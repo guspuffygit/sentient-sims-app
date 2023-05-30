@@ -1,12 +1,11 @@
 {
-  "name": "electron-react-boilerplate",
-  "version": "4.6.0",
-  "description": "A foundation for scalable desktop apps",
+  "name": "sentient-sims-app",
+  "version": "1.0.0",
+  "description": "Companion app for the Sentient Sims mod",
   "license": "MIT",
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://github.com/electron-react-boilerplate"
+    "name": "Gus Puffy",
+    "url": "https://github.com/guspuffygit/sentient-sims-app"
   },
   "main": "./dist/main/main.js",
   "scripts": {
