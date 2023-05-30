@@ -61,10 +61,10 @@ async function testOpenAI() {
   }
 }
 
-function generate(maxLength: any, prompt: any) {
+async function generate(maxLength: any, prompt: any) {
   const request: CreateChatCompletionRequest = {
     model: 'gpt-3.5-turbo',
-    max_tokens: maxLength,
+    max_tokens: maxLength || 100,
     messages: [
       {
         role: ChatCompletionRequestMessageRoleEnum.System,
@@ -78,25 +78,23 @@ function generate(maxLength: any, prompt: any) {
     ],
   };
 
-  openai
-    .createChatCompletion(request)
-    .then((r) => {
-      const { message } = r.data.choices[0];
-      if (message) {
-        const responseString = message.content?.trim();
-        return {
-          results: [{ text: responseString }],
-        };
-      }
+  try {
+    const response = await openai.createChatCompletion(request);
+    const { message } = response.data.choices[0];
+    if (message) {
+      const responseString = message.content?.trim();
       return {
-        results: [{ text: 'AI request failed, no message' }],
+        results: [{ text: responseString }],
       };
-    })
-    .catch(() => {
-      return {
-        results: [{ text: 'AI request failed' }],
-      };
-    });
+    }
+    return {
+      results: [{ text: 'AI request failed, no message' }],
+    };
+  } catch (err: any) {
+    return {
+      results: [{ text: 'AI request failed' }],
+    };
+  }
 }
 
 export { getOpenAIKey, testOpenAI, generate };

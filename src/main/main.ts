@@ -142,6 +142,7 @@ app
   .catch(console.log);
 
 const expressApp = express();
+expressApp.use(express.json());
 const port = 25148;
 
 expressApp.get('/health', (req, res) => {
@@ -157,7 +158,7 @@ expressApp.get('/api/v1/count', (req, res) => {
   res.json({ count: encode(req.body.prompt).length });
 });
 
-expressApp.get('/api/v1/generate', async (req, res) => {
+expressApp.post('/api/v1/generate', async (req, res) => {
   const { body } = req;
   const { prompt } = body;
   const maxLength = body.max_length;
