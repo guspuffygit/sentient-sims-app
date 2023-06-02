@@ -16,7 +16,12 @@ import log from 'electron-log';
 import { encode } from '@nem035/gpt-3-encoder';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { generate, testOpenAI } from './sentient-sims/openai';
+import {
+  OpenAIKeyNotSetError,
+  generate,
+  testOpenAI,
+} from './sentient-sims/openai';
+import { getSettings, writeSettings } from './sentient-sims/directories';
 
 class AppUpdater {
   constructor() {
@@ -150,8 +155,16 @@ expressApp.get('/health', (req, res) => {
 });
 
 expressApp.get('/test-open-ai', async (req, res) => {
-  const response = await testOpenAI();
-  res.send({ status: response });
+  try {
+    const response = await testOpenAI();
+    res.send(response);
+  } catch (e: any) {
+    if (e instanceof OpenAIKeyNotSetError) {
+      res.status(400).send({ status: 'API key not set!' });
+    } else {
+      res.status(500).send({ error: `${e.name}: ${e.message}` });
+    }
+  }
 });
 
 expressApp.post('/api/v1/count', (req, res) => {
@@ -169,6 +182,15 @@ expressApp.post('/api/v1/generate', async (req, res) => {
 
 expressApp.get('/send-logs', async (req, res) => {
   res.json({ message: 'Not implemented yet' });
+});
+
+expressApp.get('/settings', async (req, res) => {
+  res.json(getSettings());
+});
+
+expressApp.post('/settings', async (req, res) => {
+  writeSettings(req.body);
+  res.json(getSettings());
 });
 
 expressApp.listen(port, () => {

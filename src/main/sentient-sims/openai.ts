@@ -8,17 +8,26 @@ import {
 } from 'openai';
 import { getSentientSimsFolder } from './directories';
 
-function getOpenAIKey(): string {
+export class OpenAIKeyNotSetError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'OpenAIKeyNotSetError';
+  }
+}
+
+function getOpenAIKey(): string | undefined {
   // Check environment variable
   const openAIKeyFromEnv = process.env.OPENAI_KEY;
   if (openAIKeyFromEnv) {
     return openAIKeyFromEnv;
   }
 
-  // Read JSON file
-  const configFile = path.join(getSentientSimsFolder(), 'settings.json');
-  if (fs.existsSync(configFile)) {
-    const configData = fs.readFileSync(configFile, 'utf8');
+  const sentientSimsAppConfigFile = path.join(
+    getSentientSimsFolder(),
+    'app-settings.json'
+  );
+  if (fs.existsSync(sentientSimsAppConfigFile)) {
+    const configData = fs.readFileSync(sentientSimsAppConfigFile, 'utf8');
     const jsonData = JSON.parse(configData);
     const openAIKeyFromJson = jsonData.openai_key;
     if (openAIKeyFromJson) {
@@ -26,16 +35,37 @@ function getOpenAIKey(): string {
     }
   }
 
-  // Throw an error if the key is not found
-  throw new Error('OpenAI key not found.');
+  // Read JSON file
+  const sentientSimsConfigFile = path.join(
+    getSentientSimsFolder(),
+    'settings.json'
+  );
+  if (fs.existsSync(sentientSimsConfigFile)) {
+    const configData = fs.readFileSync(sentientSimsConfigFile, 'utf8');
+    const jsonData = JSON.parse(configData);
+    const openAIKeyFromJson = jsonData.openai_key;
+    if (openAIKeyFromJson) {
+      return openAIKeyFromJson;
+    }
+  }
+
+  throw new OpenAIKeyNotSetError('No OpenAI Key set!');
 }
 
-const configuration = new Configuration({
-  apiKey: getOpenAIKey(),
-});
-const openai = new OpenAIApi(configuration);
+let openai: OpenAIApi;
+
+function setupOpenAIClient() {
+  const openAIKey = getOpenAIKey();
+  const configuration = new Configuration({
+    apiKey: openAIKey,
+  });
+  openai = new OpenAIApi(configuration);
+}
 
 async function testOpenAI() {
+  if (!openai) {
+    setupOpenAIClient();
+  }
   const request: CreateChatCompletionRequest = {
     model: 'gpt-3.5-turbo',
     max_tokens: 100,
@@ -53,15 +83,25 @@ async function testOpenAI() {
     const response = await openai.createChatCompletion(request);
     const { message } = response.data.choices[0];
     if (message) {
-      return message.content?.trim();
+      return {
+        status: message.content?.trim(),
+      };
     }
-    return 'not working, no message';
+    return {
+      status: 'not working, no message',
+    };
   } catch (error: any) {
-    return 'not working';
+    return {
+      status: 'not working',
+    };
   }
 }
 
 async function generate(maxLength: any, prompt: any) {
+  if (!openai) {
+    setupOpenAIClient();
+  }
+
   const request: CreateChatCompletionRequest = {
     model: 'gpt-3.5-turbo',
     max_tokens: maxLength || 100,

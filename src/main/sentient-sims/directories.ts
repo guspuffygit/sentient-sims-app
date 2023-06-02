@@ -20,6 +20,37 @@ function getSentientSimsFolder(): string {
   return path.join(modsFolder, 'sentient-sims');
 }
 
+// function createSentientSimsFolder() {
+//   const sentientSimsFolder = getSentientSimsFolder();
+//   if (fs.existsSync(sentientSimsFolder)) {
+
+//   }
+//   fs.mkdirSync(getModsFolder(), { recursive: true });
+//   fs.mkdirSync()
+// }
+
+function getSettingsFile(): string {
+  return path.join(getSentientSimsFolder(), 'app-settings.json');
+}
+
+export function getSettings() {
+  const settingsFile = getSettingsFile();
+  if (fs.existsSync(settingsFile)) {
+    return JSON.parse(fs.readFileSync(settingsFile, 'utf-8'));
+  }
+
+  return {};
+}
+
+export function writeSettings(data: any) {
+  const sentientSimsFolder = getSentientSimsFolder();
+  if (!fs.existsSync(sentientSimsFolder)) {
+    fs.mkdirSync(sentientSimsFolder, { recursive: true });
+  }
+
+  fs.writeFileSync(getSettingsFile(), JSON.stringify(data, null, 2), 'utf-8');
+}
+
 function listFilesRecursively(directoryPath: string): string[] {
   const files: string[] = [];
 

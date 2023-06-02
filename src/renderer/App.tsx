@@ -1,12 +1,20 @@
 /* eslint-disable promise/always-return */
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import { Typography } from '@mui/material';
+import { Card, CardContent, Container, Grid, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { LoadingButton } from '@mui/lab';
-import icon from '../../assets/icon.png';
+import { Outlet } from 'react-router-dom';
+import MenuBar from './MenuBar';
+import WidgetWithOverlay from './WidgetWithOverlay';
+import OpenAIKeyModal from './OpenAIKeyModal';
 
-function Hello() {
+export function Hello() {
+  const [open, setOpen] = useState(false);
+
+  // const handleButtonClick = () => {
+  //   // setOpen(true);
+  // };
+
   const [openAIStatus, setOpenAIStatus] = useState({
     status: '',
     loading: false,
@@ -17,7 +25,12 @@ function Hello() {
       loading: true,
     });
     fetch('http://localhost:25148/test-open-ai')
-      .then((res) => res.json())
+      .then((res) => {
+        // if (res.status === 400) {
+        //   setOpen(true);
+        // }
+        return res.json();
+      })
       .then((response: any) => {
         setOpenAIStatus({
           status: response.status,
@@ -33,38 +46,61 @@ function Hello() {
       });
   };
 
+  const handleClose = () => {
+    setOpen(false);
+    testOpenAI();
+  };
+
   useEffect(() => {
     testOpenAI();
   }, []);
 
   return (
     <div>
-      <div className="Hello">
-        <img width="75" alt="icon" src={icon} />
-      </div>
-      <h1>Sentient Sims</h1>
-      <Typography sx={{ margin: 2 }}>
-        Open AI Status: {openAIStatus.status}
-      </Typography>
-      <LoadingButton
-        loading={openAIStatus.loading}
-        onClick={testOpenAI}
-        sx={{ marginRight: 2 }}
-        color="primary"
-        variant="outlined"
-      >
-        Test Open AI
-      </LoadingButton>
+      <Card sx={{ minWidth: 275, marginBottom: 2 }}>
+        <CardContent>
+          <p>Sentient Sims Companion App</p>
+          <p>
+            Keep this app running while you are playing the Sentient Sims Mod!
+          </p>
+        </CardContent>
+      </Card>
+      <Card sx={{ minWidth: 275, marginBottom: 1 }}>
+        <CardContent>
+          <Typography sx={{ margin: 2 }}>
+            Open AI Status: {openAIStatus.status}
+          </Typography>
+          <LoadingButton
+            loading={openAIStatus.loading}
+            onClick={testOpenAI}
+            sx={{ marginRight: 2 }}
+            color="primary"
+            variant="outlined"
+          >
+            Test Open AI
+          </LoadingButton>
+          {/* <Button onClick={handleButtonClick} variant="contained"> */}
+          {/*  Open AI Key */}
+          {/* </Button> */}
+          <OpenAIKeyModal open={open} onClose={handleClose} />
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Hello />} />
-      </Routes>
-    </Router>
+    <Container maxWidth="lg" className="root">
+      <Grid container spacing={3}>
+        <Grid item xs={8}>
+          <MenuBar />
+          <Outlet />
+        </Grid>
+        <Grid item xs={4}>
+          <WidgetWithOverlay />
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
