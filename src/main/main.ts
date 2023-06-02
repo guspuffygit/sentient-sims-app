@@ -154,7 +154,7 @@ expressApp.get('/test-open-ai', async (req, res) => {
   res.send({ status: response });
 });
 
-expressApp.get('/api/v1/count', (req, res) => {
+expressApp.post('/api/v1/count', (req, res) => {
   res.json({ count: encode(req.body.prompt).length });
 });
 
@@ -162,6 +162,7 @@ expressApp.post('/api/v1/generate', async (req, res) => {
   const { body } = req;
   const { prompt } = body;
   const maxLength = body.max_length;
+
   const response = await generate(maxLength, prompt);
   res.json(response);
 });
