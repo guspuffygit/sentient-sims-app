@@ -1,12 +1,14 @@
 /* eslint-disable promise/always-return */
 import './App.css';
-import { Card, CardContent, Container, Grid, Typography } from '@mui/material';
+import { Container, Grid, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { LoadingButton } from '@mui/lab';
 import { Outlet } from 'react-router-dom';
 import MenuBar from './MenuBar';
 import WidgetWithOverlay from './WidgetWithOverlay';
 import OpenAIKeyModal from './OpenAIKeyModal';
+import AppCard from './AppCard';
+import UpdateComponent from './UpdateComponent';
 
 export function Hello() {
   const [open, setOpen] = useState(false);
@@ -57,34 +59,28 @@ export function Hello() {
 
   return (
     <div>
-      <Card sx={{ minWidth: 275, marginBottom: 2 }}>
-        <CardContent>
-          <p>Sentient Sims Companion App</p>
-          <p>
-            Keep this app running while you are playing the Sentient Sims Mod!
-          </p>
-        </CardContent>
-      </Card>
-      <Card sx={{ minWidth: 275, marginBottom: 1 }}>
-        <CardContent>
-          <Typography sx={{ margin: 2 }}>
-            Open AI Status: {openAIStatus.status}
-          </Typography>
-          <LoadingButton
-            loading={openAIStatus.loading}
-            onClick={testOpenAI}
-            sx={{ marginRight: 2 }}
-            color="primary"
-            variant="outlined"
-          >
-            Test Open AI
-          </LoadingButton>
-          {/* <Button onClick={handleButtonClick} variant="contained"> */}
-          {/*  Open AI Key */}
-          {/* </Button> */}
-          <OpenAIKeyModal open={open} onClose={handleClose} />
-        </CardContent>
-      </Card>
+      <AppCard>
+        <p>Sentient Sims Companion App</p>
+        <p>
+          Keep this app running while you are playing the Sentient Sims Mod!
+        </p>
+      </AppCard>
+      <UpdateComponent />
+      <AppCard>
+        <Typography sx={{ margin: 2 }}>
+          Open AI Status: {openAIStatus.status}
+        </Typography>
+        <LoadingButton
+          loading={openAIStatus.loading}
+          onClick={testOpenAI}
+          sx={{ marginRight: 2 }}
+          color="primary"
+          variant="outlined"
+        >
+          Test Open AI
+        </LoadingButton>
+        <OpenAIKeyModal open={open} onClose={handleClose} />
+      </AppCard>
     </div>
   );
 }

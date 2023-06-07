@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import path from 'path';
 
-function getSims4Folder(): string {
+export function getSims4Folder(): string {
   return path.join(
     process.env.HOME || process.env.USERPROFILE || '',
     'Documents',
@@ -10,12 +10,12 @@ function getSims4Folder(): string {
   );
 }
 
-function getModsFolder(): string {
+export function getModsFolder(): string {
   const sims4Folder = getSims4Folder();
   return path.join(sims4Folder, 'Mods');
 }
 
-function getSentientSimsFolder(): string {
+export function getSentientSimsFolder(): string {
   const modsFolder = getModsFolder();
   return path.join(modsFolder, 'sentient-sims');
 }
@@ -29,8 +29,20 @@ function getSentientSimsFolder(): string {
 //   fs.mkdirSync()
 // }
 
-function getSettingsFile(): string {
+export function getSettingsFile(): string {
   return path.join(getSentientSimsFolder(), 'app-settings.json');
+}
+
+export function getModVersionFile(): string {
+  return path.join(getSentientSimsFolder(), 'mod-version.json');
+}
+
+export function getAppVersionFile(): string {
+  return path.join(getSentientSimsFolder(), 'app-version.json');
+}
+
+export function getZippedModFile(): string {
+  return path.join(getModsFolder(), 'sentient-sims.zip');
 }
 
 export function getSettings() {
@@ -51,7 +63,7 @@ export function writeSettings(data: any) {
   fs.writeFileSync(getSettingsFile(), JSON.stringify(data, null, 2), 'utf-8');
 }
 
-function listFilesRecursively(directoryPath: string): string[] {
+export function listFilesRecursively(directoryPath: string): string[] {
   const files: string[] = [];
 
   function traverseDirectory(currentPath: string) {
@@ -73,10 +85,3 @@ function listFilesRecursively(directoryPath: string): string[] {
 
   return files;
 }
-
-export {
-  getSims4Folder,
-  getModsFolder,
-  getSentientSimsFolder,
-  listFilesRecursively,
-};

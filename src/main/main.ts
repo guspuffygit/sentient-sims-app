@@ -15,13 +15,19 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { encode } from '@nem035/gpt-3-encoder';
 import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+import { isDebugMode, resolveHtmlPath } from './util';
 import {
   OpenAIKeyNotSetError,
   generate,
   testOpenAI,
 } from './sentient-sims/openai';
 import { getSettings, writeSettings } from './sentient-sims/directories';
+import {
+  getAppVersion,
+  getModVersion,
+  updateMod,
+} from './sentient-sims/updater';
+import Logger from './sentient-sims/logger';
 
 class AppUpdater {
   constructor() {
@@ -31,11 +37,13 @@ class AppUpdater {
   }
 }
 
+const logger = new Logger('main');
+
 let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
+  logger.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
 });
 
@@ -44,8 +52,7 @@ if (process.env.NODE_ENV === 'production') {
   sourceMapSupport.install();
 }
 
-const isDebug =
-  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+const isDebug = isDebugMode();
 
 if (isDebug) {
   require('electron-debug')();
@@ -188,9 +195,22 @@ expressApp.get('/settings', async (req, res) => {
   res.json(getSettings());
 });
 
+expressApp.get('/versions/mod', async (req, res) => {
+  res.json(getModVersion());
+});
+
+expressApp.get('/versions/app', async (req, res) => {
+  res.json(getAppVersion());
+});
+
 expressApp.post('/settings', async (req, res) => {
   writeSettings(req.body);
   res.json(getSettings());
+});
+
+expressApp.post('/update/mod', async (req, res) => {
+  await updateMod(req.body);
+  res.json({ done: 'done' });
 });
 
 expressApp.listen(port, () => {
