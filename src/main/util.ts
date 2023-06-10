@@ -11,9 +11,3 @@ export function resolveHtmlPath(htmlFileName: string) {
   }
   return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
 }
-
-export function isDebugMode() {
-  return (
-    process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true'
-  );
-}

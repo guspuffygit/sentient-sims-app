@@ -15,7 +15,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { encode } from '@nem035/gpt-3-encoder';
 import MenuBuilder from './menu';
-import { isDebugMode, resolveHtmlPath } from './util';
+import { resolveHtmlPath } from './util';
 import {
   OpenAIKeyNotSetError,
   generate,
@@ -52,7 +52,8 @@ if (process.env.NODE_ENV === 'production') {
   sourceMapSupport.install();
 }
 
-const isDebug = isDebugMode();
+const isDebug =
+  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 if (isDebug) {
   require('electron-debug')();
