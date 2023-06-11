@@ -93,7 +93,6 @@
   "dependencies": {
     "@aws-amplify/ui-react": "^4.6.4",
     "@aws-sdk/client-s3": "^3.347.1",
-    "@discordjs/core": "^0.6.0",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.11.16",
