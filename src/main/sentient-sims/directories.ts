@@ -20,21 +20,17 @@ export function getSentientSimsFolder(): string {
   return path.join(modsFolder, 'sentient-sims');
 }
 
-// function createSentientSimsFolder() {
-//   const sentientSimsFolder = getSentientSimsFolder();
-//   if (fs.existsSync(sentientSimsFolder)) {
-
-//   }
-//   fs.mkdirSync(getModsFolder(), { recursive: true });
-//   fs.mkdirSync()
-// }
-
 export function getSettingsFile(): string {
   return path.join(getSentientSimsFolder(), 'app-settings.json');
 }
 
 export function getModVersionFile(): string {
   return path.join(getSentientSimsFolder(), 'mod-version.json');
+}
+
+export function getLogsFile(): Buffer {
+  const logFilePath = path.join(getSentientSimsFolder(), 'logs.txt');
+  return fs.readFileSync(logFilePath);
 }
 
 export function getAppVersionFile(): string {
@@ -84,4 +80,40 @@ export function listFilesRecursively(directoryPath: string): string[] {
   traverseDirectory(directoryPath);
 
   return files;
+}
+
+export function findFilesWithKeywords(
+  folderPath: string,
+  keywords: string[]
+): string[] {
+  const files: string[] = [];
+
+  // Read the contents of the folder
+  const items = fs.readdirSync(folderPath);
+
+  // Iterate over each item in the folder
+  items.forEach((item) => {
+    const fullPath = `${folderPath}/${item}`;
+
+    // Check if the item is a file
+    if (fs.statSync(fullPath).isFile()) {
+      // Check if the filename contains any of the specified keywords
+      const hasKeywords = keywords.some((keyword) =>
+        new RegExp(keyword, 'i').test(item)
+      );
+      if (hasKeywords) {
+        files.push(fullPath);
+      }
+    }
+  });
+
+  return files;
+}
+
+export function getLastExceptionFiles() {
+  return findFilesWithKeywords(getSims4Folder(), [
+    'lastException',
+    'lastCleanException',
+    'lastUIException',
+  ]);
 }

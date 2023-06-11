@@ -1,10 +1,12 @@
-/* eslint no-console: off, no-alert: off, consistent-return: off, no-useless-return: off */
+/* eslint no-alert: off, consistent-return: off, no-useless-return: off */
 import { useEffect, useState } from 'react';
 import { CardActions, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { ModUpdate } from 'main/sentient-sims/updater';
 import { Auth } from 'aws-amplify';
+import log from 'electron-log';
+
 import { isNewVersionAvailable } from './versions';
 import AppCard from './AppCard';
 
@@ -37,7 +39,7 @@ export default function UpdateComponent() {
         'http://localhost:25148/versions/mod'
       );
       const modVersion = await modVersionResponse.json();
-      console.log(modVersion);
+      log.debug(`modVersion: ${modVersion}`);
       const response = await isNewVersionAvailable(modVersion.version);
       const currentTime = getCurrentTime();
 
@@ -46,7 +48,7 @@ export default function UpdateComponent() {
         lastChecked: currentTime,
       });
     } catch (err) {
-      console.error('Error checking for updates:', err);
+      log.error('Error checking for updates:', err);
     } finally {
       setIsLoading(false);
     }

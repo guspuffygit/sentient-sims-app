@@ -1,12 +1,13 @@
-/* eslint no-console: off, import/prefer-default-export: off */
+/* eslint import/prefer-default-export: off */
 import { HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Auth } from 'aws-amplify';
+import log from 'electron-log';
 
 export async function isNewVersionAvailable(
   currentVersionId: string,
   type = 'main'
 ): Promise<boolean> {
-  console.log(`current version: ${currentVersionId}`);
+  log.debug(`current version: ${currentVersionId}`);
   try {
     const credentials = await Auth.currentCredentials();
     const client = new S3Client({ region: 'us-east-1', credentials });
@@ -21,11 +22,14 @@ export async function isNewVersionAvailable(
 
     // Compare the latest version ID with the version you have
     const latestVersionId = response?.Metadata?.version;
-    console.log(`latestVersionId: ${latestVersionId}`);
+    log.debug(`latestVersionId: ${latestVersionId}`);
     const yourVersionId = currentVersionId;
 
     if (latestVersionId !== yourVersionId) {
       // A new version is available
+      log.info(
+        `New version available. Current: ${yourVersionId} Latest: ${latestVersionId}`
+      );
       return true;
     }
 
@@ -33,7 +37,7 @@ export async function isNewVersionAvailable(
     return false;
   } catch (error) {
     // Handle error if the object doesn't exist or other issues occur
-    console.error('Error checking for new version:', error);
+    log.error('Error checking for new version:', error);
     throw error;
   }
 }

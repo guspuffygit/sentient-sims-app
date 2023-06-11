@@ -9,6 +9,7 @@ import WidgetWithOverlay from './WidgetWithOverlay';
 import OpenAIKeyModal from './OpenAIKeyModal';
 import AppCard from './AppCard';
 import UpdateComponent from './UpdateComponent';
+import SendLogButton from './SendLogButton';
 
 export function Hello() {
   const [open, setOpen] = useState(false);
@@ -80,6 +81,7 @@ export function Hello() {
           Test Open AI
         </LoadingButton>
         <OpenAIKeyModal open={open} onClose={handleClose} />
+        <SendLogButton />
       </AppCard>
     </div>
   );
