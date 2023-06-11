@@ -6,6 +6,7 @@ import {
   CreateChatCompletionRequest,
   OpenAIApi,
 } from 'openai';
+import log from 'electron-log';
 import { getSentientSimsFolder } from './directories';
 
 export class OpenAIKeyNotSetError extends Error {
@@ -91,8 +92,9 @@ async function testOpenAI() {
       status: 'not working, no message',
     };
   } catch (error: any) {
+    log.error('Error testing OpenAI API:', error);
     return {
-      status: 'not working',
+      status: 'not working, send logs to debug',
     };
   }
 }

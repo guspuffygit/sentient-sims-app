@@ -10,7 +10,7 @@
  */
 import express from 'express';
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { encode } from '@nem035/gpt-3-encoder';
@@ -27,7 +27,10 @@ import {
   getModVersion,
   updateMod,
 } from './sentient-sims/updater';
-import Logger from './sentient-sims/logger';
+import sendLogs from './sentient-sims/discord';
+
+// Optional, initialize the logger for any renderer processses
+log.initialize({ preload: true });
 
 class AppUpdater {
   constructor() {
@@ -37,15 +40,7 @@ class AppUpdater {
   }
 }
 
-const logger = new Logger('main');
-
 let mainWindow: BrowserWindow | null = null;
-
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  logger.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
-});
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -189,7 +184,8 @@ expressApp.post('/api/v1/generate', async (req, res) => {
 });
 
 expressApp.get('/send-logs', async (req, res) => {
-  res.json({ message: 'Not implemented yet' });
+  const result = await sendLogs();
+  res.json(result);
 });
 
 expressApp.get('/settings', async (req, res) => {
@@ -215,5 +211,5 @@ expressApp.post('/update/mod', async (req, res) => {
 });
 
 expressApp.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  log.debug(`Server is running on port ${port}`);
 });
