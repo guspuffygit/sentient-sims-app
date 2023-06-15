@@ -99,13 +99,13 @@ async function testOpenAI() {
   }
 }
 
-async function generate(maxLength: any, prompt: any) {
+async function generate(maxLength: any, prompt: any, model: any) {
   if (!openai) {
     setupOpenAIClient();
   }
 
   const request: CreateChatCompletionRequest = {
-    model: 'gpt-3.5-turbo',
+    model: model || 'gpt-3.5-turbo',
     max_tokens: maxLength || 100,
     messages: [
       {

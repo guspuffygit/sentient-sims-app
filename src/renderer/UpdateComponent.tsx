@@ -113,7 +113,16 @@ export default function UpdateComponent() {
               </LoadingButton>
             )}
           </div>
-          <div />
+          <div>
+            <LoadingButton
+              onClick={handleUpdate}
+              loading={isLoading}
+              color="warning"
+              variant="outlined"
+            >
+              Force Update
+            </LoadingButton>
+          </div>
         </CardActions>
       }
     >

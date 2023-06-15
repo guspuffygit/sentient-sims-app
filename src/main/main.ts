@@ -176,10 +176,10 @@ expressApp.post('/api/v1/count', (req, res) => {
 
 expressApp.post('/api/v1/generate', async (req, res) => {
   const { body } = req;
-  const { prompt } = body;
+  const { prompt, model } = body;
   const maxLength = body.max_length;
 
-  const response = await generate(maxLength, prompt);
+  const response = await generate(maxLength, prompt, model);
   res.json(response);
 });
 
