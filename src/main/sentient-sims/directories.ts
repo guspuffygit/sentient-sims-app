@@ -20,6 +20,12 @@ export function getSentientSimsFolder(): string {
   return path.join(modsFolder, 'sentient-sims');
 }
 
+export function filesToDelete(): string[] {
+  return [
+    path.join(getSentientSimsFolder(), 'sentient-sims-descriptions.ts4script'),
+  ];
+}
+
 export function getSettingsFile(): string {
   return path.join(getSentientSimsFolder(), 'app-settings.json');
 }

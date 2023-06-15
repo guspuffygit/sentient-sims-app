@@ -5,6 +5,7 @@ import { Readable } from 'stream';
 import AdmZip from 'adm-zip';
 import log from 'electron-log';
 import {
+  filesToDelete,
   getAppVersionFile,
   getModVersionFile,
   getModsFolder,
@@ -115,11 +116,11 @@ export async function updateMod({ type, credentials }: ModUpdate) {
 
     log.info(`Update completed.`);
   } finally {
-    if (fs.existsSync(getZippedModFile())) {
-      log.log(
-        `Zipped mod file exists at the end, deleting: ${getZippedModFile()}`
-      );
-      fs.rmSync(getZippedModFile());
-    }
+    filesToDelete().forEach((fileToDelete) => {
+      if (fs.existsSync(fileToDelete)) {
+        log.info(`File exists, deleting: ${fileToDelete}`);
+        fs.rmSync(fileToDelete);
+      }
+    });
   }
 }
