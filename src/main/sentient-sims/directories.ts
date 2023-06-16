@@ -20,12 +20,6 @@ export function getSentientSimsFolder(): string {
   return path.join(modsFolder, 'sentient-sims');
 }
 
-export function filesToDelete(): string[] {
-  return [
-    path.join(getSentientSimsFolder(), 'sentient-sims-descriptions.ts4script'),
-  ];
-}
-
 export function getSettingsFile(): string {
   return path.join(getSentientSimsFolder(), 'app-settings.json');
 }
@@ -45,6 +39,13 @@ export function getAppVersionFile(): string {
 
 export function getZippedModFile(): string {
   return path.join(getModsFolder(), 'sentient-sims.zip');
+}
+
+export function filesToDelete(): string[] {
+  return [
+    path.join(getSentientSimsFolder(), 'sentient-sims-descriptions.ts4script'),
+    getZippedModFile(),
+  ];
 }
 
 export function getSettings() {

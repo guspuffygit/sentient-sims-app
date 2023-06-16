@@ -206,8 +206,20 @@ expressApp.post('/settings', async (req, res) => {
 });
 
 expressApp.post('/update/mod', async (req, res) => {
-  await updateMod(req.body);
-  res.json({ done: 'done' });
+  try {
+    log.info('Starting update.');
+    await updateMod(req.body);
+    res.json({ done: 'done' });
+  } catch (err: any) {
+    const response = {
+      error: {
+        stack: err?.stack,
+        message: err?.message,
+      },
+    };
+    log.error(`Error updating: ${response}`);
+    res.status(500).json(response);
+  }
 });
 
 expressApp.listen(port, () => {

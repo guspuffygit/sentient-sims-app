@@ -18,13 +18,13 @@ export default function UpdateComponent() {
     versionType,
   });
 
-  const handleUpdate = async (): Promise<void> => {
+  const handleUpdate = async (forceUpdate: boolean): Promise<void> => {
     await handleCheckForUpdates();
     const modUpdate: ModUpdate = {
       type: versionType,
       credentials: await Auth.currentCredentials(),
     };
-    if (updateState.newVersionAvailable) {
+    if (updateState.newVersionAvailable || forceUpdate) {
       setIsLoading(true);
       return fetch('http://localhost:25148/update/mod', {
         method: 'POST',
@@ -70,7 +70,7 @@ export default function UpdateComponent() {
             </LoadingButton>
             {updateState.newVersionAvailable && (
               <LoadingButton
-                onClick={handleUpdate}
+                onClick={() => handleUpdate(false)}
                 loading={isLoading}
                 color="success"
                 variant="contained"
@@ -82,7 +82,7 @@ export default function UpdateComponent() {
           </div>
           <div>
             <LoadingButton
-              onClick={handleUpdate}
+              onClick={() => handleUpdate(true)}
               loading={isLoading}
               color="warning"
               variant="outlined"
