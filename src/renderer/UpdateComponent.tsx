@@ -21,7 +21,7 @@ export default function UpdateComponent() {
   const handleUpdate = async (): Promise<void> => {
     await handleCheckForUpdates();
     const modUpdate: ModUpdate = {
-      type: 'main',
+      type: versionType,
       credentials: await Auth.currentCredentials(),
     };
     if (updateState.newVersionAvailable) {

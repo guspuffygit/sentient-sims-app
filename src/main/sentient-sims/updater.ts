@@ -18,7 +18,7 @@ export type Version = {
 };
 
 export type ModUpdate = {
-  type: 'main' | 'develop';
+  type: string;
   credentials: ICredentials;
 };
 
