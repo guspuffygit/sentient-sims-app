@@ -2,6 +2,7 @@ import path from 'path';
 import * as fs from 'fs';
 import log from 'electron-log';
 import os from 'os';
+import xml2js from 'xml2js';
 import {
   getLastExceptionFiles,
   getLogsFile,
@@ -75,7 +76,19 @@ export default async function sendLogs() {
       lastExceptionFiles.forEach((lastExceptionFile) => {
         const filename = path.basename(lastExceptionFile);
         const lastExceptionData = fs.readFileSync(lastExceptionFile, 'utf-8');
-        const lastExceptionBlob = new Blob([lastExceptionData], {
+        let lastExceptionString = lastExceptionData;
+        try {
+          const parser = new xml2js.Parser();
+          parser.parseString(lastExceptionData, (err: any, result: any) => {
+            const stackTrace = result.root.report[0].desyncdata[0];
+            lastExceptionString = `${stackTrace}`;
+          });
+        } catch (parseError: any) {
+          const message = 'Error parsing lastException file';
+          log.error(message, parseError);
+          errors.push(message, parseError);
+        }
+        const lastExceptionBlob = new Blob([lastExceptionString], {
           type: 'text/plain',
         });
         formData.append(filename, lastExceptionBlob, filename);
