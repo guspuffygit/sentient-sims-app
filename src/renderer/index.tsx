@@ -5,9 +5,12 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material';
 import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
-import App, { Hello } from './App';
+import App from './App';
 import theme from './theme';
 import awsExports from './aws-exports';
+import HomePage from './HomePage';
+import SettingsPage from './SettingsPage';
+import ChatPage from './ChatPage';
 
 const urls = new Map<string, string>();
 urls.set('localhost', 'http://localhost:25148');
@@ -29,11 +32,15 @@ const router = createMemoryRouter([
     children: [
       {
         path: '/',
-        element: (
-          <p>
-            <Hello />
-          </p>
-        ),
+        element: <HomePage />,
+      },
+      {
+        path: '/settings',
+        element: <SettingsPage />,
+      },
+      {
+        path: '/chat',
+        element: <ChatPage />,
       },
     ],
   },

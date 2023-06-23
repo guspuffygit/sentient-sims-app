@@ -10,7 +10,14 @@
  */
 import express from 'express';
 import path from 'path';
-import { app, BrowserWindow, shell } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  globalShortcut,
+  shell,
+  ipcMain,
+  IpcMainEvent,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { encode } from '@nem035/gpt-3-encoder';
@@ -19,6 +26,7 @@ import { resolveHtmlPath } from './util';
 import {
   OpenAIKeyNotSetError,
   generate,
+  generateChatCompletion,
   testOpenAI,
 } from './sentient-sims/openai';
 import { getSettings, writeSettings } from './sentient-sims/directories';
@@ -114,6 +122,17 @@ const createWindow = async () => {
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
+  const ret = globalShortcut.register('Control+Shift+C', () => {
+    console.log('Control+Shift+C is pressed');
+    if (mainWindow) {
+      mainWindow.webContents.send('debug-mode-toggle');
+    }
+  });
+
+  if (!ret) {
+    console.log('registration failed');
+  }
+
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
     shell.openExternal(edata.url);
@@ -137,6 +156,13 @@ app.on('window-all-closed', () => {
   }
 });
 
+let openAIModel = 'gpt-3.5-turbo';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const handleSetOpenAIModel = (event: IpcMainEvent, model: string) => {
+  openAIModel = model;
+};
+
 app
   .whenReady()
   .then(() => {
@@ -146,6 +172,8 @@ app
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();
     });
+
+    ipcMain.on('set-openai-model', handleSetOpenAIModel);
   })
   .catch(console.log);
 
@@ -179,8 +207,19 @@ expressApp.post('/api/v1/generate', async (req, res) => {
   const { prompt, model } = body;
   const maxLength = body.max_length;
 
-  const response = await generate(maxLength, prompt, model);
+  const response = await generate(
+    maxLength,
+    prompt,
+    model || openAIModel,
+    mainWindow
+  );
   res.json(response);
+});
+
+expressApp.post('/generate', async (req, res) => {
+  const { body } = req;
+  const result = await generateChatCompletion(body);
+  res.json(result);
 });
 
 expressApp.get('/send-logs', async (req, res) => {

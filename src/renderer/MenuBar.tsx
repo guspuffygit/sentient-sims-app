@@ -1,8 +1,10 @@
 import { AppBar, Box, Button, Toolbar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import useDebugModeHook from './UseDebugModeHook';
 
 function MenuBar() {
   const navigate = useNavigate();
+  const [debugModeEnabled] = useDebugModeHook();
 
   return (
     <Box sx={{ flexGrow: 1, marginBottom: 2 }}>
@@ -20,6 +22,26 @@ function MenuBar() {
             >
               HOME
             </Button>
+          </div>
+          <div>
+            {debugModeEnabled ? (
+              <>
+                <Button
+                  color="secondary"
+                  onClick={() => navigate('/chat')}
+                  sx={{ margin: '10px' }}
+                >
+                  Chat
+                </Button>
+                <Button
+                  color="secondary"
+                  onClick={() => navigate('/settings')}
+                  sx={{ margin: '10px' }}
+                >
+                  Settings
+                </Button>
+              </>
+            ) : null}
           </div>
         </Toolbar>
       </AppBar>
