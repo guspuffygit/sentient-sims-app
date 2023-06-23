@@ -193,11 +193,19 @@ expressApp.get('/settings', async (req, res) => {
 });
 
 expressApp.get('/versions/mod', async (req, res) => {
-  res.json(getModVersion());
+  try {
+    res.json(getModVersion());
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 expressApp.get('/versions/app', async (req, res) => {
-  res.json(getAppVersion());
+  try {
+    res.json(getAppVersion());
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 expressApp.post('/settings', async (req, res) => {

@@ -23,16 +23,20 @@ export type ModUpdate = {
 };
 
 function getVersion(path: string): Version {
-  if (fs.existsSync(path)) {
-    log.log(`Version file exists at path: ${path}`);
-    const parsedVersion = JSON.parse(
-      fs.readFileSync(path, { encoding: 'utf-8' })
-    );
-    log.log(parsedVersion);
-    return parsedVersion;
+  try {
+    if (fs.existsSync(path)) {
+      log.info(`Version file exists at path: ${path}`);
+      const parsedVersion = JSON.parse(
+        fs.readFileSync(path, { encoding: 'utf-8' })
+      );
+      log.info(parsedVersion);
+      return parsedVersion;
+    }
+  } catch (err) {
+    log.error('Unable to read version json file', err);
   }
 
-  log.log(`Version file does not exist at path: ${path}`);
+  log.info(`Returning none version: ${path}`);
   return { version: 'none' };
 }
 
