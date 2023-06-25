@@ -150,7 +150,7 @@ export default function ChatPage() {
 
   return (
     <>
-      <Box height={1000} overflow="auto">
+      <Box height={575} overflow="auto">
         {messages.map((message) => (
           <ChatBoxComponent
             message={message}
