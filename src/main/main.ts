@@ -122,7 +122,7 @@ const createWindow = async () => {
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
-  const ret = globalShortcut.register('Control+Shift+C', () => {
+  const ret = globalShortcut.register('Control+Shift+D', () => {
     console.log('Control+Shift+C is pressed');
     if (mainWindow) {
       mainWindow.webContents.send('debug-mode-toggle');
