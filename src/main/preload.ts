@@ -1,7 +1,7 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer } from 'electron';
-import { systemPrompt } from './sentient-sims/openai';
+import { systemPrompt } from './contants';
 
 const electronHandler = {
   onDebugModeToggle: (callback: any) => {
