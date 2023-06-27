@@ -33,10 +33,6 @@ export function getLogsFile(): Buffer {
   return fs.readFileSync(logFilePath);
 }
 
-export function getAppVersionFile(): string {
-  return path.join(getSentientSimsFolder(), 'app-version.json');
-}
-
 export function getZippedModFile(): string {
   return path.join(getModsFolder(), 'sentient-sims.zip');
 }

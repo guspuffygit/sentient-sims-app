@@ -30,11 +30,7 @@ import {
   testOpenAI,
 } from './sentient-sims/openai';
 import { getSettings, writeSettings } from './sentient-sims/directories';
-import {
-  getAppVersion,
-  getModVersion,
-  updateMod,
-} from './sentient-sims/updater';
+import { getModVersion, updateMod } from './sentient-sims/updater';
 import sendLogs from './sentient-sims/discord';
 
 // Optional, initialize the logger for any renderer processses
@@ -236,7 +232,7 @@ expressApp.get('/versions/mod', async (req, res) => {
 });
 
 expressApp.get('/versions/app', async (req, res) => {
-  res.json(getAppVersion());
+  res.json({ version: app.getVersion() });
 });
 
 expressApp.post('/settings', async (req, res) => {

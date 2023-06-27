@@ -6,7 +6,6 @@ import AdmZip from 'adm-zip';
 import log from 'electron-log';
 import {
   filesToDelete,
-  getAppVersionFile,
   getModVersionFile,
   getModsFolder,
   getSentientSimsFolder,
@@ -39,11 +38,6 @@ function getVersion(path: string): Version {
 export function getModVersion(): Version {
   const modVersionFile = getModVersionFile();
   return getVersion(modVersionFile);
-}
-
-export function getAppVersion(): Version {
-  const appVersionFile = getAppVersionFile();
-  return getVersion(appVersionFile);
 }
 
 export async function updateMod({ type, credentials }: ModUpdate) {
