@@ -42,3 +42,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm exec electron-builder -- --publish always --win --mac --linux
+          aws s3 cp . s3://sentient-sims-artifacts/build/ --recursive
