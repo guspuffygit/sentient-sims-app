@@ -32,6 +32,7 @@ import {
 import { getSettings, writeSettings } from './sentient-sims/directories';
 import { getModVersion, updateMod } from './sentient-sims/updater';
 import sendLogs from './sentient-sims/discord';
+import { systemPrompt as defaultSystemPrompt } from './contants';
 
 // Optional, initialize the logger for any renderer processses
 log.initialize({ preload: true });
@@ -200,14 +201,15 @@ expressApp.post('/api/v1/count', (req, res) => {
 
 expressApp.post('/api/v1/generate', async (req, res) => {
   const { body } = req;
-  const { prompt, model } = body;
+  const { prompt, model, systemPrompt } = body;
   const maxLength = body.max_length;
 
   const response = await generate(
     maxLength,
     prompt,
     model || openAIModel,
-    mainWindow
+    mainWindow,
+    systemPrompt || defaultSystemPrompt
   );
   res.json(response);
 });

@@ -8,7 +8,6 @@ import {
 } from 'openai';
 import log from 'electron-log';
 import { BrowserWindow } from 'electron';
-import { systemPrompt } from '../contants';
 import { getSentientSimsFolder } from './directories';
 
 export class OpenAIKeyNotSetError extends Error {
@@ -123,7 +122,8 @@ export async function generate(
   maxLength: any,
   prompt: any,
   model: any,
-  mainWindow: BrowserWindow | null
+  mainWindow: BrowserWindow | null,
+  systemPrompt: any
 ) {
   const request: CreateChatCompletionRequest = {
     model: model || 'gpt-3.5-turbo',
