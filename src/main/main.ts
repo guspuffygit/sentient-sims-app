@@ -33,6 +33,10 @@ import { getSettings, writeSettings } from './sentient-sims/directories';
 import { getModVersion, updateMod } from './sentient-sims/updater';
 import sendLogs from './sentient-sims/discord';
 import { systemPrompt as defaultSystemPrompt } from './contants';
+import {
+  deleteLastExceptionFiles,
+  getParsedLastExceptionFiles,
+} from './sentient-sims/lastException';
 
 // Optional, initialize the logger for any renderer processses
 log.initialize({ preload: true });
@@ -223,6 +227,16 @@ expressApp.post('/generate', async (req, res) => {
 expressApp.get('/send-logs', async (req, res) => {
   const result = await sendLogs();
   res.json(result);
+});
+
+expressApp.get('/files/last-exception', async (req, res) => {
+  const lastExceptionFiles = getParsedLastExceptionFiles();
+  res.json(lastExceptionFiles);
+});
+
+expressApp.delete('/files/last-exception', async (req, res) => {
+  deleteLastExceptionFiles();
+  res.json({ done: 'done' });
 });
 
 expressApp.get('/settings', async (req, res) => {

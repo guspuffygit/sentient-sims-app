@@ -1,9 +1,11 @@
 import { LoadingButton } from '@mui/lab';
 import { Box, Button, Divider, Modal } from '@mui/material';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import LogSendInformationComponent from './LogSendInformationComponent';
 
 export default function SendLogButton() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -84,7 +86,26 @@ export default function SendLogButton() {
           </div>
         </Box>
       </Modal>
-      <Button onClick={handleClick}>Send Logs</Button>
+      <div
+        style={{
+          display: 'flex',
+          marginTop: 10,
+          justifyContent: 'space-between',
+        }}
+      >
+        <div>
+          <Button onClick={handleClick}>Send Logs</Button>
+        </div>
+        <div>
+          <Button
+            color="secondary"
+            onClick={() => navigate('/last-exception')}
+            sx={{ margin: '10px' }}
+          >
+            Last Exception Browser
+          </Button>
+        </div>
+      </div>
     </>
   );
 }

@@ -11,6 +11,7 @@ import awsExports from './aws-exports';
 import HomePage from './HomePage';
 import SettingsPage from './SettingsPage';
 import ChatPage from './ChatPage';
+import LastExceptionPage from './LastExceptionPage';
 
 const urls = new Map<string, string>();
 urls.set('localhost', 'http://localhost:25148');
@@ -41,6 +42,10 @@ const router = createMemoryRouter([
       {
         path: '/chat',
         element: <ChatPage />,
+      },
+      {
+        path: '/last-exception',
+        element: <LastExceptionPage />,
       },
     ],
   },
