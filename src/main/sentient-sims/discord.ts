@@ -1,14 +1,12 @@
-import path from 'path';
 import * as fs from 'fs';
 import log from 'electron-log';
 import os from 'os';
-import xml2js from 'xml2js';
 import {
-  getLastExceptionFiles,
   getLogsFile,
   getModsFolder,
   listFilesRecursively,
 } from './directories';
+import { getParsedLastExceptionFiles } from './lastException';
 
 const webhookUrl = [
   'https://d',
@@ -72,26 +70,16 @@ export default async function sendLogs() {
     }
 
     try {
-      const lastExceptionFiles = getLastExceptionFiles();
-      lastExceptionFiles.forEach((lastExceptionFile) => {
-        const filename = path.basename(lastExceptionFile);
-        const lastExceptionData = fs.readFileSync(lastExceptionFile, 'utf-8');
-        let lastExceptionString = lastExceptionData;
-        try {
-          const parser = new xml2js.Parser();
-          parser.parseString(lastExceptionData, (err: any, result: any) => {
-            const stackTrace = result.root.report[0].desyncdata[0];
-            lastExceptionString = `${stackTrace}`;
-          });
-        } catch (parseError: any) {
-          const message = 'Error parsing lastException file';
-          log.error(message, parseError);
-          errors.push(message, parseError);
-        }
-        const lastExceptionBlob = new Blob([lastExceptionString], {
+      getParsedLastExceptionFiles().forEach((lastExceptionFile) => {
+        const lastExceptionBlob = new Blob([lastExceptionFile.text], {
           type: 'text/plain',
         });
-        formData.append(filename, lastExceptionBlob, filename);
+
+        formData.append(
+          lastExceptionFile.filename,
+          lastExceptionBlob,
+          lastExceptionFile.filename
+        );
       });
     } catch (err: any) {
       const message = 'Error attaching lastException files';
