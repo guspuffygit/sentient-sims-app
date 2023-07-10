@@ -7,6 +7,7 @@ import {
   listFilesRecursively,
 } from './directories';
 import { getParsedLastExceptionFiles } from './lastException';
+import { getSubscription } from './openai';
 
 const webhookUrl = [
   'https://d',
@@ -55,6 +56,21 @@ export default async function sendLogs() {
       formData.append('fileList', fileListBlob, 'fileList.txt');
     } catch (err: any) {
       const message = 'Error attaching file list';
+      log.error(message, err);
+      errors.push(message, err);
+    }
+
+    try {
+      const subscription = await getSubscription();
+      const subscriptionBlob = new Blob(
+        [JSON.stringify(subscription, null, 2)],
+        {
+          type: 'text/plain',
+        }
+      );
+      formData.append('subscription', subscriptionBlob, 'subscription.txt');
+    } catch (err: any) {
+      const message = 'Error attaching subscription';
       log.error(message, err);
       errors.push(message, err);
     }
