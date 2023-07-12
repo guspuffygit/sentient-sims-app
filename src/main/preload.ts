@@ -13,6 +13,7 @@ const electronHandler = {
   onChatGeneration: (callback: any) => {
     return ipcRenderer.on('on-chat-generation', callback);
   },
+  selectDirectory: () => ipcRenderer.invoke('dialog:selectDirectory'),
   systemPrompt,
 };
 

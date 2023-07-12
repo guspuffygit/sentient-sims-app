@@ -1,18 +1,13 @@
 import * as fs from 'fs';
 import path from 'path';
-
-export function getSims4Folder(): string {
-  return path.join(
-    process.env.HOME || process.env.USERPROFILE || '',
-    'Documents',
-    'Electronic Arts',
-    'The Sims 4'
-  );
-}
+import { SettingsEnum, get } from './settings';
 
 export function getModsFolder(): string {
-  const sims4Folder = getSims4Folder();
-  return path.join(sims4Folder, 'Mods');
+  return get(SettingsEnum.MODS_DIRECTORY) as string;
+}
+
+export function getSims4Folder(): string {
+  return path.resolve(getModsFolder(), '..');
 }
 
 export function getSentientSimsFolder(): string {

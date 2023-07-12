@@ -4,27 +4,28 @@ import {
   Select,
   SelectChangeEvent,
 } from '@mui/material';
-import { useState } from 'react';
 import useDebugModeHook from './UseDebugModeHook';
+import useSetting, { SettingsHook } from './hooks/useSetting';
 
 export default function OpenAIModelSelection() {
   const [debugModeEnabled] = useDebugModeHook();
-  const [openAIModel, setOpenAIModel] = useState('gpt-3.5-turbo');
+  const openAIModel: SettingsHook = useSetting('openaiModel', 'gpt-3.5-turbo');
 
   const handleChange = (event: SelectChangeEvent) => {
     const model = event.target.value;
     window.electron.setOpenAIModel(model);
-    setOpenAIModel(model);
+    openAIModel.setSetting(model);
   };
 
   if (debugModeEnabled) {
     return (
       <div>
         <Select
+          size="small"
           labelId="openai-model-label"
           id="openai-model"
           label="OpenAI Model"
-          value={openAIModel}
+          value={openAIModel.value}
           onChange={handleChange}
         >
           <ListSubheader>gpt-3.5</ListSubheader>

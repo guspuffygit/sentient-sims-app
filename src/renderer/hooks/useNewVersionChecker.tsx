@@ -10,7 +10,7 @@ import { isNewVersionAvailable } from '../versions';
 
 type NewVersionAvailableProps = {
   setIsLoading: Dispatch<SetStateAction<boolean>>;
-  versionType: string;
+  releaseType: string;
 };
 const getCurrentTime = (): string => {
   const currentDate = new Date();
@@ -27,7 +27,7 @@ const getCurrentTime = (): string => {
 };
 export default function useNewVersionChecker({
   setIsLoading,
-  versionType,
+  releaseType: versionType,
 }: NewVersionAvailableProps) {
   const [updateState, setUpdateState] = useState({
     newVersionAvailable: false,
