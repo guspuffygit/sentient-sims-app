@@ -1,27 +1,27 @@
 /* eslint no-alert: off, consistent-return: off, no-useless-return: off */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CardActions, Typography, Select, MenuItem } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { ModUpdate } from 'main/sentient-sims/updater';
 import { Auth } from 'aws-amplify';
-
 import { SelectChangeEvent } from '@mui/material/Select/SelectInput';
 import AppCard from './AppCard';
 import useNewVersionChecker from './hooks/useNewVersionChecker';
+import useSetting, { SettingsHook } from './hooks/useSetting';
 
 export default function UpdateComponent() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [versionType, setVersionType] = useState('main');
+  const releaseType: SettingsHook = useSetting('modRelease', 'main');
   const { updateState, handleCheckForUpdates } = useNewVersionChecker({
     setIsLoading,
-    versionType,
+    releaseType: releaseType.value,
   });
 
   const handleUpdate = async (forceUpdate: boolean): Promise<void> => {
     await handleCheckForUpdates();
     const modUpdate: ModUpdate = {
-      type: versionType,
+      type: releaseType.value,
       credentials: await Auth.currentCredentials(),
     };
     if (updateState.newVersionAvailable || forceUpdate) {
@@ -45,11 +45,11 @@ export default function UpdateComponent() {
     return;
   };
 
-  const handleChangeVersionType = async (
+  const handleChangeReleaseType = async (
     event: SelectChangeEvent
   ): Promise<void> => {
     const newType = event.target.value;
-    setVersionType(newType);
+    releaseType.setSetting(newType);
   };
 
   return (
@@ -109,9 +109,9 @@ export default function UpdateComponent() {
             Last Checked: {updateState.lastChecked}
           </Typography>
 
-          {versionType !== 'main' ? (
+          {releaseType.value !== 'main' ? (
             <Typography sx={{ marginTop: 2 }}>
-              Warning: Only use the Nightly version if you are working with the
+              Warning: Only use the Nightly release if you are working with the
               dev team to test a fix
             </Typography>
           ) : null}
@@ -119,11 +119,11 @@ export default function UpdateComponent() {
         <div>
           <Select
             size="small"
-            labelId="version-type-select-label"
-            id="version-type-select"
-            value={versionType}
+            labelId="release-type-select-label"
+            id="release-type-select"
+            value={releaseType.value}
             sx={{ minWidth: 100 }}
-            onChange={handleChangeVersionType}
+            onChange={handleChangeReleaseType}
           >
             <MenuItem value="main">Stable</MenuItem>
             <MenuItem value="develop">Nightly</MenuItem>

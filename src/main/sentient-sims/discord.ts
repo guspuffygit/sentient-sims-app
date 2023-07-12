@@ -8,6 +8,7 @@ import {
 } from './directories';
 import { getParsedLastExceptionFiles } from './lastException';
 import { getSubscription } from './openai';
+import { get, SettingsEnum } from './settings';
 
 const webhookUrl = [
   'https://d',
@@ -40,6 +41,9 @@ export default async function sendLogs() {
           `Platform: ${os.platform()}`,
           `Architecture: ${os.arch()}`,
           `OS Release: ${os.release()}`,
+          `Mods Folder: ${getModsFolder()}`,
+          `OpenAI Model: ${get(SettingsEnum.OPENAI_MODEL)}`,
+          `Release Type: ${get(SettingsEnum.MOD_RELEASE)}`,
         ].join('\n')
       );
     } catch (err: any) {

@@ -25,23 +25,21 @@ function MenuBar() {
           </div>
           <div>
             {debugModeEnabled ? (
-              <>
-                <Button
-                  color="secondary"
-                  onClick={() => navigate('/chat')}
-                  sx={{ margin: '10px' }}
-                >
-                  Chat
-                </Button>
-                <Button
-                  color="secondary"
-                  onClick={() => navigate('/settings')}
-                  sx={{ margin: '10px' }}
-                >
-                  Settings
-                </Button>
-              </>
+              <Button
+                color="secondary"
+                onClick={() => navigate('/chat')}
+                sx={{ margin: '10px' }}
+              >
+                Chat
+              </Button>
             ) : null}
+            <Button
+              color="secondary"
+              onClick={() => navigate('/settings')}
+              sx={{ margin: '10px' }}
+            >
+              Settings
+            </Button>
           </div>
         </Toolbar>
       </AppBar>

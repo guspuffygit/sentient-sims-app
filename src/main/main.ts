@@ -13,10 +13,11 @@ import path from 'path';
 import {
   app,
   BrowserWindow,
+  dialog,
   globalShortcut,
-  shell,
   ipcMain,
   IpcMainEvent,
+  shell,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -24,9 +25,9 @@ import { encode } from '@nem035/gpt-3-encoder';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import {
-  OpenAIKeyNotSetError,
   generate,
   generateChatCompletion,
+  OpenAIKeyNotSetError,
   testOpenAI,
 } from './sentient-sims/openai';
 import { getSettings, writeSettings } from './sentient-sims/directories';
@@ -37,6 +38,12 @@ import {
   deleteLastExceptionFiles,
   getParsedLastExceptionFiles,
 } from './sentient-sims/lastException';
+import {
+  getSetting,
+  set,
+  setSetting,
+  SettingsEnum,
+} from './sentient-sims/settings';
 
 // Optional, initialize the logger for any renderer processses
 log.initialize({ preload: true });
@@ -75,6 +82,17 @@ const installExtensions = async () => {
     )
     .catch(console.log);
 };
+
+async function handleSelectDirectory() {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ['openDirectory'],
+  });
+  if (!canceled) {
+    return filePaths[0];
+  }
+
+  return null;
+}
 
 const createWindow = async () => {
   if (isDebug) {
@@ -124,7 +142,7 @@ const createWindow = async () => {
   menuBuilder.buildMenu();
 
   const ret = globalShortcut.register('Control+Shift+D', () => {
-    console.log('Control+Shift+C is pressed');
+    console.log('Control+Shift+D is pressed');
     if (mainWindow) {
       mainWindow.webContents.send('debug-mode-toggle');
     }
@@ -162,11 +180,13 @@ let openAIModel = 'gpt-3.5-turbo';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const handleSetOpenAIModel = (event: IpcMainEvent, model: string) => {
   openAIModel = model;
+  set(SettingsEnum.OPENAI_MODEL, model);
 };
 
 app
   .whenReady()
   .then(() => {
+    ipcMain.handle('dialog:selectDirectory', handleSelectDirectory);
     createWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
@@ -175,6 +195,12 @@ app
     });
 
     ipcMain.on('set-openai-model', handleSetOpenAIModel);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ipcMain.on('verify-mod-folder', (event: IpcMainEvent, folder: string) => {
+      if (mainWindow) {
+        mainWindow.webContents.send('verify-mod-folder', 'message');
+      }
+    });
   })
   .catch(console.log);
 
@@ -237,6 +263,18 @@ expressApp.get('/files/last-exception', async (req, res) => {
 expressApp.delete('/files/last-exception', async (req, res) => {
   deleteLastExceptionFiles();
   res.json({ done: 'done' });
+});
+
+expressApp.get('/settings/app/:appSetting', async (req, res) => {
+  const { appSetting } = req.params;
+  res.json({ value: getSetting(appSetting) });
+});
+
+expressApp.post('/settings/app/:appSetting', async (req, res) => {
+  const { appSetting } = req.params;
+  const { value } = req.body;
+  log.info(`Setting app setting: ${appSetting}, to value: ${value}`);
+  res.json({ value: setSetting(appSetting, value) });
 });
 
 expressApp.get('/settings', async (req, res) => {
