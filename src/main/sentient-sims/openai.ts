@@ -1,3 +1,4 @@
+/* eslint-disable promise/always-return */
 import * as fs from 'fs';
 import path from 'path';
 import {
@@ -7,7 +8,7 @@ import {
   OpenAIApi,
 } from 'openai';
 import log from 'electron-log';
-import { BrowserWindow } from 'electron';
+import electron, { BrowserWindow } from 'electron';
 import { getSentientSimsFolder } from './directories';
 
 export class OpenAIKeyNotSetError extends Error {
@@ -64,6 +65,45 @@ function setupOpenAIClient() {
   openai = new OpenAIApi(configuration);
 }
 
+export async function getSubscription() {
+  try {
+    const response = await fetch(
+      'https://api.openai.com/dashboard/billing/subscription',
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${getOpenAIKey()}`,
+        },
+        redirect: 'follow',
+      }
+    );
+    const result = await response.json();
+    // Strip out PII
+    const strippedResult = {
+      current_time: Math.floor(Date.now() / 1000),
+      has_payment_method: result?.has_payment_method,
+      canceled: result?.canceled,
+      canceled_at: result?.canceled_at,
+      delinquent: result?.delinquent,
+      access_until: result?.access_until,
+      soft_limit: result?.soft_limit,
+      hard_limit: result?.hard_limit,
+      system_hard_limit: result?.system_hard_limit,
+      soft_limit_usd: result?.soft_limit_usd,
+      hard_limit_usd: result?.hard_limit_usd,
+      system_hard_limit_usd: result?.system_hard_limit_usd,
+      plan: result?.plan,
+      primary: result?.primary,
+    };
+    log.info(strippedResult);
+    return strippedResult;
+  } catch (error: any) {
+    log.error('Error getting subscription', error);
+  }
+
+  return null;
+}
+
 export async function testOpenAI() {
   if (!openai) {
     setupOpenAIClient();
@@ -94,6 +134,27 @@ export async function testOpenAI() {
     };
   } catch (error: any) {
     log.error('Error testing OpenAI API:', error);
+
+    getSubscription()
+      .then((subscription) => {
+        if (
+          subscription?.plan?.id === 'free' &&
+          subscription.current_time > subscription.access_until
+        ) {
+          electron?.BrowserWindow?.getAllWindows().forEach((window) => {
+            if (window.webContents?.isDestroyed() === false) {
+              window.webContents.send(
+                'popup-notification',
+                'OpenAI free trial has expired. Convert your account to pay-as-you-go to continue.'
+              );
+            }
+          });
+        }
+      })
+      .catch(() => {
+        // do nothing
+      });
+
     return {
       status: 'not working, send logs to debug',
     };
@@ -169,43 +230,5 @@ export async function generate(
       results: [{ text: 'AI request failed' }],
       request,
     };
-  }
-}
-
-export async function getSubscription() {
-  try {
-    const response = await fetch(
-      'https://api.openai.com/dashboard/billing/subscription',
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${getOpenAIKey()}`,
-        },
-        redirect: 'follow',
-      }
-    );
-    const result = await response.json();
-    // Strip out PII
-    const strippedResult = {
-      current_time: Math.floor(Date.now() / 1000),
-      has_payment_method: result?.has_payment_method,
-      canceled: result?.canceled,
-      canceled_at: result?.canceled_at,
-      delinquent: result?.delinquent,
-      access_until: result?.access_until,
-      soft_limit: result?.soft_limit,
-      hard_limit: result?.hard_limit,
-      system_hard_limit: result?.system_hard_limit,
-      soft_limit_usd: result?.soft_limit_usd,
-      hard_limit_usd: result?.hard_limit_usd,
-      system_hard_limit_usd: result?.system_hard_limit_usd,
-      plan: result?.plan,
-      primary: result?.primary,
-    };
-    log.info(strippedResult);
-    return strippedResult;
-  } catch (error: any) {
-    log.error(error);
-    return { error: error?.message };
   }
 }
