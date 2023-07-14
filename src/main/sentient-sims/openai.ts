@@ -1,3 +1,4 @@
+/* eslint-disable promise/always-return */
 import * as fs from 'fs';
 import path from 'path';
 import {
@@ -7,7 +8,7 @@ import {
   OpenAIApi,
 } from 'openai';
 import log from 'electron-log';
-import { BrowserWindow } from 'electron';
+import electron, { BrowserWindow } from 'electron';
 import { getSentientSimsFolder } from './directories';
 
 export class OpenAIKeyNotSetError extends Error {
@@ -64,60 +65,6 @@ function setupOpenAIClient() {
   openai = new OpenAIApi(configuration);
 }
 
-export async function testOpenAI() {
-  if (!openai) {
-    setupOpenAIClient();
-  }
-  const request: CreateChatCompletionRequest = {
-    model: 'gpt-3.5-turbo',
-    max_tokens: 100,
-    temperature: 0,
-    top_p: 0,
-    messages: [
-      {
-        role: ChatCompletionRequestMessageRoleEnum.User,
-        content: 'Return the text "OK"',
-      },
-    ],
-  };
-
-  try {
-    const response = await openai.createChatCompletion(request);
-    const { message } = response.data.choices[0];
-    if (message) {
-      return {
-        status: message.content?.trim(),
-      };
-    }
-    return {
-      status: 'not working, no message',
-    };
-  } catch (error: any) {
-    log.error('Error testing OpenAI API:', error);
-    return {
-      status: 'not working, send logs to debug',
-    };
-  }
-}
-
-export async function generateChatCompletion(
-  request: CreateChatCompletionRequest
-) {
-  if (!openai) {
-    setupOpenAIClient();
-  }
-
-  try {
-    const response = await openai.createChatCompletion(request);
-    return { request, response: response.data };
-  } catch (err: any) {
-    return {
-      request,
-      err,
-    };
-  }
-}
-
 export async function getSubscription() {
   try {
     const response = await fetch(
@@ -151,8 +98,84 @@ export async function getSubscription() {
     log.info(strippedResult);
     return strippedResult;
   } catch (error: any) {
-    log.error(error);
-    return { error: error?.message };
+    log.error('Error getting subscription', error);
+  }
+
+  return null;
+}
+
+export async function testOpenAI() {
+  if (!openai) {
+    setupOpenAIClient();
+  }
+  const request: CreateChatCompletionRequest = {
+    model: 'gpt-3.5-turbo',
+    max_tokens: 100,
+    temperature: 0,
+    top_p: 0,
+    messages: [
+      {
+        role: ChatCompletionRequestMessageRoleEnum.User,
+        content: 'Return the text "OK"',
+      },
+    ],
+  };
+
+  try {
+    const response = await openai.createChatCompletion(request);
+    const { message } = response.data.choices[0];
+    if (message) {
+      return {
+        status: message.content?.trim(),
+      };
+    }
+    return {
+      status: 'not working, no message',
+    };
+  } catch (error: any) {
+    log.error('Error testing OpenAI API:', error);
+
+    getSubscription()
+      .then((subscription) => {
+        if (
+          subscription?.plan?.id === 'free' &&
+          subscription.current_time > subscription.access_until
+        ) {
+          electron?.BrowserWindow?.getAllWindows().forEach((window) => {
+            if (window.webContents?.isDestroyed() === false) {
+              window.webContents.send(
+                'popup-notification',
+                'OpenAI free trial has expired. Convert your account to pay-as-you-go to continue.'
+              );
+            }
+          });
+        }
+      })
+      .catch(() => {
+        // do nothing
+      });
+
+    return {
+      status: 'not working, send logs to debug',
+    };
+  }
+}
+
+export async function generateChatCompletion(
+  request: CreateChatCompletionRequest
+) {
+  if (!openai) {
+    setupOpenAIClient();
+  }
+
+  try {
+    const response = await openai.createChatCompletion(request);
+    return { request, response: response.data };
+  } catch (err: any) {
+    return {
+      request,
+      err,
+    };
   }
 }
 

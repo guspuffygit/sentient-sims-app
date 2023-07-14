@@ -94,11 +94,14 @@ export default function SendLogButton() {
         }}
       >
         <div>
-          <Button onClick={handleClick}>Send Logs</Button>
+          <Button variant="outlined" onClick={handleClick}>
+            Send Logs
+          </Button>
         </div>
         <div>
           <Button
             color="secondary"
+            variant="outlined"
             onClick={() => navigate('/last-exception')}
             sx={{ margin: '10px' }}
           >

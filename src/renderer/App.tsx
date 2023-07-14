@@ -4,6 +4,7 @@ import { Container, Grid } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import MenuBar from './MenuBar';
 import WidgetWithOverlay from './WidgetWithOverlay';
+import PopupNotificationModal from './PopupNotification';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
           <WidgetWithOverlay />
         </Grid>
       </Grid>
+      <PopupNotificationModal />
     </Container>
   );
 }
