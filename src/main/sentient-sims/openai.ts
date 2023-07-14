@@ -118,44 +118,6 @@ export async function generateChatCompletion(
   }
 }
 
-export async function getSubscription() {
-  try {
-    const response = await fetch(
-      'https://api.openai.com/dashboard/billing/subscription',
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${getOpenAIKey()}`,
-        },
-        redirect: 'follow',
-      }
-    );
-    const result = await response.json();
-    // Strip out PII
-    const strippedResult = {
-      current_time: Math.floor(Date.now() / 1000),
-      has_payment_method: result?.has_payment_method,
-      canceled: result?.canceled,
-      canceled_at: result?.canceled_at,
-      delinquent: result?.delinquent,
-      access_until: result?.access_until,
-      soft_limit: result?.soft_limit,
-      hard_limit: result?.hard_limit,
-      system_hard_limit: result?.system_hard_limit,
-      soft_limit_usd: result?.soft_limit_usd,
-      hard_limit_usd: result?.hard_limit_usd,
-      system_hard_limit_usd: result?.system_hard_limit_usd,
-      plan: result?.plan,
-      primary: result?.primary,
-    };
-    log.info(strippedResult);
-    return strippedResult;
-  } catch (error: any) {
-    log.error(error);
-    return { error: error?.message };
-  }
-}
-
 export async function generate(
   maxLength: any,
   prompt: any,
@@ -207,5 +169,43 @@ export async function generate(
       results: [{ text: 'AI request failed' }],
       request,
     };
+  }
+}
+
+export async function getSubscription() {
+  try {
+    const response = await fetch(
+      'https://api.openai.com/dashboard/billing/subscription',
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${getOpenAIKey()}`,
+        },
+        redirect: 'follow',
+      }
+    );
+    const result = await response.json();
+    // Strip out PII
+    const strippedResult = {
+      current_time: Math.floor(Date.now() / 1000),
+      has_payment_method: result?.has_payment_method,
+      canceled: result?.canceled,
+      canceled_at: result?.canceled_at,
+      delinquent: result?.delinquent,
+      access_until: result?.access_until,
+      soft_limit: result?.soft_limit,
+      hard_limit: result?.hard_limit,
+      system_hard_limit: result?.system_hard_limit,
+      soft_limit_usd: result?.soft_limit_usd,
+      hard_limit_usd: result?.hard_limit_usd,
+      system_hard_limit_usd: result?.system_hard_limit_usd,
+      plan: result?.plan,
+      primary: result?.primary,
+    };
+    log.info(strippedResult);
+    return strippedResult;
+  } catch (error: any) {
+    log.error(error);
+    return { error: error?.message };
   }
 }
