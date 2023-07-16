@@ -3,6 +3,7 @@ import { Box, Button, Divider, Modal } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LogSendInformationComponent from './LogSendInformationComponent';
+import SpaceBetweenDiv from './components/SpaceBetweenDiv';
 
 export default function SendLogButton() {
   const navigate = useNavigate();
@@ -56,14 +57,8 @@ export default function SendLogButton() {
           }}
         >
           <LogSendInformationComponent />
-          <Divider sx={{ margin: 2 }} />
-          <div
-            style={{
-              display: 'flex',
-              marginTop: 10,
-              justifyContent: 'space-between',
-            }}
-          >
+          <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+          <SpaceBetweenDiv>
             <div>
               <LoadingButton
                 loading={loading}
@@ -83,16 +78,10 @@ export default function SendLogButton() {
                 Cancel
               </LoadingButton>
             </div>
-          </div>
+          </SpaceBetweenDiv>
         </Box>
       </Modal>
-      <div
-        style={{
-          display: 'flex',
-          marginTop: 10,
-          justifyContent: 'space-between',
-        }}
-      >
+      <SpaceBetweenDiv>
         <div>
           <Button variant="outlined" onClick={handleClick}>
             Send Logs
@@ -103,12 +92,11 @@ export default function SendLogButton() {
             color="secondary"
             variant="outlined"
             onClick={() => navigate('/last-exception')}
-            sx={{ margin: '10px' }}
           >
             Last Exception Browser
           </Button>
         </div>
-      </div>
+      </SpaceBetweenDiv>
     </>
   );
 }

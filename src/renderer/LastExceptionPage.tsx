@@ -8,35 +8,18 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
-import { LastExceptionFile } from 'main/sentient-sims/lastException';
-import { useEffect, useState } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { LastExceptionFile } from 'main/sentient-sims/lastException';
+import { useState } from 'react';
 import AppCard from './AppCard';
+import useLastExceptionFiles from './hooks/useLastExceptionFiles';
+import SpaceBetweenDiv from './components/SpaceBetweenDiv';
 
 export default function LastExceptionPage() {
-  const [lastExceptionFiles, setLastExceptionFiles] = useState<
-    LastExceptionFile[]
-  >([]);
   const [selectedException, setSelectedException] = useState<
     LastExceptionFile | undefined
   >();
-
-  async function getLastExceptionFiles() {
-    const response = await fetch('http://localhost:25148/files/last-exception');
-    const jsonResponse = await response.json();
-    setLastExceptionFiles(jsonResponse);
-  }
-
-  useEffect(() => {
-    getLastExceptionFiles();
-  });
-
-  async function handleClearAll() {
-    await fetch('http://localhost:25148/files/last-exception', {
-      method: 'DELETE',
-    });
-    await getLastExceptionFiles();
-  }
+  const { lastExceptionFiles, deleteFiles } = useLastExceptionFiles();
 
   const renderRows: any = [];
 
@@ -58,12 +41,7 @@ export default function LastExceptionPage() {
     <AppCard>
       {selectedException ? (
         <div style={{ marginBottom: 2 }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-            }}
-          >
+          <SpaceBetweenDiv>
             <div>
               <IconButton
                 aria-label="delete"
@@ -78,7 +56,7 @@ export default function LastExceptionPage() {
                 {selectedException.filename}
               </Typography>
             </div>
-          </div>
+          </SpaceBetweenDiv>
           <textarea
             value={selectedException.text}
             rows={selectedException.text.split('\n').length}
@@ -91,23 +69,18 @@ export default function LastExceptionPage() {
         </div>
       ) : (
         <div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-            }}
-          >
+          <SpaceBetweenDiv>
             <div />
             <div style={{ marginRight: 2 }}>
               <Button
                 color="error"
                 variant="outlined"
-                onClick={() => handleClearAll()}
+                onClick={() => deleteFiles()}
               >
                 Clear All
               </Button>
             </div>
-          </div>
+          </SpaceBetweenDiv>
           <div>
             <Divider sx={{ margin: 2 }} />
             <List component="nav">{renderRows}</List>

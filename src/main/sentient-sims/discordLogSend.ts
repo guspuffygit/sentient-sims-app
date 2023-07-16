@@ -24,7 +24,7 @@ const webhookUrl = [
   '1Ee5jO7kVJkyo',
 ].join('');
 
-export default async function sendLogs() {
+export default async function sendLogsToDiscord() {
   const logId = Array.from({ length: 10 }, () =>
     Math.random().toString(36).charAt(2)
   ).join('');

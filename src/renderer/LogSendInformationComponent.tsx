@@ -38,11 +38,11 @@ export default function LogSendInformationComponent() {
       </Typography>
       <p />
       <Typography variant="body1" gutterBottom>
-        The data will be deleted once the investigation is complete.
+        The data will be deleted once it has been reviewed.
       </Typography>
       <p />
       <Typography variant="body1" gutterBottom>
-        See the{' '}
+        Copy and paste the generated id to the{' '}
         {
           <Link
             href="https://discord.com/channels/1098029759201542144/1110714954492940410"
@@ -53,7 +53,11 @@ export default function LogSendInformationComponent() {
             #support
           </Link>
         }{' '}
-        channel in Discord if you have any questions.
+        channel in Discord to claim the logs and describe your issue.
+      </Typography>
+      <p />
+      <Typography variant="body1" gutterBottom>
+        Logs are anonymous until they are claimed!
       </Typography>
     </>
   );

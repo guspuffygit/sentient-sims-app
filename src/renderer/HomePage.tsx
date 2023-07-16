@@ -1,23 +1,24 @@
-import { Typography } from '@mui/material';
 import AppCard from './AppCard';
 import UpdateComponent from './UpdateComponent';
-import SendLogButton from './SendLogButton';
 import OpenAIComponent from './OpenAIComponent';
+import DebugCard from './DebugCard';
 
 export default function HomePage() {
   return (
     <div>
       <AppCard>
-        <p>
-          Keep this app running while you are playing the Sentient Sims Mod!
-        </p>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          Keep this app running while you are playing Sentient Sims!
+        </div>
       </AppCard>
       <UpdateComponent />
       <OpenAIComponent />
-      <AppCard>
-        <Typography sx={{ marginBottom: 3 }}>Debug</Typography>
-        <SendLogButton />
-      </AppCard>
+      <DebugCard />
     </div>
   );
 }
