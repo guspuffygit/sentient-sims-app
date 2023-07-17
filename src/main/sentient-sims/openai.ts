@@ -8,7 +8,7 @@ import {
   OpenAIApi,
 } from 'openai';
 import log from 'electron-log';
-import electron, { BrowserWindow } from 'electron';
+import electron from 'electron';
 import { getSentientSimsFolder } from './directories';
 
 export class OpenAIKeyNotSetError extends Error {
@@ -183,7 +183,6 @@ export async function generate(
   maxLength: any,
   prompt: any,
   model: any,
-  mainWindow: BrowserWindow | null,
   systemPrompt: any
 ) {
   const request: CreateChatCompletionRequest = {
@@ -204,12 +203,13 @@ export async function generate(
   try {
     const result = await generateChatCompletion(request);
     try {
-      if (mainWindow) {
-        mainWindow.webContents.send('on-chat-generation', result);
-      }
+      electron?.BrowserWindow?.getAllWindows().forEach((window) => {
+        if (window.webContents?.isDestroyed() === false) {
+          window.webContents.send('on-chat-generation', result);
+        }
+      });
     } catch (err) {
-      log.error(`Failed sending`);
-      /* empty */
+      log.error(`Failed sending`, err);
     }
     if (result.response) {
       const { message } = result.response.choices[0];
