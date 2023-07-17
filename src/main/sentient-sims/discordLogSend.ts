@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import log from 'electron-log';
 import os from 'os';
+import { app } from 'electron';
 import {
   getLogsFile,
   getModsFolder,
@@ -9,7 +10,6 @@ import {
 import { getParsedLastExceptionFiles } from './lastException';
 import { getSubscription } from './openai';
 import { get, SettingsEnum } from './settings';
-import { app } from 'electron';
 import { getModVersion } from './updater';
 
 const webhookUrl = [
