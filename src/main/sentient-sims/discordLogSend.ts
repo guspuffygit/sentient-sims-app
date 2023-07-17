@@ -9,6 +9,8 @@ import {
 import { getParsedLastExceptionFiles } from './lastException';
 import { getSubscription } from './openai';
 import { get, SettingsEnum } from './settings';
+import { app } from 'electron';
+import { getModVersion } from './updater';
 
 const webhookUrl = [
   'https://d',
@@ -44,6 +46,8 @@ export default async function sendLogsToDiscord() {
           `Mods Folder: ${getModsFolder()}`,
           `OpenAI Model: ${get(SettingsEnum.OPENAI_MODEL)}`,
           `Release Type: ${get(SettingsEnum.MOD_RELEASE)}`,
+          `Mod Version: ${getModVersion()}`,
+          `App Version: ${app.getVersion()}`,
         ].join('\n')
       );
     } catch (err: any) {
