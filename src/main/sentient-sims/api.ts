@@ -2,6 +2,7 @@ import express from 'express';
 import { encode } from '@nem035/gpt-3-encoder';
 import log from 'electron-log';
 import { app } from 'electron';
+import request from 'request';
 import {
   generate,
   generateChatCompletion,
@@ -49,13 +50,47 @@ export default function runApi() {
     const { prompt, model, systemPrompt } = body;
     const maxLength = body.max_length;
 
-    const response = await generate(
-      maxLength,
-      prompt,
-      model || get(SettingsEnum.OPENAI_MODEL),
-      systemPrompt || defaultSystemPrompt
-    );
-    res.json(response);
+    if (get(SettingsEnum.CUSTOM_LLM_ENABLED)) {
+      const newPrompt = [
+        'This response is written in the style of a novel excerpt written in the third person by an omniscient narrator, containing vivid descriptions of each scene.',
+        'Every response takes into account every previous response.',
+        'The response stays in the present and does not contain information about the future.',
+        'At the end of each response, there is a cliffhanger, staying in the present, leaving it open what happens next.',
+        'Never end with a summary or moral of the story.',
+        'Consider the user context when writing the story.',
+        `USER: ${prompt}`,
+        `ASSISTANT:`,
+      ].join('\n');
+      log.log(newPrompt);
+      const options = {
+        method: 'POST',
+        url: `${get(SettingsEnum.CUSTOM_LLM_HOSTNAME)}/api/v1/generate`,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: newPrompt,
+          max_new_tokens: maxLength,
+        }),
+      };
+
+      request(
+        options,
+        (error: string | undefined, response: any, responseBody: any) => {
+          try {
+            res.json(JSON.parse(responseBody));
+          } catch (err) {
+            log.error(err);
+          }
+        }
+      );
+    } else {
+      const response = await generate(
+        maxLength,
+        prompt,
+        model || get(SettingsEnum.OPENAI_MODEL),
+        systemPrompt || defaultSystemPrompt
+      );
+      res.json(response);
+    }
   });
 
   expressApp.post('/generate', async (req, res) => {

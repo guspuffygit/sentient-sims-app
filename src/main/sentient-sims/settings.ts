@@ -6,6 +6,8 @@ export enum SettingsEnum {
   MOD_RELEASE = 'modRelease',
   OPENAI_MODEL = 'openaiModel',
   MODS_DIRECTORY = 'modsDirectory',
+  CUSTOM_LLM_ENABLED = 'customLLMEnabled',
+  CUSTOM_LLM_HOSTNAME = 'customLLMHostname',
 }
 
 const store = new Store({
@@ -17,6 +19,14 @@ const store = new Store({
     [SettingsEnum.OPENAI_MODEL]: {
       type: 'string',
       default: 'gpt-3.5-turbo',
+    },
+    [SettingsEnum.CUSTOM_LLM_ENABLED]: {
+      type: 'boolean',
+      default: false,
+    },
+    [SettingsEnum.CUSTOM_LLM_HOSTNAME]: {
+      type: 'string',
+      default: 'http://192.168.1.33:5000',
     },
     [SettingsEnum.MODS_DIRECTORY]: {
       type: 'string',
