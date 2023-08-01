@@ -1,5 +1,4 @@
 import express from 'express';
-import { encode } from '@nem035/gpt-3-encoder';
 import log from 'electron-log';
 import { app } from 'electron';
 import request from 'request';
@@ -18,6 +17,8 @@ import {
 } from './lastException';
 import { getSettings, writeSettings } from './directories';
 import { getModVersion, updateMod } from './updater';
+import { llamaTokenizer } from './llama/LLamaTokenizer';
+import { formatLLamaPrompt } from './promptFormatter';
 
 export default function runApi() {
   const expressApp = express();
@@ -42,7 +43,9 @@ export default function runApi() {
   });
 
   expressApp.post('/api/v1/count', (req, res) => {
-    res.json({ count: encode(req.body.prompt).length });
+    const prompt = formatLLamaPrompt(req.body.prompt);
+    const count = llamaTokenizer.encode(prompt).length;
+    res.json({ count });
   });
 
   expressApp.post('/api/v1/generate', async (req, res) => {
@@ -51,23 +54,14 @@ export default function runApi() {
     const maxLength = body.max_length;
 
     if (get(SettingsEnum.CUSTOM_LLM_ENABLED)) {
-      const newPrompt = [
-        'This response is written in the style of a novel excerpt written in the third person by an omniscient narrator, containing vivid descriptions of each scene.',
-        'Every response takes into account every previous response.',
-        'The response stays in the present and does not contain information about the future.',
-        'At the end of each response, there is a cliffhanger, staying in the present, leaving it open what happens next.',
-        'Never end with a summary or moral of the story.',
-        'Consider the user context when writing the story.',
-        `USER: ${prompt}`,
-        `ASSISTANT:`,
-      ].join('\n');
-      log.log(newPrompt);
+      const llamaPrompt = formatLLamaPrompt(prompt);
+      log.log(`prompt: ${llamaPrompt}`);
       const options = {
         method: 'POST',
         url: `${get(SettingsEnum.CUSTOM_LLM_HOSTNAME)}/api/v1/generate`,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: newPrompt,
+          prompt: llamaPrompt,
           max_new_tokens: maxLength,
         }),
       };
