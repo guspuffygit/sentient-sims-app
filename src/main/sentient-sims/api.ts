@@ -2,6 +2,7 @@ import express from 'express';
 import log from 'electron-log';
 import { app } from 'electron';
 import request from 'request';
+import { encode } from '@nem035/gpt-3-encoder';
 import {
   generate,
   generateChatCompletion,
@@ -17,8 +18,8 @@ import {
 } from './lastException';
 import { getSettings, writeSettings } from './directories';
 import { getModVersion, updateMod } from './updater';
-import { llamaTokenizer } from './llama/LLamaTokenizer';
-import { formatLLamaPrompt } from './promptFormatter';
+import { PromptRequest } from './models/PromptRequest';
+import { PromptFormatter } from './promptFormatter';
 
 export default function runApi() {
   const expressApp = express();
@@ -42,27 +43,25 @@ export default function runApi() {
     }
   });
 
-  expressApp.post('/api/v1/count', (req, res) => {
-    const prompt = formatLLamaPrompt(req.body.prompt);
-    const count = llamaTokenizer.encode(prompt).length;
-    res.json({ count });
-  });
+  expressApp.post('/api/v2/generate', async (req, res) => {
+    const promptRequest: PromptRequest = req.body;
 
-  expressApp.post('/api/v1/generate', async (req, res) => {
-    const { body } = req;
-    const { prompt, model, systemPrompt } = body;
-    const maxLength = body.max_length;
+    const customLLMEnabled = get(SettingsEnum.CUSTOM_LLM_ENABLED) as boolean;
+    const promptFormatter = new PromptFormatter(customLLMEnabled);
+    const prompt = promptFormatter.formatPrompt(promptRequest);
+    log.debug(`prompt: ${prompt}`);
 
-    if (get(SettingsEnum.CUSTOM_LLM_ENABLED)) {
-      const llamaPrompt = formatLLamaPrompt(prompt);
-      log.log(`prompt: ${llamaPrompt}`);
+    if (customLLMEnabled) {
       const options = {
         method: 'POST',
         url: `${get(SettingsEnum.CUSTOM_LLM_HOSTNAME)}/api/v1/generate`,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${get(SettingsEnum.ACCESS_TOKEN)}`,
+        },
         body: JSON.stringify({
-          prompt: llamaPrompt,
-          max_new_tokens: maxLength,
+          prompt,
+          max_new_tokens: 90,
         }),
       };
 
@@ -70,21 +69,58 @@ export default function runApi() {
         options,
         (error: string | undefined, response: any, responseBody: any) => {
           try {
-            res.json(JSON.parse(responseBody));
+            const result = JSON.parse(responseBody);
+
+            // Strip USER and ASSISTANT continuations
+            // TODO: Use stop tokens in model settings
+            let { text } = result.results[0];
+            text = text.split('USER:', 1)[0].trim();
+            text = text.split('ASSISTANT:', 1)[0].trim();
+            result.results[0].text = text;
+
+            res.json(result);
           } catch (err) {
             log.error(err);
           }
         }
       );
     } else {
-      const response = await generate(
-        maxLength,
-        prompt,
-        model || get(SettingsEnum.OPENAI_MODEL),
-        systemPrompt || defaultSystemPrompt
+      res.json(
+        await generate(
+          prompt,
+          get(SettingsEnum.OPENAI_MODEL),
+          defaultSystemPrompt,
+          90
+        )
       );
-      res.json(response);
     }
+  });
+
+  expressApp.post('/api/v1/count', (req, res) => {
+    res.json({ count: encode(req.body.prompt).length });
+  });
+
+  expressApp.post('/api/v1/generate', async (req, res) => {
+    const { body } = req;
+    const { prompt, model, systemPrompt } = body;
+    const maxLength = body.max_length;
+
+    const response = await generate(
+      prompt,
+      model || get(SettingsEnum.OPENAI_MODEL),
+      systemPrompt || defaultSystemPrompt,
+      maxLength
+    );
+    res.json(response);
+  });
+
+  expressApp.post('/translate', async (req, res) => {
+    const { body } = req;
+    const { prompt, systemPrompt } = body;
+
+    const response = await generate(prompt, 'gpt-3.5-turbo', systemPrompt);
+
+    res.json(response);
   });
 
   expressApp.post('/generate', async (req, res) => {

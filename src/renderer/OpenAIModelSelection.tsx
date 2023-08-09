@@ -4,11 +4,11 @@ import {
   Select,
   SelectChangeEvent,
 } from '@mui/material';
-import useDebugModeHook from './UseDebugModeHook';
 import useSetting, { SettingsHook } from './hooks/useSetting';
+import { useDebugMode } from './providers/DebugModeProvider';
 
 export default function OpenAIModelSelection() {
-  const [debugModeEnabled] = useDebugModeHook();
+  const debugMode = useDebugMode();
   const openAIModel: SettingsHook = useSetting('openaiModel', 'gpt-3.5-turbo');
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -17,7 +17,7 @@ export default function OpenAIModelSelection() {
     openAIModel.setSetting(model);
   };
 
-  if (debugModeEnabled) {
+  if (debugMode.isEnabled) {
     return (
       <div>
         <Select

@@ -17,6 +17,9 @@ const electronHandler = {
     return ipcRenderer.on('popup-notification', callback);
   },
   selectDirectory: () => ipcRenderer.invoke('dialog:selectDirectory'),
+  setAccessToken: (accessToken: string) => {
+    ipcRenderer.send('set-access-token', accessToken);
+  },
   systemPrompt,
 };
 

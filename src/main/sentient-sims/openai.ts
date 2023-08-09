@@ -180,14 +180,14 @@ export async function generateChatCompletion(
 }
 
 export async function generate(
-  maxLength: any,
   prompt: any,
   model: any,
-  systemPrompt: any
+  systemPrompt: any,
+  maxLength?: any
 ) {
   const request: CreateChatCompletionRequest = {
     model: model || 'gpt-3.5-turbo',
-    max_tokens: maxLength || 100,
+    max_tokens: maxLength,
     messages: [
       {
         role: ChatCompletionRequestMessageRoleEnum.System,

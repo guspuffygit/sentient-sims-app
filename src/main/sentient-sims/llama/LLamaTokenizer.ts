@@ -219,14 +219,7 @@ type TokenNode = {
   next: any;
 };
 
-function encode(
-  prompt: string,
-  addBosToken = true,
-  addPrecedingSpace = true,
-  logPerformance = false
-) {
-  const startTime = Date.now();
-
+function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
   if (prompt.length === 0) {
     return [];
   }
@@ -350,11 +343,6 @@ function encode(
     currTokenNode = currTokenNode.next
   ) {
     mergedTokenIds.push(currTokenNode.tokenId);
-  }
-
-  if (logPerformance) {
-    const endTime = performance.now();
-    console.log(`Tokenizer running time: ${endTime - startTime} milliseconds`);
   }
 
   return mergedTokenIds;

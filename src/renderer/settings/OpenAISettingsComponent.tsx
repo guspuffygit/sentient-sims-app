@@ -11,8 +11,10 @@ import useSetting from 'renderer/hooks/useSetting';
 import log from 'electron-log';
 import React from 'react';
 import AppCard from '../AppCard';
+import { useDebugMode } from '../providers/DebugModeProvider';
 
 export default function OpenAISettingsComponent() {
+  const debugMode = useDebugMode();
   const modsDirectory = useSetting('modsDirectory');
   const customLLMEnabled = useSetting('customLLMEnabled', false);
   const customLLMHostname = useSetting('customLLMHostname');
@@ -55,20 +57,22 @@ export default function OpenAISettingsComponent() {
           Modify
         </Button>
       </Box>
-      <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
-        <FormControlLabel
-          label="Enable Custom LLM"
-          control={
-            <Checkbox
-              checked={customLLMEnabled.value}
-              onChange={(change) =>
-                customLLMEnabled.setSetting(change.target.checked)
-              }
-            />
-          }
-        />
-      </Box>
-      {customLLMEnabled.value ? (
+      {debugMode.isEnabled ? (
+        <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+          <FormControlLabel
+            label="Enable Custom LLM"
+            control={
+              <Checkbox
+                checked={customLLMEnabled.value}
+                onChange={(change) =>
+                  customLLMEnabled.setSetting(change.target.checked)
+                }
+              />
+            }
+          />
+        </Box>
+      ) : null}
+      {customLLMEnabled.value && debugMode.isEnabled ? (
         <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
           <TextField
             focused

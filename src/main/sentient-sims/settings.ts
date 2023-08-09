@@ -8,6 +8,7 @@ export enum SettingsEnum {
   MODS_DIRECTORY = 'modsDirectory',
   CUSTOM_LLM_ENABLED = 'customLLMEnabled',
   CUSTOM_LLM_HOSTNAME = 'customLLMHostname',
+  ACCESS_TOKEN = 'accessToken',
 }
 
 const store = new Store({
@@ -26,7 +27,7 @@ const store = new Store({
     },
     [SettingsEnum.CUSTOM_LLM_HOSTNAME]: {
       type: 'string',
-      default: 'http://192.168.1.33:5000',
+      default: 'https://ai.sentientsimulations.com:25150',
     },
     [SettingsEnum.MODS_DIRECTORY]: {
       type: 'string',
@@ -37,6 +38,9 @@ const store = new Store({
         'The Sims 4',
         'Mods'
       ),
+    },
+    [SettingsEnum.ACCESS_TOKEN]: {
+      type: 'string',
     },
   },
 });
