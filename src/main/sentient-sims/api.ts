@@ -1,7 +1,8 @@
 import express from 'express';
-import { encode } from '@nem035/gpt-3-encoder';
 import log from 'electron-log';
 import { app } from 'electron';
+import request from 'request';
+import { encode } from '@nem035/gpt-3-encoder';
 import {
   generate,
   generateChatCompletion,
@@ -17,6 +18,8 @@ import {
 } from './lastException';
 import { getSettings, writeSettings } from './directories';
 import { getModVersion, updateMod } from './updater';
+import { PromptRequest } from './models/PromptRequest';
+import { PromptFormatter } from './promptFormatter';
 
 export default function runApi() {
   const expressApp = express();
@@ -40,6 +43,59 @@ export default function runApi() {
     }
   });
 
+  expressApp.post('/api/v2/generate', async (req, res) => {
+    const promptRequest: PromptRequest = req.body;
+
+    const customLLMEnabled = get(SettingsEnum.CUSTOM_LLM_ENABLED) as boolean;
+    const promptFormatter = new PromptFormatter(customLLMEnabled);
+    const prompt = promptFormatter.formatPrompt(promptRequest);
+    log.debug(`prompt: ${prompt}`);
+
+    if (customLLMEnabled) {
+      const options = {
+        method: 'POST',
+        url: `${get(SettingsEnum.CUSTOM_LLM_HOSTNAME)}/api/v1/generate`,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${get(SettingsEnum.ACCESS_TOKEN)}`,
+        },
+        body: JSON.stringify({
+          prompt,
+          max_new_tokens: 90,
+        }),
+      };
+
+      request(
+        options,
+        (error: string | undefined, response: any, responseBody: any) => {
+          try {
+            const result = JSON.parse(responseBody);
+
+            // Strip USER and ASSISTANT continuations
+            // TODO: Use stop tokens in model settings
+            let { text } = result.results[0];
+            text = text.split('USER:', 1)[0].trim();
+            text = text.split('ASSISTANT:', 1)[0].trim();
+            result.results[0].text = text;
+
+            res.json(result);
+          } catch (err) {
+            log.error(err);
+          }
+        }
+      );
+    } else {
+      res.json(
+        await generate(
+          prompt,
+          get(SettingsEnum.OPENAI_MODEL),
+          defaultSystemPrompt,
+          90
+        )
+      );
+    }
+  });
+
   expressApp.post('/api/v1/count', (req, res) => {
     res.json({ count: encode(req.body.prompt).length });
   });
@@ -50,11 +106,20 @@ export default function runApi() {
     const maxLength = body.max_length;
 
     const response = await generate(
-      maxLength,
       prompt,
       model || get(SettingsEnum.OPENAI_MODEL),
-      systemPrompt || defaultSystemPrompt
+      systemPrompt || defaultSystemPrompt,
+      maxLength
     );
+    res.json(response);
+  });
+
+  expressApp.post('/translate', async (req, res) => {
+    const { body } = req;
+    const { prompt, systemPrompt } = body;
+
+    const response = await generate(prompt, 'gpt-3.5-turbo', systemPrompt);
+
     res.json(response);
   });
 

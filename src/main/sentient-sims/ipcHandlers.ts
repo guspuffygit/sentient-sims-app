@@ -17,4 +17,10 @@ export default function ipcHandlers() {
   ipcMain.on('set-openai-model', (_event: IpcMainEvent, model: string) => {
     set(SettingsEnum.OPENAI_MODEL, model);
   });
+  ipcMain.on(
+    'set-access-token',
+    (_event: IpcMainEvent, accessToken: string) => {
+      set(SettingsEnum.ACCESS_TOKEN, accessToken);
+    }
+  );
 }

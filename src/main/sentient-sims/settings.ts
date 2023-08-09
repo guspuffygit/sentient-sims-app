@@ -6,6 +6,9 @@ export enum SettingsEnum {
   MOD_RELEASE = 'modRelease',
   OPENAI_MODEL = 'openaiModel',
   MODS_DIRECTORY = 'modsDirectory',
+  CUSTOM_LLM_ENABLED = 'customLLMEnabled',
+  CUSTOM_LLM_HOSTNAME = 'customLLMHostname',
+  ACCESS_TOKEN = 'accessToken',
 }
 
 const store = new Store({
@@ -18,6 +21,14 @@ const store = new Store({
       type: 'string',
       default: 'gpt-3.5-turbo',
     },
+    [SettingsEnum.CUSTOM_LLM_ENABLED]: {
+      type: 'boolean',
+      default: false,
+    },
+    [SettingsEnum.CUSTOM_LLM_HOSTNAME]: {
+      type: 'string',
+      default: 'https://ai.sentientsimulations.com:25150',
+    },
     [SettingsEnum.MODS_DIRECTORY]: {
       type: 'string',
       default: path.join(
@@ -27,6 +38,9 @@ const store = new Store({
         'The Sims 4',
         'Mods'
       ),
+    },
+    [SettingsEnum.ACCESS_TOKEN]: {
+      type: 'string',
     },
   },
 });

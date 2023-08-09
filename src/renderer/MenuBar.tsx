@@ -1,10 +1,18 @@
 import { AppBar, Box, Button, Toolbar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import useDebugModeHook from './UseDebugModeHook';
+import { useAuthenticator } from '@aws-amplify/ui-react';
+import useAuthCredentials from './hooks/useAuthCredentials';
+import { useDebugMode } from './providers/DebugModeProvider';
 
 function MenuBar() {
   const navigate = useNavigate();
-  const [debugModeEnabled] = useDebugModeHook();
+  const debugMode = useDebugMode();
+  const { user, signOut } = useAuthenticator((context) => [
+    context.user,
+    context.signOut,
+  ]);
+
+  useAuthCredentials(user);
 
   return (
     <Box sx={{ flexGrow: 1, marginBottom: 2 }}>
@@ -24,7 +32,7 @@ function MenuBar() {
             </Button>
           </div>
           <div>
-            {debugModeEnabled ? (
+            {debugMode.isEnabled ? (
               <Button
                 color="secondary"
                 onClick={() => navigate('/chat')}
@@ -40,6 +48,19 @@ function MenuBar() {
             >
               Settings
             </Button>
+            {user ? (
+              <Button color="warning" onClick={signOut} sx={{ margin: '10px' }}>
+                Logout
+              </Button>
+            ) : (
+              <Button
+                color="warning"
+                onClick={() => navigate('/login')}
+                sx={{ margin: '10px' }}
+              >
+                Login
+              </Button>
+            )}
           </div>
         </Toolbar>
       </AppBar>

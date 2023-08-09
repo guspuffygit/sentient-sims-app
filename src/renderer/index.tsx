@@ -4,7 +4,9 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material';
 import { Amplify } from 'aws-amplify';
+import '@aws-amplify/ui-react/styles.css';
 import { Authenticator } from '@aws-amplify/ui-react';
+import log from 'electron-log';
 import App from './App';
 import theme from './theme';
 import awsExports from './aws-exports';
@@ -12,6 +14,8 @@ import HomePage from './HomePage';
 import SettingsPage from './SettingsPage';
 import ChatPage from './ChatPage';
 import LastExceptionPage from './LastExceptionPage';
+import LoginPage from './LoginPage';
+import { DebugModeProvider } from './providers/DebugModeProvider';
 
 const urls = new Map<string, string>();
 urls.set('localhost', 'http://localhost:25148');
@@ -20,10 +24,11 @@ const updatedAwsConfig = {
   ...awsExports,
   oauth: {
     ...awsExports.oauth,
-    redirectSignIn: urls.get(window.location.hostname),
-    redirectSignOut: urls.get(window.location.hostname),
+    redirectSignIn: `http://${window.location.host}`,
+    redirectSignOut: `http://${window.location.host}`,
   },
 };
+log.info(`url: http://${window.location.host}`);
 Amplify.configure(updatedAwsConfig);
 
 const router = createMemoryRouter([
@@ -47,6 +52,10 @@ const router = createMemoryRouter([
         path: '/last-exception',
         element: <LastExceptionPage />,
       },
+      {
+        path: '/login',
+        element: <LoginPage />,
+      },
     ],
   },
 ]);
@@ -58,7 +67,9 @@ root.render(
     <CssBaseline />
     <React.StrictMode>
       <Authenticator.Provider>
-        <RouterProvider router={router} />
+        <DebugModeProvider>
+          <RouterProvider router={router} />
+        </DebugModeProvider>
       </Authenticator.Provider>
     </React.StrictMode>
   </ThemeProvider>
