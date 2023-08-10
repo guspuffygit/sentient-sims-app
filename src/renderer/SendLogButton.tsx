@@ -93,7 +93,7 @@ export default function SendLogButton() {
             variant="outlined"
             onClick={() => navigate('/last-exception')}
           >
-            Last Exception Browser
+            Last Exceptions
           </Button>
         </div>
       </SpaceBetweenDiv>

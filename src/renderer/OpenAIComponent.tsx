@@ -35,7 +35,7 @@ export default function OpenAIComponent() {
               color="primary"
               variant="outlined"
             >
-              Test Open AI
+              Test
             </LoadingButton>
           </div>
           <OpenAIModelSelection />

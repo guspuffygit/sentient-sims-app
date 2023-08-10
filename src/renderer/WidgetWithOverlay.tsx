@@ -13,8 +13,8 @@ function WidgetWithOverlay() {
       <WidgetBot
         server="1098029759201542144"
         channel="1098054540181381222"
-        height={700}
-        width={300}
+        height={860}
+        width={380}
       />
 
       <div className="overlay" onClick={handleClick} />

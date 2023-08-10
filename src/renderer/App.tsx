@@ -8,13 +8,13 @@ import PopupNotificationModal from './PopupNotification';
 
 export default function App() {
   return (
-    <Container maxWidth="lg" className="root">
+    <Container maxWidth={false} className="root">
       <Grid container spacing={3}>
-        <Grid item xs={8}>
+        <Grid item xs={8.5}>
           <MenuBar />
           <Outlet />
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3.5}>
           <WidgetWithOverlay />
         </Grid>
       </Grid>

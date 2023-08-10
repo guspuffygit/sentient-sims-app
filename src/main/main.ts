@@ -70,8 +70,8 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 959,
-    height: 770,
+    width: 1400,
+    height: 900,
     autoHideMenuBar: true,
     icon: getAssetPath('icon.png'),
     thickFrame: false,

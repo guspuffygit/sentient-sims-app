@@ -66,7 +66,7 @@ export default function UpdateComponent() {
               variant="outlined"
               sx={{ marginRight: 2 }}
             >
-              Check Updates
+              Refresh
             </LoadingButton>
             {updateState.newVersionAvailable && (
               <LoadingButton

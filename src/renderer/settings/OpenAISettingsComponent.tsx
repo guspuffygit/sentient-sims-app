@@ -9,7 +9,6 @@ import {
 } from '@mui/material';
 import useSetting from 'renderer/hooks/useSetting';
 import log from 'electron-log';
-import React from 'react';
 import AppCard from '../AppCard';
 import { useDebugMode } from '../providers/DebugModeProvider';
 
