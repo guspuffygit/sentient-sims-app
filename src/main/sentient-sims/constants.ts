@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/prefer-default-export
-export const systemPrompt = [
+export const defaultSystemPrompt = [
   'Imagine yourself as an author, spinning a tale set in a realistic fictional world.',
   'Your characters, a diverse ensemble of humans, are defined by unique traits, ambitions, and skills that shape their life paths.',
   'They build relationships, chase careers, manage health, and navigate the unexpected twists and turns of life.',

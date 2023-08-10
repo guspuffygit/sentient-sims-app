@@ -7,6 +7,7 @@ import {
 } from 'openai';
 import { useEffect, useState } from 'react';
 import { MessageInputProps } from 'renderer/ChatBoxComponent';
+import { defaultSystemPrompt } from 'main/sentient-sims/constants';
 
 const defaultMessages = [
   {
@@ -14,7 +15,7 @@ const defaultMessages = [
     index: 0,
     message: {
       role: ChatCompletionRequestMessageRoleEnum.System,
-      content: window.electron.systemPrompt,
+      content: defaultSystemPrompt,
     },
   },
   {

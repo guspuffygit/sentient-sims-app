@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
 import { OpenAIService } from '../services/OpenAIService';
-import { systemPrompt as defaultSystemPrompt } from '../contants';
+import { defaultSystemPrompt } from '../constants';
 import { PromptRequest } from '../models/PromptRequest';
 import { PromptFormatter } from '../promptFormatter';
 import { CustomLLMService } from '../services/CustomLLMService';

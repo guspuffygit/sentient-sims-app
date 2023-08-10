@@ -1,7 +1,6 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer } from 'electron';
-import { systemPrompt } from './sentient-sims/contants';
 
 const electronHandler = {
   onDebugModeToggle: (callback: any) => {
@@ -20,7 +19,6 @@ const electronHandler = {
   setAccessToken: (accessToken: string) => {
     ipcRenderer.send('set-access-token', accessToken);
   },
-  systemPrompt,
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);
