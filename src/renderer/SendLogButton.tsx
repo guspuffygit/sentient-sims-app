@@ -17,7 +17,7 @@ export default function SendLogButton() {
   const handleSendLogs = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:25148/send-logs');
+      const response = await fetch('http://localhost:25148/debug/send-logs');
       const responseJson = await response.json();
       if (response.ok) {
         setOpen(false);

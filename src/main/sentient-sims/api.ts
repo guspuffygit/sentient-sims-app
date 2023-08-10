@@ -1,194 +1,78 @@
 import express from 'express';
 import log from 'electron-log';
-import { app } from 'electron';
-import request from 'request';
-import { encode } from '@nem035/gpt-3-encoder';
-import {
-  generate,
-  generateChatCompletion,
-  OpenAIKeyNotSetError,
-  testOpenAI,
-} from './openai';
-import { get, getSetting, setSetting, SettingsEnum } from './settings';
-import { systemPrompt as defaultSystemPrompt } from './contants';
-import sendLogs from './discordLogSend';
-import {
-  deleteLastExceptionFiles,
-  getParsedLastExceptionFiles,
-} from './lastException';
-import { getSettings, writeSettings } from './directories';
-import { getModVersion, updateMod } from './updater';
-import { PromptRequest } from './models/PromptRequest';
-import { PromptFormatter } from './promptFormatter';
+import { FileController } from './controllers/FileController';
+import { LastExceptionService } from './services/LastExceptionService';
+import { SettingsService } from './services/SettingsService';
+import { OpenAIService } from './services/OpenAIService';
+import { DirectoryService } from './services/DirectoryService';
+import { VersionService } from './services/VersionService';
+import { UpdateService } from './services/UpdateService';
+import { UpdateController } from './controllers/UpdateController';
+import { SettingsController } from './controllers/SettingsController';
+import { VersionController } from './controllers/VersionController';
+import { DebugController } from './controllers/DebugController';
+import { LogSendService } from './services/LogSendService';
+import { AIController } from './controllers/AIController';
+import { CustomLLMService } from './services/CustomLLMService';
+
+const settingsService = new SettingsService();
+const directoryService = new DirectoryService(settingsService);
+const lastExceptionService = new LastExceptionService(directoryService);
+const versionService = new VersionService(directoryService);
+const versionController = new VersionController(versionService);
+const updateService = new UpdateService(directoryService);
+const openAIService = new OpenAIService(directoryService, settingsService);
+const customLLMService = new CustomLLMService(settingsService);
+const fileController = new FileController(lastExceptionService);
+const updateController = new UpdateController(updateService);
+const settingsController = new SettingsController(
+  directoryService,
+  settingsService
+);
+const logSendService = new LogSendService(
+  settingsService,
+  directoryService,
+  lastExceptionService,
+  versionService,
+  openAIService
+);
+const debugController = new DebugController(openAIService, logSendService);
+const aiController = new AIController(openAIService, customLLMService);
 
 export default function runApi() {
   const expressApp = express();
   expressApp.use(express.json());
   const port = 25148;
 
-  expressApp.get('/health', (req, res) => {
-    res.send('OK');
-  });
+  // TODO: Deprecated
+  expressApp.get('/health', DebugController.healthCheck);
+  expressApp.post('/api/v1/count', AIController.countTokens);
+  expressApp.post('/api/v1/generate', aiController.generate);
 
-  expressApp.get('/test-open-ai', async (req, res) => {
-    try {
-      const response = await testOpenAI();
-      res.send(response);
-    } catch (e: any) {
-      if (e instanceof OpenAIKeyNotSetError) {
-        res.status(400).send({ status: 'API key not set!' });
-      } else {
-        res.status(500).send({ error: `${e.name}: ${e.message}` });
-      }
-    }
-  });
+  expressApp.get('/debug/health', DebugController.healthCheck);
+  expressApp.get('/debug/test-open-ai', debugController.testOpenAI);
+  expressApp.get('/debug/send-logs', debugController.sendDebugLogs);
 
-  expressApp.post('/api/v2/generate', async (req, res) => {
-    const promptRequest: PromptRequest = req.body;
+  expressApp.post('/ai/v2/generate', aiController.sentientSimsGenerate);
+  expressApp.post('/ai/translate', aiController.translate);
+  expressApp.post('/ai/generate', aiController.generateChatCompletion);
 
-    const customLLMEnabled = get(SettingsEnum.CUSTOM_LLM_ENABLED) as boolean;
-    const promptFormatter = new PromptFormatter(customLLMEnabled);
-    const prompt = promptFormatter.formatPrompt(promptRequest);
-    log.debug(`prompt: ${prompt}`);
+  expressApp.get('/files/last-exception', fileController.getLastExceptionFiles);
+  expressApp.delete(
+    '/files/last-exception',
+    fileController.deleteLastExceptionFiles
+  );
 
-    if (customLLMEnabled) {
-      const options = {
-        method: 'POST',
-        url: `${get(SettingsEnum.CUSTOM_LLM_HOSTNAME)}/api/v1/generate`,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${get(SettingsEnum.ACCESS_TOKEN)}`,
-        },
-        body: JSON.stringify({
-          prompt,
-          max_new_tokens: 90,
-        }),
-      };
+  expressApp.get('/settings/app/:appSetting', settingsController.getSetting);
+  expressApp.post(
+    '/settings/app/:appSetting',
+    settingsController.updateSetting
+  );
 
-      request(
-        options,
-        (error: string | undefined, response: any, responseBody: any) => {
-          try {
-            const result = JSON.parse(responseBody);
+  expressApp.get('/versions/mod', versionController.getModVersion);
+  expressApp.get('/versions/app', versionController.getAppVersion);
 
-            // Strip USER and ASSISTANT continuations
-            // TODO: Use stop tokens in model settings
-            let { text } = result.results[0];
-            text = text.split('USER:', 1)[0].trim();
-            text = text.split('ASSISTANT:', 1)[0].trim();
-            result.results[0].text = text;
-
-            res.json(result);
-          } catch (err) {
-            log.error(err);
-          }
-        }
-      );
-    } else {
-      res.json(
-        await generate(
-          prompt,
-          get(SettingsEnum.OPENAI_MODEL),
-          defaultSystemPrompt,
-          90
-        )
-      );
-    }
-  });
-
-  expressApp.post('/api/v1/count', (req, res) => {
-    res.json({ count: encode(req.body.prompt).length });
-  });
-
-  expressApp.post('/api/v1/generate', async (req, res) => {
-    const { body } = req;
-    const { prompt, model, systemPrompt } = body;
-    const maxLength = body.max_length;
-
-    const response = await generate(
-      prompt,
-      model || get(SettingsEnum.OPENAI_MODEL),
-      systemPrompt || defaultSystemPrompt,
-      maxLength
-    );
-    res.json(response);
-  });
-
-  expressApp.post('/translate', async (req, res) => {
-    const { body } = req;
-    const { prompt, systemPrompt } = body;
-
-    const response = await generate(prompt, 'gpt-3.5-turbo', systemPrompt);
-
-    res.json(response);
-  });
-
-  expressApp.post('/generate', async (req, res) => {
-    const { body } = req;
-    const result = await generateChatCompletion(body);
-    res.json(result);
-  });
-
-  expressApp.get('/send-logs', async (req, res) => {
-    const result = await sendLogs();
-    res.json(result);
-  });
-
-  expressApp.get('/files/last-exception', async (req, res) => {
-    const lastExceptionFiles = getParsedLastExceptionFiles();
-    res.json(lastExceptionFiles);
-  });
-
-  expressApp.delete('/files/last-exception', async (req, res) => {
-    deleteLastExceptionFiles();
-    res.json({ done: 'done' });
-  });
-
-  expressApp.get('/settings/app/:appSetting', async (req, res) => {
-    const { appSetting } = req.params;
-    res.json({ value: getSetting(appSetting) });
-  });
-
-  expressApp.post('/settings/app/:appSetting', async (req, res) => {
-    const { appSetting } = req.params;
-    const { value } = req.body;
-    log.info(`Setting app setting: ${appSetting}, to value: ${value}`);
-    res.json({ value: setSetting(appSetting, value) });
-  });
-
-  expressApp.get('/settings', async (req, res) => {
-    res.json(getSettings());
-  });
-
-  expressApp.get('/versions/mod', async (req, res) => {
-    res.json(getModVersion());
-  });
-
-  expressApp.get('/versions/app', async (req, res) => {
-    res.json({ version: app.getVersion() });
-  });
-
-  expressApp.post('/settings', async (req, res) => {
-    writeSettings(req.body);
-    res.json(getSettings());
-  });
-
-  expressApp.post('/update/mod', async (req, res) => {
-    try {
-      log.info('Starting update.');
-      await updateMod(req.body);
-      res.json({ done: 'done' });
-    } catch (err: any) {
-      const response = {
-        error: {
-          stack: err?.stack,
-          message: err?.message,
-        },
-      };
-      log.error(`Error updating: ${response}`);
-      res.status(500).json(response);
-    }
-  });
+  expressApp.post('/update/mod', updateController.updateMod);
 
   expressApp.listen(port, () => {
     log.debug(`Server is running on port ${port}`);

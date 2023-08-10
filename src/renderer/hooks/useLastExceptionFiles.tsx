@@ -1,4 +1,4 @@
-import { LastExceptionFile } from 'main/sentient-sims/lastException';
+import { LastExceptionFile } from 'main/sentient-sims/services/LastExceptionService';
 import { useEffect, useState } from 'react';
 
 export default function useLastExceptionFiles() {

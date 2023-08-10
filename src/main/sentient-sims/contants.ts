@@ -16,5 +16,3 @@ export const systemPrompt = [
   "Yet, it's also where they find joy, love, and the strength to keep going.",
   "Now, let's dive into their story.",
 ].join(' ');
-
-export const openaiModel = 'gpt-3.5-turbo';

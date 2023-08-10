@@ -11,7 +11,7 @@ export default function useOpenAITest() {
       status: '',
       loading: true,
     });
-    fetch('http://localhost:25148/test-open-ai')
+    fetch('http://localhost:25148/debug/test-open-ai')
       .then((res) => {
         // if (res.status === 400) {
         //   setOpen(true);

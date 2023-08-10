@@ -97,7 +97,7 @@ export default function useChatGeneration() {
         messages: messages.map((message) => message.message),
       };
 
-      const response = await fetch('http://localhost:25148/generate', {
+      const response = await fetch('http://localhost:25148/ai/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(request),

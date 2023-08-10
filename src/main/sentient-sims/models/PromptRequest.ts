@@ -7,4 +7,6 @@ export type PromptRequest = {
   pre_action?: string;
   action?: string;
   max_tokens?: number;
+  model?: string;
+  systemPrompt?: string;
 };

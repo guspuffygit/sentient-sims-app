@@ -38,7 +38,7 @@
     "start:main": "cross-env NODE_ENV=development electronmon -r ts-node/register/transpile-only .",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
-    "test": "echo 'test'"
+    "test": "jest '\\.test\\.ts'"
   },
   "browserslist": [],
   "prettier": {
@@ -75,6 +75,9 @@
     "setupFiles": [
       "./.erb/scripts/check-build-exists.ts"
     ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/setup-jest.js"
+    ],
     "testEnvironment": "jsdom",
     "testEnvironmentOptions": {
       "url": "http://localhost/"
@@ -88,7 +91,12 @@
     ],
     "transform": {
       "\\.(ts|tsx|js|jsx)$": "ts-jest"
-    }
+    },
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "./src/**"
+    ],
+    "coverageDirectory": "coverage"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^4.6.4",
@@ -132,7 +140,9 @@
     "@types/react-dom": "^18.2.1",
     "@types/react-test-renderer": "^18.0.0",
     "@types/react-window": "^1.8.5",
+    "@types/request": "^2.48.8",
     "@types/terser-webpack-plugin": "^5.0.4",
+    "@types/uuid": "^9.0.2",
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "@types/xml2js": "^0.4.11",
     "@typescript-eslint/eslint-plugin": "^5.59.1",

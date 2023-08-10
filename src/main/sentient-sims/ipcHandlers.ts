@@ -1,5 +1,7 @@
 import { IpcMainEvent, dialog, ipcMain } from 'electron';
-import { SettingsEnum, set } from './settings';
+import { SettingsEnum, SettingsService } from './services/SettingsService';
+
+const settingsService = new SettingsService();
 
 async function handleSelectDirectory() {
   const { canceled, filePaths } = await dialog.showOpenDialog({
@@ -15,12 +17,12 @@ async function handleSelectDirectory() {
 export default function ipcHandlers() {
   ipcMain.handle('dialog:selectDirectory', handleSelectDirectory);
   ipcMain.on('set-openai-model', (_event: IpcMainEvent, model: string) => {
-    set(SettingsEnum.OPENAI_MODEL, model);
+    settingsService.set(SettingsEnum.OPENAI_MODEL, model);
   });
   ipcMain.on(
     'set-access-token',
     (_event: IpcMainEvent, accessToken: string) => {
-      set(SettingsEnum.ACCESS_TOKEN, accessToken);
+      settingsService.set(SettingsEnum.ACCESS_TOKEN, accessToken);
     }
   );
 }
