@@ -7,8 +7,9 @@ import { app } from 'electron';
 import { DirectoryService } from './DirectoryService';
 import { LastExceptionService } from './LastExceptionService';
 import { OpenAIService } from './OpenAIService';
-import { SettingsEnum, SettingsService } from './SettingsService';
+import { SettingsService } from './SettingsService';
 import { VersionService } from './VersionService';
+import { SettingsEnum } from '../models/SettingsEnum';
 
 export const webhookUrl = [
   'https://d',

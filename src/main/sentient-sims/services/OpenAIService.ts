@@ -11,7 +11,8 @@ import log from 'electron-log';
 import electron from 'electron';
 import { encode } from '@nem035/gpt-3-encoder';
 import { DirectoryService } from './DirectoryService';
-import { SettingsEnum, SettingsService } from './SettingsService';
+import { SettingsService } from './SettingsService';
+import { SettingsEnum } from '../models/SettingsEnum';
 
 export class OpenAIKeyNotSetError extends Error {
   constructor(message: string) {

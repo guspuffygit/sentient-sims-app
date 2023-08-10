@@ -2,7 +2,8 @@
 /* eslint-disable import/prefer-default-export */
 import * as fs from 'fs';
 import path from 'path';
-import { SettingsEnum, SettingsService } from './SettingsService';
+import { SettingsEnum } from '../models/SettingsEnum';
+import { SettingsService } from './SettingsService';
 
 export class DirectoryService {
   private settingsService: SettingsService;

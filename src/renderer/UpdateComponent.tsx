@@ -1,18 +1,22 @@
 /* eslint no-alert: off, consistent-return: off, no-useless-return: off */
 import { useState } from 'react';
-import { CardActions, Typography, Select, MenuItem } from '@mui/material';
+import { CardActions, MenuItem, Select, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Auth } from 'aws-amplify';
 import { SelectChangeEvent } from '@mui/material/Select/SelectInput';
 import { ModUpdate } from 'main/sentient-sims/services/UpdateService';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import AppCard from './AppCard';
 import useNewVersionChecker from './hooks/useNewVersionChecker';
 import useSetting, { SettingsHook } from './hooks/useSetting';
 
 export default function UpdateComponent() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const releaseType: SettingsHook = useSetting('modRelease', 'main');
+  const releaseType: SettingsHook = useSetting(
+    SettingsEnum.MOD_RELEASE,
+    'main'
+  );
   const { updateState, handleCheckForUpdates } = useNewVersionChecker({
     setIsLoading,
     releaseType: releaseType.value,
@@ -49,7 +53,7 @@ export default function UpdateComponent() {
     event: SelectChangeEvent
   ): Promise<void> => {
     const newType = event.target.value;
-    releaseType.setSetting(newType);
+    await releaseType.setSetting(newType);
   };
 
   return (

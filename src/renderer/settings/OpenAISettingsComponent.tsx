@@ -1,22 +1,22 @@
 import {
   Box,
-  Button,
-  Checkbox,
   Divider,
-  FormControlLabel,
+  IconButton,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import useSetting from 'renderer/hooks/useSetting';
 import log from 'electron-log';
+import RotateLeftIcon from '@mui/icons-material/RotateLeft';
+import EditIcon from '@mui/icons-material/Edit';
+import React from 'react';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import AppCard from '../AppCard';
-import { useDebugMode } from '../providers/DebugModeProvider';
+import CustomLLMSettingsComponent from './CustomLLMSettings';
 
 export default function OpenAISettingsComponent() {
-  const debugMode = useDebugMode();
-  const modsDirectory = useSetting('modsDirectory');
-  const customLLMEnabled = useSetting('customLLMEnabled', false);
-  const customLLMHostname = useSetting('customLLMHostname');
+  const modsDirectory = useSetting(SettingsEnum.MODS_DIRECTORY);
 
   const handleDirectoryPicker = async () => {
     try {
@@ -46,48 +46,20 @@ export default function OpenAISettingsComponent() {
           InputProps={{
             readOnly: true,
           }}
-          sx={{ marginRight: 2 }}
+          sx={{ marginRight: 1 }}
         />
-        <Button
-          color="secondary"
-          variant="outlined"
-          onClick={() => handleDirectoryPicker()}
-        >
-          Modify
-        </Button>
+        <Tooltip title="Edit">
+          <IconButton onClick={() => handleDirectoryPicker()}>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Reset to Default">
+          <IconButton onClick={() => modsDirectory.resetSetting()}>
+            <RotateLeftIcon />
+          </IconButton>
+        </Tooltip>
       </Box>
-      {debugMode.isEnabled ? (
-        <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
-          <FormControlLabel
-            label="Enable Custom LLM"
-            control={
-              <Checkbox
-                checked={customLLMEnabled.value}
-                onChange={(change) =>
-                  customLLMEnabled.setSetting(change.target.checked)
-                }
-              />
-            }
-          />
-        </Box>
-      ) : null}
-      {customLLMEnabled.value && debugMode.isEnabled ? (
-        <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
-          <TextField
-            focused
-            id="outlined-basic"
-            label="Custom LLM Hostname"
-            variant="outlined"
-            value={customLLMHostname.value}
-            size="small"
-            fullWidth
-            onChange={(change) =>
-              customLLMHostname.setSetting(change.target.value)
-            }
-            sx={{ marginRight: 2 }}
-          />
-        </Box>
-      ) : null}
+      <CustomLLMSettingsComponent />
     </AppCard>
   );
 }

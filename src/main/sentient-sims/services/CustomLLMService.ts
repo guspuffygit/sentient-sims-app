@@ -1,6 +1,7 @@
 import request from 'request';
 import log from 'electron-log';
-import { SettingsEnum, SettingsService } from './SettingsService';
+import { SettingsService } from './SettingsService';
+import { SettingsEnum } from '../models/SettingsEnum';
 
 export class CustomLLMService {
   private settingsService: SettingsService;

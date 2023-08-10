@@ -18,6 +18,7 @@ export class SettingsController {
 
     this.updateSetting = this.updateSetting.bind(this);
     this.getSetting = this.getSetting.bind(this);
+    this.resetSetting = this.resetSetting.bind(this);
   }
 
   async updateSetting(req: Request, res: Response) {
@@ -30,5 +31,10 @@ export class SettingsController {
   async getSetting(req: Request, res: Response) {
     const { appSetting } = req.params;
     res.json({ value: this.settingsService.getSetting(appSetting) });
+  }
+
+  async resetSetting(req: Request, res: Response) {
+    const { appSetting } = req.params;
+    res.json({ value: this.settingsService.resetSetting(appSetting) });
   }
 }

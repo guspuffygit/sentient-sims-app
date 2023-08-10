@@ -68,6 +68,10 @@ export default function runApi() {
     '/settings/app/:appSetting',
     settingsController.updateSetting
   );
+  expressApp.get(
+    '/settings/app/:appSetting/reset',
+    settingsController.resetSetting
+  );
 
   expressApp.get('/versions/mod', versionController.getModVersion);
   expressApp.get('/versions/app', versionController.getAppVersion);

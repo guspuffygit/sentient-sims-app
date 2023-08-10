@@ -9,8 +9,8 @@ import {
   Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { LastExceptionFile } from 'main/sentient-sims/lastException';
 import { useState } from 'react';
+import { LastExceptionFile } from 'main/sentient-sims/services/LastExceptionService';
 import AppCard from './AppCard';
 import useLastExceptionFiles from './hooks/useLastExceptionFiles';
 import SpaceBetweenDiv from './components/SpaceBetweenDiv';

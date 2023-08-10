@@ -1,36 +1,28 @@
 import log from 'electron-log';
 import Store from 'electron-store';
 import path from 'path';
-
-export enum SettingsEnum {
-  MOD_RELEASE = 'modRelease',
-  OPENAI_MODEL = 'openaiModel',
-  MODS_DIRECTORY = 'modsDirectory',
-  CUSTOM_LLM_ENABLED = 'customLLMEnabled',
-  CUSTOM_LLM_HOSTNAME = 'customLLMHostname',
-  ACCESS_TOKEN = 'accessToken',
-}
+import { SettingsEnum } from '../models/SettingsEnum';
 
 export class SettingsService {
   private store = new Store({
     schema: {
-      [SettingsEnum.MOD_RELEASE]: {
+      [SettingsEnum.MOD_RELEASE.toString()]: {
         type: 'string',
         default: 'main',
       },
-      [SettingsEnum.OPENAI_MODEL]: {
+      [SettingsEnum.OPENAI_MODEL.toString()]: {
         type: 'string',
         default: 'gpt-3.5-turbo',
       },
-      [SettingsEnum.CUSTOM_LLM_ENABLED]: {
+      [SettingsEnum.CUSTOM_LLM_ENABLED.toString()]: {
         type: 'boolean',
         default: false,
       },
-      [SettingsEnum.CUSTOM_LLM_HOSTNAME]: {
+      [SettingsEnum.CUSTOM_LLM_HOSTNAME.toString()]: {
         type: 'string',
         default: 'https://ai.sentientsimulations.com:25150',
       },
-      [SettingsEnum.MODS_DIRECTORY]: {
+      [SettingsEnum.MODS_DIRECTORY.toString()]: {
         type: 'string',
         default: path.join(
           process.env.HOME || process.env.USERPROFILE || '',
@@ -40,8 +32,9 @@ export class SettingsService {
           'Mods'
         ),
       },
-      [SettingsEnum.ACCESS_TOKEN]: {
+      [SettingsEnum.ACCESS_TOKEN.toString()]: {
         type: 'string',
+        default: '',
       },
     },
   });
@@ -54,6 +47,13 @@ export class SettingsService {
     this.store.set(key, value);
     log.info(`Setting app setting: ${key} to value: ${value}`);
     return value;
+  }
+
+  resetSetting(key: string) {
+    this.store.reset(key);
+    const defaultValue = this.getSetting(key);
+    log.info(`Reset app setting: ${key} to value: ${defaultValue}`);
+    return defaultValue;
   }
 
   get(setting: SettingsEnum) {

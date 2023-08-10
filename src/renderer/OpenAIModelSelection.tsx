@@ -4,12 +4,16 @@ import {
   Select,
   SelectChangeEvent,
 } from '@mui/material';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting, { SettingsHook } from './hooks/useSetting';
 import { useDebugMode } from './providers/DebugModeProvider';
 
 export default function OpenAIModelSelection() {
   const debugMode = useDebugMode();
-  const openAIModel: SettingsHook = useSetting('openaiModel', 'gpt-3.5-turbo');
+  const openAIModel: SettingsHook = useSetting(
+    SettingsEnum.OPENAI_MODEL,
+    'gpt-3.5-turbo'
+  );
 
   const handleChange = (event: SelectChangeEvent) => {
     const model = event.target.value;

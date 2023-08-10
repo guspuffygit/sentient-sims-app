@@ -13,7 +13,7 @@ function WidgetWithOverlay() {
       <WidgetBot
         server="1098029759201542144"
         channel="1098054540181381222"
-        height={860}
+        height={780}
         width={380}
       />
 

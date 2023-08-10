@@ -1,8 +1,6 @@
 import '@testing-library/jest-dom';
-import {
-  SettingsEnum,
-  SettingsService,
-} from 'main/sentient-sims/services/SettingsService';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import { SettingsService } from 'main/sentient-sims/services/SettingsService';
 
 describe('Settings', () => {
   it('should return default value', () => {

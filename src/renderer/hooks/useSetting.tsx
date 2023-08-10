@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
 import log from 'electron-log';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 
 export type SettingsHook = {
   value: any;
   isLoading: boolean;
   setSetting: (settingValue: any) => Promise<void>;
+  resetSetting: () => Promise<void>;
 };
 
 export default function useSetting(
-  settingName: string,
+  settingsEnum: SettingsEnum,
   defaultValue: any = ''
 ): SettingsHook {
+  const settingName = settingsEnum.toString();
   const [isLoading, setIsLoading] = useState(false);
   const [value, setValue] = useState(defaultValue);
 
@@ -54,15 +57,38 @@ export default function useSetting(
     }
   }
 
+  async function resetSetting() {
+    if (defaultValue) {
+      await setSetting(defaultValue);
+    } else {
+      setIsLoading(true);
+
+      try {
+        const response = await fetch(
+          `http://localhost:25148/settings/app/${settingName}/reset`,
+          {
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+        const result = await response.json();
+        log.info(`result: ${result}`);
+        setValue(result.value);
+      } catch (err: any) {
+        log.error(`Unable to reset setting ${settingName}`, err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  }
+
   useEffect(() => {
     handleGetSetting();
   }, [handleGetSetting]);
 
-  const hook: SettingsHook = {
+  return {
     isLoading,
     value,
     setSetting,
+    resetSetting,
   };
-
-  return hook;
 }

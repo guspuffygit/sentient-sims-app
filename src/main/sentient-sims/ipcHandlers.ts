@@ -1,5 +1,6 @@
 import { IpcMainEvent, dialog, ipcMain } from 'electron';
-import { SettingsEnum, SettingsService } from './services/SettingsService';
+import { SettingsEnum } from './models/SettingsEnum';
+import { SettingsService } from './services/SettingsService';
 
 const settingsService = new SettingsService();
 
