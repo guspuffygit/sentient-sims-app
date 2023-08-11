@@ -13,6 +13,7 @@ import { encode } from '@nem035/gpt-3-encoder';
 import { DirectoryService } from './DirectoryService';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
+import { defaultSystemPrompt } from '../constants';
 
 export class OpenAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -130,7 +131,7 @@ export class OpenAIService {
       messages: [
         {
           role: ChatCompletionRequestMessageRoleEnum.System,
-          content: systemPrompt,
+          content: systemPrompt || defaultSystemPrompt,
         },
         {
           role: ChatCompletionRequestMessageRoleEnum.User,
