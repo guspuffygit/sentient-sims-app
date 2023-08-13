@@ -4,7 +4,7 @@ import log from 'electron-log';
 import { OpenAIService } from '../services/OpenAIService';
 import { defaultSystemPrompt } from '../constants';
 import { PromptRequest } from '../models/PromptRequest';
-import { PromptFormatter } from '../promptFormatter';
+import { PromptFormatter } from '../PromptFormatter';
 import { CustomLLMService } from '../services/CustomLLMService';
 
 export class AIController {
