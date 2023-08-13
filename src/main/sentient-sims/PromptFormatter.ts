@@ -91,9 +91,11 @@ export class PromptFormatter {
 
     const memoriesToInsert: string[] = [];
     let memoryTokenCount = 0;
-    memories.forEach((memory) => {
+    // eslint-disable-next-line no-plusplus
+    for (let i = memories.length - 1; i >= 0; i--) {
+      const memory = memories[i];
       if (memoryTokenCount + prePromptTokenCount > max_tokens) {
-        return;
+        break;
       }
 
       const formattedMemory = this.formatMemory(memory);
@@ -102,7 +104,7 @@ export class PromptFormatter {
         const { length } = this.encode(formattedMemory);
         memoryTokenCount += length;
       }
-    });
+    }
 
     let prompt = this.combineFormattedPrompt(
       participants,
