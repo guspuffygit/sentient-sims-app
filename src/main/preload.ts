@@ -19,6 +19,16 @@ const electronHandler = {
   setAccessToken: (accessToken: string) => {
     ipcRenderer.send('set-access-token', accessToken);
   },
+  onAuth: (callback: any) => {
+    ipcRenderer.on('on-auth', callback);
+    function removeListener() {
+      ipcRenderer.removeListener('on-auth', callback);
+    }
+    return removeListener;
+  },
+  onSuccessfulAuth: () => {
+    ipcRenderer.send('on-successful-auth');
+  },
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

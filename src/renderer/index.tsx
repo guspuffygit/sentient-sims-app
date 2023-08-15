@@ -6,7 +6,6 @@ import { ThemeProvider } from '@mui/material';
 import { Amplify } from 'aws-amplify';
 import '@aws-amplify/ui-react/styles.css';
 import { Authenticator } from '@aws-amplify/ui-react';
-import log from 'electron-log';
 import App from './App';
 import theme from './theme';
 import awsExports from './aws-exports';
@@ -17,18 +16,14 @@ import LastExceptionPage from './LastExceptionPage';
 import LoginPage from './LoginPage';
 import { DebugModeProvider } from './providers/DebugModeProvider';
 
-const urls = new Map<string, string>();
-urls.set('localhost', 'http://localhost:25148');
-urls.set('www.sentientsimulations.com', 'https://www.sentientsimulations.com');
 const updatedAwsConfig = {
   ...awsExports,
   oauth: {
     ...awsExports.oauth,
-    redirectSignIn: `http://${window.location.host}`,
-    redirectSignOut: `http://${window.location.host}`,
+    redirectSignIn: 'http://localhost:25148/login/callback',
+    redirectSignOut: `http://localhost:25148/login/signout`,
   },
 };
-log.info(`url: http://${window.location.host}`);
 Amplify.configure(updatedAwsConfig);
 
 const router = createMemoryRouter([

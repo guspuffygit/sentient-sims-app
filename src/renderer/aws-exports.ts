@@ -12,9 +12,9 @@ const awsmobile = {
   "aws_cognito_identity_pool_id": "us-east-1:2d20518d-feb1-46ff-87ad-ac45fae61eb1",
   "aws_cognito_region": "us-east-1",
   "aws_user_pools_id": "us-east-1_qRTW6SLkg",
-  "aws_user_pools_web_client_id": "cjl4a400vdi0tomqnmq7soqcu",
+  "aws_user_pools_web_client_id": "2cjmpeg1ie22sfud6ddbsgvjpl",
   "oauth": {
-      "domain": "b1ujr61wjtsc-staging.auth.us-east-1.amazoncognito.com",
+      "domain": "sentientsimulations.auth.us-east-1.amazoncognito.com",
       "scope": [
           "phone",
           "email",

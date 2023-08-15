@@ -5,14 +5,10 @@ import useAuthCredentials from './hooks/useAuthCredentials';
 import { useDebugMode } from './providers/DebugModeProvider';
 
 function MenuBar() {
+  const { user, signOut } = useAuthenticator((context) => [context.user]);
   const navigate = useNavigate();
   const debugMode = useDebugMode();
-  const { user, signOut } = useAuthenticator((context) => [
-    context.user,
-    context.signOut,
-  ]);
-
-  useAuthCredentials(user);
+  useAuthCredentials();
 
   return (
     <Box sx={{ flexGrow: 1, marginBottom: 2 }}>

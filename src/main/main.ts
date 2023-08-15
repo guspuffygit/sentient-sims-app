@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell, session, WebRequestFilter } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -112,6 +112,10 @@ const createWindow = async () => {
     return { action: 'deny' };
   });
 
+  ipcHandlers(mainWindow);
+
+  runApi();
+
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
@@ -138,8 +142,23 @@ app
       if (mainWindow === null) createWindow();
     });
 
-    ipcHandlers();
+    const filter: WebRequestFilter = {
+      urls: ['http://localhost:25148/login/*'],
+    };
+
+    session.defaultSession.webRequest.onBeforeRequest(
+      filter,
+      function (details) {
+        const { url } = details;
+        if (url.includes('/login/callback')) {
+          log.debug('/login/callback initiated');
+          mainWindow?.webContents.send('on-auth', `${url}`);
+        }
+        if (url.endsWith('/login/signout')) {
+          log.debug('/login/signout initiated');
+          mainWindow?.loadURL(resolveHtmlPath('index.html'));
+        }
+      }
+    );
   })
   .catch(console.log);
-
-runApi();

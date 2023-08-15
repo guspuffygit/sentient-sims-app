@@ -1,6 +1,7 @@
-import { IpcMainEvent, dialog, ipcMain } from 'electron';
+import { IpcMainEvent, dialog, ipcMain, BrowserWindow } from 'electron';
 import { SettingsEnum } from './models/SettingsEnum';
 import { SettingsService } from './services/SettingsService';
+import { resolveHtmlPath } from '../util';
 
 const settingsService = new SettingsService();
 
@@ -15,7 +16,7 @@ async function handleSelectDirectory() {
   return null;
 }
 
-export default function ipcHandlers() {
+export default function ipcHandlers(mainWindow: BrowserWindow) {
   ipcMain.handle('dialog:selectDirectory', handleSelectDirectory);
   ipcMain.on('set-openai-model', (_event: IpcMainEvent, model: string) => {
     settingsService.set(SettingsEnum.OPENAI_MODEL, model);
@@ -26,4 +27,7 @@ export default function ipcHandlers() {
       settingsService.set(SettingsEnum.ACCESS_TOKEN, accessToken);
     }
   );
+  ipcMain.on('on-successful-auth', () => {
+    mainWindow.loadURL(resolveHtmlPath('index.html'));
+  });
 }
