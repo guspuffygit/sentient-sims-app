@@ -18,6 +18,8 @@ import registerDebugToggleHotkey from './sentient-sims/registerDebugToggleHotkey
 import ipcHandlers from './sentient-sims/ipcHandlers';
 import runApi from './sentient-sims/api';
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 log.initialize({ preload: true });
 
 class AppUpdater {
