@@ -19,15 +19,14 @@ export class CustomLLMService {
 
   async generate(prompt: string, callback: any) {
     const url = `${this.customLLMHostname()}/api/v1/generate`;
-    log.debug(`url: ${url}`);
+    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
+    log.debug(`url: ${url}, auth: ${authHeader}`);
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.settingsService.get(
-            SettingsEnum.ACCESS_TOKEN
-          )}`,
+          Authentication: authHeader,
         },
         body: JSON.stringify({
           prompt,

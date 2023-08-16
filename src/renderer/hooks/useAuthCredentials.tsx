@@ -19,7 +19,8 @@ function refreshAuth() {
       }
 
       log.debug('Updated auth token');
-      window.electron.setAccessToken(session.getAccessToken().getJwtToken());
+      log.debug(`idToken: ${session.getIdToken().getJwtToken()}`);
+      window.electron.setAccessToken(session.getIdToken().getJwtToken());
     })
     .catch((error: any) => {
       if (error === 'The user is not authenticated') {
@@ -42,7 +43,8 @@ export default function useAuthCredentials() {
     return () => clearInterval(intervalId);
   }, []);
 
-  async function onAuth(_event: any, url: any) {
+  async function onAuth(_event: any, url: string) {
+    log.debug('onAuth running');
     log.debug(`onAuth: ${url}`);
     // eslint-disable-next-line no-restricted-globals
     Object.defineProperty(history, 'replaceState', {

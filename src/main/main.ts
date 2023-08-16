@@ -9,7 +9,13 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, session, WebRequestFilter } from 'electron';
+import electron, {
+  app,
+  BrowserWindow,
+  shell,
+  session,
+  WebRequestFilter,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -150,14 +156,27 @@ app
 
     session.defaultSession.webRequest.onBeforeRequest(
       filter,
+      // eslint-disable-next-line func-names
       function (details) {
         const { url } = details;
+        log.debug(`url hit: ${url}`);
         if (url.includes('/login/callback')) {
-          log.debug('/login/callback initiated');
-          mainWindow?.webContents.send('on-auth', `${url}`);
+          log.debug(`/login/callback initiated for url: ${url}`);
+          mainWindow?.webContents.loadURL(resolveHtmlPath('index.html'));
+          setTimeout(() => {
+            electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
+              if (wnd.webContents?.isDestroyed() === false) {
+                log.debug('Sending onAuth');
+                wnd.webContents.send('on-auth', url);
+              }
+            });
+          }, 3000);
         }
-        if (url.endsWith('/login/signout')) {
+        if (url.includes('/login/signout')) {
           log.debug('/login/signout initiated');
+          session.defaultSession.clearAuthCache();
+          session.defaultSession.clearCache();
+          session.defaultSession.clearStorageData();
           mainWindow?.loadURL(resolveHtmlPath('index.html'));
         }
       }
