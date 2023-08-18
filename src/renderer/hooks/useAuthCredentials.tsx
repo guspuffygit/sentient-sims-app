@@ -4,7 +4,7 @@ import log from 'electron-log';
 import { Auth } from 'aws-amplify';
 import { CognitoUser } from '@aws-amplify/auth';
 import { useEffect } from 'react';
-import { SettingsEnum } from '../../main/sentient-sims/models/SettingsEnum';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 
 function refreshAuth() {
   log.debug('Updating auth credentials');

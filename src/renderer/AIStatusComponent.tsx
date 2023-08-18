@@ -1,4 +1,4 @@
-import { SettingsEnum } from '../main/sentient-sims/models/SettingsEnum';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import CustomLLMComponent from './CustomLLMComponent';
 import useSetting from './hooks/useSetting';
 import OpenAIComponent from './OpenAIComponent';
