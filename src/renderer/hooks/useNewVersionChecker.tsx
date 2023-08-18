@@ -42,7 +42,7 @@ export default function useNewVersionChecker({
         'http://localhost:25148/versions/mod'
       );
       const modVersion = await modVersionResponse.json();
-      log.debug(`modVersion: ${modVersion}`);
+      log.debug(`modVersion: ${modVersion.version}`);
       const response = await isNewVersionAvailable(
         modVersion.version,
         versionType

@@ -17,7 +17,6 @@ export default function OpenAIModelSelection() {
 
   const handleChange = (event: SelectChangeEvent) => {
     const model = event.target.value;
-    window.electron.setOpenAIModel(model);
     openAIModel.setSetting(model);
   };
 

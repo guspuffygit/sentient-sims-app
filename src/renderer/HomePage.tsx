@@ -1,9 +1,9 @@
 import { Grid } from '@mui/material';
 import AppCard from './AppCard';
 import UpdateComponent from './UpdateComponent';
-import OpenAIComponent from './OpenAIComponent';
 import DebugCard from './DebugCard';
 import ThankYouCard from './ThankYouCard';
+import AIStatusComponent from './AIStatusComponent';
 
 export default function HomePage() {
   return (
@@ -21,7 +21,7 @@ export default function HomePage() {
       <Grid container spacing={2}>
         <Grid item xs={6}>
           <UpdateComponent />
-          <OpenAIComponent />
+          <AIStatusComponent />
         </Grid>
         <Grid item xs={6}>
           <DebugCard />

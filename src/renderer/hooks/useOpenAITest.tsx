@@ -13,9 +13,6 @@ export default function useOpenAITest() {
     });
     fetch('http://localhost:25148/debug/test-open-ai')
       .then((res) => {
-        // if (res.status === 400) {
-        //   setOpen(true);
-        // }
         return res.json();
       })
       // eslint-disable-next-line promise/always-return

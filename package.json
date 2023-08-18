@@ -106,6 +106,7 @@
     "@mui/icons-material": "^5.11.16",
     "@mui/lab": "^5.0.0-alpha.132",
     "@mui/material": "^5.13.2",
+    "@mui/x-data-grid": "^6.11.2",
     "@nem035/gpt-3-encoder": "^1.1.7",
     "@widgetbot/react-embed": "^1.7.0",
     "adm-zip": "^0.5.10",

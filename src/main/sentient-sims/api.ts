@@ -36,7 +36,11 @@ const logSendService = new LogSendService(
   versionService,
   openAIService
 );
-const debugController = new DebugController(openAIService, logSendService);
+const debugController = new DebugController(
+  openAIService,
+  logSendService,
+  customLLMService
+);
 const aiController = new AIController(openAIService, customLLMService);
 
 export default function runApi() {
@@ -51,6 +55,11 @@ export default function runApi() {
 
   expressApp.get('/debug/health', DebugController.healthCheck);
   expressApp.get('/debug/test-open-ai', debugController.testOpenAI);
+  expressApp.get('/debug/test-custom-llm', debugController.testCustomLLM);
+  expressApp.get(
+    '/debug/custom-llm-workers',
+    debugController.getCustomLLMWorkers
+  );
   expressApp.get('/debug/send-logs', debugController.sendDebugLogs);
 
   expressApp.post('/ai/v2/generate', aiController.sentientSimsGenerate);

@@ -16,6 +16,9 @@ export default function useSetting(
   const settingName = settingsEnum.toString();
   const [isLoading, setIsLoading] = useState(false);
   const [value, setValue] = useState(defaultValue);
+  const [bounceTimeout, setBounceTimeout] = useState<ReturnType<
+    typeof setTimeout
+  > | null>();
 
   const handleGetSetting = useCallback(async () => {
     setIsLoading(true);
@@ -34,56 +37,45 @@ export default function useSetting(
   }, [settingName]);
 
   async function setSetting(settingValue: any) {
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(
-        `http://localhost:25148/settings/app/${settingName}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ value: settingValue }),
-        }
-      );
-      const result = await response.json();
-      setValue(result.value);
-    } catch (err: any) {
-      log.error(
-        `Unable to set setting ${settingName} to value ${settingValue}`,
-        err
-      );
-    } finally {
-      setIsLoading(false);
+    if (bounceTimeout) {
+      clearTimeout(bounceTimeout);
     }
+
+    setValue(settingValue);
+
+    // debounce so that we dont send a bunch of requests back and forth
+    const timeout = setTimeout(() => {
+      log.debug(
+        `Setting debounce running: ${settingsEnum.toString()}, value: ${settingValue}`
+      );
+      window.electron.setSetting(settingsEnum, settingValue);
+    }, 600);
+
+    setBounceTimeout(timeout);
   }
 
   async function resetSetting() {
     if (defaultValue) {
       await setSetting(defaultValue);
     } else {
-      setIsLoading(true);
-
-      try {
-        const response = await fetch(
-          `http://localhost:25148/settings/app/${settingName}/reset`,
-          {
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
-        const result = await response.json();
-        log.info(`result: ${result}`);
-        setValue(result.value);
-      } catch (err: any) {
-        log.error(`Unable to reset setting ${settingName}`, err);
-      } finally {
-        setIsLoading(false);
-      }
+      window.electron.resetSetting(settingsEnum);
     }
   }
 
   useEffect(() => {
     handleGetSetting();
   }, [handleGetSetting]);
+
+  useEffect(() => {
+    return window.electron.onSettingChange(
+      (_event: any, setting: SettingsEnum, newValue: any) => {
+        if (setting === settingsEnum) {
+          log.debug(`New value: ${newValue}`);
+          setValue(newValue);
+        }
+      }
+    );
+  });
 
   return {
     isLoading,

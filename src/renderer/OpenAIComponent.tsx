@@ -16,33 +16,31 @@ export default function OpenAIComponent() {
   };
 
   return (
-    <div>
-      <AppCard>
-        <Typography sx={{ marginBottom: 3 }}>
-          Open AI Status: {openAIStatus.status}
-        </Typography>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-          }}
-        >
-          <div>
-            <LoadingButton
-              loading={openAIStatus.loading}
-              onClick={testOpenAI}
-              sx={{ marginRight: 2 }}
-              color="primary"
-              variant="outlined"
-            >
-              Test
-            </LoadingButton>
-          </div>
-          <OpenAIModelSelection />
+    <AppCard>
+      <Typography sx={{ marginBottom: 3 }}>
+        Open AI Status: {openAIStatus.status}
+      </Typography>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
+        <div>
+          <LoadingButton
+            loading={openAIStatus.loading}
+            onClick={testOpenAI}
+            sx={{ marginRight: 2 }}
+            color="primary"
+            variant="outlined"
+          >
+            Test
+          </LoadingButton>
         </div>
+        <OpenAIModelSelection />
+      </div>
 
-        <OpenAIKeyModal open={open} onClose={handleClose} />
-      </AppCard>
-    </div>
+      <OpenAIKeyModal open={open} onClose={handleClose} />
+    </AppCard>
   );
 }
