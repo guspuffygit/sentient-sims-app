@@ -1,6 +1,9 @@
 name: Test
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   test:
@@ -26,6 +29,7 @@ jobs:
 
       - name: npm test
         env:
+          OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm run package
