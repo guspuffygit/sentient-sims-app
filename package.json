@@ -198,6 +198,9 @@
     "webpack-merge": "^5.8.0",
     "whatwg-fetch": "^3.6.2"
   },
+  "resolutions": {
+    "webpack": "5.85.0"
+  },
   "build": {
     "productName": "SentientSims",
     "appId": "com.sentientsimulations.sentientsims",
