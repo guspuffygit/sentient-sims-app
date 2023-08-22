@@ -44,6 +44,10 @@ export class AIController {
             ],
           });
         } else {
+          result.results[0].text = promptFormatter.formatOutput(
+            result.results[0].text
+          );
+          log.debug(result);
           res.json(result);
         }
       });

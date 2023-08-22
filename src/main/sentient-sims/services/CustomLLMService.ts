@@ -37,13 +37,6 @@ export class CustomLLMService {
       });
 
       const result = await response.json();
-      // Strip USER and ASSISTANT continuations
-      // TODO: Use stop tokens in model settings
-      let { text } = result.results[0];
-      text = text.split('USER:', 1)[0].trim();
-      text = text.split('ASSISTANT:', 1)[0].trim();
-      result.results[0].text = text;
-      log.debug(result);
       callback(null, result);
     } catch (e: any) {
       log.error(`Error requesting to server`, e);

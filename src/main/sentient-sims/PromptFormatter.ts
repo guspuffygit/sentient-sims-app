@@ -8,6 +8,10 @@ import { SentientMemory } from './models/SentientMemory';
 export class PromptFormatter {
   private readonly customLLMEnabled: boolean;
 
+  public readonly userToken = '### Instruction:';
+
+  public readonly assistantToken = '### Response:';
+
   constructor(customLLMEnabled: boolean) {
     this.customLLMEnabled = customLLMEnabled;
   }
@@ -16,9 +20,9 @@ export class PromptFormatter {
     let entries;
     if (this.customLLMEnabled) {
       entries = [
-        memory.action && `USER: ${memory.action.trim()}`,
-        memory.content && `ASSISTANT: ${memory.content.trim()}`,
-        memory.observation && `USER: ${memory.observation.trim()}`,
+        memory.action && `${this.userToken}\n${memory.action.trim()}`,
+        memory.content && `${this.assistantToken}\n${memory.content.trim()}`,
+        memory.observation && `${this.userToken}\n${memory.observation.trim()}`,
       ].filter(Boolean);
     } else {
       entries = [
@@ -50,22 +54,30 @@ export class PromptFormatter {
     memoriesToInsert: string[],
     actions?: string
   ) {
-    const prompt = [
-      participants,
-      location,
-      memoriesToInsert.join('\n'),
-      actions,
-    ].join('\n');
-
     if (this.customLLMEnabled) {
       return [
-        "Write a story in the third person, describing scenes clearly, based on what's been said before, without predicting the future or giving a lesson, ending each part on a cliffhanger, and considering the user context.",
-        `USER: ${prompt}`,
-        `ASSISTANT:`,
+        [
+          'Write a story in the third person, describing scenes clearly, explicitly, in vivid detail',
+          "based on what's been said before",
+          'using lots of dialog',
+          'without predicting the future or giving a lesson',
+          'ending each part on a cliffhanger, using these character descriptions:',
+        ].join(', '),
+        participants,
+        '',
+        location,
+        '',
+        memoriesToInsert.join('\n'),
+        '',
+        actions,
+        '',
+        this.assistantToken,
       ].join('\n');
     }
 
-    return prompt;
+    return [participants, location, memoriesToInsert.join('\n'), actions].join(
+      '\n'
+    );
   }
 
   formatPrompt({
@@ -79,7 +91,7 @@ export class PromptFormatter {
     let actions: string | undefined;
     if (pre_action || action) {
       if (this.customLLMEnabled) {
-        actions = ['USER:', pre_action, action].join(' ');
+        actions = `${this.userToken}\n${[pre_action, action].join(' ').trim()}`;
       } else {
         actions = [pre_action, action].join(' ');
       }
@@ -126,5 +138,15 @@ export class PromptFormatter {
     }
 
     return prompt;
+  }
+
+  formatOutput(text: string) {
+    if (this.customLLMEnabled) {
+      let output = text.split(this.userToken, 1)[0].trim();
+      output = output.split(this.assistantToken, 1)[0].trim();
+      return output;
+    }
+
+    return text;
   }
 }
