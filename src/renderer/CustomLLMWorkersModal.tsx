@@ -30,7 +30,7 @@ export default function CustomLLMWorkersModal({
   workers,
 }: ModalProps) {
   const rows: any[] = [];
-  workers.forEach((worker, index) => {
+  workers?.forEach((worker, index) => {
     rows.push({
       id: index,
       name: worker.name,
