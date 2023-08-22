@@ -9,17 +9,19 @@ import {
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import React from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { useDebugMode } from '../providers/DebugModeProvider';
+import { useAuthenticator } from '@aws-amplify/ui-react';
 import useSetting from '../hooks/useSetting';
+import PatreonUser from '../wrappers/PatreonUser';
 
 export default function CustomLLMSettingsComponent() {
-  const debugMode = useDebugMode();
+  const { user } = useAuthenticator((context) => [context.user]);
+  const patreonUser = new PatreonUser(user);
   const customLLMEnabled = useSetting(SettingsEnum.CUSTOM_LLM_ENABLED, false);
   const customLLMHostname = useSetting(SettingsEnum.CUSTOM_LLM_HOSTNAME);
 
   return (
     <div>
-      {debugMode.isEnabled ? (
+      {(user && patreonUser.isDevOrSubscriber()) || customLLMEnabled.value ? (
         <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
           <FormControlLabel
             label="Enable Custom LLM"
@@ -34,7 +36,7 @@ export default function CustomLLMSettingsComponent() {
           />
         </Box>
       ) : null}
-      {customLLMEnabled.value && debugMode.isEnabled ? (
+      {customLLMEnabled.value ? (
         <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
           <TextField
             focused

@@ -16,18 +16,6 @@ export default function CustomLLMComponent() {
       <Typography sx={{ marginBottom: 3 }}>
         Custom LLM Status: {customLLMStatus.status}
       </Typography>
-      <LoadingButton
-        loading={workersLoading}
-        variant="text"
-        sx={{ marginBottom: 3 }}
-        onClick={() => {
-          if (workers.length > 0) {
-            setOpen(true);
-          }
-        }}
-      >
-        {workers.length} worker/s in the cluster
-      </LoadingButton>
       <div
         style={{
           display: 'flex',
@@ -41,11 +29,24 @@ export default function CustomLLMComponent() {
               testCustomLLM();
               getCustomLLMWorkers();
             }}
-            sx={{ marginRight: 2 }}
             color="primary"
             variant="outlined"
           >
             Test
+          </LoadingButton>
+        </div>
+        <div>
+          <LoadingButton
+            loading={workersLoading}
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              if (workers.length > 0) {
+                setOpen(true);
+              }
+            }}
+          >
+            {workers.length} worker/s
           </LoadingButton>
         </div>
       </div>

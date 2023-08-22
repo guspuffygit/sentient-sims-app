@@ -1,5 +1,6 @@
 import express from 'express';
 import log from 'electron-log';
+import { BrowserWindow } from 'electron';
 import { FileController } from './controllers/FileController';
 import { LastExceptionService } from './services/LastExceptionService';
 import { SettingsService } from './services/SettingsService';
@@ -14,6 +15,9 @@ import { DebugController } from './controllers/DebugController';
 import { LogSendService } from './services/LogSendService';
 import { AIController } from './controllers/AIController';
 import { CustomLLMService } from './services/CustomLLMService';
+import { AssetsController } from './controllers/AssetsController';
+import { PatreonController } from './controllers/PatreonController';
+import { PatreonService } from './services/PatreonService';
 
 const settingsService = new SettingsService();
 const directoryService = new DirectoryService(settingsService);
@@ -36,6 +40,7 @@ const logSendService = new LogSendService(
   versionService,
   openAIService
 );
+const patreonService = new PatreonService(settingsService);
 const debugController = new DebugController(
   openAIService,
   logSendService,
@@ -43,7 +48,12 @@ const debugController = new DebugController(
 );
 const aiController = new AIController(openAIService, customLLMService);
 
-export default function runApi() {
+export default function runApi(
+  mainWindow: BrowserWindow,
+  getAssetPath: (...paths: string[]) => string
+) {
+  const assetsController = new AssetsController(getAssetPath);
+  const patreonController = new PatreonController(patreonService, mainWindow);
   const expressApp = express();
   expressApp.use(express.json());
   const port = 25148;
@@ -71,6 +81,7 @@ export default function runApi() {
     '/files/last-exception',
     fileController.deleteLastExceptionFiles
   );
+  expressApp.get('/files/:filename', assetsController.getAssetsFile);
 
   expressApp.get('/settings/app/:appSetting', settingsController.getSetting);
   expressApp.post(
@@ -86,6 +97,8 @@ export default function runApi() {
   expressApp.get('/versions/app', versionController.getAppVersion);
 
   expressApp.post('/update/mod', updateController.updateMod);
+
+  expressApp.get('/patreon-redirect', patreonController.handleRedirect);
 
   expressApp.listen(port, () => {
     log.debug(`Server is running on port ${port}`);

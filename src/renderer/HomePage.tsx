@@ -4,6 +4,7 @@ import UpdateComponent from './UpdateComponent';
 import DebugCard from './DebugCard';
 import ThankYouCard from './ThankYouCard';
 import AIStatusComponent from './AIStatusComponent';
+import PatreonComponent from './PatreonComponent';
 
 export default function HomePage() {
   return (
@@ -26,6 +27,7 @@ export default function HomePage() {
         <Grid item xs={6}>
           <DebugCard />
           <ThankYouCard />
+          <PatreonComponent />
         </Grid>
       </Grid>
     </div>

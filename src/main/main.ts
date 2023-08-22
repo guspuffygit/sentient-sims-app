@@ -122,7 +122,7 @@ const createWindow = async () => {
 
   ipcHandlers(mainWindow);
 
-  runApi();
+  runApi(mainWindow, getAssetPath);
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line

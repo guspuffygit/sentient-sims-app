@@ -7,11 +7,17 @@ import { Auth } from 'aws-amplify';
 import { SelectChangeEvent } from '@mui/material/Select/SelectInput';
 import { ModUpdate } from 'main/sentient-sims/services/UpdateService';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import { useAuthenticator } from '@aws-amplify/ui-react';
+import log from 'electron-log';
 import AppCard from './AppCard';
 import useNewVersionChecker from './hooks/useNewVersionChecker';
 import useSetting, { SettingsHook } from './hooks/useSetting';
+import PatreonUser from './wrappers/PatreonUser';
+import { getNightlyAccess } from './util/nightlyAccess';
 
 export default function UpdateComponent() {
+  const { user } = useAuthenticator((context) => [context.user]);
+  const patreonUser = new PatreonUser(user);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const releaseType: SettingsHook = useSetting(
     SettingsEnum.MOD_RELEASE,
@@ -53,8 +59,11 @@ export default function UpdateComponent() {
     event: SelectChangeEvent
   ): Promise<void> => {
     const newType = event.target.value;
+    log.debug(`Changed release type to: ${newType}`);
     await releaseType.setSetting(newType);
   };
+
+  const { disableNightly, nightlyText } = getNightlyAccess(patreonUser);
 
   return (
     <AppCard
@@ -112,13 +121,6 @@ export default function UpdateComponent() {
           <Typography sx={{ fontSize: 14 }} color="text.secondary">
             Last Checked: {updateState.lastChecked}
           </Typography>
-
-          {releaseType.value !== 'main' ? (
-            <Typography sx={{ marginTop: 2 }}>
-              Warning: Only use the Nightly release if you are working with the
-              dev team to test a fix
-            </Typography>
-          ) : null}
         </div>
         <div>
           <Select
@@ -130,7 +132,9 @@ export default function UpdateComponent() {
             onChange={handleChangeReleaseType}
           >
             <MenuItem value="main">Stable</MenuItem>
-            <MenuItem value="develop">Nightly</MenuItem>
+            <MenuItem disabled={disableNightly} value="develop">
+              {nightlyText}
+            </MenuItem>
           </Select>
         </div>
       </div>
