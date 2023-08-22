@@ -42,15 +42,20 @@ export default class PatreonUser {
     return this.getFounderStatus() === 'founder';
   }
 
-  isDevOrSubscriber() {
+  isDev() {
     const founderStatus = this.getFounderStatus();
+    return founderStatus === 'dev';
+  }
+
+  isSubscriber() {
     const subscriptionLevel = this.getSubscriptionLevel();
     if (subscriptionLevel === 'tier1') {
       return true;
     }
-    if (subscriptionLevel === 'tier2') {
-      return true;
-    }
-    return founderStatus === 'dev';
+    return subscriptionLevel === 'tier2';
+  }
+
+  isMember() {
+    return this.isFounder() || this.isSubscriber() || this.isDev();
   }
 }

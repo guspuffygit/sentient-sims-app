@@ -21,7 +21,7 @@ export default function CustomLLMSettingsComponent() {
 
   return (
     <div>
-      {(user && patreonUser.isDevOrSubscriber()) || customLLMEnabled.value ? (
+      {(user && patreonUser.isMember()) || customLLMEnabled.value ? (
         <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
           <FormControlLabel
             label="Enable Custom LLM"

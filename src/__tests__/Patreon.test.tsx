@@ -11,7 +11,7 @@ describe('Patreon', () => {
 
   it('nightly founder', () => {
     const mockPatreonUserInstance = {
-      isDevOrSubscriber: jest.fn().mockReturnValue(false),
+      isMember: jest.fn().mockReturnValue(false),
       isFounder: jest.fn().mockReturnValue(true),
     };
 
@@ -24,7 +24,7 @@ describe('Patreon', () => {
 
   it('nightly dev or subscriber', () => {
     const mockPatreonUserInstance = {
-      isDevOrSubscriber: jest.fn().mockReturnValue(true),
+      isMember: jest.fn().mockReturnValue(true),
       isFounder: jest.fn().mockReturnValue(false),
     };
 
@@ -37,7 +37,7 @@ describe('Patreon', () => {
 
   it('nightly no dev or founder or subscriber', () => {
     const mockPatreonUserInstance = {
-      isDevOrSubscriber: jest.fn().mockReturnValue(false),
+      isMember: jest.fn().mockReturnValue(false),
       isFounder: jest.fn().mockReturnValue(false),
     };
 
