@@ -12,14 +12,19 @@ export default function OpenAIComponent() {
 
   const handleClose = () => {
     setOpen(false);
-    testOpenAI();
   };
 
   return (
     <AppCard>
-      <Typography sx={{ marginBottom: 3 }}>
-        Open AI Status: {openAIStatus.status}
-      </Typography>
+      <div
+        style={{ margin: 1, display: 'flex', justifyContent: 'space-between' }}
+      >
+        <div>
+          <Typography sx={{ marginBottom: 3 }}>
+            Open AI Status: {openAIStatus.status}
+          </Typography>
+        </div>
+      </div>
       <div
         style={{
           display: 'flex',
@@ -29,12 +34,23 @@ export default function OpenAIComponent() {
         <div>
           <LoadingButton
             loading={openAIStatus.loading}
-            onClick={testOpenAI}
+            onClick={() => testOpenAI()}
             sx={{ marginRight: 2 }}
             color="primary"
             variant="outlined"
           >
             Test
+          </LoadingButton>
+        </div>
+        <div>
+          <LoadingButton
+            loading={openAIStatus.loading}
+            onClick={() => setOpen(true)}
+            sx={{ marginRight: 2 }}
+            color="secondary"
+            variant="outlined"
+          >
+            Edit OpenAI Key
           </LoadingButton>
         </div>
         <OpenAIModelSelection />

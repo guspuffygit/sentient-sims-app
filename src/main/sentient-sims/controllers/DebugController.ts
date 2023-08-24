@@ -31,8 +31,13 @@ export class DebugController {
   }
 
   async testOpenAI(req: Request, res: Response) {
+    let { openAIKey } = req.query;
+    if (openAIKey !== undefined) {
+      openAIKey = openAIKey as string;
+    }
+
     try {
-      const response = await this.openAIService.testOpenAI();
+      const response = await this.openAIService.testOpenAI(openAIKey);
       res.send(response);
     } catch (e: any) {
       if (e instanceof OpenAIKeyNotSetError) {

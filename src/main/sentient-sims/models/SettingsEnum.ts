@@ -5,4 +5,5 @@ export enum SettingsEnum {
   CUSTOM_LLM_ENABLED = 'customLLMEnabled',
   CUSTOM_LLM_HOSTNAME = 'customLLMHostname',
   ACCESS_TOKEN = 'accessToken',
+  OPENAI_KEY = 'openaiKey',
 }

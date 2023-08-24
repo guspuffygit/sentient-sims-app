@@ -42,9 +42,19 @@ export class OpenAIService {
   }
 
   getOpenAIKey(): string | undefined {
+    // Check app settings
+    const openAIKeyFromSettings = this.settingsService.get(
+      SettingsEnum.OPENAI_KEY
+    );
+    if (openAIKeyFromSettings) {
+      log.debug('Using openai key from settings');
+      return openAIKeyFromSettings as string;
+    }
+
     // Check environment variable
     const openAIKeyFromEnv = process.env.OPENAI_KEY;
     if (openAIKeyFromEnv) {
+      log.debug('Using openai key from environment');
       return openAIKeyFromEnv;
     }
 
@@ -55,6 +65,7 @@ export class OpenAIService {
       const jsonData = JSON.parse(configData);
       const openAIKeyFromJson = jsonData.openai_key;
       if (openAIKeyFromJson) {
+        log.debug('Using openai key from mod settings');
         return openAIKeyFromJson;
       }
     }
@@ -70,9 +81,20 @@ export class OpenAIService {
     return new OpenAIApi(configuration);
   }
 
-  async testOpenAI() {
-    if (!this.openAIClient) {
-      this.openAIClient = this.createOpenAIClient();
+  async testOpenAI(openAIKey?: string) {
+    let client: OpenAIApi;
+
+    if (openAIKey) {
+      log.debug('Testing with openAIKey parameter');
+      const configuration = new Configuration({
+        apiKey: openAIKey as string,
+      });
+      client = new OpenAIApi(configuration);
+    } else {
+      if (!this.openAIClient) {
+        this.openAIClient = this.createOpenAIClient();
+      }
+      client = this.openAIClient;
     }
 
     const request: CreateChatCompletionRequest = {
@@ -89,7 +111,7 @@ export class OpenAIService {
     };
 
     try {
-      const response = await this.openAIClient.createChatCompletion(request);
+      const response = await client.createChatCompletion(request);
       const { message } = response.data.choices[0];
       if (message) {
         return {

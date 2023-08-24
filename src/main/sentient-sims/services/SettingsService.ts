@@ -36,6 +36,10 @@ export class SettingsService {
         type: 'string',
         default: '',
       },
+      [SettingsEnum.OPENAI_KEY.toString()]: {
+        type: 'string',
+        default: '',
+      },
     },
   });
 
