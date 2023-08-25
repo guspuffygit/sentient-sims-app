@@ -1,36 +1,40 @@
-import {
-  ChatCompletionRequestMessageRoleEnum,
-  ChatCompletionResponseMessage,
-  ChatCompletionResponseMessageRoleEnum,
-  CreateChatCompletionRequest,
-  CreateChatCompletionResponse,
-} from 'openai';
 import { useEffect, useState } from 'react';
 import { MessageInputProps } from 'renderer/ChatBoxComponent';
 import { defaultSystemPrompt } from 'main/sentient-sims/constants';
+import {
+  ChatCompletion,
+  ChatCompletionMessage,
+  CompletionCreateParams,
+} from 'openai/resources/chat';
+import { ChatCompletionMessageRole } from 'main/sentient-sims/models/ChatCompletionMessageRole';
+import { encode } from '@nem035/gpt-3-encoder';
 
-const defaultMessages = [
+const defaultSystemMessage: ChatCompletionMessage = {
+  role: 'system',
+  content: defaultSystemPrompt,
+};
+
+const defaultUserMessage: ChatCompletionMessage = {
+  role: 'user',
+  content: ``,
+};
+
+const defaultMessages: MessageInputProps[] = [
   {
     id: 'o120378hlkjh',
     index: 0,
-    message: {
-      role: ChatCompletionRequestMessageRoleEnum.System,
-      content: defaultSystemPrompt,
-    },
+    message: defaultSystemMessage,
   },
   {
     id: 'lskjeow9127834',
     index: 1,
-    message: {
-      role: ChatCompletionRequestMessageRoleEnum.User,
-      content: ``,
-    },
+    message: defaultUserMessage,
   },
 ];
 
 type GenerationResult = {
-  request: CreateChatCompletionRequest;
-  response: CreateChatCompletionResponse;
+  request: CompletionCreateParams;
+  response: ChatCompletion;
   err: any;
 };
 
@@ -39,6 +43,13 @@ export default function useChatGeneration() {
   const [messages, setMessages] = useState<MessageInputProps[]>(() => {
     const storedState = localStorage.getItem('myState');
     return storedState !== null ? JSON.parse(storedState) : defaultMessages;
+  });
+
+  let tokenCount = 0;
+  messages?.forEach((message) => {
+    if (message?.message?.content) {
+      tokenCount += encode(message.message.content).length;
+    }
   });
 
   useEffect(() => {
@@ -69,12 +80,7 @@ export default function useChatGeneration() {
     );
   }, []);
 
-  const addMessage = (
-    response:
-      | ChatCompletionResponseMessage
-      | ChatCompletionResponseMessage
-      | undefined
-  ) => {
+  const addMessage = (response: ChatCompletionMessage | undefined) => {
     if (response) {
       const updatedMessages = [
         ...messages,
@@ -93,7 +99,7 @@ export default function useChatGeneration() {
   const generateChat = async () => {
     setLoading(true);
     try {
-      const request: CreateChatCompletionRequest = {
+      const request: CompletionCreateParams = {
         model: 'gpt-3.5-turbo',
         messages: messages.map((message) => message.message),
       };
@@ -136,7 +142,7 @@ export default function useChatGeneration() {
     setMessages(updatedMessages);
   };
 
-  const addNewMessage = (role: ChatCompletionResponseMessageRoleEnum) => {
+  const addNewMessage = (role: ChatCompletionMessageRole) => {
     addMessage({
       role,
       content: '',
@@ -151,5 +157,6 @@ export default function useChatGeneration() {
     resetMessages,
     deleteMessage,
     addNewMessage,
+    tokenCount,
   };
 }

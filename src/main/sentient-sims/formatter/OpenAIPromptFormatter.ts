@@ -17,13 +17,9 @@ export class OpenAIPromptFormatter implements PromptFormatter {
     memoriesToInsert: string[],
     actions?: string
   ): string {
-    return [
-      defaultSystemPrompt,
-      participants,
-      location,
-      memoriesToInsert.join('\n'),
-      actions,
-    ].join('\n');
+    return [participants, location, memoriesToInsert.join('\n'), actions].join(
+      '\n'
+    );
   }
 
   formatMemory(memory: SentientMemory) {
@@ -62,7 +58,7 @@ export class OpenAIPromptFormatter implements PromptFormatter {
   }
 
   formatPrompt({
-    max_tokens = 3700,
+    max_tokens = 3950,
     memories,
     participants,
     location,
@@ -72,7 +68,8 @@ export class OpenAIPromptFormatter implements PromptFormatter {
     const actions = this.formatActions(pre_action, action);
 
     const prePromptTokenCount = this.encode(
-      this.combineFormattedPrompt(participants, location, [], actions)
+      defaultSystemPrompt +
+        this.combineFormattedPrompt(participants, location, [], actions)
     ).length;
 
     const memoriesToInsert: string[] = [];
@@ -99,7 +96,7 @@ export class OpenAIPromptFormatter implements PromptFormatter {
       actions
     );
 
-    let tokenCount = this.encode(prompt).length;
+    let tokenCount = this.encode(defaultSystemPrompt + prompt).length;
     while (tokenCount > max_tokens) {
       memoriesToInsert.shift();
       prompt = this.combineFormattedPrompt(
@@ -108,7 +105,7 @@ export class OpenAIPromptFormatter implements PromptFormatter {
         memoriesToInsert,
         actions
       );
-      tokenCount = this.encode(prompt).length;
+      tokenCount = this.encode(defaultSystemPrompt + prompt).length;
     }
 
     return prompt;

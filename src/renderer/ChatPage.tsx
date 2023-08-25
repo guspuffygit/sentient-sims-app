@@ -1,8 +1,7 @@
-import { Box, Button, CardActions } from '@mui/material';
+import { Box, Button, CardActions, Grid, Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import SendIcon from '@mui/icons-material/Send';
-import { ChatCompletionResponseMessageRoleEnum } from 'openai';
 import { useRef } from 'react';
 import { ChatBoxComponent } from './ChatBoxComponent';
 import useChatGeneration from './hooks/useChatGeneration';
@@ -16,6 +15,7 @@ export default function ChatPage() {
     resetMessages,
     deleteMessage,
     addNewMessage,
+    tokenCount,
   } = useChatGeneration();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -46,18 +46,14 @@ export default function ChatPage() {
                 Send
               </Button>
               <Button
-                onClick={() =>
-                  addNewMessage(ChatCompletionResponseMessageRoleEnum.User)
-                }
+                onClick={() => addNewMessage('user')}
                 color="primary"
                 endIcon={<AddCircleIcon />}
               >
                 Add User
               </Button>
               <Button
-                onClick={() =>
-                  addNewMessage(ChatCompletionResponseMessageRoleEnum.Assistant)
-                }
+                onClick={() => addNewMessage('assistant')}
                 color="primary"
                 endIcon={<AddCircleIcon />}
               >
@@ -65,9 +61,18 @@ export default function ChatPage() {
               </Button>
             </div>
             <div>
-              <Button onClick={resetMessages} color="primary">
-                Reset
-              </Button>
+              <Grid container alignItems="center">
+                <Grid item>
+                  <Typography sx={{ marginRight: 2 }}>
+                    Tokens: {tokenCount}
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Button onClick={resetMessages} color="primary">
+                    Reset
+                  </Button>
+                </Grid>
+              </Grid>
             </div>
           </>
         )}

@@ -6,13 +6,13 @@ import {
   TextField,
 } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import { ChatCompletionRequestMessage } from 'openai';
+import { ChatCompletionMessage } from 'openai/resources/chat';
 
 export type MessageInputProps = {
   id?: string;
   timestamp?: number;
   index: number;
-  message: ChatCompletionRequestMessage;
+  message: ChatCompletionMessage;
 };
 
 export type ChatBoxComponentProps = {

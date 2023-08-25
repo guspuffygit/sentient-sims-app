@@ -1,15 +1,11 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable promise/always-return */
 import * as fs from 'fs';
-import {
-  ChatCompletionRequestMessageRoleEnum,
-  Configuration,
-  CreateChatCompletionRequest,
-  OpenAIApi,
-} from 'openai';
 import log from 'electron-log';
 import electron from 'electron';
 import { encode } from '@nem035/gpt-3-encoder';
+import OpenAI from 'openai';
+import { CompletionCreateParamsNonStreaming } from 'openai/src/resources/chat/completions';
 import { DirectoryService } from './DirectoryService';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
@@ -27,7 +23,7 @@ export class OpenAIService {
 
   private settingsService: SettingsService;
 
-  private openAIClient?: OpenAIApi;
+  private openAIClient?: OpenAI;
 
   constructor(
     directoryService: DirectoryService,
@@ -75,21 +71,20 @@ export class OpenAIService {
 
   createOpenAIClient() {
     const openAIKey = this.getOpenAIKey();
-    const configuration = new Configuration({
+    return new OpenAI({
+      dangerouslyAllowBrowser: process.env.NODE_ENV === 'test',
       apiKey: openAIKey,
     });
-    return new OpenAIApi(configuration);
   }
 
   async testOpenAI(openAIKey?: string) {
-    let client: OpenAIApi;
+    let client: OpenAI;
 
     if (openAIKey) {
       log.debug('Testing with openAIKey parameter');
-      const configuration = new Configuration({
+      client = new OpenAI({
         apiKey: openAIKey as string,
       });
-      client = new OpenAIApi(configuration);
     } else {
       if (!this.openAIClient) {
         this.openAIClient = this.createOpenAIClient();
@@ -97,22 +92,23 @@ export class OpenAIService {
       client = this.openAIClient;
     }
 
-    const request: CreateChatCompletionRequest = {
+    const request: CompletionCreateParamsNonStreaming = {
+      stream: false,
       model: 'gpt-3.5-turbo',
       max_tokens: 100,
       temperature: 0,
       top_p: 0,
       messages: [
         {
-          role: ChatCompletionRequestMessageRoleEnum.User,
+          role: 'user',
           content: 'Return the text "OK"',
         },
       ],
     };
 
     try {
-      const response = await client.createChatCompletion(request);
-      const { message } = response.data.choices[0];
+      const response = await client.chat.completions.create(request);
+      const { message } = response.choices[0];
       if (message) {
         return {
           status: message.content?.trim(),
@@ -130,14 +126,16 @@ export class OpenAIService {
     }
   }
 
-  async generateChatCompletion(request: CreateChatCompletionRequest) {
+  async generateChatCompletion(request: CompletionCreateParamsNonStreaming) {
+    request.stream = false;
+
     if (!this.openAIClient) {
       this.openAIClient = this.createOpenAIClient();
     }
 
     try {
-      const response = await this.openAIClient.createChatCompletion(request);
-      return { request, response: response.data };
+      const response = await this.openAIClient.chat.completions.create(request);
+      return { request, response };
     } catch (err: any) {
       return {
         request,
@@ -147,22 +145,21 @@ export class OpenAIService {
   }
 
   async generate(prompt: any, model: any, systemPrompt: any, maxLength?: any) {
-    const request: CreateChatCompletionRequest = {
+    const request: CompletionCreateParamsNonStreaming = {
+      stream: false,
       model: model || this.getOpenAIModel(),
       max_tokens: maxLength,
       messages: [
         {
-          role: ChatCompletionRequestMessageRoleEnum.System,
+          role: 'system',
           content: systemPrompt || defaultSystemPrompt,
         },
         {
-          role: ChatCompletionRequestMessageRoleEnum.User,
+          role: 'user',
           content: prompt,
         },
       ],
     };
-
-    log.debug(`prompt length: ${encode(defaultSystemPrompt + prompt).length}`);
 
     try {
       const result = await this.generateChatCompletion(request);
@@ -208,12 +205,12 @@ export class OpenAIService {
       this.openAIClient = this.createOpenAIClient();
     }
 
-    const response = await this.openAIClient.createEmbedding({
+    const response = await this.openAIClient?.embeddings.create({
       model: 'text-embedding-ada-002',
       input: text,
     });
 
-    return response.data.data[0].embedding;
+    return response.data[0].embedding;
   }
 
   static countTokens(text: string) {
