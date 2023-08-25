@@ -177,11 +177,18 @@ export class OpenAIService {
         if (message) {
           const responseString = message.content?.trim();
 
+          log.debug(`Result:\n${responseString}`);
           return {
             results: [{ text: responseString }],
             request,
           };
         }
+      } else if (result.err) {
+        log.error(`OpenAI Request failed`, result.err);
+        return {
+          results: [{ error: result.err?.message }],
+          request,
+        };
       }
 
       const errorMessage = 'AI request failed, no message';
