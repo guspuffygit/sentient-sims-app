@@ -2,9 +2,9 @@ import '@testing-library/jest-dom';
 import {
   removeLastParagraph,
   trimIncompleteSentence,
-} from 'main/sentient-sims/formatter';
+} from 'main/sentient-sims/formatter/PromptFormatter';
 
-describe('Formatter', () => {
+describe('PromptFormatter', () => {
   it('should trim sentence', () => {
     const imcompleteSentence = 'This is a sentence. This is a';
     expect(trimIncompleteSentence(imcompleteSentence)).toEqual(

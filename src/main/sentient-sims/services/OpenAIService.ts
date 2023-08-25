@@ -162,6 +162,8 @@ export class OpenAIService {
       ],
     };
 
+    log.debug(`prompt length: ${encode(defaultSystemPrompt + prompt).length}`);
+
     try {
       const result = await this.generateChatCompletion(request);
       try {

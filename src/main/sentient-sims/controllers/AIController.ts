@@ -4,8 +4,8 @@ import log from 'electron-log';
 import { OpenAIService } from '../services/OpenAIService';
 import { defaultSystemPrompt } from '../constants';
 import { PromptRequest } from '../models/PromptRequest';
-import { PromptFormatter } from '../PromptFormatter';
 import { CustomLLMService } from '../services/CustomLLMService';
+import { createPromptFormatter } from '../formatter/PromptFormatterFactory';
 
 export class AIController {
   private openAIService: OpenAIService;
@@ -29,7 +29,8 @@ export class AIController {
     const promptRequest: PromptRequest = req.body;
 
     const customLLMEnabled = this.customLLMService.customLLMEnabled();
-    const promptFormatter = new PromptFormatter(customLLMEnabled);
+    const promptFormatter = createPromptFormatter(customLLMEnabled);
+    promptRequest.max_tokens = undefined;
     const prompt = promptFormatter.formatPrompt(promptRequest);
     log.debug(`prompt: ${prompt}`);
 

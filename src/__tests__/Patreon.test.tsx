@@ -11,7 +11,7 @@ describe('Patreon', () => {
 
   it('nightly founder', () => {
     const mockPatreonUserInstance = {
-      isMember: jest.fn().mockReturnValue(false),
+      isMember: jest.fn().mockReturnValue(true),
       isFounder: jest.fn().mockReturnValue(true),
     };
 
