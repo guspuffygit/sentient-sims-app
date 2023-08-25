@@ -34,7 +34,7 @@ function PatreonButton({ url }: PatreonButtonProps) {
     <Button href={url} target="_blank">
       <img
         src="http://localhost:25148/files/patreon-medium-button.png"
-        width="250"
+        width="215"
         alt="Patreon"
       />
     </Button>
