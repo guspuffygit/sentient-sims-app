@@ -3,6 +3,7 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { LLMWorker } from 'main/sentient-sims/models/LLMWorker';
+import log from 'electron-log';
 
 interface ModalProps {
   open: boolean;
@@ -30,15 +31,21 @@ export default function CustomLLMWorkersModal({
   workers,
 }: ModalProps) {
   const rows: any[] = [];
-  workers?.forEach((worker, index) => {
-    rows.push({
-      id: index,
-      name: worker.name,
-      type: worker.type,
-      model: worker.model,
+  try {
+    workers?.forEach((worker, index) => {
+      rows.push({
+        id: index,
+        name: worker.name,
+        type: worker.type,
+        model: worker.model,
+      });
     });
-  });
-  // const rows = JSON.parse(JSON.stringify(workers));
+  } catch (err: any) {
+    log.error(
+      `Exception thrown trying to render workers, typeof: ${typeof workers}`,
+      err
+    );
+  }
   return (
     <Modal open={open} onClose={onClose}>
       <Box
