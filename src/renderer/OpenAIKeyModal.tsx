@@ -4,8 +4,8 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import { LoadingButton } from '@mui/lab';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting from './hooks/useSetting';
-import { SettingsEnum } from '../main/sentient-sims/models/SettingsEnum';
 import useOpenAITest from './hooks/useOpenAITest';
 
 interface ModalProps {

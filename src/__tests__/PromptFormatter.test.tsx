@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { MythoMaxPromptFormatter } from 'main/sentient-sims/formatter/MythoMaxPromptFormatter';
 import { OpenAIPromptFormatter } from 'main/sentient-sims/formatter/OpenAIPromptFormatter';
-import { createPromptFormatter } from '../main/sentient-sims/formatter/PromptFormatterFactory';
+import { createPromptFormatter } from 'main/sentient-sims/formatter/PromptFormatterFactory';
 
 describe('MythoMax Prompt Formatter', () => {
   it('should trim output user and assistant tokens', () => {

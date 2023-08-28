@@ -6,26 +6,32 @@ import {
   TextField,
 } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import { ChatCompletionMessage } from 'openai/resources/chat';
-
-export type MessageInputProps = {
-  id?: string;
-  timestamp?: number;
-  index: number;
-  message: ChatCompletionMessage;
-};
+import { MessageInputProps } from 'main/sentient-sims/models/MessageInputProps';
 
 export type ChatBoxComponentProps = {
   message: MessageInputProps;
   handleMessageTextChange: any;
   handleDeleteMessage: any;
+  index: number;
 };
 
 export function ChatBoxComponent({
   message,
   handleMessageTextChange,
   handleDeleteMessage,
+  index,
 }: ChatBoxComponentProps) {
+  let endAdornment;
+
+  if (message.message.role === 'user' || message.message.role === 'assistant') {
+    endAdornment = (
+      <InputAdornment position="end" sx={{ alignItems: 'flex-end' }}>
+        <IconButton onClick={() => handleDeleteMessage(index)}>
+          <RemoveCircleOutlineIcon />
+        </IconButton>
+      </InputAdornment>
+    );
+  }
   return (
     <Card
       key={message.id}
@@ -37,20 +43,14 @@ export function ChatBoxComponent({
           label={message.message.role}
           fullWidth
           onChange={(event) =>
-            handleMessageTextChange(message.index, event.target.value)
+            handleMessageTextChange(index, event.target.value)
           }
           variant="filled"
           multiline
           value={message.message.content}
           style={{ height: '100%', margin: 0 }}
           InputProps={{
-            endAdornment: (
-              <InputAdornment position="end" sx={{ alignItems: 'flex-end' }}>
-                <IconButton onClick={() => handleDeleteMessage(message.index)}>
-                  <RemoveCircleOutlineIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
+            endAdornment,
           }}
         />
       </CardContent>

@@ -3,10 +3,19 @@ import CircularProgress from '@mui/material/CircularProgress';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import SendIcon from '@mui/icons-material/Send';
 import { useRef } from 'react';
+import log from 'electron-log';
 import { ChatBoxComponent } from './ChatBoxComponent';
 import useChatGeneration from './hooks/useChatGeneration';
 
 export default function ChatPage() {
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  function handleGenerationLoaded() {
+    log.info('called');
+    setTimeout(() => {
+      log.info('go');
+      messagesEndRef?.current?.scrollIntoView();
+    }, 500);
+  }
   const {
     messages,
     loading,
@@ -16,14 +25,15 @@ export default function ChatPage() {
     deleteMessage,
     addNewMessage,
     tokenCount,
-  } = useChatGeneration();
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  } = useChatGeneration(handleGenerationLoaded);
 
   return (
     <>
-      <Box height={575} overflow="auto">
-        {messages.map((message) => (
+      <Box height={650} overflow="auto">
+        {messages.map((message, index) => (
           <ChatBoxComponent
+            index={index}
+            key={message.id}
             message={message}
             handleMessageTextChange={handleMessageTextChange}
             handleDeleteMessage={deleteMessage}

@@ -2,7 +2,6 @@
 /* eslint-disable promise/always-return */
 import * as fs from 'fs';
 import log from 'electron-log';
-import electron from 'electron';
 import { encode } from '@nem035/gpt-3-encoder';
 import OpenAI from 'openai';
 import { CompletionCreateParamsNonStreaming } from 'openai/src/resources/chat/completions';
@@ -163,15 +162,6 @@ export class OpenAIService {
 
     try {
       const result = await this.generateChatCompletion(request);
-      try {
-        electron?.BrowserWindow?.getAllWindows().forEach((window) => {
-          if (window.webContents?.isDestroyed() === false) {
-            window.webContents.send('on-chat-generation', result);
-          }
-        });
-      } catch (err) {
-        log.error(`Failed sending`, err);
-      }
       if (result.response) {
         const { message } = result.response.choices[0];
         if (message) {

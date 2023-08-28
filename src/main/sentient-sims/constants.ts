@@ -16,3 +16,11 @@ export const defaultSystemPrompt = [
   "Yet, it's also where they find joy, love, and the strength to keep going.",
   "Now, let's dive into their story.",
 ].join(' ');
+
+export const defaultCustomLLMPrompt = [
+  'Write a story in the third person, describing scenes clearly, explicitly, in vivid detail',
+  "based on what's been said before",
+  'using lots of dialog',
+  'without predicting the future or giving a lesson',
+  'ending each part on a cliffhanger, using these character descriptions:',
+].join(', ');

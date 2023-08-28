@@ -1,91 +1,177 @@
-import { useEffect, useState } from 'react';
-import { MessageInputProps } from 'renderer/ChatBoxComponent';
-import { defaultSystemPrompt } from 'main/sentient-sims/constants';
+/* eslint-disable no-plusplus */
+import { useCallback, useEffect, useState } from 'react';
 import {
-  ChatCompletion,
-  ChatCompletionMessage,
-  CompletionCreateParams,
-} from 'openai/resources/chat';
+  defaultCustomLLMPrompt,
+  defaultSystemPrompt,
+} from 'main/sentient-sims/constants';
+import { ChatCompletionMessage } from 'openai/resources/chat';
 import { ChatCompletionMessageRole } from 'main/sentient-sims/models/ChatCompletionMessageRole';
-import { encode } from '@nem035/gpt-3-encoder';
+import { generateUUID } from '@widgetbot/react-embed/dist/util';
+import log from 'electron-log';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import { MessageInputProps } from 'main/sentient-sims/models/MessageInputProps';
+import { SentientMemory } from 'main/sentient-sims/models/SentientMemory';
+import { GenerationResult } from 'main/sentient-sims/formatter/GenerationResult';
+import {
+  removeLastParagraph,
+  trimIncompleteSentence,
+} from 'main/sentient-sims/formatter/PromptFormatter';
+import { createPromptFormatter } from 'main/sentient-sims/formatter/PromptFormatterFactory';
+import { PromptRequest } from 'main/sentient-sims/models/PromptRequest';
+import useSetting from './useSetting';
 
-const defaultSystemMessage: ChatCompletionMessage = {
-  role: 'system',
-  content: defaultSystemPrompt,
-};
+function defaultMessages(systemPrompt: string): MessageInputProps[] {
+  return [
+    {
+      id: generateUUID(),
+      message: {
+        role: 'system',
+        content: systemPrompt,
+      },
+    },
+    {
+      id: generateUUID(),
+      message: {
+        role: 'participants',
+        content: '',
+      },
+    },
+    {
+      id: generateUUID(),
+      message: {
+        role: 'location',
+        content: '',
+      },
+    },
+    {
+      id: generateUUID(),
+      message: {
+        role: 'user',
+        content: '',
+      },
+    },
+  ];
+}
 
-const defaultUserMessage: ChatCompletionMessage = {
-  role: 'user',
-  content: ``,
-};
-
-const defaultMessages: MessageInputProps[] = [
-  {
-    id: 'o120378hlkjh',
-    index: 0,
-    message: defaultSystemMessage,
-  },
-  {
-    id: 'lskjeow9127834',
-    index: 1,
-    message: defaultUserMessage,
-  },
-];
-
-type GenerationResult = {
-  request: CompletionCreateParams;
-  response: ChatCompletion;
-  err: any;
-};
-
-export default function useChatGeneration() {
+export default function useChatGeneration(handleGenerationLoaded: () => void) {
+  const customLLMEnabled = useSetting(SettingsEnum.CUSTOM_LLM_ENABLED, false);
   const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState<MessageInputProps[]>(() => {
-    const storedState = localStorage.getItem('myState');
-    return storedState !== null ? JSON.parse(storedState) : defaultMessages;
-  });
+  const [messages, setMessages] = useState<MessageInputProps[]>(
+    defaultMessages(defaultSystemPrompt)
+  );
+  const [tokenCount, setTokenCount] = useState(0);
 
-  let tokenCount = 0;
-  messages?.forEach((message) => {
-    if (message?.message?.content) {
-      tokenCount += encode(message.message.content).length;
+  const resetMessages = useCallback(() => {
+    if (customLLMEnabled.value) {
+      setMessages(defaultMessages(defaultCustomLLMPrompt));
+    } else {
+      setMessages(defaultMessages(defaultSystemPrompt));
     }
-  });
+  }, [customLLMEnabled.value]);
 
   useEffect(() => {
-    window.electron.onChatGeneration(
+    resetMessages();
+  }, [resetMessages]);
+
+  useEffect(() => {
+    const removeListener = window.electron.onChatGeneration(
       (_event: any, result: GenerationResult) => {
-        const updatedMessages = [];
-        // eslint-disable-next-line no-plusplus
-        for (let i = 0; i < result.request.messages.length; i++) {
+        const updatedMessages: MessageInputProps[] = [];
+
+        updatedMessages.push({
+          id: generateUUID(),
+          message: {
+            role: 'system',
+            content: result.prompt.systemPrompt || defaultCustomLLMPrompt,
+          },
+        });
+        updatedMessages.push({
+          id: generateUUID(),
+          message: {
+            role: 'participants',
+            content: result.prompt.participants,
+          },
+        });
+        updatedMessages.push({
+          id: generateUUID(),
+          message: {
+            role: 'location',
+            content: result.prompt.location,
+          },
+        });
+        result.prompt.memories.forEach((memory) => {
+          if (memory.action) {
+            updatedMessages.push({
+              id: generateUUID(),
+              message: {
+                role: 'user',
+                content: memory.action.trim(),
+              },
+            });
+          }
+          if (memory.content) {
+            updatedMessages.push({
+              id: generateUUID(),
+              message: {
+                role: 'assistant',
+                content: memory.content.trim(),
+              },
+            });
+          }
+          if (memory.observation) {
+            updatedMessages.push({
+              id: generateUUID(),
+              message: {
+                role: 'user',
+                content: memory.observation.trim(),
+              },
+            });
+          }
+        });
+        const actions: string[] = [];
+
+        if (result.prompt.pre_action) {
+          actions.push(result.prompt.pre_action.trim());
+        }
+        if (result.prompt.action) {
+          actions.push(result.prompt.action.trim());
+        }
+        if (actions.length > 0) {
           updatedMessages.push({
-            index: i,
+            id: generateUUID(),
             message: {
-              role: result.request.messages[i].role,
-              content: result.request.messages[i].content,
+              role: 'user',
+              content: actions.join(' '),
             },
           });
         }
-        if (result.response.choices?.[0]?.message) {
+
+        if (result.output && result.output.trim() !== '') {
+          let content = removeLastParagraph(result.output.trim());
+          content = trimIncompleteSentence(content.trim());
           updatedMessages.push({
-            index: updatedMessages.length,
+            id: generateUUID(),
             message: {
-              role: result.response.choices[0].message?.role,
-              content: result.response.choices[0].message?.content,
+              role: 'assistant',
+              content: content.trim(),
             },
           });
         }
+
         setMessages(updatedMessages);
+        handleGenerationLoaded();
       }
     );
-  }, []);
+    return () => {
+      removeListener();
+    };
+  }, [customLLMEnabled.value, handleGenerationLoaded]);
 
   const addMessage = (response: ChatCompletionMessage | undefined) => {
     if (response) {
       const updatedMessages = [
         ...messages,
         {
-          index: messages.length,
           message: {
             role: response.role,
             content: response.content,
@@ -96,23 +182,49 @@ export default function useChatGeneration() {
     }
   };
 
+  const getPromptRequest = useCallback(() => {
+    const memories: SentientMemory[] = [];
+    for (let i = 3; i < messages.length; i++) {
+      if (messages[i].message.role === 'user') {
+        memories.push({
+          action: messages[i].message.content as string,
+        });
+      } else {
+        memories.push({
+          content: messages[i].message.content as string,
+        });
+      }
+    }
+    return {
+      systemPrompt: messages[0].message.content as string,
+      participants: messages[1].message.content as string,
+      location: messages[2].message.content as string,
+      memories,
+    };
+  }, [messages]);
+
+  useEffect(() => {
+    const promptRequest: PromptRequest = getPromptRequest();
+    const promptFormatter = createPromptFormatter(customLLMEnabled.value);
+    const prompt = promptFormatter.formatPrompt(promptRequest);
+    const { length } = promptFormatter.encode(
+      (customLLMEnabled.value ? '' : promptRequest.systemPrompt) + prompt
+    );
+    setTokenCount(length);
+  }, [customLLMEnabled.value, getPromptRequest]);
+
   const generateChat = async () => {
     setLoading(true);
     try {
-      const request: CompletionCreateParams = {
-        model: 'gpt-3.5-turbo',
-        messages: messages.map((message) => message.message),
-      };
+      const request = getPromptRequest();
 
-      const response = await fetch('http://localhost:25148/ai/generate', {
+      await fetch('http://localhost:25148/ai/v2/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(request),
       });
-      const result: GenerationResult = await response.json();
-      if (result.response?.choices?.[0]?.message) {
-        addMessage(result.response.choices[0].message);
-      }
+    } catch (e: any) {
+      log.error(`Unabled to generateChat`, e);
     } finally {
       setLoading(false);
     }
@@ -130,10 +242,6 @@ export default function useChatGeneration() {
       };
       setMessages(updatedMessages);
     }
-  };
-
-  const resetMessages = () => {
-    setMessages(defaultMessages);
   };
 
   const deleteMessage = (index: number) => {

@@ -5,6 +5,7 @@ export interface PromptFormatter {
   formatMemory(memory: SentientMemory): string | undefined;
   encode(prompt: string): number[];
   combineFormattedPrompt(
+    systemPrompt: string,
     participants: string,
     location: string,
     memoriesToInsert: string[],

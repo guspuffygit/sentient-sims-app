@@ -1,11 +1,29 @@
 /* eslint-disable import/prefer-default-export */
 import { Request, Response } from 'express';
 import log from 'electron-log';
+import electron from 'electron';
 import { OpenAIService } from '../services/OpenAIService';
 import { defaultSystemPrompt } from '../constants';
 import { PromptRequest } from '../models/PromptRequest';
 import { CustomLLMService } from '../services/CustomLLMService';
 import { createPromptFormatter } from '../formatter/PromptFormatterFactory';
+
+function sendChatGeneration(
+  promptRequest: PromptRequest,
+  output: string,
+  err: any
+) {
+  electron?.BrowserWindow?.getAllWindows().forEach((window) => {
+    if (window.webContents?.isDestroyed() === false) {
+      log.debug('Sending on-chat-generation from ai controller');
+      window.webContents.send('on-chat-generation', {
+        prompt: promptRequest,
+        output,
+        err: err ? err.message : null,
+      });
+    }
+  });
+}
 
 export class AIController {
   private openAIService: OpenAIService;
@@ -50,17 +68,26 @@ export class AIController {
           );
           log.debug(result);
           res.json(result);
+          sendChatGeneration(promptRequest, result.results[0].text, err);
         }
       });
     } else {
-      res.json(
-        await this.openAIService.generate(
-          prompt,
-          promptRequest.model,
-          promptRequest.systemPrompt,
-          90
-        )
+      const response = await this.openAIService.generate(
+        prompt,
+        promptRequest.model,
+        promptRequest.systemPrompt,
+        90
       );
+      res.json(response);
+      let error: any;
+      if (response?.results?.[0] && 'error' in response.results[0]) {
+        error = response?.results?.[0]?.error;
+      }
+      let output: any;
+      if (response?.results?.[0] && 'text' in response.results[0]) {
+        output = response?.results?.[0].text;
+      }
+      sendChatGeneration(promptRequest, output, error);
     }
   }
 

@@ -8,7 +8,11 @@ const electronHandler = {
     return ipcRenderer.on('debug-mode-toggle', callback);
   },
   onChatGeneration: (callback: any) => {
-    return ipcRenderer.on('on-chat-generation', callback);
+    ipcRenderer.on('on-chat-generation', callback);
+    function removeListener() {
+      ipcRenderer.removeListener('on-chat-generation', callback);
+    }
+    return removeListener;
   },
   onPopupNotification: (callback: any) => {
     return ipcRenderer.on('popup-notification', callback);

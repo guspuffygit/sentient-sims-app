@@ -12,6 +12,7 @@ export class OpenAIPromptFormatter implements PromptFormatter {
   }
 
   combineFormattedPrompt(
+    systemPrompt: string,
     participants: string,
     location: string,
     memoriesToInsert: string[],
@@ -64,12 +65,19 @@ export class OpenAIPromptFormatter implements PromptFormatter {
     location,
     pre_action,
     action,
+    systemPrompt = defaultSystemPrompt,
   }: PromptRequest) {
     const actions = this.formatActions(pre_action, action);
 
     const prePromptTokenCount = this.encode(
-      defaultSystemPrompt +
-        this.combineFormattedPrompt(participants, location, [], actions)
+      systemPrompt +
+        this.combineFormattedPrompt(
+          systemPrompt,
+          participants,
+          location,
+          [],
+          actions
+        )
     ).length;
 
     const memoriesToInsert: string[] = [];
@@ -90,22 +98,24 @@ export class OpenAIPromptFormatter implements PromptFormatter {
     }
 
     let prompt = this.combineFormattedPrompt(
+      systemPrompt,
       participants,
       location,
       memoriesToInsert,
       actions
     );
 
-    let tokenCount = this.encode(defaultSystemPrompt + prompt).length;
+    let tokenCount = this.encode(systemPrompt + prompt).length;
     while (tokenCount > max_tokens) {
       memoriesToInsert.shift();
       prompt = this.combineFormattedPrompt(
+        systemPrompt,
         participants,
         location,
         memoriesToInsert,
         actions
       );
-      tokenCount = this.encode(defaultSystemPrompt + prompt).length;
+      tokenCount = this.encode(systemPrompt + prompt).length;
     }
 
     return prompt;

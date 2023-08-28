@@ -4,6 +4,7 @@ import { PromptFormatter } from './PromptFormatter';
 import { SentientMemory } from '../models/SentientMemory';
 import { PromptRequest } from '../models/PromptRequest';
 import { llamaTokenizer } from '../llama/LLamaTokenizer';
+import { defaultCustomLLMPrompt } from '../constants';
 
 export class MythoMaxPromptFormatter implements PromptFormatter {
   public readonly userToken = '### Instruction:';
@@ -15,19 +16,14 @@ export class MythoMaxPromptFormatter implements PromptFormatter {
   }
 
   combineFormattedPrompt(
+    systemPrompt: string,
     participants: string,
     location: string,
     memoriesToInsert: string[],
     actions?: string
   ): string {
     return [
-      [
-        'Write a story in the third person, describing scenes clearly, explicitly, in vivid detail',
-        "based on what's been said before",
-        'using lots of dialog',
-        'without predicting the future or giving a lesson',
-        'ending each part on a cliffhanger, using these character descriptions:',
-      ].join(', '),
+      systemPrompt,
       participants,
       '',
       location,
@@ -84,11 +80,18 @@ export class MythoMaxPromptFormatter implements PromptFormatter {
     location,
     pre_action,
     action,
+    systemPrompt = defaultCustomLLMPrompt,
   }: PromptRequest) {
     const actions = this.formatActions(pre_action, action);
 
     const prePromptTokenCount = this.encode(
-      this.combineFormattedPrompt(participants, location, [], actions)
+      this.combineFormattedPrompt(
+        systemPrompt,
+        participants,
+        location,
+        [],
+        actions
+      )
     ).length;
 
     const memoriesToInsert: string[] = [];
@@ -109,6 +112,7 @@ export class MythoMaxPromptFormatter implements PromptFormatter {
     }
 
     let prompt = this.combineFormattedPrompt(
+      systemPrompt,
       participants,
       location,
       memoriesToInsert,
@@ -119,6 +123,7 @@ export class MythoMaxPromptFormatter implements PromptFormatter {
     while (tokenCount > max_tokens) {
       memoriesToInsert.shift();
       prompt = this.combineFormattedPrompt(
+        systemPrompt,
         participants,
         location,
         memoriesToInsert,
