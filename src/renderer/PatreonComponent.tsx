@@ -4,6 +4,7 @@ import { PropsWithChildren } from 'react';
 import AppCard from './AppCard';
 import PatreonUser from './wrappers/PatreonUser';
 import { useDebugMode } from './providers/DebugModeProvider';
+import EditAvatarComponent from './components/EditAvatarComponent';
 
 export const getPatreonOauthUrl = (): string => {
   const redirectUrl = 'http://localhost:25148/patreon-redirect';
@@ -60,9 +61,12 @@ function SubscribedPatreon({ patreonUser }: SubscribedPatreonProps) {
   }
 
   return (
-    <Typography variant="h5" align="center">
-      {text}
-    </Typography>
+    <div>
+      <Typography variant="h5" align="center">
+        {text}
+      </Typography>
+      <EditAvatarComponent />
+    </div>
   );
 }
 
