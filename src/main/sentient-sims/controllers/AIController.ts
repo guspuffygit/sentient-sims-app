@@ -11,7 +11,7 @@ import { createPromptFormatter } from '../formatter/PromptFormatterFactory';
 function sendChatGeneration(
   promptRequest: PromptRequest,
   output: string,
-  err: any
+  err?: any
 ) {
   electron?.BrowserWindow?.getAllWindows().forEach((window) => {
     if (window.webContents?.isDestroyed() === false) {
@@ -53,24 +53,24 @@ export class AIController {
     log.debug(`prompt: ${prompt}`);
 
     if (customLLMEnabled) {
-      this.customLLMService.generate(prompt, (err: any, result: any) => {
-        if (err) {
-          res.status(400).json({
-            results: [
-              {
-                text: err.message,
-              },
-            ],
-          });
-        } else {
-          result.results[0].text = promptFormatter.formatOutput(
-            result.results[0].text
-          );
-          log.debug(result);
-          res.json(result);
-          sendChatGeneration(promptRequest, result.results[0].text, err);
-        }
-      });
+      try {
+        const response = await this.customLLMService.generate(prompt);
+        response.results[0].text = promptFormatter.formatOutput(
+          response.results[0].text
+        );
+        log.debug(response);
+        res.json(response);
+        sendChatGeneration(promptRequest, response.results[0].text);
+      } catch (err: any) {
+        log.error('Error getting customllm response', err);
+        res.status(400).json({
+          results: [
+            {
+              text: err?.message,
+            },
+          ],
+        });
+      }
     } else {
       const response = await this.openAIService.generate(
         prompt,

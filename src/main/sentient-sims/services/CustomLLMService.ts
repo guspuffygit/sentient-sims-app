@@ -19,29 +19,23 @@ export class CustomLLMService {
     return this.settingsService.get(SettingsEnum.CUSTOM_LLM_HOSTNAME) as string;
   }
 
-  async generate(prompt: string, callback: any) {
+  async generate(prompt: string) {
     const url = `${this.customLLMHostname()}/api/v1/generate`;
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     log.debug(`url: ${url}, auth: ${authHeader}`);
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authentication: authHeader,
-        },
-        body: JSON.stringify({
-          prompt,
-          max_new_tokens: 90,
-        }),
-      });
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authentication: authHeader,
+      },
+      body: JSON.stringify({
+        prompt,
+        max_new_tokens: 90,
+      }),
+    });
 
-      const result = await response.json();
-      callback(null, result);
-    } catch (e: any) {
-      log.error(`Error requesting to server`, e);
-      callback(e);
-    }
+    return response.json();
   }
 
   async testHealth() {
