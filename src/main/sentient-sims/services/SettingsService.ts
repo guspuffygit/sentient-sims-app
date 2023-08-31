@@ -20,7 +20,7 @@ export class SettingsService {
       },
       [SettingsEnum.CUSTOM_LLM_HOSTNAME.toString()]: {
         type: 'string',
-        default: 'https://ai.sentientsimulations.com:25150',
+        default: 'https://ai.sentientsimulations.com',
       },
       [SettingsEnum.MODS_DIRECTORY.toString()]: {
         type: 'string',
