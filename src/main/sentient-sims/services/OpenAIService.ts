@@ -1,13 +1,20 @@
-/* eslint-disable max-classes-per-file */
+/* eslint-disable max-classes-per-file,class-methods-use-this */
 /* eslint-disable promise/always-return */
 import * as fs from 'fs';
 import log from 'electron-log';
 import OpenAI from 'openai';
-import { CompletionCreateParamsNonStreaming } from 'openai/src/resources/chat/completions';
+import {
+  ChatCompletion,
+  CompletionCreateParamsNonStreaming,
+} from 'openai/src/resources/chat/completions';
 import { DirectoryService } from './DirectoryService';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { defaultSystemPrompt } from '../constants';
+import { PromptRequest } from '../models/PromptRequest';
+import { OpenAIPromptFormatter } from '../formatter/OpenAIPromptFormatter';
+import { GenerationService } from './GenerationService';
+import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 
 export class OpenAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -16,19 +23,23 @@ export class OpenAIKeyNotSetError extends Error {
   }
 }
 
-export class OpenAIService {
+export class OpenAIService implements GenerationService {
   private directoryService: DirectoryService;
 
   private settingsService: SettingsService;
+
+  private promptFormatter: OpenAIPromptFormatter;
 
   private openAIClient?: OpenAI;
 
   constructor(
     directoryService: DirectoryService,
-    settingsService: SettingsService
+    settingsService: SettingsService,
+    promptFormatter: OpenAIPromptFormatter
   ) {
     this.directoryService = directoryService;
     this.settingsService = settingsService;
+    this.promptFormatter = promptFormatter;
   }
 
   getOpenAIModel(): string {
@@ -131,26 +142,24 @@ export class OpenAIService {
       this.openAIClient = this.createOpenAIClient();
     }
 
-    try {
-      const response = await this.openAIClient.chat.completions.create(request);
-      return { request, response };
-    } catch (err: any) {
-      return {
-        request,
-        err,
-      };
-    }
+    log.debug(JSON.stringify(request, null, 2));
+
+    return this.openAIClient.chat.completions.create(request);
   }
 
-  async generate(prompt: any, model: any, systemPrompt: any, maxLength?: any) {
+  async sentientSimsGenerate(
+    promptRequest: PromptRequest
+  ): Promise<SimsGenerateResponse> {
+    const prompt = this.promptFormatter.formatPrompt(promptRequest);
+    const systemPrompt = promptRequest.systemPrompt || defaultSystemPrompt;
     const request: CompletionCreateParamsNonStreaming = {
       stream: false,
-      model: model || this.getOpenAIModel(),
-      max_tokens: maxLength,
+      model: promptRequest.model || this.getOpenAIModel(),
+      max_tokens: 90,
       messages: [
         {
           role: 'system',
-          content: systemPrompt || defaultSystemPrompt,
+          content: systemPrompt,
         },
         {
           role: 'user',
@@ -158,42 +167,40 @@ export class OpenAIService {
         },
       ],
     };
+    const result = await this.generateChatCompletion(request);
+    const text = this.getOutputFromGeneration(result);
+    return {
+      text,
+      systemPrompt,
+    };
+  }
 
-    try {
-      const result = await this.generateChatCompletion(request);
-      if (result.response) {
-        const { message } = result.response.choices[0];
-        if (message) {
-          const responseString = message.content?.trim();
-
-          log.debug(`Result:\n${responseString}`);
-          return {
-            results: [{ text: responseString }],
-            request,
-          };
-        }
-      } else if (result.err) {
-        log.error(`OpenAI Request failed`, result.err);
-        return {
-          results: [{ error: result.err?.message }],
-          request,
-        };
-      }
-
-      const errorMessage = 'AI request failed, no message';
-      log.error(errorMessage, result);
-      return {
-        results: [{ text: errorMessage }],
-        request,
-      };
-    } catch (err: any) {
-      const errorMessage = 'AI request failed';
-      log.error(errorMessage, err.message);
-      return {
-        results: [{ text: errorMessage }],
-        request,
-      };
+  getOutputFromGeneration(generation: ChatCompletion) {
+    const output = generation.choices[0].message.content;
+    if (output) {
+      return output;
     }
+
+    throw new Error(`Output wasnt truthy ${output}`);
+  }
+
+  async translate(text: string, language: string) {
+    const request: CompletionCreateParamsNonStreaming = {
+      stream: false,
+      model: 'gpt-3.5-turbo',
+      messages: [
+        {
+          role: 'system',
+          content: `Translate the user input from English to ${language}`,
+        },
+        {
+          role: 'user',
+          content: text,
+        },
+      ],
+    };
+    const result = await this.generateChatCompletion(request);
+    return this.getOutputFromGeneration(result);
   }
 
   async getVector(text: string) {

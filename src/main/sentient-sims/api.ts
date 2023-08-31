@@ -18,6 +18,8 @@ import { CustomLLMService } from './services/CustomLLMService';
 import { AssetsController } from './controllers/AssetsController';
 import { PatreonController } from './controllers/PatreonController';
 import { PatreonService } from './services/PatreonService';
+import { MythoMaxPromptFormatter } from './formatter/MythoMaxPromptFormatter';
+import { OpenAIPromptFormatter } from './formatter/OpenAIPromptFormatter';
 
 const settingsService = new SettingsService();
 const directoryService = new DirectoryService(settingsService);
@@ -25,8 +27,15 @@ const lastExceptionService = new LastExceptionService(directoryService);
 const versionService = new VersionService(directoryService);
 const versionController = new VersionController(versionService);
 const updateService = new UpdateService(directoryService);
-const openAIService = new OpenAIService(directoryService, settingsService);
-const customLLMService = new CustomLLMService(settingsService);
+const openAIService = new OpenAIService(
+  directoryService,
+  settingsService,
+  new OpenAIPromptFormatter()
+);
+const customLLMService = new CustomLLMService(
+  settingsService,
+  new MythoMaxPromptFormatter()
+);
 const fileController = new FileController(lastExceptionService);
 const updateController = new UpdateController(updateService);
 const settingsController = new SettingsController(
@@ -69,7 +78,6 @@ export default function runApi(
 
   expressApp.post('/ai/v2/generate', aiController.sentientSimsGenerate);
   expressApp.post('/ai/translate', aiController.translate);
-  expressApp.post('/ai/generate', aiController.generateChatCompletion);
 
   expressApp.get('/files/last-exception', fileController.getLastExceptionFiles);
   expressApp.delete(

@@ -3,12 +3,23 @@ import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { LLMWorker } from '../models/LLMWorker';
 import { fetchWithTimeout } from '../util/fetchWithTimeout';
+import { PromptRequest } from '../models/PromptRequest';
+import { MythoMaxPromptFormatter } from '../formatter/MythoMaxPromptFormatter';
+import { GenerationService } from './GenerationService';
+import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
+import { defaultCustomLLMPrompt } from '../constants';
 
-export class CustomLLMService {
+export class CustomLLMService implements GenerationService {
   private settingsService: SettingsService;
 
-  constructor(settingsService: SettingsService) {
+  private promptFormatter: MythoMaxPromptFormatter;
+
+  constructor(
+    settingsService: SettingsService,
+    promptFormatter: MythoMaxPromptFormatter
+  ) {
     this.settingsService = settingsService;
+    this.promptFormatter = promptFormatter;
   }
 
   customLLMEnabled() {
@@ -19,7 +30,7 @@ export class CustomLLMService {
     return this.settingsService.get(SettingsEnum.CUSTOM_LLM_HOSTNAME) as string;
   }
 
-  async generate(prompt: string) {
+  async generate(prompt: string): Promise<string> {
     const url = `${this.customLLMHostname()}/api/v1/generate`;
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     log.debug(`url: ${url}, auth: ${authHeader}`);
@@ -35,7 +46,24 @@ export class CustomLLMService {
       }),
     });
 
-    return response.json();
+    const result = await response.json();
+
+    return result.results[0].text;
+  }
+
+  async sentientSimsGenerate(
+    promptRequest: PromptRequest
+  ): Promise<SimsGenerateResponse> {
+    promptRequest.max_tokens = undefined;
+    const prompt = this.promptFormatter.formatPrompt(promptRequest);
+    log.debug(`prompt: ${prompt}`);
+
+    const response = await this.generate(prompt);
+    const text = this.promptFormatter.formatOutput(response);
+    return {
+      text,
+      systemPrompt: promptRequest.systemPrompt || defaultCustomLLMPrompt,
+    };
   }
 
   async testHealth() {

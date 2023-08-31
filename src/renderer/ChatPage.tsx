@@ -3,16 +3,13 @@ import CircularProgress from '@mui/material/CircularProgress';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import SendIcon from '@mui/icons-material/Send';
 import { useRef } from 'react';
-import log from 'electron-log';
 import { ChatBoxComponent } from './ChatBoxComponent';
 import useChatGeneration from './hooks/useChatGeneration';
 
 export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   function handleGenerationLoaded() {
-    log.info('called');
     setTimeout(() => {
-      log.info('go');
       messagesEndRef?.current?.scrollIntoView();
     }, 500);
   }

@@ -82,7 +82,7 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
           id: generateUUID(),
           message: {
             role: 'system',
-            content: result.prompt.systemPrompt || defaultCustomLLMPrompt,
+            content: result.systemPrompt,
           },
         });
         updatedMessages.push({

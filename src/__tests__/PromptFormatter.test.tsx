@@ -1,7 +1,6 @@
 import '@testing-library/jest-dom';
 import { MythoMaxPromptFormatter } from 'main/sentient-sims/formatter/MythoMaxPromptFormatter';
 import { OpenAIPromptFormatter } from 'main/sentient-sims/formatter/OpenAIPromptFormatter';
-import { createPromptFormatter } from 'main/sentient-sims/formatter/PromptFormatterFactory';
 
 describe('MythoMax Prompt Formatter', () => {
   it('should trim output user and assistant tokens', () => {
@@ -106,17 +105,5 @@ describe('OpenAI Prompt Formatter', () => {
     expect(formatter.formatActions('pre action')).toEqual(`pre action`);
     expect(formatter.formatActions(undefined, 'action ')).toEqual(`action`);
     expect(formatter.formatActions('pre', 'action')).toEqual(`pre action`);
-  });
-});
-
-describe('PromptFormatterFactory', () => {
-  it('gives correct prompt formatter', () => {
-    expect(createPromptFormatter(true) instanceof MythoMaxPromptFormatter).toBe(
-      true
-    );
-
-    expect(createPromptFormatter(false) instanceof OpenAIPromptFormatter).toBe(
-      true
-    );
   });
 });
