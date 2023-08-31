@@ -3,7 +3,6 @@ import { Request, Response } from 'express';
 import log from 'electron-log';
 import electron from 'electron';
 import { OpenAIService } from '../services/OpenAIService';
-import { defaultSystemPrompt } from '../constants';
 import { PromptRequest } from '../models/PromptRequest';
 import { CustomLLMService } from '../services/CustomLLMService';
 import { createPromptFormatter } from '../formatter/PromptFormatterFactory';
