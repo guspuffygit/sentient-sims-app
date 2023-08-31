@@ -2,7 +2,6 @@
 /* eslint-disable promise/always-return */
 import * as fs from 'fs';
 import log from 'electron-log';
-import { encode } from '@nem035/gpt-3-encoder';
 import OpenAI from 'openai';
 import { CompletionCreateParamsNonStreaming } from 'openai/src/resources/chat/completions';
 import { DirectoryService } from './DirectoryService';
@@ -208,9 +207,5 @@ export class OpenAIService {
     });
 
     return response.data[0].embedding;
-  }
-
-  static countTokens(text: string) {
-    return { count: encode(text).length };
   }
 }

@@ -37,7 +37,6 @@ export class AIController {
     this.openAIService = openAIService;
     this.customLLMService = customLLMService;
 
-    this.generate = this.generate.bind(this);
     this.sentientSimsGenerate = this.sentientSimsGenerate.bind(this);
     this.generateChatCompletion = this.generateChatCompletion.bind(this);
     this.translate = this.translate.bind(this);
@@ -89,24 +88,6 @@ export class AIController {
       }
       sendChatGeneration(promptRequest, output, error);
     }
-  }
-
-  async generate(req: Request, res: Response) {
-    const { body } = req;
-    const { prompt, model, systemPrompt } = body;
-    const maxLength = body.max_length;
-
-    const response = await this.openAIService.generate(
-      prompt,
-      model,
-      systemPrompt || defaultSystemPrompt,
-      maxLength
-    );
-    res.json(response);
-  }
-
-  static countTokens(req: Request, res: Response) {
-    res.json(OpenAIService.countTokens(req.body.prompt));
   }
 
   async generateChatCompletion(req: Request, res: Response) {

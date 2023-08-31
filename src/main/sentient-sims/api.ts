@@ -58,11 +58,6 @@ export default function runApi(
   expressApp.use(express.json());
   const port = 25148;
 
-  // TODO: Deprecated
-  expressApp.get('/health', DebugController.healthCheck);
-  expressApp.post('/api/v1/count', AIController.countTokens);
-  expressApp.post('/api/v1/generate', aiController.generate);
-
   expressApp.get('/debug/health', DebugController.healthCheck);
   expressApp.get('/debug/test-open-ai', debugController.testOpenAI);
   expressApp.get('/debug/test-custom-llm', debugController.testCustomLLM);
