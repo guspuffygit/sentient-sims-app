@@ -41,6 +41,7 @@ export class AIController {
     this.customLLMService = customLLMService;
 
     this.sentientSimsGenerate = this.sentientSimsGenerate.bind(this);
+    this.sentientSimsWants = this.sentientSimsWants.bind(this);
     this.translate = this.translate.bind(this);
   }
 
@@ -57,6 +58,30 @@ export class AIController {
 
     try {
       const response = await service.sentientSimsGenerate(promptRequest);
+      log.debug(response);
+      res.json({ text: response.text });
+      sendChatGeneration(promptRequest, response);
+    } catch (err: any) {
+      log.error(logMessage, err);
+      res.json({
+        error: err?.message,
+      });
+    }
+  }
+
+  async sentientSimsWants(req: Request, res: Response) {
+    const promptRequest: PromptRequest = req.body;
+    const customLLMEnabled = this.customLLMService.customLLMEnabled();
+
+    const service: GenerationService = customLLMEnabled
+      ? this.customLLMService
+      : this.openAIService;
+    const logMessage = customLLMEnabled
+      ? 'Error getting customllm response'
+      : 'Error getting response';
+
+    try {
+      const response = await service.sentientSimsWants(promptRequest);
       log.debug(response);
       res.json({ text: response.text });
       sendChatGeneration(promptRequest, response);

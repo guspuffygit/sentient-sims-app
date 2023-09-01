@@ -1,12 +1,14 @@
 /* eslint-disable camelcase */
 /* eslint-disable class-methods-use-this */
 import { encode as gpt3Encoder } from '@nem035/gpt-3-encoder';
-import { PromptFormatter } from './PromptFormatter';
 import { SentientMemory } from '../models/SentientMemory';
 import { PromptRequest } from '../models/PromptRequest';
 import { defaultSystemPrompt } from '../constants';
+import { removeLastParagraph, trimIncompleteSentence } from './PromptFormatter';
 
-export class OpenAIPromptFormatter implements PromptFormatter {
+export class OpenAIPromptFormatter {
+  private readonly maxTokens = 3950;
+
   encode(prompt: string): number[] {
     return gpt3Encoder(prompt);
   }
@@ -38,7 +40,9 @@ export class OpenAIPromptFormatter implements PromptFormatter {
   }
 
   formatOutput(text: string): string {
-    return text;
+    let output = trimIncompleteSentence(text);
+    output = removeLastParagraph(output);
+    return output.trim();
   }
 
   formatActions(preAction?: string, action?: string) {
@@ -59,7 +63,6 @@ export class OpenAIPromptFormatter implements PromptFormatter {
   }
 
   formatPrompt({
-    max_tokens = 3950,
     memories,
     participants,
     location,
@@ -85,7 +88,7 @@ export class OpenAIPromptFormatter implements PromptFormatter {
     // eslint-disable-next-line no-plusplus
     for (let i = memories.length - 1; i >= 0; i--) {
       const memory = memories[i];
-      if (memoryTokenCount + prePromptTokenCount > max_tokens) {
+      if (memoryTokenCount + prePromptTokenCount > this.maxTokens) {
         break;
       }
 
@@ -106,7 +109,7 @@ export class OpenAIPromptFormatter implements PromptFormatter {
     );
 
     let tokenCount = this.encode(systemPrompt + prompt).length;
-    while (tokenCount > max_tokens) {
+    while (tokenCount > this.maxTokens) {
       memoriesToInsert.shift();
       prompt = this.combineFormattedPrompt(
         systemPrompt,

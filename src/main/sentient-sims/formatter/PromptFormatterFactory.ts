@@ -1,10 +1,9 @@
 import { MythoMaxPromptFormatter } from './MythoMaxPromptFormatter';
 import { OpenAIPromptFormatter } from './OpenAIPromptFormatter';
-import { PromptFormatter } from './PromptFormatter';
 
 export function createPromptFormatter(
   customLLMEnabled: boolean
-): PromptFormatter {
+): OpenAIPromptFormatter | MythoMaxPromptFormatter {
   if (customLLMEnabled) {
     return new MythoMaxPromptFormatter();
   }

@@ -5,4 +5,7 @@ export interface GenerationService {
   sentientSimsGenerate(
     promptRequest: PromptRequest
   ): Promise<SimsGenerateResponse>;
+  sentientSimsWants(
+    promptRequest: PromptRequest
+  ): Promise<SimsGenerateResponse>;
 }

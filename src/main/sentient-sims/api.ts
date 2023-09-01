@@ -78,6 +78,7 @@ export default function runApi(
 
   expressApp.post('/ai/v2/generate', aiController.sentientSimsGenerate);
   expressApp.post('/ai/translate', aiController.translate);
+  expressApp.post('/ai/wants', aiController.sentientSimsWants);
 
   expressApp.get('/files/last-exception', fileController.getLastExceptionFiles);
   expressApp.delete(

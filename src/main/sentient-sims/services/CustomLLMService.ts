@@ -54,7 +54,6 @@ export class CustomLLMService implements GenerationService {
   async sentientSimsGenerate(
     promptRequest: PromptRequest
   ): Promise<SimsGenerateResponse> {
-    promptRequest.max_tokens = undefined;
     const prompt = this.promptFormatter.formatPrompt(promptRequest);
     log.debug(`prompt: ${prompt}`);
 
@@ -102,5 +101,28 @@ export class CustomLLMService implements GenerationService {
       log.error(`Unabled to get workers from custom llm`, e);
       return [];
     }
+  }
+
+  async sentientSimsWants(
+    promptRequest: PromptRequest
+  ): Promise<SimsGenerateResponse> {
+    const wantsQuestion =
+      'If you were the character in the story, what would you want to do?';
+    promptRequest.systemPrompt = wantsQuestion;
+    promptRequest.action = wantsQuestion;
+    promptRequest.preResponse = 'I want to ';
+    const prompt = this.promptFormatter.formatPrompt(promptRequest);
+
+    log.debug(`prompt: ${prompt}`);
+
+    const response = await this.generate(prompt);
+    const text = this.promptFormatter.formatWantsOutput(
+      promptRequest.preResponse,
+      response
+    );
+    return {
+      text,
+      systemPrompt: wantsQuestion,
+    };
   }
 }

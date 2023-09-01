@@ -1,21 +1,3 @@
-import { SentientMemory } from '../models/SentientMemory';
-import { PromptRequest } from '../models/PromptRequest';
-
-export interface PromptFormatter {
-  formatMemory(memory: SentientMemory): string | undefined;
-  encode(prompt: string): number[];
-  combineFormattedPrompt(
-    systemPrompt: string,
-    participants: string,
-    location: string,
-    memoriesToInsert: string[],
-    actions?: string
-  ): string;
-  formatPrompt(promptRequest: PromptRequest): string;
-  formatOutput(text: string): string;
-  formatActions(preAction?: string, action?: string): string | undefined;
-}
-
 export function removeLastParagraph(text: string): string {
   const paragraphs = text.split('\n');
 

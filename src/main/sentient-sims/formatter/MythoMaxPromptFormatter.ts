@@ -1,12 +1,15 @@
 /* eslint-disable camelcase */
 /* eslint-disable class-methods-use-this */
-import { PromptFormatter } from './PromptFormatter';
 import { SentientMemory } from '../models/SentientMemory';
 import { PromptRequest } from '../models/PromptRequest';
 import { llamaTokenizer } from '../llama/LLamaTokenizer';
 import { defaultCustomLLMPrompt } from '../constants';
+import { filterNullAndUndefined } from '../util/filter';
+import { removeLastParagraph, trimIncompleteSentence } from './PromptFormatter';
 
-export class MythoMaxPromptFormatter implements PromptFormatter {
+export class MythoMaxPromptFormatter {
+  private readonly maxTokens = 3950;
+
   public readonly userToken = '### Instruction:';
 
   public readonly assistantToken = '### Response:';
@@ -20,9 +23,10 @@ export class MythoMaxPromptFormatter implements PromptFormatter {
     participants: string,
     location: string,
     memoriesToInsert: string[],
-    actions?: string
+    actions?: string,
+    preResponse?: string
   ): string {
-    return [
+    return filterNullAndUndefined([
       systemPrompt,
       participants,
       '',
@@ -33,7 +37,8 @@ export class MythoMaxPromptFormatter implements PromptFormatter {
       actions,
       '',
       this.assistantToken,
-    ].join('\n');
+      preResponse,
+    ]).join('\n');
   }
 
   formatMemory(memory: SentientMemory) {
@@ -53,7 +58,18 @@ export class MythoMaxPromptFormatter implements PromptFormatter {
   formatOutput(text: string): string {
     let output = text.split(this.userToken, 1)[0].trim();
     output = output.split(this.assistantToken, 1)[0].trim();
-    return output;
+    output = trimIncompleteSentence(output);
+    output = removeLastParagraph(output);
+    return output.trim();
+  }
+
+  formatWantsOutput(preResponse: string, text: string): string {
+    let output = this.formatOutput(text);
+    if (output.includes('I would')) {
+      output = output.split('I would', 2)[1].trim();
+    }
+
+    return [preResponse.trim(), output].join(' ');
   }
 
   formatActions(preAction?: string, action?: string) {
@@ -74,12 +90,12 @@ export class MythoMaxPromptFormatter implements PromptFormatter {
   }
 
   formatPrompt({
-    max_tokens = 3700,
     memories,
     participants,
     location,
     pre_action,
     action,
+    preResponse,
     systemPrompt = defaultCustomLLMPrompt,
   }: PromptRequest) {
     const actions = this.formatActions(pre_action, action);
@@ -90,7 +106,8 @@ export class MythoMaxPromptFormatter implements PromptFormatter {
         participants,
         location,
         [],
-        actions
+        actions,
+        preResponse
       )
     ).length;
 
@@ -99,7 +116,7 @@ export class MythoMaxPromptFormatter implements PromptFormatter {
     // eslint-disable-next-line no-plusplus
     for (let i = memories.length - 1; i >= 0; i--) {
       const memory = memories[i];
-      if (memoryTokenCount + prePromptTokenCount > max_tokens) {
+      if (memoryTokenCount + prePromptTokenCount > this.maxTokens) {
         break;
       }
 
@@ -116,18 +133,20 @@ export class MythoMaxPromptFormatter implements PromptFormatter {
       participants,
       location,
       memoriesToInsert,
-      actions
+      actions,
+      preResponse
     );
 
     let tokenCount = this.encode(prompt).length;
-    while (tokenCount > max_tokens) {
+    while (tokenCount > this.maxTokens) {
       memoriesToInsert.shift();
       prompt = this.combineFormattedPrompt(
         systemPrompt,
         participants,
         location,
         memoriesToInsert,
-        actions
+        actions,
+        preResponse
       );
       tokenCount = this.encode(prompt).length;
     }

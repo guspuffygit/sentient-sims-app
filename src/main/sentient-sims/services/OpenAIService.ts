@@ -178,7 +178,7 @@ export class OpenAIService implements GenerationService {
   getOutputFromGeneration(generation: ChatCompletion) {
     const output = generation.choices[0].message.content;
     if (output) {
-      return output;
+      return output.trim();
     }
 
     throw new Error(`Output wasnt truthy ${output}`);
@@ -214,5 +214,42 @@ export class OpenAIService implements GenerationService {
     });
 
     return response.data[0].embedding;
+  }
+
+  async sentientSimsWants(
+    promptRequest: PromptRequest
+  ): Promise<SimsGenerateResponse> {
+    const prompt = this.promptFormatter.formatPrompt(promptRequest);
+    const systemPrompt =
+      'If you were the character in the story, what would you want to do?';
+    promptRequest.systemPrompt = systemPrompt;
+    promptRequest.preResponse = 'I want to';
+    const request: CompletionCreateParamsNonStreaming = {
+      stream: false,
+      model: promptRequest.model || this.getOpenAIModel(),
+      max_tokens: 90,
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+        {
+          role: 'assistant',
+          content: promptRequest.preResponse,
+        },
+      ],
+    };
+    const chatCompletion = await this.generateChatCompletion(request);
+    const response = this.getOutputFromGeneration(chatCompletion);
+    const output = this.promptFormatter.formatOutput(response);
+    const text = [promptRequest.preResponse, output].join(' ');
+    return {
+      text,
+      systemPrompt,
+    };
   }
 }
