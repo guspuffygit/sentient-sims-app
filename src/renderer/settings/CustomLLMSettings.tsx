@@ -1,13 +1,10 @@
 import {
   Box,
   FormHelperText,
-  IconButton,
   MenuItem,
   Select,
   TextField,
-  Tooltip,
 } from '@mui/material';
-import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import React from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { useAuthenticator } from '@aws-amplify/ui-react';
