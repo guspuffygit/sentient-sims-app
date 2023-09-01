@@ -4,17 +4,26 @@ import { useState } from 'react';
 import AppCard from './AppCard';
 import { useCustomLLMHealth, useCustomLLMWorkers } from './hooks/useCustomLLM';
 import CustomLLMWorkersModal from './CustomLLMWorkersModal';
+import useSetting from './hooks/useSetting';
+import { SettingsEnum } from '../main/sentient-sims/models/SettingsEnum';
+import { sentientSimsAIHost } from '../main/sentient-sims/constants';
 
 export default function CustomLLMComponent() {
+  const customLLMHostname = useSetting(SettingsEnum.CUSTOM_LLM_HOSTNAME, false);
   const { customLLMStatus, testCustomLLM } = useCustomLLMHealth();
   const { workers, workersLoading, getCustomLLMWorkers } =
     useCustomLLMWorkers();
   const [open, setOpen] = useState(false);
 
+  let label = 'Sentient Sims AI';
+  if (customLLMHostname.value !== sentientSimsAIHost) {
+    label = 'Custom Remote/Local LLM';
+  }
+
   return (
     <AppCard>
       <Typography sx={{ marginBottom: 3 }}>
-        Custom LLM Status: {customLLMStatus.status}
+        {label} Status: {customLLMStatus.status}
       </Typography>
       <div
         style={{

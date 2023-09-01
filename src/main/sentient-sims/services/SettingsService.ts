@@ -5,6 +5,9 @@ import { SettingsEnum } from '../models/SettingsEnum';
 
 export class SettingsService {
   private store = new Store({
+    beforeEachMigration: (store, context) => {
+      log.info(`Migrate from ${context.fromVersion} → ${context.toVersion}`);
+    },
     schema: {
       [SettingsEnum.MOD_RELEASE.toString()]: {
         type: 'string',

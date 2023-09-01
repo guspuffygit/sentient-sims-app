@@ -1,8 +1,9 @@
 import {
   Box,
-  Checkbox,
-  FormControlLabel,
+  FormHelperText,
   IconButton,
+  MenuItem,
+  Select,
   TextField,
   Tooltip,
 } from '@mui/material';
@@ -10,8 +11,27 @@ import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import React from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { useAuthenticator } from '@aws-amplify/ui-react';
+import { SelectChangeEvent } from '@mui/material/Select/SelectInput';
 import useSetting from '../hooks/useSetting';
 import PatreonUser from '../wrappers/PatreonUser';
+import { sentientSimsAIHost } from '../../main/sentient-sims/constants';
+
+enum ApiType {
+  OpenAI = 'openai',
+  SentientSimsAI = 'sentientsimsai',
+  CustomAI = 'customai',
+}
+
+function getAIHelperText(apiType: ApiType) {
+  if (apiType === ApiType.OpenAI) {
+    return 'OpenAI AI using the same API as ChatGPT and your personal API key.';
+  }
+  if (apiType === ApiType.SentientSimsAI) {
+    return 'Sentient Sims uncensored AI hosted on the Sentient Sims servers.';
+  }
+
+  return 'Custom Local or remote AI running on your own PC';
+}
 
 export default function CustomLLMSettingsComponent() {
   const { user } = useAuthenticator((context) => [context.user]);
@@ -19,24 +39,75 @@ export default function CustomLLMSettingsComponent() {
   const customLLMEnabled = useSetting(SettingsEnum.CUSTOM_LLM_ENABLED, false);
   const customLLMHostname = useSetting(SettingsEnum.CUSTOM_LLM_HOSTNAME);
 
+  const handleChangeReleaseType = async (
+    event: SelectChangeEvent
+  ): Promise<void> => {
+    const newType = event.target.value;
+    if (newType === ApiType.OpenAI) {
+      await customLLMEnabled.setSetting(false);
+    } else if (newType === ApiType.SentientSimsAI) {
+      await customLLMHostname.resetSetting();
+      await customLLMEnabled.setSetting(true);
+    } else {
+      await customLLMEnabled.setSetting(true);
+      if (customLLMHostname.value === sentientSimsAIHost) {
+        await customLLMHostname.setSetting('');
+      }
+    }
+  };
+
+  let dropdownValue: ApiType = ApiType.OpenAI;
+  if (customLLMEnabled.value) {
+    if (customLLMHostname.value === sentientSimsAIHost) {
+      dropdownValue = ApiType.SentientSimsAI;
+    } else {
+      dropdownValue = ApiType.CustomAI;
+    }
+  }
+
+  const sentientSimsAISelected =
+    customLLMEnabled.value && customLLMHostname.value === sentientSimsAIHost;
+
+  const showLogInError = !user && sentientSimsAISelected;
+
+  const showMemberError = !patreonUser.isMember() && sentientSimsAISelected;
+
   return (
     <div>
-      {(user && patreonUser.isMember()) || customLLMEnabled.value ? (
-        <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
-          <FormControlLabel
-            label="Enable Custom LLM"
-            control={
-              <Checkbox
-                checked={customLLMEnabled.value}
-                onChange={(change) =>
-                  customLLMEnabled.setSetting(change.target.checked)
-                }
-              />
-            }
-          />
-        </Box>
+      {showLogInError ? (
+        <FormHelperText sx={{ mb: 1 }} error>
+          You must be logged in to use the Sentient Sims AI API
+        </FormHelperText>
       ) : null}
-      {customLLMEnabled.value ? (
+      {showMemberError ? (
+        <FormHelperText sx={{ mb: 1 }} error>
+          You must be a Founder or Patron to use the Sentient Sims Uncensored AI
+        </FormHelperText>
+      ) : null}
+      {patreonUser ? null : (
+        <FormHelperText sx={{ mb: 1 }} error>
+          You must be logged in to use the Sentient Sims AI API
+        </FormHelperText>
+      )}
+      <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+        <Select
+          size="small"
+          labelId="release-type-select-label"
+          id="release-type-select"
+          value={dropdownValue}
+          sx={{ minWidth: 100, marginRight: 2 }}
+          onChange={handleChangeReleaseType}
+        >
+          <MenuItem value={ApiType.OpenAI}>OpenAI</MenuItem>
+          <MenuItem value={ApiType.SentientSimsAI}>
+            Sentient Sims Uncensored AI (Founder/Patreon)
+          </MenuItem>
+          <MenuItem value={ApiType.CustomAI}>Custom Remote/Local AI</MenuItem>
+        </Select>
+        <FormHelperText>{getAIHelperText(dropdownValue)}</FormHelperText>
+      </Box>
+      {customLLMEnabled.value &&
+      customLLMHostname.value !== sentientSimsAIHost ? (
         <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
           <TextField
             focused
@@ -51,11 +122,6 @@ export default function CustomLLMSettingsComponent() {
             }
             sx={{ marginRight: 2 }}
           />
-          <Tooltip title="Reset to Default">
-            <IconButton onClick={() => customLLMHostname.resetSetting()}>
-              <RotateLeftIcon />
-            </IconButton>
-          </Tooltip>
         </Box>
       ) : null}
     </div>

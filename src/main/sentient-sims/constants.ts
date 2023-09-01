@@ -24,3 +24,5 @@ export const defaultCustomLLMPrompt = [
   'without predicting the future or giving a lesson',
   'ending each part on a cliffhanger, using these character descriptions:',
 ].join(', ');
+
+export const sentientSimsAIHost = 'https://ai.sentientsimulations.com';
