@@ -14,6 +14,7 @@ import React from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import AppCard from '../AppCard';
 import CustomLLMSettingsComponent from './CustomLLMSettings';
+import LocalizationSettingsComponent from './LocalizationSettingsComponent';
 
 export default function OpenAISettingsComponent() {
   const modsDirectory = useSetting(SettingsEnum.MODS_DIRECTORY);
@@ -60,6 +61,7 @@ export default function OpenAISettingsComponent() {
         </Tooltip>
       </Box>
       <CustomLLMSettingsComponent />
+      <LocalizationSettingsComponent />
     </AppCard>
   );
 }

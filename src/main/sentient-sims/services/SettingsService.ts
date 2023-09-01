@@ -43,6 +43,14 @@ export class SettingsService {
         type: 'string',
         default: '',
       },
+      [SettingsEnum.LOCALIZATION_ENABLED.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
+      [SettingsEnum.LOCALIZATION_LANGUAGE.toString()]: {
+        type: 'string',
+        default: '',
+      },
     },
   });
 

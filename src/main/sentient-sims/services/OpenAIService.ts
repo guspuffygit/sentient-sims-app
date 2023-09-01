@@ -168,7 +168,15 @@ export class OpenAIService implements GenerationService {
       ],
     };
     const result = await this.generateChatCompletion(request);
-    const text = this.getOutputFromGeneration(result);
+    let text = this.getOutputFromGeneration(result);
+
+    if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED)) {
+      text = await this.translate(
+        text,
+        this.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE) as string
+      );
+    }
+
     return {
       text,
       systemPrompt,
@@ -246,7 +254,15 @@ export class OpenAIService implements GenerationService {
     const chatCompletion = await this.generateChatCompletion(request);
     const response = this.getOutputFromGeneration(chatCompletion);
     const output = this.promptFormatter.formatOutput(response);
-    const text = [promptRequest.preResponse, output].join(' ');
+    let text = [promptRequest.preResponse, output].join(' ');
+
+    if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED)) {
+      text = await this.translate(
+        text,
+        this.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE) as string
+      );
+    }
+
     return {
       text,
       systemPrompt,

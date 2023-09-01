@@ -6,4 +6,6 @@ export enum SettingsEnum {
   CUSTOM_LLM_HOSTNAME = 'customLLMHostname',
   ACCESS_TOKEN = 'accessToken',
   OPENAI_KEY = 'openaiKey',
+  LOCALIZATION_ENABLED = 'localizationEnabled',
+  LOCALIZATION_LANGUAGE = 'localizationLanguage',
 }
