@@ -8,6 +8,7 @@ import { CustomLLMService } from '../services/CustomLLMService';
 import { GenerationService } from '../services/GenerationService';
 import { GenerationResult } from '../formatter/GenerationResult';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
+import { sendPopUpNotification } from '../util/popupNotification';
 
 function sendChatGeneration(
   promptRequest: PromptRequest,
@@ -66,6 +67,7 @@ export class AIController {
       res.json({
         error: err?.message,
       });
+      sendPopUpNotification(err?.message);
     }
   }
 
@@ -90,6 +92,7 @@ export class AIController {
       res.json({
         error: err?.message,
       });
+      sendPopUpNotification(err?.message);
     }
   }
 
@@ -105,6 +108,7 @@ export class AIController {
       res.json({
         error: err?.message,
       });
+      sendPopUpNotification(err?.message);
     }
   }
 }

@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
 import { UpdateService } from '../services/UpdateService';
+import { sendPopUpNotification } from '../util/popupNotification';
 
 export class UpdateController {
   private updateService: UpdateService;
@@ -26,6 +27,7 @@ export class UpdateController {
         },
       };
       log.error(`Error updating: ${response}`);
+      sendPopUpNotification(err?.message);
       res.status(500).json(response);
     }
   }

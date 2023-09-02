@@ -15,6 +15,7 @@ import { PromptRequest } from '../models/PromptRequest';
 import { OpenAIPromptFormatter } from '../formatter/OpenAIPromptFormatter';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
+import { sendPopUpNotification } from '../util/popupNotification';
 
 export class OpenAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -75,7 +76,9 @@ export class OpenAIService implements GenerationService {
       }
     }
 
-    throw new OpenAIKeyNotSetError('No OpenAI Key set!');
+    throw new OpenAIKeyNotSetError(
+      'No OpenAI Key set, Edit OpenAI Key to set it'
+    );
   }
 
   createOpenAIClient() {
@@ -117,17 +120,14 @@ export class OpenAIService implements GenerationService {
 
     try {
       const response = await client.chat.completions.create(request);
-      const { message } = response.choices[0];
-      if (message) {
-        return {
-          status: message.content?.trim(),
-        };
-      }
+      const text = this.getOutputFromGeneration(response);
       return {
-        status: 'not working, no message',
+        status: text,
       };
     } catch (error: any) {
       log.error('Error testing OpenAI API:', error);
+
+      sendPopUpNotification(error?.message);
 
       return {
         status: 'not working, send logs to debug',

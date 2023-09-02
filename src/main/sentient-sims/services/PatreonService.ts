@@ -2,6 +2,7 @@
 import log from 'electron-log';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
+import { sendPopUpNotification } from '../util/popupNotification';
 
 export class NotLoggedInError extends Error {
   constructor(message: string) {
@@ -37,6 +38,7 @@ export class PatreonService {
         }
       } catch (err: any) {
         log.error(`Patreon redirect failed`, err);
+        sendPopUpNotification(err?.message);
         throw err;
       }
     }

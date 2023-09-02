@@ -8,6 +8,7 @@ import { MythoMaxPromptFormatter } from '../formatter/MythoMaxPromptFormatter';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { defaultCustomLLMPrompt } from '../constants';
+import { sendPopUpNotification } from '../util/popupNotification';
 
 export class CustomLLMService implements GenerationService {
   private settingsService: SettingsService;
@@ -79,6 +80,7 @@ export class CustomLLMService implements GenerationService {
       return await response.text();
     } catch (e: any) {
       log.error('Error checking custom LLM health', e);
+      sendPopUpNotification(e?.message);
       return 'Custom LLM Not healthy';
     }
   }
@@ -99,6 +101,7 @@ export class CustomLLMService implements GenerationService {
       return result;
     } catch (e: any) {
       log.error(`Unabled to get workers from custom llm`, e);
+      sendPopUpNotification(e?.message);
       return [];
     }
   }
