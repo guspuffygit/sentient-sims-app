@@ -9,6 +9,7 @@ import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { defaultCustomLLMPrompt } from '../constants';
 import { sendPopUpNotification } from '../util/popupNotification';
+import { fetchWithRetries } from '../util/fetchWithRetries';
 
 export class CustomLLMService implements GenerationService {
   private settingsService: SettingsService;
@@ -35,7 +36,7 @@ export class CustomLLMService implements GenerationService {
     const url = `${this.customLLMHostname()}/api/v1/generate`;
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     log.debug(`url: ${url}, auth: ${authHeader}`);
-    const response = await fetch(url, {
+    const response = await fetchWithRetries(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
