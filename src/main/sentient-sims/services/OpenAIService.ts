@@ -169,6 +169,7 @@ export class OpenAIService implements GenerationService {
     };
     const result = await this.generateChatCompletion(request);
     let text = this.getOutputFromGeneration(result);
+    text = this.promptFormatter.formatOutput(text);
 
     if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED)) {
       text = await this.translate(

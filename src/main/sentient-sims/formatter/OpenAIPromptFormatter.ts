@@ -40,8 +40,8 @@ export class OpenAIPromptFormatter {
   }
 
   formatOutput(text: string): string {
-    let output = trimIncompleteSentence(text);
-    output = removeLastParagraph(output);
+    let output = removeLastParagraph(text);
+    output = trimIncompleteSentence(text);
     return output.trim();
   }
 
