@@ -10,12 +10,17 @@ import {
 import { DirectoryService } from './DirectoryService';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
-import { defaultSystemPrompt } from '../constants';
+import {
+  defaultOriginalSystemPrompt,
+  defaultSystemPrompt,
+  defaultWantsPrompt,
+} from '../constants';
 import { PromptRequest } from '../models/PromptRequest';
 import { OpenAIPromptFormatter } from '../formatter/OpenAIPromptFormatter';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { sendPopUpNotification } from '../util/popupNotification';
+import { formatWantsOutput } from '../formatter/PromptFormatter';
 
 export class OpenAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -150,22 +155,19 @@ export class OpenAIService implements GenerationService {
   async sentientSimsGenerate(
     promptRequest: PromptRequest
   ): Promise<SimsGenerateResponse> {
-    const prompt = this.promptFormatter.formatPrompt(promptRequest);
-    const systemPrompt = promptRequest.systemPrompt || defaultSystemPrompt;
+    const prompt = promptRequest?.pre_action
+      ? this.promptFormatter.formatActionPrompt(promptRequest)
+      : this.promptFormatter.formatPrompt(promptRequest);
+    const defaultPrompt = promptRequest?.pre_action
+      ? defaultSystemPrompt
+      : defaultOriginalSystemPrompt;
     const request: CompletionCreateParamsNonStreaming = {
       stream: false,
       model: promptRequest.model || this.getOpenAIModel(),
       max_tokens: 90,
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+      messages: prompt.map((message) => {
+        return { content: message.content, role: message.role };
+      }),
     };
     const result = await this.generateChatCompletion(request);
     let text = this.getOutputFromGeneration(result);
@@ -180,7 +182,7 @@ export class OpenAIService implements GenerationService {
 
     return {
       text,
-      systemPrompt,
+      systemPrompt: promptRequest.systemPrompt || defaultPrompt,
     };
   }
 
@@ -228,34 +230,21 @@ export class OpenAIService implements GenerationService {
   async sentientSimsWants(
     promptRequest: PromptRequest
   ): Promise<SimsGenerateResponse> {
-    const prompt = this.promptFormatter.formatPrompt(promptRequest);
-    const systemPrompt =
-      'If you were the character in the story, what would you want to do?';
-    promptRequest.systemPrompt = systemPrompt;
+    promptRequest.systemPrompt = defaultWantsPrompt;
     promptRequest.preResponse = 'I want to';
+    const prompt = this.promptFormatter.formatWantsPrompt(promptRequest);
     const request: CompletionCreateParamsNonStreaming = {
       stream: false,
       model: promptRequest.model || this.getOpenAIModel(),
       max_tokens: 90,
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-        {
-          role: 'assistant',
-          content: promptRequest.preResponse,
-        },
-      ],
+      messages: prompt.map((message) => {
+        return { content: message.content, role: message.role };
+      }),
     };
     const chatCompletion = await this.generateChatCompletion(request);
     const response = this.getOutputFromGeneration(chatCompletion);
     const output = this.promptFormatter.formatOutput(response);
-    let text = [promptRequest.preResponse, output].join(' ');
+    let text = formatWantsOutput(promptRequest.preResponse, output);
 
     if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED)) {
       text = await this.translate(
@@ -266,7 +255,7 @@ export class OpenAIService implements GenerationService {
 
     return {
       text,
-      systemPrompt,
+      systemPrompt: defaultWantsPrompt,
     };
   }
 }

@@ -21,3 +21,15 @@ export function trimIncompleteSentence(text: string): string {
 
   return text;
 }
+
+export function formatWantsOutput(preResponse: string, text: string): string {
+  let output = text;
+  if (output.includes('I would')) {
+    output = output.split('I would', 2)[1].trim();
+  }
+  if (output.startsWith(preResponse)) {
+    return output;
+  }
+
+  return [preResponse.trim(), output].join(' ');
+}

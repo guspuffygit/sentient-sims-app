@@ -54,12 +54,12 @@ describe('OpenAIService', () => {
       participants: 'Gus',
       location: 'Square cube',
       memories: [],
-      action: 'Looks around',
+      pre_action: 'Looks around',
     };
     const result = await openAIService.sentientSimsGenerate(promptRequest);
     expect(result.systemPrompt).toEqual(defaultSystemPrompt);
     expect(result.text).toContain('Gus');
-  }, 10000);
+  }, 20000);
 
   it('translation', async () => {
     // No way this test is gonna pass every time
@@ -72,16 +72,16 @@ describe('OpenAIService', () => {
       settingsService,
       new OpenAIPromptFormatter()
     );
+    const systemPrompt = 'Return the text "Alright?"';
     const promptRequest: PromptRequest = {
       participants: '',
       location: '',
       memories: [],
-      systemPrompt: ' ',
-      action: 'Return the text "Alright?"',
+      systemPrompt,
     };
     const result = await openAIService.sentientSimsGenerate(promptRequest);
     console.log(result.text);
-    expect(result.systemPrompt).toEqual(' ');
+    expect(result.systemPrompt).toEqual(systemPrompt);
     expect(result.text.toLocaleLowerCase()).toContain('bien?');
   }, 20000);
 

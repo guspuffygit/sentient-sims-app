@@ -5,7 +5,6 @@ export type PromptRequest = {
   location: string;
   memories: SentientMemory[];
   pre_action?: string;
-  action?: string;
   model?: string;
   systemPrompt?: string;
   preResponse?: string;

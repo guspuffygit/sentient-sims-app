@@ -1,5 +1,11 @@
 // eslint-disable-next-line import/prefer-default-export
 export const defaultSystemPrompt = [
+  'The user will prompt you with an action that you will rewrite in the form of a story in the third person,',
+  "describing scenes clearly, explicitly, in vivid detail based on what's been said before using lots of dialog without predicting the future or giving a lesson.",
+  'Use the following characters, location, and history to help rewrite the user action into story format:',
+].join(' ');
+
+export const defaultOriginalSystemPrompt = [
   'Imagine yourself as an author, spinning a tale set in a realistic fictional world.',
   'Your characters, a diverse ensemble of humans, are defined by unique traits, ambitions, and skills that shape their life paths.',
   'They build relationships, chase careers, manage health, and navigate the unexpected twists and turns of life.',
@@ -17,6 +23,12 @@ export const defaultSystemPrompt = [
   "Now, let's dive into their story.",
 ].join(' ');
 
+export const defaultContinueSystemPrompt = [
+  'Write a story in the third person,',
+  "describing scenes clearly, explicitly, in vivid detail based on what's been said before using lots of dialog without predicting the future or giving a lesson.",
+  'Use the following characters, location, and history to help continue writing the story:',
+].join(' ');
+
 export const defaultCustomLLMPrompt = [
   'Write a story in the third person, describing scenes clearly, explicitly, in vivid detail',
   "based on what's been said before",
@@ -26,3 +38,6 @@ export const defaultCustomLLMPrompt = [
 ].join(', ');
 
 export const sentientSimsAIHost = 'https://ai.sentientsimulations.com';
+
+export const defaultWantsPrompt =
+  'If you were the character in the story, what would you want to do?';

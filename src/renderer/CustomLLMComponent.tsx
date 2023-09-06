@@ -1,12 +1,12 @@
 import { Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { useState } from 'react';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import { sentientSimsAIHost } from 'main/sentient-sims/constants';
 import AppCard from './AppCard';
 import { useCustomLLMHealth, useCustomLLMWorkers } from './hooks/useCustomLLM';
 import CustomLLMWorkersModal from './CustomLLMWorkersModal';
 import useSetting from './hooks/useSetting';
-import { SettingsEnum } from '../main/sentient-sims/models/SettingsEnum';
-import { sentientSimsAIHost } from '../main/sentient-sims/constants';
 
 export default function CustomLLMComponent() {
   const customLLMHostname = useSetting(SettingsEnum.CUSTOM_LLM_HOSTNAME, false);

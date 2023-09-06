@@ -12,12 +12,9 @@ import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { MessageInputProps } from 'main/sentient-sims/models/MessageInputProps';
 import { SentientMemory } from 'main/sentient-sims/models/SentientMemory';
 import { GenerationResult } from 'main/sentient-sims/formatter/GenerationResult';
-import {
-  removeLastParagraph,
-  trimIncompleteSentence,
-} from 'main/sentient-sims/formatter/PromptFormatter';
 import { createPromptFormatter } from 'main/sentient-sims/formatter/PromptFormatterFactory';
 import { PromptRequest } from 'main/sentient-sims/models/PromptRequest';
+import { OpenAIPromptFormatter } from 'main/sentient-sims/formatter/OpenAIPromptFormatter';
 import useSetting from './useSetting';
 
 function defaultMessages(systemPrompt: string): MessageInputProps[] {
@@ -100,12 +97,12 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
           },
         });
         result.prompt.memories.forEach((memory) => {
-          if (memory.action) {
+          if (memory.pre_action) {
             updatedMessages.push({
               id: generateUUID(),
               message: {
                 role: 'user',
-                content: memory.action.trim(),
+                content: memory.pre_action.trim(),
               },
             });
           }
@@ -128,32 +125,21 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
             });
           }
         });
-        const actions: string[] = [];
-
         if (result.prompt.pre_action) {
-          actions.push(result.prompt.pre_action.trim());
-        }
-        if (result.prompt.action) {
-          actions.push(result.prompt.action.trim());
-        }
-        if (actions.length > 0) {
           updatedMessages.push({
             id: generateUUID(),
             message: {
               role: 'user',
-              content: actions.join(' '),
+              content: result.prompt.pre_action.trim(),
             },
           });
         }
-
         if (result.output && result.output.trim() !== '') {
-          let content = removeLastParagraph(result.output.trim());
-          content = trimIncompleteSentence(content.trim());
           updatedMessages.push({
             id: generateUUID(),
             message: {
               role: 'assistant',
-              content: content.trim(),
+              content: result.output.trim(),
             },
           });
         }
@@ -206,10 +192,22 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
   const countTokens = () => {
     const promptRequest: PromptRequest = getPromptRequest();
     const promptFormatter = createPromptFormatter(customLLMEnabled.value);
-    const prompt = promptFormatter.formatPrompt(promptRequest);
-    const { length } = promptFormatter.encode(
-      (customLLMEnabled.value ? '' : promptRequest.systemPrompt) + prompt
-    );
+
+    let length = 0;
+    if (promptFormatter instanceof OpenAIPromptFormatter) {
+      const prompt = promptRequest.pre_action
+        ? promptFormatter.formatActionPrompt(promptRequest)
+        : promptFormatter.formatPrompt(promptRequest);
+      length = prompt.reduce(
+        (accumulator, value) => accumulator + value.tokens,
+        0
+      );
+    } else {
+      const prompt = promptRequest.pre_action
+        ? promptFormatter.formatActionPrompt(promptRequest)
+        : promptFormatter.formatPrompt(promptRequest);
+      length = promptFormatter.encode(prompt).length;
+    }
     setTokenCount(length);
   };
 
