@@ -2,7 +2,7 @@
 export const defaultSystemPrompt = [
   'The user will prompt you with an action that you will rewrite in the form of a story in the third person,',
   "describing scenes clearly, explicitly, in vivid detail based on what's been said before using lots of dialog without predicting the future or giving a lesson.",
-  'Use the following characters, location, and history to help rewrite the user action into story format:',
+  'Use the following characters, and location to help rewrite the user action into story format:',
 ].join(' ');
 
 export const defaultOriginalSystemPrompt = [
@@ -23,18 +23,11 @@ export const defaultOriginalSystemPrompt = [
   "Now, let's dive into their story.",
 ].join(' ');
 
-export const defaultContinueSystemPrompt = [
-  'Write a story in the third person,',
-  "describing scenes clearly, explicitly, in vivid detail based on what's been said before using lots of dialog without predicting the future or giving a lesson.",
-  'Use the following characters, location, and history to help continue writing the story:',
-].join(' ');
-
 export const defaultCustomLLMPrompt = [
-  'Write a story in the third person, describing scenes clearly, explicitly, in vivid detail',
-  "based on what's been said before",
-  'using lots of dialog',
+  'Writing the story in the third person, describing scenes clearly, explicitly, in vivid detail',
+  "based on what's been said before using lots of dialog",
   'without predicting the future or giving a lesson',
-  'ending each part on a cliffhanger, using these character descriptions:',
+  'ending each part on a cliffhanger, using the characters location and history provided:',
 ].join(', ');
 
 export const sentientSimsAIHost = 'https://ai.sentientsimulations.com';

@@ -3,7 +3,7 @@
 import { SentientMemory } from '../models/SentientMemory';
 import { PromptRequest } from '../models/PromptRequest';
 import { llamaTokenizer } from '../llama/LLamaTokenizer';
-import { defaultCustomLLMPrompt, defaultSystemPrompt } from '../constants';
+import { defaultSystemPrompt } from '../constants';
 import { filterNullAndUndefined } from '../util/filter';
 import { removeLastParagraph, trimIncompleteSentence } from './PromptFormatter';
 
@@ -28,17 +28,20 @@ export class MythoMaxPromptFormatter {
   ): string {
     return filterNullAndUndefined([
       systemPrompt,
+      'CHARACTERS:',
       participants,
       '',
+      'LOCATION:',
       location,
       '',
       memoriesToInsert.join('\n'),
       '',
       actions,
       '',
-      this.assistantToken,
       preResponse,
-    ]).join('\n');
+    ])
+      .join('\n')
+      .trim();
   }
 
   formatMemory(memory: SentientMemory) {
@@ -63,21 +66,20 @@ export class MythoMaxPromptFormatter {
     return output.trim();
   }
 
-  formatActions(preAction?: string, action?: string) {
-    const actions: string[] = [];
-
+  formatActions(preAction?: string) {
     if (preAction) {
-      actions.push(preAction.trim());
-    }
-    if (action) {
-      actions.push(action.trim());
-    }
-
-    if (actions.length > 0) {
-      return `${this.userToken}\n${actions.join(' ')}`;
+      return `${this.userToken}\n${preAction.trim()}\n${this.assistantToken}`;
     }
 
     return undefined;
+  }
+
+  formatPreResponse(preResponse?: string) {
+    if (preResponse) {
+      return `${this.assistantToken}\n${preResponse.trim()}`;
+    }
+
+    return `${this.assistantToken}\n`;
   }
 
   formatPrompt({
@@ -86,16 +88,18 @@ export class MythoMaxPromptFormatter {
     location,
     pre_action,
     preResponse,
-    systemPrompt = defaultCustomLLMPrompt,
+    systemPrompt = defaultSystemPrompt,
   }: PromptRequest) {
+    const formattedActions = this.formatActions(pre_action);
+    const formattedPreResponse = this.formatPreResponse(preResponse);
     const prePromptTokenCount = this.encode(
       this.combineFormattedPrompt(
         systemPrompt,
         participants,
         location,
         [],
-        pre_action,
-        preResponse
+        formattedActions,
+        formattedPreResponse
       )
     ).length;
 
@@ -104,15 +108,15 @@ export class MythoMaxPromptFormatter {
     // eslint-disable-next-line no-plusplus
     for (let i = memories.length - 1; i >= 0; i--) {
       const memory = memories[i];
-      if (memoryTokenCount + prePromptTokenCount > this.maxTokens) {
-        break;
-      }
-
       const formattedMemory = this.formatMemory(memory);
       if (formattedMemory) {
+        memoryTokenCount += this.encode(formattedMemory).length;
+
+        if (memoryTokenCount + prePromptTokenCount > this.maxTokens) {
+          break;
+        }
+
         memoriesToInsert.unshift(formattedMemory);
-        const { length } = this.encode(formattedMemory);
-        memoryTokenCount += length;
       }
     }
 
@@ -121,8 +125,8 @@ export class MythoMaxPromptFormatter {
       participants,
       location,
       memoriesToInsert,
-      pre_action,
-      preResponse
+      formattedActions,
+      formattedPreResponse
     );
 
     let tokenCount = this.encode(prompt).length;
@@ -133,8 +137,8 @@ export class MythoMaxPromptFormatter {
         participants,
         location,
         memoriesToInsert,
-        pre_action,
-        preResponse
+        formattedActions,
+        formattedPreResponse
       );
       tokenCount = this.encode(prompt).length;
     }
