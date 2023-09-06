@@ -54,10 +54,14 @@ interface SubscribedPatreonProps {
 }
 
 function SubscribedPatreon({ patreonUser }: SubscribedPatreonProps) {
+  let text = `Thank you for being a ${patreonUser.getSubscriptionLevel()} Patreon subscriber!`;
+  if (patreonUser.isDev()) {
+    text = `Thank you for being a Dev!`;
+  }
+
   return (
     <Typography variant="h5" align="center">
-      Thank you for being a {patreonUser.getSubscriptionLevel()} Patreon
-      subscriber!
+      {text}
     </Typography>
   );
 }
@@ -70,11 +74,11 @@ export default function PatreonComponent() {
   }
   const patreonUser = new PatreonUser(user);
   let content = <PatreonButton url={getPatreonOauthUrl()} />;
-  if (patreonUser.isPatreonLinked()) {
-    if (patreonUser.getSubscriptionLevel() === 'free') {
-      content = <PatreonButton url="https://www.patreon.com/SentientSims" />;
-    } else {
+  if (patreonUser.isPatreonLinked() || patreonUser.isDev()) {
+    if (patreonUser.isDev() || patreonUser.getSubscriptionLevel() !== 'free') {
       content = <SubscribedPatreon patreonUser={patreonUser} />;
+    } else {
+      content = <PatreonButton url="https://www.patreon.com/SentientSims" />;
     }
   }
 
