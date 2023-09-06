@@ -25,13 +25,7 @@ describe('MythoMax Prompt Formatter', () => {
 
     expect(
       formatter.formatMemory({
-        pre_action: 'hello',
-      })
-    ).toBeUndefined();
-
-    expect(
-      formatter.formatMemory({
-        action: `hello\n\n`,
+        pre_action: `hello\n\n`,
         content: `\n hi\n`,
         observation: `obs`,
       })
@@ -44,7 +38,7 @@ describe('MythoMax Prompt Formatter', () => {
         pre_action: '\nhello\n',
         observation: '1029j',
       })
-    ).toEqual(`${formatter.userToken}\n1029j`);
+    ).toEqual(`${formatter.userToken}\nhello\n${formatter.userToken}\n1029j`);
   });
 
   it('format actions', () => {
@@ -74,36 +68,34 @@ describe('OpenAI Prompt Formatter', () => {
   it('format memory', () => {
     const formatter = new OpenAIPromptFormatter();
 
-    expect(formatter.formatMemory({})).toBeUndefined();
+    expect(formatter.formatMemory({})).toEqual([]);
 
     expect(
       formatter.formatMemory({
         pre_action: 'hello',
       })
-    ).toBeUndefined();
+    ).toEqual([{ content: 'hello', role: 'user', tokens: 1 }]);
 
     expect(
       formatter.formatMemory({
-        action: 'hello\n\n',
+        pre_action: 'hello\n\n',
         content: '\nhi\n',
         observation: 'obs',
       })
-    ).toEqual('hello\nhi\nobs');
+    ).toEqual([
+      { content: 'obs', role: 'user', tokens: 1 },
+      { content: 'hi', role: 'assistant', tokens: 1 },
+      { content: 'hello', role: 'user', tokens: 1 },
+    ]);
 
     expect(
       formatter.formatMemory({
         pre_action: '\nhello\n',
         observation: '1029j',
       })
-    ).toEqual('1029j');
-  });
-
-  it('format actions', () => {
-    const formatter = new OpenAIPromptFormatter();
-    expect(formatter.formatActions()).toBeUndefined();
-
-    expect(formatter.formatActions('pre action')).toEqual(`pre action`);
-    expect(formatter.formatActions(undefined, 'action ')).toEqual(`action`);
-    expect(formatter.formatActions('pre', 'action')).toEqual(`pre action`);
+    ).toEqual([
+      { content: '1029j', role: 'user', tokens: 3 },
+      { content: 'hello', role: 'user', tokens: 1 },
+    ]);
   });
 });

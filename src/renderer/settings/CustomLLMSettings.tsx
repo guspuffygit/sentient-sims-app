@@ -9,9 +9,9 @@ import React from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { SelectChangeEvent } from '@mui/material/Select/SelectInput';
+import { sentientSimsAIHost } from 'main/sentient-sims/constants';
 import useSetting from '../hooks/useSetting';
 import PatreonUser from '../wrappers/PatreonUser';
-import { sentientSimsAIHost } from '../../main/sentient-sims/constants';
 
 enum ApiType {
   OpenAI = 'openai',

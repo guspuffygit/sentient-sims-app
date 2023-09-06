@@ -3,7 +3,7 @@
 import { SentientMemory } from '../models/SentientMemory';
 import { PromptRequest } from '../models/PromptRequest';
 import { llamaTokenizer } from '../llama/LLamaTokenizer';
-import { defaultCustomLLMPrompt } from '../constants';
+import { defaultCustomLLMPrompt, defaultSystemPrompt } from '../constants';
 import { filterNullAndUndefined } from '../util/filter';
 import { removeLastParagraph, trimIncompleteSentence } from './PromptFormatter';
 
@@ -43,7 +43,7 @@ export class MythoMaxPromptFormatter {
 
   formatMemory(memory: SentientMemory) {
     const entries = [
-      memory.action && `${this.userToken}\n${memory.action.trim()}`,
+      memory.pre_action && `${this.userToken}\n${memory.pre_action.trim()}`,
       memory.content && `${this.assistantToken}\n${memory.content.trim()}`,
       memory.observation && `${this.userToken}\n${memory.observation.trim()}`,
     ].filter(Boolean);
@@ -61,15 +61,6 @@ export class MythoMaxPromptFormatter {
     output = trimIncompleteSentence(output);
     output = removeLastParagraph(output);
     return output.trim();
-  }
-
-  formatWantsOutput(preResponse: string, text: string): string {
-    let output = this.formatOutput(text);
-    if (output.includes('I would')) {
-      output = output.split('I would', 2)[1].trim();
-    }
-
-    return [preResponse.trim(), output].join(' ');
   }
 
   formatActions(preAction?: string, action?: string) {
@@ -94,19 +85,16 @@ export class MythoMaxPromptFormatter {
     participants,
     location,
     pre_action,
-    action,
     preResponse,
     systemPrompt = defaultCustomLLMPrompt,
   }: PromptRequest) {
-    const actions = this.formatActions(pre_action, action);
-
     const prePromptTokenCount = this.encode(
       this.combineFormattedPrompt(
         systemPrompt,
         participants,
         location,
         [],
-        actions,
+        pre_action,
         preResponse
       )
     ).length;
@@ -133,7 +121,7 @@ export class MythoMaxPromptFormatter {
       participants,
       location,
       memoriesToInsert,
-      actions,
+      pre_action,
       preResponse
     );
 
@@ -145,12 +133,17 @@ export class MythoMaxPromptFormatter {
         participants,
         location,
         memoriesToInsert,
-        actions,
+        pre_action,
         preResponse
       );
       tokenCount = this.encode(prompt).length;
     }
 
     return prompt;
+  }
+
+  formatActionPrompt(promptRequest: PromptRequest) {
+    promptRequest.systemPrompt = defaultSystemPrompt;
+    return this.formatPrompt(promptRequest);
   }
 }
