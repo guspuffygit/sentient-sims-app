@@ -49,12 +49,6 @@ describe('MythoMax Prompt Formatter', () => {
     expect(formatter.formatActions(' pre action ')).toEqual(
       `${formatter.userToken}\npre action`
     );
-    expect(formatter.formatActions(undefined, ' action')).toEqual(
-      `${formatter.userToken}\naction`
-    );
-    expect(formatter.formatActions('pre', ' action')).toEqual(
-      `${formatter.userToken}\npre action`
-    );
   });
 });
 

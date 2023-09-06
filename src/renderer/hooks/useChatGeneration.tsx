@@ -173,7 +173,7 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
     for (let i = 3; i < messages.length; i++) {
       if (messages[i].message.role === 'user') {
         memories.push({
-          action: messages[i].message.content as string,
+          pre_action: messages[i].message.content as string,
         });
       } else {
         memories.push({
