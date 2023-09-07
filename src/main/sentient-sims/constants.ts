@@ -34,3 +34,10 @@ export const sentientSimsAIHost = 'https://ai.sentientsimulations.com';
 
 export const defaultWantsPrompt =
   'If you were the character in the story, what would you want to do?';
+
+// eslint-disable-next-line import/prefer-default-export
+// export const defaultSystemPrompt = [
+//   'You shall rewrite the user action prompt in the form of a story in the third person.',
+//   'Responses must be detailed, creative, immersive, and drive the scenario forward using lots of dialog without predicting the future using',
+//   'the following characters, and location to help rewrite the user action into story format:',
+// ].join(' ');
