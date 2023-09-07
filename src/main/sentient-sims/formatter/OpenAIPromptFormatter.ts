@@ -53,13 +53,13 @@ export class OpenAIPromptFormatter {
 
   formatMemory(memory: SentientMemory): OpenAIMessage[] {
     const messages: OpenAIMessage[] = [];
-    if (memory.observation && memory.observation.trim()) {
-      messages.push({
-        content: memory.observation.trim(),
-        tokens: this.countTokens(memory.observation.trim()),
-        role: 'user',
-      });
-    }
+    // if (memory.observation && memory.observation.trim()) {
+    //   messages.push({
+    //     content: memory.observation.trim(),
+    //     tokens: this.countTokens(memory.observation.trim()),
+    //     role: 'user',
+    //   });
+    // }
 
     if (memory.content && memory.content.trim()) {
       messages.push({
@@ -84,7 +84,7 @@ export class OpenAIPromptFormatter {
     const entries = [
       memory.pre_action && memory.pre_action.trim(),
       memory.content && memory.content.trim(),
-      memory.observation && memory.observation.trim(),
+      // memory.observation && memory.observation.trim(),
     ].filter(Boolean);
 
     if (entries.length > 0) {
