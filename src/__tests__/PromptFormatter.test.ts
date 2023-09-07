@@ -21,7 +21,7 @@ describe('MythoMax Prompt Formatter', () => {
   it('format memory', () => {
     const formatter = new MythoMaxPromptFormatter();
 
-    expect(formatter.formatMemory({})).toBeUndefined();
+    expect(formatter.formatMemory({})).toEqual([]);
 
     expect(
       formatter.formatMemory({
@@ -29,25 +29,30 @@ describe('MythoMax Prompt Formatter', () => {
         content: `\n hi\n`,
         observation: `obs`,
       })
-    ).toEqual(
-      `${formatter.userToken}\nhello\n${formatter.assistantToken}\nhi\n${formatter.userToken}\nobs`
-    );
+    ).toEqual([
+      `${formatter.userToken}\nobs`,
+      `${formatter.assistantToken}\nhi`,
+      `${formatter.userToken}\nhello`,
+    ]);
 
     expect(
       formatter.formatMemory({
         pre_action: '\nhello\n',
         observation: '1029j',
       })
-    ).toEqual(`${formatter.userToken}\nhello\n${formatter.userToken}\n1029j`);
+    ).toEqual([
+      `${formatter.userToken}\n1029j`,
+      `${formatter.userToken}\nhello`,
+    ]);
   });
 
   it('format actions', () => {
     const formatter = new MythoMaxPromptFormatter();
 
-    expect(formatter.formatActions()).toBeUndefined();
+    expect(formatter.formatActions()).toEqual('### Response:\n');
 
     expect(formatter.formatActions(' pre action ')).toEqual(
-      `${formatter.userToken}\npre action`
+      `${formatter.userToken}\npre action\n${formatter.assistantToken}`
     );
   });
 });
@@ -68,7 +73,7 @@ describe('OpenAI Prompt Formatter', () => {
       formatter.formatMemory({
         pre_action: 'hello',
       })
-    ).toEqual([{ content: 'hello', role: 'user', tokens: 1 }]);
+    ).toEqual([{ content: 'hello', role: 'user', tokens: 5 }]);
 
     expect(
       formatter.formatMemory({
@@ -77,9 +82,9 @@ describe('OpenAI Prompt Formatter', () => {
         observation: 'obs',
       })
     ).toEqual([
-      { content: 'obs', role: 'user', tokens: 1 },
-      { content: 'hi', role: 'assistant', tokens: 1 },
-      { content: 'hello', role: 'user', tokens: 1 },
+      { content: 'obs', role: 'user', tokens: 5 },
+      { content: 'hi', role: 'assistant', tokens: 5 },
+      { content: 'hello', role: 'user', tokens: 5 },
     ]);
 
     expect(
@@ -88,8 +93,8 @@ describe('OpenAI Prompt Formatter', () => {
         observation: '1029j',
       })
     ).toEqual([
-      { content: '1029j', role: 'user', tokens: 3 },
-      { content: 'hello', role: 'user', tokens: 1 },
+      { content: '1029j', role: 'user', tokens: 7 },
+      { content: 'hello', role: 'user', tokens: 5 },
     ]);
   });
 });

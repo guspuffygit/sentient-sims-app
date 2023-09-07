@@ -113,10 +113,10 @@ export class CustomLLMService implements GenerationService {
   async sentientSimsWants(
     promptRequest: PromptRequest
   ): Promise<SimsGenerateResponse> {
-    const wantsQuestion =
-      'If you were the character in the story, what would you want to do?';
-    promptRequest.systemPrompt = wantsQuestion;
-    promptRequest.pre_action = wantsQuestion;
+    promptRequest.systemPrompt =
+      'You are the following character in the following location:';
+    promptRequest.pre_action =
+      'If you were the character in the story, what are your wants right now?';
     promptRequest.preResponse = 'I want to ';
     const prompt = this.promptFormatter.formatPrompt(promptRequest);
 
@@ -127,7 +127,7 @@ export class CustomLLMService implements GenerationService {
     const text = formatWantsOutput(promptRequest.preResponse, output);
     return {
       text,
-      systemPrompt: wantsQuestion,
+      systemPrompt: promptRequest.systemPrompt,
     };
   }
 }
