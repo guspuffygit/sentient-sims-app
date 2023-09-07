@@ -22,6 +22,7 @@ export default function ChatPage() {
     deleteMessage,
     addNewMessage,
     tokenCount,
+    countTokens,
   } = useChatGeneration(handleGenerationLoaded);
 
   return (
@@ -70,7 +71,12 @@ export default function ChatPage() {
             <div>
               <Grid container alignItems="center">
                 <Grid item>
-                  <Typography sx={{ marginRight: 2 }}>
+                  <Button onClick={countTokens} color="primary">
+                    Count
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <Typography sx={{ marginRight: 2, marginLeft: 2 }}>
                     Tokens: {tokenCount}
                   </Typography>
                 </Grid>

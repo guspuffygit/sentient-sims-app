@@ -203,7 +203,7 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
     };
   }, [messages]);
 
-  useEffect(() => {
+  const countTokens = () => {
     const promptRequest: PromptRequest = getPromptRequest();
     const promptFormatter = createPromptFormatter(customLLMEnabled.value);
     const prompt = promptFormatter.formatPrompt(promptRequest);
@@ -211,7 +211,7 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
       (customLLMEnabled.value ? '' : promptRequest.systemPrompt) + prompt
     );
     setTokenCount(length);
-  }, [customLLMEnabled.value, getPromptRequest]);
+  };
 
   const generateChat = async () => {
     setLoading(true);
@@ -266,5 +266,6 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
     deleteMessage,
     addNewMessage,
     tokenCount,
+    countTokens,
   };
 }
