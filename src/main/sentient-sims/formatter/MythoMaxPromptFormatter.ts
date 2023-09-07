@@ -23,60 +23,61 @@ export class MythoMaxPromptFormatter {
     participants: string,
     location: string,
     memoriesToInsert: string[],
-    actions?: string,
-    preResponse?: string
+    actions?: string
   ): string {
     return filterNullAndUndefined([
       systemPrompt,
-      'CHARACTERS:',
       participants,
       '',
-      'LOCATION:',
       location,
       '',
       memoriesToInsert.join('\n'),
       '',
       actions,
-      '',
-      preResponse,
     ])
       .join('\n')
       .trim();
   }
 
   formatMemory(memory: SentientMemory) {
-    const entries = [
-      memory.pre_action && `${this.userToken}\n${memory.pre_action.trim()}`,
-      memory.content && `${this.assistantToken}\n${memory.content.trim()}`,
-      memory.observation && `${this.userToken}\n${memory.observation.trim()}`,
-    ].filter(Boolean);
-
-    if (entries.length > 0) {
-      return entries.join('\n');
+    const memories: string[] = [];
+    if (memory.observation) {
+      memories.push(`${this.userToken}\n${memory.observation.trim()}`);
+    }
+    if (memory.content) {
+      memories.push(`${this.assistantToken}\n${memory.content.trim()}`);
+    }
+    if (memory.pre_action) {
+      memories.push(`${this.userToken}\n${memory.pre_action.trim()}`);
     }
 
-    return undefined;
+    return memories;
   }
 
   formatOutput(text: string): string {
     let output = text.split(this.userToken, 1)[0].trim();
     output = output.split(this.assistantToken, 1)[0].trim();
-    output = trimIncompleteSentence(output);
     output = removeLastParagraph(output);
+    output = trimIncompleteSentence(output);
     return output.trim();
   }
 
-  formatActions(preAction?: string) {
-    if (preAction) {
-      return `${this.userToken}\n${preAction.trim()}\n${this.assistantToken}`;
+  formatActions(preAction?: string, preResponse?: string) {
+    if (preAction && preResponse) {
+      return [
+        this.userToken,
+        preAction.trim(),
+        this.assistantToken,
+        preResponse,
+      ].join('\n');
     }
 
-    return undefined;
-  }
+    if (preAction) {
+      return [this.userToken, preAction.trim(), this.assistantToken].join('\n');
+    }
 
-  formatPreResponse(preResponse?: string) {
     if (preResponse) {
-      return `${this.assistantToken}\n${preResponse.trim()}`;
+      return [this.assistantToken, preResponse].join('\n');
     }
 
     return `${this.assistantToken}\n`;
@@ -90,16 +91,14 @@ export class MythoMaxPromptFormatter {
     preResponse,
     systemPrompt = defaultSystemPrompt,
   }: PromptRequest) {
-    const formattedActions = this.formatActions(pre_action);
-    const formattedPreResponse = this.formatPreResponse(preResponse);
+    const formattedActions = this.formatActions(pre_action, preResponse);
     const prePromptTokenCount = this.encode(
       this.combineFormattedPrompt(
         systemPrompt,
         participants,
         location,
         [],
-        formattedActions,
-        formattedPreResponse
+        formattedActions
       )
     ).length;
 
@@ -108,15 +107,17 @@ export class MythoMaxPromptFormatter {
     // eslint-disable-next-line no-plusplus
     for (let i = memories.length - 1; i >= 0; i--) {
       const memory = memories[i];
-      const formattedMemory = this.formatMemory(memory);
-      if (formattedMemory) {
-        memoryTokenCount += this.encode(formattedMemory).length;
+      const formattedMemories = this.formatMemory(memory);
+      if (formattedMemories.length > 0) {
+        memoryTokenCount += this.encode(formattedMemories.join('\n')).length;
 
         if (memoryTokenCount + prePromptTokenCount > this.maxTokens) {
           break;
         }
 
-        memoriesToInsert.unshift(formattedMemory);
+        formattedMemories.forEach((formattedMemory) => {
+          memoriesToInsert.unshift(formattedMemory);
+        });
       }
     }
 
@@ -125,8 +126,7 @@ export class MythoMaxPromptFormatter {
       participants,
       location,
       memoriesToInsert,
-      formattedActions,
-      formattedPreResponse
+      formattedActions
     );
 
     let tokenCount = this.encode(prompt).length;
@@ -137,11 +137,50 @@ export class MythoMaxPromptFormatter {
         participants,
         location,
         memoriesToInsert,
-        formattedActions,
-        formattedPreResponse
+        formattedActions
       );
       tokenCount = this.encode(prompt).length;
     }
+
+    const realMemoriesToInsert: string[] = [];
+    let lastToken = '';
+    memoriesToInsert.forEach((memory) => {
+      if (memory.includes(this.userToken)) {
+        if (lastToken === this.userToken) {
+          realMemoriesToInsert.push(
+            memory.replace(`${this.userToken}\n`, '').replace('\n', ' ')
+          );
+        } else {
+          realMemoriesToInsert.push(
+            memory
+              .replace('\n', ' ')
+              .replace(`${this.userToken} `, `${this.userToken}\n`)
+          );
+          lastToken = this.userToken;
+        }
+      } else if (memory.includes(this.assistantToken)) {
+        if (lastToken === this.assistantToken) {
+          realMemoriesToInsert.push(
+            memory.replace(`${this.assistantToken}\n`, '').replace('\n', ' ')
+          );
+        } else {
+          realMemoriesToInsert.push(
+            memory
+              .replace('\n', ' ')
+              .replace(`${this.assistantToken} `, `${this.assistantToken}\n`)
+          );
+          lastToken = this.assistantToken;
+        }
+      }
+    });
+
+    prompt = this.combineFormattedPrompt(
+      systemPrompt,
+      participants,
+      location,
+      realMemoriesToInsert,
+      formattedActions
+    );
 
     return prompt;
   }

@@ -15,10 +15,16 @@ export type OpenAIMessage = {
 };
 
 export class OpenAIPromptFormatter {
-  public readonly maxTokens = 3950;
+  public readonly maxTokens = 3900;
 
   encode(prompt: string): number[] {
     return gpt3Encoder(prompt);
+  }
+
+  countTokens(prompt: string): number {
+    // See how awful it is to count tokens for chat completions then just go with adding 4
+    // https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
+    return this.encode(prompt).length + 4;
   }
 
   formatActionSystemPrompt(
@@ -41,7 +47,7 @@ export class OpenAIPromptFormatter {
     return {
       content: prompt,
       role: 'system',
-      tokens: this.encode(prompt).length,
+      tokens: this.countTokens(prompt),
     };
   }
 
@@ -50,7 +56,7 @@ export class OpenAIPromptFormatter {
     if (memory.observation && memory.observation.trim()) {
       messages.push({
         content: memory.observation.trim(),
-        tokens: this.encode(memory.observation.trim()).length,
+        tokens: this.countTokens(memory.observation.trim()),
         role: 'user',
       });
     }
@@ -58,7 +64,7 @@ export class OpenAIPromptFormatter {
     if (memory.content && memory.content.trim()) {
       messages.push({
         content: memory.content.trim(),
-        tokens: this.encode(memory.content.trim()).length,
+        tokens: this.countTokens(memory.content.trim()),
         role: 'assistant',
       });
     }
@@ -66,7 +72,7 @@ export class OpenAIPromptFormatter {
     if (memory.pre_action && memory.pre_action.trim()) {
       messages.push({
         content: memory.pre_action.trim(),
-        tokens: this.encode(memory.pre_action.trim()).length,
+        tokens: this.countTokens(memory.pre_action.trim()),
         role: 'user',
       });
     }
@@ -100,7 +106,7 @@ export class OpenAIPromptFormatter {
       return {
         content,
         role: 'user',
-        tokens: this.encode(content).length,
+        tokens: this.countTokens(content),
       };
     }
 
@@ -147,6 +153,12 @@ export class OpenAIPromptFormatter {
     }
 
     if (actionMessage) {
+      log.debug(
+        `check: ${[systemMessage, ...memoriesToInsert, actionMessage].reduce(
+          (accumulator, currentValue) => accumulator + currentValue.tokens,
+          0
+        )}`
+      );
       return [systemMessage, ...memoriesToInsert, actionMessage];
     }
 
@@ -170,10 +182,10 @@ export class OpenAIPromptFormatter {
     location,
     systemPrompt = defaultOriginalSystemPrompt,
   }: PromptRequest): OpenAIMessage[] {
-    const prePromptTokenCount = this.encode(
+    const prePromptTokenCount = this.countTokens(
       systemPrompt +
         this.combineFormattedContinuePrompt(participants, location, [])
-    ).length;
+    );
 
     const memoriesToInsert: string[] = [];
     let memoryTokenCount = 0;
@@ -182,7 +194,7 @@ export class OpenAIPromptFormatter {
       const memory = memories[i];
       const formattedMemory = this.formatStringMemory(memory);
       if (formattedMemory) {
-        memoryTokenCount += this.encode(formattedMemory).length;
+        memoryTokenCount += this.countTokens(formattedMemory);
         if (memoryTokenCount + prePromptTokenCount > this.maxTokens) {
           break;
         }
@@ -200,12 +212,12 @@ export class OpenAIPromptFormatter {
       {
         role: 'system',
         content: systemPrompt,
-        tokens: this.encode(systemPrompt).length,
+        tokens: this.countTokens(systemPrompt),
       },
       {
         role: 'user',
         content: prompt,
-        tokens: this.encode(prompt).length,
+        tokens: this.countTokens(prompt),
       },
     ];
   }
@@ -215,7 +227,7 @@ export class OpenAIPromptFormatter {
     messages.push({
       role: 'assistant',
       content: promptRequest.preResponse || '',
-      tokens: this.encode(promptRequest.preResponse || '').length,
+      tokens: this.countTokens(promptRequest.preResponse || ''),
     });
     return messages;
   }

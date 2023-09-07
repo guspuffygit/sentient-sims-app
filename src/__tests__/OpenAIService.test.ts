@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import '@testing-library/jest-dom';
 import { OpenAIPromptFormatter } from 'main/sentient-sims/formatter/OpenAIPromptFormatter';
 import { OpenAIService } from 'main/sentient-sims/services/OpenAIService';
