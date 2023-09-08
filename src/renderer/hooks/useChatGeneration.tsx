@@ -228,8 +228,8 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
     }
   };
 
-  const handleMessageTextChange = (index: number, value: string) => {
-    if (index in messages) {
+  const handleMessageTextChange = useCallback(
+    (index: number, value: string) => {
       const updatedMessages = [...messages];
       updatedMessages[index] = {
         ...updatedMessages[index],
@@ -239,8 +239,9 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
         },
       };
       setMessages(updatedMessages);
-    }
-  };
+    },
+    [messages]
+  );
 
   const deleteMessage = (index: number) => {
     const updatedMessages = [...messages];

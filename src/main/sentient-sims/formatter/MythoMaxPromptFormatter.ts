@@ -3,7 +3,7 @@
 import { SentientMemory } from '../models/SentientMemory';
 import { PromptRequest } from '../models/PromptRequest';
 import { llamaTokenizer } from '../llama/LLamaTokenizer';
-import { defaultSystemPrompt } from '../constants';
+import { defaultMythoMaxSystemPrompt } from '../constants';
 import { filterNullAndUndefined } from '../util/filter';
 import { removeLastParagraph, trimIncompleteSentence } from './PromptFormatter';
 
@@ -89,7 +89,7 @@ export class MythoMaxPromptFormatter {
     location,
     pre_action,
     preResponse,
-    systemPrompt = defaultSystemPrompt,
+    systemPrompt = defaultMythoMaxSystemPrompt,
   }: PromptRequest) {
     const formattedActions = this.formatActions(pre_action, preResponse);
     const prePromptTokenCount = this.encode(
@@ -186,7 +186,7 @@ export class MythoMaxPromptFormatter {
   }
 
   formatActionPrompt(promptRequest: PromptRequest) {
-    promptRequest.systemPrompt = defaultSystemPrompt;
+    promptRequest.systemPrompt = defaultMythoMaxSystemPrompt;
     return this.formatPrompt(promptRequest);
   }
 }

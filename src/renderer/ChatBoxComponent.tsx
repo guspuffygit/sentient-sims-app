@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { MessageInputProps } from 'main/sentient-sims/models/MessageInputProps';
+import { useMemo } from 'react';
 
 export type ChatBoxComponentProps = {
   message: MessageInputProps;
@@ -21,17 +22,22 @@ export function ChatBoxComponent({
   handleDeleteMessage,
   index,
 }: ChatBoxComponentProps) {
-  let endAdornment;
+  const endAdornment = useMemo(() => {
+    if (
+      message.message.role === 'user' ||
+      message.message.role === 'assistant'
+    ) {
+      return (
+        <InputAdornment position="end" sx={{ alignItems: 'flex-end' }}>
+          <IconButton onClick={() => handleDeleteMessage(index)}>
+            <RemoveCircleOutlineIcon />
+          </IconButton>
+        </InputAdornment>
+      );
+    }
+    return null;
+  }, [handleDeleteMessage, index, message.message.role]);
 
-  if (message.message.role === 'user' || message.message.role === 'assistant') {
-    endAdornment = (
-      <InputAdornment position="end" sx={{ alignItems: 'flex-end' }}>
-        <IconButton onClick={() => handleDeleteMessage(index)}>
-          <RemoveCircleOutlineIcon />
-        </IconButton>
-      </InputAdornment>
-    );
-  }
   return (
     <Card
       key={message.id}
