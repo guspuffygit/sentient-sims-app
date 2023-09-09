@@ -256,6 +256,38 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
     });
   };
 
+  async function generate(request: PromptRequest): Promise<string> {
+    const response = await fetch('http://localhost:25148/ai/v2/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    });
+    const { text } = await response.json();
+    return text;
+  }
+
+  const generateMultipleChat = async (count: number) => {
+    let results: string[] = [];
+
+    setLoading(true);
+    try {
+      const request = getPromptRequest();
+
+      const generations = [];
+      for (let i = 0; i < count; i++) {
+        generations.push(generate(request));
+      }
+
+      results = await Promise.all(generations);
+    } catch (e: any) {
+      log.error(`Unabled to generateMultipleChat`, e);
+    } finally {
+      setLoading(false);
+    }
+
+    return results;
+  };
+
   return {
     messages,
     loading,
@@ -266,5 +298,6 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
     addNewMessage,
     tokenCount,
     countTokens,
+    generateMultipleChat,
   };
 }

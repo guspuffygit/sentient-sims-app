@@ -5,6 +5,7 @@ import SendIcon from '@mui/icons-material/Send';
 import { useRef } from 'react';
 import { ChatBoxComponent } from './ChatBoxComponent';
 import useChatGeneration from './hooks/useChatGeneration';
+import ChatResultsModal from './ChatResultsModal';
 
 export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -23,7 +24,18 @@ export default function ChatPage() {
     addNewMessage,
     tokenCount,
     countTokens,
+    generateMultipleChat,
   } = useChatGeneration(handleGenerationLoaded);
+
+  const resultsModal = ChatResultsModal();
+
+  const onGenerateMultiple = async () => {
+    const results = await generateMultipleChat(10);
+    resultsModal.setResults({
+      open: true,
+      results,
+    });
+  };
 
   return (
     <>
@@ -52,6 +64,14 @@ export default function ChatPage() {
                 endIcon={<SendIcon />}
               >
                 Send
+              </Button>
+              <Button
+                type="submit"
+                onClick={() => onGenerateMultiple()}
+                color="primary"
+                endIcon={<SendIcon />}
+              >
+                Send 10
               </Button>
               <Button
                 onClick={() => addNewMessage('user')}
@@ -89,6 +109,7 @@ export default function ChatPage() {
             </div>
           </>
         )}
+        {resultsModal.resultsModal}
       </CardActions>
     </>
   );
