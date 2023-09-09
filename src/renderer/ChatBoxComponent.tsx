@@ -7,7 +7,8 @@ import {
 } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { MessageInputProps } from 'main/sentient-sims/models/MessageInputProps';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { useDebounceHook } from './hooks/useDebounceHook';
 
 export type ChatBoxComponentProps = {
   message: MessageInputProps;
@@ -22,6 +23,9 @@ export function ChatBoxComponent({
   handleDeleteMessage,
   index,
 }: ChatBoxComponentProps) {
+  const [text, setText] = useState(message.message.content);
+  const inputDebounce = useDebounceHook();
+
   const endAdornment = useMemo(() => {
     if (
       message.message.role === 'user' ||
@@ -38,6 +42,12 @@ export function ChatBoxComponent({
     return null;
   }, [handleDeleteMessage, index, message.message.role]);
 
+  function handleTextChange(value: string) {
+    setText(value);
+
+    inputDebounce(() => handleMessageTextChange(index, value), 600);
+  }
+
   return (
     <Card
       key={message.id}
@@ -48,12 +58,10 @@ export function ChatBoxComponent({
           id="outlined-textarea"
           label={message.message.role}
           fullWidth
-          onChange={(event) =>
-            handleMessageTextChange(index, event.target.value)
-          }
+          onChange={(event) => handleTextChange(event.target.value)}
           variant="filled"
           multiline
-          value={message.message.content}
+          value={text}
           style={{ height: '100%', margin: 0 }}
           InputProps={{
             endAdornment,
