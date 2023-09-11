@@ -1,8 +1,6 @@
 // eslint-disable-next-line import/prefer-default-export
 export const defaultMythoMaxSystemPrompt = [
-  'The user will prompt you with an action that you will rewrite in the form of a story in the third person,',
-  "describing scenes clearly, explicitly, in vivid detail based on what's been said before using lots of dialog without predicting the future or giving a lesson.",
-  'Use the following characters, and location to help rewrite the user action into story format:',
+  "The user will prompt you with a character action that you will rewrite in the form of a story in the third person, describing scenes clearly, explicitly, in vivid detail based on what's been said before using lots of dialog and using the following characters, and location to help rewrite the user action into story format:",
 ].join(' ');
 
 export const defaultSystemPrompt = [
