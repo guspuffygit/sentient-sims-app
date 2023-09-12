@@ -33,14 +33,3 @@ export function formatWantsOutput(preResponse: string, text: string): string {
 
   return [preResponse.trim(), output].join(' ');
 }
-
-export function removeLastWord(sentence: string): string {
-  const words = sentence.split(' ');
-  if (words.length <= 1) {
-    // If there's only one word or no words, return an empty string or the original sentence
-    return sentence;
-  }
-  // Remove the last word and join the remaining words back into a sentence
-  words.pop();
-  return words.join(' ');
-}

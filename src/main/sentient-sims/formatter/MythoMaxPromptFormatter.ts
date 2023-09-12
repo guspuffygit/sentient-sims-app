@@ -47,9 +47,9 @@ export class MythoMaxPromptFormatter {
 
   formatMemory(memory: SentientMemory) {
     const memories: string[] = [];
-    // if (memory.observation) {
-    //   memories.push(`${this.userToken}\n${memory.observation.trim()}`);
-    // }
+    if (memory.observation) {
+      memories.push(`${this.userToken}\n${memory.observation.trim()}`);
+    }
     if (memory.content) {
       memories.push(`${this.assistantToken}\n${memory.content.trim()}`);
     }

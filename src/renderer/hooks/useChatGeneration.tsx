@@ -115,15 +115,15 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
               },
             });
           }
-          // if (memory.observation) {
-          //   updatedMessages.push({
-          //     id: generateUUID(),
-          //     message: {
-          //       role: 'user',
-          //       content: memory.observation.trim(),
-          //     },
-          //   });
-          // }
+          if (memory.observation) {
+            updatedMessages.push({
+              id: generateUUID(),
+              message: {
+                role: 'user',
+                content: memory.observation.trim(),
+              },
+            });
+          }
         });
         if (result.prompt.pre_action) {
           updatedMessages.push({
