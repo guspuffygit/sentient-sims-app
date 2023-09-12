@@ -14,6 +14,12 @@ export class MythoMaxPromptFormatter {
 
   public readonly assistantToken = '### Response:';
 
+  public readonly assistantActionResponseToken =
+    '### Response (rewrite instruction in story format using lots of descriptive dialogue):';
+
+  public readonly assistantContinueResponseToken =
+    '### Response (continue story):';
+
   encode(prompt: string): number[] {
     return llamaTokenizer.encode(prompt);
   }
@@ -67,17 +73,21 @@ export class MythoMaxPromptFormatter {
       return [
         this.userToken,
         preAction.trim(),
-        this.assistantToken,
+        this.assistantActionResponseToken,
         preResponse,
       ].join('\n');
     }
 
     if (preAction) {
-      return [this.userToken, preAction.trim(), this.assistantToken].join('\n');
+      return [
+        this.userToken,
+        preAction.trim(),
+        this.assistantActionResponseToken,
+      ].join('\n');
     }
 
     if (preResponse) {
-      return [this.assistantToken, preResponse].join('\n');
+      return [this.assistantActionResponseToken, preResponse].join('\n');
     }
 
     return `${this.assistantToken}\n`;
