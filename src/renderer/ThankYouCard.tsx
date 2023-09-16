@@ -1,17 +1,73 @@
-import { Avatar, Divider, Stack, Typography } from '@mui/material';
+import { Avatar, Stack, Typography } from '@mui/material';
+import { useMemo } from 'react';
 import AppCard from './AppCard';
 import { useThankYous } from './hooks/useThankYous';
+import PatreonComponent from './PatreonComponent';
+
+export enum AvatarType {
+  DEV = '#206694',
+  TIER_2 = '#f1c40f',
+  TIER_1 = '#2ecc71',
+}
 
 type AvatarCardProps = {
   name: string;
   url: string;
+  type: AvatarType;
 };
 
-function AvatarCard({ name, url }: AvatarCardProps) {
+type AvatarSize = {
+  size: number;
+  variant:
+    | 'body2'
+    | 'button'
+    | 'caption'
+    | 'h1'
+    | 'h2'
+    | 'h3'
+    | 'h4'
+    | 'h5'
+    | 'h6'
+    | 'inherit'
+    | 'subtitle1'
+    | 'subtitle2'
+    | 'body1'
+    | 'overline'
+    | undefined;
+};
+
+function getAvatarSize(avatarType: AvatarType): AvatarSize {
+  if (avatarType === AvatarType.TIER_2) {
+    return { size: 30, variant: 'body1' };
+  }
+
+  if (avatarType === AvatarType.TIER_1) {
+    return { size: 20, variant: 'body2' };
+  }
+
+  // Dev
+  return { size: 40, variant: 'h6' };
+}
+
+function AvatarCard({ name, url, type }: AvatarCardProps) {
+  const avatarSize = useMemo(() => {
+    return getAvatarSize(type);
+  }, [type]);
+
   return (
-    <Stack alignItems="center" direction="row" spacing={2} sx={{ margin: 2 }}>
-      <Avatar alt={name} src={url} />
-      <Typography variant="body2">{name}</Typography>
+    <Stack alignItems="center" direction="row" spacing={1}>
+      <Avatar
+        alt={name}
+        src={url}
+        sx={{
+          height: avatarSize.size,
+          width: avatarSize.size,
+          backgroundColor: 'white',
+        }}
+      />
+      <Typography variant={avatarSize.variant} sx={{ color: type }}>
+        {name}
+      </Typography>
     </Stack>
   );
 }
@@ -28,55 +84,65 @@ export function ThankYouCardPatreon() {
 
   return (
     <AppCard>
-      <Typography align="center" sx={{ marginBottom: 1 }}>
-        Special Thanks to Sentient Sims Devs!
+      <Typography align="center" sx={{ marginBottom: 2 }}>
+        Special Thank you to Devs and Patrons!
       </Typography>
-      <Stack textAlign="center" direction="row" spacing={2}>
-        <AvatarCard
-          name="@JazK"
-          url="https://cdn.discordapp.com/avatars/231275797908815872/3264ac64218c189e283a5d4472f281e0.webp?size=128"
-        />
-        <AvatarCard
-          name="@ScottA"
-          url="https://cdn.discordapp.com/avatars/1072327430204837918/ad8bdc65b1813206a159e67cdc052768.webp?size=128"
-        />
+      <Stack
+        direction="row"
+        spacing={{ xs: 1, sm: 1 }}
+        flexWrap="wrap"
+        useFlexGap
+        sx={{ marginTop: 1 }}
+      >
+        {thankYous.dev.map((thankYouUser) => {
+          return (
+            <AvatarCard
+              name={`@${thankYouUser.name}`}
+              url={`${thankYouUser.avatar}?size=128`}
+              type={AvatarType.DEV}
+            />
+          );
+        })}
       </Stack>
       {tier2Exists ? (
-        <>
-          <Divider sx={{ marginTop: 2, marginBotton: 2 }} />
-          <Typography align="center" sx={{ marginBottom: 1, marginTop: 2 }}>
-            Tier 2
-          </Typography>
-          <Stack textAlign="center" direction="row" spacing={2}>
-            {thankYous.tier2.map((thankYouUser) => {
-              return (
-                <AvatarCard
-                  name={`@${thankYouUser.name}`}
-                  url={`${thankYouUser.avatar}?size=128`}
-                />
-              );
-            })}
-          </Stack>
-        </>
+        <Stack
+          direction="row"
+          spacing={{ xs: 1, sm: 1 }}
+          flexWrap="wrap"
+          useFlexGap
+          sx={{ marginTop: 1 }}
+        >
+          {thankYous.tier2.map((thankYouUser) => {
+            return (
+              <AvatarCard
+                name={`@${thankYouUser.name}`}
+                url={`${thankYouUser.avatar}?size=128`}
+                type={AvatarType.TIER_2}
+              />
+            );
+          })}
+        </Stack>
       ) : null}
       {tier1Exists ? (
-        <>
-          <Divider sx={{ marginTop: 2, marginBotton: 2 }} />
-          <Typography align="center" sx={{ marginBottom: 1, marginTop: 2 }}>
-            Tier 1
-          </Typography>
-          <Stack textAlign="center" direction="row" spacing={2}>
-            {thankYous.tier1.map((thankYouUser) => {
-              return (
-                <AvatarCard
-                  name={`@${thankYouUser.name}`}
-                  url={thankYouUser.avatar}
-                />
-              );
-            })}
-          </Stack>
-        </>
+        <Stack
+          direction="row"
+          spacing={{ xs: 1, sm: 1 }}
+          flexWrap="wrap"
+          useFlexGap
+          sx={{ marginTop: 1 }}
+        >
+          {thankYous.tier1.map((thankYouUser) => {
+            return (
+              <AvatarCard
+                name={`@${thankYouUser.name}`}
+                url={thankYouUser.avatar}
+                type={AvatarType.TIER_1}
+              />
+            );
+          })}
+        </Stack>
       ) : null}
+      <PatreonComponent />
     </AppCard>
   );
 }

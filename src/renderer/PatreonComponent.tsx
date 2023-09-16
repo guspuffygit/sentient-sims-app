@@ -1,10 +1,8 @@
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { Box, Button, Typography } from '@mui/material';
 import { PropsWithChildren } from 'react';
-import AppCard from './AppCard';
 import PatreonUser from './wrappers/PatreonUser';
 import { useDebugMode } from './providers/DebugModeProvider';
-import EditAvatarComponent from './components/EditAvatarComponent';
 
 export const getPatreonOauthUrl = (): string => {
   const redirectUrl = 'http://localhost:25148/patreon-redirect';
@@ -44,7 +42,14 @@ function PatreonButton({ url }: PatreonButtonProps) {
 
 function CenteredBox({ children }: PropsWithChildren) {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', margin: 2 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        margin: 2,
+        marginTop: 4,
+      }}
+    >
       {children}
     </Box>
   );
@@ -65,7 +70,7 @@ function SubscribedPatreon({ patreonUser }: SubscribedPatreonProps) {
       <Typography variant="h5" align="center">
         {text}
       </Typography>
-      <EditAvatarComponent />
+      {/* <EditAvatarComponent /> */}
     </div>
   );
 }
@@ -87,7 +92,7 @@ export default function PatreonComponent() {
   }
 
   return (
-    <AppCard>
+    <>
       <Box>
         {debugMode.isEnabled ? (
           <div>
@@ -104,6 +109,6 @@ export default function PatreonComponent() {
         ) : null}
       </Box>
       <CenteredBox>{content}</CenteredBox>
-    </AppCard>
+    </>
   );
 }
