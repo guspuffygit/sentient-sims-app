@@ -24,6 +24,7 @@ export class DebugController {
     this.sendDebugLogs = this.sendDebugLogs.bind(this);
     this.testCustomLLM = this.testCustomLLM.bind(this);
     this.getCustomLLMWorkers = this.getCustomLLMWorkers.bind(this);
+    this.sendBugReport = this.sendBugReport.bind(this);
   }
 
   static healthCheck(req: Request, res: Response) {
@@ -60,5 +61,9 @@ export class DebugController {
 
   async sendDebugLogs(req: Request, res: Response) {
     res.json(await this.logSendService.sendLogsToDiscord(webhookUrl));
+  }
+
+  async sendBugReport(req: Request, res: Response) {
+    res.json(await this.logSendService.sendBugReport(webhookUrl, req.body));
   }
 }

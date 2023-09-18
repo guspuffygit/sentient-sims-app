@@ -10,6 +10,7 @@ import { OpenAIService } from './OpenAIService';
 import { SettingsService } from './SettingsService';
 import { VersionService } from './VersionService';
 import { SettingsEnum } from '../models/SettingsEnum';
+import { InteractionBugReport } from '../models/InteractionBugReport';
 
 export const webhookUrl = [
   'https://d',
@@ -72,7 +73,7 @@ export class LogSendService {
 
       const response = await this.sendFormData(formData, errors, url);
 
-      log.log('Sent logs for debugging');
+      log.info('Sent logs for debugging');
 
       if (!response || !response.ok) {
         errors.push(
@@ -94,15 +95,64 @@ export class LogSendService {
     };
   }
 
+  async sendBugReport(url: string, bugReport: InteractionBugReport) {
+    const logId = LogSendService.newLogId();
+    const errors: any[] = [];
+
+    try {
+      const formData = new FormData();
+      const interactionBugInfo = [
+        `INTERACTION BUG REPORT:`,
+        `Interaction Title: ${bugReport.interactionTitle}`,
+        `Bug Notes: ${bugReport.bugDetails}`,
+        `Username: ${bugReport.username}`,
+        `Pre Action: ${bugReport?.memory.pre_action}`,
+        `Content: ${bugReport?.memory.content}`,
+      ];
+
+      this.appendInformationToFormData(
+        formData,
+        logId,
+        errors,
+        interactionBugInfo
+      );
+
+      const response = await this.sendFormData(formData, errors, url);
+
+      log.info('Sent interaction bug report');
+
+      if (!response || !response.ok) {
+        errors.push(
+          `Failed to post message: ${response?.status} ${response?.statusText}.`
+        );
+        if (response) {
+          errors.push(await response.json());
+        }
+      }
+    } catch (err: any) {
+      const message = 'Error sending logs';
+      log.error(message, err);
+      errors.push(message, err);
+    }
+
+    if (errors) {
+      return { error: errors.join('\n') };
+    }
+
+    return { text: logId };
+  }
+
   private appendInformationToFormData(
     formData: FormData,
     logId: string,
-    errors: any[]
+    errors: any[],
+    extraInfo: string[] = []
   ) {
     try {
       formData.append(
         'content',
         [
+          ...extraInfo,
           `Log id: ${logId}`,
           `Platform: ${os.platform()}`,
           `Architecture: ${os.arch()}`,
