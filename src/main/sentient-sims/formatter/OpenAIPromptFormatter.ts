@@ -84,19 +84,21 @@ export class OpenAIPromptFormatter {
     ).length;
 
     const memoriesToInsert: string[] = [];
-    let memoryTokenCount = 0;
-    // eslint-disable-next-line no-plusplus
-    for (let i = memories.length - 1; i >= 0; i--) {
-      const memory = memories[i];
-      if (memoryTokenCount + prePromptTokenCount > this.maxTokens) {
-        break;
-      }
+    if (memories) {
+      let memoryTokenCount = 0;
+      // eslint-disable-next-line no-plusplus
+      for (let i = memories.length - 1; i >= 0; i--) {
+        const memory = memories[i];
+        if (memoryTokenCount + prePromptTokenCount > this.maxTokens) {
+          break;
+        }
 
-      const formattedMemory = this.formatMemory(memory);
-      if (formattedMemory) {
-        memoriesToInsert.unshift(formattedMemory);
-        const { length } = this.encode(formattedMemory);
-        memoryTokenCount += length;
+        const formattedMemory = this.formatMemory(memory);
+        if (formattedMemory) {
+          memoriesToInsert.unshift(formattedMemory);
+          const { length } = this.encode(formattedMemory);
+          memoryTokenCount += length;
+        }
       }
     }
 
