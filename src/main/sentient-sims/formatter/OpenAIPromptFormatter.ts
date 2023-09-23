@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 /* eslint-disable camelcase */
 /* eslint-disable class-methods-use-this */
 import { encode as gpt3Encoder } from '@nem035/gpt-3-encoder';
@@ -133,23 +134,24 @@ export class OpenAIPromptFormatter {
       systemMessage.tokens + (actionMessage?.tokens || 0);
 
     const memoriesToInsert: OpenAIMessage[] = [];
-    let memoryTokenCount = 0;
-    // eslint-disable-next-line no-plusplus
-    for (let i = memories.length - 1; i >= 0; i--) {
-      const memory = memories[i];
-      const formattedMemories = this.formatMemory(memory);
-      memoryTokenCount += formattedMemories.reduce(
-        (accumulator, currentValue) => accumulator + currentValue.tokens,
-        0
-      );
+    if (memories) {
+      let memoryTokenCount = 0;
+      for (let i = memories.length - 1; i >= 0; i--) {
+        const memory = memories[i];
+        const formattedMemories = this.formatMemory(memory);
+        memoryTokenCount += formattedMemories.reduce(
+          (accumulator, currentValue) => accumulator + currentValue.tokens,
+          0
+        );
 
-      if (memoryTokenCount + prePromptTokenCount > this.maxTokens) {
-        break;
+        if (memoryTokenCount + prePromptTokenCount > this.maxTokens) {
+          break;
+        }
+
+        formattedMemories.forEach((formattedMemory) => {
+          memoriesToInsert.unshift(formattedMemory);
+        });
       }
-
-      formattedMemories.forEach((formattedMemory) => {
-        memoriesToInsert.unshift(formattedMemory);
-      });
     }
 
     if (actionMessage) {

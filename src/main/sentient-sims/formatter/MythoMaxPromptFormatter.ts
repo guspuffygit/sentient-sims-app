@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 /* eslint-disable camelcase */
 /* eslint-disable class-methods-use-this */
 import { SentientMemory } from '../models/SentientMemory';
@@ -114,20 +115,21 @@ export class MythoMaxPromptFormatter {
 
     const memoriesToInsert: string[] = [];
     let memoryTokenCount = 0;
-    // eslint-disable-next-line no-plusplus
-    for (let i = memories.length - 1; i >= 0; i--) {
-      const memory = memories[i];
-      const formattedMemories = this.formatMemory(memory);
-      if (formattedMemories.length > 0) {
-        memoryTokenCount += this.encode(formattedMemories.join('\n')).length;
+    if (memories) {
+      for (let i = memories.length - 1; i >= 0; i--) {
+        const memory = memories[i];
+        const formattedMemories = this.formatMemory(memory);
+        if (formattedMemories.length > 0) {
+          memoryTokenCount += this.encode(formattedMemories.join('\n')).length;
 
-        if (memoryTokenCount + prePromptTokenCount > this.maxTokens) {
-          break;
+          if (memoryTokenCount + prePromptTokenCount > this.maxTokens) {
+            break;
+          }
+
+          formattedMemories.forEach((formattedMemory) => {
+            memoriesToInsert.unshift(formattedMemory);
+          });
         }
-
-        formattedMemories.forEach((formattedMemory) => {
-          memoriesToInsert.unshift(formattedMemory);
-        });
       }
     }
 
