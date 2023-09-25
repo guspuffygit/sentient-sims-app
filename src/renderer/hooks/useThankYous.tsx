@@ -21,7 +21,11 @@ export function useThankYous() {
   });
 
   useEffect(() => {
-    fetch('https://www.sentientsimulations.com/thankyou.json')
+    fetch('https://www.sentientsimulations.com/thankyou.json', {
+      headers: {
+        'cache-control': 'no-cache',
+      },
+    })
       .then((res) => res.json())
       .then((response: ThankYou) => {
         setThankYous(response);

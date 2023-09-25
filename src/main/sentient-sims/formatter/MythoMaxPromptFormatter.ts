@@ -15,11 +15,7 @@ export class MythoMaxPromptFormatter {
 
   public readonly assistantToken = '### Response:';
 
-  public readonly assistantActionResponseToken =
-    '### Response (rewrite instruction in story format using lots of descriptive dialogue):';
-
-  public readonly assistantContinueResponseToken =
-    '### Response (continue story):';
+  public readonly assistantActionResponseToken = '### Response:';
 
   encode(prompt: string): number[] {
     return llamaTokenizer.encode(prompt);
