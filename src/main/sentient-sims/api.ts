@@ -75,6 +75,7 @@ export default function runApi(
     debugController.getCustomLLMWorkers
   );
   expressApp.get('/debug/send-logs', debugController.sendDebugLogs);
+  expressApp.post('/debug/interaction', debugController.sendBugReport);
 
   expressApp.post('/ai/v2/generate', aiController.sentientSimsGenerate);
   expressApp.post('/ai/translate', aiController.translate);

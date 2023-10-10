@@ -10,6 +10,7 @@ import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { defaultCustomLLMPrompt } from '../constants';
 import { sendPopUpNotification } from '../util/popupNotification';
 import { fetchWithRetries } from '../util/fetchWithRetries';
+import { formatWantsOutput } from '../formatter/PromptFormatter';
 
 export class CustomLLMService implements GenerationService {
   private settingsService: SettingsService;
@@ -56,7 +57,9 @@ export class CustomLLMService implements GenerationService {
   async sentientSimsGenerate(
     promptRequest: PromptRequest
   ): Promise<SimsGenerateResponse> {
-    const prompt = this.promptFormatter.formatPrompt(promptRequest);
+    const prompt = promptRequest.pre_action
+      ? this.promptFormatter.formatActionPrompt(promptRequest)
+      : this.promptFormatter.formatPrompt(promptRequest);
     log.debug(`prompt: ${prompt}`);
 
     const response = await this.generate(prompt);
@@ -110,23 +113,21 @@ export class CustomLLMService implements GenerationService {
   async sentientSimsWants(
     promptRequest: PromptRequest
   ): Promise<SimsGenerateResponse> {
-    const wantsQuestion =
-      'If you were the character in the story, what would you want to do?';
-    promptRequest.systemPrompt = wantsQuestion;
-    promptRequest.action = wantsQuestion;
+    promptRequest.systemPrompt =
+      'You are the following character in the following location:';
+    promptRequest.pre_action =
+      'If you were the character in the story, what are your wants right now?';
     promptRequest.preResponse = 'I want to ';
     const prompt = this.promptFormatter.formatPrompt(promptRequest);
 
     log.debug(`prompt: ${prompt}`);
 
     const response = await this.generate(prompt);
-    const text = this.promptFormatter.formatWantsOutput(
-      promptRequest.preResponse,
-      response
-    );
+    const output = this.promptFormatter.formatOutput(response);
+    const text = formatWantsOutput(promptRequest.preResponse, output);
     return {
       text,
-      systemPrompt: wantsQuestion,
+      systemPrompt: promptRequest.systemPrompt,
     };
   }
 }

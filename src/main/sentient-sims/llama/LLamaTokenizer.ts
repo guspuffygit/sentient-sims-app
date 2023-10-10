@@ -7,6 +7,7 @@
 /* eslint-disable no-bitwise */
 /* eslint-disable no-plusplus */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import log from 'electron-log';
 import { mergesBinary, vocabBase64 } from './vocab';
 
 class PriorityQueue {
@@ -199,7 +200,7 @@ function mapCharactersToTokenIds(
         if (!(hex >= 0)) {
           // This is not supposed to happen because the LLaMA vocabulary has a token corresponding to each byte,
           // but if this happens regardless, let's follow the protocol and tokenize to <UNK> token instead of crashing.
-          console.log(
+          log.error(
             `Encountered unknown character ${character} (partial UTF-8 byte ${byte} + hex + ${utf8ByteToHex(
               byte
             )})`
@@ -235,6 +236,7 @@ function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
     return a.mergePrio < b.mergePrio;
   });
 
+  // eslint-disable-next-line func-names
   const addToMergeQueue = function (leftNode: {
     origPos: any;
     tokenId: any;

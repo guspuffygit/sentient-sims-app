@@ -7,6 +7,8 @@ import {
 } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { MessageInputProps } from 'main/sentient-sims/models/MessageInputProps';
+import { useMemo, useState } from 'react';
+import { useDebounceHook } from './hooks/useDebounceHook';
 
 export type ChatBoxComponentProps = {
   message: MessageInputProps;
@@ -21,17 +23,31 @@ export function ChatBoxComponent({
   handleDeleteMessage,
   index,
 }: ChatBoxComponentProps) {
-  let endAdornment;
+  const [text, setText] = useState(message.message.content);
+  const inputDebounce = useDebounceHook();
 
-  if (message.message.role === 'user' || message.message.role === 'assistant') {
-    endAdornment = (
-      <InputAdornment position="end" sx={{ alignItems: 'flex-end' }}>
-        <IconButton onClick={() => handleDeleteMessage(index)}>
-          <RemoveCircleOutlineIcon />
-        </IconButton>
-      </InputAdornment>
-    );
+  const endAdornment = useMemo(() => {
+    if (
+      message.message.role === 'user' ||
+      message.message.role === 'assistant'
+    ) {
+      return (
+        <InputAdornment position="end" sx={{ alignItems: 'flex-end' }}>
+          <IconButton onClick={() => handleDeleteMessage(index)}>
+            <RemoveCircleOutlineIcon />
+          </IconButton>
+        </InputAdornment>
+      );
+    }
+    return null;
+  }, [handleDeleteMessage, index, message.message.role]);
+
+  function handleTextChange(value: string) {
+    setText(value);
+
+    inputDebounce(() => handleMessageTextChange(index, value), 600);
   }
+
   return (
     <Card
       key={message.id}
@@ -42,12 +58,10 @@ export function ChatBoxComponent({
           id="outlined-textarea"
           label={message.message.role}
           fullWidth
-          onChange={(event) =>
-            handleMessageTextChange(index, event.target.value)
-          }
+          onChange={(event) => handleTextChange(event.target.value)}
           variant="filled"
           multiline
-          value={message.message.content}
+          value={text}
           style={{ height: '100%', margin: 0 }}
           InputProps={{
             endAdornment,

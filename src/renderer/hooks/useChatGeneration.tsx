@@ -12,12 +12,9 @@ import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { MessageInputProps } from 'main/sentient-sims/models/MessageInputProps';
 import { SentientMemory } from 'main/sentient-sims/models/SentientMemory';
 import { GenerationResult } from 'main/sentient-sims/formatter/GenerationResult';
-import {
-  removeLastParagraph,
-  trimIncompleteSentence,
-} from 'main/sentient-sims/formatter/PromptFormatter';
 import { createPromptFormatter } from 'main/sentient-sims/formatter/PromptFormatterFactory';
 import { PromptRequest } from 'main/sentient-sims/models/PromptRequest';
+import { OpenAIPromptFormatter } from 'main/sentient-sims/formatter/OpenAIPromptFormatter';
 import useSetting from './useSetting';
 
 function defaultMessages(systemPrompt: string): MessageInputProps[] {
@@ -100,12 +97,12 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
           },
         });
         result.prompt.memories.forEach((memory) => {
-          if (memory.action) {
+          if (memory.pre_action) {
             updatedMessages.push({
               id: generateUUID(),
               message: {
                 role: 'user',
-                content: memory.action.trim(),
+                content: memory.pre_action.trim(),
               },
             });
           }
@@ -128,32 +125,21 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
             });
           }
         });
-        const actions: string[] = [];
-
         if (result.prompt.pre_action) {
-          actions.push(result.prompt.pre_action.trim());
-        }
-        if (result.prompt.action) {
-          actions.push(result.prompt.action.trim());
-        }
-        if (actions.length > 0) {
           updatedMessages.push({
             id: generateUUID(),
             message: {
               role: 'user',
-              content: actions.join(' '),
+              content: result.prompt.pre_action.trim(),
             },
           });
         }
-
         if (result.output && result.output.trim() !== '') {
-          let content = removeLastParagraph(result.output.trim());
-          content = trimIncompleteSentence(content.trim());
           updatedMessages.push({
             id: generateUUID(),
             message: {
               role: 'assistant',
-              content: content.trim(),
+              content: result.output.trim(),
             },
           });
         }
@@ -187,7 +173,7 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
     for (let i = 3; i < messages.length; i++) {
       if (messages[i].message.role === 'user') {
         memories.push({
-          action: messages[i].message.content as string,
+          pre_action: messages[i].message.content as string,
         });
       } else {
         memories.push({
@@ -206,10 +192,22 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
   const countTokens = () => {
     const promptRequest: PromptRequest = getPromptRequest();
     const promptFormatter = createPromptFormatter(customLLMEnabled.value);
-    const prompt = promptFormatter.formatPrompt(promptRequest);
-    const { length } = promptFormatter.encode(
-      (customLLMEnabled.value ? '' : promptRequest.systemPrompt) + prompt
-    );
+
+    let length = 0;
+    if (promptFormatter instanceof OpenAIPromptFormatter) {
+      const prompt = promptRequest.pre_action
+        ? promptFormatter.formatActionPrompt(promptRequest)
+        : promptFormatter.formatPrompt(promptRequest);
+      length = prompt.reduce(
+        (accumulator, value) => accumulator + value.tokens,
+        0
+      );
+    } else {
+      const prompt = promptRequest.pre_action
+        ? promptFormatter.formatActionPrompt(promptRequest)
+        : promptFormatter.formatPrompt(promptRequest);
+      length = promptFormatter.encode(prompt).length;
+    }
     setTokenCount(length);
   };
 
@@ -230,8 +228,8 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
     }
   };
 
-  const handleMessageTextChange = (index: number, value: string) => {
-    if (index in messages) {
+  const handleMessageTextChange = useCallback(
+    (index: number, value: string) => {
       const updatedMessages = [...messages];
       updatedMessages[index] = {
         ...updatedMessages[index],
@@ -241,8 +239,9 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
         },
       };
       setMessages(updatedMessages);
-    }
-  };
+    },
+    [messages]
+  );
 
   const deleteMessage = (index: number) => {
     const updatedMessages = [...messages];
@@ -257,6 +256,38 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
     });
   };
 
+  async function generate(request: PromptRequest): Promise<string> {
+    const response = await fetch('http://localhost:25148/ai/v2/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(request),
+    });
+    const { text } = await response.json();
+    return text;
+  }
+
+  const generateMultipleChat = async (count: number) => {
+    let results: string[] = [];
+
+    setLoading(true);
+    try {
+      const request = getPromptRequest();
+
+      const generations = [];
+      for (let i = 0; i < count; i++) {
+        generations.push(generate(request));
+      }
+
+      results = await Promise.all(generations);
+    } catch (e: any) {
+      log.error(`Unabled to generateMultipleChat`, e);
+    } finally {
+      setLoading(false);
+    }
+
+    return results;
+  };
+
   return {
     messages,
     loading,
@@ -267,5 +298,6 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
     addNewMessage,
     tokenCount,
     countTokens,
+    generateMultipleChat,
   };
 }

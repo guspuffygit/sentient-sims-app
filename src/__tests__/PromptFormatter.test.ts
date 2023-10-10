@@ -21,45 +21,38 @@ describe('MythoMax Prompt Formatter', () => {
   it('format memory', () => {
     const formatter = new MythoMaxPromptFormatter();
 
-    expect(formatter.formatMemory({})).toBeUndefined();
+    expect(formatter.formatMemory({})).toEqual([]);
 
     expect(
       formatter.formatMemory({
-        pre_action: 'hello',
-      })
-    ).toBeUndefined();
-
-    expect(
-      formatter.formatMemory({
-        action: `hello\n\n`,
+        pre_action: `hello\n\n`,
         content: `\n hi\n`,
         observation: `obs`,
       })
-    ).toEqual(
-      `${formatter.userToken}\nhello\n${formatter.assistantToken}\nhi\n${formatter.userToken}\nobs`
-    );
+    ).toEqual([
+      `${formatter.userToken}\nobs`,
+      `${formatter.assistantToken}\nhi`,
+      `${formatter.userToken}\nhello`,
+    ]);
 
     expect(
       formatter.formatMemory({
         pre_action: '\nhello\n',
         observation: '1029j',
       })
-    ).toEqual(`${formatter.userToken}\n1029j`);
+    ).toEqual([
+      `${formatter.userToken}\n1029j`,
+      `${formatter.userToken}\nhello`,
+    ]);
   });
 
   it('format actions', () => {
     const formatter = new MythoMaxPromptFormatter();
 
-    expect(formatter.formatActions()).toBeUndefined();
+    expect(formatter.formatActions()).toEqual('### Response:\n');
 
     expect(formatter.formatActions(' pre action ')).toEqual(
-      `${formatter.userToken}\npre action`
-    );
-    expect(formatter.formatActions(undefined, ' action')).toEqual(
-      `${formatter.userToken}\naction`
-    );
-    expect(formatter.formatActions('pre', ' action')).toEqual(
-      `${formatter.userToken}\npre action`
+      `${formatter.userToken}\npre action\n${formatter.assistantToken}`
     );
   });
 });
@@ -74,36 +67,34 @@ describe('OpenAI Prompt Formatter', () => {
   it('format memory', () => {
     const formatter = new OpenAIPromptFormatter();
 
-    expect(formatter.formatMemory({})).toBeUndefined();
+    expect(formatter.formatMemory({})).toEqual([]);
 
     expect(
       formatter.formatMemory({
         pre_action: 'hello',
       })
-    ).toBeUndefined();
+    ).toEqual([{ content: 'hello', role: 'user', tokens: 5 }]);
 
     expect(
       formatter.formatMemory({
-        action: 'hello\n\n',
+        pre_action: 'hello\n\n',
         content: '\nhi\n',
         observation: 'obs',
       })
-    ).toEqual('hello\nhi\nobs');
+    ).toEqual([
+      { content: 'obs', role: 'user', tokens: 5 },
+      { content: 'hi', role: 'assistant', tokens: 5 },
+      { content: 'hello', role: 'user', tokens: 5 },
+    ]);
 
     expect(
       formatter.formatMemory({
         pre_action: '\nhello\n',
         observation: '1029j',
       })
-    ).toEqual('1029j');
-  });
-
-  it('format actions', () => {
-    const formatter = new OpenAIPromptFormatter();
-    expect(formatter.formatActions()).toBeUndefined();
-
-    expect(formatter.formatActions('pre action')).toEqual(`pre action`);
-    expect(formatter.formatActions(undefined, 'action ')).toEqual(`action`);
-    expect(formatter.formatActions('pre', 'action')).toEqual(`pre action`);
+    ).toEqual([
+      { content: '1029j', role: 'user', tokens: 7 },
+      { content: 'hello', role: 'user', tokens: 5 },
+    ]);
   });
 });
