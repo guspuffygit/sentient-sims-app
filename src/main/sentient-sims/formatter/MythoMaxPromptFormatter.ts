@@ -11,11 +11,12 @@ import { removeLastParagraph, trimIncompleteSentence } from './PromptFormatter';
 export class MythoMaxPromptFormatter {
   private readonly maxTokens = 3950;
 
-  public readonly userToken = '### Instruction:';
+  public readonly userToken = '### Input:';
 
   public readonly assistantToken = '### Response:';
 
-  public readonly assistantActionResponseToken = '### Response:';
+  public readonly assistantActionResponseToken =
+    '### Response: (length = medium)';
 
   encode(prompt: string): number[] {
     return llamaTokenizer.encode(prompt);
