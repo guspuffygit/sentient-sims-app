@@ -29,7 +29,7 @@ export const defaultOriginalSystemPrompt = [
 ].join(' ');
 
 export const defaultCustomLLMPrompt = [
-  'Writing the story in the third person, describing scenes clearly, explicitly, in vivid detail',
+  'Continue writing the story in the third person, describing scenes clearly, explicitly, in vivid detail',
   "based on what's been said before using lots of dialog",
   'without predicting the future or giving a lesson',
   'ending each part on a cliffhanger, using the characters location and history provided:',
@@ -38,4 +38,4 @@ export const defaultCustomLLMPrompt = [
 export const sentientSimsAIHost = 'https://ai.sentientsimulations.com';
 
 export const defaultWantsPrompt =
-  'If you were the character in the story, what would you want to do?';
+  'If you were the character in the story, what would you want to do next?';
