@@ -1,5 +1,4 @@
 import { Box, FormControlLabel, TextField, Checkbox } from '@mui/material';
-import React from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting from '../hooks/useSetting';
 
@@ -19,7 +18,7 @@ export default function LocalizationSettingsComponent() {
       {!customLLMEnabled.value ? (
         <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
           <FormControlLabel
-            label="Localization"
+            label="Translate/Language"
             control={
               <Checkbox
                 checked={localizationEnabled.value}
