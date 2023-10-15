@@ -52,7 +52,7 @@ describe('MythoMax Prompt Formatter', () => {
     expect(formatter.formatActions()).toEqual('### Response:\n');
 
     expect(formatter.formatActions(' pre action ')).toEqual(
-      `${formatter.userToken}\npre action\n${formatter.assistantToken}`
+      `${formatter.userToken}\npre action\n${formatter.assistantActionResponseToken}`
     );
   });
 });
