@@ -91,6 +91,14 @@ export default function SendLogButton() {
           <Button
             color="secondary"
             variant="outlined"
+            sx={{ marginRight: 1 }}
+            onClick={() => navigate('/logs')}
+          >
+            Logs
+          </Button>
+          <Button
+            color="secondary"
+            variant="outlined"
             onClick={() => navigate('/last-exception')}
           >
             Last Exceptions

@@ -4,6 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material';
 import { Amplify } from 'aws-amplify';
+import '@patternfly/react-core/dist/styles/base.css';
 import '@aws-amplify/ui-react/styles.css';
 import { Authenticator } from '@aws-amplify/ui-react';
 import App from './App';
@@ -15,6 +16,7 @@ import ChatPage from './ChatPage';
 import LastExceptionPage from './LastExceptionPage';
 import LoginPage from './LoginPage';
 import { DebugModeProvider } from './providers/DebugModeProvider';
+import LogViewerPage from './LogViewerPage';
 
 const updatedAwsConfig = {
   ...awsExports,
@@ -50,6 +52,10 @@ const router = createMemoryRouter([
       {
         path: '/login',
         element: <LoginPage />,
+      },
+      {
+        path: '/logs',
+        element: <LogViewerPage />,
       },
     ],
   },

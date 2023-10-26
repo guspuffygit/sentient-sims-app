@@ -1,6 +1,7 @@
 import express from 'express';
 import log from 'electron-log';
 import { BrowserWindow } from 'electron';
+
 import { FileController } from './controllers/FileController';
 import { LastExceptionService } from './services/LastExceptionService';
 import { SettingsService } from './services/SettingsService';
@@ -20,6 +21,8 @@ import { PatreonController } from './controllers/PatreonController';
 import { PatreonService } from './services/PatreonService';
 import { MythoMaxPromptFormatter } from './formatter/MythoMaxPromptFormatter';
 import { OpenAIPromptFormatter } from './formatter/OpenAIPromptFormatter';
+import { LogsService } from './services/LogsService';
+import { startWebSocketServer } from './websocketServer';
 
 const settingsService = new SettingsService();
 const directoryService = new DirectoryService(settingsService);
@@ -50,6 +53,7 @@ const logSendService = new LogSendService(
   openAIService
 );
 const patreonService = new PatreonService(settingsService);
+const logsService = new LogsService(directoryService);
 const debugController = new DebugController(
   openAIService,
   logSendService,
@@ -104,6 +108,8 @@ export default function runApi(
   expressApp.post('/update/mod', updateController.updateMod);
 
   expressApp.get('/patreon-redirect', patreonController.handleRedirect);
+
+  startWebSocketServer(logsService, settingsService);
 
   expressApp.listen(port, () => {
     log.debug(`Server is running on port ${port}`);

@@ -10,11 +10,11 @@ import useSetting from 'renderer/hooks/useSetting';
 import log from 'electron-log';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import EditIcon from '@mui/icons-material/Edit';
-import React from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import AppCard from '../AppCard';
 import CustomLLMSettingsComponent from './CustomLLMSettings';
 import LocalizationSettingsComponent from './LocalizationSettingsComponent';
+import DebugLogsSettingsComponent from './DebugLogsSettingsComponent';
 
 export default function OpenAISettingsComponent() {
   const modsDirectory = useSetting(SettingsEnum.MODS_DIRECTORY);
@@ -62,6 +62,7 @@ export default function OpenAISettingsComponent() {
       </Box>
       <CustomLLMSettingsComponent />
       <LocalizationSettingsComponent />
+      <DebugLogsSettingsComponent />
     </AppCard>
   );
 }

@@ -193,7 +193,7 @@ export class LogSendService {
 
   private appendLogsFileToFormData(formData: FormData, errors: any[]) {
     try {
-      const logFile = this.directoryService.getLogsFile();
+      const logFile = this.directoryService.getLogsFileBuffer();
       const blob = new Blob([logFile], { type: 'application/octet-stream' });
       formData.append('logs', blob, 'logs.txt');
     } catch (err: any) {
