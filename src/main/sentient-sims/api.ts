@@ -23,6 +23,8 @@ import { MythoMaxPromptFormatter } from './formatter/MythoMaxPromptFormatter';
 import { OpenAIPromptFormatter } from './formatter/OpenAIPromptFormatter';
 import { LogsService } from './services/LogsService';
 import { startWebSocketServer } from './websocketServer';
+import { AnimationsController } from './controllers/AnimationsController';
+import { AnimationsService } from './services/AnimationsService';
 
 const settingsService = new SettingsService();
 const directoryService = new DirectoryService(settingsService);
@@ -54,12 +56,14 @@ const logSendService = new LogSendService(
 );
 const patreonService = new PatreonService(settingsService);
 const logsService = new LogsService(directoryService);
+const animationsService = new AnimationsService(settingsService);
 const debugController = new DebugController(
   openAIService,
   logSendService,
   customLLMService
 );
 const aiController = new AIController(openAIService, customLLMService);
+const animationsController = new AnimationsController(animationsService);
 
 export default function runApi(
   mainWindow: BrowserWindow,
@@ -108,6 +112,9 @@ export default function runApi(
   expressApp.post('/update/mod', updateController.updateMod);
 
   expressApp.get('/patreon-redirect', patreonController.handleRedirect);
+
+  expressApp.get('/animations', animationsController.getAnimations);
+  expressApp.post('/animations', animationsController.setAnimation);
 
   startWebSocketServer(logsService, settingsService);
 

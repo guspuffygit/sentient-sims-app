@@ -51,6 +51,10 @@ export const defaultStore = new Store({
       type: 'boolean',
       default: false,
     },
+    [SettingsEnum.NSFW_ENABLED.toString()]: {
+      type: 'boolean',
+      default: false,
+    },
   },
 });
 

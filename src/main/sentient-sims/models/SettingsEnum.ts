@@ -9,4 +9,5 @@ export enum SettingsEnum {
   LOCALIZATION_ENABLED = 'localizationEnabled',
   LOCALIZATION_LANGUAGE = 'localizationLanguage',
   DEBUG_LOGS = 'debugLogs',
+  NSFW_ENABLED = 'nsfwEnabled',
 }
