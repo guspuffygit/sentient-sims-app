@@ -187,6 +187,7 @@
     "rimraf": "^4.1.2",
     "sass": "^1.58.0",
     "sass-loader": "^13.2.0",
+    "sqlite3": "^5.1.6",
     "style-loader": "^3.3.1",
     "terser-webpack-plugin": "^5.3.6",
     "ts-jest": "^29.0.5",
