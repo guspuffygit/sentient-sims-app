@@ -63,11 +63,7 @@ export class SettingsService {
 
   // eslint-disable-next-line @typescript-eslint/no-shadow
   constructor(store?: Store) {
-    if (store) {
-      this.store = store;
-    } else {
-      this.store = defaultStore;
-    }
+    this.store = store ?? defaultStore;
   }
 
   getSetting(key: string) {
