@@ -2,6 +2,7 @@
 /* eslint-disable import/prefer-default-export */
 import * as fs from 'fs';
 import path from 'path';
+import log from 'electron-log';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { SettingsService } from './SettingsService';
 
@@ -116,5 +117,36 @@ export class DirectoryService {
     });
 
     return files;
+  }
+
+  getSentientSimsDb() {
+    return path.join(this.getSentientSimsFolder(), 'sentient-sims.db');
+  }
+
+  getSentientSimsDbUnsaved() {
+    return path.join(this.getSentientSimsFolder(), 'sentient-sims-unsaved.db');
+  }
+
+  static fileExistsSync(filePath: string): boolean {
+    try {
+      fs.accessSync(filePath, fs.constants.F_OK);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  listDirectoriesSync(directoryPath: string): string[] {
+    try {
+      const contents = fs.readdirSync(directoryPath);
+      const directories = contents.filter((item) => {
+        const itemPath = path.join(directoryPath, item);
+        return fs.statSync(itemPath).isDirectory();
+      });
+      return directories;
+    } catch (error) {
+      log.error('Error occurred while listing directories:', error);
+      return [];
+    }
   }
 }

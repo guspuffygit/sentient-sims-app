@@ -25,6 +25,10 @@ import { LogsService } from './services/LogsService';
 import { startWebSocketServer } from './websocketServer';
 import { AnimationsController } from './controllers/AnimationsController';
 import { AnimationsService } from './services/AnimationsService';
+import { DbService } from './services/DbService';
+import { DbController } from './controllers/DbController';
+import { ParticipantRepository } from './db/ParticipantRepository';
+import { ParticipantsController } from './controllers/ParticipantsController';
 
 const settingsService = new SettingsService();
 const directoryService = new DirectoryService(settingsService);
@@ -42,6 +46,10 @@ const customLLMService = new CustomLLMService(
   new MythoMaxPromptFormatter()
 );
 const fileController = new FileController(lastExceptionService);
+const dbService = new DbService(directoryService);
+const dbController = new DbController(dbService);
+const participantRepository = new ParticipantRepository(dbService);
+const participantController = new ParticipantsController(participantRepository);
 const updateController = new UpdateController(updateService);
 const settingsController = new SettingsController(
   directoryService,
@@ -111,7 +119,25 @@ export default function runApi(
 
   expressApp.post('/update/mod', updateController.updateMod);
 
+  // TODO: Deprecated
+  expressApp.post('/participants', participantController.getParticipants);
+  expressApp.get(
+    '/participants/:participantId',
+    participantController.getParticipant
+  );
+  expressApp.post(
+    '/participants/:participantId',
+    participantController.updateParticipant
+  );
+  expressApp.delete(
+    '/participants/:participantId',
+    participantController.deleteParticipant
+  );
+
   expressApp.get('/patreon-redirect', patreonController.handleRedirect);
+
+  expressApp.get('/db/load', dbController.loadDatabase);
+  expressApp.get('/db/save', dbController.saveDatabase);
 
   expressApp.get('/animations', animationsController.getAnimations);
   expressApp.post('/animations', animationsController.setAnimation);
