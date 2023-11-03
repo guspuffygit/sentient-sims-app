@@ -10,6 +10,13 @@ function MenuBar() {
   const debugMode = useDebugMode();
   useAuthCredentials();
 
+  const handleOpenWiki = (event: any) => {
+    event.preventDefault();
+    window.electron.openBrowserLink(
+      'https://github.com/guspuffygit/sentient-sims-app/wiki'
+    );
+  };
+
   return (
     <Box sx={{ flexGrow: 1, marginBottom: 2 }}>
       <AppBar
@@ -25,6 +32,13 @@ function MenuBar() {
               sx={{ margin: '10px' }}
             >
               HOME
+            </Button>
+            <Button
+              color="secondary"
+              onClick={handleOpenWiki}
+              sx={{ margin: '10px' }}
+            >
+              Wiki
             </Button>
           </div>
           <div>

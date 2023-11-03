@@ -42,6 +42,9 @@ const electronHandler = {
     }
     return removeListener;
   },
+  openBrowserLink: (link: string) => {
+    ipcRenderer.send('open-browser-link', link);
+  },
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

@@ -1,4 +1,4 @@
-import { IpcMainEvent, dialog, ipcMain, BrowserWindow } from 'electron';
+import { IpcMainEvent, dialog, ipcMain, BrowserWindow, shell } from 'electron';
 import log from 'electron-log';
 import { SettingsEnum } from './models/SettingsEnum';
 import { SettingsService } from './services/SettingsService';
@@ -33,5 +33,8 @@ export default function ipcHandlers(mainWindow: BrowserWindow) {
   });
   ipcMain.on('on-successful-auth', () => {
     mainWindow.loadURL(resolveHtmlPath('index.html'));
+  });
+  ipcMain.on('open-browser-link', (_event: IpcMainEvent, link: string) => {
+    shell.openExternal(link);
   });
 }
