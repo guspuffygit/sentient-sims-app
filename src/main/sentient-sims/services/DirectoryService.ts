@@ -123,8 +123,24 @@ export class DirectoryService {
     return path.join(this.getSentientSimsFolder(), 'sentient-sims.db');
   }
 
-  getSentientSimsDbUnsaved() {
-    return path.join(this.getSentientSimsFolder(), 'sentient-sims-unsaved.db');
+  getSentientSimsDbUnsaved(sessionId: string) {
+    return path.join(
+      this.getSentientSimsFolder(),
+      `${sessionId}-sentient-sims-unsaved.db`
+    );
+  }
+
+  listSentientSimsDbUnsaved() {
+    try {
+      const folderPath = this.getSentientSimsFolder();
+      const files = fs.readdirSync(folderPath);
+      return files
+        .filter((file) => file.endsWith('-sentient-sims-unsaved.db'))
+        .map((file) => path.join(folderPath, file));
+    } catch (error) {
+      log.error('Error reading directory:', error);
+      return [];
+    }
   }
 
   static fileExistsSync(filePath: string): boolean {

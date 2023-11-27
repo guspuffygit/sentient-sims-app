@@ -16,21 +16,24 @@ export class DbService {
     this.directoryService = directoryService;
   }
 
-  async loadDatabase() {
+  async loadDatabase(sessionId: string) {
     // Create a "working" version of the database and only commit changes to it if the game saves
     if (
+      !DirectoryService.fileExistsSync(
+        this.directoryService.getSentientSimsDbUnsaved(sessionId)
+      ) &&
       DirectoryService.fileExistsSync(this.directoryService.getSentientSimsDb())
     ) {
       fs.copyFileSync(
         this.directoryService.getSentientSimsDb(),
-        this.directoryService.getSentientSimsDbUnsaved()
+        this.directoryService.getSentientSimsDbUnsaved(sessionId)
       );
     }
 
     // Promise to handle database opening
     await new Promise<void>((resolve, reject) => {
       this.db = new sqlite3.Database(
-        this.directoryService.getSentientSimsDbUnsaved(),
+        this.directoryService.getSentientSimsDbUnsaved(sessionId),
         (err) => {
           if (err) {
             log.error('Error opening database', err);
@@ -53,24 +56,26 @@ export class DbService {
     }
   }
 
-  saveDatabase() {
+  saveDatabase(sessionId: string) {
     if (
       DirectoryService.fileExistsSync(
-        this.directoryService.getSentientSimsDbUnsaved()
+        this.directoryService.getSentientSimsDbUnsaved(sessionId)
       )
     ) {
       fs.copyFileSync(
-        this.directoryService.getSentientSimsDbUnsaved(),
+        this.directoryService.getSentientSimsDbUnsaved(sessionId),
         this.directoryService.getSentientSimsDb()
       );
     }
+
+    // Cleanup old unsaved databases
+    this.directoryService
+      .listSentientSimsDbUnsaved()
+      .filter((unsavedDb) => !unsavedDb.includes(sessionId))
+      .forEach((unsavedDb) => fs.rmSync(unsavedDb));
   }
 
   async getDb() {
-    if (!this.db) {
-      await this.loadDatabase();
-    }
-
     if (this.db) {
       return this.db;
     }

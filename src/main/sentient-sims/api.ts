@@ -136,8 +136,8 @@ export default function runApi(
 
   expressApp.get('/patreon-redirect', patreonController.handleRedirect);
 
-  expressApp.get('/db/load', dbController.loadDatabase);
-  expressApp.get('/db/save', dbController.saveDatabase);
+  expressApp.get('/db/load/:sessionId', dbController.loadDatabase);
+  expressApp.get('/db/save/:sessionId', dbController.saveDatabase);
 
   expressApp.get('/animations', animationsController.getAnimations);
   expressApp.post('/animations', animationsController.setAnimation);
