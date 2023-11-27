@@ -15,9 +15,11 @@ export class DbController {
   }
 
   async loadDatabase(req: Request, res: Response) {
-    log.debug('Loading database');
     try {
-      await this.dbService.loadDatabase();
+      const { sessionId } = req.params;
+      log.debug(`Loading database: ${sessionId}`);
+
+      await this.dbService.loadDatabase(sessionId);
       return res.json({ text: 'Db Loaded' });
     } catch (err: any) {
       log.error('Error loading database', err);
@@ -26,9 +28,11 @@ export class DbController {
   }
 
   saveDatabase(req: Request, res: Response) {
-    log.debug('Saving database');
     try {
-      this.dbService.saveDatabase();
+      const { sessionId } = req.params;
+      log.debug(`Saving database: ${sessionId}`);
+
+      this.dbService.saveDatabase(sessionId);
       return res.json({ text: 'Db Saved' });
     } catch (err: any) {
       log.error('Error saving database', err);
