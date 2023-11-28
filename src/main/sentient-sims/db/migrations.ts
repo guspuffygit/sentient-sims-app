@@ -16,6 +16,17 @@ export const migrations: Map<string, string> = new Map([
     );
   `,
   ],
+  [
+    '002-create-location-table',
+    `
+    CREATE TABLE location ( 
+      id                   INTEGER NOT NULL  PRIMARY KEY  ,
+      name                 TEXT     ,
+      lot_type             TEXT     ,
+      description          TEXT     
+    );
+  `,
+  ],
 ]);
 
 const createDbMigrationsTable = async (db: Database) => {

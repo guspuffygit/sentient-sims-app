@@ -13,6 +13,7 @@ describe('ParticipantRepository', () => {
       recursive: true,
     });
     const dbService = new DbService(directoryService);
+    await dbService.loadDatabase('9587321');
     const participantRepository = new ParticipantRepository(dbService);
 
     const participant: ParticipantEntity = {

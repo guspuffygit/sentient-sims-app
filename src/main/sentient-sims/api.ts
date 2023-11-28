@@ -29,6 +29,8 @@ import { DbService } from './services/DbService';
 import { DbController } from './controllers/DbController';
 import { ParticipantRepository } from './db/ParticipantRepository';
 import { ParticipantsController } from './controllers/ParticipantsController';
+import { LocationRepository } from './db/LocationRepository';
+import { LocationsController } from './controllers/LocationsController';
 
 const settingsService = new SettingsService();
 const directoryService = new DirectoryService(settingsService);
@@ -49,7 +51,11 @@ const fileController = new FileController(lastExceptionService);
 const dbService = new DbService(directoryService);
 const dbController = new DbController(dbService);
 const participantRepository = new ParticipantRepository(dbService);
-const participantController = new ParticipantsController(participantRepository);
+const locationRepository = new LocationRepository(dbService);
+const participantsController = new ParticipantsController(
+  participantRepository
+);
+const locationsController = new LocationsController(locationRepository);
 const updateController = new UpdateController(updateService);
 const settingsController = new SettingsController(
   directoryService,
@@ -120,18 +126,25 @@ export default function runApi(
   expressApp.post('/update/mod', updateController.updateMod);
 
   // TODO: Deprecated
-  expressApp.post('/participants', participantController.getParticipants);
+  expressApp.post('/participants', participantsController.getParticipants);
   expressApp.get(
     '/participants/:participantId',
-    participantController.getParticipant
+    participantsController.getParticipant
   );
   expressApp.post(
     '/participants/:participantId',
-    participantController.updateParticipant
+    participantsController.updateParticipant
   );
   expressApp.delete(
     '/participants/:participantId',
-    participantController.deleteParticipant
+    participantsController.deleteParticipant
+  );
+
+  expressApp.get('/locations/:locationId', locationsController.getLocation);
+  expressApp.post('/locations', locationsController.updateLocation);
+  expressApp.delete(
+    '/locations/:locationId',
+    locationsController.deleteLocation
   );
 
   expressApp.get('/patreon-redirect', patreonController.handleRedirect);
