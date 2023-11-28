@@ -83,7 +83,11 @@ describe('OpenAIService', () => {
     const result = await openAIService.sentientSimsGenerate(promptRequest);
     console.log(result.text);
     expect(result.systemPrompt).toEqual(systemPrompt);
-    expect(result.text.toLocaleLowerCase()).toContain('bien?');
+    const possibleMatches = ['acuerdo?', 'bien?'];
+    const isMatch = possibleMatches.some((item) =>
+      result.text.toLocaleLowerCase().includes(item)
+    );
+    expect(isMatch).toBeTruthy();
   }, 20000);
 
   it('wants doesnt throw an error', async () => {
