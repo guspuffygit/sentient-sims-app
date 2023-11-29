@@ -38,7 +38,7 @@
     "start:main": "cross-env NODE_ENV=development electronmon -r ts-node/register/transpile-only .",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
-    "test": "jest '\\.test\\.ts' '\\.test\\.tsx'"
+    "test": "jest 'MemoryRepository.test.ts'"
   },
   "browserslist": [],
   "prettier": {
@@ -115,6 +115,7 @@
     "@widgetbot/react-embed": "^1.7.0",
     "adm-zip": "^0.5.10",
     "aws-amplify": "^5.3.6",
+    "better-sqlite3": "^9.1.1",
     "electron-debug": "^3.2.0",
     "electron-log": "^5.0.0-beta.24",
     "electron-store": "^8.1.0",
@@ -138,6 +139,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
     "@types/adm-zip": "^0.5.0",
+    "@types/better-sqlite3": "^7.6.8",
     "@types/jest": "^29.5.1",
     "@types/node": "18.16.2",
     "@types/react": "^18.2.0",

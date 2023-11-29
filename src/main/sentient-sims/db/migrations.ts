@@ -1,5 +1,5 @@
 import log from 'electron-log';
-import { Database } from 'sqlite3';
+import { Database } from 'better-sqlite3';
 
 export type DbMigration = {
   name: string;
@@ -23,7 +23,31 @@ export const migrations: Map<string, string> = new Map([
       id                   INTEGER NOT NULL  PRIMARY KEY  ,
       name                 TEXT     ,
       lot_type             TEXT     ,
-      description          TEXT     
+      description          TEXT
+    );
+  `,
+  ],
+  [
+    '003-create-memory-table',
+    `
+    CREATE TABLE memory (
+      id                   INTEGER PRIMARY KEY  ,
+      pre_action           TEXT     ,
+      observation          TEXT     ,
+      content              TEXT     ,
+      timestamp            DATETIME DEFAULT CURRENT_TIMESTAMP ,
+      location_id          INTEGER NOT NULL
+    );
+  `,
+  ],
+  [
+    '004-create-memory-participants-table',
+    `
+    CREATE TABLE memory_participants (
+      id                   INTEGER PRIMARY KEY  ,
+      participant_id       INTEGER NOT NULL    ,
+      memory_id            INTEGER NOT NULL    ,
+      FOREIGN KEY ( memory_id ) REFERENCES memory( id ) ON DELETE CASCADE ON UPDATE CASCADE
     );
   `,
   ],
@@ -70,7 +94,10 @@ const applyMigration = async (db: Database, dbMigration: DbMigration) => {
           'INSERT INTO migrations (name) VALUES (?)',
           dbMigration.name,
           (err) => {
-            if (err) return reject(err);
+            if (err) {
+              log.error(`Error applying migration: ${err}`);
+              return reject(err);
+            }
             return resolve();
           }
         );

@@ -1,16 +1,13 @@
 /* eslint-disable promise/always-return */
-import sqlite3 from 'sqlite3';
 import * as fs from 'fs';
 import log from 'electron-log';
 import { DirectoryService } from './DirectoryService';
 import { migrate } from '../db/migrations';
 
-sqlite3.verbose();
-
 export class DbService {
   private directoryService: DirectoryService;
 
-  private db?: sqlite3.Database;
+  private db?: Database;
 
   constructor(directoryService: DirectoryService) {
     this.directoryService = directoryService;
@@ -32,7 +29,7 @@ export class DbService {
 
     // Promise to handle database opening
     await new Promise<void>((resolve, reject) => {
-      this.db = new sqlite3.Database(
+      this.db = new Database(
         this.directoryService.getSentientSimsDbUnsaved(sessionId),
         (err) => {
           if (err) {
@@ -83,16 +80,16 @@ export class DbService {
     throw new Error('Database is not loaded yet!');
   }
 
-  async run(sql: string, params: any) {
+  async run(sql: string, params?: any) {
     const db = await this.getDb();
-    await new Promise<void>((resolve, reject) => {
+    return new Promise<number>((resolve, reject) => {
       db.run(sql, params, function doRun(err) {
         if (err) {
           log.error('Error in db run', err);
           return reject(err); // Reject the promise with the error
         }
 
-        return resolve(); // Resolve the promise when successful
+        return resolve(this.lastID); // Resolve the promise when successful
       });
     });
   }
@@ -107,6 +104,20 @@ export class DbService {
         }
 
         return resolve(rows);
+      });
+    });
+  }
+
+  async serialize(
+    callback: (
+      resolve: (value: any[] | PromiseLike<any[]>) => void,
+      reject: (reason?: any) => void
+    ) => void
+  ) {
+    const db = await this.getDb();
+    return new Promise<any[]>((resolve, reject) => {
+      db.serialize(() => {
+        callback(resolve, reject);
       });
     });
   }
