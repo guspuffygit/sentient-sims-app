@@ -25,7 +25,7 @@ describe('MemoryRepository', () => {
       content: 'foiwje9if91082u',
       observation: 'joijofi10298',
     };
-    const result = await memoryRepository.createMemory({
+    const result = memoryRepository.createMemory({
       memory,
       participants,
     });
@@ -36,10 +36,12 @@ describe('MemoryRepository', () => {
     expect(result.location_id).toEqual(memory.location_id);
     expect(result.timestamp).toBeDefined();
 
-    const memoryParticipants = await memoryRepository.getMemoryParticipants({
+    // Check createMemory also created memory_participants rows
+    const memoryParticipants = memoryRepository.getMemoryParticipants({
       memory_id: Number(result.id),
     });
     expect(memoryParticipants).toHaveLength(2);
+
     const participantIds = participants.map((participant) => participant.id);
     memoryParticipants.forEach((memoryParticipant) => {
       expect(memoryParticipant.memory_id).toEqual(result.id);
@@ -50,50 +52,49 @@ describe('MemoryRepository', () => {
     memory.id = result.id;
     memory.observation = expectedObservation;
 
-    const updateResult = await memoryRepository.updateMemory(memory);
-    expect(memory.id).toEqual(updateResult);
+    memoryRepository.updateMemory(memory);
 
-    const updatedMemory = await memoryRepository.getMemory({
-      id: updateResult,
+    const updatedMemory = memoryRepository.getMemory({
+      id: Number(memory.id),
     });
     expect(updatedMemory.observation).toEqual(expectedObservation);
 
-    const results = await memoryRepository.getMemories();
+    const results = memoryRepository.getMemories();
     expect(results).toHaveLength(1);
     expect(updatedMemory).toEqual(results[0]);
 
-    const noParticipantMemories =
-      await memoryRepository.getParticipantsMemories({
-        participant_ids: [9857897436],
-      });
+    const noParticipantMemories = memoryRepository.getParticipantsMemories({
+      participant_ids: [9857897436],
+    });
     expect(noParticipantMemories).toHaveLength(0);
-    const participantMemories = await memoryRepository.getParticipantsMemories({
+
+    const participantMemories = memoryRepository.getParticipantsMemories({
       participant_ids: [128937674, 18276365],
     });
     expect(participantMemories).toHaveLength(1);
 
     // Delete item
-    await memoryRepository.deleteMemory({ id: updateResult });
-    const noResults = await memoryRepository.getMemories();
+    memoryRepository.deleteMemory({ id: Number(memory.id) });
+    const noResults = memoryRepository.getMemories();
     expect(noResults).toHaveLength(0);
 
     // Links rows in memory_participants table should be cascade deleted
-    const noMemoryParticipants = await memoryRepository.getMemoryParticipants({
+    const noMemoryParticipants = memoryRepository.getMemoryParticipants({
       memory_id: Number(result.id),
     });
     expect(noMemoryParticipants).toHaveLength(0);
 
     // Test deleteAllMemories
-    await memoryRepository.createMemory({
+    memoryRepository.createMemory({
       memory,
       participants,
     });
-    await memoryRepository.createMemory({
+    memoryRepository.createMemory({
       memory,
       participants,
     });
-    await memoryRepository.deleteAllMemories();
-    const noResultsDeleteAll = await memoryRepository.getMemories();
+    memoryRepository.deleteAllMemories();
+    const noResultsDeleteAll = memoryRepository.getMemories();
     expect(noResultsDeleteAll).toHaveLength(0);
   });
 });

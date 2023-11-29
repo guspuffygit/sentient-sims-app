@@ -11,13 +11,13 @@ export class LocationRepository extends Repository {
 
    * @returns {Promise<ParticipantEntity>} A promise that resolves to the location entity.
    */
-  async getLocation(
-    locationRequest: GetLocationRequest
-  ): Promise<LocationEntity> {
-    const query = `SELECT * FROM location WHERE id = ?`;
-    const result = await this.dbService.all(query, [locationRequest.id]);
-    if (result.length > 0) {
-      return result[0];
+  getLocation(locationRequest: GetLocationRequest): LocationEntity {
+    const results = this.dbService
+      .getDb()
+      .prepare('SELECT * FROM location WHERE id = ?')
+      .all([locationRequest.id]) as LocationEntity[];
+    if (results.length > 0) {
+      return results[0];
     }
 
     return (
@@ -44,16 +44,24 @@ export class LocationRepository extends Repository {
    * @param {ParticipantEntity} location - The location entity to update or insert.
    * @returns {Promise<void>} A promise that resolves when the operation is complete.
    */
-  async updateLocation(location: LocationEntity) {
-    return this.dbService.run(
-      'INSERT OR REPLACE INTO location(id, name, lot_type, description) VALUES(?, ?, ?, ?)',
-      [location.id, location.name, location.lot_type, location.description]
-    );
+  updateLocation(location: LocationEntity) {
+    return this.dbService
+      .getDb()
+      .prepare(
+        'INSERT OR REPLACE INTO location(id, name, lot_type, description) VALUES(?, ?, ?, ?)'
+      )
+      .run([
+        location.id,
+        location.name,
+        location.lot_type,
+        location.description,
+      ]);
   }
 
-  async deleteLocation(location: DeleteLocationRequest) {
-    return this.dbService.run('DELETE FROM location WHERE id = ?', [
-      location.id,
-    ]);
+  deleteLocation(location: DeleteLocationRequest) {
+    return this.dbService
+      .getDb()
+      .prepare('DELETE FROM location WHERE id = ?')
+      .run([location.id]);
   }
 }
