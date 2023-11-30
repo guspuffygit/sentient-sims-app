@@ -6,52 +6,42 @@ export type DbMigration = {
   sql: string;
 };
 
-export const migrations: Map<string, string> = new Map([
-  [
-    '001-create-participant-table',
-    `
-    CREATE TABLE participant (
-      id                   INTEGER NOT NULL  PRIMARY KEY  ,
-      description          TEXT
-    );
-  `,
-  ],
-  [
-    '002-create-location-table',
-    `
-    CREATE TABLE location (
-      id                   INTEGER NOT NULL  PRIMARY KEY  ,
-      name                 TEXT     ,
-      lot_type             TEXT     ,
-      description          TEXT
-    );
-  `,
-  ],
-  [
-    '003-create-memory-table',
-    `
-    CREATE TABLE memory (
-      id                   INTEGER PRIMARY KEY  ,
-      pre_action           TEXT     ,
-      observation          TEXT     ,
-      content              TEXT     ,
-      timestamp            DATETIME DEFAULT CURRENT_TIMESTAMP ,
-      location_id          INTEGER NOT NULL
-    );
-  `,
-  ],
-  [
-    '004-create-memory-participants-table',
-    `
-    CREATE TABLE memory_participants (
-      id                   INTEGER PRIMARY KEY  ,
-      participant_id       INTEGER NOT NULL    ,
-      memory_id            INTEGER NOT NULL    ,
-      FOREIGN KEY ( memory_id ) REFERENCES memory( id ) ON DELETE CASCADE ON UPDATE CASCADE
-    );
-  `,
-  ],
-]);
+export const migrations: Map<string, string> = new Map(
+  Object.entries({
+    '001-create-participant-table': `
+      CREATE TABLE participant (
+        id                   INTEGER NOT NULL  PRIMARY KEY  ,
+        description          TEXT
+      );
+    `,
+    '002-create-location-table': `
+      CREATE TABLE location (
+        id                   INTEGER NOT NULL  PRIMARY KEY  ,
+        name                 TEXT     ,
+        lot_type             TEXT     ,
+        description          TEXT
+      );
+    `,
+    '003-create-memory-table': `
+      CREATE TABLE memory (
+        id                   INTEGER PRIMARY KEY  ,
+        pre_action           TEXT     ,
+        observation          TEXT     ,
+        content              TEXT     ,
+        timestamp            DATETIME DEFAULT CURRENT_TIMESTAMP ,
+        location_id          INTEGER NOT NULL
+      );
+    `,
+    '004-create-memory-participants-table': `
+      CREATE TABLE memory_participants (
+        id                   INTEGER PRIMARY KEY  ,
+        participant_id       INTEGER NOT NULL    ,
+        memory_id            INTEGER NOT NULL    ,
+        FOREIGN KEY ( memory_id ) REFERENCES memory( id ) ON DELETE CASCADE ON UPDATE CASCADE
+      );
+    `,
+  })
+);
 
 const createDbMigrationsTable = (db: Database) => {
   db.prepare(

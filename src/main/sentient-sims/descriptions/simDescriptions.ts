@@ -1,7 +1,6 @@
-export const defaultSimDescriptions: Map<String, string> = new Map([
-  [
-    'Travis Scott',
-    [
+export const defaultSimDescriptions: Map<String, string> = new Map(
+  Object.entries({
+    'Travis Scott': [
       'In the sun-drenched neighborhood of Oasis Springs, Travis Scott was known as a tech-savvy whiz kid with a magnetic personality.',
       'A young adult with an unquenchable thirst for knowledge, he had already made his mark in the world of programming and video gaming, swiftly climbing the ranks of expertise.',
       'Sharing a home with his equally ambitious roommates, Mitchell Kalani and Gavin Richards, Travis had found a perfect balance between his work as a Live Chat Support Agent and his ever-growing circle of friends.',
@@ -10,10 +9,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Gael Gonzalez',
-    [
+    'Gael Gonzalez': [
       'Gael Gonzalez, a fun-loving individual with an infectious zest for life, often found himself surrounded by friends and family, filling the room with laughter and warmth.',
       'His passion for cooking knew no bounds, as he eagerly experimented with new recipes, fusing flavors to create culinary masterpieces.',
       "A natural-born entertainer, Gael's wit and charm captivated those around him, while his keen sense of style never failed to leave an impression.",
@@ -22,10 +18,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Tank Grunt',
-    [
+    'Tank Grunt': [
       'Tank Grunt, a man of unwavering discipline and military prowess, stands out amongst the peculiar inhabitants of the enigmatic Strangetown neighborhood.',
       "With his unmistakable buzz cut and rugged, chiseled features, Tank's no-nonsense demeanor is mirrored in his choice of utilitarian attire.",
       'A testament to his military upbringing, he boasts exceptional fitness skills, dedicating his leisure hours to achieving peak physical condition.',
@@ -35,10 +28,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Loki Beaker',
-    [
+    'Loki Beaker': [
       'Loki Beaker, a mischievous and brilliant man, made his home in the peculiar town of Strangetown.',
       'His eccentric personality and fervent passion for science were well-known among the townsfolk.',
       'With hair as fiery as his intellect, and skin as pale as his laboratory walls, Loki was an easily recognizable figure.',
@@ -50,10 +40,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Buck Grunt',
-    [
+    'Buck Grunt': [
       "Buck Grunt, hailing from the enigmatic neighborhood of Strangetown, is a young man caught in the crossfire between his family's military heritage and his own dreams.",
       "As the youngest of three brothers, Buck can't help but feel eclipsed by their accomplishments, all the while yearning for a future in professional gaming.",
       'His short, brown hair and casual attire of a t-shirt and jeans speak to his easy-going nature.',
@@ -64,10 +51,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Sydney Wright',
-    [
+    'Sydney Wright': [
       'Sydney Wright, a young adult with an effervescent personality, was known for her ability to make friends wherever she went.',
       'Her creative and ambitious nature led her to immerse herself in the world of arts, chasing her dreams in the entertainment industry.',
       'Blessed with a natural talent for music, Sydney could often be found strumming her guitar or practicing her vocal skills, honing her craft with dedication.',
@@ -79,10 +63,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    "Babs L'Amour",
-    [
+    "Babs L'Amour": [
       "Babs L'Amour, a woman of undeniable allure, captivated the hearts of those around her with her fiery red hair and enchanting green eyes.",
       'Her romantic nature was evident in her flirtatious conversations and relentless pursuit of love.',
       'Babs had a gift for nurturing relationships and brought people together, fostering connections in her community.',
@@ -93,10 +74,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    "Bjorn Tu'Rock",
-    [
+    "Bjorn Tu'Rock": [
       "Bjorn Tu'Rock, with his bold personality and distinctive appearance, never failed to stand out in a crowd.",
       'His stylish hairstyle and fashionable clothing spoke of a man who knew how to make an impression.',
       'A social butterfly, Bjorn easily engaged in conversations, his infectious sense of humor and charisma drawing people to him like moths to a flame.',
@@ -107,10 +85,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Gladys Morse',
-    [
+    'Gladys Morse': [
       'Gladys Morse was the embodiment of creativity and artistry, her fingers dancing gracefully across the strings of her guitar or leaving trails of vibrant colors on a canvas.',
       'Her laughter was contagious, her friendly and outgoing nature drawing people towards her like moths to a flame.',
       'With dreams of raising a big, loving family, she filled her home with hearty meals crafted from innovative recipes that she eagerly shared with friends and family.',
@@ -121,10 +96,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Morgan Park',
-    [
+    'Morgan Park': [
       'Morgan Park was the embodiment of charm and creativity, with an artistic flair that seemed to flow effortlessly through their fingertips.',
       'Their friendly demeanor acted as a magnet, drawing in neighbors and strangers alike, transforming them into friends and confidants.',
       "Ambition coursed through Morgan's veins, driving them to seize every opportunity to improve their skills and achieve their goals, often burning the midnight oil in the pursuit of greatness.",
@@ -135,10 +107,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Kasen Henry',
-    [
+    'Kasen Henry': [
       'Kasen Henry was a true artistic soul, his hands perpetually stained with the vibrant hues of his latest masterpiece.',
       'His eyes, filled with the tenderness of a hopeless romantic, eagerly searched for the one person who could complete his picturesque life.',
       'With a captivating charm and a razor-sharp wit, Kasen effortlessly attracted friends, creating an intricate tapestry of connections that he cherished deeply.',
@@ -149,10 +118,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Liberty Lee',
-    [
+    'Liberty Lee': [
       'Liberty Lee, a spirited young woman with a shock of short, red hair and signature glasses, made her home in the bustling town of Willow Creek.',
       'Her cheerful and ambitious nature found a perfect outlet in her love for science, as she aspired to venture into the cosmos as an astronaut.',
       'Liberty shared her abode with her friends Travis Scott and Summer Holiday, the household forever brimming with laughter and lively conversations.',
@@ -162,10 +128,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Bella Goth',
-    [
+    'Bella Goth': [
       'Bella Goth, a captivating and enigmatic woman, was the epitome of elegance and mystery.',
       'As a prominent member of the distinguished Goth family, her life seemed to revolve around her husband, Mortimer, and their two children, Cassandra and Alexander.',
       "Bella's striking appearance, often adorned in a long, flowing red dress and black gloves, was only matched by her unique and intricate updo - a perfect complement to her dark red lipstick and winged eyeliner.",
@@ -177,10 +140,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Betty Newbie',
-    [
+    'Betty Newbie': [
       'Betty Newbie, with her vivacious smile and fiery red hair, was the embodiment of warmth and friendliness.',
       'She approached life with an insatiable zest, always eager to forge new connections and explore the world around her.',
       'As one half of an iconic couple, she and her husband Bob Newbie, stood as the epitome of love and partnership.',
@@ -190,10 +150,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Holly Vinedal',
-    [
+    'Holly Vinedal': [
       'Holly Vinedal, an elegant and sophisticated woman, was renowned for her love of nature and exceptional gardening skills.',
       'With every graceful stride, Holly exuded charm and intelligence, qualities that effortlessly drew others into her orbit.',
       'As an aspiring freelance botanist, she dedicated her days to nourishing the lush gardens that enveloped her home, a harmonious fusion of modern and rustic design.',
@@ -204,10 +161,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Hunter Evans',
-    [
+    'Hunter Evans': [
       'Hunter Evans is a charismatic and outgoing young man who loves to make friends and socialize with others.',
       'He has a natural talent for making people feel at ease, thanks to his friendly demeanor and genuine interest in their lives.',
       'Hunter is also quite ambitious, always seeking ways to advance his career and improve his skills.',
@@ -220,10 +174,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Farrah Nouvel',
-    [
+    'Farrah Nouvel': [
       'Farrah Nouvel, a woman of style and ambition, never fails to turn heads with her bold and fashionable ensembles.',
       'Her effervescent personality naturally draws people in, making her the life and soul of every gathering.',
       "Besides being an aspiring artist, Farrah's creative passions span across painting, photography, and interior design, as she tirelessly hones her skills and sells her masterpieces to sustain her livelihood.",
@@ -234,10 +185,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Armand DiAggro',
-    [
+    'Armand DiAggro': [
       'Armand DiAggro, a stylish and confident individual, always knew how to make a statement with his bold fashion choices and flair for the dramatic.',
       'His unique hairstyle and striking facial features set him apart from the crowd, while his outgoing nature and ability to make friends quickly made him a frequent guest at the trendiest spots in town.',
       'Ambitious and determined, Armand constantly strove for success in his career and personal life, indulging in gourmet meals and expensive hobbies to satisfy his love for the finer things in life.',
@@ -248,10 +196,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Johnny Smith',
-    [
+    'Johnny Smith': [
       'In the peculiar neighborhood of Strangetown, Johnny Smith stood out like a beacon with his vibrant green skin, a testament to his unique heritage.',
       'The son of Pollination Technician 9 and Jenny Smith, Johnny was blessed with an adventurous spirit that was only matched by his insatiable curiosity for the cosmos.',
       'As a young adult, he was the epitome of a well-rounded individual, gifted with the qualities of a genius, a kind heart, and an unyielding energy.',
@@ -260,10 +205,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Eliza Pancakes',
-    [
+    'Eliza Pancakes': [
       "Eliza Pancakes resided in the quaint Willow Creek neighborhood, her presence as vibrant as the town's lush greenery.",
       'A passionate culinary artist, she strived to achieve the prestigious title of Master Chef, her nimble hands skilled in both cooking and gardening.',
       'With a cheerful, neat, and outgoing personality, Eliza easily captured the hearts of her many social media followers as she shared her life experiences with them.',
@@ -275,10 +217,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'James Stock',
-    [
+    'James Stock': [
       'James Stock was the epitome of charisma, a man who thrived in social situations and effortlessly drew others into his orbit.',
       'With a sculpted physique honed by hours spent in the gym and countless miles jogging through the neighborhood, he exuded an air of confidence and ambition that others found irresistible.',
       "In the quiet moments stolen between his professional pursuits and vigorous fitness routine, James found solace in the culinary arts, skillfully wielding his chef's knife to create mouthwatering feasts and experiment with new recipes.",
@@ -288,10 +227,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Don Lothario',
-    [
+    'Don Lothario': [
       'Don Lothario, a striking and captivating young man, was notorious for his amorous escapades, as he effortlessly charmed the hearts of many in the sun-drenched Oasis Springs neighborhood.',
       'Residing in an elegant, contemporary abode that matched his charismatic persona, Don worked diligently as an orderly, with aspirations of one day becoming the Chief of Staff.',
       'His romantic conquests were the talk of the town; the beautiful Caliente sisters and enigmatic Bella Goth, just a few of the many who had fallen under his spell.',
@@ -301,10 +237,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Nova Curious',
-    [
+    'Nova Curious': [
       'Nova Curious was an enigmatic figure with an insatiable thirst for knowledge, standing out in any crowd with her fiery red hair and eclectic attire that perfectly mirrored her unconventional charm.',
       'A brilliant scientist and an ardent explorer of the unknown, she dedicated her life to unraveling the mysteries of the universe and sharing her wisdom with those who shared her unquenchable curiosity.',
       'In her relentless quest for enlightenment, Nova spent countless hours tinkering with intricate gadgets, her nimble fingers weaving together the threads of innovation with every new invention.',
@@ -314,10 +247,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Sophia Jordan',
-    [
+    'Sophia Jordan': [
       'Sophia Jordan radiated an unmistakable zest for life as she roamed through the city, her genuine smile and vibrant aura drawing people into her orbit effortlessly.',
       'Her ensembles, always on the cutting edge of fashion, demonstrated her flair for self-expression and her innate understanding of the human desire for connection.',
       "Sophia's natural leadership abilities shone through in her unwavering dedication to personal growth and her willingness to offer guidance to her ever-growing circle of friends.",
@@ -327,10 +257,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Seth Pinkerton',
-    [
+    'Seth Pinkerton': [
       'Seth Pinkerton is a creative and ambitious individual who aspires to become a renowned author, known for his distinctive pink hair and unique fashion sense that sets him apart from the crowd.',
       'A social butterfly, Seth easily engages in conversations, making friends and occasionally finding himself in romantic entanglements.',
       'He has a penchant for gourmet cooking and enjoys hosting dinner parties at his modern, stylish abode.',
@@ -341,10 +268,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'RÃ©my St. Feu',
-    [
+    'RÃ©my St. Feu': [
       'Feu, a charming and sophisticated individual, was renowned for his impeccable taste in fashion and design.',
       'His dark, wavy hair and piercing green eyes made him the center of attention wherever he went.',
       "A natural-born leader, RÃ©my's charismatic personality effortlessly drew people to him.",
@@ -357,10 +281,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Millie Bobby Brown',
-    [
+    'Millie Bobby Brown': [
       'Millie Bobby Brown, a talented and ambitious young actress, dreams of making it big in the acting world.',
       'With her cheerful and outgoing personality, she easily befriends people of all walks of life.',
       'Millie sports a unique sense of style, effortlessly blending casual and chic outfits.',
@@ -373,10 +294,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Tristen Palmer',
-    [
+    'Tristen Palmer': [
       'Tristen Palmer, a charismatic and outgoing individual, effortlessly captivates the hearts of those around him with his magnetic charm.',
       'His evenings are often spent frequenting local hotspots and forging new connections, making him a beloved figure amongst both peers and coworkers.',
       'A romantic at heart, Tristen navigates the complexities of his love life with the same determination he applies to his flourishing career in the business or political sphere.',
@@ -386,10 +304,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Steve Fogel',
-    [
+    'Steve Fogel': [
       'Steve Fogel, a creative and ambitious soul, longs to make his mark in the art world with his captivating, colorful paintings.',
       'With an outgoing nature that draws others into his orbit, he can often be found meandering through art galleries and museums, seeking inspiration and connection with fellow artists.',
       'His artistic spirit is reflected not only in the vibrant hues of his attire but also in the way he chooses to live, from the open-concept, modern design of his abode to his penchant for hosting dinner parties where he delights friends with his culinary prowess.',
@@ -398,10 +313,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Mortimer Goth',
-    [
+    'Mortimer Goth': [
       'Mortimer Goth, a man of intellect and mystery, found solace in the eerie and the obscure.',
       'His brooding appearance, complete with a distinguished goatee and somber attire, spoke volumes of his enigmatic persona.',
       'Mortimer was a loving husband to his ethereal wife, Bella, and a doting father to their two children, Cassandra and Alexander.',
@@ -411,10 +323,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Gavin Richards',
-    [
+    'Gavin Richards': [
       'Gavin Richards was a creative and outgoing soul with aspirations that reached for the heavens, as he longed to make a name for himself in the world of art.',
       'A natural talent for painting coursed through his veins, leading him to spend countless hours immersed in the creation of awe-inspiring masterpieces.',
       'A hopeless romantic, Gavin often found himself daydreaming about the day he would find his true love and settle down into a life of bliss.',
@@ -427,10 +336,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Gabby Gonzalez',
-    [
+    'Gabby Gonzalez': [
       'Gabby Gonzalez, an effervescent social butterfly, danced her way through life as the life of every party.',
       'Her charismatic presence, combined with her profound passion for music, led her to dazzle audiences at various events as a talented DJ.',
       'With ambitions of becoming a professional entertainer, Gabby devoted herself to refining her artistry.',
@@ -441,10 +347,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Moose Dubros',
-    [
+    'Moose Dubros': [
       'Moose Dubros was an eccentric and creative individual who loved to stand out from the crowd.',
       'Possessing a unique fashion sense, he often sported bold patterns and bright colors.',
       'Sociable by nature, Moose enjoyed the company of others and made new friends wherever he went.',
@@ -457,10 +360,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Cassandra Goth',
-    [
+    'Cassandra Goth': [
       'Cassandra Goth, a dark and enigmatic young woman, stood out among her peers with her striking gothic attire that seemed to mirror the shadows that lingered around her.',
       'Her long black hair cascaded down her back, framing her pale visage and deep, penetrating eyes that seemed to hold a world of secrets.',
       'Born into the enigmatic Goth family, Cassandra was the cherished daughter of Mortimer and Bella, and the protective older sister of young Alexander.',
@@ -470,10 +370,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Sofia Martinez',
-    [
+    'Sofia Martinez': [
       'Sofia Martinez, a vibrant young adult, resides in the sun-soaked, arid landscape of Oasis Springs.',
       'As a member of the eclectic Roomies household, she shares her abode with an array of fascinating roommates.',
       "Sofia's radiant and outgoing nature allows her to effortlessly forge friendships and connect with others, driven by her aspiration to become a Friend of the World.",
@@ -486,10 +383,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Bob Pancakes',
-    [
+    'Bob Pancakes': [
       'Bob Pancakes resided in the quaint neighborhood of Willow Creek, where he shared a cozy, domestic household with his wife, Eliza Pancakes.',
       'With a penchant for the culinary arts, Bob was a man of simple tastes, pursuing his aspiration to become a Master Chef, one delectable dish at a time.',
       'His laid-back personality often found him shirking strenuous activities, preferring the calming hum of the kitchen as he honed his skills.',
@@ -500,10 +394,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Kat Jenkins',
-    [
+    'Kat Jenkins': [
       'Kat Jenkins is a vibrant, artistic soul with an unquenchable thirst for creative expression.',
       'Her eclectic wardrobe bursts with color, effortlessly capturing her imaginative spirit and turning heads wherever she goes.',
       'She shares her abode with Whiskers, her equally mischievous feline companion, and together they form an inseparable duo.',
@@ -515,10 +406,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Bob Newbie',
-    [
+    'Bob Newbie': [
       'Bob Newbie, an endearing slob, navigates his way through life alongside his wife, Betty Newbie, as the epitome of a beginner couple.',
       "Defined by his disheveled appearance, Bob's iconic green shirt and blue pants seem to mirror the chaos of his unkempt home, a place where disorder runs rampant and cleanliness is a foreign concept.",
       'However, beneath the mess lies a man with a passion for food, as his discerning palate and culinary expertise drive him to pursue a career as a Master Chef.',
@@ -528,10 +416,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Circe Beaker',
-    [
+    'Circe Beaker': [
       'Circe Beaker, a striking figure with vibrant purple hair and a lab coat, resides in the enigmatic town of StrangeVille where she plays an essential role in the unfolding story.',
       'A brilliant and dedicated scientist, Circe spends countless hours conducting her groundbreaking research at the StrangeVille Science Facility, alongside her equally ambitious husband, Loki Beaker.',
       "The Beaker family's legacy spans generations, with their eccentric personalities and relentless pursuit of knowledge setting them apart.",
@@ -541,10 +426,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Mary-Sue Pleasant',
-    [
+    'Mary-Sue Pleasant': [
       'Mary-Sue Pleasant, a career-driven woman with an unwavering focus on wealth and material possessions, is known for her steadfast determination to climb the corporate ladder.',
       'Married to the unfaithful Daniel Pleasant, their tumultuous union is constantly teetering on the edge of collapse.',
       'Together, they are the parents of twin daughters, Angela and Lilith, two polar opposites who frequently find themselves at odds.',
@@ -554,10 +436,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Princess Ess',
-    [
+    'Princess Ess': [
       'Princess Ess, a regal figure of elegance and sophistication, was adored and admired by all who crossed her path.',
       'Her majestic presence, often draped in lavish gowns and adorned with exquisite accessories, exuded grace and poise.',
       'This noble woman had a fervent passion for the arts, and her calendar was filled with grand events such as balls and soirees.',
@@ -569,10 +448,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Katrina Caliente',
-    [
+    'Katrina Caliente': [
       'Katrina Caliente, a striking woman with fiery red hair, embodies passion and vivacity as she navigates life in the sun-drenched neighborhood of Oasis Springs.',
       'As a single mother, her devotion to her daughters, Nina and Dina, is unwavering, their shared zest for life and unmistakable appearance forging an unbreakable bond.',
       "Katrina's expertise in the subtle art of flirtation and her culinary prowess make her a captivating presence in any social gathering, where she often finds herself the center of attention.",
@@ -581,10 +457,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Elle Canon',
-    [
+    'Elle Canon': [
       'Elle Canon, a vivacious and outgoing woman, never failed to captivate those around her with her keen sense of style and penchant for setting trends.',
       'Confident and ambitious, Elle was a force to be reckoned with as she pursued her goals and navigated the complexities of the social hierarchy.',
       'A true social butterfly, she reveled in the limelight, attending and hosting lavish parties where her charm and magnetism drew people to her.',
@@ -595,10 +468,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Jennifer Martinez',
-    [
+    'Jennifer Martinez': [
       'Jennifer Martinez is a creative soul who thrives on painting and exploring various artistic techniques.',
       'Her strong family values make her a devoted and nurturing mother to her two children.',
       'Effortlessly charming, Jennifer is a social butterfly who easily forms connections, becoming the life of the party at neighborhood gatherings.',
@@ -611,10 +481,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Olive Specter',
-    [
+    'Olive Specter': [
       'Olive Specter, a woman shrouded in eerie mystique, casts an enigmatic presence wherever she goes, her pale complexion only intensifying her ghostly aura.',
       'Widowed and haunted by the spectral presence of her late husband, Earl E.',
       "DeMise, Olive's family tree is a chilling graveyard of dearly departed kin, sparking whispered rumors of her sinister involvement in their untimely ends.",
@@ -624,10 +491,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Chuck Cenzo',
-    [
+    'Chuck Cenzo': [
       'Chuck Cenzo, a charming and outgoing individual, effortlessly captivated everyone he encountered with his infectious sense of humor, witty jokes, and comical gestures.',
       'A family-oriented man, he relished in hosting dinner parties and family outings, where his natural flair for cooking left everyone craving more of his delectable dishes.',
       'As an avid sports enthusiast, Chuck could often be found flexing his muscles at the local gym or participating in neighborhood leagues.',
@@ -637,10 +501,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Iggy Pancakes',
-    [
+    'Iggy Pancakes': [
       'Iggy Pancakes, a young boy hailing from the peculiar town of Willow Creek, is a bright and noticeable character with his short blond hair and piercing blue eyes.',
       'He belongs to the quirky Pancakes family, which also includes his parents, Bob and Eliza Pancakes.',
       'As an extroverted and outgoing child, Iggy has a natural inclination towards making friends, embracing his role as a social butterfly with remarkable ease.',
@@ -650,10 +511,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Jill Smith',
-    [
+    'Jill Smith': [
       'Jill Smith is a cheerful and outgoing individual who loves spending time with her friends and family.',
       'She has a passion for gardening and can often be found tending to her plants in her backyard.',
       'Jill is a natural-born leader and enjoys hosting events and gatherings at her home.',
@@ -667,10 +525,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Pascal Curious',
-    [
+    'Pascal Curious': [
       'Pascal Curious, a uniquely brilliant mind, found himself driven by an insatiable thirst for knowledge and discovery, destining him for a career in the sciences.',
       "Born into the renowned Curious family, Pascal's fascination with the enigmatic was a natural inheritance, his intelligence and eccentricity further setting him apart from the ordinary.",
       'Frequently immersed in tinkering with bizarre inventions or conducting peculiar experiments within the confines of his home laboratory, Pascal was easily identified by his vibrant red hair and iconic round glasses.',
@@ -680,10 +535,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Luarant Dupre',
-    [
+    'Luarant Dupre': [
       'Laurant Dupre, a sophisticated man with a penchant for the finer things in life, exudes an air of elegance with his stylish and up-to-date wardrobe.',
       'With a discerning eye for art, he often immerses himself in the world of creativity by frequenting museums and galleries.',
       'Charismatic and witty, Laurant captures the attention of those around him, effortlessly drawing them into his orbit.',
@@ -694,10 +546,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Jasmine Holiday',
-    [
+    'Jasmine Holiday': [
       'With her vibrant red hair and a cheerful personality, Jasmine Holiday effortlessly brightened the lives of those around her.',
       'Often found at the community gardens, Jasmine would provide holiday-event related tasks and challenges for her fellow townspeople, her infectious charm and fashionable style - complete with a green top, black skirt, and red tights - making her a standout presence.',
       'As an event coordinator, her love for socializing and mingling with others was evident, and she could often be spotted chatting animatedly with various individuals throughout the town.',
@@ -706,10 +555,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Johnny Zest',
-    [
+    'Johnny Zest': [
       'Johnny Zest, a young adult with a zest for life, resides in the sunbaked Mirage Canyon neighborhood of Oasis Springs.',
       "As an estranged member of the affluent Landgraab family, Johnny has found himself carving his own path, refusing to rely on his family's wealth.",
       'With dreams of becoming a renowned comedian, Johnny has already honed his comedic skills and possesses an infectious outgoing personality, drawing others to him with ease.',
@@ -719,10 +565,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Fiona Whitfield',
-    [
+    'Fiona Whitfield': [
       'Fiona Whitfield, a vivacious and gifted individual, aspires to etch her name in the annals of art history.',
       'With a paintbrush as her wand, she conjures up magnificent masterpieces on canvas, investing hours to ensure their perfection.',
       'Exuding an infectious cheerfulness, Fiona easily befriends those around her, delighting in their camaraderie.',
@@ -736,10 +579,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Lyla Grunt',
-    [
+    'Lyla Grunt': [
       'Lyla Grunt, a striking and tenacious woman, hailed from a respected military family, with her vibrant red hair and piercing green eyes making her a standout figure in any gathering.',
       'Her exceptional intelligence and unwavering determination propelled her to great heights in her military career, earning her the admiration of her colleagues.',
       "Lyla's athleticism was no secret either, as she dominated both sports and fitness contests with her incredible prowess.",
@@ -750,10 +590,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Malcolm Landgraab',
-    [
+    'Malcolm Landgraab': [
       'Malcolm Landgraab, scion of the prominent and opulent Landgraab family, possessed an ambitious and materialistic disposition that was both envied and reviled in equal measure.',
       'The young heir, with his snobbish demeanor and penchant for cruelty, as well as his adoration for music, made for a complex and intriguing personality.',
       'Intent on amassing a fortune befitting his lineage, Malcolm cut a dashing figure in his sartorial choices - a dark blue blazer, crisp white shirt, and an elegant black tie, perfectly complementing his neatly styled brown hair and piercing light blue eyes.',
@@ -762,10 +599,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Dela Ostrow',
-    [
+    'Dela Ostrow': [
       'Dela Ostrow, an eccentric and vibrant soul, is a gifted artist with aspirations of gaining fame through her exceptional talent.',
       'Consumed by her passion, she spends countless hours in her cozy studio, mastering the art of painting and refining her keen eye for detail.',
       "Known for her quirky sense of humor, Dela's magnetic personality attracts a loyal circle of friends who cherish her honesty and devotion.",
@@ -777,10 +611,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Nervous Subject',
-    [
+    'Nervous Subject': [
       'Nervous Subject was an enigmatic individual who stood out in any crowd due to his peculiar greenish skin tone and a mop of unruly black curls.',
       'He was a peculiar mix of human and alien genetics, the offspring of the renowned Pollination Technician 9 Smith and the brilliant, yet eccentric Glarn Curious.',
       'Inhabiting the eerie and intriguing Strangetown, Nervous found himself living amongst the sinister Beaker family, infamous for their bizarre and sometimes cruel experiments.',
@@ -791,10 +622,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'J Huntington III',
-    [
+    'J Huntington III': [
       'J Huntington III, a suave and athletic young adult, thrived amidst the pulsating energy of the dynamic metropolis of San Myshuno.',
       'As a prominent member of the illustrious Partihaus household, his magnetic charm and striking good looks never failed to draw a crowd wherever he went.',
       'Ambitious and driven, J devoted much of his time to diligently working towards his goal of becoming a renowned Professional Athlete, which often involved grueling sessions at the local gym.',
@@ -806,10 +634,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Kurt Lumberjackson',
-    [
+    'Kurt Lumberjackson': [
       'Kurt Lumberjackson, a strapping outdoorsman, was a man whose very essence seemed to be intertwined with the wilderness.',
       'With a muscular frame cultivated through years of laborious lumberjacking, he was easily recognizable in his signature plaid shirts, jeans, and work boots.',
       'A proud and prodigious beard adorned his chiseled jaw, its maintenance a topic he eagerly discussed with fellow beard enthusiasts.',
@@ -821,10 +646,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Olivia Stewart',
-    [
+    'Olivia Stewart': [
       'Olivia Stewart was an artistic spirit, blessed with a natural talent for painting that had already begun to make waves in the art world.',
       'A social butterfly by nature, she had an uncanny ability to forge deep connections with those around her, her circle of friends ever-growing.',
       'A hopeless romantic at heart, she yearned to find her soulmate and build a loving family within the walls of her idyllic abode.',
@@ -835,10 +657,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Kalista Kalid',
-    [
+    'Kalista Kalid': [
       'Kalista Kalid was a woman of undeniable charm and talent, her passion for the arts and keen eye for fashion setting her apart from the rest.',
       'Her magnetic charisma made her the life of any gathering, effortlessly drawing friends from all walks of life into her warm embrace.',
       'Creativity thrived within her, manifesting in the beautifully appointed home where she often spent her hours painting or strumming her guitar.',
@@ -851,10 +670,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Li Loh',
-    [
+    'Li Loh': [
       'Li Loh was a vivacious young woman with an infectious smile that effortlessly attracted people into her circle.',
       'Her warm and sociable nature was complemented by a fierce devotion to her family, cherishing every moment spent with her parents and siblings.',
       'A creative spirit, Li Loh found solace in painting, writing, and singing, using these artistic outlets as a means of self-expression.',
@@ -866,10 +682,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Lilith Pleasant',
-    [
+    'Lilith Pleasant': [
       'With her striking red hair and rebellious nature, teenage Lilith Pleasant stood out even amid the unique individuals in her family.',
       'As the twin sister of Angela Pleasant, the two shared a physical resemblance that belied their contrasting personalities, often resulting in tension between them.',
       'Marching to the beat of her own drum, Lilith was known for her mischief and troublemaking, but beneath her rough exterior lay a hidden soft side that endeared her to those she deemed close.',
@@ -879,10 +692,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Lazlo Curious',
-    [
+    'Lazlo Curious': [
       'Lazlo Curious, with his wild red hair and striking blue eyes, was an eccentric and brilliant individual who resided in the peculiar town of Strangetown.',
       'As a member of the enigmatic Curious family, Lazlo was known for his insatiable appetite for scientific knowledge and his unwavering dedication to uncovering the secrets of the universe.',
       'He shared this passion with his two brothers, Pascal and Vidcund, and together, they embarked on countless adventures and experiments that often landed them in the most bizarre situations.',
@@ -892,10 +702,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Vivian Lewis',
-    [
+    'Vivian Lewis': [
       'Vivian Lewis was a vivacious and warm-hearted woman, often the life and soul of any gathering she attended.',
       'With a keen eye for fashion, she relished in experimenting with eclectic styles and vibrant colors, her wardrobe a testament to her adventurous spirit.',
       'Her magnetic personality easily drew others to her, and she reveled in forging new connections and nurturing existing relationships with heartfelt sincerity.',
@@ -908,10 +715,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Bilal Hassani',
-    [
+    'Bilal Hassani': [
       'Bilal Hassani was a captivating presence, exuding an aura of talent and style that seemed to turn heads wherever he went.',
       'His colorful hairstyles and bold clothing choices made it impossible for him not to stand out in any crowd, and his incredible singing abilities ensured he was always the center of attention.',
       "A naturally gifted performer, Bilal's rise to fame was meteoric, his friendly and outgoing nature allowing him to forge deep connections and build a strong support network.",
@@ -922,10 +726,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Mitchell Kalani',
-    [
+    'Mitchell Kalani': [
       'Mitchell Kalani was the epitome of charm and charisma, with an effervescent personality that drew people to him like moths to a flame.',
       'He possessed an innate musical talent, often found strumming his guitar or serenading those around him with his mellifluous voice.',
       'His laid-back demeanor occasionally interfered with his career ambitions, but he never failed to make ends meet.',
@@ -938,10 +739,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Maggie Bennet',
-    [
+    'Maggie Bennet': [
       'Maggie Bennet was a vibrant soul, her creativity and passion for music and arts, making her an influential presence in her community.',
       'Her outgoing personality attracted others to her, like moths to a flame, and she cherished the connections she had with her loved ones.',
       "Maggie's unique sense of style, an amalgamation of bold colors and eclectic patterns, was a testament to her artistic nature.",
@@ -954,10 +752,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Kierra Tilo',
-    [
+    'Kierra Tilo': [
       'Kierra Tilo, a vivacious and spirited individual, was known for her delightful presence and eclectic sense of style that never failed to turn heads.',
       'Her boundless ambition propelled her to tackle a multitude of hobbies, from painting masterpieces to concocting culinary delights, and tending to her flourishing garden.',
       "A social butterfly, Kierra's extroverted nature drew people from all walks of life into her ever-expanding circle of friends.",
@@ -968,10 +763,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Dana Adler',
-    [
+    'Dana Adler': [
       'Dana Adler was a creative soul with an unquenchable passion for the arts and a distinctive flair for fashion.',
       'Her natural talent for painting was evident as she spent countless hours perfecting her masterpieces, each stroke an extension of her vivid imagination.',
       'Outgoing and sociable, Dana relished attending soirees and befriending fellow artists, yet she never neglected her need for solitude to recharge and seek inspiration.',
@@ -983,10 +775,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Matilda The Cook',
-    [
+    'Matilda The Cook': [
       'Matilda The Cook, a culinary virtuoso, devoted her existence to mastering the art of cooking, often found in her kitchen sanctuary, concocting unique recipes and refining her techniques.',
       'Her innate aptitude for gourmet cuisine catapulted her to fame as a distinguished chef, her amiable and sociable nature endearing her to those who had the pleasure of tasting her creations.',
       'As she ascended the culinary hierarchy, she dreamt of one day inaugurating her own gourmet restaurant.',
@@ -997,10 +786,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Dudley Landgraab',
-    [
+    'Dudley Landgraab': [
       'Dudley Landgraab, a wealthy and well-connected individual, hails from the prominent Landgraab family known for their opulent lifestyle and grandiose soirÃ©es.',
       "As a socialite, Dudley's days are filled with rubbing shoulders with the crÃ¨me de la crÃ¨me of society while seeking new business ventures and investment opportunities to expand his empire.",
       'However, his reputation for snobbery precedes him, often overshadowing his accomplishments as he looks down upon those not sharing his social standing.',
@@ -1011,10 +797,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Aliya Fuego',
-    [
+    'Aliya Fuego': [
       'Aliya Fuego, a fiery and passionate woman, never hesitated to express herself through her audacious fashion choices and vibrant red hair that symbolized her unwavering zest for life.',
       'A true social butterfly, Aliya could effortlessly charm her way into any gathering, leaving behind a trail of new friends and admirers.',
       'Her innate affinity for the arts, especially dance, allowed her to sway and twirl with grace and determination that left onlookers in awe.',
@@ -1026,10 +809,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Pablo Martinez',
-    [
+    'Pablo Martinez': [
       'Pablo Martinez was the epitome of affability, his genuine warmth and gregarious nature drawing people into his orbit with an irresistible magnetism.',
       'A dapper individual, his wardrobe was a kaleidoscope of hues and patterns that reflected his vibrant personality.',
       'A connoisseur of culinary delights, Pablo relished exploring the diverse flavors of the local gastronomic scene, and his green thumb nurtured a flourishing garden that was the envy of his neighbors.',
@@ -1042,10 +822,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Zoe Patel',
-    [
+    'Zoe Patel': [
       "In the bustling neighborhood of Oasis Springs, Zoe Patel's cheerful and energetic presence could light up any room she entered.",
       'A creative soul, she found her calling in the world of entertainment, gracing stages and enthralling audiences with her undeniable talent.',
       'Her passion for the culinary arts manifested in her aspiration to become a Master Mixologist, delighting in the creation of the most delectable and inventive concoctions.',
@@ -1056,10 +833,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Phoenix Money',
-    [
+    'Phoenix Money': [
       'Phoenix Money, an ambitious individual, dreams of amassing great fortune and becoming a renowned business tycoon.',
       'Possessing an unwavering focus on career advancement, Phoenix constantly seeks opportunities to prosper.',
       'Their confident and outgoing personality allows them to effortlessly forge friendships and connections, which prove instrumental in their pursuit of wealth.',
@@ -1072,10 +846,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Brent Hong',
-    [
+    'Brent Hong': [
       'Brent Hong was a man known for his ambition and pursuit of excellence in everything he touched.',
       'With a sharp wit and charming presence, he effortlessly captured the attention and admiration of those around him.',
       'Obsessed with technology, Brent dedicated his free time to refining his programming and gaming abilities, all while envisioning a future for himself in the tech industry.',
@@ -1086,10 +857,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Kailee Barclay',
-    [
+    'Kailee Barclay': [
       'Kailee Barclay was a woman whose vibrant personality and strong individuality made her stand out in any crowd.',
       'With a penchant for fashion, she often donned eclectic outfits that showcased her unique sense of style.',
       "Kailee's social prowess allowed her to easily befriend others, and she reveled in nights spent painting the town with laughter and good company.",
@@ -1102,10 +870,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Ollie Purdue',
-    [
+    'Ollie Purdue': [
       'Ollie Purdue, a charming and outgoing individual, had an uncanny ability to make friends wherever he went, his warm smile and affable demeanor acting as a magnet for companionship.',
       'Possessing an innate sense of style, he was often seen donning trendy outfits that showcased his creative spirit.',
       'Ambitious and hardworking, Ollie constantly strived to reach the pinnacle of his career, balancing his pursuits with a variety of hobbies, such as painting, cooking, and guitar playing.',
@@ -1115,10 +880,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Camille Abbiza',
-    [
+    'Camille Abbiza': [
       'Camille Abbiza, a creative and ambitious soul, fervently pursues success in all aspects of her life.',
       'Her passion for the arts manifests through her love of painting and playing the guitar in her leisure time.',
       "With a proclivity for socializing and making friends, Camille's outgoing personality is mirrored in her chic and trendy sense of style.",
@@ -1129,10 +891,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Kai Kahue',
-    [
+    'Kai Kahue': [
       'Kai Kahue, a fun-loving individual, could often be found basking in the sun at the beach or engaging in various water activities, his affinity for the ocean apparent to all who knew him.',
       'Possessing a laid-back personality, he formed friendships with ease, his warm and approachable nature drawing people to him like a magnet.',
       'Proudly embracing his island heritage, Kai donned clothing and accessories that reflected his rich culture.',
@@ -1145,10 +904,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Nina Caliente',
-    [
+    'Nina Caliente': [
       'Nina Caliente, a vivacious young woman with a mane of fiery red hair, was as alluring as she was enigmatic.',
       'With an innate flair for fashion, she turned heads wherever she went, her sultry appearance drawing the attention of all who crossed her path.',
       "Residing in the sun-drenched Oasis Springs neighborhood with her sister, Dina, and their mother, Katrina, Nina's life was a whirlwind of flirtatious encounters and romantic trysts.",
@@ -1158,10 +914,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Ceres Beaker',
-    [
+    'Ceres Beaker': [
       'Ceres Beaker is a brilliant scientist who is constantly pushing the boundaries of knowledge in her field.',
       'She has a passion for chemistry and spends countless hours in her lab experimenting with various concoctions.',
       "Ceres is also known for her eccentric fashion sense, often sporting lab goggles and a white coat even when she's not working.",
@@ -1174,10 +927,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Kaiden Bryant',
-    [
+    'Kaiden Bryant': [
       'Kaiden Bryant, a creative and ambitious soul, thrives on expressing himself through various art forms.',
       'His cheerful demeanor and ability to connect with others make him a social magnet, drawing people into his magnetic presence.',
       'A passionate musician, Kaiden dreams of achieving fame, often losing himself in the melodies of the instruments he plays.',
@@ -1190,10 +940,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Lewis Sancho',
-    [
+    'Lewis Sancho': [
       'Lewis Sancho is an outgoing and friendly individual who loves to socialize with his neighbors.',
       'He has a penchant for dressing in stylish and trendy clothing, which reflects his self-assured personality.',
       'Lewis is passionate about his career and works hard to achieve his goals, but he also knows how to have fun and let loose.',
@@ -1207,10 +954,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Vernon Morse',
-    [
+    'Vernon Morse': [
       'Vernon Morse was the epitome of ambition, his eyes always fixed on the glittering prize of success.',
       'Tirelessly dedicated, he often burned the midnight oil at the office, fueled by the relentless drive to scale the corporate ladder.',
       "A dashing figure, Vernon's keen sense of fashion ensured he was always impeccably dressed, whether attending a high-stakes work event or enjoying a night out with friends.",
@@ -1223,10 +967,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Andre DaSilva',
-    [
+    'Andre DaSilva': [
       'Andre DaSilva is a charming individual with a distinct sense of style, often seen sporting a fashionable outfit that matches his confident personality.',
       'With his dark hair and striking features, he immediately catches the eye of anyone who walks by.',
       'Andre is a skilled artist with a passion for painting, constantly working on perfecting his craft.',
@@ -1239,10 +980,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Tycho Curious',
-    [
+    'Tycho Curious': [
       'Tycho Curious, a young man hailing from the enigmatic Curious family, was a true embodiment of their insatiable passion for science and the mysteries of the unknown.',
       "Residing in the peculiar neighborhood of Strangetown, Tycho's short black hair and glasses only accentuated his endearing, nerdy demeanor.",
       'The son of Glarn and Kitty Curious, he found solace in the company of his brothers, the older Lazlo and the younger Pascal.',
@@ -1253,10 +991,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Ned Whalen',
-    [
+    'Ned Whalen': [
       'Ned Whalen, a creative soul with an undeniable flair for art, often found himself immersed in an array of oil paints and canvas, experimenting with different styles to capture the essence of the world around him.',
       'His outgoing personality, a magnet for friendship, made him a regular at social events, where he effortlessly charmed his way into new circles.',
       "A family man at heart, Ned's dream was to be surrounded by a big, loving family, showering them with attention and care.",
@@ -1269,10 +1004,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Ross Valentin',
-    [
+    'Ross Valentin': [
       'Ross Valentin, a charismatic and sociable individual, has an innate ability to befriend anyone he encounters.',
       'With a heart full of ardor for music, he often serenades guests at gatherings with his guitar or mellifluous voice.',
       'A hopeless romantic, Ross yearns for the day he meets his soulmate, but until then, he relishes in flirtatious encounters and exciting dates.',
@@ -1286,10 +1018,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Pollination Tech 9 Smith',
-    [
+    'Pollination Tech 9 Smith': [
       'Amidst the peculiar and eccentric residents of Strangetown, the enigmatic Pollination Tech 9 Smith stood out with his extraordinary green skin, a testament to his extraterrestrial origin.',
       'Married to the lovely Jenny Smith and a doting father to Johnny and stepfather to Jill, he pursued an unparalleled career as a Pollination Technician, journeying to far-off realms to propagate plant life.',
       'Possessing an insatiable thirst for knowledge, his intellect was matched only by his penchant for cleanliness and ardent commitment to the environment.',
@@ -1299,10 +1028,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Dina Caliente',
-    [
+    'Dina Caliente': [
       'Dina Caliente, a sultry beauty with tanned skin, bright red hair, and alluring green eyes, resides in the sun-soaked town of Oasis Springs along with her sister Nina and mother Katrina.',
       'As a member of the renowned Caliente family, Dina carries a rich history and is well-known for her flirtatious and romantic nature, which often finds her entangled in a web of various love affairs.',
       'With a passion for food and cooking, she works diligently as an Assistant Dishwasher, honing her skills in the culinary arts.',
@@ -1313,10 +1039,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Jenny Smith',
-    [
+    'Jenny Smith': [
       'Jenny Smith, a vivacious young adult, resided in the sun-drenched oasis of Oasis Springs alongside her doting husband, Johnny Smith, and their enigmatic daughter, Lily Smith.',
       "A beacon of cheerfulness and charm, Jenny's outgoing personality drew friends into her orbit with ease.",
       'With an innate passion for fashion, she showcased a unique sense of style through her trendy and eye-catching ensembles.',
@@ -1328,10 +1051,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Jaylen Mace',
-    [
+    'Jaylen Mace': [
       "Jaylen Mace's magnetic charm and relentless ambition made him a captivating figure in the bustling town.",
       'His creative spirit and diverse interests led him to forge connections with ease, becoming the life of every gathering with his infectious humor.',
       'A fitness aficionado, Jaylen spent his mornings jogging and sculpting his physique at the local gym, envisioning a future as a prosperous entrepreneur or corporate tycoon.',
@@ -1343,10 +1063,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Sue D. Nym',
-    [
+    'Sue D. Nym': [
       "Nym was an imaginative and artistic soul, known for her penchant for vibrant brush strokes on canvas and her ability to capture life's most fleeting moments through her camera lens.",
       'Her eccentric fashion choices were a delightful topic of conversation, as she often found herself draped in the most whimsically colorful garments.',
       'Laughter and wit were her currency, which she generously spent in social gatherings, yet she also treasured her quiet evenings, sharing her abode with Whiskers, her feline companion.',
@@ -1356,10 +1073,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Wilson Luchador',
-    [
+    'Wilson Luchador': [
       'Wilson Luchador, a charismatic figure with dreams of wrestling stardom, boasts a muscular build and a vibrant, eye-catching ensemble that mirrors his fervor for the sport.',
       'Blessed with an inherent charm, he effortlessly captivates those around him, forging friendships with remarkable ease.',
       'When not honing his fitness at the gym, Wilson reveals a tender side, often volunteering at the local animal shelter.',
@@ -1370,10 +1084,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Grim Reaper',
-    [
+    'Grim Reaper': [
       "Cloaked in the shadows of the night, the enigmatic Grim Reaper weaves through the fabric of mortal lives, appearing at the moment of a soul's departure.",
       "Shrouded in a black, hooded cloak, its face remains hidden, revealing only a pair of glowing, mysterious eyes that seem to pierce through the very essence of one's being.",
       'A scythe, the age-old symbol of death and harvest, is wielded with an eerie grace, poised and ready to sever the thread of life.',
@@ -1384,10 +1095,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'General Buzz Grunt',
-    [
+    'General Buzz Grunt': [
       'General Buzz Grunt, a high-ranking military officer, strides through the peculiar neighborhood of Strangetown with a commanding presence, his strict and disciplined demeanor apparent in every step.',
       "Clad in his ever-present uniform, Buzz's life revolves around his dedication to his career and his three sons, Tank, Ripp, and Buck, each of whom share a unique bond with their father.",
       "Tragedy has struck the Grunt household with the loss of Buzz's wife, leaving him to singlehandedly navigate the turbulent waters of parenthood.",
@@ -1398,10 +1106,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Olivia Kim-Lewis',
-    [
+    'Olivia Kim-Lewis': [
       'Olivia Kim-Lewis was a vibrant, young woman with an unbridled passion for fashion, her keen sense of style turning heads as she navigated the lively streets of bustling San Myshuno.',
       'Hailing from the renowned Lewis family, whose members had achieved success in various fields, Olivia was determined to make her own mark on the world as a world-famous painter.',
       'An outgoing social butterfly, she effortlessly expanded her circle of friends and acquaintances, all while honing her artistic skills with an innate flair for learning.',
@@ -1411,10 +1116,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Geoffrey Landgraab',
-    [
+    'Geoffrey Landgraab': [
       'Geoffrey Landgraab, a man of wealth and prestige, resided in the opulent neighborhood of Oasis Springs with his adoring wife, Nancy, and their bright son, Malcolm.',
       'Hailing from the renowned Landgraab lineage, Geoffrey was no stranger to ambition and hard work, holding a position as a Regional Manager in a reputable corporation.',
       'Although his career consumed much of his time, he never failed to nurture the bonds within his family, pouring his heart into their relationships.',
@@ -1424,10 +1126,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Livie Mounier',
-    [
+    'Livie Mounier': [
       'Livie Mounier is a stylish and outgoing young woman with a penchant for fashion, often seen wearing the latest trends that make her stand out in any crowd.',
       'Her friendly and approachable demeanor allows her to easily make new friends and engage in intriguing conversations wherever she goes.',
       "Livie's favorite pastimes include shopping, attending lavish parties, and exploring different neighborhoods to discover hidden gems.",
@@ -1439,10 +1138,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Emiko Mori',
-    [
+    'Emiko Mori': [
       'Emiko Mori is a creative and ambitious young woman who aspires to make a name for herself in the world of fine art.',
       'Her cheerful disposition and quick wit make her a magnetic presence at social gatherings, endearing her to friends and acquaintances alike.',
       'As a skilled painter, Emiko devotes countless hours to honing her craft, producing masterpieces that have begun to capture the attention of esteemed collectors and art connoisseurs.',
@@ -1454,10 +1150,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Kiernan Shipka',
-    [
+    'Kiernan Shipka': [
       'With her golden locks cascading down her shoulders like a silken waterfall, Kiernan effortlessly commanded the attention of any room she entered with her expressive eyes and captivating presence.',
       'She was the embodiment of creativity, her passion for the arts evident in the way she could bring any character to life, her talent honed from a young age.',
       'Naturally self-assured, outgoing, and ambitious, Kiernan was a force to be reckoned with, admired by many for her successful acting career and her impeccable sense of style.',
@@ -1468,10 +1161,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Mimi Landgraab',
-    [
+    'Mimi Landgraab': [
       'Mimi Landgraab, a sophisticated and graceful woman, belonged to the wealthy and influential Landgraab lineage.',
       'Dressed impeccably in chic and stylish outfits, her undeniable charisma attracted people and helped her navigate the complexities of high society.',
       'As a member of the renowned Landgraab family, Mimi indulged in a luxurious lifestyle, hosting extravagant parties in her opulent mansion.',
@@ -1483,10 +1173,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Raj Khemlani',
-    [
+    'Raj Khemlani': [
       'Raj Khemlani, a vibrant young adult, was a breath of fresh air in the small community with his eclectic wardrobe that spoke volumes about his personality.',
       'His outgoing and friendly nature made it effortless for him to befriend anyone he encountered, and his passion for cooking led him to constantly whip up delectable dishes for friends and family.',
       'With strong family values at his core, Raj often dreamt of having a big family of his own someday.',
@@ -1498,10 +1185,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Amber Stein',
-    [
+    'Amber Stein': [
       'Amber Stein, a creative and ambitious soul, had an innate ability to color the world around her with her artistic talents and penchant for fashion.',
       'Her ever-evolving wardrobe mirrored the latest trends, making her a style icon in her quaint neighborhood.',
       'Her friendly nature and infectious laughter drew people toward her, allowing her to forge friendships quickly and effortlessly.',
@@ -1513,10 +1197,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Melina Sophie',
-    [
+    'Melina Sophie': [
       'Melina Sophie was a vibrant and spirited young woman with a fervent passion for the arts that was evident from the moment you laid eyes on her.',
       'Her innate talent for painting made her a force to be reckoned with as she spent countless hours perfecting her masterpieces, each one more breathtaking than the last.',
       'Melina was a social butterfly, her magnetic personality drawing people to her like moths to a flame, and her innate charm and wit made her a beloved figure in her close-knit community.',
@@ -1527,10 +1208,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Valeria Lopez',
-    [
+    'Valeria Lopez': [
       'Valeria Lopez, a stylish and creative soul, effortlessly expressed her individuality through her impeccable fashion sense and eye for design.',
       'Known to be the life of any gathering, her vivacious personality and warm, inviting smile drew people from far and wide into her enchanting orbit.',
       "A culinary enthusiast, Valeria's unique recipes and flair for experimentation made her a sought-after dinner guest among her ever-expanding circle of friends.",
@@ -1543,10 +1221,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Mia Hayes',
-    [
+    'Mia Hayes': [
       'Mia Hayes, a vivacious and affable woman, was known to captivate those around her with her innate charm and unwavering zest for life.',
       'With a keen eye for fashion, she would effortlessly assemble ensembles that spoke to her vibrant personality, making her stand out in any crowd.',
       'Driven by ambition, Mia tirelessly honed her skills and navigated the corporate world with determination, while her love for cooking often found her crafting exquisite dishes to the delight of her loved ones.',
@@ -1559,10 +1234,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Alice Spencer-Kim',
-    [
+    'Alice Spencer-Kim': [
       'Alice Spencer-Kim is a vibrant and gregarious woman who resides in the quaint town of Windenburg, nestled within her uniquely blended family.',
       'Alongside her devoted husband Eric Lewis, her spirited daughter Olivia, and her charming stepson Vivian, Alice thrives in her role as a loving matriarch.',
       'With a passion for gardening, she can frequently be found outdoors, nurturing her plants with the same tender care she bestows upon her family.',
@@ -1575,10 +1247,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Maya Riordan',
-    [
+    'Maya Riordan': [
       'Maya Riordan, a stylish and confident woman, has a penchant for expressing herself through her carefully curated fashion choices.',
       'Undeniably a social butterfly, she thrives in the company of others, easily forging connections and cultivating a vast network of friends and acquaintances.',
       'In her leisure time, Maya indulges in her passion for cooking, experimenting with new recipes to the delight of her taste buds.',
@@ -1590,10 +1259,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Marco Russo',
-    [
+    'Marco Russo': [
       'Marco Russo, a young adult with an infectious zest for life, exudes a passion for fitness and social interactions that draws people to him like moths to a flame.',
       'His dark brown hair, chiseled facial features, and athletic build make him a head-turner wherever he goes, be it the local gym or the neighborhood park.',
       'With an innate charm and knack for connecting with others, Marco easily forms deep bonds that he cherishes and nurtures.',
@@ -1605,10 +1271,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Noah Meyer',
-    [
+    'Noah Meyer': [
       'Noah Meyer was a creative and ambitious soul, with aspirations to make a name for himself in the world of art.',
       'Possessing a natural talent for painting, one could often find Noah with a brush in hand, expertly crafting masterpieces that captivated those around him.',
       'A lover of the outdoors, he found solace and inspiration in lush gardens and parks, their beauty fueling his artistic muse.',
@@ -1621,10 +1284,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Angela Pleasant',
-    [
+    'Angela Pleasant': [
       'Angela Pleasant, a vivacious teenager with fiery red hair, lived in the quaint town of Pleasantview alongside her family.',
       "As the daughter of Mary-Sue and Daniel Pleasant, and the twin sister of Lilith, Angela's life was a fascinating mix of love, rivalry, and ambition.",
       'Her responsible nature and dedication to her studies earned her a spot on the high school honor roll, a fact she took pride in.',
@@ -1636,10 +1296,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Aliya St. Feu',
-    [
+    'Aliya St. Feu': [
       'Feu, a dynamic and aspiring fashionista, possessed an innate flair for design and a magnetic charm that endeared her to everyone she encountered.',
       'Her thirst for adventure and exploration of diverse cultures was evident in her vibrant and eclectic wardrobe choices, which captivated the imagination of those around her.',
       'As an outgoing and spirited individual, she eagerly sought out new experiences that enriched her life with vivid memories and stories to share.',
@@ -1650,10 +1307,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'June Kay',
-    [
+    'June Kay': [
       'June Kay was a creative and friendly soul who thrived on self-expression through painting and various artistic endeavors.',
       'Her natural ability to forge lasting friendships and maintain strong relationships was only enhanced by her delightful sense of humor, which could effortlessly lighten the mood and make others feel comfortable in her company.',
       'June, a true nature aficionado, relished her moments spent outdoors, whether she was meticulously tending to her flourishing garden or exploring the breathtaking landscapes that adorned her world.',
@@ -1666,10 +1320,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Leonardo Martinez',
-    [
+    'Leonardo Martinez': [
       'Leonardo Martinez, a creative and artistic soul, could often be found immersed in his paintings or skillfully playing a musical instrument.',
       'With a strong sense of family, he cherished moments spent with his loved ones, be it a large family dinner or simply relaxing at home.',
       'Known for his culinary prowess, Leonardo loved experimenting with new recipes, consistently impressing guests with his delectable creations.',
@@ -1683,10 +1334,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Rodrigo De Pablo',
-    [
+    'Rodrigo De Pablo': [
       'Rodrigo De Pablo was a charismatic and outgoing man who thrived in the bustling town of Willow Creek.',
       'With a passion for the arts, he dedicated his free time to painting and playing the guitar, much to the delight of his friends and neighbors.',
       'Always impeccably dressed, his fashion sense was the talk of the town, as he effortlessly stood out in any crowd.',
@@ -1699,10 +1347,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Eric Lewis',
-    [
+    'Eric Lewis': [
       'Eric Lewis, a charming young adult, made his home amid the lively and colorful Spice Market neighborhood of the bustling city of San Myshuno.',
       'As a prominent member of the notorious "Partyhaus" household, Eric was known for his love of partying and socializing.',
       'With a head of brown hair and a well-groomed beard, he could often be spotted sporting a stylish leather jacket and crisp white shirt.',
@@ -1714,10 +1359,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Dennis Kim',
-    [
+    'Dennis Kim': [
       'Dennis Kim, a young adult with an unmistakable artistic flair, was a familiar face in the quaint town of Willow Creek.',
       'With his vibrant pink tank top, black shorts, and blue high-top sneakers, he exuded a colorful and expressive personality that matched his undeniable creative talent.',
       'Dennis often found solace in the great outdoors, where he could lose himself in the picturesque landscapes that surrounded him, his paintbrush a mere extension of his soul.',
@@ -1729,10 +1371,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Mom Landgraab',
-    [
+    'Mom Landgraab': [
       'Mom Landgraab, a woman of wealth and influence, resides in the opulent neighborhood of Del Sol Valley, alongside her husband, Malcolm, and their son, Johnny.',
       'Distinguished by her high social standing, she relishes attending extravagant soirees and events, her prowess in the business world having honed her charisma and logic.',
       'A true fashionista, Mom Landgraab adorns herself in designer clothing and accessories, exuding an air of snobbery that may initially deter others.',
@@ -1742,10 +1381,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Daniel Pleasant',
-    [
+    'Daniel Pleasant': [
       'Daniel Pleasant, a charming and outgoing man, holds a prominent position within the Pleasant family, a lineage with a storied past.',
       'Married to the diligent Mary-Sue, Daniel is the father of two teenage daughters, Angela and Lilith, each with her own unique disposition.',
       'His magnetic personality draws people to him, especially when it comes to matters of the heart, though his romantic entanglements often threaten the stability of his seemingly idyllic family life.',
@@ -1754,10 +1390,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Bob The Butler',
-    [
+    'Bob The Butler': [
       'Bob The Butler, a highly skilled and experienced individual, is always impeccably dressed in a sharply tailored suit, exuding an air of dedication and finesse.',
       'With neatly combed hair and a stoic expression, he strikes the perfect balance between professionalism and approachability.',
       'Adept in cooking, cleaning, and repairing household items, Bob ensures the seamless functioning of any home.',
@@ -1770,10 +1403,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Summer Holiday',
-    [
+    'Summer Holiday': [
       'Summer Holiday is a vivacious, extroverted individual with an innate warmth that immediately puts others at ease.',
       'Her passion for outdoor activities and forging new friendships is evident in her toned physique, which she maintains through her devotion to fitness and exercise.',
       'With a shock of vibrant red hair and an eye for the latest trends, Summer inevitably captures attention wherever she goes.',
@@ -1785,10 +1415,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Atom Beaker',
-    [
+    'Atom Beaker': [
       'Atom Beaker, a prodigious scientist with an eccentric spirit, resides in the sun-drenched town of Oasis Springs, where he is revered for his inventive intellect.',
       'Born to the infamous Loki and Circe Beaker, noted for their unscrupulous experiments, Atom not only inherited their passion for the sciences, but also their striking red hair.',
       'As a scion of the Beaker clan, he shares a familial connection with the enigmatic and accomplished Specter household.',
@@ -1800,10 +1427,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Callia Maebey',
-    [
+    'Callia Maebey': [
       'Callia Maebey is a creative and ambitious individual, whose passion lies in expressing herself through the art of painting.',
       'With a keen eye for detail, she loses herself in a world of colors and shapes, while meticulously perfecting her artwork.',
       'A social butterfly, Callia adores meeting new people and forging connections, broadening her network within the art world.',
@@ -1817,10 +1441,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Pak Ree',
-    [
+    'Pak Ree': [
       'Pak Ree was a vivacious and intrepid soul, constantly yearning to uncover new horizons and immerse himself in novel experiences.',
       'A true connoisseur of music, he relished in the harmonious melodies produced by his deft fingers on various instruments, and reveled in the communal energy of live concerts.',
       "Pak Ree's passion for culinary arts was well-known among his circle, as he delighted in crafting sumptuous meals infused with exotic flavors that tantalized the taste buds of his loved ones.",
@@ -1834,10 +1455,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Leanna Epps',
-    [
+    'Leanna Epps': [
       'Leanna Epps, a vivacious and sociable young woman, effortlessly draws others into her magnetic aura as she navigates the world with an insatiable appetite for connection.',
       'A devotee of fashion, Leanna masterfully curates her wardrobe to create a dazzling tapestry that mirrors her distinctive spirit.',
       'Family plays a central role in her life, as she cherishes every moment spent with loved ones, weaving a rich tapestry of memories to last a lifetime.',
@@ -1849,10 +1467,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'DÃ©sirÃ©e St. Feu',
-    [
+    'DÃ©sirÃ©e St. Feu': [
       "Feu, a dazzling fashionista with an eye for all things opulent and chic, aspired to make her mark as a renowned fashion designer, conjuring up enchanting ensembles for the world's elite.",
       'With her fiery disposition and fervor for life, she found herself drawn to the vibrant hue of red, which she deemed a fitting emblem of her persona.',
       'A hopeless romantic, DÃ©sirÃ©e yearned to discover a soulmate who would stand by her side, cherishing their shared dreams and ambitions.',
@@ -1865,10 +1480,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Laney Voom',
-    [
+    'Laney Voom': [
       'Laney Voom was an exuberant individual with a penchant for bold colors and patterns, which not only adorned her clothing but also the walls of her vibrant home.',
       'Outgoing and sociable, she thrived in meeting new people and expanding her circle of friends.',
       "Laney's artistic soul shone through her talents in painting and photography, where she transformed her emotions into captivating masterpieces.",
@@ -1881,10 +1493,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Tommi Turner',
-    [
+    'Tommi Turner': [
       'Tommi Turner, a creative and ambitious soul, often found themselves immersed in various art forms, expressing their emotions through colorful masterpieces on canvas.',
       "With a passion for painting and a talent for strumming heartfelt songs on the guitar, Tommi's charisma made them the life of every social gathering.",
       'With dreams of becoming a renowned artist or musician, Tommi worked tirelessly to attain recognition, never losing sight of their goals.',
@@ -1896,10 +1505,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Zoe Flores',
-    [
+    'Zoe Flores': [
       'Zoe Flores, a vibrant young adult, resides in the picturesque suburban town of Willow Creek, sharing her cozy abode with her two eclectic roommates, Mitchell Kalani and Gavin Richards.',
       'As a member of the Garden Gnomes household, Zoe fills her home with warmth and laughter, her cheerful and outgoing personality a beacon of light to those around her.',
       'With a passion for music, an insatiable palate, and a penchant for mischief, Zoe is the life of every gathering, effortlessly blending melodious tunes and culinary delights with her infectious humor.',
@@ -1908,10 +1514,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Marquise Palumbo',
-    [
+    'Marquise Palumbo': [
       'Marquise Palumbo was a stylish and sophisticated woman who relished in socializing with friends and neighbors.',
       'Her penchant for high-end fashion and always dressing in the latest trends made her the envy of many around town.',
       'A natural-born leader, Marquise often found herself organizing and hosting events, bringing people together and ensuring everyone had a great time.',
@@ -1925,10 +1528,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Chaz MacFreeling',
-    [
+    'Chaz MacFreeling': [
       'Chaz MacFreeling, a creative and ambitious soul, effortlessly captivated attention with his stylish wardrobe and unique sense of humor.',
       'His natural charm and social finesse drew people into his orbit, making him a popular presence wherever he ventured.',
       'His innate musical talent opened doors to various artistic careers, from singer to DJ, and even music producer.',
@@ -1940,10 +1540,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Erroll Dowd',
-    [
+    'Erroll Dowd': [
       'Erroll Dowd was a creative and ambitious soul who loved to spend his time honing his skills in various fields.',
       'A natural-born artist, he was often seen with a paintbrush in hand and a canvas before him, expressing his emotions through vivid colors and unique shapes.',
       "Erroll's outgoing nature allowed him to easily befriend others at social gatherings, his sense of humor always providing witty jokes and amusing anecdotes to make everyone laugh.",
@@ -1956,10 +1553,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Jayden Armstrong',
-    [
+    'Jayden Armstrong': [
       'With a magnetic charm that could light up any room, Jayden Armstrong was the epitome of charisma.',
       'Whether he was in a bustling social gathering or a quiet corner at the local cafe, his laughter was contagious, and his stories held his audience captive.',
       'His dashing good looks, coupled with an ambitious drive to succeed, made him a force to be reckoned with in his professional life.',
@@ -1972,10 +1566,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Ophelia Nigmos',
-    [
+    'Ophelia Nigmos': [
       'Ophelia Nigmos was a captivating presence in the eerie town of Forgotten Hollow, with her porcelain skin, raven hair, and striking red eyes that seemed to pierce the very souls of those who glanced her way.',
       'Possessing an innate artistic talent, Ophelia was often found with a brush in hand, her canvas a beautiful dance of colors reflecting her creative passions.',
       'Her intelligence and thirst for knowledge shone through as she immersed herself in the pages of countless books and engaged in deep conversations with those who dared approach her.',
@@ -1988,10 +1579,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Long John Buttercups',
-    [
+    'Long John Buttercups': [
       'Long John Buttercups, a unique and quirky character, has a penchant for swashbuckling and all things pirate-themed.',
       'Donning a signature eye patch and pirate hat, he is always the life of the party and captivates everyone with his riveting storytelling abilities.',
       'His passion for sailing is infectious, and he dreams of owning a ship to explore the vast open seas someday.',
@@ -2004,10 +1592,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Ripp Grunt',
-    [
+    'Ripp Grunt': [
       'Ripp Grunt was a teenage resident of the peculiar town of Strangetown, known for its military families and otherworldly happenings.',
       "His bright red hair, inherited from his father General Buzz Grunt and shared by his younger brother Buck, was a symbol of the family's strong military background.",
       'With a slender build, Ripp often sported a black sleeveless shirt adorned with a green alien graphic, dark pants, and sneakers.',
@@ -2018,10 +1603,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Emily Parcel',
-    [
+    'Emily Parcel': [
       'Emily Parcel, a friendly and outgoing young woman, was often seen socializing with her neighbors, her infectious warmth drawing others to her.',
       'A true fashionista, she was always impeccably dressed in the latest trends, her appearance a testament to her meticulous attention to detail.',
       'Family-oriented at heart, Emily harbored dreams of building a large family and forging close bonds with her relatives.',
@@ -2034,10 +1616,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Alexander Goth',
-    [
+    'Alexander Goth': [
       'Alexander Goth, a young boy with a dark and mysterious demeanor, was born into the prestigious Goth family, known for their gothic aesthetics and enigmatic aura.',
       "Often clad in black attire, Alexander's appearance is a testament to his family's distinctive style.",
       'As an intellectually gifted child with a Whiz Kid aspiration, he is a quick learner, excelling in academics and demonstrating an insatiable thirst for knowledge.',
@@ -2048,10 +1627,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Vidcund Curious',
-    [
+    'Vidcund Curious': [
       'Vidcund Curious, a prominent figure in the enigmatic town of StrangeTown, was widely known for his insatiable appetite for scientific knowledge and discovery.',
       'His pale complexion, raven hair, and sharp, angular facial features set him apart from the common crowd, while his distinctive attire - lab coat, goggles, and boots - further emphasized his passion for research.',
       "As a scientist by profession, Vidcund's expertise spanned logic, cooking, and cleaning, making him a remarkably well-rounded individual.",
@@ -2062,10 +1638,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Kan Fetter',
-    [
+    'Kan Fetter': [
       'Kan Fetter, an aspiring artist, possessed a vibrant personality that drew people towards him like moths to a flame.',
       'His innate cheerfulness and gregarious nature served as a catalyst for forming friendships in his eclectic neighborhood.',
       'He sought inspiration for his masterpieces in nature, often wandering through lush parks, his eyes scanning every leaf and petal for that one spark of creativity.',
@@ -2079,10 +1652,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Nancy Landgraab',
-    [
+    'Nancy Landgraab': [
       'Nancy Landgraab, a wealthy and ambitious woman, resides in the opulent neighborhood of Oasis Springs, alongside her husband Geoffrey and their teenage son, Malcolm.',
       'Born into the prestigious Landgraab family, Nancy is often perceived as snobbish and materialistic, with aspirations of accumulating immense wealth.',
       'Employed as a Regional Manager in the competitive world of business, her expertise in Charisma and Logic are as remarkable as her dedication to fostering social connections.',
@@ -2091,10 +1661,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Alex Moyer',
-    [
+    'Alex Moyer': [
       'Alex Moyer was the epitome of a social butterfly, her warm smile and contagious laughter drew people in like moths to a flame.',
       'Often spotted around town engaging in a myriad of activities and events, her presence was like a breath of fresh air in any gathering.',
       'With an innate flair for fashion, her outfits were a mesmerizing blend of creativity and style, earning her admiration from those who shared her passion.',
@@ -2106,10 +1673,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Cassidy Purdue',
-    [
+    'Cassidy Purdue': [
       'Cassidy Purdue was a vibrant and ambitious young woman living in the heart of a bustling metropolis.',
       'With a burning passion for the arts, she would often lose herself in the melodic strumming of her guitar or the delicate strokes of her paintbrush, creating soul-stirring masterpieces.',
       'An outgoing and friendly soul, she had the uncanny ability to breathe life into any gathering, her unique and bold sense of fashion a testament to her spirited nature.',
@@ -2120,10 +1684,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Sean Sullivan',
-    [
+    'Sean Sullivan': [
       'Sean Sullivan was a congenial and extroverted fellow who thrived on forging new connections and cultivating friendships.',
       'With a penchant for gardening, he would frequently immerse himself in nurturing his flora or wandering through verdant parks.',
       "Family played a pivotal role in Sean's life, and he relished in sharing memorable moments with his children.",
@@ -2136,10 +1697,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'George Rivers',
-    [
+    'George Rivers': [
       'George Rivers was a charming and outgoing man, known for his magnetic personality that attracted friends and adventure in equal measure.',
       'With a passion for music that set his soul alight, he spent his free time perfecting his guitar skills or immersing himself in the electric atmosphere of live concerts.',
       'A devoted family man, George cherished his relationships with loved ones, always seeking opportunities to create lasting memories with them.',
@@ -2151,10 +1709,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Cordelia Thebe',
-    [
+    'Cordelia Thebe': [
       'Cordelia Thebe was an enchanting woman, adorned with long, wavy brown hair and often dressed in bohemian attire that mirrored her free-spirited soul.',
       'She possessed an innate artistic flair, frequently immersed in creating exquisite paintings within her snug studio.',
       "Cordelia's gregarious nature made her a sought-after presence at social events, and her love for nature inspired her to nurture her garden and embark on leisurely strolls through the park.",
@@ -2165,10 +1720,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Johnson Ready',
-    [
+    'Johnson Ready': [
       'Johnson Ready is a charismatic and outgoing individual who loves to make new friends and socialize at various events.',
       'He is quite ambitious and works diligently to climb the career ladder in his chosen profession.',
       'With a keen eye for fashion, he always makes sure he looks his best, often changing his outfits to suit the occasion.',
@@ -2182,10 +1734,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Lacey Stiles',
-    [
+    'Lacey Stiles': [
       'Lacey Stiles, a young and ambitious woman, dreams of conquering the fashion world with her keen eye for detail and natural design talents.',
       'A social butterfly, Lacey thrives on forging connections in both her personal and professional life.',
       'With a soft spot for animals, she often finds herself adopting stray cats, and her hopeless romantic nature keeps her in constant pursuit of her soulmate, even if she occasionally confuses infatuation for true love.',
@@ -2197,10 +1746,7 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-  [
-    'Tragic Clown',
-    [
+    'Tragic Clown': [
       'With a heavy heart and an even heavier pair of oversized shoes, Sunny the Tragic Clown shuffled through life, a melancholic figure in a world that seemed to reject the very notion of his existence.',
       'His white and blue makeup, smeared with tears, along with his signature red nose, only served to accentuate the sorrow that clung to him like a shroud.',
       'Though his ultimate aim was to bring joy and laughter, his clumsy efforts often fell flat, leaving those he encountered feeling downcast and uneasy.',
@@ -2210,5 +1756,5 @@ export const defaultSimDescriptions: Map<String, string> = new Map([
     ]
       .join(' ')
       .trim(),
-  ],
-]);
+  })
+);
