@@ -20,7 +20,7 @@ describe('ParticipantRepository', () => {
       id: 1029376491723,
       description: randomString(),
     };
-    await participantRepository.updateParticipant(participant);
+    participantRepository.updateParticipant(participant);
 
     const result = await participantRepository.getParticipants([
       {
@@ -40,10 +40,10 @@ describe('ParticipantRepository', () => {
     expect(result[1].description).toBeFalsy();
     expect(result.length).toEqual(2);
 
-    await participantRepository.deleteParticipant(participant);
+    participantRepository.deleteParticipant(participant);
 
     const noDescription: ParticipantEntity = { id: 91283 };
-    await participantRepository.updateParticipant(noDescription);
+    participantRepository.updateParticipant(noDescription);
 
     const noDescriptionResult = await participantRepository.getParticipants([
       {
@@ -55,7 +55,7 @@ describe('ParticipantRepository', () => {
     expect(noDescriptionResult[0].description).toBeNull();
 
     noDescription.description = randomString();
-    await participantRepository.updateParticipant(noDescription);
+    participantRepository.updateParticipant(noDescription);
     const descriptionChangedResult =
       await participantRepository.getParticipants([
         { id: noDescription.id, fullName: 'some name' },

@@ -1,16 +1,14 @@
 /* eslint-disable promise/always-return */
-import sqlite3 from 'sqlite3';
 import * as fs from 'fs';
 import log from 'electron-log';
+import DatabaseConstructor, { Database } from 'better-sqlite3';
 import { DirectoryService } from './DirectoryService';
 import { migrate } from '../db/migrations';
-
-sqlite3.verbose();
 
 export class DbService {
   private directoryService: DirectoryService;
 
-  private db?: sqlite3.Database;
+  private db?: Database;
 
   constructor(directoryService: DirectoryService) {
     this.directoryService = directoryService;
@@ -30,28 +28,23 @@ export class DbService {
       );
     }
 
-    // Promise to handle database opening
-    await new Promise<void>((resolve, reject) => {
-      this.db = new sqlite3.Database(
-        this.directoryService.getSentientSimsDbUnsaved(sessionId),
-        (err) => {
-          if (err) {
-            log.error('Error opening database', err);
-            reject(err); // Reject the promise with the error
-          } else {
-            resolve();
-          }
-        }
+    try {
+      this.db = new DatabaseConstructor(
+        this.directoryService.getSentientSimsDbUnsaved(sessionId)
       );
-    });
+    } catch (err: any) {
+      log.error('Error opening database', err);
+      throw err;
+    }
 
     // Once the above promise is resolved (i.e., DB opened successfully), proceed with migration
     if (this.db) {
       try {
-        await migrate(this.db); // Await the migration
+        migrate(this.db); // Await the migration
         log.info('DB Migration complete');
-      } catch (migrationErr) {
+      } catch (migrationErr: any) {
         log.error('DB migration failed', migrationErr);
+        throw migrationErr;
       }
     }
   }
@@ -75,39 +68,11 @@ export class DbService {
       .forEach((unsavedDb) => fs.rmSync(unsavedDb));
   }
 
-  async getDb() {
+  getDb() {
     if (this.db) {
       return this.db;
     }
 
     throw new Error('Database is not loaded yet!');
-  }
-
-  async run(sql: string, params: any) {
-    const db = await this.getDb();
-    await new Promise<void>((resolve, reject) => {
-      db.run(sql, params, function doRun(err) {
-        if (err) {
-          log.error('Error in db run', err);
-          return reject(err); // Reject the promise with the error
-        }
-
-        return resolve(); // Resolve the promise when successful
-      });
-    });
-  }
-
-  async all(sql: string, params: any) {
-    const db = await this.getDb();
-    return new Promise<any[]>((resolve, reject) => {
-      db.all(sql, params, (err, rows) => {
-        if (err) {
-          log.error('Error in db all:', err);
-          return reject(err);
-        }
-
-        return resolve(rows);
-      });
-    });
   }
 }

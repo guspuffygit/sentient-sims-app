@@ -31,6 +31,8 @@ import { ParticipantRepository } from './db/ParticipantRepository';
 import { ParticipantsController } from './controllers/ParticipantsController';
 import { LocationRepository } from './db/LocationRepository';
 import { LocationsController } from './controllers/LocationsController';
+import { MemoryRepository } from './db/MemoryRepository';
+import { MemoriesController } from './controllers/MemoriesController';
 
 const settingsService = new SettingsService();
 const directoryService = new DirectoryService(settingsService);
@@ -52,6 +54,8 @@ const dbService = new DbService(directoryService);
 const dbController = new DbController(dbService);
 const participantRepository = new ParticipantRepository(dbService);
 const locationRepository = new LocationRepository(dbService);
+const memoryRepository = new MemoryRepository(dbService);
+const memoriesController = new MemoriesController(memoryRepository);
 const participantsController = new ParticipantsController(
   participantRepository
 );
@@ -146,6 +150,18 @@ export default function runApi(
     '/locations/:locationId',
     locationsController.deleteLocation
   );
+
+  expressApp.get('/memories/:memoryId', memoriesController.getMemory);
+  expressApp.get('/memories', memoriesController.getMemories);
+  // TODO: Deprecated
+  expressApp.get(
+    '/participant-memories',
+    memoriesController.getParticipantsMemories
+  );
+  expressApp.post('/memories/:memoryId', memoriesController.updateMemory);
+  expressApp.post('/memories', memoriesController.createMemory);
+  expressApp.delete('/memories/:memoryId', memoriesController.deleteMemory);
+  expressApp.delete('/memories', memoriesController.deleteAllMemories);
 
   expressApp.get('/patreon-redirect', patreonController.handleRedirect);
 

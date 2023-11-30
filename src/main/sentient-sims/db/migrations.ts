@@ -1,5 +1,5 @@
 import log from 'electron-log';
-import { Database } from 'sqlite3';
+import { Database } from 'better-sqlite3';
 
 export type DbMigration = {
   name: string;
@@ -19,70 +19,80 @@ export const migrations: Map<string, string> = new Map([
   [
     '002-create-location-table',
     `
-    CREATE TABLE location ( 
+    CREATE TABLE location (
       id                   INTEGER NOT NULL  PRIMARY KEY  ,
       name                 TEXT     ,
       lot_type             TEXT     ,
-      description          TEXT     
+      description          TEXT
+    );
+  `,
+  ],
+  [
+    '003-create-memory-table',
+    `
+    CREATE TABLE memory (
+      id                   INTEGER PRIMARY KEY  ,
+      pre_action           TEXT     ,
+      observation          TEXT     ,
+      content              TEXT     ,
+      timestamp            DATETIME DEFAULT CURRENT_TIMESTAMP ,
+      location_id          INTEGER NOT NULL
+    );
+  `,
+  ],
+  [
+    '004-create-memory-participants-table',
+    `
+    CREATE TABLE memory_participants (
+      id                   INTEGER PRIMARY KEY  ,
+      participant_id       INTEGER NOT NULL    ,
+      memory_id            INTEGER NOT NULL    ,
+      FOREIGN KEY ( memory_id ) REFERENCES memory( id ) ON DELETE CASCADE ON UPDATE CASCADE
     );
   `,
   ],
 ]);
 
-const createDbMigrationsTable = async (db: Database) => {
-  return new Promise<void>((resolve, reject) => {
-    db.serialize(() => {
-      db.exec(
-        `
-        CREATE TABLE IF NOT EXISTS migrations (
-          id INTEGER PRIMARY KEY,
-          name TEXT NOT NULL,
-          timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-        `,
-        (err) => {
-          if (err) return reject(err);
-          return resolve();
-        }
+const createDbMigrationsTable = (db: Database) => {
+  db.prepare(
+    `
+    CREATE TABLE IF NOT EXISTS migrations (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `
+  ).run();
+};
+
+const getAppliedMigrations = (db: Database): string[] => {
+  const rows = db.prepare('SELECT name FROM migrations').all();
+  return rows.map((row: any) => row.name);
+};
+
+const applyMigration = (db: Database, dbMigration: DbMigration) => {
+  try {
+    const migrationTransaction = db.transaction(() => {
+      db.prepare(dbMigration.sql).run();
+
+      db.prepare('INSERT INTO migrations (name) VALUES (?)').run(
+        dbMigration.name
       );
     });
-  });
+
+    migrationTransaction();
+  } catch (err: any) {
+    log.error(`Error applying migration: ${err}`);
+    throw err;
+  }
 };
 
-const getAppliedMigrations = (db: Database): Promise<string[]> => {
-  return new Promise((resolve, reject) => {
-    db.all('SELECT name FROM migrations', (err, rows) => {
-      if (err) return reject(err);
-      const appliedMigrations = rows.map((row: any) => row.name);
-      return resolve(appliedMigrations);
-    });
-  });
-};
+export const migrate = (db: Database) => {
+  db.pragma('foreign_keys = ON');
+  db.pragma('journal_mode = WAL');
+  createDbMigrationsTable(db);
 
-const applyMigration = async (db: Database, dbMigration: DbMigration) => {
-  return new Promise<void>((resolve, reject) => {
-    db.serialize(() => {
-      // eslint-disable-next-line consistent-return
-      db.exec(dbMigration.sql, (migrationErr) => {
-        if (migrationErr) return reject(migrationErr);
-
-        db.run(
-          'INSERT INTO migrations (name) VALUES (?)',
-          dbMigration.name,
-          (err) => {
-            if (err) return reject(err);
-            return resolve();
-          }
-        );
-      });
-    });
-  });
-};
-
-export const migrate = async (db: Database) => {
-  await createDbMigrationsTable(db);
-
-  const appliedMigrations = await getAppliedMigrations(db);
+  const appliedMigrations = getAppliedMigrations(db);
   const migrationsToApply: string[] = [];
   migrations.forEach((value, key) => {
     if (!appliedMigrations.includes(key)) {
@@ -98,7 +108,6 @@ export const migrate = async (db: Database) => {
       sql: migrations.get(migrationName) as string,
     };
     log.info(`Applying migration: ${migration.name} sql:\n${migration.sql}`);
-    // eslint-disable-next-line no-await-in-loop
-    await applyMigration(db, migration);
+    applyMigration(db, migration);
   }
 };

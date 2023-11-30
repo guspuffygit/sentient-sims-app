@@ -2,9 +2,6 @@ name: Test
 
 on:
   push:
-    branches:
-      - main
-      - develop
 
 jobs:
   test:
@@ -16,16 +13,17 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Node.js and NPM
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 18
           cache: npm
 
       - name: npm install
         run: |
+          npm cache clean --force
           npm install
 
       - name: npm test
@@ -36,3 +34,8 @@ jobs:
           npm run package
           npm run lint
           npm test
+
+      - name: Upload Coverage Report as Artifact
+        uses: actions/upload-pages-artifact@v1
+        with: 
+          path: './coverage/lcov-report/'
