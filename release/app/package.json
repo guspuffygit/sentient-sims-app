@@ -14,7 +14,7 @@
     "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts"
   },
   "dependencies": {
-    "sqlite3": "^5.1.6"
+    "better-sqlite3": "^9.1.1"
   },
   "overrides": {
     "sqlite3": {
