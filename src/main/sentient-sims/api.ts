@@ -154,7 +154,7 @@ export default function runApi(
   expressApp.get('/memories/:memoryId', memoriesController.getMemory);
   expressApp.get('/memories', memoriesController.getMemories);
   // TODO: Deprecated
-  expressApp.get(
+  expressApp.post(
     '/participant-memories',
     memoriesController.getParticipantsMemories
   );

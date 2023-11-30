@@ -1,4 +1,3 @@
-import log from 'electron-log';
 import {
   CreateMemoryRequest,
   DeleteMemoryRequest,
@@ -56,8 +55,6 @@ export class MemoryRepository extends Repository {
       'ORDER BY memory.timestamp DESC',
       'LIMIT 50',
     ].join('\n');
-
-    log.info(query);
 
     return this.dbService
       .getDb()

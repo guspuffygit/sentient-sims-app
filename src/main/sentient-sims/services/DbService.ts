@@ -55,10 +55,7 @@ export class DbService {
         this.directoryService.getSentientSimsDbUnsaved(sessionId)
       )
     ) {
-      fs.copyFileSync(
-        this.directoryService.getSentientSimsDbUnsaved(sessionId),
-        this.directoryService.getSentientSimsDb()
-      );
+      this.getDb().backup(this.directoryService.getSentientSimsDb());
     }
 
     // Cleanup old unsaved databases

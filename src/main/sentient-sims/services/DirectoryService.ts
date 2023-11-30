@@ -135,7 +135,7 @@ export class DirectoryService {
       const folderPath = this.getSentientSimsFolder();
       const files = fs.readdirSync(folderPath);
       return files
-        .filter((file) => file.endsWith('-sentient-sims-unsaved.db'))
+        .filter((file) => file.includes('-sentient-sims-unsaved.db'))
         .map((file) => path.join(folderPath, file));
     } catch (error) {
       log.error('Error reading directory:', error);
