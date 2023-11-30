@@ -1,7 +1,7 @@
 /* eslint-disable promise/always-return */
 import * as fs from 'fs';
 import log from 'electron-log';
-import DatabaseConstructor, { Database } from 'better-sqlite3';
+import DatabaseConstructor, { Database } from '@guspuffy/better-sqlite3';
 import { DirectoryService } from './DirectoryService';
 import { migrate } from '../db/migrations';
 

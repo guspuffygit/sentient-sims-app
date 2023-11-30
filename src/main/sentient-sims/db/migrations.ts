@@ -1,5 +1,5 @@
 import log from 'electron-log';
-import { Database } from 'better-sqlite3';
+import { Database } from '@guspuffy/better-sqlite3';
 
 export type DbMigration = {
   name: string;

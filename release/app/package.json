@@ -14,11 +14,7 @@
     "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts"
   },
   "dependencies": {
-    "better-sqlite3": "^9.1.1"
-  },
-  "overrides": {
-    "sqlite3": {
-      "node-gyp": "^10.0.1"
-    }
+    "@guspuffy/better-sqlite3": "^9.1.3",
+    "node-gyp": "10.0.1"
   }
 }
