@@ -72,12 +72,6 @@ export class MemoryRepository extends Repository {
       .all() as MemoryEntity[];
   }
 
-  /**
-   * Updates an existing memory or inserts a new memory if they do not exist in the database.
-   *
-   * @param {MemoryEntity} memory - The memory entity to update or insert.
-   * @returns {Promise<void>} A promise that resolves when the operation is complete.
-   */
   updateMemory(memory: MemoryEntity) {
     return this.dbService
       .getDb()
