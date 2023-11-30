@@ -46,6 +46,7 @@ jobs:
 
       - name: Install and build
         run: |
+          npm cache clean --force
           npm install
           npm run postinstall
           npm run build

@@ -19,8 +19,10 @@ export class ParticipantRepository extends Repository {
   async getParticipant(
     participantRequest: GetParticipantRequest
   ): Promise<ParticipantEntity> {
-    const query = `SELECT * FROM participant WHERE id = ?`;
-    const result = await this.dbService.all(query, [participantRequest.id]);
+    const result = this.dbService
+      .getDb()
+      .prepare('SELECT * FROM participant WHERE id = ?')
+      .all([participantRequest.id]) as ParticipantEntity[];
     if (result.length > 0) {
       return result[0];
     }
@@ -47,16 +49,19 @@ export class ParticipantRepository extends Repository {
    * @param {ParticipantEntity} participant - The participant entity to update or insert.
    * @returns {Promise<void>} A promise that resolves when the operation is complete.
    */
-  async updateParticipant(participant: ParticipantEntity) {
-    return this.dbService.run(
-      'INSERT OR REPLACE INTO participant(id, description) VALUES(?, ?)',
-      [participant.id, participant.description]
-    );
+  updateParticipant(participant: ParticipantEntity) {
+    return this.dbService
+      .getDb()
+      .prepare(
+        'INSERT OR REPLACE INTO participant(id, description) VALUES(?, ?)'
+      )
+      .run([participant.id, participant.description]);
   }
 
-  async deleteParticipant(participant: ParticipantEntity) {
-    return this.dbService.run('DELETE FROM participant WHERE id = ?', [
-      participant.id,
-    ]);
+  deleteParticipant(participant: ParticipantEntity) {
+    return this.dbService
+      .getDb()
+      .prepare('DELETE FROM participant WHERE id = ?')
+      .run([participant.id]);
   }
 }

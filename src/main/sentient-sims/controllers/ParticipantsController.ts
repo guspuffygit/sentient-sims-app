@@ -55,7 +55,7 @@ export class ParticipantsController {
         description,
       };
 
-      await this.participantRepository.updateParticipant(participant);
+      this.participantRepository.updateParticipant(participant);
       return res.json({
         text: `Updated participant with id ${participant.id}`,
       });
@@ -70,7 +70,7 @@ export class ParticipantsController {
       const { participantId } = req.params;
       const participant: ParticipantEntity = { id: Number(participantId) };
 
-      await this.participantRepository.deleteParticipant(participant);
+      this.participantRepository.deleteParticipant(participant);
       return res.json({ text: 'Deleted' });
     } catch (err: any) {
       log.error('Error deleting participant', err);
