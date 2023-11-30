@@ -31,7 +31,7 @@ jobs:
           OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npm run package
+          npm run build
           npm test
 
       - name: Upload Coverage Report as Artifact
