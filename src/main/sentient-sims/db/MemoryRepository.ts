@@ -1,3 +1,5 @@
+import log from 'electron-log';
+import electron from 'electron';
 import {
   CreateMemoryRequest,
   DeleteMemoryRequest,
@@ -126,7 +128,16 @@ export class MemoryRepository extends Repository {
 
     const createdMemoryId = createMemoryTransaction();
 
-    return this.getMemory({ id: Number(createdMemoryId) });
+    const memory = this.getMemory({ id: Number(createdMemoryId) });
+
+    electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
+      if (wnd.webContents?.isDestroyed() === false) {
+        log.debug('Sending new memory added');
+        wnd.webContents.send('on-new-memory-added', memory);
+      }
+    });
+
+    return memory;
   }
 
   deleteMemory(deleteMemoryRequest: DeleteMemoryRequest) {

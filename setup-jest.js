@@ -1,3 +1,4 @@
+import 'core-js/modules/web.immediate';
 import { TextEncoder, TextDecoder } from 'util';
 import 'whatwg-fetch';
 

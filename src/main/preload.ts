@@ -45,6 +45,30 @@ const electronHandler = {
   openBrowserLink: (link: string) => {
     ipcRenderer.send('open-browser-link', link);
   },
+  onNewMemoryAdded: (callback: any) => {
+    ipcRenderer.on('on-new-memory-added', callback);
+
+    function removeListener() {
+      ipcRenderer.removeListener('on-new-memory-added', callback);
+    }
+    return removeListener;
+  },
+  onDatabaseLoaded: (callback: any) => {
+    ipcRenderer.on('on-database-loaded', callback);
+
+    function removeListener() {
+      ipcRenderer.removeListener('on-database-loaded', callback);
+    }
+    return removeListener;
+  },
+  onDatabaseUnloaded: (callback: any) => {
+    ipcRenderer.on('on-database-unloaded', callback);
+
+    function removeListener() {
+      ipcRenderer.removeListener('on-database-unloaded', callback);
+    }
+    return removeListener;
+  },
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);
