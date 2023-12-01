@@ -5,6 +5,7 @@ import log from 'electron-log';
 import { MemoryRepository } from '../db/MemoryRepository';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { CreateMemoryRequest } from '../models/GetMemoryRequest';
+import { DatabaseNotLoadedError } from '../exceptions/DatabaseNotLoadedError';
 
 export class MemoriesController {
   private readonly memoryRepository: MemoryRepository;
@@ -24,7 +25,7 @@ export class MemoriesController {
   async getMemory(req: Request, res: Response) {
     try {
       const { memoryId } = req.params;
-      const result = await this.memoryRepository.getMemory({
+      const result = this.memoryRepository.getMemory({
         id: Number(memoryId),
       });
       return res.json(result);
@@ -36,9 +37,14 @@ export class MemoriesController {
 
   async getMemories(req: Request, res: Response) {
     try {
-      const result = await this.memoryRepository.getMemories();
+      const result = this.memoryRepository.getMemories();
       return res.json(result);
     } catch (err: any) {
+      if (err instanceof DatabaseNotLoadedError) {
+        log.debug('Database isnt loaded yet, returning empty list');
+        return res.json([]);
+      }
+
       log.error('Error getting memories', err);
       return res.json({ error: err.message });
     }
@@ -50,7 +56,7 @@ export class MemoriesController {
         (participantId: string) => Number(participantId)
       );
 
-      const result = await this.memoryRepository.getParticipantsMemories({
+      const result = this.memoryRepository.getParticipantsMemories({
         participant_ids: participantIds,
       });
       return res.json(result);
@@ -66,7 +72,7 @@ export class MemoriesController {
       const memory: MemoryEntity = req.body;
       memory.id = Number(memoryId);
 
-      await this.memoryRepository.updateMemory(memory);
+      this.memoryRepository.updateMemory(memory);
       return res.json({
         text: `Updated memory with id ${memory.id}`,
       });
@@ -80,9 +86,7 @@ export class MemoriesController {
     try {
       const createMemoryRequest: CreateMemoryRequest = req.body;
 
-      const memory = await this.memoryRepository.createMemory(
-        createMemoryRequest
-      );
+      const memory = this.memoryRepository.createMemory(createMemoryRequest);
       return res.json(memory);
     } catch (err: any) {
       log.error('Error creating memory', err);
@@ -94,7 +98,7 @@ export class MemoriesController {
     try {
       const { memoryId } = req.params;
 
-      await this.memoryRepository.deleteMemory({ id: Number(memoryId) });
+      this.memoryRepository.deleteMemory({ id: Number(memoryId) });
       return res.json({ text: `Deleted memory with id: ${memoryId}` });
     } catch (err: any) {
       log.error('Error deleting memory', err);
@@ -104,7 +108,7 @@ export class MemoriesController {
 
   async deleteAllMemories(req: Request, res: Response) {
     try {
-      await this.memoryRepository.deleteAllMemories();
+      this.memoryRepository.deleteAllMemories();
       return res.json({ text: `Deleted all memories` });
     } catch (err: any) {
       log.error('Error deleting memory', err);

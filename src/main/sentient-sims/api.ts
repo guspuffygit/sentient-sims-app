@@ -167,6 +167,7 @@ export default function runApi(
 
   expressApp.get('/db/load/:sessionId', dbController.loadDatabase);
   expressApp.get('/db/save/:sessionId', dbController.saveDatabase);
+  expressApp.get('/db/unload', dbController.unloadDatabase);
 
   expressApp.get('/animations', animationsController.getAnimations);
   expressApp.post('/animations', animationsController.setAnimation);

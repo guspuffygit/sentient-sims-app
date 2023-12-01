@@ -73,6 +73,14 @@ code {
   display: none;
 }
 
+.hoverHighlightTypography {
+  display: inline-block;
+}
+
+.hoverHighlightTypography:hover {
+  color: #fff8ac;
+}
+
 .code-window {
   width: 100%;
   height: 500px;

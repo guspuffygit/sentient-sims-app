@@ -53,6 +53,13 @@ function MenuBar() {
             ) : null}
             <Button
               color="secondary"
+              onClick={() => navigate('/memories')}
+              sx={{ margin: '10px' }}
+            >
+              Memories
+            </Button>
+            <Button
+              color="secondary"
               onClick={() => navigate('/settings')}
               sx={{ margin: '10px' }}
             >

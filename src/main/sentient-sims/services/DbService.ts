@@ -2,8 +2,10 @@
 import * as fs from 'fs';
 import log from 'electron-log';
 import DatabaseConstructor, { Database } from 'better-sqlite3';
+import electron from 'electron';
 import { DirectoryService } from './DirectoryService';
 import { migrate } from '../db/migrations';
+import { DatabaseNotLoadedError } from '../exceptions/DatabaseNotLoadedError';
 
 export class DbService {
   private directoryService: DirectoryService;
@@ -47,15 +49,22 @@ export class DbService {
         throw migrationErr;
       }
     }
+
+    electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
+      if (wnd.webContents?.isDestroyed() === false) {
+        log.debug('Sending database loaded');
+        wnd.webContents.send('on-database-loaded', sessionId);
+      }
+    });
   }
 
-  saveDatabase(sessionId: string) {
+  async saveDatabase(sessionId: string) {
     if (
       DirectoryService.fileExistsSync(
         this.directoryService.getSentientSimsDbUnsaved(sessionId)
       )
     ) {
-      this.getDb().backup(this.directoryService.getSentientSimsDb());
+      await this.getDb().backup(this.directoryService.getSentientSimsDb());
     }
 
     // Cleanup old unsaved databases
@@ -65,11 +74,27 @@ export class DbService {
       .forEach((unsavedDb) => fs.rmSync(unsavedDb));
   }
 
+  unloadDatabase() {
+    this.db = undefined;
+
+    // Cleanup unsaved databases
+    this.directoryService
+      .listSentientSimsDbUnsaved()
+      .forEach((unsavedDb) => fs.rmSync(unsavedDb));
+
+    electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
+      if (wnd.webContents?.isDestroyed() === false) {
+        log.debug('Sending database unloaded');
+        wnd.webContents.send('on-database-unloaded');
+      }
+    });
+  }
+
   getDb() {
-    if (this.db) {
+    if (this?.db) {
       return this.db;
     }
 
-    throw new Error('Database is not loaded yet!');
+    throw new DatabaseNotLoadedError();
   }
 }

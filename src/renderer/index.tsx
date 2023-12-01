@@ -17,6 +17,7 @@ import LastExceptionPage from './LastExceptionPage';
 import LoginPage from './LoginPage';
 import { DebugModeProvider } from './providers/DebugModeProvider';
 import LogViewerPage from './LogViewerPage';
+import MemoriesPage from './MemoriesPage';
 
 const updatedAwsConfig = {
   ...awsExports,
@@ -44,6 +45,10 @@ const router = createMemoryRouter([
       {
         path: '/chat',
         element: <ChatPage />,
+      },
+      {
+        path: '/memories',
+        element: <MemoriesPage />,
       },
       {
         path: '/last-exception',

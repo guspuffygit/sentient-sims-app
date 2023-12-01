@@ -12,6 +12,7 @@ export class DbController {
 
     this.loadDatabase = this.loadDatabase.bind(this);
     this.saveDatabase = this.saveDatabase.bind(this);
+    this.unloadDatabase = this.unloadDatabase.bind(this);
   }
 
   async loadDatabase(req: Request, res: Response) {
@@ -27,13 +28,25 @@ export class DbController {
     }
   }
 
-  saveDatabase(req: Request, res: Response) {
+  async saveDatabase(req: Request, res: Response) {
     try {
       const { sessionId } = req.params;
       log.debug(`Saving database: ${sessionId}`);
 
-      this.dbService.saveDatabase(sessionId);
+      await this.dbService.saveDatabase(sessionId);
       return res.json({ text: 'Db Saved' });
+    } catch (err: any) {
+      log.error('Error saving database', err);
+      return res.json({ error: err.message });
+    }
+  }
+
+  unloadDatabase(req: Request, res: Response) {
+    try {
+      log.debug(`Unloading database`);
+
+      this.dbService.unloadDatabase();
+      return res.json({ text: 'Db unloaded' });
     } catch (err: any) {
       log.error('Error saving database', err);
       return res.json({ error: err.message });
