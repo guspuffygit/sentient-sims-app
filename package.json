@@ -212,6 +212,7 @@
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "afterPack": "./myAfterPackHook.js",
+    "npmRebuild": false,
     "files": [
       "dist",
       "node_modules",
