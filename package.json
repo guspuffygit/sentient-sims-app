@@ -211,6 +211,8 @@
     "appId": "com.sentientsimulations.sentientsims",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
+    "nodeGypRebuild": true,
+    "buildDependenciesFromSource": true,
     "files": [
       "dist",
       "node_modules",
