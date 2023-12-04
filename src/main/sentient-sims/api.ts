@@ -33,6 +33,7 @@ import { LocationRepository } from './db/LocationRepository';
 import { LocationsController } from './controllers/LocationsController';
 import { MemoryRepository } from './db/MemoryRepository';
 import { MemoriesController } from './controllers/MemoriesController';
+import { PromptRequestBuilderService } from './services/PromptRequestBuilderService';
 
 const settingsService = new SettingsService();
 const directoryService = new DirectoryService(settingsService);
@@ -80,7 +81,14 @@ const debugController = new DebugController(
   logSendService,
   customLLMService
 );
-const aiController = new AIController(openAIService, customLLMService);
+const promptRequestBuilderService = new PromptRequestBuilderService(
+  locationRepository
+);
+const aiController = new AIController(
+  openAIService,
+  customLLMService,
+  promptRequestBuilderService
+);
 const animationsController = new AnimationsController(animationsService);
 
 export default function runApi(
@@ -106,6 +114,8 @@ export default function runApi(
   expressApp.post('/ai/v2/generate', aiController.sentientSimsGenerate);
   expressApp.post('/ai/translate', aiController.translate);
   expressApp.post('/ai/wants', aiController.sentientSimsWants);
+  expressApp.post('/ai/event/interaction', aiController.interactionEvent);
+  expressApp.post('/ai/event/wants', aiController.wantsEvent);
 
   expressApp.get('/files/last-exception', fileController.getLastExceptionFiles);
   expressApp.delete(
