@@ -9,6 +9,8 @@ import { GenerationService } from '../services/GenerationService';
 import { GenerationResult } from '../formatter/GenerationResult';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { sendPopUpNotification } from '../util/popupNotification';
+import { EventRequest } from '../models/EventRequest';
+import { PromptRequestBuilderService } from '../services/PromptRequestBuilderService';
 
 function sendChatGeneration(
   promptRequest: PromptRequest,
@@ -34,15 +36,21 @@ export class AIController {
 
   private readonly customLLMService: CustomLLMService;
 
+  private readonly promptRequestBuilderService: PromptRequestBuilderService;
+
   constructor(
     openAIService: OpenAIService,
-    customLLMService: CustomLLMService
+    customLLMService: CustomLLMService,
+    promptRequestBuilderService: PromptRequestBuilderService
   ) {
     this.openAIService = openAIService;
     this.customLLMService = customLLMService;
+    this.promptRequestBuilderService = promptRequestBuilderService;
 
     this.sentientSimsGenerate = this.sentientSimsGenerate.bind(this);
     this.sentientSimsWants = this.sentientSimsWants.bind(this);
+    this.interactionEvent = this.interactionEvent.bind(this);
+    this.wantsEvent = this.wantsEvent.bind(this);
     this.translate = this.translate.bind(this);
   }
 
@@ -71,6 +79,14 @@ export class AIController {
     }
   }
 
+  async interactionEvent(req: Request, res: Response) {
+    const eventRequest: EventRequest = req.body;
+    const promptRequest =
+      this.promptRequestBuilderService.buildPromptRequest(eventRequest);
+    req.body = promptRequest;
+    return this.sentientSimsGenerate(req, res);
+  }
+
   async sentientSimsWants(req: Request, res: Response) {
     const promptRequest: PromptRequest = req.body;
     const customLLMEnabled = this.customLLMService.customLLMEnabled();
@@ -94,6 +110,14 @@ export class AIController {
       });
       sendPopUpNotification(err?.message);
     }
+  }
+
+  async wantsEvent(req: Request, res: Response) {
+    const eventRequest: EventRequest = req.body;
+    const promptRequest =
+      this.promptRequestBuilderService.buildPromptRequest(eventRequest);
+    req.body = promptRequest;
+    return this.sentientSimsWants(req, res);
   }
 
   async translate(req: Request, res: Response) {
