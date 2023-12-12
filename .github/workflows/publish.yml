@@ -18,9 +18,10 @@ jobs:
       matrix:
         platform:
           [
-            { os: "ubuntu-latest", cmd: "--linux" },
-            { os: "macos-latest", cmd: "--mac" },
-            { os: "windows-latest", cmd: "--win" },
+            { os: "ubuntu-latest", cmd: "--linux", arch: '' },
+            { os: "macos-latest", cmd: "--mac", arch: 'x64' },
+            { os: "macos-latest", cmd: "--mac", arch: 'arm64' },
+            { os: "windows-latest", cmd: "--win", arch: '' },
           ]
 
     steps:
@@ -44,6 +45,10 @@ jobs:
           echo "C:\Program Files\Git\usr\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           echo "C:\Program Files\Git\mingw64\libexec\git-core" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
+      - name: Setup mac build
+        if: matrix.platform.cmd == '--mac'
+        run: |
+          node setupMacBuildArch.js ${{ matrix.platform.arch }}
       - name: Install and build
         run: |
           npm cache clean --force
