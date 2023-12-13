@@ -749,5 +749,58 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
         "The lot's elevated position is a vantage point not just geographically, but symbolically too - poised between the whispers of the sea and the beckoning of the land, it offers a haven for dreams to take shape amidst the beauty of the harbor.",
       ].join(' '),
     },
+    '1851654149': {
+      id: 1851654149,
+      name: 'Stutefani Onsen Bathhouse',
+      lot_type: 'Onsen Bathhouse',
+      description: [
+        'In the hushed serenity of a snow-laden landscape, the Stutefani Onsen Bathhouse stands as a bastion of tradition and tranquility.',
+        "Its snow-capped, multi-tiered roofs harmonize with the winter's embrace, while warm light spills from the windows, beckoning visitors inside.",
+        'A steaming natural stone onsen offers a warm refuge against the cold, and meticulously shaped topiary bushes add a touch of cultivated nature.',
+        'Inside, the warmth of wood and the glow of soft lighting create an inviting atmosphere.',
+        'The communal areas—a tatami lounge and a dining space with a shared table—foster a sense of community and comfort.',
+        'Here, in this haven, every detail, from the geta sandals at the entrance to the shoji screens, resonates with the spirit of hospitality, offering a peaceful retreat that mirrors the quietude of the surrounding snowy expanse.',
+      ].join(' '),
+    },
+    '3428188211': {
+      id: 3428188211,
+      name: '5-1-2 Kiyomatsu',
+      lot_type: 'Vacation Rental',
+      description: [
+        'Nestled in a serene winter landscape, the 5-1-2 Kiyomatsu vacation rental harmoniously blends traditional architecture with modern comforts.',
+        'Its snow-covered roof and icicle-fringed eaves complement the wooden structure, hinting at skilled craftsmanship.',
+        'Inside, the first floor features an open-plan design with a traditional tatami area, a cozy lounge with a fireplace, and a modern kitchen, all adorned with delicate decorations and plants.',
+        'Upstairs, the minimalist bedrooms offer calm and restfulness with comfortable beds, soft lighting, and neutral colors, enhanced by indoor greenery and a small sitting area for quiet relaxation.',
+        'This rental is a tranquil winter retreat, where every space combines functionality, comfort, and aesthetic appeal.',
+      ].join(' '),
+    },
+    '3429957684': {
+      id: 3429957684,
+      name: '5-1-1 Kiyomatsu',
+      lot_type: 'Vacation Rental',
+      description: [
+        'The vacation rental at 5-1-1 Kiyomatsu is a serene winter retreat, combining traditional Japanese architecture with modern comforts.',
+        'Nestled in a tranquil snow-covered landscape, its dark wooden structures stand elegantly against the white backdrop, connected by wooden verandas.',
+        'The interior, showcases a minimalist yet functional design with sliding doors, tatami mats, and polished wooden floors.',
+        'The living area features a low wooden table with cushions, adjacent to a dining space with a blend of Eastern and Western influences.',
+        'A well-equipped kitchen promises home cooking comforts.',
+        ' Upstairs, a cozy bedroom with a plush western-style bed, wooden partitions, and soft lighting offers a luxurious escape, perfectly complementing the hushed beauty of the snowy exterior.',
+      ].join(' '),
+    },
+    '4055957510': {
+      id: 4055957510,
+      name: 'Izakaya Ippai',
+      lot_type: 'Bar',
+      description: [
+        'The Izakaya Ippai offers a cozy, Japanese-style setting with distinct areas for dining and socializing.',
+        'The entrance leads to a warmly lit bar with a selection of Japanese spirits, high stools, and a backlit bottle display.',
+        'The main dining area features four-seater tables and booths with traditional decorations, providing a comfortable atmosphere.',
+        'An elevated section on the right offers additional, quieter tables for more private experiences.',
+        'The second floor presents a tranquil dining space with a few tables and a booth by the window, offering a view of the streetscape.',
+        'Essential amenities include a well-maintained bathroom and a small kitchenette for final dish preparations.',
+        'The décor blends traditional Japanese elements with a rustic touch, unified by dark hardwood flooring.',
+        'Lanterns outside the windows enhance the ambiance, making this floor an ideal retreat for peaceful dining.',
+      ].join(' '),
+    },
   })
 );
