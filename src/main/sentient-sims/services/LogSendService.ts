@@ -80,7 +80,11 @@ export class LogSendService {
           `Failed to post message: ${response?.status} ${response?.statusText}.`
         );
         if (response) {
-          errors.push(await response.json());
+          const responseJson = await response.json();
+          log.error(
+            `Response JSON Error:\n${JSON.stringify(responseJson, null, 2)}`
+          );
+          errors.push(responseJson);
         }
       }
     } catch (err: any) {
@@ -260,7 +264,7 @@ export class LogSendService {
         body: formData,
       });
     } catch (err: any) {
-      this.handleAppendError('Error sending logs', err, errors);
+      this.handleAppendError('Error sending log data', err, errors);
       return null;
     }
   }
