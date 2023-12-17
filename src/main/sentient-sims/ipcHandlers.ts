@@ -24,15 +24,21 @@ export default function ipcHandlers(mainWindow: BrowserWindow) {
     (_event: IpcMainEvent, setting: SettingsEnum, value: any) => {
       log.debug(`set-setting: ${setting.toString()}, value: ${value}`);
       settingsService.set(setting, value);
-      mainWindow.webContents.send('setting-changed', setting, value);
+      if (mainWindow.webContents?.isDestroyed() === false) {
+        mainWindow.webContents.send('setting-changed', setting, value);
+      }
     }
   );
   ipcMain.on('reset-setting', (_event: IpcMainEvent, setting: SettingsEnum) => {
     const value = settingsService.resetSetting(setting.toString());
-    mainWindow.webContents.send('setting-changed', setting, value);
+    if (mainWindow.webContents?.isDestroyed() === false) {
+      mainWindow.webContents.send('setting-changed', setting, value);
+    }
   });
   ipcMain.on('on-successful-auth', () => {
-    mainWindow.loadURL(resolveHtmlPath('index.html'));
+    if (mainWindow.webContents?.isDestroyed() === false) {
+      mainWindow.loadURL(resolveHtmlPath('index.html'));
+    }
   });
   ipcMain.on('open-browser-link', (_event: IpcMainEvent, link: string) => {
     shell.openExternal(link);
