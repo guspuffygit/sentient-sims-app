@@ -180,6 +180,10 @@ export default function runApi(
   expressApp.get('/db/unload', dbController.unloadDatabase);
 
   expressApp.get('/animations', animationsController.getAnimations);
+  expressApp.get(
+    '/animations/nsfw-enabled',
+    animationsController.isNsfwEnabled
+  );
   expressApp.post('/animations', animationsController.setAnimation);
 
   startWebSocketServer(logsService, settingsService);

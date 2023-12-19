@@ -4,7 +4,10 @@
 import { SentientMemory } from '../models/SentientMemory';
 import { PromptRequest } from '../models/PromptRequest';
 import { llamaTokenizer } from '../llama/LLamaTokenizer';
-import { defaultMythoMaxSystemPrompt } from '../constants';
+import {
+  defaultMythoMaxNsfwSystemPrompt,
+  defaultMythoMaxSystemPrompt,
+} from '../constants';
 import { filterNullAndUndefined } from '../util/filter';
 import { removeLastParagraph, trimIncompleteSentence } from './PromptFormatter';
 
@@ -196,6 +199,11 @@ export class MythoMaxPromptFormatter {
 
   formatActionPrompt(promptRequest: PromptRequest) {
     promptRequest.systemPrompt = defaultMythoMaxSystemPrompt;
+    return this.formatPrompt(promptRequest);
+  }
+
+  formatNsfwPrompt(promptRequest: PromptRequest) {
+    promptRequest.systemPrompt = defaultMythoMaxNsfwSystemPrompt;
     return this.formatPrompt(promptRequest);
   }
 }

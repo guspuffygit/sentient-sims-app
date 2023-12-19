@@ -10,6 +10,7 @@ export class AnimationsController {
 
     this.getAnimations = this.getAnimations.bind(this);
     this.setAnimation = this.setAnimation.bind(this);
+    this.isNsfwEnabled = this.isNsfwEnabled.bind(this);
   }
 
   async getAnimations(req: Request, res: Response) {
@@ -20,5 +21,9 @@ export class AnimationsController {
     const animation: Animation = req.body;
     await this.animationsService.setAnimation(animation);
     res.json({ text: 'done' });
+  }
+
+  async isNsfwEnabled(req: Request, res: Response) {
+    res.json({ value: this.animationsService.isNsfwEnabled() });
   }
 }

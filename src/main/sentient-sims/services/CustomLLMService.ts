@@ -57,9 +57,14 @@ export class CustomLLMService implements GenerationService {
   async sentientSimsGenerate(
     promptRequest: PromptRequest
   ): Promise<SimsGenerateResponse> {
-    const prompt = promptRequest.pre_action
-      ? this.promptFormatter.formatActionPrompt(promptRequest)
-      : this.promptFormatter.formatPrompt(promptRequest);
+    let prompt: string;
+    if (promptRequest.nsfw) {
+      prompt = this.promptFormatter.formatNsfwPrompt(promptRequest);
+    } else if (promptRequest.pre_action) {
+      prompt = this.promptFormatter.formatActionPrompt(promptRequest);
+    } else {
+      prompt = this.promptFormatter.formatPrompt(promptRequest);
+    }
     log.debug(`prompt: ${prompt}`);
 
     const response = await this.generate(prompt);

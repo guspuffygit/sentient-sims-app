@@ -41,4 +41,12 @@ export class AnimationsService {
 
     return response.json();
   }
+
+  async isNsfwEnabled() {
+    if (this.settingsService.get(SettingsEnum.CUSTOM_LLM_ENABLED)) {
+      return true;
+    }
+
+    return this.settingsService.get(SettingsEnum.NSFW_ENABLED);
+  }
 }

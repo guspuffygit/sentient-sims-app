@@ -8,4 +8,5 @@ export type EventRequest = {
   model?: string;
   systemPrompt?: string;
   preResponse?: string;
+  nsfw?: boolean;
 };
