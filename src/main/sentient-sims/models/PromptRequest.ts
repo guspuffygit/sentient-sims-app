@@ -8,4 +8,5 @@ export type PromptRequest = {
   model?: string;
   systemPrompt?: string;
   preResponse?: string;
+  nsfw?: boolean;
 };

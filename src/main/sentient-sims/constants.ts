@@ -3,6 +3,10 @@ export const defaultMythoMaxSystemPrompt = [
   "### Instruction:\nThe user will prompt you with a character action that you will rewrite in the form of a story in the third person, describing scenes clearly, explicitly, in vivid detail based on what's been said before using lots of dialog and using the following characters, and location to help rewrite the user action into story format:",
 ].join(' ');
 
+export const defaultMythoMaxNsfwSystemPrompt = [
+  "### Instruction:\nThe user will prompt you with a description of a sexual act that you will rewrite in the form of a story in the third person, describing the characters performing the act explicitly in vivid detail based on what's been said before using lots of dialog and using the following characters, and location to help rewrite the sexual act into story format:",
+].join(' ');
+
 export const defaultSystemPrompt = [
   'The user will provide you with an interaction involving two characters: {initiator} and {target}.',
   'Your task is to craft a story in the third person that begins with the described action and then flows into the response or consequence of that action.',

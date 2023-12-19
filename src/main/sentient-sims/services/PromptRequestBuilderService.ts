@@ -22,6 +22,7 @@ export class PromptRequestBuilderService {
       model: eventRequest?.model,
       systemPrompt: eventRequest?.systemPrompt,
       preResponse: eventRequest?.preResponse,
+      nsfw: eventRequest?.nsfw,
     };
   }
 }
