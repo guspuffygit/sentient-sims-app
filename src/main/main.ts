@@ -110,7 +110,7 @@ const createWindow = async () => {
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
-  registerDebugToggleHotkey(mainWindow);
+  registerDebugToggleHotkey();
 
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
@@ -118,9 +118,9 @@ const createWindow = async () => {
     return { action: 'deny' };
   });
 
-  ipcHandlers(mainWindow);
+  ipcHandlers();
 
-  runApi(mainWindow, getAssetPath);
+  runApi(getAssetPath);
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line

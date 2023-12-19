@@ -1,16 +1,13 @@
 import { Request, Response } from 'express';
-import { BrowserWindow } from 'electron';
+import electron from 'electron';
 import { NotLoggedInError, PatreonService } from '../services/PatreonService';
 import { resolveHtmlPath } from '../../util';
 
 export class PatreonController {
   private patreonService: PatreonService;
 
-  private mainWindow: BrowserWindow;
-
-  constructor(patreonService: PatreonService, mainWindow: BrowserWindow) {
+  constructor(patreonService: PatreonService) {
     this.patreonService = patreonService;
-    this.mainWindow = mainWindow;
 
     this.handleRedirect = this.handleRedirect.bind(this);
   }
@@ -21,15 +18,22 @@ export class PatreonController {
     try {
       await this.patreonService.handlePatreonRedirect(code as string);
       res.redirect('https://www.patreon.com/SentientSims');
-      return this.mainWindow.webContents.loadURL(resolveHtmlPath('index.html'));
+      electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
+        if (wnd.webContents?.isDestroyed() === false) {
+          wnd.webContents.loadURL(resolveHtmlPath('index.html'));
+        }
+      });
     } catch (exception: any) {
       if (exception instanceof NotLoggedInError) {
-        return this.mainWindow.webContents.loadURL(
-          resolveHtmlPath('index.html#/login')
-        );
+        electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
+          if (wnd.webContents?.isDestroyed() === false) {
+            wnd.webContents.loadURL(resolveHtmlPath('index.html#/login'));
+          }
+        });
+        return;
       }
 
-      return res.send(exception.message);
+      res.send(exception.message);
     }
   }
 }

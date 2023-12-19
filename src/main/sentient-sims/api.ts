@@ -1,6 +1,5 @@
 import express from 'express';
 import log from 'electron-log';
-import { BrowserWindow } from 'electron';
 
 import { FileController } from './controllers/FileController';
 import { LastExceptionService } from './services/LastExceptionService';
@@ -91,12 +90,9 @@ const aiController = new AIController(
 );
 const animationsController = new AnimationsController(animationsService);
 
-export default function runApi(
-  mainWindow: BrowserWindow,
-  getAssetPath: (...paths: string[]) => string
-) {
+export default function runApi(getAssetPath: (...paths: string[]) => string) {
   const assetsController = new AssetsController(getAssetPath);
-  const patreonController = new PatreonController(patreonService, mainWindow);
+  const patreonController = new PatreonController(patreonService);
   const expressApp = express();
   expressApp.use(express.json());
   const port = 25148;

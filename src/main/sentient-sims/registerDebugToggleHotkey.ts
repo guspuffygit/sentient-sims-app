@@ -1,12 +1,15 @@
-import { BrowserWindow, globalShortcut } from 'electron';
+import electron, { globalShortcut } from 'electron';
 import log from 'electron-log';
 
-export default function registerDebugToggleHotkey(mainWindow: BrowserWindow) {
+export default function registerDebugToggleHotkey() {
   const ret = globalShortcut.register('Control+Shift+D', () => {
     log.info('Control+Shift+D is pressed');
-    if (mainWindow) {
-      mainWindow.webContents.send('debug-mode-toggle');
-    }
+
+    electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
+      if (wnd.webContents?.isDestroyed() === false) {
+        wnd.webContents.send('debug-mode-toggle');
+      }
+    });
   });
 
   if (!ret) {
