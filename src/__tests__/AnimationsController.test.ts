@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import '@testing-library/jest-dom';
-import { DatabaseNotLoadedError } from 'main/sentient-sims/exceptions/DatabaseNotLoadedError';
 import { AnimationsService } from 'main/sentient-sims/services/AnimationsService';
 import { SettingsService } from 'main/sentient-sims/services/SettingsService';
 import { AnimationsController } from 'main/sentient-sims/controllers/AnimationsController';
