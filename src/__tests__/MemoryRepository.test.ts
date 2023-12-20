@@ -29,12 +29,12 @@ describe('MemoryRepository', () => {
       memory,
       participants,
     });
-    expect(result.id).toBeDefined();
+    expect(result.id).toBeGreaterThanOrEqual(0);
     expect(result.content).toEqual(memory.content);
     expect(result.pre_action).toEqual(memory.pre_action);
     expect(result.observation).toEqual(memory.observation);
     expect(result.location_id).toEqual(memory.location_id);
-    expect(result.timestamp).toBeDefined();
+    expect(result.timestamp).toBeTruthy();
 
     // Check createMemory also created memory_participants rows
     const memoryParticipants = memoryRepository.getMemoryParticipants({

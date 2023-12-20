@@ -49,14 +49,17 @@ export class MemoryRepository extends Repository {
       .map(() => '?')
       .join(', ');
 
-    const query = [
-      'SELECT DISTINCT memory.*',
-      'FROM memory',
-      'INNER JOIN memory_participants ON memory.id = memory_participants.memory_id',
-      `WHERE memory_participants.participant_id IN (${placeholders})`,
-      'ORDER BY memory.timestamp DESC',
-      'LIMIT 50',
-    ].join('\n');
+    const query = `
+      SELECT * FROM (
+        SELECT DISTINCT memory.*
+        FROM memory
+        INNER JOIN memory_participants ON memory.id = memory_participants.memory_id
+        WHERE memory_participants.participant_id IN (${placeholders})
+        ORDER BY memory.timestamp DESC
+        LIMIT 10
+      ) AS subquery
+      ORDER BY subquery.timestamp ASC;
+    `;
 
     return this.dbService
       .getDb()
@@ -67,7 +70,16 @@ export class MemoryRepository extends Repository {
   getMemories(): MemoryEntity[] {
     return this.dbService
       .getDb()
-      .prepare('SELECT * FROM memory ORDER BY timestamp DESC LIMIT 50')
+      .prepare(
+        `
+          SELECT * FROM (
+            SELECT * FROM memory
+            ORDER BY timestamp DESC
+            LIMIT 10
+          ) AS subquery
+          ORDER BY subquery.timestamp ASC;
+        `
+      )
       .all() as MemoryEntity[];
   }
 
@@ -105,14 +117,13 @@ export class MemoryRepository extends Repository {
       const updateMemoryResult = this.dbService
         .getDb()
         .prepare(
-          'INSERT OR REPLACE INTO memory(id, pre_action, observation, content, timestamp, location_id) VALUES(?, ?, ?, ?, ?, ?)'
+          'INSERT OR REPLACE INTO memory(id, pre_action, observation, content, location_id) VALUES(?, ?, ?, ?, ?)'
         )
         .run([
           createMemoryRequest.memory.id,
           createMemoryRequest.memory.pre_action,
           createMemoryRequest.memory.observation,
           createMemoryRequest.memory.content,
-          createMemoryRequest.memory.timestamp,
           createMemoryRequest.memory.location_id,
         ]);
 
