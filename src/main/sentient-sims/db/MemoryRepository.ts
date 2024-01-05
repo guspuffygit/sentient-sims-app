@@ -56,7 +56,7 @@ export class MemoryRepository extends Repository {
         INNER JOIN memory_participants ON memory.id = memory_participants.memory_id
         WHERE memory_participants.participant_id IN (${placeholders})
         ORDER BY memory.timestamp DESC
-        LIMIT 10
+        LIMIT 100
       ) AS subquery
       ORDER BY subquery.timestamp ASC;
     `;
@@ -75,7 +75,7 @@ export class MemoryRepository extends Repository {
           SELECT * FROM (
             SELECT * FROM memory
             ORDER BY timestamp DESC
-            LIMIT 10
+            LIMIT 100
           ) AS subquery
           ORDER BY subquery.timestamp ASC;
         `
