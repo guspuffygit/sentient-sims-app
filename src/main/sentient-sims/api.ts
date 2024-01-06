@@ -94,7 +94,7 @@ export default function runApi(getAssetPath: (...paths: string[]) => string) {
   const assetsController = new AssetsController(getAssetPath);
   const patreonController = new PatreonController(patreonService);
   const expressApp = express();
-  expressApp.use(express.json());
+  expressApp.use(express.json({ limit: 52428800 }));
   const port = 25148;
 
   expressApp.get('/debug/health', DebugController.healthCheck);
