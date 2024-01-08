@@ -3,6 +3,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import SendIcon from '@mui/icons-material/Send';
 import { useRef } from 'react';
+import log from 'electron-log';
 import { ChatBoxComponent } from './ChatBoxComponent';
 import useChatGeneration from './hooks/useChatGeneration';
 import ChatResultsModal from './ChatResultsModal';
@@ -30,7 +31,11 @@ export default function ChatPage() {
   const resultsModal = ChatResultsModal();
 
   const onGenerateMultiple = async () => {
+    const startTime = performance.now();
     const results = await generateMultipleChat(10);
+    const endTime = performance.now() - startTime;
+    log.debug(`Time to run 10: ${endTime}`);
+
     resultsModal.setResults({
       open: true,
       results,
