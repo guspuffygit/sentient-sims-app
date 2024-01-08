@@ -1,10 +1,10 @@
 // eslint-disable-next-line import/prefer-default-export
 export const defaultMythoMaxSystemPrompt = [
-  "### Instruction:\nThe user will prompt you with a character action that you will rewrite in the form of a story in the third person, describing scenes clearly, explicitly, in vivid detail based on what's been said before using lots of dialog and using the following characters, and location to help rewrite the user action into story format:",
+  "### Instruction:\nThe user will prompt you with a description of an act that you will narrate in the third person, describing the characters present who are performing the act explicitly in vivid detail based on what's been said before using lots of dialog and using the following characters, while using the location description to help narrate the act:",
 ].join(' ');
 
 export const defaultMythoMaxNsfwSystemPrompt = [
-  "### Instruction:\nThe user will prompt you with a description of a sexual act that you will rewrite in the form of a story in the third person, describing the characters performing the act explicitly in vivid detail based on what's been said before using lots of dialog and using the following characters, and location to help rewrite the sexual act into story format:",
+  "### Instruction:\nThe user will prompt you with a description of a sexual act that you will narrate in the third person, describing the characters present who are performing the act explicitly in vivid detail based on what's been said before using lots of dialog and using the following characters, while using the location description to help narrate the sexual act:",
 ].join(' ');
 
 export const defaultSystemPrompt = [
@@ -43,3 +43,8 @@ export const sentientSimsAIHost = 'https://ai.sentientsimulations.com';
 
 export const defaultWantsPrompt =
   'If you were the character in the story, what would you want to do next?';
+
+export const rendererWebsocketPort = 25146;
+export const modWebsocketPort = 25145;
+export const appApiPort = 25148;
+export const appApiUrl = `http://localhost:${appApiPort}`;

@@ -43,6 +43,13 @@ export class ParticipantRepository extends Repository {
     return Promise.all(results);
   }
 
+  getAllParticipants(): ParticipantEntity[] {
+    return this.dbService
+      .getDb()
+      .prepare('SELECT * FROM participant')
+      .all() as ParticipantEntity[];
+  }
+
   /**
    * Updates an existing participant or inserts a new participant if they do not exist in the database.
    *

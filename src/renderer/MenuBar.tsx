@@ -1,10 +1,18 @@
-import { AppBar, Box, Button, Toolbar } from '@mui/material';
+import { AppBar, Box, Button, IconButton, Toolbar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuthenticator } from '@aws-amplify/ui-react';
+import { Dispatch, SetStateAction } from 'react';
+import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
+import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
 import useAuthCredentials from './hooks/useAuthCredentials';
 import { useDebugMode } from './providers/DebugModeProvider';
 
-function MenuBar() {
+export type MenuBarProperties = {
+  hideSideBar: boolean;
+  setHideSideBar: Dispatch<SetStateAction<boolean>>;
+};
+
+function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
   const { user, signOut } = useAuthenticator((context) => [context.user]);
   const navigate = useNavigate();
   const debugMode = useDebugMode();
@@ -78,6 +86,13 @@ function MenuBar() {
                 Login
               </Button>
             )}
+            <IconButton onClick={() => setHideSideBar(!hideSideBar)}>
+              {hideSideBar ? (
+                <ViewSidebarOutlinedIcon />
+              ) : (
+                <ChevronRightOutlinedIcon />
+              )}
+            </IconButton>
           </div>
         </Toolbar>
       </AppBar>

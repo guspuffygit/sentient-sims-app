@@ -14,6 +14,7 @@ export class ParticipantsController {
 
     this.getParticipant = this.getParticipant.bind(this);
     this.getParticipants = this.getParticipants.bind(this);
+    this.getAllParticipants = this.getAllParticipants.bind(this);
     this.updateParticipant = this.updateParticipant.bind(this);
     this.deleteParticipant = this.deleteParticipant.bind(this);
   }
@@ -42,6 +43,16 @@ export class ParticipantsController {
       return res.json(result);
     } catch (err: any) {
       log.error('Error getting participants', err);
+      return res.json({ error: err.message });
+    }
+  }
+
+  async getAllParticipants(req: Request, res: Response) {
+    try {
+      const result = this.participantRepository.getAllParticipants();
+      return res.json(result);
+    } catch (err: any) {
+      log.error('Error getting all participants', err);
       return res.json({ error: err.message });
     }
   }

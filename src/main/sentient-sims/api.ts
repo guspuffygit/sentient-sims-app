@@ -137,6 +137,7 @@ export default function runApi(getAssetPath: (...paths: string[]) => string) {
 
   // TODO: Deprecated
   expressApp.post('/participants', participantsController.getParticipants);
+  expressApp.get('/participants', participantsController.getAllParticipants);
   expressApp.get(
     '/participants/:participantId',
     participantsController.getParticipant
