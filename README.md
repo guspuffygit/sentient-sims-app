@@ -9,6 +9,8 @@ can intercept your data and read it.
 
 The app also handles state and saves for the mod.
 
+[Checkout the wiki for more details.](https://github.com/guspuffygit/sentient-sims-app/wiki)
+
 # Contributing
 
 Contributions are welcome, the app is open source.
