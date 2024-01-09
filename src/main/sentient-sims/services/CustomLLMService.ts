@@ -7,7 +7,7 @@ import { PromptRequest } from '../models/PromptRequest';
 import { MythoMaxPromptFormatter } from '../formatter/MythoMaxPromptFormatter';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
-import { defaultCustomLLMPrompt } from '../constants';
+import { defaultMythoMaxSystemPrompt } from '../constants';
 import { sendPopUpNotification } from '../util/popupNotification';
 import { fetchWithRetries } from '../util/fetchWithRetries';
 import { formatWantsOutput } from '../formatter/PromptFormatter';
@@ -71,7 +71,7 @@ export class CustomLLMService implements GenerationService {
     const text = this.promptFormatter.formatOutput(response);
     return {
       text,
-      systemPrompt: promptRequest.systemPrompt || defaultCustomLLMPrompt,
+      systemPrompt: promptRequest.systemPrompt || defaultMythoMaxSystemPrompt,
     };
   }
 
