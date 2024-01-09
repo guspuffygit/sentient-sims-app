@@ -1,5 +1,6 @@
 import { Box, FormControlLabel, TextField, Checkbox } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import HelpButton from 'renderer/components/HelpButton';
 import useSetting from '../hooks/useSetting';
 
 export default function LocalizationSettingsComponent() {
@@ -28,6 +29,7 @@ export default function LocalizationSettingsComponent() {
               />
             }
           />
+          <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/How%E2%80%90to-Use-The-Sentient-Sims-App#translation-and-language-support" />
         </Box>
       ) : null}
       {!customLLMEnabled.value && localizationEnabled.value ? (

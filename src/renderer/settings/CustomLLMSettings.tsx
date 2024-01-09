@@ -1,15 +1,18 @@
 import {
   Box,
+  Checkbox,
+  FormControlLabel,
   FormHelperText,
   MenuItem,
   Select,
   TextField,
 } from '@mui/material';
-import React from 'react';
+import { ChangeEvent } from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { SelectChangeEvent } from '@mui/material/Select/SelectInput';
 import { sentientSimsAIHost } from 'main/sentient-sims/constants';
+import HelpButton from 'renderer/components/HelpButton';
 import useSetting from '../hooks/useSetting';
 import PatreonUser from '../wrappers/PatreonUser';
 
@@ -35,6 +38,10 @@ export default function CustomLLMSettingsComponent() {
   const patreonUser = new PatreonUser(user);
   const customLLMEnabled = useSetting(SettingsEnum.CUSTOM_LLM_ENABLED, false);
   const customLLMHostname = useSetting(SettingsEnum.CUSTOM_LLM_HOSTNAME);
+  const animationMappingEnabled = useSetting(
+    SettingsEnum.MAPPING_NOTIFICATION_ENABLED,
+    true
+  );
 
   const handleChangeReleaseType = async (
     event: SelectChangeEvent
@@ -51,6 +58,12 @@ export default function CustomLLMSettingsComponent() {
         await customLLMHostname.setSetting('');
       }
     }
+  };
+
+  const onAnimationMappingEnabledChange = (
+    change: ChangeEvent<HTMLInputElement>
+  ) => {
+    animationMappingEnabled.setSetting(change.target.checked);
   };
 
   let dropdownValue: ApiType = ApiType.OpenAI;
@@ -102,6 +115,7 @@ export default function CustomLLMSettingsComponent() {
           <MenuItem value={ApiType.CustomAI}>Custom Remote/Local AI</MenuItem>
         </Select>
         <FormHelperText>{getAIHelperText(dropdownValue)}</FormHelperText>
+        <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/AI-Backends" />
       </Box>
       {customLLMEnabled.value &&
       customLLMHostname.value !== sentientSimsAIHost ? (
@@ -119,6 +133,20 @@ export default function CustomLLMSettingsComponent() {
             }
             sx={{ marginRight: 2 }}
           />
+        </Box>
+      ) : null}
+      {customLLMEnabled.value ? (
+        <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+          <FormControlLabel
+            label="Enable Animation Mapping"
+            control={
+              <Checkbox
+                checked={animationMappingEnabled.value}
+                onChange={onAnimationMappingEnabledChange}
+              />
+            }
+          />
+          <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/External-Mod-Support#mapping-animations" />
         </Box>
       ) : null}
     </div>

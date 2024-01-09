@@ -15,7 +15,6 @@ import AppCard from '../AppCard';
 import CustomLLMSettingsComponent from './CustomLLMSettings';
 import LocalizationSettingsComponent from './LocalizationSettingsComponent';
 import DebugLogsSettingsComponent from './DebugLogsSettingsComponent';
-import NsfwSettingsComponent from './NsfwSettingsComponent';
 
 export default function OpenAISettingsComponent() {
   const modsDirectory = useSetting(SettingsEnum.MODS_DIRECTORY);
@@ -63,7 +62,6 @@ export default function OpenAISettingsComponent() {
       </Box>
       <CustomLLMSettingsComponent />
       <LocalizationSettingsComponent />
-      <NsfwSettingsComponent />
       <DebugLogsSettingsComponent />
     </AppCard>
   );

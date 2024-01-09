@@ -55,6 +55,10 @@ export const defaultStore = new Store({
       type: 'boolean',
       default: false,
     },
+    [SettingsEnum.MAPPING_NOTIFICATION_ENABLED.toString()]: {
+      type: 'boolean',
+      default: true,
+    },
   },
 });
 

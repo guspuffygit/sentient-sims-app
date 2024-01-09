@@ -10,4 +10,5 @@ export enum SettingsEnum {
   LOCALIZATION_LANGUAGE = 'localizationLanguage',
   DEBUG_LOGS = 'debugLogs',
   NSFW_ENABLED = 'nsfwEnabled',
+  MAPPING_NOTIFICATION_ENABLED = 'mappingNotificationEnabled',
 }

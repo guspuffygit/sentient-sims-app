@@ -3,6 +3,7 @@ import log from 'electron-log';
 import { SettingsEnum } from './models/SettingsEnum';
 import { SettingsService } from './services/SettingsService';
 import { resolveHtmlPath } from '../util';
+import notifySettingChanged from './util/notifyRenderer';
 
 const settingsService = new SettingsService();
 
@@ -25,20 +26,12 @@ export default function ipcHandlers() {
       log.debug(`set-setting: ${setting.toString()}, value: ${value}`);
       settingsService.set(setting, value);
 
-      electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-        if (wnd.webContents?.isDestroyed() === false) {
-          wnd.webContents.send('setting-changed', setting, value);
-        }
-      });
+      notifySettingChanged(setting, value);
     }
   );
   ipcMain.on('reset-setting', (_event: IpcMainEvent, setting: SettingsEnum) => {
     const value = settingsService.resetSetting(setting.toString());
-    electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-      if (wnd.webContents?.isDestroyed() === false) {
-        wnd.webContents.send('setting-changed', setting, value);
-      }
-    });
+    notifySettingChanged(setting, value);
   });
   ipcMain.on('on-successful-auth', () => {
     electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {

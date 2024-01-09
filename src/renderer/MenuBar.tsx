@@ -7,6 +7,7 @@ import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
 import HomeIcon from '@mui/icons-material/Home';
 import useAuthCredentials from './hooks/useAuthCredentials';
 import { useDebugMode } from './providers/DebugModeProvider';
+import handleOpenExternalLink from './hooks/handleOpenExternalLink';
 
 export type MenuBarProperties = {
   hideSideBar: boolean;
@@ -19,12 +20,9 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
   const debugMode = useDebugMode();
   useAuthCredentials();
 
-  const handleOpenWiki = (event: any) => {
-    event.preventDefault();
-    window.electron.openBrowserLink(
-      'https://github.com/guspuffygit/sentient-sims-app/wiki'
-    );
-  };
+  const handleOpenWiki = handleOpenExternalLink(
+    'https://github.com/guspuffygit/sentient-sims-app/wiki'
+  );
 
   return (
     <Box sx={{ flexGrow: 1, marginBottom: 2 }}>
