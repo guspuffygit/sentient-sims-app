@@ -4,6 +4,7 @@ import { useAuthenticator } from '@aws-amplify/ui-react';
 import { Dispatch, SetStateAction } from 'react';
 import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
+import HomeIcon from '@mui/icons-material/Home';
 import useAuthCredentials from './hooks/useAuthCredentials';
 import { useDebugMode } from './providers/DebugModeProvider';
 
@@ -34,17 +35,13 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
       >
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <div>
-            <Button
-              color="secondary"
-              onClick={() => navigate('/')}
-              sx={{ margin: '10px' }}
-            >
-              HOME
-            </Button>
+            <IconButton color="secondary" onClick={() => navigate('/')}>
+              <HomeIcon />
+            </IconButton>
             <Button
               color="secondary"
               onClick={handleOpenWiki}
-              sx={{ margin: '10px' }}
+              sx={{ marginLeft: '5px' }}
             >
               Wiki
             </Button>
@@ -54,7 +51,7 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
               <Button
                 color="secondary"
                 onClick={() => navigate('/chat')}
-                sx={{ margin: '10px' }}
+                sx={{ marginLeft: '5px' }}
               >
                 Chat
               </Button>
@@ -62,31 +59,38 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
             <Button
               color="secondary"
               onClick={() => navigate('/memories')}
-              sx={{ margin: '10px' }}
+              sx={{ marginLeft: '5px' }}
             >
               Memories
             </Button>
             <Button
               color="secondary"
               onClick={() => navigate('/settings')}
-              sx={{ margin: '10px' }}
+              sx={{ marginLeft: '5px' }}
             >
               Settings
             </Button>
             {user ? (
-              <Button color="warning" onClick={signOut} sx={{ margin: '10px' }}>
+              <Button
+                color="warning"
+                onClick={signOut}
+                sx={{ marginLeft: '5px' }}
+              >
                 Logout
               </Button>
             ) : (
               <Button
                 color="warning"
                 onClick={() => navigate('/login')}
-                sx={{ margin: '10px' }}
+                sx={{ marginLeft: '5px' }}
               >
                 Login
               </Button>
             )}
-            <IconButton onClick={() => setHideSideBar(!hideSideBar)}>
+            <IconButton
+              onClick={() => setHideSideBar(!hideSideBar)}
+              sx={{ marginLeft: '5px' }}
+            >
               {hideSideBar ? (
                 <ViewSidebarOutlinedIcon />
               ) : (
