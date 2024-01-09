@@ -295,7 +295,7 @@ export default function MemoriesPage() {
           onMouseLeave={() => setMemoriesFocused(false)}
           sx={{
             minWidth: 275,
-            maxHeight: 400,
+            maxHeight: editedMemory ? 400 : 720,
             marginBottom: 2,
             overflow: 'auto',
           }}
