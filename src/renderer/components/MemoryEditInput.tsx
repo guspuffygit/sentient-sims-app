@@ -1,5 +1,4 @@
-import { Box, IconButton, InputAdornment, TextField } from '@mui/material';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import { Box, TextField } from '@mui/material';
 import { ChangeEvent } from 'react';
 
 export type MemoryEditInputProperties = {
@@ -9,7 +8,6 @@ export type MemoryEditInputProperties = {
   handleEdit: (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
-  setSelectedMemory: (index: number) => void;
 };
 
 export function MemoryEditInput({
@@ -17,7 +15,6 @@ export function MemoryEditInput({
   value,
   label,
   handleEdit,
-  setSelectedMemory,
 }: MemoryEditInputProperties) {
   if (!value) {
     return null;
@@ -36,15 +33,6 @@ export function MemoryEditInput({
         label={label}
         fullWidth
         sx={{ height: '100%', marginBottom: 1 }}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end" sx={{ alignItems: 'flex-end' }}>
-              <IconButton onClick={() => setSelectedMemory(-1)}>
-                <RemoveCircleOutlineIcon />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
       />
     </Box>
   );

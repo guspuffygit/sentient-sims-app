@@ -53,6 +53,14 @@ const electronHandler = {
     }
     return removeListener;
   },
+  onLocationChanged: (callback: any) => {
+    ipcRenderer.on('on-location-changed', callback);
+
+    function removeListener() {
+      ipcRenderer.removeListener('on-location-changed', callback);
+    }
+    return removeListener;
+  },
   onDatabaseLoaded: (callback: any) => {
     ipcRenderer.on('on-database-loaded', callback);
 

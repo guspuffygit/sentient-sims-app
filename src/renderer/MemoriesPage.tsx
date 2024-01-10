@@ -268,19 +268,16 @@ export default function MemoriesPage() {
           <MemoryEditInput
             label="Observation (Shown only to the AI)"
             handleEdit={handleObservationEdit}
-            setSelectedMemory={handleSetSelectedMemory}
             value={editedMemory?.memory?.observation}
           />
           <MemoryEditInput
             label="Pre Action (Shown only to the AI)"
             handleEdit={handlePreActionEdit}
-            setSelectedMemory={handleSetSelectedMemory}
             value={editedMemory?.memory?.pre_action}
           />
           <MemoryEditInput
             label="Content"
             handleEdit={handleContentEdit}
-            setSelectedMemory={handleSetSelectedMemory}
             rows={5}
             value={editedMemory?.memory?.content}
           />

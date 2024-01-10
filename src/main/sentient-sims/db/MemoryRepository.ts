@@ -1,5 +1,3 @@
-import log from 'electron-log';
-import electron from 'electron';
 import {
   CreateMemoryRequest,
   DeleteMemoryRequest,
@@ -10,6 +8,7 @@ import {
 import { Repository } from './Repository';
 import { MemoryEntity } from './entities/MemoryEntity';
 import { MemoryParticipantEntity } from './entities/MemoryParticipantEntity';
+import { notifyNewMemoryAdded } from '../util/notifyRenderer';
 
 export class MemoryRepository extends Repository {
   /**
@@ -141,12 +140,7 @@ export class MemoryRepository extends Repository {
 
     const memory = this.getMemory({ id: Number(createdMemoryId) });
 
-    electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-      if (wnd.webContents?.isDestroyed() === false) {
-        log.debug('Sending new memory added');
-        wnd.webContents.send('on-new-memory-added', memory);
-      }
-    });
+    notifyNewMemoryAdded(memory);
 
     return memory;
   }

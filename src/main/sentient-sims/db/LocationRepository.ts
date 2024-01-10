@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import { defaultLocationDescriptions } from '../descriptions/locationDescriptions';
 import { DeleteLocationRequest } from '../models/DeleteLocationRequest';
 import { GetLocationRequest } from '../models/GetLocationRequest';
@@ -42,7 +43,6 @@ export class LocationRepository extends Repository {
    * Updates an existing location or inserts a new location if it does not exist in the database.
    *
    * @param {ParticipantEntity} location - The location entity to update or insert.
-   * @returns {Promise<void>} A promise that resolves when the operation is complete.
    */
   updateLocation(location: LocationEntity) {
     return this.dbService
@@ -63,5 +63,27 @@ export class LocationRepository extends Repository {
       .getDb()
       .prepare('DELETE FROM location WHERE id = ?')
       .run([location.id]);
+  }
+
+  getAllLocations(): LocationEntity[] {
+    const locations = new Map(defaultLocationDescriptions);
+    const results = this.getModifiedLocations();
+
+    results.forEach((location) => {
+      locations.set(location.id.toString(), location);
+    });
+
+    return Array.from(locations.values());
+  }
+
+  getModifiedLocations(): LocationEntity[] {
+    return this.dbService
+      .getDb()
+      .prepare('SELECT * FROM location')
+      .all() as LocationEntity[];
+  }
+
+  getDefaultLocations(): LocationEntity[] {
+    return Array.from(defaultLocationDescriptions.values());
   }
 }

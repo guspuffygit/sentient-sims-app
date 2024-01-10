@@ -20,7 +20,6 @@ function refreshAuth() {
       }
 
       log.debug('Updated auth token');
-      log.debug(`idToken: ${session.getIdToken().getJwtToken()}`);
       window.electron.setSetting(
         SettingsEnum.ACCESS_TOKEN,
         session.getIdToken().getJwtToken()

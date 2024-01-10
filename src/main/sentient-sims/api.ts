@@ -61,10 +61,7 @@ const participantsController = new ParticipantsController(
 );
 const locationsController = new LocationsController(locationRepository);
 const updateController = new UpdateController(updateService);
-const settingsController = new SettingsController(
-  directoryService,
-  settingsService
-);
+const settingsController = new SettingsController(settingsService);
 const logSendService = new LogSendService(
   settingsService,
   directoryService,
@@ -151,6 +148,12 @@ export default function runApi(getAssetPath: (...paths: string[]) => string) {
     participantsController.deleteParticipant
   );
 
+  expressApp.get('/locations', locationsController.getAllLocations);
+  expressApp.get('/locations/default', locationsController.getDefaultLocations);
+  expressApp.get(
+    '/locations/modified',
+    locationsController.getModifiedLocations
+  );
   expressApp.get('/locations/:locationId', locationsController.getLocation);
   expressApp.post('/locations', locationsController.updateLocation);
   expressApp.delete(

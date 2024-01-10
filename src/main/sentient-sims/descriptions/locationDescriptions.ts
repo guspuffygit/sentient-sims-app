@@ -5,6 +5,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
   Object.entries({
     '90369424': {
       id: 90369424,
+      is_default: true,
       name: 'The Blue Velvet',
       lot_type: 'Bar',
       description: [
@@ -22,6 +23,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '90336000': {
       id: 90336000,
+      is_default: true,
       name: 'Movers & Shakers',
       lot_type: 'Gym',
       description: [
@@ -39,6 +41,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '90243216': {
       id: 90243216,
+      is_default: true,
       name: 'Willow Creek Archive',
       lot_type: 'Library',
       description: [
@@ -56,6 +59,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '90404736': {
       id: 90404736,
+      is_default: true,
       name: 'Municipal Muses',
       lot_type: 'Museum',
       description: [
@@ -72,6 +76,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '64101728': {
       id: 64101728,
+      is_default: true,
       name: 'Magnolia Blossom',
       lot_type: 'Park',
       description: [
@@ -89,6 +94,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '254075440': {
       id: 254075440,
+      is_default: true,
       name: 'Rattlesnake Juice',
       lot_type: 'Bar',
       description: [
@@ -104,6 +110,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '254175856': {
       id: 254175856,
+      is_default: true,
       name: 'Burners & Builders',
       lot_type: 'Gym',
       description: [
@@ -121,6 +128,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '254110336': {
       id: 254110336,
+      is_default: true,
       name: 'The Futures Past',
       lot_type: 'Museum',
       description: [
@@ -137,6 +145,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '254126448': {
       id: 254126448,
+      is_default: true,
       name: 'The Solar Flare',
       lot_type: 'Bar Lounge',
       description: [
@@ -152,6 +161,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '89245504': {
       id: 89245504,
+      is_default: true,
       name: 'Desert Bloom',
       lot_type: 'Park',
       description: [
@@ -169,6 +179,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '2061565955': {
       id: 2061565955,
+      is_default: true,
       name: 'The Shrieking Llama',
       lot_type: 'Bar',
       description: [
@@ -187,6 +198,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '996802565': {
       id: 996802565,
+      is_default: true,
       name: 'Von Haunt Estate',
       lot_type: 'Chalet Gardens',
       description: [
@@ -212,6 +224,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '674955270': {
       id: 674955270,
+      is_default: true,
       name: 'The Bluffs',
       lot_type: 'Island Bluffs',
       description: [
@@ -229,6 +242,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '1391722499': {
       id: 1391722499,
+      is_default: true,
       name: 'Ancient Ruins',
       lot_type: 'Ancient Ruins',
       description: [
@@ -248,6 +262,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '3329884165': {
       id: 3329884165,
+      is_default: true,
       name: 'Quad Manor',
       lot_type: 'Library',
       description: [
@@ -269,6 +284,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '3318415364': {
       id: 3318415364,
+      is_default: true,
       name: 'The Narwhal Arms',
       lot_type: 'Nightclub',
       description: [
@@ -292,6 +308,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '3304849411': {
       id: 3304849411,
+      is_default: true,
       name: 'South Square Coffee',
       lot_type: 'Cafe',
       description: [
@@ -315,6 +332,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '3771138057': {
       id: 3771138057,
+      is_default: true,
       name: 'Old Quarter Inn',
       lot_type: 'Bar',
       description: [
@@ -333,6 +351,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '4137877509': {
       id: 4137877509,
+      is_default: true,
       name: 'Discotheque Pan Europa',
       lot_type: 'Nightclub',
       description: [
@@ -352,6 +371,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '504889347': {
       id: 504889347,
+      is_default: true,
       name: 'Bathe De Rill',
       lot_type: 'Pool',
       description: [
@@ -370,6 +390,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '4125622276': {
       id: 4125622276,
+      is_default: true,
       name: 'Hare Square',
       lot_type: 'Park',
       description: [
@@ -389,6 +410,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '1995309060': {
       id: 1995309060,
+      is_default: true,
       name: 'Hare and Hedgehog',
       lot_type: 'Cafe',
       description: [
@@ -406,6 +428,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '1993998339': {
       id: 1993998339,
+      is_default: true,
       name: 'Harbor Quarter Gym',
       lot_type: 'Gym',
       description: [
@@ -428,6 +451,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '1464926213': {
       id: 1464926213,
+      is_default: true,
       name: 'Planet Honey Pop',
       lot_type: 'Bar',
       description: [
@@ -445,6 +469,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '3081175056': {
       id: 3081175056,
+      is_default: true,
       name: 'Pupperstone Park',
       lot_type: 'Park',
       description: [
@@ -462,6 +487,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '587399173': {
       id: 587399173,
+      is_default: true,
       name: 'Brindleton Pawspital',
       lot_type: 'Vet clinic',
       description: [
@@ -482,6 +508,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '2473787395': {
       id: 2473787395,
+      is_default: true,
       name: "It's A Good House",
       lot_type: 'Residential',
       description: [
@@ -503,6 +530,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '2886467601': {
       id: 2886467601,
+      is_default: true,
       name: 'Domus Familiaris',
       lot_type: 'Residential',
       description: [
@@ -522,6 +550,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '3041853450': {
       id: 3041853450,
+      is_default: true,
       name: 'Sporting Space',
       lot_type: 'Residential',
       description: [
@@ -539,6 +568,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '3421044741': {
       id: 3421044741,
+      is_default: true,
       name: 'Chateau Frise',
       lot_type: 'Residential',
       description: [
@@ -559,6 +589,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '1187053577': {
       id: 1187053577,
+      is_default: true,
       name: 'Bedlington Boathouse',
       lot_type: 'Residential',
       description: [
@@ -578,6 +609,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '2064580676': {
       id: 2064580676,
+      is_default: true,
       name: "Hound's Head",
       lot_type: 'Residential',
       description: [
@@ -599,6 +631,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '1192493066': {
       id: 1192493066,
+      is_default: true,
       name: "Dachshund's Creek",
       lot_type: 'Residential',
       description: [
@@ -618,6 +651,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '1162739717': {
       id: 1162739717,
+      is_default: true,
       name: 'Hindquarter Hideaway',
       lot_type: 'Residential',
       description: [
@@ -636,6 +670,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '1287389190': {
       id: 1287389190,
+      is_default: true,
       name: 'Deadgrass Discoveries',
       lot_type: 'Museum',
       description: [
@@ -655,6 +690,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '1430847506': {
       id: 1430847506,
+      is_default: true,
       name: 'Club Calico',
       lot_type: 'Lounge',
       description: [
@@ -676,6 +712,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '390791172': {
       id: 390791172,
+      is_default: true,
       name: 'Salty Paws Saloon',
       lot_type: 'Bar',
       description: [
@@ -698,6 +735,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '397672454': {
       id: 397672454,
+      is_default: true,
       name: 'Catscratch Cottage',
       lot_type: 'Residential',
       description: [
@@ -716,6 +754,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '422707207': {
       id: 422707207,
+      is_default: true,
       name: 'Ragdoll Refurb',
       lot_type: 'Residential',
       description: [
@@ -734,6 +773,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '1435500562': {
       id: 1435500562,
+      is_default: true,
       name: "Tail's End",
       lot_type: 'Residential',
       description: [
@@ -751,6 +791,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '1851654149': {
       id: 1851654149,
+      is_default: true,
       name: 'Stutefani Onsen Bathhouse',
       lot_type: 'Onsen Bathhouse',
       description: [
@@ -764,6 +805,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '3428188211': {
       id: 3428188211,
+      is_default: true,
       name: '5-1-2 Kiyomatsu',
       lot_type: 'Vacation Rental',
       description: [
@@ -776,6 +818,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '3429957684': {
       id: 3429957684,
+      is_default: true,
       name: '5-1-1 Kiyomatsu',
       lot_type: 'Vacation Rental',
       description: [
@@ -789,6 +832,7 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
     },
     '4055957510': {
       id: 4055957510,
+      is_default: true,
       name: 'Izakaya Ippai',
       lot_type: 'Bar',
       description: [

@@ -97,7 +97,7 @@ export class CustomLLMService implements GenerationService {
   async getWorkers() {
     const url = `${this.customLLMHostname()}/workers`;
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
-    log.debug(`getWorkers: ${url}, auth: ${authHeader}`);
+
     try {
       const response = await fetchWithTimeout(url, {
         headers: {

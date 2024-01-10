@@ -56,6 +56,13 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
             ) : null}
             <Button
               color="secondary"
+              onClick={() => navigate('/locations')}
+              sx={{ marginLeft: '5px' }}
+            >
+              Locations
+            </Button>
+            <Button
+              color="secondary"
               onClick={() => navigate('/memories')}
               sx={{ marginLeft: '5px' }}
             >

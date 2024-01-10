@@ -2,19 +2,13 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
 import { SettingsService } from '../services/SettingsService';
-import { DirectoryService } from '../services/DirectoryService';
-import notifySettingChanged from '../util/notifyRenderer';
+import { notifySettingChanged } from '../util/notifyRenderer';
+import { SettingsEnum } from '../models/SettingsEnum';
 
 export class SettingsController {
-  private directoryService: DirectoryService;
-
   private settingsService: SettingsService;
 
-  constructor(
-    directoryService: DirectoryService,
-    settingsService: SettingsService
-  ) {
-    this.directoryService = directoryService;
+  constructor(settingsService: SettingsService) {
     this.settingsService = settingsService;
 
     this.updateSetting = this.updateSetting.bind(this);
@@ -25,7 +19,9 @@ export class SettingsController {
   async updateSetting(req: Request, res: Response) {
     const { appSetting } = req.params;
     const { value } = req.body;
-    log.info(`Setting app setting: ${appSetting}, to value: ${value}`);
+    if (appSetting !== SettingsEnum.ACCESS_TOKEN) {
+      log.info(`Setting app setting: ${appSetting}, to value: ${value}`);
+    }
     res.json({ value: this.settingsService.setSetting(appSetting, value) });
     notifySettingChanged(appSetting, value);
   }

@@ -4,4 +4,5 @@ export type LocationEntity = {
   lot_type: string;
   description: string;
   is_generic?: boolean;
+  is_default?: boolean;
 };

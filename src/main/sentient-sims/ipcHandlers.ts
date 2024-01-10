@@ -3,7 +3,7 @@ import log from 'electron-log';
 import { SettingsEnum } from './models/SettingsEnum';
 import { SettingsService } from './services/SettingsService';
 import { resolveHtmlPath } from '../util';
-import notifySettingChanged from './util/notifyRenderer';
+import { notifySettingChanged } from './util/notifyRenderer';
 
 const settingsService = new SettingsService();
 
@@ -23,7 +23,9 @@ export default function ipcHandlers() {
   ipcMain.on(
     'set-setting',
     (_event: IpcMainEvent, setting: SettingsEnum, value: any) => {
-      log.debug(`set-setting: ${setting.toString()}, value: ${value}`);
+      if (setting !== SettingsEnum.ACCESS_TOKEN) {
+        log.debug(`set-setting: ${setting.toString()}, value: ${value}`);
+      }
       settingsService.set(setting, value);
 
       notifySettingChanged(setting, value);

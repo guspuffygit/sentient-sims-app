@@ -18,6 +18,7 @@ import LoginPage from './LoginPage';
 import { DebugModeProvider } from './providers/DebugModeProvider';
 import LogViewerPage from './LogViewerPage';
 import MemoriesPage from './MemoriesPage';
+import LocationsPage from './LocationsPage';
 
 const updatedAwsConfig = {
   ...awsExports,
@@ -45,6 +46,10 @@ const router = createMemoryRouter([
       {
         path: '/chat',
         element: <ChatPage />,
+      },
+      {
+        path: '/locations',
+        element: <LocationsPage />,
       },
       {
         path: '/memories',
