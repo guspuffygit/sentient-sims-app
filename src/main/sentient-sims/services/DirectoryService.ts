@@ -38,13 +38,8 @@ export class DirectoryService {
     return path.join(this.getSentientSimsFolder(), 'logs.txt');
   }
 
-  getLogsFileBuffer(): Buffer {
-    return fs.readFileSync(this.getLogsFile());
-  }
-
-  getConfigFile(): Buffer {
-    const configFile = path.join(this.getSims4Folder(), 'Config.log');
-    return fs.readFileSync(configFile);
+  getConfigFile(): string {
+    return path.join(this.getSims4Folder(), 'Config.log');
   }
 
   getZippedModFile(): string {

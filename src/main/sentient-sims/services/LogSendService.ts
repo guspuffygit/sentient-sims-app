@@ -1,9 +1,9 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable import/prefer-default-export */
-import * as fs from 'fs';
 import log from 'electron-log';
 import os from 'os';
 import { app } from 'electron';
+import AdmZip from 'adm-zip';
 import { DirectoryService } from './DirectoryService';
 import { LastExceptionService } from './LastExceptionService';
 import { OpenAIService } from './OpenAIService';
@@ -11,6 +11,7 @@ import { SettingsService } from './SettingsService';
 import { VersionService } from './VersionService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { InteractionBugReport } from '../models/InteractionBugReport';
+import { sendPopUpNotification } from '../util/popupNotification';
 
 export const webhookUrl = [
   'https://d',
@@ -62,14 +63,18 @@ export class LogSendService {
     const errors: any[] = [];
 
     try {
+      const logZip = new AdmZip();
+
+      this.appendFilesListToZipFile(logZip, errors);
+      this.appendLogsFileToZipFile(logZip, errors);
+      this.appendLastExceptionFilesToZipFile(logZip, errors);
+      this.appendAppLogsToZipFile(logZip, errors);
+      this.appendConfigFileToZipFile(logZip, errors);
+
       const formData = new FormData();
 
       this.appendInformationToFormData(formData, logId, errors);
-      this.appendFilesListToFormData(formData, errors);
-      this.appendLogsFileToFormData(formData, errors);
-      this.appendLastExceptionFilesToFormData(formData, errors);
-      this.appendAppLogsToFormData(formData, errors);
-      this.appendConfigFileToFormData(formData, errors);
+      this.appendZipFileToFormData(logZip, formData, errors);
 
       const response = await this.sendFormData(formData, errors, url);
 
@@ -181,46 +186,37 @@ export class LogSendService {
     }
   }
 
-  private appendFilesListToFormData(formData: FormData, errors: any[]) {
+  private appendFilesListToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
       const filesList = this.directoryService.listFilesRecursively(
         this.directoryService.getModsFolder()
       );
-      const fileListBlob = new Blob([filesList.join('\n')], {
-        type: 'text/plain',
-      });
-      formData.append('fileList', fileListBlob, 'fileList.txt');
+      zipFile.addFile(
+        'fileList.txt',
+        Buffer.from(filesList.join('\n'), 'utf-8')
+      );
     } catch (err: any) {
-      this.handleAppendError('Error attaching file list', err, errors);
+      this.handleAppendError('Error adding file list', err, errors);
     }
   }
 
-  private appendLogsFileToFormData(formData: FormData, errors: any[]) {
+  private appendLogsFileToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
-      const logFile = this.directoryService.getLogsFileBuffer();
-      const blob = new Blob([logFile], { type: 'application/octet-stream' });
-      formData.append('logs', blob, 'logs.txt');
+      const logFile = this.directoryService.getLogsFile();
+      zipFile.addLocalFile(logFile);
     } catch (err: any) {
       this.handleAppendError('Error attaching mod log file', err, errors);
     }
   }
 
-  private appendLastExceptionFilesToFormData(
-    formData: FormData,
-    errors: any[]
-  ) {
+  private appendLastExceptionFilesToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
       this.lastExceptionService
         .getParsedLastExceptionFiles()
         .forEach((lastExceptionFile) => {
-          const lastExceptionBlob = new Blob([lastExceptionFile.text], {
-            type: 'text/plain',
-          });
-
-          formData.append(
+          zipFile.addFile(
             lastExceptionFile.filename,
-            lastExceptionBlob,
-            lastExceptionFile.filename
+            Buffer.from(lastExceptionFile.text, 'utf-8')
           );
         });
     } catch (err: any) {
@@ -232,28 +228,34 @@ export class LogSendService {
     }
   }
 
-  private appendAppLogsToFormData(formData: FormData, errors: any[]) {
+  private appendAppLogsToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
       const appLogFile = log.transports.file.getFile();
-      const appLogs = fs.readFileSync(appLogFile.path, 'utf-8');
-      const appLogsBlob = new Blob([appLogs], {
-        type: 'text/plain',
-      });
-      formData.append('app-logs.log', appLogsBlob, 'app-logs.log');
+      zipFile.addLocalFile(appLogFile.path);
     } catch (err: any) {
       this.handleAppendError('Error attaching app log file', err, errors);
     }
   }
 
-  private appendConfigFileToFormData(formData: FormData, errors: any[]) {
+  private appendConfigFileToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
       const configFile = this.directoryService.getConfigFile();
-      const blob = new Blob([configFile], {
-        type: 'application/octet-stream',
-      });
-      formData.append('config', blob, 'Config.log');
+      zipFile.addLocalFile(configFile);
     } catch (err: any) {
       this.handleAppendError('Error attaching Config.log file', err, errors);
+    }
+  }
+
+  private appendZipFileToFormData(
+    zipFile: AdmZip,
+    formData: FormData,
+    errors: any[]
+  ) {
+    try {
+      const blob = new Blob([zipFile.toBuffer()], { type: 'application/zip' });
+      formData.append('logs', blob, 'logs.zip');
+    } catch (err: any) {
+      this.handleAppendError('Error attaching logs zip file', err, errors);
     }
   }
 
@@ -265,6 +267,7 @@ export class LogSendService {
       });
     } catch (err: any) {
       this.handleAppendError('Error sending log data', err, errors);
+      sendPopUpNotification(`Error sending log data: ${err.message}`);
       return null;
     }
   }
