@@ -2,19 +2,14 @@ import { Box, Button, CardActions, Grid, Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import SendIcon from '@mui/icons-material/Send';
-import { useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import log from 'electron-log';
 import { ChatBoxComponent } from './ChatBoxComponent';
-import useChatGeneration from './hooks/useChatGeneration';
 import ChatResultsModal from './ChatResultsModal';
+import { useChatGenerationContext } from './providers/ChatGenerationProvider';
 
 export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  function handleGenerationLoaded() {
-    setTimeout(() => {
-      messagesEndRef?.current?.scrollIntoView();
-    }, 500);
-  }
   const {
     messages,
     loading,
@@ -26,7 +21,16 @@ export default function ChatPage() {
     tokenCount,
     countTokens,
     generateMultipleChat,
-  } = useChatGeneration(handleGenerationLoaded);
+    handleGenerationLoaded,
+  } = useChatGenerationContext();
+
+  handleGenerationLoaded(
+    useCallback(() => {
+      setTimeout(() => {
+        messagesEndRef?.current?.scrollIntoView();
+      }, 500);
+    }, [])
+  );
 
   const resultsModal = ChatResultsModal();
 

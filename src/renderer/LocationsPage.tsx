@@ -9,6 +9,7 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
+import { useOnDatabaseLoaded } from './hooks/useOnDatabaseLoaded';
 
 type SelectedLocation = {
   location: LocationEntity;
@@ -61,6 +62,10 @@ export default function LocationsPage() {
   useEffect(() => {
     getLocations();
   }, []);
+
+  useOnDatabaseLoaded(() => {
+    getLocations();
+  });
 
   useEffect(() => {
     const removeListener = window.electron.onDatabaseLoaded(() => {

@@ -19,6 +19,7 @@ import { DebugModeProvider } from './providers/DebugModeProvider';
 import LogViewerPage from './LogViewerPage';
 import MemoriesPage from './MemoriesPage';
 import LocationsPage from './LocationsPage';
+import { ChatGenerationProvider } from './providers/ChatGenerationProvider';
 
 const updatedAwsConfig = {
   ...awsExports,
@@ -78,9 +79,11 @@ root.render(
     <CssBaseline />
     <React.StrictMode>
       <Authenticator.Provider>
-        <DebugModeProvider>
-          <RouterProvider router={router} />
-        </DebugModeProvider>
+        <ChatGenerationProvider>
+          <DebugModeProvider>
+            <RouterProvider router={router} />
+          </DebugModeProvider>
+        </ChatGenerationProvider>
       </Authenticator.Provider>
     </React.StrictMode>
   </ThemeProvider>

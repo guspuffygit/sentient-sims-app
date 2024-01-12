@@ -1,5 +1,11 @@
 /* eslint-disable no-plusplus */
-import { useCallback, useEffect, useState } from 'react';
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import {
   defaultCustomLLMPrompt,
   defaultSystemPrompt,
@@ -50,9 +56,26 @@ function defaultMessages(systemPrompt: string): MessageInputProps[] {
   ];
 }
 
-export default function useChatGeneration(handleGenerationLoaded: () => void) {
+export interface ChatGeneration {
+  messages: MessageInputProps[];
+  loading: boolean;
+  generateChat: () => Promise<void>;
+  countTokens: () => void;
+  handleMessageTextChange: (index: number, value: string) => void;
+  resetMessages: () => void;
+  deleteMessage: (index: number) => void;
+  addNewMessage: (role: ChatCompletionMessageRole) => void;
+  tokenCount: number;
+  generateMultipleChat: (count: number) => Promise<string[]>;
+  handleGenerationLoaded: Dispatch<SetStateAction<() => void>>;
+}
+
+export default function useChatGeneration(): ChatGeneration {
   const customLLMEnabled = useSetting(SettingsEnum.CUSTOM_LLM_ENABLED, false);
   const [loading, setLoading] = useState(false);
+  const [generationLoadedCallback, setGenerationLoadedCallback] = useState<
+    () => void
+  >(() => {});
   const [messages, setMessages] = useState<MessageInputProps[]>(
     defaultMessages(defaultSystemPrompt)
   );
@@ -145,13 +168,13 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
         }
 
         setMessages(updatedMessages);
-        handleGenerationLoaded();
+        generationLoadedCallback();
       }
     );
     return () => {
       removeListener();
     };
-  }, [customLLMEnabled.value, handleGenerationLoaded]);
+  }, [customLLMEnabled.value, generationLoadedCallback]);
 
   const addMessage = (response: ChatCompletionMessage | undefined) => {
     if (response) {
@@ -299,5 +322,6 @@ export default function useChatGeneration(handleGenerationLoaded: () => void) {
     tokenCount,
     countTokens,
     generateMultipleChat,
+    handleGenerationLoaded: setGenerationLoadedCallback,
   };
 }
