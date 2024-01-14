@@ -1,9 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import { Request, Response } from 'express';
-import log from 'electron-log';
 import { SettingsService } from '../services/SettingsService';
 import { notifySettingChanged } from '../util/notifyRenderer';
-import { SettingsEnum } from '../models/SettingsEnum';
 
 export class SettingsController {
   private settingsService: SettingsService;
@@ -19,9 +17,6 @@ export class SettingsController {
   async updateSetting(req: Request, res: Response) {
     const { appSetting } = req.params;
     const { value } = req.body;
-    if (appSetting !== SettingsEnum.ACCESS_TOKEN) {
-      log.info(`Setting app setting: ${appSetting}, to value: ${value}`);
-    }
     res.json({ value: this.settingsService.setSetting(appSetting, value) });
     notifySettingChanged(appSetting, value);
   }

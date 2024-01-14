@@ -76,7 +76,9 @@ export class SettingsService {
 
   setSetting(key: string, value: any) {
     this.store.set(key, value);
-    log.info(`Setting app setting: ${key} to value: ${value}`);
+    if (key !== SettingsEnum.ACCESS_TOKEN) {
+      log.info(`Setting app setting: ${key} to value: ${value}`);
+    }
     return value;
   }
 
