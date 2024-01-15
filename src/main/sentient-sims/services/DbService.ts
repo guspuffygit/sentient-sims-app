@@ -58,6 +58,26 @@ export class DbService {
     });
   }
 
+  cleanupUnsavedDatabases(sessionId: string) {
+    let unsavedDatabases;
+    try {
+      unsavedDatabases = this.directoryService.listSentientSimsDbUnsaved();
+    } catch (err: any) {
+      log.error('Unabled to list unsaved databases', err);
+      return;
+    }
+
+    unsavedDatabases
+      .filter((unsavedDb) => !unsavedDb.includes(sessionId))
+      .forEach((unsavedDb) => {
+        try {
+          fs.rmSync(unsavedDb);
+        } catch (err: any) {
+          log.error(`Unable to remove unsaved db sessionId: ${sessionId}`, err);
+        }
+      });
+  }
+
   async saveDatabase(sessionId: string) {
     if (
       DirectoryService.fileExistsSync(
@@ -67,11 +87,7 @@ export class DbService {
       await this.getDb().backup(this.directoryService.getSentientSimsDb());
     }
 
-    // Cleanup old unsaved databases
-    this.directoryService
-      .listSentientSimsDbUnsaved()
-      .filter((unsavedDb) => !unsavedDb.includes(sessionId))
-      .forEach((unsavedDb) => fs.rmSync(unsavedDb));
+    this.cleanupUnsavedDatabases(sessionId);
   }
 
   unloadDatabase() {
