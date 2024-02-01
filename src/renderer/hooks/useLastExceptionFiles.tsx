@@ -1,3 +1,4 @@
+import { appApiUrl } from 'main/sentient-sims/constants';
 import { LastExceptionFile } from 'main/sentient-sims/services/LastExceptionService';
 import { useEffect, useState } from 'react';
 
@@ -7,7 +8,7 @@ export default function useLastExceptionFiles() {
   >([]);
 
   async function getLastExceptionFiles() {
-    const response = await fetch('http://localhost:25148/files/last-exception');
+    const response = await fetch(`${appApiUrl}/files/last-exception`);
     const jsonResponse = await response.json();
     setLastExceptionFiles(jsonResponse);
   }
@@ -17,7 +18,7 @@ export default function useLastExceptionFiles() {
   }, []);
 
   async function deleteFiles() {
-    await fetch('http://localhost:25148/files/last-exception', {
+    await fetch(`${appApiUrl}/files/last-exception`, {
       method: 'DELETE',
     });
     await getLastExceptionFiles();

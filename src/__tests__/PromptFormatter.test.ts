@@ -1,100 +1,318 @@
+/* eslint-disable no-console */
 import '@testing-library/jest-dom';
-import { MythoMaxPromptFormatter } from 'main/sentient-sims/formatter/MythoMaxPromptFormatter';
-import { OpenAIPromptFormatter } from 'main/sentient-sims/formatter/OpenAIPromptFormatter';
+import {
+  InteractionEvent,
+  SSEventType,
+} from 'main/sentient-sims/models/InteractionEvents';
+import * as fs from 'fs';
+import { DbService } from 'main/sentient-sims/services/DbService';
+import { ParticipantRepository } from 'main/sentient-sims/db/ParticipantRepository';
+import { LocationRepository } from 'main/sentient-sims/db/LocationRepository';
+import { MemoryRepository } from 'main/sentient-sims/db/MemoryRepository';
+import { PromptRequestBuilderService } from 'main/sentient-sims/services/PromptRequestBuilderService';
+import {
+  BodyState,
+  cleanupAIOutput,
+  formatListToString,
+  formatWWProperties,
+  hasWWProperties,
+} from 'main/sentient-sims/formatter/PromptFormatter';
+import { SentientSim } from 'main/sentient-sims/models/SentientSim';
+import { RepositoryService } from 'main/sentient-sims/services/RepositoryService';
+import { AIType } from 'main/sentient-sims/models/AIType';
+import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
+import {
+  OpenAIRequestBuilder,
+  PromptRequest2,
+} from 'main/sentient-sims/models/OpenAIRequestBuilder';
+import { mockDirectoryService } from './util';
 
-describe('MythoMax Prompt Formatter', () => {
-  it('should trim output user and assistant tokens', () => {
-    const formatter = new MythoMaxPromptFormatter();
+describe('Output', () => {
+  it('cleanup', () => {
+    expect(cleanupAIOutput('output')).toEqual('output');
 
-    const sentence = `This is a sentence. ${formatter.userToken} oqiwjdoiqjwd`;
-    expect(formatter.formatOutput(sentence)).toEqual('This is a sentence.');
-
-    const sentenceTwo = `This is a sentence. ${formatter.assistantToken} oqiwjdoiqjwd`;
-    expect(formatter.formatOutput(sentenceTwo)).toEqual('This is a sentence.');
-
-    const sentenceThree = `This is a sentence.${formatter.assistantToken} ${formatter.userToken} oqiwjdoiqjwd`;
-    expect(formatter.formatOutput(sentenceThree)).toEqual(
-      'This is a sentence.'
-    );
+    const actual = 'This is a sentence. Here is another';
+    const expected = 'This is a sentence.';
+    expect(cleanupAIOutput(actual)).toEqual(expected);
   });
 
-  it('format memory', () => {
-    const formatter = new MythoMaxPromptFormatter();
+  describe('Event Formatter', () => {
+    it('test', async () => {
+      const event: InteractionEvent = {
+        sentient_sims: [
+          {
+            careers: [
+              {
+                name: 'career_Adult_Criminal',
+                level: 3,
+                track_name: 'Criminal_Track1',
+              },
+            ],
+            name: 'Ricky Rickerson',
+            age: 32,
+            sim_id: '772948625141858300',
+            gender: 'Male',
+            likes: ['Activities_RocketScience', 'Activities_Fitness'],
+            dislikes: [],
+            aspirations: ['Muser'],
+            moods: ['Mood_Flirty'],
+            motives: [],
+            personality_traits: ['Evil', 'Glutton', 'CommitmentIssues'],
+            is_ghost: false,
+            grubby: false,
+            in_pool: false,
+            is_at_home: true,
+            is_dying: false,
+            is_human: true,
+            is_inside_building: false,
+            is_outside: true,
+            is_pet: false,
+            on_fire: false,
+            on_home_lot: true,
+            sleeping: false,
+            is_pregnant: false,
+            is_player_sim: true,
+          },
+          {
+            careers: [
+              {
+                name: 'careers_Adult_SocialMedia',
+                level: 9,
+                track_name:
+                  'careerTrack_SocialMedia_Track2_InternetPersonality',
+              },
+            ],
+            name: 'Richy Richardson',
+            age: 22,
+            sim_id: '772949305175180300',
+            gender: 'Male',
+            likes: ['Color_Green'],
+            dislikes: ['Music_Pop', 'Activities_VideoGaming'],
+            aspirations: ['HomeTurf'],
+            moods: ['Mood_Flirty'],
+            motives: [],
+            personality_traits: ['Ambitious', 'Romantic', 'Outgoing'],
+            is_ghost: false,
+            grubby: false,
+            in_pool: false,
+            is_at_home: false,
+            is_dying: false,
+            is_human: true,
+            is_inside_building: false,
+            is_outside: false,
+            is_pet: false,
+            on_fire: false,
+            on_home_lot: false,
+            sleeping: false,
+            is_pregnant: false,
+            is_player_sim: false,
+          },
+        ],
+        event_id: '2daaac8e-bd86-4afe-a9f8-60cf3132e057',
+        event_type: SSEventType.INTERACTION,
+        location_id: 2891968416,
+        interaction_name:
+          'mixer_social_ShareFishingTips_targeted_Friendly_alwaysOn_skills',
+      };
 
-    expect(formatter.formatMemory({})).toEqual([]);
+      const directoryService = mockDirectoryService();
+      fs.mkdirSync(directoryService.getSentientSimsFolder(), {
+        recursive: true,
+      });
+      const dbService = new DbService(directoryService);
+      await dbService.loadDatabase('958127321');
+      const repositoryService = new RepositoryService(
+        new LocationRepository(dbService),
+        new MemoryRepository(dbService),
+        new ParticipantRepository(dbService)
+      );
+      const promptRequestBuilderService = new PromptRequestBuilderService(
+        repositoryService
+      );
 
-    expect(
-      formatter.formatMemory({
-        pre_action: `hello\n\n`,
-        content: `\n hi\n`,
-        observation: `obs`,
-      })
-    ).toEqual([
-      `${formatter.userToken}\nobs`,
-      `${formatter.assistantToken}\nhi`,
-      `${formatter.userToken}\nhello`,
-    ]);
+      const result = await promptRequestBuilderService.buildPromptRequest(
+        event,
+        {
+          action:
+            '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
+          aiType: AIType.MYTHOMAX,
+        }
+      );
 
-    expect(
-      formatter.formatMemory({
-        pre_action: '\nhello\n',
-        observation: '1029j',
-      })
-    ).toEqual([
-      `${formatter.userToken}\n1029j`,
-      `${formatter.userToken}\nhello`,
-    ]);
+      console.log(JSON.stringify(result, null, 2));
+
+      expect(result?.action).toEqual(
+        'Ricky Rickerson and Richy Richardson are having a friendly conversation, sharing fishing tips.'
+      );
+
+      // System prompt should contain sim names for an interaction
+      expect(result.systemPrompt).toContain('Richy Richardson');
+      expect(result.systemPrompt).toContain('Ricky Rickerson');
+    });
   });
 
-  it('format actions', () => {
-    const formatter = new MythoMaxPromptFormatter();
+  describe('formatListToString', () => {
+    it('zero item list', () => {
+      expect(formatListToString([])).toEqual('');
+    });
 
-    expect(formatter.formatActions()).toEqual('### Response:\n');
+    it('one item', () => {
+      expect(formatListToString(['hello'])).toEqual('hello');
+    });
 
-    expect(formatter.formatActions(' pre action ')).toEqual(
-      `${formatter.userToken}\npre action\n${formatter.assistantActionResponseToken}`
-    );
+    it('two items', () => {
+      expect(formatListToString(['hello', 'hi'])).toEqual('hello and hi');
+    });
+
+    it('three items', () => {
+      expect(formatListToString(['hello', 'hi', 'how'])).toEqual(
+        'hello, hi, and how'
+      );
+    });
   });
-});
 
-describe('OpenAI Prompt Formatter', () => {
-  it('output remains the same', () => {
-    const formatter = new OpenAIPromptFormatter();
-    const expected = 'output';
-    expect(formatter.formatOutput(expected)).toEqual(expected);
+  describe('formatting', () => {
+    let sentientSim: SentientSim;
+
+    beforeEach(() => {
+      sentientSim = {
+        careers: [],
+        name: '',
+        age: 0,
+        sim_id: '',
+        gender: '',
+        likes: [],
+        dislikes: [],
+        aspirations: [],
+        moods: [],
+        motives: [],
+        personality_traits: [],
+        is_ghost: false,
+        grubby: false,
+        in_pool: false,
+        is_at_home: false,
+        is_dying: false,
+        is_human: false,
+        is_inside_building: false,
+        is_outside: false,
+        is_pet: false,
+        on_fire: false,
+        on_home_lot: false,
+        sleeping: false,
+        is_pregnant: false,
+        is_player_sim: true,
+      };
+    });
+
+    it('hasWWProperties', () => {
+      expect(hasWWProperties(sentientSim)).toBeFalsy();
+
+      sentientSim.upper_body = 3;
+      expect(hasWWProperties(sentientSim)).toBeFalsy();
+
+      sentientSim.lower_body = 2;
+      expect(hasWWProperties(sentientSim)).toBeTruthy();
+    });
+
+    it('completelyNaked', () => {
+      sentientSim.upper_body = BodyState.NUDE;
+      sentientSim.lower_body = BodyState.NUDE;
+      expect(formatWWProperties(sentientSim)).toEqual(
+        `${sentientSim.name} is completely naked.`
+      );
+    });
   });
 
-  it('format memory', () => {
-    const formatter = new OpenAIPromptFormatter();
+  describe('OpenAIRequestBuilder', () => {
+    const builder = new OpenAIRequestBuilder(new OpenAITokenCounter());
+    let request: PromptRequest2;
+    beforeEach(() => {
+      request = {
+        location: 'location',
+        participants: 'sim 1',
+        systemPrompt: 'system',
+        memories: [
+          {
+            content: 'Give me A',
+            role: 'user',
+          },
+          {
+            content: 'A',
+            role: 'assistant',
+          },
+          {
+            content: 'Give me B',
+            role: 'user',
+          },
+          {
+            content: 'B',
+            role: 'assistant',
+          },
+        ],
+        maxResponseTokens: 100,
+        maxTokens: 3000,
+        action: 'action',
+        assistantPreResponse: 'assistantPreResponse',
+      };
+    });
 
-    expect(formatter.formatMemory({})).toEqual([]);
+    it('buildOpenAIRequest everything', () => {
+      const result = builder.buildOpenAIRequest(request);
 
-    expect(
-      formatter.formatMemory({
-        pre_action: 'hello',
-      })
-    ).toEqual([{ content: 'hello', role: 'user', tokens: 5 }]);
+      expect(result.messages[0].content).toContain('location');
+      expect(result.messages[0].content).toContain('sim 1');
+      expect(result.messages[0].content).toContain('system');
+      expect(result.messages[0].role).toBe('system');
+      expect(result.messages[0].tokens).toBeGreaterThan(5);
 
-    expect(
-      formatter.formatMemory({
-        pre_action: 'hello\n\n',
-        content: '\nhi\n',
-        observation: 'obs',
-      })
-    ).toEqual([
-      { content: 'obs', role: 'user', tokens: 5 },
-      { content: 'hi', role: 'assistant', tokens: 5 },
-      { content: 'hello', role: 'user', tokens: 5 },
-    ]);
+      expect(result.messages[1].content).toBe('Give me A');
+      expect(result.messages[1].role).toBe('user');
 
-    expect(
-      formatter.formatMemory({
-        pre_action: '\nhello\n',
-        observation: '1029j',
-      })
-    ).toEqual([
-      { content: '1029j', role: 'user', tokens: 7 },
-      { content: 'hello', role: 'user', tokens: 5 },
-    ]);
+      expect(result.messages[2].content).toBe('A');
+      expect(result.messages[2].role).toBe('assistant');
+
+      expect(result.messages[3].content).toBe('Give me B');
+      expect(result.messages[3].role).toBe('user');
+
+      expect(result.messages[4].content).toBe('B');
+      expect(result.messages[4].role).toBe('assistant');
+
+      expect(result.messages[5].content).toBe('action');
+      expect(result.messages[5].role).toBe('user');
+
+      expect(result.messages[6].content).toBe('assistantPreResponse');
+      expect(result.messages[6].role).toBe('assistant');
+      let tokenCount = 0;
+      result.messages.forEach((message) => {
+        tokenCount += message.tokens;
+      });
+      console.log(`Tokens: ${tokenCount}`);
+    });
+
+    it('buildOpenAIRequest test length', () => {
+      request.maxTokens = 48;
+      const result = builder.buildOpenAIRequest(request);
+
+      expect(result.messages[0].content).toContain('location');
+      expect(result.messages[0].content).toContain('sim 1');
+      expect(result.messages[0].content).toContain('system');
+      expect(result.messages[0].role).toBe('system');
+      expect(result.messages[0].tokens).toBeGreaterThan(5);
+
+      expect(result.messages[1].content).toBe('A');
+      expect(result.messages[1].role).toBe('assistant');
+
+      expect(result.messages[2].content).toBe('Give me B');
+      expect(result.messages[2].role).toBe('user');
+
+      expect(result.messages[3].content).toBe('B');
+      expect(result.messages[3].role).toBe('assistant');
+
+      expect(result.messages[4].content).toBe('action');
+      expect(result.messages[4].role).toBe('user');
+
+      expect(result.messages[5].content).toBe('assistantPreResponse');
+      expect(result.messages[5].role).toBe('assistant');
+    });
   });
 });

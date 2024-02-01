@@ -1,5 +1,5 @@
+import { ParticipantDTO } from '../db/dto/ParticipantDTO';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
-import { ParticipantEntity } from '../db/entities/ParticipantEntity';
 
 export type GetMemoryRequest = {
   id: number;
@@ -14,10 +14,10 @@ export type GetMemoryParticipantsRequest = {
 };
 
 export type GetParticipantsMemoriesRequest = {
-  participant_ids: number[];
+  participant_ids: string[];
 };
 
 export type CreateMemoryRequest = {
   memory: MemoryEntity;
-  participants: ParticipantEntity[];
+  participants: ParticipantDTO[];
 };

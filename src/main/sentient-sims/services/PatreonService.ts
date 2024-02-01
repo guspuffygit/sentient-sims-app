@@ -2,7 +2,7 @@
 import log from 'electron-log';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
-import { sendPopUpNotification } from '../util/popupNotification';
+import { sendPopUpNotification } from '../util/notifyRenderer';
 
 export class NotLoggedInError extends Error {
   constructor(message: string) {

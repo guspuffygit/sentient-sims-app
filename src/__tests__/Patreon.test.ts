@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
+import { getNightlyAccess } from 'main/sentient-sims/util/nightlyAccess';
 import PatreonUser from 'renderer/wrappers/PatreonUser';
-import { getNightlyAccess } from 'renderer/util/nightlyAccess';
 
 jest.mock('renderer/wrappers/PatreonUser');
 describe('Patreon', () => {

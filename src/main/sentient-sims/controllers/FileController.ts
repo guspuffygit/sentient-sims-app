@@ -15,7 +15,7 @@ export class FileController {
   }
 
   async getLastExceptionFiles(req: Request, res: Response) {
-    res.json(await this.lastExceptionService.getParsedLastExceptionFiles());
+    res.json(this.lastExceptionService.getParsedLastExceptionFiles());
   }
 
   async deleteLastExceptionFiles(req: Request, res: Response) {

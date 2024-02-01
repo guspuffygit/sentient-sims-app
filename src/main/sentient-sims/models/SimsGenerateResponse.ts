@@ -1,4 +1,6 @@
+import { OpenAICompatibleRequest } from './OpenAICompatibleRequest';
+
 export type SimsGenerateResponse = {
   text: string;
-  systemPrompt: string;
+  request: OpenAICompatibleRequest;
 };

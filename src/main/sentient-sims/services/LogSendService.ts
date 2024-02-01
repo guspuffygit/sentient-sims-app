@@ -6,12 +6,12 @@ import { app } from 'electron';
 import AdmZip from 'adm-zip';
 import { DirectoryService } from './DirectoryService';
 import { LastExceptionService } from './LastExceptionService';
-import { OpenAIService } from './OpenAIService';
 import { SettingsService } from './SettingsService';
 import { VersionService } from './VersionService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { InteractionBugReport } from '../models/InteractionBugReport';
-import { sendPopUpNotification } from '../util/popupNotification';
+import { SSEventType, WWInteractionEvent } from '../models/InteractionEvents';
+import { sendPopUpNotification } from '../util/notifyRenderer';
 
 export const webhookUrl = [
   'https://d',
@@ -36,20 +36,16 @@ export class LogSendService {
 
   private versionService: VersionService;
 
-  private openAIService: OpenAIService;
-
   constructor(
     settingsService: SettingsService,
     directoryService: DirectoryService,
     lastExceptionService: LastExceptionService,
-    versionService: VersionService,
-    openAIService: OpenAIService
+    versionService: VersionService
   ) {
     this.settingsService = settingsService;
     this.directoryService = directoryService;
     this.lastExceptionService = lastExceptionService;
     this.versionService = versionService;
-    this.openAIService = openAIService;
   }
 
   static newLogId() {
@@ -104,7 +100,10 @@ export class LogSendService {
     };
   }
 
-  async sendBugReport(url: string, bugReport: InteractionBugReport) {
+  async sendBugReport(
+    url: string,
+    { event, username, memory, bugDetails }: InteractionBugReport
+  ) {
     const logId = LogSendService.newLogId();
     const errors: any[] = [];
 
@@ -112,12 +111,35 @@ export class LogSendService {
       const formData = new FormData();
       const interactionBugInfo = [
         `INTERACTION BUG REPORT:`,
-        `Interaction Title: ${bugReport.interactionTitle}`,
-        `Bug Notes: ${bugReport.bugDetails}`,
-        `Username: ${bugReport.username}`,
-        `Pre Action: ${bugReport?.memory.pre_action}`,
-        `Content: ${bugReport?.memory.content}`,
+        `Username: ${username}`,
+        `Bug Notes: ${bugDetails}`,
+        `Location ID: ${memory.location_id}`,
+        `Event Type: ${event.event_type}`,
       ];
+
+      if (memory?.pre_action) {
+        interactionBugInfo.push(`Pre Action: ${memory.pre_action}`);
+      }
+      if (memory?.content) {
+        interactionBugInfo.push(`Content: ${memory.content}`);
+      }
+      if (memory?.observation) {
+        interactionBugInfo.push(`Observation: ${memory.observation}`);
+      }
+
+      if (event.event_type === SSEventType.WICKED_WHIMS) {
+        const wwEvent = event as WWInteractionEvent;
+        interactionBugInfo.push(
+          [
+            `Animation Id: ${wwEvent.animation_identifier}`,
+            `Animation Author: ${wwEvent.animation_author}`,
+            `Animation Name: ${wwEvent.animation_name}`,
+            `WW Event Type: ${wwEvent.ww_event_type}`,
+            `Sex Category: ${wwEvent.sex_category}`,
+            `Sex Location: ${wwEvent.sex_location}`,
+          ].join('\n')
+        );
+      }
 
       this.appendInformationToFormData(
         formData,
@@ -142,10 +164,7 @@ export class LogSendService {
       const message = 'Error sending logs';
       log.error(message, err);
       errors.push(message, err);
-    }
-
-    if (errors) {
-      return { error: errors.join('\n') };
+      sendPopUpNotification(`Error sending logs: ${err.message}`);
     }
 
     return { text: logId };

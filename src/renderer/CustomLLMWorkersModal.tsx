@@ -32,14 +32,16 @@ export default function CustomLLMWorkersModal({
 }: ModalProps) {
   const rows: any[] = [];
   try {
-    workers?.forEach((worker, index) => {
-      rows.push({
-        id: index,
-        name: worker.name,
-        type: worker.type,
-        model: worker.model,
+    if (workers) {
+      workers?.forEach((worker, index) => {
+        rows.push({
+          id: index,
+          name: worker.name,
+          type: worker.type,
+          model: worker.model,
+        });
       });
-    });
+    }
   } catch (err: any) {
     log.error(
       `Exception thrown trying to render workers, typeof: ${typeof workers}`,

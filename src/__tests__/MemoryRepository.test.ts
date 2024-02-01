@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { DbService } from 'main/sentient-sims/services/DbService';
 import { MemoryRepository } from 'main/sentient-sims/db/MemoryRepository';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
-import { ParticipantEntity } from 'main/sentient-sims/db/entities/ParticipantEntity';
+import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
 import { mockDirectoryService } from './util';
 
 describe('MemoryRepository', () => {
@@ -15,9 +15,9 @@ describe('MemoryRepository', () => {
     const dbService = new DbService(directoryService);
     await dbService.loadDatabase('7981723');
     const memoryRepository = new MemoryRepository(dbService);
-    const participants: ParticipantEntity[] = [
-      { id: 128937674 },
-      { id: 18276365 },
+    const participants: ParticipantDTO[] = [
+      { id: '128937674' },
+      { id: '18276365' },
     ];
     const memory: MemoryEntity = {
       location_id: 90369424,
@@ -64,12 +64,12 @@ describe('MemoryRepository', () => {
     expect(updatedMemory).toEqual(results[0]);
 
     const noParticipantMemories = memoryRepository.getParticipantsMemories({
-      participant_ids: [9857897436],
+      participant_ids: ['9857897436'],
     });
     expect(noParticipantMemories).toHaveLength(0);
 
     const participantMemories = memoryRepository.getParticipantsMemories({
-      participant_ids: [128937674, 18276365],
+      participant_ids: ['128937674', '18276365'],
     });
     expect(participantMemories).toHaveLength(1);
 

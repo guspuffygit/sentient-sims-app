@@ -2,8 +2,6 @@
 import * as fs from 'fs';
 import { DirectoryService } from './DirectoryService';
 
-export const defaultLogFileName = 'mod-logs.txt';
-
 export class LogsService {
   private readonly directoryService: DirectoryService;
 

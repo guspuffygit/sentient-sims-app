@@ -1,44 +1,41 @@
 /* eslint-disable import/prefer-default-export */
 import { Request, Response } from 'express';
-import { OpenAIKeyNotSetError, OpenAIService } from '../services/OpenAIService';
+import { OpenAIKeyNotSetError } from '../services/OpenAIService';
 import { LogSendService, webhookUrl } from '../services/LogSendService';
-import { CustomLLMService } from '../services/CustomLLMService';
+import { SettingsService } from '../services/SettingsService';
+import { getGenerationService } from '../factories/generationServiceFactory';
 
 export class DebugController {
-  private openAIService: OpenAIService;
+  private readonly settingsService: SettingsService;
 
-  private logSendService: LogSendService;
-
-  private customLLMService: CustomLLMService;
+  private readonly logSendService: LogSendService;
 
   constructor(
-    openAIService: OpenAIService,
-    logSendService: LogSendService,
-    customLLMService: CustomLLMService
+    settingsService: SettingsService,
+    logSendService: LogSendService
   ) {
-    this.openAIService = openAIService;
+    this.settingsService = settingsService;
     this.logSendService = logSendService;
-    this.customLLMService = customLLMService;
 
-    this.testOpenAI = this.testOpenAI.bind(this);
+    this.healthCheckGenerationService =
+      this.healthCheckGenerationService.bind(this);
     this.sendDebugLogs = this.sendDebugLogs.bind(this);
-    this.testCustomLLM = this.testCustomLLM.bind(this);
-    this.getCustomLLMWorkers = this.getCustomLLMWorkers.bind(this);
     this.sendBugReport = this.sendBugReport.bind(this);
   }
 
-  static healthCheck(req: Request, res: Response) {
+  static appHealthCheck(req: Request, res: Response) {
     res.send('OK');
   }
 
-  async testOpenAI(req: Request, res: Response) {
-    let { openAIKey } = req.query;
-    if (openAIKey !== undefined) {
-      openAIKey = openAIKey as string;
+  async healthCheckGenerationService(req: Request, res: Response) {
+    let { apiKey } = req.query;
+    if (apiKey !== undefined) {
+      apiKey = apiKey as string;
     }
 
     try {
-      const response = await this.openAIService.testOpenAI(openAIKey);
+      const generationService = getGenerationService(this.settingsService);
+      const response = await generationService.healthCheck(apiKey);
       res.send(response);
     } catch (e: any) {
       if (e instanceof OpenAIKeyNotSetError) {
@@ -47,16 +44,6 @@ export class DebugController {
         res.status(500).send({ error: `${e.name}: ${e.message}` });
       }
     }
-  }
-
-  async testCustomLLM(req: Request, res: Response) {
-    const status = await this.customLLMService.testHealth();
-    res.send({ status });
-  }
-
-  async getCustomLLMWorkers(req: Request, res: Response) {
-    const workers = await this.customLLMService.getWorkers();
-    res.send(workers);
   }
 
   async sendDebugLogs(req: Request, res: Response) {

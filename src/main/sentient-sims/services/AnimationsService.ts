@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import { Animation } from 'main/sentient-sims/models/Animation';
 import log from 'electron-log';
 import { SettingsService } from './SettingsService';
@@ -5,8 +6,17 @@ import { sentientSimsAIHost } from '../constants';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { fetchWithRetries } from '../util/fetchWithRetries';
 
+export function getAnimationKey(
+  animationAuthor: string,
+  animationIdentifier: string
+) {
+  return `${animationAuthor}:${animationIdentifier}`;
+}
+
 export class AnimationsService {
   private settingsService: SettingsService;
+
+  private animations?: Map<string, Animation>;
 
   constructor(settingsService: SettingsService) {
     this.settingsService = settingsService;
@@ -39,14 +49,34 @@ export class AnimationsService {
       body: JSON.stringify(animation),
     });
 
-    return response.json();
+    const result = await response.json();
+
+    this.animations = new Map(Object.entries(result));
+
+    return result;
   }
 
-  async isNsfwEnabled() {
+  async getAnimation(animationAuthor: string, animationIdentifier: string) {
+    const animationKey = getAnimationKey(animationAuthor, animationIdentifier);
+
+    if (!this.animations) {
+      this.animations = new Map(Object.entries(await this.getAnimations()));
+    }
+
+    return this.animations.get(animationKey);
+  }
+
+  isNsfwEnabled(): boolean {
     if (this.settingsService.get(SettingsEnum.CUSTOM_LLM_ENABLED)) {
       return true;
     }
 
-    return this.settingsService.get(SettingsEnum.NSFW_ENABLED);
+    return this.settingsService.get(SettingsEnum.NSFW_ENABLED) as boolean;
+  }
+
+  isAnimationMappingEnabled(): boolean {
+    return this.settingsService.get(
+      SettingsEnum.MAPPING_NOTIFICATION_ENABLED
+    ) as boolean;
   }
 }

@@ -10,6 +10,7 @@ import {
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
 import log from 'electron-log';
+import { appApiUrl } from 'main/sentient-sims/constants';
 import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
 
@@ -51,7 +52,7 @@ export default function MemoriesPage() {
   }, [memories]);
 
   function getMemories() {
-    fetch(`http://localhost:25148/memories`, {
+    fetch(`${appApiUrl}/memories`, {
       headers: { 'Content-Type': 'application/json' },
     })
       .then((res) => res.json())
@@ -106,7 +107,7 @@ export default function MemoriesPage() {
     if (editedMemory) {
       log.debug(`Edited Memory: ${JSON.stringify(editedMemory.memory)}`);
 
-      const url = `http://localhost:25148/memories/${editedMemory.memory.id}`;
+      const url = `${appApiUrl}/memories/${editedMemory.memory.id}`;
       fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -136,7 +137,7 @@ export default function MemoriesPage() {
 
   const handleDelete = useCallback(() => {
     if (editedMemory) {
-      fetch(`http://localhost:25148/memories/${editedMemory.memory.id}`, {
+      fetch(`${appApiUrl}/memories/${editedMemory.memory.id}`, {
         method: 'DELETE',
       })
         .then(() => {

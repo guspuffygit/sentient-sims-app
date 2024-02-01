@@ -24,7 +24,7 @@ export class LocationRepository extends Repository {
     return (
       defaultLocationDescriptions.get(locationRequest.id.toString()) || {
         id: locationRequest.id,
-        name: 'none',
+        name: 'the home',
         lot_type: 'Residence',
         description: [
           'The suburban residence was nestled within a quiet neighborhood, surrounded by neatly trimmed lawns and white picket fences.',

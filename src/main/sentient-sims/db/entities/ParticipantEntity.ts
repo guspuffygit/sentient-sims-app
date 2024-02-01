@@ -1,4 +1,5 @@
 export type ParticipantEntity = {
-  id: number;
+  id: bigint;
   description?: string;
+  name?: string;
 };

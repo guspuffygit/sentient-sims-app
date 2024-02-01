@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
 import { UpdateService } from '../services/UpdateService';
-import { sendPopUpNotification } from '../util/popupNotification';
+import { sendPopUpNotification } from '../util/notifyRenderer';
 
 export class UpdateController {
   private updateService: UpdateService;

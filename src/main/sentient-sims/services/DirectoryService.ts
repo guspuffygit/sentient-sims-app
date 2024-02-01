@@ -7,7 +7,7 @@ import { SettingsEnum } from '../models/SettingsEnum';
 import { SettingsService } from './SettingsService';
 
 export class DirectoryService {
-  private settingsService: SettingsService;
+  readonly settingsService: SettingsService;
 
   constructor(settingsService: SettingsService) {
     this.settingsService = settingsService;
@@ -26,10 +26,6 @@ export class DirectoryService {
     return path.join(modsFolder, 'sentient-sims');
   }
 
-  getModSettingsFile(): string {
-    return path.join(this.getSentientSimsFolder(), 'settings.json');
-  }
-
   getModVersionFile(): string {
     return path.join(this.getSentientSimsFolder(), 'mod-version.json');
   }
@@ -44,10 +40,6 @@ export class DirectoryService {
 
   getZippedModFile(): string {
     return path.join(this.getModsFolder(), 'sentient-sims.zip');
-  }
-
-  getMemoriesFolder(): string {
-    return path.join(this.getSentientSimsFolder(), 'memories');
   }
 
   filesToDelete(): string[] {
@@ -144,20 +136,6 @@ export class DirectoryService {
       return true;
     } catch (err) {
       return false;
-    }
-  }
-
-  listDirectoriesSync(directoryPath: string): string[] {
-    try {
-      const contents = fs.readdirSync(directoryPath);
-      const directories = contents.filter((item) => {
-        const itemPath = path.join(directoryPath, item);
-        return fs.statSync(itemPath).isDirectory();
-      });
-      return directories;
-    } catch (error) {
-      log.error('Error occurred while listing directories:', error);
-      return [];
     }
   }
 }

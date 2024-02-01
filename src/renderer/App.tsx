@@ -6,6 +6,7 @@ import { useState } from 'react';
 import MenuBar from './MenuBar';
 import WidgetWithOverlay from './WidgetWithOverlay';
 import PopupNotificationModal from './PopupNotification';
+import { AnimationMappingModal } from './components/AnimationMappingComponent';
 
 export default function App() {
   const [hideSideBar, setHideSideBar] = useState(false);
@@ -26,6 +27,7 @@ export default function App() {
         )}
       </Grid>
       <PopupNotificationModal />
+      <AnimationMappingModal />
     </Container>
   );
 }

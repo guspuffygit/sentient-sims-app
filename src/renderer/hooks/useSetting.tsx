@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import { appApiUrl } from 'main/sentient-sims/constants';
 
 export type SettingsHook = {
   value: any;
@@ -24,9 +25,7 @@ export default function useSetting(
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `http://localhost:25148/settings/app/${settingName}`
-      );
+      const response = await fetch(`${appApiUrl}/settings/app/${settingName}`);
       const result = await response.json();
       setValue(result.value);
     } catch (err: any) {

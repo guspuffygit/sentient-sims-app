@@ -1,16 +1,17 @@
-/* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
 import { useEffect, useState } from 'react';
+import log from 'electron-log';
+import { VersionClient } from 'main/sentient-sims/clients/VersionClient';
+
+const versionClient = new VersionClient();
 
 export default function useAppVersion() {
   const [version, setVersion] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:25148/versions/app')
-      .then((res) => res.json())
-      .then((response: any) => {
-        setVersion(response.version);
-      });
+    versionClient
+      .getAppVersion()
+      .then((result) => setVersion(result.version))
+      .catch((err: any) => log.error('Error getting app version', err));
   }, []);
 
   return version;

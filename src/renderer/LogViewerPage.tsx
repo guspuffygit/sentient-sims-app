@@ -6,6 +6,7 @@ import { Button } from '@mui/material';
 import { RendererWebsocketMessage } from 'main/sentient-sims/models/RendererWebsocketMessage';
 import log from 'electron-log';
 import { formatLog } from 'main/sentient-sims/util/format';
+import { rendererWebsocketPort } from 'main/sentient-sims/constants';
 import AppCard from './AppCard';
 import { useDebounceHook } from './hooks/useDebounceHook';
 
@@ -33,7 +34,7 @@ export default function LogViewerPage() {
   };
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:25146');
+    const ws = new WebSocket(`ws://localhost:${rendererWebsocketPort}`);
     ws.onopen = () => log.debug('Renderer opened connection with app');
     ws.onclose = () => log.debug('Renderer closed connection with app');
 

@@ -22,7 +22,10 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import registerDebugToggleHotkey from './sentient-sims/registerDebugToggleHotkey';
 import ipcHandlers from './sentient-sims/ipcHandlers';
-import runApi from './sentient-sims/api';
+import { runApi, runWebSocketServer } from './sentient-sims/api';
+import { SettingsService } from './sentient-sims/services/SettingsService';
+import { DirectoryService } from './sentient-sims/services/DirectoryService';
+import { appApiPort } from './sentient-sims/constants';
 
 log.initialize({ preload: true });
 
@@ -120,7 +123,16 @@ const createWindow = async () => {
 
   ipcHandlers();
 
-  runApi(getAssetPath);
+  const settingsService = new SettingsService();
+  const directoryService = new DirectoryService(settingsService);
+
+  runWebSocketServer(settingsService, directoryService);
+  runApi({
+    getAssetPath,
+    port: appApiPort,
+    settingsService,
+    directoryService,
+  });
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line

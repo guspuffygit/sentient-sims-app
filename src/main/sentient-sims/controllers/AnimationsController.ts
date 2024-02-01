@@ -24,6 +24,6 @@ export class AnimationsController {
   }
 
   async isNsfwEnabled(req: Request, res: Response) {
-    res.json({ value: await this.animationsService.isNsfwEnabled() });
+    res.json({ value: this.animationsService.isNsfwEnabled() });
   }
 }

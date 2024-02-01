@@ -1,10 +1,9 @@
-import { PromptRequest } from './PromptRequest';
-import { SentientMemory } from './SentientMemory';
+import { MemoryEntity } from '../db/entities/MemoryEntity';
+import { SSEvent } from './InteractionEvents';
 
 export type InteractionBugReport = {
   username: string;
-  interactionTitle: string;
   bugDetails: string;
-  promptRequest: PromptRequest;
-  memory: SentientMemory;
+  event: SSEvent;
+  memory: MemoryEntity;
 };

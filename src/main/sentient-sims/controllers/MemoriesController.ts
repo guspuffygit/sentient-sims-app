@@ -15,7 +15,6 @@ export class MemoriesController {
 
     this.getMemory = this.getMemory.bind(this);
     this.getMemories = this.getMemories.bind(this);
-    this.getParticipantsMemories = this.getParticipantsMemories.bind(this);
     this.updateMemory = this.updateMemory.bind(this);
     this.createMemory = this.createMemory.bind(this);
     this.deleteMemory = this.deleteMemory.bind(this);
@@ -45,22 +44,6 @@ export class MemoriesController {
         return res.json([]);
       }
 
-      log.error('Error getting memories', err);
-      return res.json({ error: err.message });
-    }
-  }
-
-  async getParticipantsMemories(req: Request, res: Response) {
-    try {
-      const participantIds = req.body.participantIds.map(
-        (participantId: string) => Number(participantId)
-      );
-
-      const result = this.memoryRepository.getParticipantsMemories({
-        participant_ids: participantIds,
-      });
-      return res.json(result);
-    } catch (err: any) {
       log.error('Error getting memories', err);
       return res.json({ error: err.message });
     }
