@@ -33,7 +33,11 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
       >
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <div>
-            <IconButton color="secondary" onClick={() => navigate('/')}>
+            <IconButton
+              color="secondary"
+              onClick={() => navigate('/')}
+              id="homebutton"
+            >
               <HomeIcon />
             </IconButton>
             <Button
@@ -46,18 +50,38 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
           </div>
           <div>
             {debugMode.isEnabled ? (
-              <Button
-                color="secondary"
-                onClick={() => navigate('/chat')}
-                sx={{ marginLeft: '5px' }}
-              >
-                Chat
-              </Button>
+              <>
+                <Button
+                  color="secondary"
+                  onClick={() => navigate('/chat')}
+                  sx={{ marginLeft: '5px' }}
+                  id="chat"
+                >
+                  Chat
+                </Button>
+                <Button
+                  color="secondary"
+                  onClick={() => navigate('/interactions')}
+                  sx={{ marginLeft: '5px' }}
+                  id="interactions"
+                >
+                  Interactions
+                </Button>
+              </>
             ) : null}
+            <Button
+              color="secondary"
+              onClick={() => navigate('/sims')}
+              sx={{ marginLeft: '5px' }}
+              id="sims"
+            >
+              Sims
+            </Button>
             <Button
               color="secondary"
               onClick={() => navigate('/locations')}
               sx={{ marginLeft: '5px' }}
+              id="locations"
             >
               Locations
             </Button>
@@ -65,6 +89,7 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
               color="secondary"
               onClick={() => navigate('/memories')}
               sx={{ marginLeft: '5px' }}
+              id="memories"
             >
               Memories
             </Button>
@@ -72,6 +97,7 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
               color="secondary"
               onClick={() => navigate('/settings')}
               sx={{ marginLeft: '5px' }}
+              id="settings"
             >
               Settings
             </Button>
@@ -80,6 +106,7 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
                 color="warning"
                 onClick={signOut}
                 sx={{ marginLeft: '5px' }}
+                id="logout"
               >
                 Logout
               </Button>
@@ -88,6 +115,7 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
                 color="warning"
                 onClick={() => navigate('/login')}
                 sx={{ marginLeft: '5px' }}
+                id="login"
               >
                 Login
               </Button>

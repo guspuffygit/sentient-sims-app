@@ -1,11 +1,12 @@
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { Box, Button, Typography } from '@mui/material';
 import { PropsWithChildren } from 'react';
+import { appApiUrl } from 'main/sentient-sims/constants';
 import PatreonUser from './wrappers/PatreonUser';
 import { useDebugMode } from './providers/DebugModeProvider';
 
 export const getPatreonOauthUrl = (): string => {
-  const redirectUrl = 'http://localhost:25148/patreon-redirect';
+  const redirectUrl = `${appApiUrl}/patreon-redirect`;
   const CLIENT_ID =
     'V73t_b4e0wEzeJq7SaU4NTtLTNTheiw6oOU4-pXe2PyvfMAFu8AAGz3XcoQqAKVp';
   const scopes = [
@@ -32,7 +33,7 @@ function PatreonButton({ url }: PatreonButtonProps) {
   return (
     <Button href={url} target="_blank">
       <img
-        src="http://localhost:25148/files/patreon-medium-button.png"
+        src={`${appApiUrl}/files/patreon-medium-button.png`}
         width="215"
         alt="Patreon"
       />

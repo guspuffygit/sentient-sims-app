@@ -1,5 +1,5 @@
 export type GetParticipantRequest = {
-  id: number;
+  id: string;
   fullName: string;
 };
 

@@ -3,71 +3,74 @@ import Store from 'electron-store';
 import path from 'path';
 import { SettingsEnum } from '../models/SettingsEnum';
 
-export const defaultStore = new Store({
-  schema: {
-    [SettingsEnum.MOD_RELEASE.toString()]: {
-      type: 'string',
-      default: 'main',
+export function defaultStore(cwd?: string) {
+  return new Store({
+    cwd,
+    schema: {
+      [SettingsEnum.MOD_RELEASE.toString()]: {
+        type: 'string',
+        default: 'main',
+      },
+      [SettingsEnum.OPENAI_MODEL.toString()]: {
+        type: 'string',
+        default: 'gpt-3.5-turbo',
+      },
+      [SettingsEnum.CUSTOM_LLM_ENABLED.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
+      [SettingsEnum.CUSTOM_LLM_HOSTNAME.toString()]: {
+        type: 'string',
+        default: 'https://ai.sentientsimulations.com',
+      },
+      [SettingsEnum.MODS_DIRECTORY.toString()]: {
+        type: 'string',
+        default: path.join(
+          process.env.HOME || process.env.USERPROFILE || '',
+          'Documents',
+          'Electronic Arts',
+          'The Sims 4',
+          'Mods'
+        ),
+      },
+      [SettingsEnum.ACCESS_TOKEN.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.OPENAI_KEY.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.LOCALIZATION_ENABLED.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
+      [SettingsEnum.LOCALIZATION_LANGUAGE.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.DEBUG_LOGS.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
+      [SettingsEnum.NSFW_ENABLED.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
+      [SettingsEnum.MAPPING_NOTIFICATION_ENABLED.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
     },
-    [SettingsEnum.OPENAI_MODEL.toString()]: {
-      type: 'string',
-      default: 'gpt-3.5-turbo',
-    },
-    [SettingsEnum.CUSTOM_LLM_ENABLED.toString()]: {
-      type: 'boolean',
-      default: false,
-    },
-    [SettingsEnum.CUSTOM_LLM_HOSTNAME.toString()]: {
-      type: 'string',
-      default: 'https://ai.sentientsimulations.com',
-    },
-    [SettingsEnum.MODS_DIRECTORY.toString()]: {
-      type: 'string',
-      default: path.join(
-        process.env.HOME || process.env.USERPROFILE || '',
-        'Documents',
-        'Electronic Arts',
-        'The Sims 4',
-        'Mods'
-      ),
-    },
-    [SettingsEnum.ACCESS_TOKEN.toString()]: {
-      type: 'string',
-      default: '',
-    },
-    [SettingsEnum.OPENAI_KEY.toString()]: {
-      type: 'string',
-      default: '',
-    },
-    [SettingsEnum.LOCALIZATION_ENABLED.toString()]: {
-      type: 'boolean',
-      default: false,
-    },
-    [SettingsEnum.LOCALIZATION_LANGUAGE.toString()]: {
-      type: 'string',
-      default: '',
-    },
-    [SettingsEnum.DEBUG_LOGS.toString()]: {
-      type: 'boolean',
-      default: false,
-    },
-    [SettingsEnum.NSFW_ENABLED.toString()]: {
-      type: 'boolean',
-      default: false,
-    },
-    [SettingsEnum.MAPPING_NOTIFICATION_ENABLED.toString()]: {
-      type: 'boolean',
-      default: true,
-    },
-  },
-});
+  });
+}
 
 export class SettingsService {
   private readonly store;
 
   // eslint-disable-next-line @typescript-eslint/no-shadow
   constructor(store?: Store) {
-    this.store = store ?? defaultStore;
+    this.store = store ?? defaultStore();
   }
 
   getSetting(key: string) {

@@ -6,6 +6,7 @@ import {
   useState,
 } from 'react';
 import log from 'electron-log';
+import { VersionClient } from 'main/sentient-sims/clients/VersionClient';
 import { isNewVersionAvailable } from '../versions';
 
 type NewVersionAvailableProps = {
@@ -25,6 +26,9 @@ const getCurrentTime = (): string => {
 
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds} ${meridiem}`;
 };
+
+const versionClient = new VersionClient();
+
 export default function useNewVersionChecker({
   setIsLoading,
   releaseType: versionType,
@@ -38,10 +42,7 @@ export default function useNewVersionChecker({
     setIsLoading(true);
 
     try {
-      const modVersionResponse = await fetch(
-        'http://localhost:25148/versions/mod'
-      );
-      const modVersion = await modVersionResponse.json();
+      const modVersion = await versionClient.getModVersion();
       log.debug(`modVersion: ${modVersion.version}`);
       const response = await isNewVersionAvailable(
         modVersion.version,

@@ -1,5 +1,1 @@
-export type ChatCompletionMessageRole =
-  | 'system'
-  | 'user'
-  | 'assistant'
-  | 'function';
+export type ChatCompletionMessageRole = 'system' | 'user' | 'assistant';

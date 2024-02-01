@@ -7,21 +7,21 @@ import {
   useState,
 } from 'react';
 import {
-  defaultCustomLLMPrompt,
+  defaultMythoMaxSystemPrompt,
   defaultSystemPrompt,
 } from 'main/sentient-sims/constants';
-import { ChatCompletionMessage } from 'openai/resources/chat';
 import { ChatCompletionMessageRole } from 'main/sentient-sims/models/ChatCompletionMessageRole';
 import { generateUUID } from '@widgetbot/react-embed/dist/util';
 import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { MessageInputProps } from 'main/sentient-sims/models/MessageInputProps';
-import { SentientMemory } from 'main/sentient-sims/models/SentientMemory';
-import { GenerationResult } from 'main/sentient-sims/formatter/GenerationResult';
-import { createPromptFormatter } from 'main/sentient-sims/formatter/PromptFormatterFactory';
-import { PromptRequest } from 'main/sentient-sims/models/PromptRequest';
-import { OpenAIPromptFormatter } from 'main/sentient-sims/formatter/OpenAIPromptFormatter';
+import { InteractionEventResult } from 'main/sentient-sims/models/InteractionEventResult';
+import { OpenAICompatibleRequest } from 'main/sentient-sims/models/OpenAICompatibleRequest';
+import { AIClient } from 'main/sentient-sims/clients/AIClient';
+import { OpenAIMessage } from 'main/sentient-sims/models/OpenAIMessage';
 import useSetting from './useSetting';
+
+const aiClient = new AIClient();
 
 function defaultMessages(systemPrompt: string): MessageInputProps[] {
   return [
@@ -30,20 +30,7 @@ function defaultMessages(systemPrompt: string): MessageInputProps[] {
       message: {
         role: 'system',
         content: systemPrompt,
-      },
-    },
-    {
-      id: generateUUID(),
-      message: {
-        role: 'participants',
-        content: '',
-      },
-    },
-    {
-      id: generateUUID(),
-      message: {
-        role: 'location',
-        content: '',
+        tokens: 0,
       },
     },
     {
@@ -51,6 +38,7 @@ function defaultMessages(systemPrompt: string): MessageInputProps[] {
       message: {
         role: 'user',
         content: '',
+        tokens: 0,
       },
     },
   ];
@@ -65,7 +53,6 @@ export interface ChatGeneration {
   resetMessages: () => void;
   deleteMessage: (index: number) => void;
   addNewMessage: (role: ChatCompletionMessageRole) => void;
-  tokenCount: number;
   generateMultipleChat: (count: number) => Promise<string[]>;
   handleGenerationLoaded: Dispatch<SetStateAction<() => void>>;
 }
@@ -79,11 +66,11 @@ export default function useChatGeneration(): ChatGeneration {
   const [messages, setMessages] = useState<MessageInputProps[]>(
     defaultMessages(defaultSystemPrompt)
   );
-  const [tokenCount, setTokenCount] = useState(0);
 
   const resetMessages = useCallback(() => {
     if (customLLMEnabled.value) {
-      setMessages(defaultMessages(defaultCustomLLMPrompt));
+      // TODO: Get model specific input formatting and apply it to the system prompt
+      setMessages(defaultMessages(defaultMythoMaxSystemPrompt));
     } else {
       setMessages(defaultMessages(defaultSystemPrompt));
     }
@@ -95,80 +82,40 @@ export default function useChatGeneration(): ChatGeneration {
 
   useEffect(() => {
     const removeListener = window.electron.onChatGeneration(
-      (_event: any, result: GenerationResult) => {
+      (_event: any, result: InteractionEventResult) => {
         const updatedMessages: MessageInputProps[] = [];
 
-        updatedMessages.push({
-          id: generateUUID(),
-          message: {
-            role: 'system',
-            content: result.systemPrompt,
-          },
-        });
-        updatedMessages.push({
-          id: generateUUID(),
-          message: {
-            role: 'participants',
-            content: result.prompt.participants,
-          },
-        });
-        updatedMessages.push({
-          id: generateUUID(),
-          message: {
-            role: 'location',
-            content: result.prompt.location,
-          },
-        });
-        result.prompt.memories.forEach((memory) => {
-          if (memory.pre_action) {
+        if (result.request?.messages) {
+          result.request.messages.forEach((message) => {
             updatedMessages.push({
               id: generateUUID(),
-              message: {
-                role: 'user',
-                content: memory.pre_action.trim(),
-              },
+              message,
             });
-          }
-          if (memory.content) {
-            updatedMessages.push({
-              id: generateUUID(),
-              message: {
-                role: 'assistant',
-                content: memory.content.trim(),
-              },
-            });
-          }
-          if (memory.observation) {
-            updatedMessages.push({
-              id: generateUUID(),
-              message: {
-                role: 'user',
-                content: memory.observation.trim(),
-              },
-            });
-          }
-        });
-        if (result.prompt.pre_action) {
-          updatedMessages.push({
-            id: generateUUID(),
-            message: {
-              role: 'user',
-              content: result.prompt.pre_action.trim(),
-            },
           });
-        }
-        if (result.output && result.output.trim() !== '') {
-          updatedMessages.push({
-            id: generateUUID(),
-            message: {
-              role: 'assistant',
-              content: result.output.trim(),
-            },
-          });
-        }
 
-        setMessages(updatedMessages);
-        generationLoadedCallback();
+          if (result.text) {
+            if (
+              updatedMessages[updatedMessages.length - 1].message.role ===
+              'assistant'
+            ) {
+              updatedMessages[
+                updatedMessages.length - 1
+              ].message.content += ` ${result.text}`;
+            } else {
+              updatedMessages.push({
+                id: generateUUID(),
+                message: {
+                  role: 'assistant',
+                  content: result.text,
+                  tokens: 0,
+                },
+              });
+            }
+          }
+
+          setMessages(updatedMessages);
+          generationLoadedCallback();
+        }
       }
     );
     return () => {
@@ -176,74 +123,39 @@ export default function useChatGeneration(): ChatGeneration {
     };
   }, [customLLMEnabled.value, generationLoadedCallback]);
 
-  const addMessage = (response: ChatCompletionMessage | undefined) => {
-    if (response) {
-      const updatedMessages = [
-        ...messages,
-        {
-          message: {
-            role: response.role,
-            content: response.content,
-          },
-        },
-      ];
-      setMessages(updatedMessages);
-    }
+  const addMessage = (message: OpenAIMessage) => {
+    setMessages((previousMessages) => [
+      ...previousMessages,
+      {
+        id: generateUUID(),
+        message,
+      },
+    ]);
   };
 
-  const getPromptRequest = useCallback(() => {
-    const memories: SentientMemory[] = [];
-    for (let i = 3; i < messages.length; i++) {
-      if (messages[i].message.role === 'user') {
-        memories.push({
-          pre_action: messages[i].message.content as string,
-        });
-      } else {
-        memories.push({
-          content: messages[i].message.content as string,
-        });
-      }
-    }
+  const getPromptRequest = useCallback((): OpenAICompatibleRequest => {
+    const requestMessages: OpenAIMessage[] = messages.map((message) => {
+      return {
+        role: message.message.role,
+        tokens: 0,
+        content: message.message.content,
+      };
+    });
     return {
-      systemPrompt: messages[0].message.content as string,
-      participants: messages[1].message.content as string,
-      location: messages[2].message.content as string,
-      memories,
+      messages: requestMessages,
+      maxResponseTokens: 90,
     };
   }, [messages]);
 
   const countTokens = () => {
-    const promptRequest: PromptRequest = getPromptRequest();
-    const promptFormatter = createPromptFormatter(customLLMEnabled.value);
-
-    let length = 0;
-    if (promptFormatter instanceof OpenAIPromptFormatter) {
-      const prompt = promptRequest.pre_action
-        ? promptFormatter.formatActionPrompt(promptRequest)
-        : promptFormatter.formatPrompt(promptRequest);
-      length = prompt.reduce(
-        (accumulator, value) => accumulator + value.tokens,
-        0
-      );
-    } else {
-      const prompt = promptRequest.pre_action
-        ? promptFormatter.formatActionPrompt(promptRequest)
-        : promptFormatter.formatPrompt(promptRequest);
-      length = promptFormatter.encode(prompt).length;
-    }
-    setTokenCount(length);
+    // TODO: Reimplement this
   };
 
   const generateChat = async () => {
     setLoading(true);
     try {
       const request = getPromptRequest();
-
-      await fetch('http://localhost:25148/ai/v2/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(request),
-      });
+      await aiClient.sentientSimsGenerate(request);
     } catch (e: any) {
       log.error(`Unabled to generateChat`, e);
     } finally {
@@ -276,18 +188,9 @@ export default function useChatGeneration(): ChatGeneration {
     addMessage({
       role,
       content: '',
+      tokens: 0,
     });
   };
-
-  async function generate(request: PromptRequest): Promise<string> {
-    const response = await fetch('http://localhost:25148/ai/v2/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request),
-    });
-    const { text } = await response.json();
-    return text;
-  }
 
   const generateMultipleChat = async (count: number) => {
     let results: string[] = [];
@@ -298,10 +201,11 @@ export default function useChatGeneration(): ChatGeneration {
 
       const generations = [];
       for (let i = 0; i < count; i++) {
-        generations.push(generate(request));
+        generations.push(aiClient.sentientSimsGenerate(request));
       }
 
-      results = await Promise.all(generations);
+      const responses = await Promise.all(generations);
+      results = responses.map((response) => response.text);
     } catch (e: any) {
       log.error(`Unabled to generateMultipleChat`, e);
     } finally {
@@ -319,7 +223,6 @@ export default function useChatGeneration(): ChatGeneration {
     resetMessages,
     deleteMessage,
     addNewMessage,
-    tokenCount,
     countTokens,
     generateMultipleChat,
     handleGenerationLoaded: setGenerationLoadedCallback,

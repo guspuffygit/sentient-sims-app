@@ -18,7 +18,6 @@ export default function ChatPage() {
     resetMessages,
     deleteMessage,
     addNewMessage,
-    tokenCount,
     countTokens,
     generateMultipleChat,
     handleGenerationLoaded,
@@ -106,7 +105,7 @@ export default function ChatPage() {
                 </Grid>
                 <Grid item>
                   <Typography sx={{ marginRight: 2, marginLeft: 2 }}>
-                    Tokens: {tokenCount}
+                    Tokens: {0}
                   </Typography>
                 </Grid>
                 <Grid item>

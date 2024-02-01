@@ -9,11 +9,14 @@ import { ModUpdate } from 'main/sentient-sims/services/UpdateService';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import log from 'electron-log';
+import { UpdateClient } from 'main/sentient-sims/clients/UpdateClient';
+import { getNightlyAccess } from 'main/sentient-sims/util/nightlyAccess';
 import AppCard from './AppCard';
 import useNewVersionChecker from './hooks/useNewVersionChecker';
 import useSetting, { SettingsHook } from './hooks/useSetting';
 import PatreonUser from './wrappers/PatreonUser';
-import { getNightlyAccess } from './util/nightlyAccess';
+
+const updateClient = new UpdateClient();
 
 export default function UpdateComponent() {
   const { user } = useAuthenticator((context) => [context.user]);
@@ -36,11 +39,8 @@ export default function UpdateComponent() {
     };
     if (updateState.newVersionAvailable || forceUpdate) {
       setIsLoading(true);
-      return fetch('http://localhost:25148/update/mod', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(modUpdate),
-      })
+      return updateClient
+        .updateMod(modUpdate)
         .then(() => {
           return handleCheckForUpdates();
         })

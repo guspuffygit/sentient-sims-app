@@ -1,5 +1,5 @@
 import { LogMessage } from './LogMessage';
 
-export type ModWebsocketMessage = {
+export type ModLogWebsocketMessage = {
   log?: LogMessage;
 };

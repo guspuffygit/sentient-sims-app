@@ -2,8 +2,8 @@
 import '@testing-library/jest-dom';
 import { ParticipantRepository } from 'main/sentient-sims/db/ParticipantRepository';
 import { DbService } from 'main/sentient-sims/services/DbService';
-import { ParticipantEntity } from 'main/sentient-sims/db/entities/ParticipantEntity';
 import * as fs from 'fs';
+import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
 import { mockDirectoryService, randomString } from './util';
 
 describe('ParticipantRepository', () => {
@@ -16,8 +16,8 @@ describe('ParticipantRepository', () => {
     await dbService.loadDatabase('9587321');
     const participantRepository = new ParticipantRepository(dbService);
 
-    const participant: ParticipantEntity = {
-      id: 1029376491723,
+    const participant: ParticipantDTO = {
+      id: '9223372036854775807', // Max 64 bit int
       description: randomString(),
     };
     participantRepository.updateParticipant(participant);
@@ -28,7 +28,7 @@ describe('ParticipantRepository', () => {
         fullName: 'Some name',
       },
       {
-        id: 198273129837,
+        id: '198273129837',
         fullName: 'Some other name',
       },
     ]);
@@ -36,13 +36,13 @@ describe('ParticipantRepository', () => {
     console.log(JSON.stringify(result));
     expect(result[0].id).toEqual(participant.id);
     expect(result[0].description).toEqual(participant.description);
-    expect(result[1].id).toEqual(198273129837);
+    expect(result[1].id).toEqual('198273129837');
     expect(result[1].description).toBeFalsy();
     expect(result.length).toEqual(2);
 
     participantRepository.deleteParticipant(participant);
 
-    const noDescription: ParticipantEntity = { id: 91283 };
+    const noDescription: ParticipantDTO = { id: '91283' };
     participantRepository.updateParticipant(noDescription);
 
     const noDescriptionResult = await participantRepository.getParticipants([
@@ -65,14 +65,14 @@ describe('ParticipantRepository', () => {
     );
 
     const defaultSimDescription = await participantRepository.getParticipant({
-      id: 187263,
+      id: '187263',
       fullName: 'Travis Scott',
     });
 
     expect(defaultSimDescription.description).toBeTruthy();
 
     const noDefaultSimDescription = await participantRepository.getParticipant({
-      id: 187263,
+      id: '187263123',
       fullName: 'No Name',
     });
 

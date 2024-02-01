@@ -1,11 +1,11 @@
-import { PromptRequest } from '../models/PromptRequest';
+import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
+import { AIHealthCheckResponse } from '../models/AIHealthCheckResponse';
 
 export interface GenerationService {
+  serviceUrl(): string;
   sentientSimsGenerate(
-    promptRequest: PromptRequest
+    request: OpenAICompatibleRequest
   ): Promise<SimsGenerateResponse>;
-  sentientSimsWants(
-    promptRequest: PromptRequest
-  ): Promise<SimsGenerateResponse>;
+  healthCheck(apiKey?: string): Promise<AIHealthCheckResponse>;
 }

@@ -1,8 +1,7 @@
-import { ChatCompletionMessage } from 'openai/resources/chat';
-import { CustomLLMChatCompletionMessage } from './CustomLLMChatCompletionMessage';
+import { OpenAIMessage } from './OpenAIMessage';
 
 export type MessageInputProps = {
   id?: string;
   timestamp?: number;
-  message: ChatCompletionMessage | CustomLLMChatCompletionMessage;
+  message: OpenAIMessage;
 };

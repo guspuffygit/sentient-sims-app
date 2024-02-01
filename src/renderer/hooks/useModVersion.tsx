@@ -1,16 +1,17 @@
-/* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
+import log from 'electron-log';
+import { VersionClient } from 'main/sentient-sims/clients/VersionClient';
 import { useEffect, useState } from 'react';
+
+const versionClient = new VersionClient();
 
 export default function useModVersion() {
   const [version, setVersion] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:25148/versions/mod')
-      .then((res) => res.json())
-      .then((response: any) => {
-        setVersion(response.version);
-      });
+    versionClient
+      .getModVersion()
+      .then((result) => setVersion(result.version))
+      .catch((err: any) => log.error('Error getting mod version', err));
   }, []);
 
   return version;

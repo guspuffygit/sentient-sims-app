@@ -39,8 +39,11 @@
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "test": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest '\\.test\\.ts' '\\.test\\.tsx'",
-    "test:single": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest 'MemoryRepository.test.ts'",
-    "test:unit": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest '(?<!\\.it)\\.test\\.(ts|tsx)$'"
+    "test:single": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest 'PromptFormatter.test.ts'",
+    "test:e2e": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest 'ChromeDriver.e2e.test.ts'",
+    "test:api": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest 'Api.test.ts'",
+    "test:unit": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest '(?<!\\.it)\\.test\\.(ts|tsx)$'",
+    "test:watch": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest --watch-all '(?<!\\.it)\\.test\\.(ts|tsx)$'"
   },
   "browserslist": [],
   "prettier": {
@@ -82,7 +85,7 @@
     ],
     "testEnvironment": "jsdom",
     "testEnvironmentOptions": {
-      "url": "http://localhost/"
+      "url": "http://localhost:25198/"
     },
     "testPathIgnorePatterns": [
       "release/app/dist",
@@ -90,7 +93,8 @@
     ],
     "transformIgnorePatterns": [
       "node_modules/(?!(@aws-amplify)/)",
-      "node_modules/(?!(@aws-sdk)/)"
+      "node_modules/(?!(@aws-sdk)/)",
+      "node_modules/(?!(uuid)/)"
     ],
     "transform": {
       "\\.(ts|tsx|js|jsx)$": "ts-jest"
@@ -99,11 +103,20 @@
     "collectCoverageFrom": [
       "./src/**"
     ],
+    "coveragePathIgnorePatterns": [
+      "main.ts",
+      "menu.ts",
+      "preload.ts",
+      "util.ts",
+      "LLamaTokenizer.ts",
+      "vocab.ts"
+    ],
     "coverageDirectory": "coverage"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^4.6.4",
     "@aws-sdk/client-s3": "^3.347.1",
+    "@aws-sdk/credential-provider-node": "^3.501.0",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.11.16",
@@ -128,7 +141,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.1",
     "react-window": "^1.8.9",
-    "uuid": "^9.0.0",
+    "uuid": "9.0.1",
     "xml2js": "^0.6.0"
   },
   "devDependencies": {
@@ -148,6 +161,7 @@
     "@types/react-test-renderer": "^18.0.0",
     "@types/react-window": "^1.8.5",
     "@types/request": "^2.48.8",
+    "@types/selenium-webdriver": "^4.1.21",
     "@types/terser-webpack-plugin": "^5.0.4",
     "@types/uuid": "^9.0.2",
     "@types/webpack-bundle-analyzer": "^4.6.0",
@@ -165,6 +179,7 @@
     "detect-port": "^1.5.1",
     "electron": "^23.0.0",
     "electron-builder": "^24.2.1",
+    "electron-chromedriver": "^23.3.13",
     "electron-devtools-installer": "^3.2.0",
     "electronmon": "^2.0.2",
     "eslint": "8.47.0",
@@ -191,6 +206,7 @@
     "rimraf": "^4.1.2",
     "sass": "^1.58.0",
     "sass-loader": "^13.2.0",
+    "selenium-webdriver": "^4.17.0",
     "style-loader": "^3.3.1",
     "terser-webpack-plugin": "^5.3.6",
     "ts-jest": "^29.0.5",
@@ -205,6 +221,9 @@
     "webpack-dev-server": "^4.11.1",
     "webpack-merge": "^5.8.0",
     "whatwg-fetch": "^3.6.2"
+  },
+  "overrides": {
+    "uuid": "9.0.1"
   },
   "build": {
     "productName": "SentientSims",

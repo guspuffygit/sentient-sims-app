@@ -1,22 +1,25 @@
 /* eslint-disable promise/always-return */
-import { WebSocketServer } from 'ws';
+import { WebSocketServer, WebSocket } from 'ws';
 import log from 'electron-log';
 import { LogsService } from './services/LogsService';
-import { ModWebsocketMessage } from './models/ModWebsocketMesssage';
+import { ModLogWebsocketMessage } from './models/ModLogWebsocketMessage';
 import { formatLog } from './util/format';
 import { RendererWebsocketMessage } from './models/RendererWebsocketMessage';
 import { SettingsService } from './services/SettingsService';
 import { SettingsEnum } from './models/SettingsEnum';
 import { LogLevel } from './models/LogLevel';
+import { ModWebsocketMessage } from './models/ModWebsocketMessage';
+import { modWebsocketPort, rendererWebsocketPort } from './constants';
+
+let rendererWs: WebSocket;
+let modWs: WebSocket;
 
 export const startWebSocketServer = (
   logsService: LogsService,
   settingsService: SettingsService
 ) => {
-  const rendererServer = new WebSocketServer({ port: 25146 });
-  let rendererWs: any;
-
-  rendererServer.on('connection', function handleRenderer(ws: any) {
+  const rendererServer = new WebSocketServer({ port: rendererWebsocketPort });
+  rendererServer.on('connection', function handleRenderer(ws: WebSocket) {
     rendererWs = ws;
     ws.on('error', log.error);
 
@@ -41,12 +44,13 @@ export const startWebSocketServer = (
       });
   });
 
-  const modServer = new WebSocketServer({ port: 25145 });
-  modServer.on('connection', function handleMod(ws: any) {
+  const modServer = new WebSocketServer({ port: modWebsocketPort });
+  modServer.on('connection', function handleMod(ws: WebSocket) {
+    modWs = ws;
     ws.on('error', log.error);
 
     ws.on('message', function message(data: any) {
-      const parsedData: ModWebsocketMessage = JSON.parse(data.toString());
+      const parsedData: ModLogWebsocketMessage = JSON.parse(data.toString());
 
       if (!parsedData.log) {
         return;
@@ -68,3 +72,13 @@ export const startWebSocketServer = (
     });
   });
 };
+
+export function sendModNotification(notification: ModWebsocketMessage) {
+  try {
+    if (modWs) {
+      modWs.send(JSON.stringify(notification));
+    }
+  } catch (err: any) {
+    log.error('Unable to send message to mod via websocket', err);
+  }
+}

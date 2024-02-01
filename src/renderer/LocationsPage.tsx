@@ -6,6 +6,7 @@ import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import log from 'electron-log';
 import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { appApiUrl } from 'main/sentient-sims/constants';
 import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
@@ -35,7 +36,7 @@ export default function LocationsPage() {
   >();
 
   function getLocations() {
-    fetch(`http://localhost:25148/locations`, {
+    fetch(`${appApiUrl}/locations`, {
       headers: { 'Content-Type': 'application/json' },
     })
       .then((res) => res.json())
@@ -106,7 +107,7 @@ export default function LocationsPage() {
       log.debug(`Edited Location: ${JSON.stringify(editedLocation.location)}`);
 
       try {
-        const url = `http://localhost:25148/locations`;
+        const url = `${appApiUrl}/locations`;
 
         await fetch(url, {
           method: 'POST',
@@ -134,12 +135,9 @@ export default function LocationsPage() {
     if (editedLocation) {
       try {
         log.info(`Deleting Location: ${editedLocation.location.id}`);
-        await fetch(
-          `http://localhost:25148/locations/${editedLocation.location.id}`,
-          {
-            method: 'DELETE',
-          }
-        );
+        await fetch(`${appApiUrl}/locations/${editedLocation.location.id}`, {
+          method: 'DELETE',
+        });
       } catch (error: any) {
         log.error('Deletion of location failed', error);
         if (error.cause) {

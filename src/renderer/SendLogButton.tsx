@@ -2,6 +2,7 @@ import { LoadingButton } from '@mui/lab';
 import { Box, Button, Divider, Modal } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { appApiUrl } from 'main/sentient-sims/constants';
 import LogSendInformationComponent from './LogSendInformationComponent';
 import SpaceBetweenDiv from './components/SpaceBetweenDiv';
 
@@ -17,7 +18,7 @@ export default function SendLogButton() {
   const handleSendLogs = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:25148/debug/send-logs');
+      const response = await fetch(`${appApiUrl}/debug/send-logs`);
       const responseJson = await response.json();
       if (response.ok) {
         setOpen(false);

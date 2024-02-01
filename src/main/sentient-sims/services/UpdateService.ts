@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { ICredentials } from '@aws-amplify/core';
+import { AwsCredentialIdentity } from '@aws-sdk/types';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
 import AdmZip from 'adm-zip';
@@ -8,7 +8,7 @@ import { DirectoryService } from './DirectoryService';
 
 export type ModUpdate = {
   type: string;
-  credentials: ICredentials;
+  credentials: AwsCredentialIdentity;
 };
 
 export class UpdateService {

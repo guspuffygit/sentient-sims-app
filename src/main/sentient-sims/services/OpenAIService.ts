@@ -1,26 +1,17 @@
 /* eslint-disable max-classes-per-file,class-methods-use-this */
 /* eslint-disable promise/always-return */
-import * as fs from 'fs';
 import log from 'electron-log';
 import OpenAI from 'openai';
 import {
   ChatCompletion,
   CompletionCreateParamsNonStreaming,
 } from 'openai/src/resources/chat/completions';
-import { DirectoryService } from './DirectoryService';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
-import {
-  defaultOriginalSystemPrompt,
-  defaultSystemPrompt,
-  defaultWantsPrompt,
-} from '../constants';
-import { PromptRequest } from '../models/PromptRequest';
-import { OpenAIPromptFormatter } from '../formatter/OpenAIPromptFormatter';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
-import { sendPopUpNotification } from '../util/popupNotification';
-import { formatWantsOutput } from '../formatter/PromptFormatter';
+import { sendPopUpNotification } from '../util/notifyRenderer';
+import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 
 export class OpenAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -30,22 +21,16 @@ export class OpenAIKeyNotSetError extends Error {
 }
 
 export class OpenAIService implements GenerationService {
-  private directoryService: DirectoryService;
-
-  private settingsService: SettingsService;
-
-  private promptFormatter: OpenAIPromptFormatter;
+  private readonly settingsService: SettingsService;
 
   private openAIClient?: OpenAI;
 
-  constructor(
-    directoryService: DirectoryService,
-    settingsService: SettingsService,
-    promptFormatter: OpenAIPromptFormatter
-  ) {
-    this.directoryService = directoryService;
+  constructor(settingsService: SettingsService) {
     this.settingsService = settingsService;
-    this.promptFormatter = promptFormatter;
+  }
+
+  serviceUrl(): string {
+    return 'https://api.openai.com/v1';
   }
 
   getOpenAIModel(): string {
@@ -69,45 +54,25 @@ export class OpenAIService implements GenerationService {
       return openAIKeyFromEnv;
     }
 
-    // Read JSON file
-    const sentientSimsConfigFile = this.directoryService.getModSettingsFile();
-    if (fs.existsSync(sentientSimsConfigFile)) {
-      const configData = fs.readFileSync(sentientSimsConfigFile, 'utf8');
-      const jsonData = JSON.parse(configData);
-      const openAIKeyFromJson = jsonData.openai_key;
-      if (openAIKeyFromJson) {
-        log.debug('Using openai key from mod settings');
-        return openAIKeyFromJson;
-      }
-    }
-
     throw new OpenAIKeyNotSetError(
       'No OpenAI Key set, Edit OpenAI Key to set it'
     );
   }
 
-  createOpenAIClient() {
-    const openAIKey = this.getOpenAIKey();
-    return new OpenAI({
-      dangerouslyAllowBrowser: process.env.NODE_ENV === 'test',
-      apiKey: openAIKey,
-    });
+  private getOpenAIClient(apiKey?: string): OpenAI {
+    if (!this.openAIClient) {
+      this.openAIClient = new OpenAI({
+        dangerouslyAllowBrowser: process.env.NODE_ENV === 'test',
+        apiKey: apiKey ?? this.getOpenAIKey(),
+        baseURL: this.serviceUrl(),
+      });
+    }
+
+    return this.openAIClient;
   }
 
-  async testOpenAI(openAIKey?: string) {
-    let client: OpenAI;
-
-    if (openAIKey) {
-      log.debug('Testing with openAIKey parameter');
-      client = new OpenAI({
-        apiKey: openAIKey as string,
-      });
-    } else {
-      if (!this.openAIClient) {
-        this.openAIClient = this.createOpenAIClient();
-      }
-      client = this.openAIClient;
-    }
+  async healthCheck(apiKey?: string) {
+    const client: OpenAI = this.getOpenAIClient(apiKey);
 
     const request: CompletionCreateParamsNonStreaming = {
       stream: false,
@@ -140,38 +105,23 @@ export class OpenAIService implements GenerationService {
     }
   }
 
-  async generateChatCompletion(request: CompletionCreateParamsNonStreaming) {
-    request.stream = false;
-
-    if (!this.openAIClient) {
-      this.openAIClient = this.createOpenAIClient();
-    }
-
-    log.debug(JSON.stringify(request, null, 2));
-
-    return this.openAIClient.chat.completions.create(request);
-  }
-
   async sentientSimsGenerate(
-    promptRequest: PromptRequest
+    request: OpenAICompatibleRequest
   ): Promise<SimsGenerateResponse> {
-    const prompt = promptRequest?.pre_action
-      ? this.promptFormatter.formatActionPrompt(promptRequest)
-      : this.promptFormatter.formatPrompt(promptRequest);
-    const defaultPrompt = promptRequest?.pre_action
-      ? defaultSystemPrompt
-      : defaultOriginalSystemPrompt;
-    const request: CompletionCreateParamsNonStreaming = {
-      stream: false,
-      model: promptRequest.model || this.getOpenAIModel(),
-      max_tokens: 90,
-      messages: prompt.map((message) => {
-        return { content: message.content, role: message.role };
+    const completionRequest: CompletionCreateParamsNonStreaming = {
+      model: this.getOpenAIModel(),
+      max_tokens: request.maxResponseTokens,
+      messages: request.messages.map((message) => {
+        return {
+          role: message.role,
+          content: message.content,
+        };
       }),
     };
-    const result = await this.generateChatCompletion(request);
+    const result = await this.getOpenAIClient().chat.completions.create(
+      completionRequest
+    );
     let text = this.getOutputFromGeneration(result);
-    text = this.promptFormatter.formatOutput(text);
 
     if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED)) {
       text = await this.translate(
@@ -182,7 +132,7 @@ export class OpenAIService implements GenerationService {
 
     return {
       text,
-      systemPrompt: promptRequest.systemPrompt || defaultPrompt,
+      request,
     };
   }
 
@@ -210,52 +160,9 @@ export class OpenAIService implements GenerationService {
         },
       ],
     };
-    const result = await this.generateChatCompletion(request);
+    const result = await this.getOpenAIClient().chat.completions.create(
+      request
+    );
     return this.getOutputFromGeneration(result);
-  }
-
-  async getVector(text: string) {
-    if (!this.openAIClient) {
-      this.openAIClient = this.createOpenAIClient();
-    }
-
-    const response = await this.openAIClient?.embeddings.create({
-      model: 'text-embedding-ada-002',
-      input: text,
-    });
-
-    return response.data[0].embedding;
-  }
-
-  async sentientSimsWants(
-    promptRequest: PromptRequest
-  ): Promise<SimsGenerateResponse> {
-    promptRequest.systemPrompt = defaultWantsPrompt;
-    promptRequest.preResponse = 'I want to';
-    const prompt = this.promptFormatter.formatWantsPrompt(promptRequest);
-    const request: CompletionCreateParamsNonStreaming = {
-      stream: false,
-      model: promptRequest.model || this.getOpenAIModel(),
-      max_tokens: 90,
-      messages: prompt.map((message) => {
-        return { content: message.content, role: message.role };
-      }),
-    };
-    const chatCompletion = await this.generateChatCompletion(request);
-    const response = this.getOutputFromGeneration(chatCompletion);
-    const output = this.promptFormatter.formatOutput(response);
-    let text = formatWantsOutput(promptRequest.preResponse, output);
-
-    if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED)) {
-      text = await this.translate(
-        text,
-        this.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE) as string
-      );
-    }
-
-    return {
-      text,
-      systemPrompt: defaultWantsPrompt,
-    };
   }
 }

@@ -9,15 +9,15 @@ const electronHandler = {
   },
   onChatGeneration: (callback: any) => {
     ipcRenderer.on('on-chat-generation', callback);
-    function removeListener() {
-      ipcRenderer.removeListener('on-chat-generation', callback);
-    }
-    return removeListener;
+
+    return () => ipcRenderer.removeListener('on-chat-generation', callback);
   },
   onPopupNotification: (callback: any) => {
     return ipcRenderer.on('popup-notification', callback);
   },
-  selectDirectory: () => ipcRenderer.invoke('dialog:selectDirectory'),
+  selectDirectory: () => {
+    return ipcRenderer.invoke('dialog:selectDirectory');
+  },
   setSetting: (setting: SettingsEnum, value: any) => {
     ipcRenderer.send('set-setting', setting, value);
   },
@@ -26,10 +26,8 @@ const electronHandler = {
   },
   onAuth: (callback: any) => {
     ipcRenderer.on('on-auth', callback);
-    function removeListener() {
-      ipcRenderer.removeListener('on-auth', callback);
-    }
-    return removeListener;
+
+    return () => ipcRenderer.removeListener('on-auth', callback);
   },
   onSuccessfulAuth: () => {
     ipcRenderer.send('on-successful-auth');
@@ -37,10 +35,7 @@ const electronHandler = {
   onSettingChange: (callback: any) => {
     ipcRenderer.on('setting-changed', callback);
 
-    function removeListener() {
-      ipcRenderer.removeListener('setting-changed', callback);
-    }
-    return removeListener;
+    return () => ipcRenderer.removeListener('setting-changed', callback);
   },
   openBrowserLink: (link: string) => {
     ipcRenderer.send('open-browser-link', link);
@@ -48,34 +43,38 @@ const electronHandler = {
   onNewMemoryAdded: (callback: any) => {
     ipcRenderer.on('on-new-memory-added', callback);
 
-    function removeListener() {
-      ipcRenderer.removeListener('on-new-memory-added', callback);
-    }
-    return removeListener;
+    return () => ipcRenderer.removeListener('on-new-memory-added', callback);
   },
   onLocationChanged: (callback: any) => {
     ipcRenderer.on('on-location-changed', callback);
 
-    function removeListener() {
-      ipcRenderer.removeListener('on-location-changed', callback);
-    }
-    return removeListener;
+    return () => ipcRenderer.removeListener('on-location-changed', callback);
+  },
+  onSimsChanged: (callback: any) => {
+    ipcRenderer.on('on-sims-changed', callback);
+
+    return () => ipcRenderer.removeListener('on-sims-changed', callback);
+  },
+  onInteractionsChanged: (callback: any) => {
+    ipcRenderer.on('on-interactions-changed', callback);
+
+    return () =>
+      ipcRenderer.removeListener('on-interactions-changed', callback);
   },
   onDatabaseLoaded: (callback: any) => {
     ipcRenderer.on('on-database-loaded', callback);
 
-    function removeListener() {
-      ipcRenderer.removeListener('on-database-loaded', callback);
-    }
-    return removeListener;
+    return () => ipcRenderer.removeListener('on-database-loaded', callback);
   },
   onDatabaseUnloaded: (callback: any) => {
     ipcRenderer.on('on-database-unloaded', callback);
 
-    function removeListener() {
-      ipcRenderer.removeListener('on-database-unloaded', callback);
-    }
-    return removeListener;
+    return () => ipcRenderer.removeListener('on-database-unloaded', callback);
+  },
+  onMapAnimation: (callback: any) => {
+    ipcRenderer.on('on-map-animation', callback);
+
+    return () => ipcRenderer.removeListener('on-map-animation', callback);
   },
 };
 

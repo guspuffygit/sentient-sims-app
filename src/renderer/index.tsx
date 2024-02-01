@@ -7,6 +7,7 @@ import { Amplify } from 'aws-amplify';
 import '@patternfly/react-core/dist/styles/base.css';
 import '@aws-amplify/ui-react/styles.css';
 import { Authenticator } from '@aws-amplify/ui-react';
+import { appApiUrl } from 'main/sentient-sims/constants';
 import App from './App';
 import theme from './theme';
 import awsExports from './aws-exports';
@@ -20,13 +21,16 @@ import LogViewerPage from './LogViewerPage';
 import MemoriesPage from './MemoriesPage';
 import LocationsPage from './LocationsPage';
 import { ChatGenerationProvider } from './providers/ChatGenerationProvider';
+import SimsPage from './SimsPage';
+import InteractionsPage from './InteractionsPage';
+import { SnackBarProvider } from './providers/SnackBarProvider';
 
 const updatedAwsConfig = {
   ...awsExports,
   oauth: {
     ...awsExports.oauth,
-    redirectSignIn: 'http://localhost:25148/login/callback',
-    redirectSignOut: `http://localhost:25148/login/signout`,
+    redirectSignIn: `${appApiUrl}/login/callback`,
+    redirectSignOut: `${appApiUrl}/login/signout`,
   },
 };
 Amplify.configure(updatedAwsConfig);
@@ -47,6 +51,14 @@ const router = createMemoryRouter([
       {
         path: '/chat',
         element: <ChatPage />,
+      },
+      {
+        path: '/interactions',
+        element: <InteractionsPage />,
+      },
+      {
+        path: '/sims',
+        element: <SimsPage />,
       },
       {
         path: '/locations',
@@ -79,11 +91,13 @@ root.render(
     <CssBaseline />
     <React.StrictMode>
       <Authenticator.Provider>
-        <ChatGenerationProvider>
-          <DebugModeProvider>
-            <RouterProvider router={router} />
-          </DebugModeProvider>
-        </ChatGenerationProvider>
+        <SnackBarProvider>
+          <ChatGenerationProvider>
+            <DebugModeProvider>
+              <RouterProvider router={router} />
+            </DebugModeProvider>
+          </ChatGenerationProvider>
+        </SnackBarProvider>
       </Authenticator.Provider>
     </React.StrictMode>
   </ThemeProvider>

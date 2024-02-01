@@ -9,15 +9,9 @@ import { Repository } from './Repository';
 import { MemoryEntity } from './entities/MemoryEntity';
 import { MemoryParticipantEntity } from './entities/MemoryParticipantEntity';
 import { notifyNewMemoryAdded } from '../util/notifyRenderer';
+import { MemoryParticipantDTO } from './dto/MemoryParticipantDTO';
 
 export class MemoryRepository extends Repository {
-  /**
-   * Retrieves a memory by their ID. If the memory is not found in the
-   * database, it throws an error.
-   *
-   * @param {number} memoryId - The unique identifier of the memory.
-   * @returns {Promise<MemoryEntity>} A promise that resolves to the memory entity.
-   */
   getMemory(getMemoryRequest: GetMemoryRequest): MemoryEntity {
     const results = this.dbService
       .getDb()
@@ -32,13 +26,21 @@ export class MemoryRepository extends Repository {
 
   getMemoryParticipants(
     getMemoryParticipantsRequest: GetMemoryParticipantsRequest
-  ): MemoryParticipantEntity[] {
-    return this.dbService
+  ): MemoryParticipantDTO[] {
+    const memoryParticipants = this.dbService
       .getDb()
       .prepare('SELECT * FROM memory_participants WHERE memory_id = ?')
       .all([
         getMemoryParticipantsRequest.memory_id,
       ]) as MemoryParticipantEntity[];
+
+    return memoryParticipants.map((memoryParticipant) => {
+      return {
+        id: memoryParticipant.id,
+        participant_id: memoryParticipant.participant_id.toString(),
+        memory_id: memoryParticipant.memory_id,
+      };
+    });
   }
 
   getParticipantsMemories(
@@ -60,10 +62,15 @@ export class MemoryRepository extends Repository {
       ORDER BY subquery.timestamp ASC;
     `;
 
+    const bigIntParticipantIds =
+      getParticipantsMemoriesRequest.participant_ids.map(
+        (participantIdString) => BigInt(participantIdString)
+      );
+
     return this.dbService
       .getDb()
       .prepare(query)
-      .all(getParticipantsMemoriesRequest.participant_ids) as MemoryEntity[];
+      .all(bigIntParticipantIds) as MemoryEntity[];
   }
 
   getMemories(): MemoryEntity[] {
@@ -98,15 +105,16 @@ export class MemoryRepository extends Repository {
       );
   }
 
-  updateMemoryParticipant(memoryParticipant: MemoryParticipantEntity) {
+  updateMemoryParticipant(memoryParticipant: MemoryParticipantDTO) {
     return this.dbService
       .getDb()
       .prepare(
         'INSERT OR REPLACE INTO memory_participants(id, participant_id, memory_id) VALUES(?, ?, ?)'
       )
+      .safeIntegers()
       .run([
         memoryParticipant.id,
-        memoryParticipant.participant_id,
+        BigInt(memoryParticipant.participant_id),
         memoryParticipant.memory_id,
       ]);
   }

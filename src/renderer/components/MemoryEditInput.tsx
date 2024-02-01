@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import { Box, TextField } from '@mui/material';
 import { ChangeEvent } from 'react';
 
@@ -8,6 +9,7 @@ export type MemoryEditInputProperties = {
   handleEdit: (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
+  forceShow?: boolean;
 };
 
 export function MemoryEditInput({
@@ -15,8 +17,9 @@ export function MemoryEditInput({
   value,
   label,
   handleEdit,
+  forceShow = false,
 }: MemoryEditInputProperties) {
-  if (!value) {
+  if (!value && !forceShow) {
     return null;
   }
 

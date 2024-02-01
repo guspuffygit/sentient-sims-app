@@ -98,6 +98,10 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
         });
       }
     },
+    '006-add-participant-name': `
+      ALTER TABLE participant
+      ADD COLUMN name TEXT;
+    `,
   })
 );
 
@@ -159,7 +163,7 @@ export const migrate = (db: Database) => {
       name: migrationName,
       sql: migrations.get(migrationName) as string,
     };
-    log.info(`Applying migration: ${migration.name} sql:\n${migration.sql}`);
+    log.info(`Applying migration: ${migration.name}`);
     applyMigration(db, migration);
   }
 };

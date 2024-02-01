@@ -3,8 +3,7 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
 import { ParticipantRepository } from '../db/ParticipantRepository';
-import { ParticipantEntity } from '../db/entities/ParticipantEntity';
-import { GetParticipantsRequest } from '../models/GetParticipantsRequest';
+import { ParticipantDTO } from '../db/dto/ParticipantDTO';
 
 export class ParticipantsController {
   private readonly participantRepository: ParticipantRepository;
@@ -13,7 +12,6 @@ export class ParticipantsController {
     this.participantRepository = participantRepository;
 
     this.getParticipant = this.getParticipant.bind(this);
-    this.getParticipants = this.getParticipants.bind(this);
     this.getAllParticipants = this.getAllParticipants.bind(this);
     this.updateParticipant = this.updateParticipant.bind(this);
     this.deleteParticipant = this.deleteParticipant.bind(this);
@@ -24,25 +22,12 @@ export class ParticipantsController {
       const { participantId } = req.params;
       const fullName = req.query.fullName as string;
       const result = await this.participantRepository.getParticipant({
-        id: Number(participantId),
+        id: participantId,
         fullName,
       });
       return res.json(result);
     } catch (err: any) {
       log.error('Error getting participant', err);
-      return res.json({ error: err.message });
-    }
-  }
-
-  async getParticipants(req: Request, res: Response) {
-    try {
-      const getParticipantsRequest: GetParticipantsRequest = req.body;
-      const result = await this.participantRepository.getParticipants(
-        getParticipantsRequest
-      );
-      return res.json(result);
-    } catch (err: any) {
-      log.error('Error getting participants', err);
       return res.json({ error: err.message });
     }
   }
@@ -60,10 +45,11 @@ export class ParticipantsController {
   async updateParticipant(req: Request, res: Response) {
     try {
       const { participantId } = req.params;
-      const { description } = req.body;
-      const participant: ParticipantEntity = {
-        id: Number(participantId),
+      const { description, name } = req.body;
+      const participant: ParticipantDTO = {
+        id: participantId,
         description,
+        name,
       };
 
       this.participantRepository.updateParticipant(participant);
@@ -79,7 +65,7 @@ export class ParticipantsController {
   async deleteParticipant(req: Request, res: Response) {
     try {
       const { participantId } = req.params;
-      const participant: ParticipantEntity = { id: Number(participantId) };
+      const participant: ParticipantDTO = { id: participantId };
 
       this.participantRepository.deleteParticipant(participant);
       return res.json({ text: 'Deleted' });

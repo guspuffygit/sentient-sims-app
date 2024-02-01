@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import log from 'electron-log';
+import { appApiUrl } from 'main/sentient-sims/constants';
 
 export default function useOpenAITest() {
   const [openAIStatus, setOpenAIStatus] = useState({
@@ -13,10 +14,10 @@ export default function useOpenAITest() {
       loading: true,
     });
 
-    let url = 'http://localhost:25148/debug/test-open-ai';
+    let url = `${appApiUrl}/debug/test-ai`;
     if (openAIKey) {
       const params = new URLSearchParams({
-        openAIKey,
+        apiKey: openAIKey,
       });
       url += `?${params.toString()}`;
     }
