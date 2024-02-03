@@ -19,6 +19,8 @@ export type GenerationOptions = {
   sexLocationType?: number;
 };
 
+const maxGroupSizeLength = 1700;
+
 export type PromptRequestBuilderOptions = GenerationOptions & {
   aiType: AIType;
 };
@@ -76,13 +78,24 @@ export class PromptRequestBuilderService {
     function addMessage(role: ChatCompletionMessageRole, text: string) {
       // Combine messages from the same role
       if (messages.length > 0 && messages[messages.length - 1].role === role) {
-        messages[messages.length - 1].content += ` ${text.trim()}`;
-      } else {
-        messages.push({
-          content: text,
-          role,
-        });
+        if (messages[messages.length - 1].content.length < maxGroupSizeLength) {
+          messages[messages.length - 1].content += ` ${text.trim()}`;
+          return;
+        }
+        if (role === 'assistant') {
+          // If you let assistant run for too long, after about 500 tokens it starts to repeat
+          // This helps give it a kick
+          messages.push({
+            content: 'Continue talking and interacting',
+            role: 'user',
+          });
+        }
       }
+
+      messages.push({
+        content: text,
+        role,
+      });
     }
 
     memories.forEach((memory) => {
