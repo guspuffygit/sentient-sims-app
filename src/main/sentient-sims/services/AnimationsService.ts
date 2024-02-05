@@ -5,6 +5,7 @@ import { SettingsService } from './SettingsService';
 import { sentientSimsAIHost } from '../constants';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { fetchWithRetries } from '../util/fetchWithRetries';
+import { ApiType } from '../models/ApiType';
 
 export function getAnimationKey(
   animationAuthor: string,
@@ -67,7 +68,7 @@ export class AnimationsService {
   }
 
   isNsfwEnabled(): boolean {
-    if (this.settingsService.get(SettingsEnum.CUSTOM_LLM_ENABLED)) {
+    if (this.settingsService.get(SettingsEnum.AI_API_TYPE) !== ApiType.OpenAI) {
       return true;
     }
 

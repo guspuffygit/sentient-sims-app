@@ -13,14 +13,10 @@ import { useAuthenticator } from '@aws-amplify/ui-react';
 import { SelectChangeEvent } from '@mui/material/Select/SelectInput';
 import { sentientSimsAIHost } from 'main/sentient-sims/constants';
 import HelpButton from 'renderer/components/HelpButton';
+import { ApiType } from 'main/sentient-sims/models/ApiType';
+import log from 'electron-log';
 import useSetting from '../hooks/useSetting';
 import PatreonUser from '../wrappers/PatreonUser';
-
-enum ApiType {
-  OpenAI = 'openai',
-  SentientSimsAI = 'sentientsimsai',
-  CustomAI = 'customai',
-}
 
 function getAIHelperText(apiType: ApiType) {
   if (apiType === ApiType.OpenAI) {
@@ -36,24 +32,34 @@ function getAIHelperText(apiType: ApiType) {
 export default function CustomLLMSettingsComponent() {
   const { user } = useAuthenticator((context) => [context.user]);
   const patreonUser = new PatreonUser(user);
-  const customLLMEnabled = useSetting(SettingsEnum.CUSTOM_LLM_ENABLED, false);
+  const aiType = useSetting(
+    SettingsEnum.AI_API_TYPE,
+    ApiType.OpenAI.toString()
+  );
   const customLLMHostname = useSetting(SettingsEnum.CUSTOM_LLM_HOSTNAME);
   const animationMappingEnabled = useSetting(
     SettingsEnum.MAPPING_NOTIFICATION_ENABLED,
     true
   );
 
-  const handleChangeReleaseType = async (
+  const handleChangeAIType = async (
     event: SelectChangeEvent
   ): Promise<void> => {
     const newType = event.target.value;
+
     if (newType === ApiType.OpenAI) {
-      await customLLMEnabled.setSetting(false);
+      log.info('OpenAI');
+      await aiType.setSetting(ApiType.OpenAI.toString());
     } else if (newType === ApiType.SentientSimsAI) {
+      log.info('Sentient Sims AI');
       await customLLMHostname.resetSetting();
-      await customLLMEnabled.setSetting(true);
+      await aiType.setSetting(ApiType.SentientSimsAI.toString());
+    } else if (newType === ApiType.NovelAI) {
+      log.info('NovelAI');
+      await aiType.setSetting(ApiType.NovelAI.toString());
     } else {
-      await customLLMEnabled.setSetting(true);
+      log.info('Else');
+      await aiType.setSetting(ApiType.SentientSimsAI.toString());
       if (customLLMHostname.value === sentientSimsAIHost) {
         await customLLMHostname.setSetting('');
       }
@@ -66,17 +72,19 @@ export default function CustomLLMSettingsComponent() {
     animationMappingEnabled.setSetting(change.target.checked);
   };
 
-  let dropdownValue: ApiType = ApiType.OpenAI;
-  if (customLLMEnabled.value) {
-    if (customLLMHostname.value === sentientSimsAIHost) {
-      dropdownValue = ApiType.SentientSimsAI;
-    } else {
-      dropdownValue = ApiType.CustomAI;
-    }
+  let dropdownValue: ApiType = ApiType.CustomAI;
+  if (aiType.value === ApiType.OpenAI) {
+    dropdownValue = ApiType.OpenAI;
+  } else if (aiType.value === ApiType.NovelAI) {
+    dropdownValue = ApiType.NovelAI;
+  } else if (aiType.value === ApiType.SentientSimsAI) {
+    dropdownValue = ApiType.SentientSimsAI;
   }
 
   const sentientSimsAISelected =
-    customLLMEnabled.value && customLLMHostname.value === sentientSimsAIHost;
+    aiType.value &&
+    aiType.value === ApiType.SentientSimsAI.toString() &&
+    customLLMHostname.value === sentientSimsAIHost;
 
   const showLogInError = !user && sentientSimsAISelected;
 
@@ -106,18 +114,19 @@ export default function CustomLLMSettingsComponent() {
           id="release-type-select"
           value={dropdownValue}
           sx={{ minWidth: 100, marginRight: 2 }}
-          onChange={handleChangeReleaseType}
+          onChange={handleChangeAIType}
         >
           <MenuItem value={ApiType.OpenAI}>OpenAI</MenuItem>
           <MenuItem value={ApiType.SentientSimsAI}>
             Sentient Sims Uncensored AI (Founder/Patreon)
           </MenuItem>
+          <MenuItem value={ApiType.NovelAI}>NovelAI</MenuItem>
           <MenuItem value={ApiType.CustomAI}>Custom Remote/Local AI</MenuItem>
         </Select>
         <FormHelperText>{getAIHelperText(dropdownValue)}</FormHelperText>
         <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/AI-Backends" />
       </Box>
-      {customLLMEnabled.value &&
+      {aiType.value === ApiType.SentientSimsAI.toString() &&
       customLLMHostname.value !== sentientSimsAIHost ? (
         <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
           <TextField
@@ -135,7 +144,7 @@ export default function CustomLLMSettingsComponent() {
           />
         </Box>
       ) : null}
-      {customLLMEnabled.value ? (
+      {aiType.value !== ApiType.OpenAI.toString() ? (
         <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
           <FormControlLabel
             label="Enable Animation Mapping"

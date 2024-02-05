@@ -3,7 +3,7 @@ import { formatAction, formatSentientSim } from '../formatter/PromptFormatter';
 import { SSEvent } from '../models/InteractionEvents';
 import { RepositoryService } from './RepositoryService';
 import { getSystemPrompt } from '../systemPrompts';
-import { AIType } from '../models/AIType';
+import { ApiType } from '../models/ApiType';
 import {
   FormattedMemoryMessage,
   PromptRequest2,
@@ -22,7 +22,7 @@ export type GenerationOptions = {
 const maxGroupSizeLength = 1700;
 
 export type PromptRequestBuilderOptions = GenerationOptions & {
-  aiType: AIType;
+  apiType: ApiType;
 };
 
 export class PromptRequestBuilderService {
@@ -145,7 +145,7 @@ export class PromptRequestBuilderService {
       );
     }
 
-    const systemPrompt = getSystemPrompt(event.event_type, options.aiType);
+    const systemPrompt = getSystemPrompt(event.event_type, options.apiType);
     const formattedSystemPrompt = formatAction(
       systemPrompt,
       event.sentient_sims,

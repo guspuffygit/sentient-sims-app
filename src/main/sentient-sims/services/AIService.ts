@@ -20,7 +20,7 @@ import {
   PromptRequestBuilderService,
 } from './PromptRequestBuilderService';
 import { containsPlayerSim } from '../util/eventContainsPlayerSim';
-import { AIType } from '../models/AIType';
+import { ApiType } from '../models/ApiType';
 import { defaultWantsPrompt } from '../constants';
 import { SettingsService } from './SettingsService';
 import {
@@ -33,6 +33,23 @@ import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { cleanupAIOutput } from '../formatter/PromptFormatter';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { InteractionService } from './InteractionService';
+import { InputFormatter } from '../formatter/InputOutputFormatting';
+import { MythoMaxFormatter } from '../formatter/MythoMaxFormatter';
+import { NovelAIFormatter } from '../formatter/NovelAIFormatter';
+
+function getInputFormatters(apiType: ApiType): InputFormatter[] {
+  const inputFormatters: InputFormatter[] = [];
+
+  if (apiType === ApiType.CustomAI || apiType === ApiType.SentientSimsAI) {
+    inputFormatters.push(new MythoMaxFormatter());
+  }
+
+  if (apiType === ApiType.NovelAI) {
+    inputFormatters.push(new NovelAIFormatter());
+  }
+
+  return inputFormatters;
+}
 
 export class AIService {
   private readonly settingsService: SettingsService;
@@ -187,12 +204,10 @@ export class AIService {
       action: options.action,
       sexCategoryType: options.sexCategoryType,
       sexLocationType: options.sexLocationType,
-      aiType: this.settingsService.get(SettingsEnum.CUSTOM_LLM_ENABLED)
-        ? AIType.MYTHOMAX
-        : AIType.OPENAI,
+      apiType: this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType,
     };
 
-    const promptRequest =
+    let promptRequest =
       await this.promptRequestBuilderService.buildPromptRequest(
         event,
         promptOptions
@@ -206,26 +221,9 @@ export class AIService {
       newMemory.pre_action = promptRequest.action;
     }
 
-    // TODO: model specific INPUT formatting
-    if (promptOptions.aiType === AIType.MYTHOMAX) {
-      if (promptRequest.action) {
-        promptRequest.action = `### Input:\n${promptRequest.action}`;
-        promptRequest.assistantPreResponse = `### Response: (length = medium):\n${promptRequest.assistantPreResponse}`;
-      } else {
-        promptRequest.assistantPreResponse = `### Response:\n${promptRequest.assistantPreResponse}`;
-      }
-
-      promptRequest.memories.forEach((memory) => {
-        if (memory.role === 'assistant') {
-          memory.content = `### Response:\n${memory.content}`;
-        }
-        if (memory.role === 'user') {
-          memory.content = `### Input:\n${memory.content}`;
-        }
-      });
-
-      promptRequest.systemPrompt = `### Instruction:\n${promptRequest.systemPrompt}`;
-    }
+    getInputFormatters(promptOptions.apiType).forEach((formatter) => {
+      promptRequest = formatter.formatInput(promptRequest);
+    });
 
     const openAIRequestBuilder = new OpenAIRequestBuilder(tokenCounter);
     const openAIRequest =
@@ -237,7 +235,10 @@ export class AIService {
 
     const stopTokens = [];
     // TODO: model specific OUTPUT formatting cleanup stop tokens
-    if (promptOptions.aiType === AIType.MYTHOMAX) {
+    if (
+      promptOptions.apiType === ApiType.SentientSimsAI ||
+      promptOptions.apiType === ApiType.CustomAI
+    ) {
       stopTokens.push('### Input:');
       stopTokens.push('### Response:');
       stopTokens.push('### Response: (length = medium)');

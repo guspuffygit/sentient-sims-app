@@ -5,6 +5,7 @@ import { SettingsService } from 'main/sentient-sims/services/SettingsService';
 import { AnimationsController } from 'main/sentient-sims/controllers/AnimationsController';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { Request, Response } from 'express';
+import { ApiType } from 'main/sentient-sims/models/ApiType';
 
 describe('AnimationsController', () => {
   let settingsService: SettingsService;
@@ -16,8 +17,8 @@ describe('AnimationsController', () => {
     animationsController = new AnimationsController(animationsService);
   });
 
-  it('CustomLLM Enabled Returns True', async () => {
-    settingsService.set(SettingsEnum.CUSTOM_LLM_ENABLED, true);
+  it('OpenAI Not selected Returns True', async () => {
+    settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.NovelAI);
 
     const req = {} as Request;
     const res = {
@@ -30,8 +31,8 @@ describe('AnimationsController', () => {
     expect(res.json).toHaveBeenCalledWith({ value: true });
   });
 
-  it('Custom LLM Disabled NSFW Disabled Returns False', async () => {
-    settingsService.set(SettingsEnum.CUSTOM_LLM_ENABLED, false);
+  it('OpenAI ApiType NSFW Disabled Returns False', async () => {
+    settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
     settingsService.set(SettingsEnum.NSFW_ENABLED, false);
 
     const req = {} as Request;
@@ -46,7 +47,7 @@ describe('AnimationsController', () => {
   });
 
   it('Force NSFW Enabled Returns True', async () => {
-    settingsService.set(SettingsEnum.CUSTOM_LLM_ENABLED, false);
+    settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
     settingsService.set(SettingsEnum.NSFW_ENABLED, true);
 
     const req = {} as Request;

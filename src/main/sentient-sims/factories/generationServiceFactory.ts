@@ -6,12 +6,20 @@ import { SentientSimsAIService } from '../services/SentientSimsAIService';
 import { TokenCounter } from '../tokens/TokenCounter';
 import { LLaMaTokenCounter } from '../tokens/LLaMaTokenCounter';
 import { OpenAITokenCounter } from '../tokens/OpenAITokenCounter';
+import { ApiType } from '../models/ApiType';
+import { NovelAIService } from '../services/NovelAIService';
+import { NovelAITokenCounter } from '../tokens/NovelAITokenCounter';
 
 export function getGenerationService(
   settingsService: SettingsService
 ): GenerationService {
-  if (settingsService.get(SettingsEnum.CUSTOM_LLM_ENABLED)) {
+  const aiType = settingsService.get(SettingsEnum.AI_API_TYPE);
+  if (aiType === ApiType.SentientSimsAI || aiType === ApiType.CustomAI) {
     return new SentientSimsAIService(settingsService);
+  }
+
+  if (aiType === ApiType.NovelAI) {
+    return new NovelAIService(settingsService);
   }
 
   return new OpenAIService(settingsService);
@@ -20,9 +28,15 @@ export function getGenerationService(
 export function getTokenCounter(
   settingsService: SettingsService
 ): TokenCounter {
-  if (settingsService.get(SettingsEnum.CUSTOM_LLM_ENABLED)) {
-    return new LLaMaTokenCounter();
+  const aiType = settingsService.get(SettingsEnum.AI_API_TYPE);
+
+  if (aiType === ApiType.NovelAI) {
+    return new NovelAITokenCounter();
   }
 
-  return new OpenAITokenCounter();
+  if (aiType === ApiType.OpenAI) {
+    return new OpenAITokenCounter();
+  }
+
+  return new LLaMaTokenCounter();
 }
