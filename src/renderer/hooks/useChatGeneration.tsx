@@ -19,6 +19,7 @@ import { InteractionEventResult } from 'main/sentient-sims/models/InteractionEve
 import { OpenAICompatibleRequest } from 'main/sentient-sims/models/OpenAICompatibleRequest';
 import { AIClient } from 'main/sentient-sims/clients/AIClient';
 import { OpenAIMessage } from 'main/sentient-sims/models/OpenAIMessage';
+import { ApiType } from 'main/sentient-sims/models/ApiType';
 import useSetting from './useSetting';
 
 const aiClient = new AIClient();
@@ -58,7 +59,7 @@ export interface ChatGeneration {
 }
 
 export default function useChatGeneration(): ChatGeneration {
-  const customLLMEnabled = useSetting(SettingsEnum.CUSTOM_LLM_ENABLED, false);
+  const apiType = useSetting(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
   const [loading, setLoading] = useState(false);
   const [generationLoadedCallback, setGenerationLoadedCallback] = useState<
     () => void
@@ -68,13 +69,12 @@ export default function useChatGeneration(): ChatGeneration {
   );
 
   const resetMessages = useCallback(() => {
-    if (customLLMEnabled.value) {
-      // TODO: Get model specific input formatting and apply it to the system prompt
-      setMessages(defaultMessages(defaultMythoMaxSystemPrompt));
-    } else {
+    if (apiType.value === ApiType.OpenAI) {
       setMessages(defaultMessages(defaultSystemPrompt));
+    } else {
+      setMessages(defaultMessages(defaultMythoMaxSystemPrompt));
     }
-  }, [customLLMEnabled.value]);
+  }, [apiType.value]);
 
   useEffect(() => {
     resetMessages();
@@ -121,7 +121,7 @@ export default function useChatGeneration(): ChatGeneration {
     return () => {
       removeListener();
     };
-  }, [customLLMEnabled.value, generationLoadedCallback]);
+  }, [apiType.value, generationLoadedCallback]);
 
   const addMessage = (message: OpenAIMessage) => {
     setMessages((previousMessages) => [

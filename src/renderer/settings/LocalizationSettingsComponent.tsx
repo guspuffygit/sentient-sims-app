@@ -1,10 +1,14 @@
 import { Box, FormControlLabel, TextField, Checkbox } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import HelpButton from 'renderer/components/HelpButton';
+import { ApiType } from 'main/sentient-sims/models/ApiType';
 import useSetting from '../hooks/useSetting';
 
 export default function LocalizationSettingsComponent() {
-  const customLLMEnabled = useSetting(SettingsEnum.CUSTOM_LLM_ENABLED, false);
+  const aiType = useSetting(
+    SettingsEnum.AI_API_TYPE,
+    ApiType.OpenAI.toString()
+  );
   const localizationEnabled = useSetting(
     SettingsEnum.LOCALIZATION_ENABLED,
     false
@@ -16,7 +20,7 @@ export default function LocalizationSettingsComponent() {
 
   return (
     <div>
-      {!customLLMEnabled.value ? (
+      {aiType.value === ApiType.OpenAI ? (
         <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
           <FormControlLabel
             label="Translate/Language"
@@ -32,7 +36,7 @@ export default function LocalizationSettingsComponent() {
           <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/How%E2%80%90to-Use-The-Sentient-Sims-App#translation-and-language-support" />
         </Box>
       ) : null}
-      {!customLLMEnabled.value && localizationEnabled.value ? (
+      {aiType.value === ApiType.OpenAI && localizationEnabled.value ? (
         <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
           <TextField
             focused

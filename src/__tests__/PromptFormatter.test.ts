@@ -19,7 +19,7 @@ import {
 } from 'main/sentient-sims/formatter/PromptFormatter';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { RepositoryService } from 'main/sentient-sims/services/RepositoryService';
-import { AIType } from 'main/sentient-sims/models/AIType';
+import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
 import {
   OpenAIRequestBuilder,
@@ -135,7 +135,7 @@ describe('Output', () => {
         {
           action:
             '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
-          aiType: AIType.MYTHOMAX,
+          apiType: ApiType.SentientSimsAI,
         }
       );
 

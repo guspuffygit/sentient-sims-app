@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import log from 'electron-log';
 import { appApiUrl } from 'main/sentient-sims/constants';
 
-export default function useOpenAITest() {
-  const [openAIStatus, setOpenAIStatus] = useState({
+export default function useApiKeyAITest() {
+  const [aiStatus, setAIStatus] = useState({
     status: '',
     loading: false,
   });
 
-  const testOpenAI = (openAIKey?: string) => {
-    setOpenAIStatus({
+  const testAI = (openAIKey?: string) => {
+    setAIStatus({
       status: '',
       loading: true,
     });
@@ -31,7 +31,7 @@ export default function useOpenAITest() {
         })
         // eslint-disable-next-line promise/always-return
         .then((response: any) => {
-          setOpenAIStatus({
+          setAIStatus({
             status: response.status,
             loading: false,
           });
@@ -39,8 +39,8 @@ export default function useOpenAITest() {
         })
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .catch((err: any) => {
-          const status = 'Error getting Open AI Status';
-          setOpenAIStatus({
+          const status = 'Error getting AI Status';
+          setAIStatus({
             status,
             loading: false,
           });
@@ -50,11 +50,11 @@ export default function useOpenAITest() {
   };
 
   useEffect(() => {
-    testOpenAI();
+    testAI();
   }, []);
 
   return {
-    openAIStatus,
-    testOpenAI,
+    aiStatus,
+    testAI,
   };
 }

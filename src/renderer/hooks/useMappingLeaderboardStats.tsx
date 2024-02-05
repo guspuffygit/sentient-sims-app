@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Auth } from 'aws-amplify';
+import { sentientSimsAIHost } from 'main/sentient-sims/constants';
 
 export type UserAnimationInfo = {
   displayName: string;
@@ -22,7 +23,7 @@ export function useMappingLeaderboardStats() {
       const session = await Auth.currentSession();
       const jwtToken = session.getIdToken().getJwtToken();
 
-      return fetch(`https://ai.sentientsimulations.com/leaderboard`, {
+      return fetch(`${sentientSimsAIHost}/leaderboard`, {
         headers: {
           Authentication: jwtToken,
         },
@@ -40,7 +41,7 @@ export function useMappingLeaderboardStats() {
       const session = await Auth.currentSession();
       const jwtToken = session.getIdToken().getJwtToken();
 
-      return fetch(`https://ai.sentientsimulations.com/me`, {
+      return fetch(`${sentientSimsAIHost}/me`, {
         headers: {
           Authentication: jwtToken,
         },
@@ -55,7 +56,7 @@ export function useMappingLeaderboardStats() {
   async function setDisplayName(displayName: string) {
     const session = await Auth.currentSession();
     const jwtToken = session.getIdToken().getJwtToken();
-    return fetch(`https://ai.sentientsimulations.com/users`, {
+    return fetch(`${sentientSimsAIHost}/users`, {
       method: 'POST',
       headers: {
         Authentication: jwtToken,
@@ -69,7 +70,7 @@ export function useMappingLeaderboardStats() {
   async function deleteDisplayName() {
     const session = await Auth.currentSession();
     const jwtToken = session.getIdToken().getJwtToken();
-    return fetch(`https://ai.sentientsimulations.com/users`, {
+    return fetch(`${sentientSimsAIHost}/users`, {
       method: 'DELETE',
       headers: {
         Authentication: jwtToken,

@@ -4,12 +4,12 @@ import {
   defaultSystemPrompt,
   defaultWantsSystemPrompt,
 } from './constants';
-import { AIType } from './models/AIType';
+import { ApiType } from './models/ApiType';
 import { SSEventType } from './models/InteractionEvents';
 
 export function getSystemPrompt(
   eventType: SSEventType,
-  aiType: AIType
+  apiType: ApiType
 ): string {
   if (eventType === SSEventType.WANTS) {
     return defaultWantsSystemPrompt;
@@ -19,7 +19,7 @@ export function getSystemPrompt(
     return defaultMythoMaxNsfwSystemPrompt;
   }
 
-  if (aiType === AIType.OPENAI) {
+  if (apiType === ApiType.OpenAI) {
     return defaultSystemPrompt;
   }
 

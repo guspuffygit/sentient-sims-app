@@ -2,6 +2,8 @@ import log from 'electron-log';
 import Store from 'electron-store';
 import path from 'path';
 import { SettingsEnum } from '../models/SettingsEnum';
+import { ApiType } from '../models/ApiType';
+import { sentientSimsAIHost } from '../constants';
 
 export function defaultStore(cwd?: string) {
   return new Store({
@@ -15,13 +17,17 @@ export function defaultStore(cwd?: string) {
         type: 'string',
         default: 'gpt-3.5-turbo',
       },
+      [SettingsEnum.NOVELAI_MODEL.toString()]: {
+        type: 'string',
+        default: 'kayra-v1',
+      },
       [SettingsEnum.CUSTOM_LLM_ENABLED.toString()]: {
         type: 'boolean',
         default: false,
       },
       [SettingsEnum.CUSTOM_LLM_HOSTNAME.toString()]: {
         type: 'string',
-        default: 'https://ai.sentientsimulations.com',
+        default: sentientSimsAIHost,
       },
       [SettingsEnum.MODS_DIRECTORY.toString()]: {
         type: 'string',
@@ -38,6 +44,10 @@ export function defaultStore(cwd?: string) {
         default: '',
       },
       [SettingsEnum.OPENAI_KEY.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.NOVELAI_KEY.toString()]: {
         type: 'string',
         default: '',
       },
@@ -60,6 +70,24 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.MAPPING_NOTIFICATION_ENABLED.toString()]: {
         type: 'boolean',
         default: true,
+      },
+    },
+    migrations: {
+      '3.1.0': (store) => {
+        if (store.get(SettingsEnum.CUSTOM_LLM_ENABLED)) {
+          if (
+            store.get(SettingsEnum.CUSTOM_LLM_ENABLED) === sentientSimsAIHost
+          ) {
+            store.set(
+              SettingsEnum.AI_API_TYPE,
+              ApiType.SentientSimsAI.toString()
+            );
+          } else {
+            store.set(SettingsEnum.AI_API_TYPE, ApiType.CustomAI.toString());
+          }
+        } else {
+          store.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI.toString());
+        }
       },
     },
   });

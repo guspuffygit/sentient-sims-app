@@ -189,9 +189,7 @@ export class LogSendService {
           `OpenAI Model: ${this.settingsService.get(
             SettingsEnum.OPENAI_MODEL
           )}`,
-          `Custom LLM Enabled: ${this.settingsService.get(
-            SettingsEnum.CUSTOM_LLM_ENABLED
-          )}`,
+          `Api Type: ${this.settingsService.get(SettingsEnum.AI_API_TYPE)}`,
           `Custom LLM Hostname: ${this.settingsService.get(
             SettingsEnum.CUSTOM_LLM_HOSTNAME
           )}`,
