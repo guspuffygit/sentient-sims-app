@@ -5,13 +5,27 @@ import { ReactNode, JSX } from 'react';
 type AppCardProps = {
   children: ReactNode;
   cardActions?: JSX.Element;
+  actionsOnTop?: boolean;
 };
 
-export default function AppCard({ cardActions, children }: AppCardProps) {
+export default function AppCard({
+  cardActions,
+  children,
+  actionsOnTop,
+}: AppCardProps) {
   return (
     <Card sx={{ minWidth: 275, marginBottom: 2 }}>
-      <CardContent>{children}</CardContent>
-      {cardActions ?? null}
+      {actionsOnTop ? (
+        <>
+          {cardActions ?? null}
+          <CardContent>{children}</CardContent>
+        </>
+      ) : (
+        <>
+          <CardContent>{children}</CardContent>
+          {cardActions ?? null}
+        </>
+      )}
     </Card>
   );
 }

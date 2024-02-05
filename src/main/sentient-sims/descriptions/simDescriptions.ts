@@ -1756,5 +1756,10 @@ export const defaultSimDescriptions: Map<String, string> = new Map(
     ]
       .join(' ')
       .trim(),
+    'Tina Peeping': [
+      'Tina Peeping is a peeping tom and likes to look in other peoples windows and watch them have sex.',
+    ]
+      .join(' ')
+      .trim(),
   })
 );

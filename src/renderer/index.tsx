@@ -8,6 +8,7 @@ import '@patternfly/react-core/dist/styles/base.css';
 import '@aws-amplify/ui-react/styles.css';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { appApiUrl } from 'main/sentient-sims/constants';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import theme from './theme';
 import awsExports from './aws-exports';
@@ -84,6 +85,8 @@ const router = createMemoryRouter([
   },
 ]);
 
+const queryClient = new QueryClient();
+
 const container = document.getElementById('root') as HTMLElement;
 const root = createRoot(container);
 root.render(
@@ -91,13 +94,15 @@ root.render(
     <CssBaseline />
     <React.StrictMode>
       <Authenticator.Provider>
-        <SnackBarProvider>
-          <ChatGenerationProvider>
-            <DebugModeProvider>
-              <RouterProvider router={router} />
-            </DebugModeProvider>
-          </ChatGenerationProvider>
-        </SnackBarProvider>
+        <QueryClientProvider client={queryClient}>
+          <SnackBarProvider>
+            <ChatGenerationProvider>
+              <DebugModeProvider>
+                <RouterProvider router={router} />
+              </DebugModeProvider>
+            </ChatGenerationProvider>
+          </SnackBarProvider>
+        </QueryClientProvider>
       </Authenticator.Provider>
     </React.StrictMode>
   </ThemeProvider>
