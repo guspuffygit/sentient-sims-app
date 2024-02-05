@@ -37,11 +37,11 @@ export default function APIKeyModal({
     event.preventDefault();
     setErrorMessage(null);
     const status = await testAI(apiKey);
-    if (status === 'OK') {
+    if (status.status) {
       await apiKeySetting.setSetting(apiKey);
       onClose();
     } else {
-      setErrorMessage(`Key not working`);
+      setErrorMessage(`Key not working: ${status?.error}`);
     }
   }
 

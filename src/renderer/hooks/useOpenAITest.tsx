@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
 import log from 'electron-log';
 import { appApiUrl } from 'main/sentient-sims/constants';
+import { AIHealthCheckResponse } from 'main/sentient-sims/models/AIHealthCheckResponse';
 
 export default function useApiKeyAITest() {
   const [aiStatus, setAIStatus] = useState({
     status: '',
+    error: '',
     loading: false,
   });
 
   const testAI = (openAIKey?: string) => {
     setAIStatus({
       status: '',
+      error: '',
       loading: true,
     });
 
@@ -30,21 +33,25 @@ export default function useApiKeyAITest() {
           return res.json();
         })
         // eslint-disable-next-line promise/always-return
-        .then((response: any) => {
+        .then((response: AIHealthCheckResponse) => {
           setAIStatus({
-            status: response.status,
+            status: response?.status || '',
+            error: response?.error || '',
             loading: false,
           });
-          return response.status;
+          return response;
         })
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .catch((err: any) => {
-          const status = 'Error getting AI Status';
           setAIStatus({
-            status,
+            status: '',
+            error: 'Error getting AI Status',
             loading: false,
           });
-          return status;
+          const response: AIHealthCheckResponse = {
+            error: 'Error getting AI Status',
+          };
+          return response;
         })
     );
   };

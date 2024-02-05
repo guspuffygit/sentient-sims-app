@@ -1,3 +1,4 @@
 export type AIHealthCheckResponse = {
-  status: string;
+  status?: string;
+  error?: string;
 };
