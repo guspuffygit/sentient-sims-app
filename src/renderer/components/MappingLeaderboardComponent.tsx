@@ -15,7 +15,6 @@ import { LoadingButton } from '@mui/lab';
 import { ChangeEvent, useState } from 'react';
 import log from 'electron-log';
 import { useAuthenticator } from '@aws-amplify/ui-react';
-import PatreonUser from 'renderer/wrappers/PatreonUser';
 import SpaceBetweenDiv from './SpaceBetweenDiv';
 
 type LeaderboardRowProperties = {
@@ -66,11 +65,6 @@ export function MappingLeaderboardComponent() {
 
   const { user } = useAuthenticator((context) => [context.user]);
   if (!user) {
-    return null;
-  }
-
-  const patreonUser = new PatreonUser(user);
-  if (!patreonUser.isMember()) {
     return null;
   }
 
@@ -161,7 +155,7 @@ export function MappingLeaderboardComponent() {
               alignItems: 'center',
             }}
           >
-            <Typography>Total Mapped Animations</Typography>
+            <Typography>Mapping Leaderboard</Typography>
           </Box>
         </SpaceBetweenDiv>
         {rows}
