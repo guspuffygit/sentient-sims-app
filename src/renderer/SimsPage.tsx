@@ -210,6 +210,7 @@ export default function SimsPage() {
             label="Description"
             handleEdit={handleDescriptionEdit}
             rows={5}
+            forceShow
             value={editedSim?.sim?.description}
           />
         </AppCard>
