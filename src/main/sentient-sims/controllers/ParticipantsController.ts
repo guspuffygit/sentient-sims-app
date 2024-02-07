@@ -4,6 +4,8 @@ import { Request, Response } from 'express';
 import log from 'electron-log';
 import { ParticipantRepository } from '../db/ParticipantRepository';
 import { ParticipantDTO } from '../db/dto/ParticipantDTO';
+import { sendModNotification } from '../websocketServer';
+import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 
 export class ParticipantsController {
   private readonly participantRepository: ParticipantRepository;
@@ -53,12 +55,13 @@ export class ParticipantsController {
       };
 
       this.participantRepository.updateParticipant(participant);
-      return res.json({
+      res.json({
         text: `Updated participant with id ${participant.id}`,
       });
+      sendModNotification({ type: ModWebsocketMessageType.CLEAR_SIM_CACHE });
     } catch (err: any) {
       log.error('Error updating participant', err);
-      return res.json({ error: err.message });
+      res.json({ error: err.message });
     }
   }
 
@@ -68,10 +71,11 @@ export class ParticipantsController {
       const participant: ParticipantDTO = { id: participantId };
 
       this.participantRepository.deleteParticipant(participant);
-      return res.json({ text: 'Deleted' });
+      res.json({ text: 'Deleted' });
+      sendModNotification({ type: ModWebsocketMessageType.CLEAR_SIM_CACHE });
     } catch (err: any) {
       log.error('Error deleting participant', err);
-      return res.json({ error: err.message });
+      res.json({ error: err.message });
     }
   }
 }

@@ -1,6 +1,6 @@
 export enum ModWebsocketMessageType {
   NOTIFICATION = 'notification',
-  ANIMATION_MAPPING = 'animation_mapping',
+  CLEAR_SIM_CACHE = 'clear_sim_cache',
 }
 
 export type ModWebsocketMessage = {
