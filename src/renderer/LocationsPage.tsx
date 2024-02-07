@@ -242,18 +242,21 @@ export default function LocationsPage() {
             label="Name"
             rows={1}
             handleEdit={handleNameEdit}
+            forceShow
             value={editedLocation?.location?.name}
           />
           <MemoryEditInput
             label="Lot Type"
             rows={1}
             handleEdit={handleLotTypeEdit}
+            forceShow
             value={editedLocation?.location?.lot_type}
           />
           <MemoryEditInput
             label="Description"
             handleEdit={handleDescriptionEdit}
             rows={5}
+            forceShow
             value={editedLocation?.location?.description}
           />
         </AppCard>
