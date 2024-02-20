@@ -1,5 +1,9 @@
 import log from 'electron-log';
-import { formatAction, formatSentientSim } from '../formatter/PromptFormatter';
+import {
+  formatAction,
+  formatSentientSim,
+  formatDateTime,
+} from '../formatter/PromptFormatter';
 import { SSEvent } from '../models/InteractionEvents';
 import { RepositoryService } from './RepositoryService';
 import { getSystemPrompt } from '../systemPrompts';
@@ -120,8 +124,10 @@ export class PromptRequestBuilderService {
     options: PromptRequestBuilderOptions
   ): Promise<PromptRequest2> {
     const location = this.repositoryService.location.getLocation({
-      id: event.location_id,
+      id: event.environment.location_id,
     });
+
+    const dateTime = formatDateTime(event.environment);
 
     let formattedAction;
     if (options.action) {
@@ -163,6 +169,7 @@ export class PromptRequestBuilderService {
       systemPrompt: formattedSystemPrompt,
       participants: sims.join('\n'),
       location: location.description,
+      dateTime,
       memories: groupedMemories,
       action: formattedAction,
       maxResponseTokens: 90,

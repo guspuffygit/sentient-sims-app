@@ -15,10 +15,28 @@ export enum WWEventType {
   MAPPING = 'mapping',
 }
 
+export type SSTime = {
+  second: number;
+  minute: number;
+  hour: number;
+  day: number;
+  week: number;
+};
+
+export type SSEnvironment = {
+  location_id: number;
+  world_id: number;
+  time: SSTime;
+  weather?: any;
+  season?: any;
+};
+
 export type SSEvent = {
   event_id: string;
   event_type: SSEventType;
+  // TODO: Deprecated
   location_id: number;
+  environment: SSEnvironment;
   sentient_sims: SentientSim[];
 };
 

@@ -3,6 +3,7 @@ import { LocationEntity } from '../db/entities/LocationEntity';
 import { getCareerTrackLevel } from '../descriptions/careerDescriptions';
 import { traitDescriptions } from '../descriptions/traitDescriptions';
 import { getSexCategory, getSexLocation } from '../descriptions/wwDescriptions';
+import { SSEnvironment } from '../models/InteractionEvents';
 import { SentientSim } from '../models/SentientSim';
 
 export enum BodyState {
@@ -429,4 +430,26 @@ export function cleanupAIOutput(text: string, stopTokens?: string[]): string {
   output = trimIncompleteSentence(output);
 
   return output.trim();
+}
+
+const daysOfWeek = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+];
+
+export function formatDateTime(environment: SSEnvironment): string {
+  const dayName = daysOfWeek[environment.time.day];
+
+  const minute = environment.time.minute.toString().padStart(2, '0');
+
+  // Determine AM or PM part and convert hour to 12-hour format.
+  const amPm = environment.time.hour >= 12 ? 'PM' : 'AM';
+  const hourIn12HourFormat = environment.time.hour % 12 || 12; // Convert 0 hour to 12 for 12 AM.
+
+  return `The day is ${dayName} at ${hourIn12HourFormat}:${minute} ${amPm}.`;
 }

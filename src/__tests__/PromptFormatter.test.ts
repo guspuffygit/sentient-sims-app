@@ -39,6 +39,8 @@ describe('Output', () => {
   describe('Event Formatter', () => {
     it('test', async () => {
       const event: InteractionEvent = {
+        // TODO: Deprecated
+        location_id: 0,
         sentient_sims: [
           {
             careers: [
@@ -110,7 +112,17 @@ describe('Output', () => {
         ],
         event_id: '2daaac8e-bd86-4afe-a9f8-60cf3132e057',
         event_type: SSEventType.INTERACTION,
-        location_id: 2891968416,
+        environment: {
+          location_id: 2891968416,
+          world_id: 0,
+          time: {
+            second: 0,
+            minute: 0,
+            hour: 0,
+            day: 0,
+            week: 0,
+          },
+        },
         interaction_name:
           'mixer_social_ShareFishingTips_targeted_Friendly_alwaysOn_skills',
       };
@@ -249,6 +261,7 @@ describe('Output', () => {
             role: 'assistant',
           },
         ],
+        dateTime: 'The day is Monday at 7:51 AM.',
         maxResponseTokens: 100,
         maxTokens: 3000,
         action: 'action',
@@ -262,6 +275,9 @@ describe('Output', () => {
       expect(result.messages[0].content).toContain('location');
       expect(result.messages[0].content).toContain('sim 1');
       expect(result.messages[0].content).toContain('system');
+      expect(result.messages[0].content).toContain(
+        'The day is Monday at 7:51 AM.'
+      );
       expect(result.messages[0].role).toBe('system');
       expect(result.messages[0].tokens).toBeGreaterThan(5);
 
@@ -290,7 +306,7 @@ describe('Output', () => {
     });
 
     it('buildOpenAIRequest test length', () => {
-      request.maxTokens = 48;
+      request.maxTokens = 60;
       const result = builder.buildOpenAIRequest(request);
 
       expect(result.messages[0].content).toContain('location');
@@ -298,7 +314,9 @@ describe('Output', () => {
       expect(result.messages[0].content).toContain('system');
       expect(result.messages[0].role).toBe('system');
       expect(result.messages[0].tokens).toBeGreaterThan(5);
-
+      console.log(
+        `THIS IS IT SEARCH FOR THIS: ${JSON.stringify(result, null, 2)}`
+      );
       expect(result.messages[1].content).toBe('A');
       expect(result.messages[1].role).toBe('assistant');
 

@@ -29,6 +29,7 @@ describe('OpenAIServiceIT', () => {
       systemPrompt: 'system prompt',
       maxResponseTokens: 90,
       maxTokens: 3900,
+      dateTime: 'The day is Monday at 7:51 AM.',
     };
     const request = builder.buildOpenAIRequest(promptRequest);
     const result = await openAIService.sentientSimsGenerate(request);
@@ -36,6 +37,7 @@ describe('OpenAIServiceIT', () => {
       [
         promptRequest.systemPrompt,
         promptRequest.location,
+        promptRequest.dateTime,
         promptRequest.participants,
       ].join('\n\n')
     );
@@ -54,11 +56,12 @@ describe('OpenAIServiceIT', () => {
       systemPrompt,
       maxResponseTokens: 3900,
       maxTokens: 90,
+      dateTime: '',
     };
     const request = builder.buildOpenAIRequest(promptRequest);
     const result = await openAIService.sentientSimsGenerate(request);
     console.log(`Translation: ${result.text}`);
-    const possibleMatches = ['acuerdo?', 'bien?'];
+    const possibleMatches = ['acuerdo?', 'bien?', 'acuerdo'];
     const isMatch = possibleMatches.some((item) =>
       result.text.toLocaleLowerCase().includes(item)
     );

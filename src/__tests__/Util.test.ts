@@ -54,8 +54,19 @@ describe('containsPlayerSim', () => {
     const event: ContinueInteractionEvent = {
       event_id: 'ioj',
       event_type: SSEventType.INTERACTION,
-      location_id: 871623123,
+      location_id: 0,
       sentient_sims: [sim],
+      environment: {
+        location_id: 871623123,
+        world_id: 0,
+        time: {
+          second: 0,
+          minute: 0,
+          hour: 0,
+          day: 0,
+          week: 0,
+        },
+      },
     };
     expect(containsPlayerSim(event)).toBeTruthy();
 

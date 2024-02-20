@@ -215,7 +215,7 @@ export class AIService {
 
     // save memory before any model specific formatting
     const newMemory: MemoryEntity = {
-      location_id: event.location_id,
+      location_id: event.environment.location_id,
     };
     if (promptRequest.action) {
       newMemory.pre_action = promptRequest.action;

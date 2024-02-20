@@ -107,6 +107,17 @@ describe('Api', () => {
       event_type: SSEventType.WANTS,
       location_id: 0,
       sentient_sims: [sentientSim],
+      environment: {
+        location_id: 0,
+        world_id: 0,
+        time: {
+          second: 0,
+          minute: 0,
+          hour: 0,
+          day: 0,
+          week: 0,
+        },
+      },
     });
 
     expect(result.text).toContain('I want to');
