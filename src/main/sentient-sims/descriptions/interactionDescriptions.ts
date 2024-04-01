@@ -7552,8 +7552,8 @@ export const interactionDescriptions: Map<String, InteractionDescription> =
       },
       // # This is the interaction that runs right when a Sim starts to walk away towards an exit
       NPCLeaveLotNow_NPC_WaveGoodBye: {
-        always_run: false,
-        observations: ['{actor.0} waves goodbye and leaves.'],
+        always_run: true,
+        observations: ['{actor.0} waves goodbye and leaves {location}.'],
         // "filters": [
         //     SimInMemories({ memoryDepth:30 }),
         //     HasNotHappened({ memoryDepth:5 }),
@@ -8560,8 +8560,9 @@ export const interactionDescriptions: Map<String, InteractionDescription> =
         ignored: true,
       },
       autonomous_ObjectPicker_CollectDishes: {
-        observations: ['{actor.0} picks up the dishes left out.'],
-        filters: [HasNotHappened({ memoryDepth: 10 }), InitiatorIsActiveSim()],
+        ignored: true,
+        // observations: ['{actor.0} picks up the dishes left out.'],
+        // filters: [HasNotHappened({ memoryDepth: 10 }), InitiatorIsActiveSim()],
       },
       fridge_GrabSnackAutonomously: {
         ignored: true,
@@ -9710,6 +9711,30 @@ export const interactionDescriptions: Map<String, InteractionDescription> =
         pre_actions: [
           '{actor.0} is making a puberty joke about facial hair with {non_initiator_participants}',
         ],
+      },
+      marketStalls_Mixers_Wave: {
+        ignored: true,
+      },
+      Mirror_CalmSelfDown2: {
+        ignored: true,
+      },
+      Mirror_CalmSelfDown3: {
+        ignored: true,
+      },
+      marketStalls_Mixers_Tend: {
+        ignored: true,
+      },
+      marketStalls_Mixers_Passive: {
+        ignored: true,
+      },
+      mirror_CalmSelfDown: {
+        ignored: true,
+      },
+      marketStalls_Mixers_ShowOff: {
+        ignored: true,
+      },
+      generic_Consume_Drink_marketStall: {
+        ignored: true,
       },
     })
   );
