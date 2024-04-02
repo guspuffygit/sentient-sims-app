@@ -9736,5 +9736,80 @@ export const interactionDescriptions: Map<String, InteractionDescription> =
       generic_Consume_Drink_marketStall: {
         ignored: true,
       },
+      marketStalls_Browse: {
+        ignored: true,
+      },
+      marketStalls_ChooseFoodDelivery: {
+        ignored: true,
+      },
+      MarketStalls_CreateAndServeFoodToSlot: {
+        ignored: true,
+      },
+      Mirror_CalmSelfDown1: {
+        ignored: true,
+      },
+      Earbuds_Jogger_GiveEarBuds_Mixer: {
+        ignored: true,
+      },
+      si_marketStalls_OrderDrink: {
+        ignored: true,
+      },
+      si_MarketStalls_WaitForDrink: {
+        ignored: true,
+      },
+      sink_Clean: {
+        ignored: true,
+      },
+      paparazzi_Idle: {
+        ignored: true,
+      },
+      marketStalls_PushOrderDrink_Autonomous_Seasonal_Fall: {
+        ignored: true,
+      },
+      idle_Buff_SimPreference_DecorReaction_Tutor: {
+        ignored: true,
+      },
+      marketStalls_PushOrderFood_Autonomous_Seasonal_Fall: {
+        ignored: true,
+      },
+      paparazzi_Reaction_Positive: {
+        ignored: true,
+      },
+      idle_Buff_SimPreference_DecorReaction_ScandinavianContemporary: {
+        ignored: true,
+      },
+      autonomous_ObjectPicker_SimPreference_Decor_FrenchCountry: {
+        ignored: true,
+      },
+      simPreference_DecorReaction_FrenchCountry: {
+        ignored: true,
+      },
+      idle_Buff_SimPreference_DecorReaction_Shabby: {
+        ignored: true,
+      },
+      idle_Buff_SimPreference_DecorReaction_Boho: {
+        ignored: true,
+      },
+      sim_Umbrella_CloseUmbrella: {
+        ignored: true,
+      },
+      goHomeForRabbitHoleInteraction_generic: {
+        ignored: true,
+      },
+      mixer_AtWork_SolveBladder: {
+        ignored: true,
+      },
+      idle_Energy: {
+        ignored: true,
+      },
+      bed_Autonomous_DoubleBed_Sleep: {
+        ignored: true,
+      },
+      si_Rabbithole_CommunityCloseness_TheMotiveGames: {
+        ignored: true,
+      },
+      'TURBODRIVER:WickedWhims_AffSuper_Peeping_FindWindow_Trigger': {
+        ignored: true,
+      },
     })
   );
