@@ -25,6 +25,9 @@ function getAIHelperText(apiType: ApiType) {
   if (apiType === ApiType.SentientSimsAI) {
     return 'Sentient Sims uncensored AI hosted on the Sentient Sims servers.';
   }
+  if (apiType === ApiType.KoboldAI) {
+    return 'KoboldAI backend self hosted.';
+  }
 
   return 'Custom Local or remote AI running on your own PC';
 }
@@ -57,6 +60,12 @@ export default function CustomLLMSettingsComponent() {
     } else if (newType === ApiType.NovelAI) {
       log.info('NovelAI');
       await aiType.setSetting(ApiType.NovelAI.toString());
+    } else if (newType === ApiType.KoboldAI) {
+      log.info('Kobold AI');
+      await aiType.setSetting(ApiType.KoboldAI.toString());
+      if (customLLMHostname.value === sentientSimsAIHost) {
+        await customLLMHostname.setSetting('http://localhost:5000');
+      }
     } else {
       log.info('Else');
       await aiType.setSetting(ApiType.SentientSimsAI.toString());
@@ -77,6 +86,8 @@ export default function CustomLLMSettingsComponent() {
     dropdownValue = ApiType.OpenAI;
   } else if (aiType.value === ApiType.NovelAI) {
     dropdownValue = ApiType.NovelAI;
+  } else if (aiType.value === ApiType.KoboldAI) {
+    dropdownValue = ApiType.KoboldAI;
   } else if (aiType.value === ApiType.SentientSimsAI) {
     dropdownValue = ApiType.SentientSimsAI;
   }
@@ -121,12 +132,14 @@ export default function CustomLLMSettingsComponent() {
             Sentient Sims Uncensored AI (Founder/Patreon)
           </MenuItem>
           <MenuItem value={ApiType.NovelAI}>NovelAI</MenuItem>
+          <MenuItem value={ApiType.KoboldAI}>Kobold AI</MenuItem>
           <MenuItem value={ApiType.CustomAI}>Custom Remote/Local AI</MenuItem>
         </Select>
         <FormHelperText>{getAIHelperText(dropdownValue)}</FormHelperText>
         <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/AI-Backends" />
       </Box>
-      {aiType.value === ApiType.SentientSimsAI.toString() &&
+      {(aiType.value === ApiType.SentientSimsAI.toString() ||
+        aiType.value === ApiType.KoboldAI.toString()) &&
       customLLMHostname.value !== sentientSimsAIHost ? (
         <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
           <TextField

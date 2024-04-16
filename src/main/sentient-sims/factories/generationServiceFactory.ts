@@ -9,6 +9,7 @@ import { OpenAITokenCounter } from '../tokens/OpenAITokenCounter';
 import { ApiType } from '../models/ApiType';
 import { NovelAIService } from '../services/NovelAIService';
 import { NovelAITokenCounter } from '../tokens/NovelAITokenCounter';
+import { KoboldAIService } from '../services/KoboldAIService';
 
 export function getGenerationService(
   settingsService: SettingsService
@@ -16,6 +17,10 @@ export function getGenerationService(
   const aiType = settingsService.get(SettingsEnum.AI_API_TYPE);
   if (aiType === ApiType.SentientSimsAI || aiType === ApiType.CustomAI) {
     return new SentientSimsAIService(settingsService);
+  }
+
+  if (aiType === ApiType.KoboldAI) {
+    return new KoboldAIService(settingsService);
   }
 
   if (aiType === ApiType.NovelAI) {
