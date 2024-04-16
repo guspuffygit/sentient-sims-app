@@ -3,4 +3,5 @@ export enum ApiType {
   SentientSimsAI = 'sentientsimsai',
   CustomAI = 'customai',
   NovelAI = 'novelai',
+  KoboldAI = 'koboldai',
 }

@@ -9,20 +9,23 @@ export default function AIStatusComponent() {
     SettingsEnum.AI_API_TYPE,
     ApiType.OpenAI.toString()
   );
-  if (
-    apiType.value === ApiType.SentientSimsAI ||
-    apiType.value === ApiType.CustomAI
-  ) {
-    return <CustomLLMComponent />;
+  switch (apiType.value) {
+    case ApiType.SentientSimsAI:
+      return <CustomLLMComponent aiName="Sentient Sims AI" />;
+    case ApiType.CustomAI:
+      return <CustomLLMComponent aiName="Custom" />;
+    case ApiType.KoboldAI:
+      return <CustomLLMComponent aiName="Kobold AI" />;
+    case ApiType.NovelAI:
+      return (
+        <ApiKeyAIComponent
+          setting={SettingsEnum.NOVELAI_KEY}
+          aiName="NovelAI"
+        />
+      );
+    default:
+      return (
+        <ApiKeyAIComponent setting={SettingsEnum.OPENAI_KEY} aiName="OpenAI" />
+      );
   }
-
-  if (apiType.value === ApiType.NovelAI) {
-    return (
-      <ApiKeyAIComponent setting={SettingsEnum.NOVELAI_KEY} aiName="NovelAI" />
-    );
-  }
-
-  return (
-    <ApiKeyAIComponent setting={SettingsEnum.OPENAI_KEY} aiName="OpenAI" />
-  );
 }

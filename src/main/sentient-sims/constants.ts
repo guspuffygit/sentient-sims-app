@@ -29,7 +29,7 @@ export const sentientSimsAIHost = 'https://ai.sentientsimulations.com';
 export const defaultWantsSystemPrompt =
   'You are the following character in the following location:';
 export const defaultWantsPrompt =
-  'If you were the character in the story, what are your wants right now?';
+  'If you were the character in the story, what are your wants right now? Respond in the first person';
 
 export const rendererWebsocketPort = 25146;
 export const modWebsocketPort = 25145;

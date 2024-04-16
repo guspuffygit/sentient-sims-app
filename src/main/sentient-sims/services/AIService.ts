@@ -40,7 +40,11 @@ import { NovelAIFormatter } from '../formatter/NovelAIFormatter';
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   const inputFormatters: InputFormatter[] = [];
 
-  if (apiType === ApiType.CustomAI || apiType === ApiType.SentientSimsAI) {
+  if (
+    apiType === ApiType.CustomAI ||
+    apiType === ApiType.SentientSimsAI ||
+    apiType === ApiType.KoboldAI
+  ) {
     inputFormatters.push(new MythoMaxFormatter());
   }
 
@@ -237,7 +241,8 @@ export class AIService {
     // TODO: model specific OUTPUT formatting cleanup stop tokens
     if (
       promptOptions.apiType === ApiType.SentientSimsAI ||
-      promptOptions.apiType === ApiType.CustomAI
+      promptOptions.apiType === ApiType.CustomAI ||
+      promptOptions.apiType === ApiType.KoboldAI
     ) {
       stopTokens.push('### Input:');
       stopTokens.push('### Response:');
