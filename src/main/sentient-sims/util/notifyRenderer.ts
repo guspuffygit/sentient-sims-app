@@ -3,6 +3,7 @@ import log from 'electron-log';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { WWInteractionEvent } from '../models/InteractionEvents';
 import { InteractionEventResult } from '../models/InteractionEventResult';
+import { DatabaseSession } from '../models/DatabaseSession';
 
 function notifyAllWindows(message: string, ...args: any[]) {
   electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
@@ -53,4 +54,9 @@ export function notifySimsChanged() {
 export function notifyUnmappedInteractionChanged() {
   log.debug('Notifying unmapped interactions changed');
   notifyAllWindows('on-interactions-changed');
+}
+
+export function notifyDatabaseLoaded(databaseSession: DatabaseSession) {
+  log.debug('Sending database loaded');
+  notifyAllWindows('on-database-loaded', databaseSession.sessionId);
 }

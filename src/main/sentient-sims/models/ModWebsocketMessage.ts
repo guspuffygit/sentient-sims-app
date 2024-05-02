@@ -1,6 +1,7 @@
 export enum ModWebsocketMessageType {
   NOTIFICATION = 'notification',
   CLEAR_SIM_CACHE = 'clear_sim_cache',
+  MIGRATE_SINGLE_SLOT_SAVE = 'migrate_single_slot_save',
 }
 
 export type ModWebsocketMessage = {

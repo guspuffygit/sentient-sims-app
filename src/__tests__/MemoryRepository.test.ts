@@ -13,7 +13,10 @@ describe('MemoryRepository', () => {
       recursive: true,
     });
     const dbService = new DbService(directoryService);
-    await dbService.loadDatabase('7981723');
+    await dbService.loadDatabase({
+      sessionId: '7981723',
+      saveId: '2',
+    });
     const memoryRepository = new MemoryRepository(dbService);
     const participants: ParticipantDTO[] = [
       { id: '128937674' },

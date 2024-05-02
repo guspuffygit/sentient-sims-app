@@ -11,6 +11,7 @@ import { AIClient } from 'main/sentient-sims/clients/AIClient';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { SSEventType } from 'main/sentient-sims/models/InteractionEvents';
 import { DbClient } from 'main/sentient-sims/clients/DbClient';
+import { DatabaseSession } from 'main/sentient-sims/models/DatabaseSession';
 import { mockEnvironment } from './util';
 
 describe('Api', () => {
@@ -73,7 +74,11 @@ describe('Api', () => {
 
   it('interaction controller', async () => {
     const dbClient = new DbClient(apiUrl);
-    await dbClient.loadDatabase('81726387641');
+    const databaseSession: DatabaseSession = {
+      sessionId: '81726387641',
+      saveId: '2',
+    };
+    await dbClient.loadDatabase(databaseSession);
     const aiClient = new AIClient(apiUrl);
     const sentientSim: SentientSim = {
       careers: [],
