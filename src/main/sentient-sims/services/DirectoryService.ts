@@ -5,6 +5,7 @@ import path from 'path';
 import log from 'electron-log';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { SettingsService } from './SettingsService';
+import { DatabaseSession } from '../models/DatabaseSession';
 
 export class DirectoryService {
   readonly settingsService: SettingsService;
@@ -106,14 +107,21 @@ export class DirectoryService {
     return files;
   }
 
-  getSentientSimsDb() {
+  getSentientSimsDb(databaseSession: DatabaseSession) {
+    return path.join(
+      this.getSentientSimsFolder(),
+      `${databaseSession.saveId}-sentient-sims.db`
+    );
+  }
+
+  getSingleSlotSentientSimsDB() {
     return path.join(this.getSentientSimsFolder(), 'sentient-sims.db');
   }
 
-  getSentientSimsDbUnsaved(sessionId: string) {
+  getSentientSimsDbUnsaved(databaseSession: DatabaseSession) {
     return path.join(
       this.getSentientSimsFolder(),
-      `${sessionId}-sentient-sims-unsaved.db`
+      `${databaseSession.sessionId}-sentient-sims-unsaved.db`
     );
   }
 

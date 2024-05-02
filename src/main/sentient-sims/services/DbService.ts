@@ -6,6 +6,10 @@ import electron from 'electron';
 import { DirectoryService } from './DirectoryService';
 import { migrate } from '../db/migrations';
 import { DatabaseNotLoadedError } from '../exceptions/DatabaseNotLoadedError';
+import { DatabaseSession } from '../models/DatabaseSession';
+import { sendModNotification } from '../websocketServer';
+import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
+import { notifyDatabaseLoaded } from '../util/notifyRenderer';
 
 export class DbService {
   private directoryService: DirectoryService;
@@ -16,24 +20,53 @@ export class DbService {
     this.directoryService = directoryService;
   }
 
-  async loadDatabase(sessionId: string) {
+  async loadDatabase(databaseSession: DatabaseSession) {
+    const unsavedDb =
+      this.directoryService.getSentientSimsDbUnsaved(databaseSession);
+    const savedDb = this.directoryService.getSentientSimsDb(databaseSession);
+
+    // Only needed for db migration to multi-slot saves, remove after awhile
+    if (databaseSession.action === 'perform_migrate_single_slot_save') {
+      log.info(
+        `Migrating single slot save to new slot:\n${unsavedDb}\n${savedDb}`
+      );
+      fs.copyFileSync(
+        this.directoryService.getSingleSlotSentientSimsDB(),
+        unsavedDb
+      );
+      fs.copyFileSync(
+        this.directoryService.getSingleSlotSentientSimsDB(),
+        savedDb
+      );
+      log.info(`Done copying, moving single slot save to backup`);
+      fs.renameSync(
+        this.directoryService.getSingleSlotSentientSimsDB(),
+        `${this.directoryService.getSingleSlotSentientSimsDB()}.backup`
+      );
+    } else if (
+      DirectoryService.fileExistsSync(
+        this.directoryService.getSingleSlotSentientSimsDB()
+      )
+    ) {
+      log.info('Single slot save exists, sending notification to mod');
+      sendModNotification({
+        type: ModWebsocketMessageType.MIGRATE_SINGLE_SLOT_SAVE,
+      });
+    }
+
+    log.debug(`loadDatabase unsavedDb: ${unsavedDb} savedDb: ${savedDb}`);
+
     // Create a "working" version of the database and only commit changes to it if the game saves
     if (
-      !DirectoryService.fileExistsSync(
-        this.directoryService.getSentientSimsDbUnsaved(sessionId)
-      ) &&
-      DirectoryService.fileExistsSync(this.directoryService.getSentientSimsDb())
+      !DirectoryService.fileExistsSync(unsavedDb) &&
+      DirectoryService.fileExistsSync(savedDb)
     ) {
-      fs.copyFileSync(
-        this.directoryService.getSentientSimsDb(),
-        this.directoryService.getSentientSimsDbUnsaved(sessionId)
-      );
+      log.debug(`Copying ${savedDb} to ${unsavedDb}`);
+      fs.copyFileSync(savedDb, unsavedDb);
     }
 
     try {
-      this.db = new DatabaseConstructor(
-        this.directoryService.getSentientSimsDbUnsaved(sessionId)
-      );
+      this.db = new DatabaseConstructor(unsavedDb);
     } catch (err: any) {
       log.error('Error opening database', err);
       throw err;
@@ -50,15 +83,10 @@ export class DbService {
       }
     }
 
-    electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-      if (wnd.webContents?.isDestroyed() === false) {
-        log.debug('Sending database loaded');
-        wnd.webContents.send('on-database-loaded', sessionId);
-      }
-    });
+    notifyDatabaseLoaded(databaseSession);
   }
 
-  cleanupUnsavedDatabases(sessionId: string) {
+  cleanupUnsavedDatabases(databaseSession: DatabaseSession) {
     let unsavedDatabases;
     try {
       unsavedDatabases = this.directoryService.listSentientSimsDbUnsaved();
@@ -68,26 +96,30 @@ export class DbService {
     }
 
     unsavedDatabases
-      .filter((unsavedDb) => !unsavedDb.includes(sessionId))
+      .filter((unsavedDb) => !unsavedDb.includes(databaseSession.sessionId))
       .forEach((unsavedDb) => {
         try {
           fs.rmSync(unsavedDb);
         } catch (err: any) {
-          log.error(`Unable to remove unsaved db sessionId: ${sessionId}`, err);
+          log.error(
+            `Unable to remove unsaved db sessionId: ${databaseSession.sessionId}`,
+            err
+          );
         }
       });
   }
 
-  async saveDatabase(sessionId: string) {
-    if (
-      DirectoryService.fileExistsSync(
-        this.directoryService.getSentientSimsDbUnsaved(sessionId)
-      )
-    ) {
-      await this.getDb().backup(this.directoryService.getSentientSimsDb());
+  async saveDatabase(databaseSession: DatabaseSession) {
+    const unsavedDb =
+      this.directoryService.getSentientSimsDbUnsaved(databaseSession);
+    const savedDb = this.directoryService.getSentientSimsDb(databaseSession);
+    log.debug(`saveDatabase unsavedDb: ${unsavedDb} savedDb: ${savedDb}`);
+
+    if (DirectoryService.fileExistsSync(unsavedDb)) {
+      await this.getDb().backup(savedDb);
     }
 
-    this.cleanupUnsavedDatabases(sessionId);
+    this.cleanupUnsavedDatabases(databaseSession);
   }
 
   unloadDatabase() {

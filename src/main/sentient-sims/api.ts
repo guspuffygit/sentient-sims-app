@@ -10,7 +10,10 @@ import { VersionService } from './services/VersionService';
 import { UpdateService } from './services/UpdateService';
 import { UpdateController } from './controllers/UpdateController';
 import { SettingsController } from './controllers/SettingsController';
-import { VersionController } from './controllers/VersionController';
+import {
+  VersionController,
+  modOutOfDate,
+} from './controllers/VersionController';
 import { DebugController } from './controllers/DebugController';
 import { LogSendService } from './services/LogSendService';
 import { AIController } from './controllers/AIController';
@@ -171,8 +174,11 @@ export function runApi({
 
   expressApp.get('/patreon-redirect', patreonController.handleRedirect);
 
-  expressApp.get('/db/load/:sessionId', dbController.loadDatabase);
-  expressApp.get('/db/save/:sessionId', dbController.saveDatabase);
+  expressApp.get('/db/load/:sessionId', modOutOfDate);
+  expressApp.get('/db/save/:sessionId', modOutOfDate);
+
+  expressApp.post('/db/load', dbController.loadDatabase);
+  expressApp.post('/db/save', dbController.saveDatabase);
   expressApp.get('/db/unload', dbController.unloadDatabase);
 
   expressApp.get('/animations', animationsController.getAnimations);

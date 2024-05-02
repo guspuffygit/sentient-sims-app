@@ -132,7 +132,10 @@ describe('Output', () => {
         recursive: true,
       });
       const dbService = new DbService(directoryService);
-      await dbService.loadDatabase('958127321');
+      await dbService.loadDatabase({
+        sessionId: '958127321',
+        saveId: '2',
+      });
       const repositoryService = new RepositoryService(
         new LocationRepository(dbService),
         new MemoryRepository(dbService),

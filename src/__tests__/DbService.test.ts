@@ -23,12 +23,21 @@ describe('DbService', () => {
   });
 
   it('Loading unloading database', async () => {
-    dbService.loadDatabase('1872638716');
+    dbService.loadDatabase({
+      sessionId: '1872638716',
+      saveId: '2',
+    });
     expect(directoryService.listSentientSimsDbUnsaved()).toHaveLength(3);
 
-    dbService.loadDatabase('718297398');
+    dbService.loadDatabase({
+      sessionId: '718297398',
+      saveId: '2',
+    });
     expect(directoryService.listSentientSimsDbUnsaved()).toHaveLength(6);
-    await dbService.saveDatabase('718297398');
+    await dbService.saveDatabase({
+      sessionId: '718297398',
+      saveId: '2',
+    });
     expect(directoryService.listSentientSimsDbUnsaved()).toHaveLength(3);
 
     dbService.unloadDatabase();

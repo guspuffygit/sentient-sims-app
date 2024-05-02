@@ -13,7 +13,10 @@ describe('ParticipantRepository', () => {
       recursive: true,
     });
     const dbService = new DbService(directoryService);
-    await dbService.loadDatabase('9587321');
+    await dbService.loadDatabase({
+      sessionId: '9587321',
+      saveId: '2',
+    });
     const participantRepository = new ParticipantRepository(dbService);
 
     const participant: ParticipantDTO = {

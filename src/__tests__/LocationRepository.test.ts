@@ -13,7 +13,10 @@ describe('LocationRepository', () => {
       recursive: true,
     });
     const dbService = new DbService(directoryService);
-    await dbService.loadDatabase('1237632');
+    await dbService.loadDatabase({
+      sessionId: '1237632',
+      saveId: '2',
+    });
     const locationRepository = new LocationRepository(dbService);
 
     // Check generic location is returned when id doesnt exist in defaultLocationDescriptions
@@ -34,7 +37,10 @@ describe('LocationRepository', () => {
       recursive: true,
     });
     const dbService = new DbService(directoryService);
-    await dbService.loadDatabase('1231237632');
+    await dbService.loadDatabase({
+      sessionId: '1231237632',
+      saveId: '2',
+    });
     const locationRepository = new LocationRepository(dbService);
 
     const locationId = 254110336;
