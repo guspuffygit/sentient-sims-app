@@ -11,10 +11,6 @@ const packageJson = JSON.parse(fs.readFileSync('package.json'));
 
 packageJson.build.mac.target.arch = [architecture];
 
-if (architecture === 'x64') {
-  delete packageJson.build.afterPack;
-}
-
 fs.rmSync('package.json');
 
 fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2));
