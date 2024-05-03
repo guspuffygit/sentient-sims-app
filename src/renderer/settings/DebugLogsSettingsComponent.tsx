@@ -1,5 +1,6 @@
 import { Box, FormControlLabel, Checkbox } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import log from 'electron-log';
 import useSetting from '../hooks/useSetting';
 
 export default function DebugLogsSettingsComponent() {
@@ -12,9 +13,14 @@ export default function DebugLogsSettingsComponent() {
         control={
           <Checkbox
             checked={debugLogsEnabled.value}
-            onChange={(change) =>
-              debugLogsEnabled.setSetting(change.target.checked)
-            }
+            onChange={(change) => {
+              debugLogsEnabled.setSetting(change.target.checked);
+              if (change.target.checked) {
+                log.transports.console.level = 'debug';
+              } else {
+                log.transports.console.level = 'info';
+              }
+            }}
           />
         }
       />

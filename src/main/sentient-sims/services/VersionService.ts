@@ -37,4 +37,17 @@ export class VersionService {
   getAppVerson(): Version {
     return { version: app.getVersion() };
   }
+
+  getGameVersion(): Version {
+    try {
+      const versionText = fs.readFileSync(
+        this.directoryService.getGameVersion(),
+        'utf-8'
+      );
+
+      return { version: versionText.trim() };
+    } catch (e: any) {
+      return { version: e?.message || 'null' };
+    }
+  }
 }

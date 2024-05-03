@@ -196,6 +196,10 @@ export class LogSendService {
           `Release Type: ${this.settingsService.get(SettingsEnum.MOD_RELEASE)}`,
           `Mod Version: ${this.versionService.getModVersion().version}`,
           `App Version: ${app.getVersion()}`,
+          `Game Version: ${this.versionService.getGameVersion().version}`,
+          `Debug Logging: ${this.settingsService.getSetting(
+            SettingsEnum.DEBUG_LOGS
+          )}`,
         ].join('\n')
       );
     } catch (err: any) {

@@ -7,6 +7,7 @@ import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { fetchWithRetries } from '../util/fetchWithRetries';
 import { sendPopUpNotification } from '../util/notifyRenderer';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
+import { SentientSimsAIError } from '../exceptions/SentientSimsAIError';
 
 export class SentientSimsAIService implements GenerationService {
   private settingsService: SettingsService;
@@ -35,8 +36,24 @@ export class SentientSimsAIService implements GenerationService {
       }),
     });
 
-    const result = await response.json();
+    if (!response.ok) {
+      try {
+        const errorResponse = await response.json();
+        const errorMessage =
+          errorResponse.error || 'Unknown JSON error occurred';
+        throw new SentientSimsAIError(`SentientSimsAI error: ${errorMessage}`);
+      } catch (e: any) {
+        if (e instanceof SentientSimsAIError) {
+          throw e;
+        }
 
+        // If JSON parsing fails, fall back to plain text error message
+        const textMessage = await response.text();
+        throw new Error(`SentientSimsAI text error: ${textMessage}`);
+      }
+    }
+
+    const result = await response.json();
     return result.results[0].text;
   }
 

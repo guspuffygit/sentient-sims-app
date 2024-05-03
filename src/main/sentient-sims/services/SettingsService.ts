@@ -4,6 +4,7 @@ import path from 'path';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { ApiType } from '../models/ApiType';
 import { sentientSimsAIHost } from '../constants';
+import { disableDebugLogging, enableDebugLogging } from '../util/debugLog';
 
 export function defaultStore(cwd?: string) {
   return new Store({
@@ -107,9 +108,18 @@ export class SettingsService {
 
   setSetting(key: string, value: any) {
     this.store.set(key, value);
+
     if (key !== SettingsEnum.ACCESS_TOKEN) {
       log.info(`Setting app setting: ${key} to value: ${value}`);
     }
+    if (key === SettingsEnum.DEBUG_LOGS) {
+      if (value) {
+        enableDebugLogging();
+      } else {
+        disableDebugLogging();
+      }
+    }
+
     return value;
   }
 

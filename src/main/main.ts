@@ -26,6 +26,11 @@ import { runApi, runWebSocketServer } from './sentient-sims/api';
 import { SettingsService } from './sentient-sims/services/SettingsService';
 import { DirectoryService } from './sentient-sims/services/DirectoryService';
 import { appApiPort } from './sentient-sims/constants';
+import { SettingsEnum } from './sentient-sims/models/SettingsEnum';
+import {
+  disableDebugLogging,
+  enableDebugLogging,
+} from './sentient-sims/util/debugLog';
 
 log.initialize({ preload: true });
 
@@ -125,6 +130,12 @@ const createWindow = async () => {
 
   const settingsService = new SettingsService();
   const directoryService = new DirectoryService(settingsService);
+
+  if (settingsService.get(SettingsEnum.DEBUG_LOGS)) {
+    enableDebugLogging();
+  } else {
+    disableDebugLogging();
+  }
 
   runWebSocketServer(settingsService, directoryService);
   runApi({

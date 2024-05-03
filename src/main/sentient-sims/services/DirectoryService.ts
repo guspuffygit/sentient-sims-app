@@ -146,4 +146,8 @@ export class DirectoryService {
       return false;
     }
   }
+
+  getGameVersion() {
+    return path.join(this.getSims4Folder(), 'GameVersion.txt');
+  }
 }
