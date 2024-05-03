@@ -27,6 +27,22 @@ export class DbService {
 
     // Only needed for db migration to multi-slot saves, remove after awhile
     if (databaseSession.action === 'perform_migrate_single_slot_save') {
+      if (
+        DirectoryService.fileExistsSync(
+          `${this.directoryService.getSingleSlotSentientSimsDB()}.backup`
+        )
+      ) {
+        log.info('Database is already migrated');
+        return;
+      }
+      if (
+        !DirectoryService.fileExistsSync(
+          this.directoryService.getSingleSlotSentientSimsDB()
+        )
+      ) {
+        log.info('No single slot save exists');
+        return;
+      }
       log.info(
         `Migrating single slot save to new slot:\n${unsavedDb}\n${savedDb}`
       );
