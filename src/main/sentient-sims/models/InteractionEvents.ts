@@ -6,6 +6,8 @@ export enum SSEventType {
   WANTS = 'wants',
   DO_SOMETHING = 'dosomething',
   CONTINUE = 'continue',
+  CHAT = 'chat',
+  CHAT_CONTINUE = 'chat_continue',
 }
 
 export enum WWEventType {
@@ -54,11 +56,17 @@ export type WantsInteractionEvent = SSEvent;
 
 export type ContinueInteractionEvent = SSEvent;
 
+export type ChatContinueInteractionEvent = SSEvent;
+
 export type InteractionEvent = SSEvent & {
   interaction_name: string;
 };
 
 export type DoSomethingInteractionEvent = SSEvent & {
+  action: string;
+};
+
+export type ChatInteractionEvent = SSEvent & {
   action: string;
 };
 

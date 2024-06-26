@@ -4,7 +4,10 @@ import {
 } from 'main/sentient-sims/models/InteractionEvents';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { containsPlayerSim } from 'main/sentient-sims/util/eventContainsPlayerSim';
-import { filterNullAndUndefined } from 'main/sentient-sims/util/filter';
+import {
+  filterNullAndUndefined,
+  removeEmojis,
+} from 'main/sentient-sims/util/filter';
 
 describe('Util', () => {
   it('filterNullAndUndefined removes null and undefined values from list', () => {
@@ -12,6 +15,10 @@ describe('Util', () => {
       '1',
       '2',
     ]);
+  });
+
+  it('removeEmojis removes emojis correctly', () => {
+    expect(removeEmojis('😀🤹🏾test')).toEqual('test');
   });
 });
 

@@ -11,6 +11,7 @@ import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
 import log from 'electron-log';
 import { appApiUrl } from 'main/sentient-sims/constants';
+import { DeleteMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
 import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
 
@@ -29,6 +30,28 @@ export default function MemoriesPage() {
 
   const addMemory = useCallback((memory: MemoryEntity) => {
     setMemories((previousMemories) => [...previousMemories, memory]);
+  }, []);
+
+  const deleteMemory = useCallback(
+    (deleteMemoryRequest: DeleteMemoryRequest) => {
+      setMemories((previousMemories) =>
+        previousMemories.filter(
+          (memory) => memory.id !== deleteMemoryRequest.id
+        )
+      );
+    },
+    []
+  );
+
+  const editMemory = useCallback((memory: MemoryEntity) => {
+    setMemories((previousMemories) => {
+      return previousMemories.map((previousMemory) => {
+        if (previousMemory.id === memory.id) {
+          return memory;
+        }
+        return previousMemory;
+      });
+    });
   }, []);
 
   useEffect(() => {
@@ -103,6 +126,32 @@ export default function MemoriesPage() {
     [memories]
   );
 
+  useEffect(() => {
+    const removeListener = window.electron.onMemoryDeleted(
+      (_event: any, deleteMemoryRequest: DeleteMemoryRequest) => {
+        deleteMemory(deleteMemoryRequest);
+        handleSetSelectedMemory(-1);
+      }
+    );
+
+    return () => {
+      removeListener();
+    };
+  }, [deleteMemory, handleSetSelectedMemory]);
+
+  useEffect(() => {
+    const removeListener = window.electron.onMemoryEdited(
+      (_event: any, memory: MemoryEntity) => {
+        editMemory(memory);
+        handleSetSelectedMemory(-1);
+      }
+    );
+
+    return () => {
+      removeListener();
+    };
+  }, [editMemory, handleSetSelectedMemory]);
+
   async function handleSave() {
     if (editedMemory) {
       log.debug(`Edited Memory: ${JSON.stringify(editedMemory.memory)}`);
@@ -114,13 +163,7 @@ export default function MemoriesPage() {
         body: JSON.stringify(editedMemory.memory),
       })
         .then((res) => res.json())
-        .then(() => {
-          setMemories((previousMemories) => {
-            previousMemories[editedMemory.index] = editedMemory.memory;
-            return previousMemories;
-          });
-          handleSetSelectedMemory(-1);
-        })
+        .then(() => {})
         .catch((error: any) => {
           log.error('Error saving updated memory', error);
           if (error.cause) {
@@ -139,23 +182,16 @@ export default function MemoriesPage() {
     if (editedMemory) {
       fetch(`${appApiUrl}/memories/${editedMemory.memory.id}`, {
         method: 'DELETE',
-      })
-        .then(() => {
-          setMemories(memories.filter((_, i) => i !== editedMemory.index));
-        })
-        .catch((error: any) => {
-          log.error('Deletion of memory failed', error);
-          if (error.cause) {
-            log.error(error.cause);
-          }
-        })
-        .finally(() => {
-          handleSetSelectedMemory(-1);
-        });
+      }).catch((error: any) => {
+        log.error('Deletion of memory failed', error);
+        if (error.cause) {
+          log.error(error.cause);
+        }
+      });
     } else {
       handleSetSelectedMemory(-1);
     }
-  }, [editedMemory, handleSetSelectedMemory, memories]);
+  }, [editedMemory, handleSetSelectedMemory]);
 
   const handleObservationEdit = useCallback(
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

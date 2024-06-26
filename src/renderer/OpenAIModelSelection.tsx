@@ -41,6 +41,7 @@ export default function OpenAIModelSelection() {
           <ListSubheader>gpt-4 (10x more $$$ BE AWARE)</ListSubheader>
           <MenuItem value="gpt-4">gpt-4 ($0.03/1Kt, $0.06/1Kt)</MenuItem>
           <MenuItem value="gpt-4-0613">gpt-4-0613</MenuItem>
+          <MenuItem value="gpt-4o">gpt-4o</MenuItem>
         </Select>
       </div>
     );

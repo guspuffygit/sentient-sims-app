@@ -4,6 +4,9 @@ import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { WWInteractionEvent } from '../models/InteractionEvents';
 import { InteractionEventResult } from '../models/InteractionEventResult';
 import { DatabaseSession } from '../models/DatabaseSession';
+import { DeleteMemoryRequest } from '../models/GetMemoryRequest';
+import { sendModNotification } from '../websocketServer';
+import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 
 function notifyAllWindows(message: string, ...args: any[]) {
   electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
@@ -20,6 +23,24 @@ export function notifySettingChanged(setting: any, value: any) {
 export function notifyNewMemoryAdded(memory: MemoryEntity) {
   log.debug('Sending new memory added to renderer');
   notifyAllWindows('on-new-memory-added', memory);
+}
+
+export function notifyMemoryDeleted(deleteMemoryRequest: DeleteMemoryRequest) {
+  log.debug('Sending memory deleted to renderer');
+  notifyAllWindows('on-memory-deleted', deleteMemoryRequest);
+  sendModNotification({
+    type: ModWebsocketMessageType.MEMORY_DELETED,
+    memory_id: deleteMemoryRequest.id,
+  });
+}
+
+export function notifyMemoryEdited(memory: MemoryEntity) {
+  log.debug('Sending memory edited to renderer');
+  notifyAllWindows('on-memory-edited', memory);
+  sendModNotification({
+    type: ModWebsocketMessageType.MEMORY_EDITED,
+    memory,
+  });
 }
 
 export function notifyLocationChanged() {

@@ -1,3 +1,4 @@
+import log from 'electron-log';
 import {
   CreateMemoryRequest,
   DeleteMemoryRequest,
@@ -8,7 +9,11 @@ import {
 import { Repository } from './Repository';
 import { MemoryEntity } from './entities/MemoryEntity';
 import { MemoryParticipantEntity } from './entities/MemoryParticipantEntity';
-import { notifyNewMemoryAdded } from '../util/notifyRenderer';
+import {
+  notifyMemoryDeleted,
+  notifyMemoryEdited,
+  notifyNewMemoryAdded,
+} from '../util/notifyRenderer';
 import { MemoryParticipantDTO } from './dto/MemoryParticipantDTO';
 
 export class MemoryRepository extends Repository {
@@ -90,7 +95,7 @@ export class MemoryRepository extends Repository {
   }
 
   updateMemory(memory: MemoryEntity) {
-    return this.dbService
+    const result = this.dbService
       .getDb()
       .prepare(
         'UPDATE memory SET pre_action = ?, observation = ?, content = ?, timestamp = ?, location_id = ? WHERE id = ?'
@@ -103,6 +108,10 @@ export class MemoryRepository extends Repository {
         memory.location_id,
         memory.id
       );
+
+    notifyMemoryEdited(memory);
+
+    return result;
   }
 
   updateMemoryParticipant(memoryParticipant: MemoryParticipantDTO) {
@@ -150,14 +159,20 @@ export class MemoryRepository extends Repository {
 
     notifyNewMemoryAdded(memory);
 
+    log.info(`Memory added:\n${JSON.stringify(memory, null, 2)}`);
+
     return memory;
   }
 
   deleteMemory(deleteMemoryRequest: DeleteMemoryRequest) {
-    return this.dbService
+    const result = this.dbService
       .getDb()
       .prepare('DELETE FROM memory WHERE id = ?')
       .run([deleteMemoryRequest.id]);
+
+    notifyMemoryDeleted(deleteMemoryRequest);
+
+    return result;
   }
 
   deleteAllMemories() {

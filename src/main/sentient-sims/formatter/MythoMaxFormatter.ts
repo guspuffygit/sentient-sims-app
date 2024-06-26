@@ -1,14 +1,27 @@
 /* eslint-disable class-methods-use-this */
 import { PromptRequest2 } from '../models/OpenAIRequestBuilder';
+import { filterNullAndUndefined } from '../util/filter';
 import { InputFormatter } from './InputOutputFormatting';
 
 export class MythoMaxFormatter implements InputFormatter {
   formatInput(promptRequest: PromptRequest2): PromptRequest2 {
     if (promptRequest.action) {
-      promptRequest.action = `### Input:\n${promptRequest.action}`;
-      promptRequest.assistantPreResponse = `### Response: (length = medium):\n${promptRequest.assistantPreResponse}`;
+      promptRequest.action = filterNullAndUndefined([
+        '### Input:\n',
+        promptRequest.prePreAction,
+        promptRequest.action,
+      ]).join(' ');
+      promptRequest.assistantPreResponse = filterNullAndUndefined([
+        '### Response: (length = medium):\n',
+        promptRequest.preAssistantPreResponse,
+        promptRequest.assistantPreResponse,
+      ]).join(' ');
     } else {
-      promptRequest.assistantPreResponse = `### Response:\n${promptRequest.assistantPreResponse}`;
+      promptRequest.assistantPreResponse = filterNullAndUndefined([
+        '### Response:\n',
+        promptRequest.preAssistantPreResponse,
+        promptRequest.assistantPreResponse,
+      ]).join(' ');
     }
 
     promptRequest.memories.forEach((memory) => {

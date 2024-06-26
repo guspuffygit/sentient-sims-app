@@ -20,6 +20,9 @@ export type PromptRequest2 = {
   maxTokens: number;
   action?: string;
   assistantPreResponse?: string;
+  preAssistantPreResponse?: string;
+  prePreAction?: string;
+  stopTokens?: string[];
 };
 
 export class OpenAIRequestBuilder {

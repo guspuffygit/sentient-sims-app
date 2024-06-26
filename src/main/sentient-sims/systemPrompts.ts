@@ -1,4 +1,5 @@
 import {
+  defaultChatPrompt,
   defaultMythoMaxNsfwSystemPrompt,
   defaultMythoMaxSystemPrompt,
   defaultSystemPrompt,
@@ -11,6 +12,13 @@ export function getSystemPrompt(
   eventType: SSEventType,
   apiType: ApiType
 ): string {
+  if (
+    eventType === SSEventType.CHAT ||
+    eventType === SSEventType.CHAT_CONTINUE
+  ) {
+    return defaultChatPrompt;
+  }
+
   if (eventType === SSEventType.WANTS) {
     return defaultWantsSystemPrompt;
   }

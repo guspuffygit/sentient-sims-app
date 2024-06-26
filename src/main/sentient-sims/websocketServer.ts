@@ -8,7 +8,7 @@ import { RendererWebsocketMessage } from './models/RendererWebsocketMessage';
 import { SettingsService } from './services/SettingsService';
 import { SettingsEnum } from './models/SettingsEnum';
 import { LogLevel } from './models/LogLevel';
-import { ModWebsocketMessage } from './models/ModWebsocketMessage';
+import { WebsocketNotification } from './models/ModWebsocketMessage';
 import { modWebsocketPort, rendererWebsocketPort } from './constants';
 
 let rendererWs: WebSocket;
@@ -73,7 +73,7 @@ export const startWebSocketServer = (
   });
 };
 
-export function sendModNotification(notification: ModWebsocketMessage) {
+export function sendModNotification(notification: WebsocketNotification) {
   try {
     if (modWs) {
       modWs.send(JSON.stringify(notification));

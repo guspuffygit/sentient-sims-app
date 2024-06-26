@@ -18,7 +18,10 @@ import { ChatCompletionMessageRole } from '../models/ChatCompletionMessageRole';
 
 export type GenerationOptions = {
   action?: string;
+  prePreAction?: string;
+  preAssistantPreResponse?: string;
   assistantPreResponse?: string;
+  stopTokens?: string[];
   sexCategoryType?: number;
   sexLocationType?: number;
 };
@@ -151,6 +154,45 @@ export class PromptRequestBuilderService {
       );
     }
 
+    let formattedPrePreAction = '';
+    if (options.prePreAction) {
+      log.debug('It has prePreAction');
+      formattedPrePreAction = formatAction(
+        options.prePreAction,
+        event.sentient_sims,
+        location,
+        options.sexCategoryType,
+        options.sexLocationType
+      );
+      log.debug(`formattedPrePreAction: ${formattedPrePreAction}`);
+    }
+
+    const formattedStopTokens: string[] = [];
+    options?.stopTokens?.forEach((stopToken) => {
+      formattedStopTokens.push(
+        formatAction(
+          stopToken,
+          event.sentient_sims,
+          location,
+          options.sexCategoryType,
+          options.sexLocationType
+        )
+      );
+    });
+
+    let formattedPreAssistantPreResponse = '';
+    if (options.preAssistantPreResponse) {
+      log.debug('It has preAssistantPreResponse');
+      formattedPreAssistantPreResponse = formatAction(
+        options.preAssistantPreResponse,
+        event.sentient_sims,
+        location,
+        options.sexCategoryType,
+        options.sexLocationType
+      );
+      log.debug(`preAssistantPreResponse: ${formattedPreAssistantPreResponse}`);
+    }
+
     const systemPrompt = getSystemPrompt(event.event_type, options.apiType);
     const formattedSystemPrompt = formatAction(
       systemPrompt,
@@ -175,6 +217,9 @@ export class PromptRequestBuilderService {
       maxResponseTokens: 90,
       maxTokens: 3900,
       assistantPreResponse: formattedAssistantPreResponse,
+      prePreAction: formattedPrePreAction,
+      preAssistantPreResponse: formattedPreAssistantPreResponse,
+      stopTokens: formattedStopTokens,
     };
   }
 }

@@ -45,6 +45,16 @@ const electronHandler = {
 
     return () => ipcRenderer.removeListener('on-new-memory-added', callback);
   },
+  onMemoryDeleted: (callback: any) => {
+    ipcRenderer.on('on-memory-deleted', callback);
+
+    return () => ipcRenderer.removeListener('on-memory-deleted', callback);
+  },
+  onMemoryEdited: (callback: any) => {
+    ipcRenderer.on('on-memory-edited', callback);
+
+    return () => ipcRenderer.removeListener('on-memory-edited', callback);
+  },
   onLocationChanged: (callback: any) => {
     ipcRenderer.on('on-location-changed', callback);
 

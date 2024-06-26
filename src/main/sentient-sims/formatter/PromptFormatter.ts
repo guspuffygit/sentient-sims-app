@@ -5,6 +5,7 @@ import { traitDescriptions } from '../descriptions/traitDescriptions';
 import { getSexCategory, getSexLocation } from '../descriptions/wwDescriptions';
 import { SSEnvironment } from '../models/InteractionEvents';
 import { SentientSim } from '../models/SentientSim';
+import { removeEmojis } from '../util/filter';
 
 export enum BodyState {
   OUTFIT = 1,
@@ -415,6 +416,9 @@ export function removeStopTokens(text: string, stopTokens?: string[]) {
 
   if (stopTokens && stopTokens.length > 0) {
     stopTokens.forEach((stopToken) => {
+      if (output.startsWith(stopToken)) {
+        output = output.slice(stopToken.length).trimStart();
+      }
       output = output.split(stopToken, 1)[0].trim();
     });
   }
@@ -423,11 +427,12 @@ export function removeStopTokens(text: string, stopTokens?: string[]) {
 }
 
 export function cleanupAIOutput(text: string, stopTokens?: string[]): string {
-  let output = text;
+  let output: string = text.trim();
 
-  output = removeStopTokens(text, stopTokens);
-  output = removeLastParagraph(text);
+  output = removeStopTokens(output, stopTokens);
+  output = removeLastParagraph(output);
   output = trimIncompleteSentence(output);
+  output = removeEmojis(output);
 
   return output.trim();
 }

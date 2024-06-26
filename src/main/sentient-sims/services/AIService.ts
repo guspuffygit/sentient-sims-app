@@ -1,4 +1,7 @@
+import log from 'electron-log';
 import {
+  ChatContinueInteractionEvent,
+  ChatInteractionEvent,
   DoSomethingInteractionEvent,
   InteractionEvent,
   InteractionEvents,
@@ -87,6 +90,10 @@ export class AIService {
     switch (event.event_type) {
       case SSEventType.DO_SOMETHING:
         return this.handleDoSomething(event as DoSomethingInteractionEvent);
+      case SSEventType.CHAT:
+        return this.handleChat(event as ChatInteractionEvent);
+      case SSEventType.CHAT_CONTINUE:
+        return this.handleChatContinue(event as ChatContinueInteractionEvent);
       case SSEventType.INTERACTION:
         return this.handleInteraction(event as InteractionEvent);
       case SSEventType.WICKED_WHIMS:
@@ -197,6 +204,22 @@ export class AIService {
     });
   }
 
+  async handleChat(chatEvent: ChatInteractionEvent) {
+    return this.runGeneration(chatEvent, {
+      action: chatEvent.action,
+      prePreAction: '{actor.0}:',
+      preAssistantPreResponse: '{actor.1}:',
+      stopTokens: ['{actor.0}:', '{actor.1}:'],
+    });
+  }
+
+  async handleChatContinue(chatContinueEvent: ChatContinueInteractionEvent) {
+    return this.runGeneration(chatContinueEvent, {
+      preAssistantPreResponse: '{actor.1}:',
+      stopTokens: ['{actor.0}:', '{actor.1}:'],
+    });
+  }
+
   async runGeneration(
     event: InteractionEvents,
     options: GenerationOptions = {}
@@ -208,6 +231,9 @@ export class AIService {
       action: options.action,
       sexCategoryType: options.sexCategoryType,
       sexLocationType: options.sexLocationType,
+      preAssistantPreResponse: options.preAssistantPreResponse,
+      prePreAction: options.prePreAction,
+      stopTokens: options.stopTokens,
       apiType: this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType,
     };
 
@@ -248,6 +274,13 @@ export class AIService {
       stopTokens.push('### Response:');
       stopTokens.push('### Response: (length = medium)');
     }
+    promptRequest?.stopTokens?.forEach((stopToken) => {
+      stopTokens.push(stopToken);
+    });
+
+    log.debug(`stop tokens: ${JSON.stringify(stopTokens, null, 2)}`);
+
+    // TODO: Add an options for formatted stop tokens that aren't necessarily in the prompt
 
     let output = cleanupAIOutput(response.text, stopTokens);
 
