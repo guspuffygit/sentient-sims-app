@@ -1,5 +1,8 @@
 /* eslint-disable class-methods-use-this */
-import { PromptRequest2 } from '../models/OpenAIRequestBuilder';
+import {
+  ClassificationRequest,
+  PromptRequest2,
+} from '../models/OpenAIRequestBuilder';
 import { filterNullAndUndefined } from '../util/filter';
 import { InputFormatter } from './InputOutputFormatting';
 
@@ -32,5 +35,11 @@ export class NovelAIFormatter implements InputFormatter {
     });
 
     return promptRequest;
+  }
+
+  formatClassification(
+    classificationRequest: ClassificationRequest
+  ): ClassificationRequest {
+    return classificationRequest;
   }
 }

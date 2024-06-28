@@ -1,5 +1,8 @@
 /* eslint-disable class-methods-use-this */
-import { PromptRequest2 } from '../models/OpenAIRequestBuilder';
+import {
+  ClassificationRequest,
+  PromptRequest2,
+} from '../models/OpenAIRequestBuilder';
 import { filterNullAndUndefined } from '../util/filter';
 import { InputFormatter } from './InputOutputFormatting';
 
@@ -36,5 +39,15 @@ export class MythoMaxFormatter implements InputFormatter {
     promptRequest.systemPrompt = `### Instruction:\n${promptRequest.systemPrompt}`;
 
     return promptRequest;
+  }
+
+  formatClassification(
+    classificationRequest: ClassificationRequest
+  ): ClassificationRequest {
+    classificationRequest.systemPrompt = `### Instruction:\n${classificationRequest.systemPrompt}`;
+    classificationRequest.userPreResponse = '### Input:\n';
+    classificationRequest.assistantPreResponse = '### Response:\n';
+
+    return classificationRequest;
   }
 }

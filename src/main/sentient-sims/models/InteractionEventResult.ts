@@ -10,6 +10,8 @@ export enum InteractionEventStatus {
   NSFW_DISABLED = 'nsfwdisabled',
   NOOP = 'noop',
   NOT_PLAYER_SIM = 'notplayersim',
+  CLASSIFIED = 'classified',
+  UNCLASSIFIED = 'unclassified',
 }
 
 export type InteractionEventResult = {

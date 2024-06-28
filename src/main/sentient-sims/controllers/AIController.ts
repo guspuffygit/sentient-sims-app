@@ -9,6 +9,7 @@ import {
 import { AIService } from '../services/AIService';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { InteractionEventStatus } from '../models/InteractionEventResult';
+import { ClassificationRequest } from '../models/OpenAIRequestBuilder';
 
 export class AIController {
   private readonly aiService: AIService;
@@ -18,6 +19,7 @@ export class AIController {
 
     this.sentientSimsGenerate = this.sentientSimsGenerate.bind(this);
     this.interactionEvent = this.interactionEvent.bind(this);
+    this.classificationEvent = this.classificationEvent.bind(this);
   }
 
   async sentientSimsGenerate(req: Request, res: Response) {
@@ -46,6 +48,24 @@ export class AIController {
 
     try {
       const result = await this.aiService.interactionEvent(event);
+      res.json(result);
+      if (result.text) {
+        sendChatGeneration(result);
+      }
+    } catch (err: any) {
+      log.error('Error getting response', err);
+      res.json({
+        error: err?.message,
+      });
+      sendPopUpNotification(err?.message);
+    }
+  }
+
+  async classificationEvent(req: Request, res: Response) {
+    const event: ClassificationRequest = req.body;
+
+    try {
+      const result = await this.aiService.runClassification(event);
       res.json(result);
       if (result.text) {
         sendChatGeneration(result);

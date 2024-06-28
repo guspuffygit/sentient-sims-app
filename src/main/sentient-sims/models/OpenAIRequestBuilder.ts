@@ -25,6 +25,16 @@ export type PromptRequest2 = {
   stopTokens?: string[];
 };
 
+export type ClassificationRequest = {
+  systemPrompt: string;
+  classifiers: string[];
+  messages: string[];
+  maxResponseTokens: number;
+  maxTokens: number;
+  userPreResponse?: string;
+  assistantPreResponse?: string;
+};
+
 export class OpenAIRequestBuilder {
   private readonly tokenCounter: TokenCounter;
 
@@ -91,6 +101,61 @@ export class OpenAIRequestBuilder {
     return {
       messages: [systemMessage, ...memoriesToInsert],
       maxResponseTokens: promptRequest.maxResponseTokens,
+    };
+  }
+
+  buildClassificationOpenAIRequest(
+    classificationRequest: ClassificationRequest
+  ): OpenAICompatibleRequest {
+    const systemMessage: OpenAIMessage = {
+      role: 'system',
+      content: classificationRequest.systemPrompt,
+      tokens: this.tokenCounter.countTokens(classificationRequest.systemPrompt),
+    };
+
+    const messages: OpenAIMessage[] = [];
+    const memoriesToInsert: string[] = [];
+    let tokenCount = systemMessage.tokens;
+    let userInputCount = 0;
+
+    if (classificationRequest.assistantPreResponse) {
+      const assistantMessage: OpenAIMessage = {
+        role: 'assistant',
+        content: classificationRequest.assistantPreResponse,
+        tokens: this.tokenCounter.countTokens(
+          classificationRequest.assistantPreResponse
+        ),
+      };
+      messages.push(assistantMessage);
+      tokenCount += assistantMessage.tokens;
+    }
+
+    for (let i = classificationRequest.messages.length - 1; i >= 0; i--) {
+      const message = `${classificationRequest.messages[i]}\n`;
+
+      const newTokens = this.tokenCounter.countTokens(message);
+      tokenCount += newTokens;
+      userInputCount += newTokens;
+      if (tokenCount > classificationRequest.maxTokens) {
+        break;
+      }
+
+      memoriesToInsert.unshift(message);
+    }
+
+    if (classificationRequest.userPreResponse) {
+      memoriesToInsert.unshift(classificationRequest.userPreResponse);
+    }
+
+    const userInput: OpenAIMessage = {
+      role: 'user',
+      content: memoriesToInsert.join('').trimEnd(),
+      tokens: userInputCount,
+    };
+
+    return {
+      messages: [systemMessage, userInput, ...messages],
+      maxResponseTokens: classificationRequest.maxResponseTokens,
     };
   }
 }

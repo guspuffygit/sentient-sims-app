@@ -411,6 +411,16 @@ export function trimIncompleteSentence(text: string): string {
   return text;
 }
 
+export function getFirstWord(sentence: string): string {
+  const words = sentence.split(' ');
+
+  return words[0] || '';
+}
+
+export function removeNonLetters(input: string): string {
+  return input.replace(/[^a-zA-Z]/g, '');
+}
+
 export function removeStopTokens(text: string, stopTokens?: string[]) {
   let output = text;
 
@@ -435,6 +445,15 @@ export function cleanupAIOutput(text: string, stopTokens?: string[]): string {
   output = removeEmojis(output);
 
   return output.trim();
+}
+
+export function cleanAIClassificationOutput(text: string): string {
+  let output: string = text.trim();
+
+  output = getFirstWord(output);
+  output = removeNonLetters(output);
+
+  return output.trim().toLowerCase();
 }
 
 const daysOfWeek = [

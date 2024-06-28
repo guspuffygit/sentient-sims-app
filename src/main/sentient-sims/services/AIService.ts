@@ -30,10 +30,16 @@ import {
   getGenerationService,
   getTokenCounter,
 } from '../factories/generationServiceFactory';
-import { OpenAIRequestBuilder } from '../models/OpenAIRequestBuilder';
+import {
+  ClassificationRequest,
+  OpenAIRequestBuilder,
+} from '../models/OpenAIRequestBuilder';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
-import { cleanupAIOutput } from '../formatter/PromptFormatter';
+import {
+  cleanAIClassificationOutput,
+  cleanupAIOutput,
+} from '../formatter/PromptFormatter';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { InteractionService } from './InteractionService';
 import { InputFormatter } from '../formatter/InputOutputFormatting';
@@ -296,6 +302,47 @@ export class AIService {
       text: output,
       request: response.request,
       memory: newMemory,
+    };
+  }
+
+  async runClassification(
+    classificationRequest: ClassificationRequest
+  ): Promise<InteractionEventResult> {
+    const generationService = getGenerationService(this.settingsService);
+    const tokenCounter = getTokenCounter(this.settingsService);
+
+    const apiType: ApiType = this.settingsService.get(
+      SettingsEnum.AI_API_TYPE
+    ) as ApiType;
+
+    getInputFormatters(apiType).forEach((formatter) => {
+      // eslint-disable-next-line no-param-reassign
+      classificationRequest = formatter.formatClassification(
+        classificationRequest
+      );
+    });
+
+    const openAIRequestBuilder = new OpenAIRequestBuilder(tokenCounter);
+    const openAIRequest = openAIRequestBuilder.buildClassificationOpenAIRequest(
+      classificationRequest
+    );
+
+    const response = await generationService.sentientSimsGenerate(
+      openAIRequest
+    );
+
+    const output = cleanAIClassificationOutput(response.text);
+
+    let status: InteractionEventStatus = InteractionEventStatus.UNCLASSIFIED;
+
+    if (classificationRequest.classifiers.includes(output.toLowerCase())) {
+      status = InteractionEventStatus.CLASSIFIED;
+    }
+
+    return {
+      status,
+      text: output,
+      request: response.request,
     };
   }
 }

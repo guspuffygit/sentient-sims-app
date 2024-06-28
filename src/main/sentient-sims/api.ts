@@ -115,6 +115,10 @@ export function runApi({
 
   expressApp.post('/ai/v2/generate', aiController.sentientSimsGenerate);
   expressApp.post('/ai/v2/event/interaction', aiController.interactionEvent);
+  expressApp.post(
+    '/ai/v2/event/classification',
+    aiController.classificationEvent
+  );
 
   expressApp.get('/files/last-exception', fileController.getLastExceptionFiles);
   expressApp.delete(
