@@ -25,14 +25,25 @@ export type PromptRequest2 = {
   stopTokens?: string[];
 };
 
-export type ClassificationRequest = {
+export type OneShotRequest = {
   systemPrompt: string;
-  classifiers: string[];
   messages: string[];
   maxResponseTokens: number;
   maxTokens: number;
   userPreResponse?: string;
   assistantPreResponse?: string;
+};
+
+export type ClassificationRequest = {
+  name: string;
+  classifiers: string[];
+  messages: string[];
+};
+
+export type BuffRequest = {
+  name: string;
+  mood: string;
+  messages: string[];
 };
 
 export class OpenAIRequestBuilder {
@@ -104,13 +115,13 @@ export class OpenAIRequestBuilder {
     };
   }
 
-  buildClassificationOpenAIRequest(
-    classificationRequest: ClassificationRequest
+  buildOneShotOpenAIRequest(
+    oneShotRequest: OneShotRequest
   ): OpenAICompatibleRequest {
     const systemMessage: OpenAIMessage = {
       role: 'system',
-      content: classificationRequest.systemPrompt,
-      tokens: this.tokenCounter.countTokens(classificationRequest.systemPrompt),
+      content: oneShotRequest.systemPrompt,
+      tokens: this.tokenCounter.countTokens(oneShotRequest.systemPrompt),
     };
 
     const messages: OpenAIMessage[] = [];
@@ -118,33 +129,33 @@ export class OpenAIRequestBuilder {
     let tokenCount = systemMessage.tokens;
     let userInputCount = 0;
 
-    if (classificationRequest.assistantPreResponse) {
+    if (oneShotRequest.assistantPreResponse) {
       const assistantMessage: OpenAIMessage = {
         role: 'assistant',
-        content: classificationRequest.assistantPreResponse,
+        content: oneShotRequest.assistantPreResponse,
         tokens: this.tokenCounter.countTokens(
-          classificationRequest.assistantPreResponse
+          oneShotRequest.assistantPreResponse
         ),
       };
       messages.push(assistantMessage);
       tokenCount += assistantMessage.tokens;
     }
 
-    for (let i = classificationRequest.messages.length - 1; i >= 0; i--) {
-      const message = `${classificationRequest.messages[i]}\n`;
+    for (let i = oneShotRequest.messages.length - 1; i >= 0; i--) {
+      const message = `${oneShotRequest.messages[i]}\n`;
 
       const newTokens = this.tokenCounter.countTokens(message);
       tokenCount += newTokens;
       userInputCount += newTokens;
-      if (tokenCount > classificationRequest.maxTokens) {
+      if (tokenCount > oneShotRequest.maxTokens) {
         break;
       }
 
       memoriesToInsert.unshift(message);
     }
 
-    if (classificationRequest.userPreResponse) {
-      memoriesToInsert.unshift(classificationRequest.userPreResponse);
+    if (oneShotRequest.userPreResponse) {
+      memoriesToInsert.unshift(oneShotRequest.userPreResponse);
     }
 
     const userInput: OpenAIMessage = {
@@ -155,7 +166,7 @@ export class OpenAIRequestBuilder {
 
     return {
       messages: [systemMessage, userInput, ...messages],
-      maxResponseTokens: classificationRequest.maxResponseTokens,
+      maxResponseTokens: oneShotRequest.maxResponseTokens,
     };
   }
 }

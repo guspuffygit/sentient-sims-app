@@ -1,5 +1,7 @@
 import {
+  defaultBuffPrompt,
   defaultChatPrompt,
+  defaultMythoMaxBuffPrompt,
   defaultMythoMaxNsfwSystemPrompt,
   defaultMythoMaxSystemPrompt,
   defaultSystemPrompt,
@@ -32,4 +34,12 @@ export function getSystemPrompt(
   }
 
   return defaultMythoMaxSystemPrompt;
+}
+
+export function getBuffSystemPrompt(apiType: ApiType): string {
+  if (apiType === ApiType.OpenAI) {
+    return defaultBuffPrompt;
+  }
+
+  return defaultMythoMaxBuffPrompt;
 }

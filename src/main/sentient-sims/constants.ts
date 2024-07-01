@@ -34,6 +34,23 @@ export const defaultSystemPrompt = [
   'Use the characters and setting provided to frame the interaction.',
 ].join(' ');
 
+export const defaultClassificationPrompt = [
+  'Based on the user input, classify the converation with one of the following moods. Return only a single word of the mood that you think classifies the conversation:\n\n{classifiers}',
+].join(' ');
+
+export const defaultBuffPrompt = [
+  'Write a game buff description based on the user input.',
+  'The player ({name}) has just completed chatting with another player and is feeling {mood} from the conversation.',
+  'Write me a buff description based on the conversation so that {name} knows why they have received the "{mood}" buff.',
+  'Return only the defscription text itself without including any prefix or title in the output.',
+].join(' ');
+
+export const defaultMythoMaxBuffPrompt = [
+  'Write a game buff description based on the user input.',
+  'The player {name} has just completed chatting with another sim and is feeling {mood} from the conversation.',
+  'Write me a buff description based on the conversation so that {name} knows why they have received the "{mood}" buff.',
+].join(' ');
+
 export const sentientSimsAIHost = 'https://ai.sentientsimulations.com';
 
 export const defaultWantsSystemPrompt =

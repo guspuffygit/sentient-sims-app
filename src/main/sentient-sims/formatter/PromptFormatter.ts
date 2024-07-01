@@ -412,7 +412,7 @@ export function trimIncompleteSentence(text: string): string {
 }
 
 export function getFirstWord(sentence: string): string {
-  const words = sentence.split(' ');
+  const words = sentence.split(/\s+/);
 
   return words[0] || '';
 }

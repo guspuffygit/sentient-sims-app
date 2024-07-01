@@ -24,14 +24,16 @@ import {
 } from './PromptRequestBuilderService';
 import { containsPlayerSim } from '../util/eventContainsPlayerSim';
 import { ApiType } from '../models/ApiType';
-import { defaultWantsPrompt } from '../constants';
+import { defaultClassificationPrompt, defaultWantsPrompt } from '../constants';
 import { SettingsService } from './SettingsService';
 import {
   getGenerationService,
   getTokenCounter,
 } from '../factories/generationServiceFactory';
 import {
+  BuffRequest,
   ClassificationRequest,
+  OneShotRequest,
   OpenAIRequestBuilder,
 } from '../models/OpenAIRequestBuilder';
 import { SettingsEnum } from '../models/SettingsEnum';
@@ -45,6 +47,7 @@ import { InteractionService } from './InteractionService';
 import { InputFormatter } from '../formatter/InputOutputFormatting';
 import { MythoMaxFormatter } from '../formatter/MythoMaxFormatter';
 import { NovelAIFormatter } from '../formatter/NovelAIFormatter';
+import { getBuffSystemPrompt } from '../systemPrompts';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   const inputFormatters: InputFormatter[] = [];
@@ -315,17 +318,26 @@ export class AIService {
       SettingsEnum.AI_API_TYPE
     ) as ApiType;
 
+    const systemPrompt = defaultClassificationPrompt.replaceAll(
+      '{classifiers}',
+      classificationRequest.classifiers.join(', ')
+    );
+
+    let oneShotRequest: OneShotRequest = {
+      systemPrompt,
+      messages: classificationRequest.messages,
+      maxResponseTokens: 15,
+      maxTokens: 3900,
+    };
+
     getInputFormatters(apiType).forEach((formatter) => {
       // eslint-disable-next-line no-param-reassign
-      classificationRequest = formatter.formatClassification(
-        classificationRequest
-      );
+      oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
     const openAIRequestBuilder = new OpenAIRequestBuilder(tokenCounter);
-    const openAIRequest = openAIRequestBuilder.buildClassificationOpenAIRequest(
-      classificationRequest
-    );
+    const openAIRequest =
+      openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
 
     const response = await generationService.sentientSimsGenerate(
       openAIRequest
@@ -341,6 +353,47 @@ export class AIService {
 
     return {
       status,
+      text: output,
+      request: response.request,
+    };
+  }
+
+  async runBuff(buffRequest: BuffRequest): Promise<InteractionEventResult> {
+    const generationService = getGenerationService(this.settingsService);
+    const tokenCounter = getTokenCounter(this.settingsService);
+
+    const apiType: ApiType = this.settingsService.get(
+      SettingsEnum.AI_API_TYPE
+    ) as ApiType;
+
+    const systemPrompt = getBuffSystemPrompt(apiType)
+      .replaceAll('{mood}', buffRequest.mood)
+      .replaceAll('{name}', buffRequest.name);
+
+    let oneShotRequest: OneShotRequest = {
+      systemPrompt,
+      messages: buffRequest.messages,
+      maxResponseTokens: 90,
+      maxTokens: 3900,
+    };
+
+    getInputFormatters(apiType).forEach((formatter) => {
+      // eslint-disable-next-line no-param-reassign
+      oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
+    });
+
+    const openAIRequestBuilder = new OpenAIRequestBuilder(tokenCounter);
+    const openAIRequest =
+      openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
+
+    const response = await generationService.sentientSimsGenerate(
+      openAIRequest
+    );
+
+    const output = cleanupAIOutput(response.text);
+
+    return {
+      status: InteractionEventStatus.GENERATED,
       text: output,
       request: response.request,
     };

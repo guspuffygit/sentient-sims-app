@@ -119,6 +119,7 @@ export function runApi({
     '/ai/v2/event/classification',
     aiController.classificationEvent
   );
+  expressApp.post('/ai/v2/event/buff', aiController.buffEvent);
 
   expressApp.get('/files/last-exception', fileController.getLastExceptionFiles);
   expressApp.delete(

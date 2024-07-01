@@ -1,13 +1,8 @@
-import {
-  ClassificationRequest,
-  PromptRequest2,
-} from '../models/OpenAIRequestBuilder';
+import { OneShotRequest, PromptRequest2 } from '../models/OpenAIRequestBuilder';
 
 export interface InputFormatter {
   formatInput(promptRequest: PromptRequest2): PromptRequest2;
-  formatClassification(
-    classificationRequest: ClassificationRequest
-  ): ClassificationRequest;
+  formatOneShotRequest(oneShotRequest: OneShotRequest): OneShotRequest;
 }
 
 export interface OutputFormatter {}
