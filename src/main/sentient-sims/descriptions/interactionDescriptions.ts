@@ -5688,24 +5688,16 @@ export const interactionDescriptions: Map<String, InteractionDescription> =
         ],
       },
       mixer_MusicProductionStation_Remix: {
-        pre_actions: [
-          '{actor.0} is using the Music Production Station to remix a track.',
-        ],
+        ignored: true,
       },
       mixer_MusicProductionStation_Idle: {
-        pre_actions: [
-          '{actor.0} is inviting {actor.1} to collaborate on a music production project together, as both of them are idle and seeking creative opportunities.',
-        ],
+        ignored: true,
       },
       mixer_MusicProductionStation_HeadphoneIdles: {
-        pre_actions: [
-          '{actor.0} is inviting {actor.1} to listen to some music together at the Music Production Station, as they are both idly chatting and enjoying the tunes.',
-        ],
+        ignored: true,
       },
       mixer_MusicProductionStation_BurnTrack: {
-        pre_actions: [
-          '{actor.0} is using the Music Production Station to burn a new track.',
-        ],
+        ignored: true,
       },
       mixer_social_Squad_SaySomethingFunny_targered_Friendly_alwaysOn: {
         pre_actions: [
@@ -5731,9 +5723,7 @@ export const interactionDescriptions: Map<String, InteractionDescription> =
         ],
       },
       mixer_MusicProductionStation_RemixIdle: {
-        pre_actions: [
-          '{actor.0} is jumping on the music production station and starting to remix a track while {actor.1} is watching in idle fascination.',
-        ],
+        ignored: true,
       },
       mixer_social_Fame_Quirk_ASeriousActor_Targeted_Mean_EmotionSpecific_Rant:
         {
@@ -9314,6 +9304,33 @@ export const interactionDescriptions: Map<String, InteractionDescription> =
         ignored: true,
       },
       idle_Buff_SimPreference_DecorReaction_Cute: {
+        ignored: true,
+      },
+      dance_skill_action_1_seeSaw: {
+        ignored: true,
+      },
+      dance_skill_Passive_1_Low: {
+        ignored: true,
+      },
+      marketStalls_Open: {
+        ignored: true,
+      },
+      idle_Buff_SimPreference_DecorReaction_Island: {
+        ignored: true,
+      },
+      idle_Buff_SimPreference_Likes_Music_Blues: {
+        ignored: true,
+      },
+      Foodball_Eat_Active: {
+        ignored: true,
+      },
+      FoodBall_Eat_LastBite: {
+        ignored: true,
+      },
+      generic_consume_foodBall: {
+        ignored: true,
+      },
+      Idle_Trait_Active: {
         ignored: true,
       },
       'TURBODRIVER:WickedWhims_AffSuper_StripClub_Customer_ThrowMoney': {
