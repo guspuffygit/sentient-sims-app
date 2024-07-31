@@ -1,5 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import log from 'electron-log';
+import { ModelsPage } from 'openai/resources';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { fetchWithTimeout } from '../util/fetchWithTimeout';
@@ -96,11 +97,31 @@ export class SentientSimsAIService implements GenerationService {
   }
 
   async getModels(): Promise<AIModel[]> {
-    return [
-      {
-        name: '',
-        displayName: 'Gryphe/MythoMax-L2-13b',
-      },
-    ];
+    const url = `${this.serviceUrl()}/models`;
+    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
+    log.debug(`getModels: ${url}`);
+    try {
+      const response = await fetchWithTimeout(url, {
+        headers: {
+          Authentication: authHeader,
+        },
+        timeout: 5000,
+      });
+      const modelsResponse: ModelsPage = await response.json();
+
+      const aiModels: AIModel[] = [];
+      modelsResponse.data.forEach((model) =>
+        aiModels.push({
+          name: model.id,
+          displayName: model.id,
+        })
+      );
+
+      return aiModels;
+    } catch (e: any) {
+      log.error('Error getting sentient sims models', e);
+
+      throw e;
+    }
   }
 }
