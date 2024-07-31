@@ -12,6 +12,7 @@ import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { sendPopUpNotification } from '../util/notifyRenderer';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
+import { AIModel } from '../models/AIModel';
 
 export class OpenAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -164,5 +165,19 @@ export class OpenAIService implements GenerationService {
       request
     );
     return this.getOutputFromGeneration(result);
+  }
+
+  async getModels(): Promise<AIModel[]> {
+    const models = await this.getOpenAIClient().models.list();
+
+    const aiModels: AIModel[] = [];
+    models.data.forEach((model) => {
+      aiModels.push({
+        name: model.id,
+        displayName: model.id,
+      });
+    });
+
+    return aiModels;
   }
 }

@@ -5,6 +5,7 @@ import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { sendPopUpNotification } from '../util/notifyRenderer';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
+import { AIModel } from '../models/AIModel';
 
 type KoboldAIModelResponse = {
   result: string;
@@ -60,13 +61,10 @@ export class KoboldAIService implements GenerationService {
   }
 
   async healthCheck() {
-    const url = `${this.serviceUrl()}/api/v1/model`;
-    log.debug(`test koboldai health: ${url}`);
     try {
-      const response = await fetch(url);
-      const modelResponse: KoboldAIModelResponse = await response.json();
-      const currentModel = modelResponse.result.toLowerCase();
-      log.debug(`Current KoboldAI Model: ${currentModel}`);
+      const models = await this.getModels();
+      const currentModel = models[0].name.toLowerCase();
+
       if (currentModel.includes('read only')) {
         return {
           status:
@@ -88,6 +86,29 @@ export class KoboldAIService implements GenerationService {
       return {
         status: 'Kobold AI Not accessible',
       };
+    }
+  }
+
+  // KoboldAI Can only return the result of the current loaded model
+  async getModels(): Promise<AIModel[]> {
+    const url = `${this.serviceUrl()}/api/v1/model`;
+    log.debug(`Grabbing koboldai model: ${url}`);
+    try {
+      const response = await fetch(url);
+      const modelResponse: KoboldAIModelResponse = await response.json();
+      const currentModel = modelResponse.result.toLowerCase();
+      log.debug(`Current KoboldAI Model: ${currentModel}`);
+
+      return [
+        {
+          name: modelResponse.result,
+          displayName: modelResponse.result,
+        },
+      ];
+    } catch (e: any) {
+      log.error('Error getting KoboldAI models', e);
+
+      throw e;
     }
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import log from 'electron-log';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
@@ -8,6 +9,7 @@ import { fetchWithRetries } from '../util/fetchWithRetries';
 import { sendPopUpNotification } from '../util/notifyRenderer';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { SentientSimsAIError } from '../exceptions/SentientSimsAIError';
+import { AIModel } from '../models/AIModel';
 
 export class SentientSimsAIService implements GenerationService {
   private settingsService: SettingsService;
@@ -91,5 +93,14 @@ export class SentientSimsAIService implements GenerationService {
         status: 'Sentient Sims AI Not healthy',
       };
     }
+  }
+
+  async getModels(): Promise<AIModel[]> {
+    return [
+      {
+        name: '',
+        displayName: 'Gryphe/MythoMax-L2-13b',
+      },
+    ];
   }
 }

@@ -6,6 +6,7 @@ import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
+import { AIModel } from '../models/AIModel';
 
 export class NovelAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -231,5 +232,14 @@ export class NovelAIService implements GenerationService {
       text: 'Error generating via novelai',
       request,
     };
+  }
+
+  async getModels(): Promise<AIModel[]> {
+    return [
+      {
+        name: 'kayra-v1',
+        displayName: 'kayra-v1',
+      },
+    ];
   }
 }
