@@ -94,6 +94,10 @@ export class LogSendService {
       errors.push(message, err);
     }
 
+    if (errors.length === 0) {
+      this.lastExceptionService.deleteLastExceptionFiles();
+    }
+
     return {
       logId,
       errors,
