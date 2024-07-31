@@ -4,7 +4,6 @@ import UpdateComponent from './UpdateComponent';
 import DebugCard from './DebugCard';
 import { ThankYouCardPatreon } from './ThankYouCard';
 import AIStatusComponent from './AIStatusComponent';
-import { MappingLeaderboardComponent } from './components/MappingLeaderboardComponent';
 
 export default function HomePage() {
   return (
@@ -14,7 +13,6 @@ export default function HomePage() {
           <UpdateComponent />
           <AIStatusComponent />
           <DebugCard />
-          <MappingLeaderboardComponent />
         </Grid>
         <Grid item xs={6}>
           <AppCard>
