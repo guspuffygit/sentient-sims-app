@@ -16,3 +16,7 @@ export enum SettingsEnum {
   KOBOLDAI_ENDPOINT = 'koboldAIEndpoint',
   SENTIENTSIMSAI_ENDPOINT = 'sentientsimsAIEndpoint',
 }
+
+export enum DeprecatedSettingsEnum {
+  CUSTOM_LLM_ENABLED = 'customLLMEnabled',
+}
