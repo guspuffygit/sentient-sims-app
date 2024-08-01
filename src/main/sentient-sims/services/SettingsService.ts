@@ -2,8 +2,11 @@ import log from 'electron-log';
 import Store from 'electron-store';
 import path from 'path';
 import { SettingsEnum } from '../models/SettingsEnum';
-import { ApiType } from '../models/ApiType';
-import { sentientSimsAIHost } from '../constants';
+import {
+  koboldaiDefaultEndpoint,
+  openaiDefaultEndpoint,
+  sentientSimsAIHost,
+} from '../constants';
 import { disableDebugLogging, enableDebugLogging } from '../util/debugLog';
 
 export function defaultStore(cwd?: string) {
@@ -21,14 +24,6 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.NOVELAI_MODEL.toString()]: {
         type: 'string',
         default: 'kayra-v1',
-      },
-      [SettingsEnum.CUSTOM_LLM_ENABLED.toString()]: {
-        type: 'boolean',
-        default: false,
-      },
-      [SettingsEnum.CUSTOM_LLM_HOSTNAME.toString()]: {
-        type: 'string',
-        default: sentientSimsAIHost,
       },
       [SettingsEnum.MODS_DIRECTORY.toString()]: {
         type: 'string',
@@ -72,23 +67,17 @@ export function defaultStore(cwd?: string) {
         type: 'boolean',
         default: true,
       },
-    },
-    migrations: {
-      '3.1.0': (store) => {
-        if (store.get(SettingsEnum.CUSTOM_LLM_ENABLED)) {
-          if (
-            store.get(SettingsEnum.CUSTOM_LLM_ENABLED) === sentientSimsAIHost
-          ) {
-            store.set(
-              SettingsEnum.AI_API_TYPE,
-              ApiType.SentientSimsAI.toString()
-            );
-          } else {
-            store.set(SettingsEnum.AI_API_TYPE, ApiType.CustomAI.toString());
-          }
-        } else {
-          store.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI.toString());
-        }
+      [SettingsEnum.OPENAI_ENDPOINT.toString()]: {
+        type: 'string',
+        default: openaiDefaultEndpoint,
+      },
+      [SettingsEnum.KOBOLDAI_ENDPOINT.toString()]: {
+        type: 'string',
+        default: koboldaiDefaultEndpoint,
+      },
+      [SettingsEnum.SENTIENTSIMSAI_ENDPOINT.toString()]: {
+        type: 'string',
+        default: sentientSimsAIHost,
       },
     },
   });

@@ -19,7 +19,7 @@ export class KoboldAIService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return this.settingsService.get(SettingsEnum.CUSTOM_LLM_HOSTNAME) as string;
+    return this.settingsService.get(SettingsEnum.KOBOLDAI_ENDPOINT) as string;
   }
 
   async generate(prompt: string, maxResponseTokens: number): Promise<string> {

@@ -31,7 +31,7 @@ export class OpenAIService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return 'https://api.openai.com/v1';
+    return this.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) as string;
   }
 
   getOpenAIModel(): string {
@@ -61,10 +61,11 @@ export class OpenAIService implements GenerationService {
   }
 
   private getOpenAIClient(apiKey?: string): OpenAI {
-    if (!this.openAIClient) {
+    const newApiKey = apiKey ?? this.getOpenAIKey();
+    if (!this.openAIClient || this.openAIClient.apiKey !== newApiKey) {
       this.openAIClient = new OpenAI({
         dangerouslyAllowBrowser: process.env.NODE_ENV === 'test',
-        apiKey: apiKey ?? this.getOpenAIKey(),
+        apiKey: newApiKey,
         baseURL: this.serviceUrl(),
       });
     }

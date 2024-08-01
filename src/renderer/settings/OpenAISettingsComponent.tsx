@@ -1,68 +1,30 @@
-import {
-  Box,
-  Divider,
-  IconButton,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
-import useSetting from 'renderer/hooks/useSetting';
-import log from 'electron-log';
-import RotateLeftIcon from '@mui/icons-material/RotateLeft';
-import EditIcon from '@mui/icons-material/Edit';
+/* eslint-disable react/jsx-no-useless-fragment */
+import { ApiType } from 'main/sentient-sims/models/ApiType';
+import { PropsWithChildren } from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import AppCard from '../AppCard';
-import CustomLLMSettingsComponent from './CustomLLMSettings';
-import LocalizationSettingsComponent from './LocalizationSettingsComponent';
-import DebugLogsSettingsComponent from './DebugLogsSettingsComponent';
+import { AIEndpointComponent } from './AIEndpointComponent';
 
-export default function OpenAISettingsComponent() {
-  const modsDirectory = useSetting(SettingsEnum.MODS_DIRECTORY);
+type OpenAISettingsComponentProps = {
+  apiType: ApiType;
+} & PropsWithChildren;
 
-  const handleDirectoryPicker = async () => {
-    try {
-      const filePath = await window.electron.selectDirectory();
-      if (filePath) {
-        log.info(`Changed Mods directory to: ${filePath}`);
-        modsDirectory.setSetting(filePath);
-      }
-    } catch (error) {
-      log.error('Error selecting directory:', error);
-    }
-  };
+export default function OpenAISettingsComponent({
+  apiType,
+  children,
+}: OpenAISettingsComponentProps) {
+  if (apiType !== ApiType.OpenAI) {
+    return <></>;
+  }
 
   return (
-    <AppCard>
-      <Typography>Settings</Typography>
-      <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-      <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
-        <TextField
-          focused
-          id="outlined-basic"
-          label="Mods Directory"
-          variant="outlined"
-          value={modsDirectory.value}
-          size="small"
-          fullWidth
-          InputProps={{
-            readOnly: true,
-          }}
-          sx={{ marginRight: 1 }}
-        />
-        <Tooltip title="Edit">
-          <IconButton onClick={() => handleDirectoryPicker()}>
-            <EditIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Reset to Default">
-          <IconButton onClick={() => modsDirectory.resetSetting()}>
-            <RotateLeftIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
-      <CustomLLMSettingsComponent />
-      <LocalizationSettingsComponent />
-      <DebugLogsSettingsComponent />
-    </AppCard>
+    <>
+      {children}
+      <AIEndpointComponent
+        type={ApiType.OpenAI}
+        selectedApiType={ApiType.OpenAI}
+        settingsEnum={SettingsEnum.OPENAI_ENDPOINT}
+        label="OpenAI Endpoint"
+      />
+    </>
   );
 }

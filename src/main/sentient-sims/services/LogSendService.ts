@@ -174,6 +174,20 @@ export class LogSendService {
     return { text: logId };
   }
 
+  private getSettings(): string[] {
+    const settings: string[] = [];
+
+    Object.values(SettingsEnum).forEach((settingsEnum) => {
+      // Dont send tokens or secrets in the logs
+      if (!settingsEnum.includes('Key') && !settingsEnum.includes('Token')) {
+        const settingsValue = this.settingsService.getSetting(settingsEnum);
+        settings.push(`${settingsEnum}: ${settingsValue}`);
+      }
+    });
+
+    return settings;
+  }
+
   private appendInformationToFormData(
     formData: FormData,
     logId: string,
@@ -190,20 +204,10 @@ export class LogSendService {
           `Architecture: ${os.arch()}`,
           `OS Release: ${os.release()}`,
           `Mods Folder: ${this.directoryService.getModsFolder()}`,
-          `OpenAI Model: ${this.settingsService.get(
-            SettingsEnum.OPENAI_MODEL
-          )}`,
-          `Api Type: ${this.settingsService.get(SettingsEnum.AI_API_TYPE)}`,
-          `Custom LLM Hostname: ${this.settingsService.get(
-            SettingsEnum.CUSTOM_LLM_HOSTNAME
-          )}`,
-          `Release Type: ${this.settingsService.get(SettingsEnum.MOD_RELEASE)}`,
           `Mod Version: ${this.versionService.getModVersion().version}`,
           `App Version: ${app.getVersion()}`,
           `Game Version: ${this.versionService.getGameVersion().version}`,
-          `Debug Logging: ${this.settingsService.getSetting(
-            SettingsEnum.DEBUG_LOGS
-          )}`,
+          ...this.getSettings(),
         ].join('\n')
       );
     } catch (err: any) {
