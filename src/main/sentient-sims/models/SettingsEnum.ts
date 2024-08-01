@@ -5,7 +5,6 @@ export enum SettingsEnum {
   MODS_DIRECTORY = 'modsDirectory',
   CUSTOM_LLM_ENABLED = 'customLLMEnabled',
   AI_API_TYPE = 'aiApiType',
-  CUSTOM_LLM_HOSTNAME = 'customLLMHostname',
   ACCESS_TOKEN = 'accessToken',
   OPENAI_KEY = 'openaiKey',
   NOVELAI_KEY = 'novelaiKey',
@@ -14,4 +13,7 @@ export enum SettingsEnum {
   DEBUG_LOGS = 'debugLogs',
   NSFW_ENABLED = 'nsfwEnabled',
   MAPPING_NOTIFICATION_ENABLED = 'mappingNotificationEnabled',
+  OPENAI_ENDPOINT = 'openaiEndpoint',
+  KOBOLDAI_ENDPOINT = 'koboldAIEndpoint',
+  SENTIENTSIMSAI_ENDPOINT = 'sentientsimsAIEndpoint',
 }

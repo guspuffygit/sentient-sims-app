@@ -62,3 +62,5 @@ export const rendererWebsocketPort = 25146;
 export const modWebsocketPort = 25145;
 export const appApiPort = 25148;
 export const appApiUrl = `http://localhost:${appApiPort}`;
+export const openaiDefaultEndpoint = 'https://api.openai.com/v1';
+export const koboldaiDefaultEndpoint = 'http://localhost:5000';

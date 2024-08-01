@@ -31,7 +31,7 @@ export class OpenAIService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return 'https://api.openai.com/v1';
+    return this.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) as string;
   }
 
   getOpenAIModel(): string {
@@ -61,10 +61,11 @@ export class OpenAIService implements GenerationService {
   }
 
   private getOpenAIClient(apiKey?: string): OpenAI {
-    if (!this.openAIClient) {
+    const newApiKey = apiKey ?? this.getOpenAIKey();
+    if (!this.openAIClient || this.openAIClient.apiKey !== newApiKey) {
       this.openAIClient = new OpenAI({
         dangerouslyAllowBrowser: process.env.NODE_ENV === 'test',
-        apiKey: apiKey ?? this.getOpenAIKey(),
+        apiKey: newApiKey,
         baseURL: this.serviceUrl(),
       });
     }
@@ -75,25 +76,11 @@ export class OpenAIService implements GenerationService {
   async healthCheck(apiKey?: string) {
     const client: OpenAI = this.getOpenAIClient(apiKey);
 
-    const request: CompletionCreateParamsNonStreaming = {
-      stream: false,
-      model: 'gpt-3.5-turbo',
-      max_tokens: 100,
-      temperature: 0,
-      top_p: 0,
-      messages: [
-        {
-          role: 'user',
-          content: 'Return the text "OK"',
-        },
-      ],
-    };
-
     try {
-      const response = await client.chat.completions.create(request);
-      const text = this.getOutputFromGeneration(response);
+      const response = await client.models.list();
+      log.info(response.data);
       return {
-        status: text,
+        status: 'Rtrieved models',
       };
     } catch (error: any) {
       log.error('Error testing OpenAI API:', error);
