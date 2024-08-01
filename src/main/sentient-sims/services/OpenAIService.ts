@@ -76,11 +76,25 @@ export class OpenAIService implements GenerationService {
   async healthCheck(apiKey?: string) {
     const client: OpenAI = this.getOpenAIClient(apiKey);
 
+    const request: CompletionCreateParamsNonStreaming = {
+      stream: false,
+      model: 'gpt-3.5-turbo',
+      max_tokens: 100,
+      temperature: 0,
+      top_p: 0,
+      messages: [
+        {
+          role: 'user',
+          content: 'Return the text "OK"',
+        },
+      ],
+    };
+
     try {
-      const response = await client.models.list();
-      log.info(response.data);
+      const response = await client.chat.completions.create(request);
+      const text = this.getOutputFromGeneration(response);
       return {
-        status: 'Rtrieved models',
+        status: text,
       };
     } catch (error: any) {
       log.error('Error testing OpenAI API:', error);

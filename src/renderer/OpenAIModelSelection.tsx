@@ -32,7 +32,6 @@ export default function OpenAIModelSelection() {
           onChange={handleChange}
         >
           <ListSubheader>gpt-3.5</ListSubheader>
-          <MenuItem value="gpt-4o-mini">gpt-4o-mini</MenuItem>
           <MenuItem value="gpt-3.5-turbo">gpt-3.5-turbo</MenuItem>
           <MenuItem value="gpt-3.5-turbo-0613">gpt-3.5-turbo-0613</MenuItem>
           <MenuItem value="gpt-3.5-turbo-16k">gpt-3.5-turbo-16k</MenuItem>

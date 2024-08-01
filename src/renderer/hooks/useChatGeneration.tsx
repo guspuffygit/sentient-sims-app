@@ -56,7 +56,6 @@ export interface ChatGeneration {
   addNewMessage: (role: ChatCompletionMessageRole) => void;
   generateMultipleChat: (count: number) => Promise<string[]>;
   handleGenerationLoaded: Dispatch<SetStateAction<() => void>>;
-  apiType: ApiType;
 }
 
 export default function useChatGeneration(): ChatGeneration {
@@ -227,6 +226,5 @@ export default function useChatGeneration(): ChatGeneration {
     countTokens,
     generateMultipleChat,
     handleGenerationLoaded: setGenerationLoadedCallback,
-    apiType: apiType.value,
   };
 }
