@@ -14,13 +14,13 @@ import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiType, ApiTypeFromValue } from 'main/sentient-sims/models/ApiType';
 import AppCard from './AppCard';
-import SentientSimsSettingsComponent from './settings/CustomLLMSettings';
 import DebugLogsSettingsComponent from './settings/DebugLogsSettingsComponent';
 import LocalizationSettingsComponent from './settings/LocalizationSettingsComponent';
 import OpenAISettingsComponent from './settings/OpenAISettingsComponent';
 import { AISelectionComponent } from './settings/AISelectionComponent';
 import { AnimationMappingSettingsComponent } from './settings/AnimationMappingSettingsComponent';
 import { KoboldAISettingsComponent } from './settings/KoboldAISettingsComponent';
+import { SentientSimsSettingsComponent } from './settings/SentientSimsSettingsComponent';
 
 export default function SettingsPage() {
   const aiType = useSetting(

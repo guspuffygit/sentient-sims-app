@@ -10,7 +10,7 @@ type SentientSimsSettingsComponentProps = {
   apiType: ApiType;
 };
 
-export default function SentientSimsSettingsComponent({
+export function SentientSimsSettingsComponent({
   apiType,
 }: SentientSimsSettingsComponentProps) {
   const { user } = useAuthenticator((context) => [context.user]);

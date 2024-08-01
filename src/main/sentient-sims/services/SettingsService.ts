@@ -3,7 +3,11 @@ import Store from 'electron-store';
 import path from 'path';
 import { DeprecatedSettingsEnum, SettingsEnum } from '../models/SettingsEnum';
 import { ApiType } from '../models/ApiType';
-import { sentientSimsAIHost } from '../constants';
+import {
+  koboldaiDefaultEndpoint,
+  openaiDefaultEndpoint,
+  sentientSimsAIHost,
+} from '../constants';
 import { disableDebugLogging, enableDebugLogging } from '../util/debugLog';
 
 export function defaultStore(cwd?: string) {
@@ -67,6 +71,18 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.MAPPING_NOTIFICATION_ENABLED.toString()]: {
         type: 'boolean',
         default: true,
+      },
+      [SettingsEnum.OPENAI_ENDPOINT.toString()]: {
+        type: 'string',
+        default: openaiDefaultEndpoint,
+      },
+      [SettingsEnum.SENTIENTSIMSAI_ENDPOINT.toString()]: {
+        type: 'string',
+        default: sentientSimsAIHost,
+      },
+      [SettingsEnum.KOBOLDAI_ENDPOINT.toString()]: {
+        type: 'string',
+        default: koboldaiDefaultEndpoint,
       },
     },
     migrations: {

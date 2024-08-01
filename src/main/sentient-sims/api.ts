@@ -120,6 +120,7 @@ export function runApi({
     aiController.classificationEvent
   );
   expressApp.post('/ai/v2/event/buff', aiController.buffEvent);
+  expressApp.get('/ai/v2/models', aiController.getModels);
 
   expressApp.get('/files/last-exception', fileController.getLastExceptionFiles);
   expressApp.delete(

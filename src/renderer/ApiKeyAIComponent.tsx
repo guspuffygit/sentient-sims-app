@@ -3,7 +3,6 @@ import { LoadingButton } from '@mui/lab';
 import { useState } from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import AppCard from './AppCard';
-import OpenAIModelSelection from './OpenAIModelSelection';
 import useApiKeyAITest from './hooks/useOpenAITest';
 import APIKeyModal from './APIKeyModal';
 
@@ -62,7 +61,6 @@ export default function ApiKeyAIComponent({
             Edit {aiName} Key
           </LoadingButton>
         </div>
-        <OpenAIModelSelection />
       </div>
 
       <APIKeyModal

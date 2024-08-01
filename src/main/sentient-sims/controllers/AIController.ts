@@ -24,6 +24,7 @@ export class AIController {
     this.interactionEvent = this.interactionEvent.bind(this);
     this.classificationEvent = this.classificationEvent.bind(this);
     this.buffEvent = this.buffEvent.bind(this);
+    this.getModels = this.getModels.bind(this);
   }
 
   async sentientSimsGenerate(req: Request, res: Response) {
@@ -98,6 +99,19 @@ export class AIController {
         error: err?.message,
       });
       sendPopUpNotification(err?.message);
+    }
+  }
+
+  async getModels(req: Request, res: Response) {
+    try {
+      const result = await this.aiService.getModels();
+      res.json(result);
+    } catch (err: any) {
+      log.error('Error getting models', err);
+      // sendPopUpNotification(err?.message);
+      res.status(500).json({
+        error: err?.message,
+      });
     }
   }
 }

@@ -48,6 +48,7 @@ import { InputFormatter } from '../formatter/InputOutputFormatting';
 import { MythoMaxFormatter } from '../formatter/MythoMaxFormatter';
 import { NovelAIFormatter } from '../formatter/NovelAIFormatter';
 import { getBuffSystemPrompt } from '../systemPrompts';
+import { AIModel } from '../models/AIModel';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   const inputFormatters: InputFormatter[] = [];
@@ -397,5 +398,11 @@ export class AIService {
       text: output,
       request: response.request,
     };
+  }
+
+  async getModels(): Promise<AIModel[]> {
+    const generationService = getGenerationService(this.settingsService);
+
+    return generationService.getModels();
   }
 }

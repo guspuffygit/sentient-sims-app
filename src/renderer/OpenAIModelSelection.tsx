@@ -1,18 +1,63 @@
 import {
-  ListSubheader,
+  FormHelperText,
+  IconButton,
   MenuItem,
   Select,
   SelectChangeEvent,
+  Tooltip,
 } from '@mui/material';
+import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import { LoadingButton } from '@mui/lab';
+import { AIModel, compareAIModels } from 'main/sentient-sims/models/AIModel';
+import { openaiDefaultEndpoint } from 'main/sentient-sims/constants';
+import { UseQueryResult } from '@tanstack/react-query';
+import log from 'electron-log';
 import useSetting, { SettingsHook } from './hooks/useSetting';
-import { useDebugMode } from './providers/DebugModeProvider';
 
-export default function OpenAIModelSelection() {
-  const debugMode = useDebugMode();
+function shouldIncludeModel(model: AIModel): boolean {
+  const name = model.name.toLowerCase();
+  if (name.includes('text-embedding')) {
+    return false;
+  }
+
+  if (name.includes('tts-')) {
+    return false;
+  }
+
+  if (name.includes('davinci')) {
+    return false;
+  }
+
+  if (name.includes('babbage')) {
+    return false;
+  }
+
+  if (name.includes('dall-e')) {
+    return false;
+  }
+
+  if (name.includes('whisper')) {
+    return false;
+  }
+
+  return true;
+}
+
+type OpenAIModelSelectionProps = {
+  aiModels: UseQueryResult<AIModel[], Error>;
+};
+
+export default function OpenAIModelSelection({
+  aiModels,
+}: OpenAIModelSelectionProps) {
   const openAIModel: SettingsHook = useSetting(
     SettingsEnum.OPENAI_MODEL,
     'gpt-3.5-turbo'
+  );
+  const openAIEndpoint: SettingsHook = useSetting(
+    SettingsEnum.OPENAI_ENDPOINT,
+    openaiDefaultEndpoint
   );
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -20,33 +65,79 @@ export default function OpenAIModelSelection() {
     openAIModel.setSetting(model);
   };
 
-  if (debugMode.isEnabled) {
+  if (aiModels.isFetching || aiModels.isLoading) {
+    return (
+      <LoadingButton loading size="large" variant="outlined" disabled>
+        <span>models</span>
+      </LoadingButton>
+    );
+  }
+
+  if (aiModels.isError) {
     return (
       <div>
-        <Select
-          size="small"
-          labelId="openai-model-label"
-          id="openai-model"
-          label="OpenAI Model"
-          value={openAIModel.value}
-          onChange={handleChange}
-        >
-          <ListSubheader>gpt-3.5</ListSubheader>
-          <MenuItem value="gpt-3.5-turbo">gpt-3.5-turbo</MenuItem>
-          <MenuItem value="gpt-3.5-turbo-0613">gpt-3.5-turbo-0613</MenuItem>
-          <MenuItem value="gpt-3.5-turbo-16k">gpt-3.5-turbo-16k</MenuItem>
-          <MenuItem value="gpt-3.5-turbo-16k-0613">
-            gpt-3.5-turbo-16k-0613
-          </MenuItem>
-          <ListSubheader>gpt-4 (10x more $$$ BE AWARE)</ListSubheader>
-          <MenuItem value="gpt-4">gpt-4 ($0.03/1Kt, $0.06/1Kt)</MenuItem>
-          <MenuItem value="gpt-4-0613">gpt-4-0613</MenuItem>
-          <MenuItem value="gpt-4o">gpt-4o</MenuItem>
-        </Select>
+        <FormHelperText sx={{ m: 1 }} error>
+          Error: {aiModels.error.message}
+        </FormHelperText>
       </div>
     );
   }
 
-  // eslint-disable-next-line react/jsx-no-useless-fragment
-  return <></>;
+  const selectChildren: any[] = [];
+
+  if (aiModels?.data?.filter) {
+    const models = aiModels.data
+      .filter((model) => shouldIncludeModel(model))
+      .sort(compareAIModels);
+
+    let currentSelectedModelAvailable = false;
+    const currentModel = openAIModel.value;
+    models.forEach((model) => {
+      selectChildren.push(
+        <MenuItem value={model.name}>{model.displayName}</MenuItem>
+      );
+      if (model.name === currentModel) {
+        currentSelectedModelAvailable = true;
+      }
+    });
+    if (!currentSelectedModelAvailable) {
+      log.info(
+        `Currently selected OpenAI model ${currentModel} is not available`
+      );
+      if (openAIEndpoint.value === openaiDefaultEndpoint) {
+        openAIModel.resetSetting();
+      } else if (models.length > 0) {
+        openAIModel.setSetting(models[0].name);
+      } else {
+        log.error(
+          'Unable to set an OpenAI model because none were returned from the API'
+        );
+      }
+    }
+  }
+
+  return (
+    <div>
+      <Select
+        size="small"
+        labelId="openai-model-label"
+        id="openai-model"
+        label="OpenAI Model"
+        value={openAIModel.value}
+        onChange={handleChange}
+      >
+        {selectChildren}
+      </Select>
+      {openAIEndpoint.value === openaiDefaultEndpoint ? (
+        <Tooltip title="Reset to Default">
+          <IconButton
+            sx={{ marginLeft: 1 }}
+            onClick={() => openAIModel.resetSetting()}
+          >
+            <RotateLeftIcon />
+          </IconButton>
+        </Tooltip>
+      ) : null}
+    </div>
+  );
 }

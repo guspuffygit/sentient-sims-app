@@ -78,7 +78,7 @@ export class OpenAIService implements GenerationService {
 
     const request: CompletionCreateParamsNonStreaming = {
       stream: false,
-      model: 'gpt-3.5-turbo',
+      model: this.getOpenAIModel(),
       max_tokens: 100,
       temperature: 0,
       top_p: 0,
@@ -150,7 +150,7 @@ export class OpenAIService implements GenerationService {
   async translate(text: string, language: string) {
     const request: CompletionCreateParamsNonStreaming = {
       stream: false,
-      model: 'gpt-3.5-turbo',
+      model: this.getOpenAIModel(),
       messages: [
         {
           role: 'system',
