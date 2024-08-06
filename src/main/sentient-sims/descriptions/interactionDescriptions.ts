@@ -9333,6 +9333,164 @@ export const interactionDescriptions: Map<String, InteractionDescription> =
       Idle_Trait_Active: {
         ignored: true,
       },
+      tv_PickChannelAutonomously: {
+        ignored: true,
+      },
+      marketStalls_Open_NoDoors: {
+        ignored: true,
+      },
+      celebrity_CheckNearbySimFame: {
+        ignored: true,
+      },
+      autonomousSimPicker_RomanticVenue_WatchStarsSky_EP16NPC: {
+        ignored: true,
+      },
+      mixer_TV_WatchNewsAndCooking: {
+        ignored: true,
+      },
+      tv_WatchNews: {
+        ignored: true,
+      },
+      si_nonTouching_Greeting_Compatibility_Awful: {
+        ignored: true,
+      },
+      stereo_AutonomousPickChannel: {
+        ignored: true,
+      },
+      EP16World_Motel_Sleep_NPC: {
+        ignored: true,
+      },
+      stereo_listenPassive: {
+        ignored: true,
+      },
+      celebrity_Fan_Faint: {
+        ignored: true,
+      },
+      mixer_Paparazzi_TakePhoto_GetAttention: {
+        ignored: true,
+      },
+      mixer_Paparazzi_TakePhoto_UpHigh: {
+        ignored: true,
+      },
+      reaction_JealousyLoveInterest: {
+        ignored: true,
+      },
+      mixer_Paparazzi_TakePhoto_Regular: {
+        ignored: true,
+      },
+      'terrain-MoveAway_Jealous': {
+        ignored: true,
+      },
+      paparazzi_Photo_Regular: {
+        ignored: true,
+      },
+      fame_Idles_Quirks_PhoneFanatic_Text: {
+        ignored: true,
+      },
+      EP16SpecialNPCs_Mixers_Weep: {
+        ignored: true,
+      },
+      stereo_Listen: {
+        ignored: true,
+      },
+      sim_NauseaDistress: {
+        ignored: true,
+      },
+      autonomousSimPicker_TriviaBox_ThumbsUp_PlayWith: {
+        ignored: true,
+      },
+      EP16SpecialNPCs_Mixers_Cry: {
+        ignored: true,
+      },
+      tv_Watch_Weather: {
+        ignored: true,
+      },
+      EP16SpecialNPCs_Mixers_Anger: {
+        ignored: true,
+      },
+      celebrity_Socials_Fan_Ask_Cont_AskforSelfie: {
+        pre_actions: [
+          '{actor.0} is asking {actor.1} if {actor.0.he/she} can take a selfie with {actor.1}.',
+        ],
+      },
+      generic_SitIntimate: {
+        ignored: true,
+      },
+      EP16SpecialNPCs_Mixers_Mourn: {
+        ignored: true,
+      },
+      triviaBox_thumbsUp_gameSetup_wait: {
+        ignored: true,
+      },
+      EP16SpecialNPC_TheRingBear_HangOut: {
+        ignored: true,
+      },
+      groupWalkingTrail_headToSign_solo_EP16World_Suburb_reflective: {
+        ignored: true,
+      },
+      groupWalkingTrail_walkSolo_reflective_EP16World_Suburb: {
+        ignored: true,
+      },
+      dance_skill_action_2_stepSpin: {
+        ignored: true,
+      },
+      autonomous_ObjectPicker_SimPreference_Decor_GothicFarmhouse: {
+        ignored: true,
+      },
+      dance_skill_action_3_skipStep: {
+        ignored: true,
+      },
+      simPreference_DecorReaction_GothicFarmhouse: {
+        ignored: true,
+      },
+      Celebrity_Mixers_Pose_Generic: {
+        ignored: true,
+      },
+      waypoint_groupWalkingTrail_solo: {
+        ignored: true,
+      },
+      EP16SpecialNPC_TheRingBear_Rummage: {
+        ignored: true,
+      },
+      groupWalkingTrail_stopPoint_chooser_reflective: {
+        ignored: true,
+      },
+      celebrity_Mixers_Pose_Female1: {
+        ignored: true,
+      },
+      groupWalkingTrail_stopPoint_reflect: {
+        ignored: true,
+      },
+      phone_Chat_Work_Missing: {
+        ignored: true,
+      },
+      celebrity_Mixers_Pose_Female2: {
+        ignored: true,
+      },
+      groupWalkingTrail_stopPoint_deepBreath: {
+        ignored: true,
+      },
+      celebrity_Fan_Reaction_Pose: {
+        ignored: true,
+      },
+      celebrity_Self_PoseforPicture: {
+        ignored: true,
+      },
+      si_nonTouching_Greeting_Compatibility_Amazing: {
+        ignored: true,
+      },
+      autonomousSimPicker_Celebrity_ShareExcitement: {
+        ignored: true,
+      },
+      painting_View_Passive: {
+        ignored: true,
+      },
+      art_GatherInspiration: {
+        ignored: true,
+      },
+      groupWalkingTrail_SI_walkSolo_situation_reflective: {
+        ignored: true,
+      },
       'TURBODRIVER:WickedWhims_AffSuper_StripClub_Customer_ThrowMoney': {
         pre_actions: [
           '{actor.1} is dancing on the stripper pole at the strip club while {actor.0} is throwing money at {actor.1}.',
