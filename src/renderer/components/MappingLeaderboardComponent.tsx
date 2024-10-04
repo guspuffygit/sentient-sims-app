@@ -103,10 +103,8 @@ export function MappingLeaderboardComponent() {
   }
 
   function handleOpen() {
-    if (me?.data?.displayName) {
-      setUsername(me.data.displayName);
-      setOpen(true);
-    }
+    setUsername(me?.data?.displayName ?? 'Anonymous');
+    setOpen(true);
   }
 
   async function handleSubmit() {
