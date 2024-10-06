@@ -1,4 +1,10 @@
-import electron, { IpcMainEvent, dialog, ipcMain, shell } from 'electron';
+import electron, {
+  IpcMainEvent,
+  clipboard,
+  dialog,
+  ipcMain,
+  shell,
+} from 'electron';
 import log from 'electron-log';
 import { SettingsEnum } from './models/SettingsEnum';
 import { SettingsService } from './services/SettingsService';
@@ -44,5 +50,16 @@ export default function ipcHandlers() {
   });
   ipcMain.on('open-browser-link', (_event: IpcMainEvent, link: string) => {
     shell.openExternal(link);
+  });
+  ipcMain.on('paste-clipboard-to-api-key-button-click', () => {
+    const clipboardResults = clipboard.readText();
+    electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
+      if (wnd.webContents?.isDestroyed() === false) {
+        wnd.webContents.send(
+          'on-api-key-paste-from-clipboard',
+          clipboardResults
+        );
+      }
+    });
   });
 }

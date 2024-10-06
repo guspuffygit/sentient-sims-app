@@ -7,6 +7,7 @@ import { LoadingButton } from '@mui/lab';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import useSetting from './hooks/useSetting';
 import useApiKeyAITest from './hooks/useOpenAITest';
 
@@ -48,6 +49,22 @@ export default function APIKeyModal({
     }
   }
 
+  function onApiKeyPasteFromClipboard(_event: any, text: string) {
+    if (text.trim()) {
+      setAPIKey(text.trim());
+    }
+  }
+
+  useEffect(() => {
+    const removeListener = window.electron.onApiKeyPasteFromClipboard(
+      onApiKeyPasteFromClipboard
+    );
+
+    return () => {
+      removeListener();
+    };
+  }, []);
+
   const label = `${aiName} AI Key`;
 
   return (
@@ -86,10 +103,23 @@ export default function APIKeyModal({
                       maxHeight: '30px',
                       minWidth: '30px',
                       minHeight: '30px',
+                      paddingRight: 10,
+                      paddingLeft: 10,
                     }}
                     onClick={() => setKeyVisibility(!keyVisibility)}
                   >
                     {keyVisibility ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                  </Button>
+                  <Button
+                    style={{
+                      maxWidth: '30px',
+                      maxHeight: '30px',
+                      minWidth: '30px',
+                      minHeight: '30px',
+                    }}
+                    onClick={() => window.electron.apiKeyPasteButtonClick()}
+                  >
+                    <ContentPasteIcon />
                   </Button>
                 </InputAdornment>
               ),

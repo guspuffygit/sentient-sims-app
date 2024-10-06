@@ -15,7 +15,6 @@ import electron, {
   shell,
   session,
   WebRequestFilter,
-  Menu,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -205,68 +204,3 @@ app
     );
   })
   .catch(console.log);
-
-app.on('ready', () => {
-  const application = {
-    label: 'Application',
-    submenu: [
-      {
-        label: 'About Application',
-        selector: 'orderFrontStandardAboutPanel:',
-      },
-      {
-        type: 'separator',
-      },
-      {
-        label: 'Quit',
-        accelerator: 'Command+Q',
-        click: () => {
-          app.quit();
-        },
-      },
-    ],
-  };
-
-  const edit = {
-    label: 'Edit',
-    submenu: [
-      {
-        label: 'Undo',
-        accelerator: 'CmdOrCtrl+Z',
-        selector: 'undo:',
-      },
-      {
-        label: 'Redo',
-        accelerator: 'Shift+CmdOrCtrl+Z',
-        selector: 'redo:',
-      },
-      {
-        type: 'separator',
-      },
-      {
-        label: 'Cut',
-        accelerator: 'CmdOrCtrl+X',
-        selector: 'cut:',
-      },
-      {
-        label: 'Copy',
-        accelerator: 'CmdOrCtrl+C',
-        selector: 'copy:',
-      },
-      {
-        label: 'Paste',
-        accelerator: 'CmdOrCtrl+V',
-        selector: 'paste:',
-      },
-      {
-        label: 'Select All',
-        accelerator: 'CmdOrCtrl+A',
-        selector: 'selectAll:',
-      },
-    ],
-  };
-
-  const template = [application, edit];
-
-  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
-});

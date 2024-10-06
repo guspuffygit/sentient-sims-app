@@ -11,20 +11,6 @@ interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   submenu?: DarwinMenuItemConstructorOptions[] | Menu;
 }
 
-const copyPasteMenu: DarwinMenuItemConstructorOptions[] = [
-  { label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:' },
-  { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:' },
-  { type: 'separator' },
-  { label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:' },
-  { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
-  { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
-  {
-    label: 'Select All',
-    accelerator: 'CmdOrCtrl+A',
-    selector: 'selectAll:',
-  },
-];
-
 export default class MenuBuilder {
   mainWindow: BrowserWindow;
 
@@ -38,8 +24,6 @@ export default class MenuBuilder {
       process.env.DEBUG_PROD === 'true'
     ) {
       this.setupDevelopmentEnvironment();
-    } else {
-      this.setupProdEnvironment();
     }
 
     const template =
@@ -64,14 +48,7 @@ export default class MenuBuilder {
             this.mainWindow.webContents.inspectElement(x, y);
           },
         },
-        ...copyPasteMenu,
       ]).popup({ window: this.mainWindow });
-    });
-  }
-
-  setupProdEnvironment(): void {
-    this.mainWindow.webContents.on('context-menu', () => {
-      Menu.buildFromTemplate(copyPasteMenu).popup({ window: this.mainWindow });
     });
   }
 
@@ -107,10 +84,21 @@ export default class MenuBuilder {
         },
       ],
     };
-
     const subMenuEdit: DarwinMenuItemConstructorOptions = {
       label: 'Edit',
-      submenu: copyPasteMenu,
+      submenu: [
+        { label: 'Undo', accelerator: 'Command+Z', selector: 'undo:' },
+        { label: 'Redo', accelerator: 'Shift+Command+Z', selector: 'redo:' },
+        { type: 'separator' },
+        { label: 'Cut', accelerator: 'Command+X', selector: 'cut:' },
+        { label: 'Copy', accelerator: 'Command+C', selector: 'copy:' },
+        { label: 'Paste', accelerator: 'Command+V', selector: 'paste:' },
+        {
+          label: 'Select All',
+          accelerator: 'Command+A',
+          selector: 'selectAll:',
+        },
+      ],
     };
     const subMenuViewDev: MenuItemConstructorOptions = {
       label: 'View',
