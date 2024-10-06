@@ -20,7 +20,7 @@ export function defaultStore(cwd?: string) {
       },
       [SettingsEnum.OPENAI_MODEL.toString()]: {
         type: 'string',
-        default: 'gpt-3.5-turbo',
+        default: 'gpt-4o-mini',
       },
       [SettingsEnum.NOVELAI_MODEL.toString()]: {
         type: 'string',

@@ -7,6 +7,6 @@ describe('OpenAIService', () => {
   it('getOpenAIModel default', async () => {
     const settingsService = new SettingsService();
     const openAIService = new OpenAIService(settingsService);
-    expect(openAIService.getOpenAIModel()).toEqual('gpt-3.5-turbo');
+    expect(openAIService.getOpenAIModel()).toEqual('gpt-4o-mini');
   });
 });

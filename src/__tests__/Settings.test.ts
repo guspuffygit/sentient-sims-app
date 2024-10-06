@@ -17,7 +17,7 @@ describe('Settings', () => {
   it('should return default value', () => {
     const settings = new SettingsService();
     const model = settings.get(SettingsEnum.OPENAI_MODEL);
-    expect(model).toEqual('gpt-3.5-turbo');
+    expect(model).toEqual('gpt-4o-mini');
   });
 
   it('get ai type openai', () => {
