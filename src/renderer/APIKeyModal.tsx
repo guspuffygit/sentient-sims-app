@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { FormHelperText } from '@mui/material';
+import { Button, FormHelperText, InputAdornment } from '@mui/material';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import { LoadingButton } from '@mui/lab';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import useSetting from './hooks/useSetting';
 import useApiKeyAITest from './hooks/useOpenAITest';
 
@@ -25,6 +27,7 @@ export default function APIKeyModal({
   const [errorMessage, setErrorMessage] = useState<string | null>();
   const { aiStatus, testAI } = useApiKeyAITest();
   const apiKeySetting = useSetting(setting, '');
+  const [keyVisibility, setKeyVisibility] = useState(false);
 
   useEffect(() => {
     setAPIKey(apiKeySetting.value);
@@ -68,12 +71,29 @@ export default function APIKeyModal({
             </FormHelperText>
           ) : null}
           <TextField
-            type="password"
+            type={keyVisibility ? 'text' : 'password'}
             label={label}
             value={apiKey}
             onChange={handleInputChange}
             fullWidth
             required
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Button
+                    style={{
+                      maxWidth: '30px',
+                      maxHeight: '30px',
+                      minWidth: '30px',
+                      minHeight: '30px',
+                    }}
+                    onClick={() => setKeyVisibility(!keyVisibility)}
+                  >
+                    {keyVisibility ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                  </Button>
+                </InputAdornment>
+              ),
+            }}
           />
           <LoadingButton
             loading={aiStatus.loading}
