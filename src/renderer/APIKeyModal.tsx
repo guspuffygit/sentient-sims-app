@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, FormHelperText, InputAdornment } from '@mui/material';
+import { Button, FormHelperText, InputAdornment, Tooltip } from '@mui/material';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -97,30 +97,38 @@ export default function APIKeyModal({
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <Button
-                    style={{
-                      maxWidth: '30px',
-                      maxHeight: '30px',
-                      minWidth: '30px',
-                      minHeight: '30px',
-                      paddingRight: 10,
-                      paddingLeft: 10,
-                    }}
-                    onClick={() => setKeyVisibility(!keyVisibility)}
-                  >
-                    {keyVisibility ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                  </Button>
-                  <Button
-                    style={{
-                      maxWidth: '30px',
-                      maxHeight: '30px',
-                      minWidth: '30px',
-                      minHeight: '30px',
-                    }}
-                    onClick={() => window.electron.apiKeyPasteButtonClick()}
-                  >
-                    <ContentPasteIcon />
-                  </Button>
+                  <Tooltip title="Toggle Visibility">
+                    <Button
+                      style={{
+                        maxWidth: '30px',
+                        maxHeight: '30px',
+                        minWidth: '30px',
+                        minHeight: '30px',
+                        paddingRight: 10,
+                        paddingLeft: 10,
+                      }}
+                      onClick={() => setKeyVisibility(!keyVisibility)}
+                    >
+                      {keyVisibility ? (
+                        <VisibilityIcon />
+                      ) : (
+                        <VisibilityOffIcon />
+                      )}
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="Paste from clipboard">
+                    <Button
+                      style={{
+                        maxWidth: '30px',
+                        maxHeight: '30px',
+                        minWidth: '30px',
+                        minHeight: '30px',
+                      }}
+                      onClick={() => window.electron.apiKeyPasteButtonClick()}
+                    >
+                      <ContentPasteIcon />
+                    </Button>
+                  </Tooltip>
                 </InputAdornment>
               ),
             }}
