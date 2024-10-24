@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import log from 'electron-log';
-import { ModelsPage } from 'openai/resources';
+import { ChatCompletion, ModelsPage } from 'openai/resources';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { fetchWithTimeout } from '../util/fetchWithTimeout';
@@ -11,6 +11,8 @@ import { sendPopUpNotification } from '../util/notifyRenderer';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { SentientSimsAIError } from '../exceptions/SentientSimsAIError';
 import { AIModel } from '../models/AIModel';
+import { VLLMChatCompletionRequest } from '../models/VLLMChatCompletionRequest';
+import { AllModelSettings } from '../modelSettings';
 
 export class SentientSimsAIService implements GenerationService {
   private settingsService: SettingsService;
@@ -25,8 +27,44 @@ export class SentientSimsAIService implements GenerationService {
     ) as string;
   }
 
-  async generate(prompt: string, maxResponseTokens: number): Promise<string> {
-    const url = `${this.serviceUrl()}/api/v1/generate`;
+  async sentientSimsGenerate(
+    request: OpenAICompatibleRequest
+  ): Promise<SimsGenerateResponse> {
+    const prompt = request.messages.map((m) => m.content).join('\n');
+    const model = this.getModel();
+    let modelSettings = AllModelSettings.default;
+    if (model in AllModelSettings) {
+      modelSettings = AllModelSettings[model];
+    }
+    const completionRequest: VLLMChatCompletionRequest = {
+      model,
+      max_tokens: request.maxResponseTokens,
+      messages: request.messages.map((message) => {
+        return {
+          role: message.role,
+          content: message.content,
+        };
+      }),
+      temperature: modelSettings.temperature,
+      top_p: modelSettings.top_p,
+      top_k: modelSettings.top_k,
+      min_tokens: 20,
+      repetition_penalty: 1.15,
+      chat_template: `{% for message in messages %}
+{% if message['role'] == 'system' %}
+{% elif message['role'] == 'user' %}
+{% elif message['role'] == 'assistant' %}
+{% endif %}
+{{ message['content']|trim -}}
+{{ '\n' }}
+{% endfor %}
+{% if add_generation_prompt and messages[-1]['role'] != 'assistant' %}
+{% endif %}
+`,
+    };
+    log.debug(`prompt: ${JSON.stringify(prompt)}`);
+
+    const url = `${this.serviceUrl()}/v1/chat/completions`;
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     log.debug(`url: ${url}, auth: ${authHeader}`);
     const response = await fetchWithRetries(url, {
@@ -35,10 +73,7 @@ export class SentientSimsAIService implements GenerationService {
         'Content-Type': 'application/json',
         Authentication: authHeader,
       },
-      body: JSON.stringify({
-        prompt,
-        max_new_tokens: maxResponseTokens,
-      }),
+      body: JSON.stringify(completionRequest),
     });
 
     if (!response.ok) {
@@ -58,21 +93,22 @@ export class SentientSimsAIService implements GenerationService {
       }
     }
 
-    const result = await response.json();
-    return result.results[0].text;
-  }
-
-  async sentientSimsGenerate(
-    request: OpenAICompatibleRequest
-  ): Promise<SimsGenerateResponse> {
-    const prompt = request.messages.map((m) => m.content).join('\n');
-    log.debug(`prompt: ${JSON.stringify(prompt)}`);
-
-    const response = await this.generate(prompt, request.maxResponseTokens);
+    const result: ChatCompletion = await response.json();
+    log.debug(`Output: ${JSON.stringify(result, null, 2)}`);
+    const text = this.getOutputFromGeneration(result);
     return {
-      text: response,
+      text,
       request,
     };
+  }
+
+  getOutputFromGeneration(generation: ChatCompletion) {
+    const output = generation.choices[0].message.content;
+    if (output) {
+      return output.trim();
+    }
+
+    throw new Error(`Output wasnt truthy ${output}`);
   }
 
   async healthCheck() {
@@ -125,5 +161,11 @@ export class SentientSimsAIService implements GenerationService {
 
       throw e;
     }
+  }
+
+  getModel(): string {
+    return this.settingsService.get(
+      SettingsEnum.SENTIENTSIMSAI_MODEL
+    ) as string;
   }
 }
