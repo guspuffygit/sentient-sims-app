@@ -1,6 +1,7 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable class-methods-use-this */
 import { TokenCounter } from 'main/sentient-sims/tokens/TokenCounter';
+import log from 'electron-log';
 import { OpenAICompatibleRequest } from './OpenAICompatibleRequest';
 import { ChatCompletionMessageRole } from './ChatCompletionMessageRole';
 import { OpenAIMessage } from './OpenAIMessage';
@@ -163,6 +164,12 @@ export class OpenAIRequestBuilder {
       content: memoriesToInsert.join('').trimEnd(),
       tokens: userInputCount,
     };
+
+    log.info(
+      `Estimated Token Count: ${this.tokenCounter.countTokens(
+        [systemMessage, userInput, ...messages].join('\n\n')
+      )}`
+    );
 
     return {
       messages: [systemMessage, userInput, ...messages],

@@ -11,8 +11,13 @@ import { sendPopUpNotification } from '../util/notifyRenderer';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { SentientSimsAIError } from '../exceptions/SentientSimsAIError';
 import { AIModel } from '../models/AIModel';
-import { VLLMChatCompletionRequest } from '../models/VLLMChatCompletionRequest';
+import {
+  VLLMChatCompletionRequest,
+  VLLMRTokenizeResponse,
+  VLLMTokenizeRequest,
+} from '../models/VLLMChatCompletionRequest';
 import { AllModelSettings } from '../modelSettings';
+import { VLLMError } from '../models/VLLMError';
 
 export class SentientSimsAIService implements GenerationService {
   private settingsService: SettingsService;
@@ -30,7 +35,6 @@ export class SentientSimsAIService implements GenerationService {
   async sentientSimsGenerate(
     request: OpenAICompatibleRequest
   ): Promise<SimsGenerateResponse> {
-    const prompt = request.messages.map((m) => m.content).join('\n');
     const model = this.getModel();
     let modelSettings = AllModelSettings.default;
     if (model in AllModelSettings) {
@@ -49,23 +53,37 @@ export class SentientSimsAIService implements GenerationService {
       top_p: modelSettings.top_p,
       top_k: modelSettings.top_k,
       min_tokens: 20,
-      repetition_penalty: 1.15,
-      chat_template: `{% for message in messages %}
-{% if message['role'] == 'system' %}
-{% elif message['role'] == 'user' %}
-{% elif message['role'] == 'assistant' %}
-{% endif %}
-{{ message['content']|trim -}}
-{{ '\n' }}
-{% endfor %}
-{% if add_generation_prompt and messages[-1]['role'] != 'assistant' %}
-{% endif %}
-`,
+      repetition_penalty: modelSettings.repetition_penalty,
     };
-    log.debug(`prompt: ${JSON.stringify(prompt)}`);
+
+    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
+    log.debug(`url: ${`${this.serviceUrl()}/tokenize`}, auth: ${authHeader}`);
+    const tokenizeRequest: VLLMTokenizeRequest = {
+      model,
+      messages: request.messages.map((message) => {
+        return {
+          role: message.role,
+          content: `${message.content}<unk>`,
+        };
+      }),
+    };
+    const tokenizeRequestResponse = await fetchWithRetries(
+      `${this.serviceUrl()}/tokenize`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authentication: authHeader,
+        },
+        body: JSON.stringify(tokenizeRequest),
+      }
+    );
+
+    const tokenizeResponse: VLLMRTokenizeResponse =
+      await tokenizeRequestResponse.json();
+    log.info(`idk: ${JSON.stringify(tokenizeResponse, null, 2)}`);
 
     const url = `${this.serviceUrl()}/v1/chat/completions`;
-    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     log.debug(`url: ${url}, auth: ${authHeader}`);
     const response = await fetchWithRetries(url, {
       method: 'POST',
@@ -93,8 +111,14 @@ export class SentientSimsAIService implements GenerationService {
       }
     }
 
-    const result: ChatCompletion = await response.json();
+    const result: ChatCompletion | any = await response.json();
+    const error: VLLMError = <VLLMError>result;
+    if (error?.message && result?.object === 'error' && result?.type) {
+      throw new SentientSimsAIError(`${result.type}: ${result.message}`);
+    }
+
     log.debug(`Output: ${JSON.stringify(result, null, 2)}`);
+
     const text = this.getOutputFromGeneration(result);
     return {
       text,

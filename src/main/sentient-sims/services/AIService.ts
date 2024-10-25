@@ -28,6 +28,7 @@ import { defaultClassificationPrompt, defaultWantsPrompt } from '../constants';
 import { SettingsService } from './SettingsService';
 import {
   getGenerationService,
+  getModelSettings,
   getTokenCounter,
 } from '../factories/generationServiceFactory';
 import {
@@ -53,11 +54,7 @@ import { AIModel } from '../models/AIModel';
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   const inputFormatters: InputFormatter[] = [];
 
-  if (
-    apiType === ApiType.CustomAI ||
-    apiType === ApiType.SentientSimsAI ||
-    apiType === ApiType.KoboldAI
-  ) {
+  if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
     inputFormatters.push(new MythoMaxFormatter());
   }
 
@@ -245,6 +242,7 @@ export class AIService {
       prePreAction: options.prePreAction,
       stopTokens: options.stopTokens,
       apiType: this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType,
+      modelSettings: getModelSettings(this.settingsService),
     };
 
     let promptRequest =
@@ -268,6 +266,15 @@ export class AIService {
     const openAIRequestBuilder = new OpenAIRequestBuilder(tokenCounter);
     const openAIRequest =
       openAIRequestBuilder.buildOpenAIRequest(promptRequest);
+
+    log.info(
+      `Working? ${openAIRequest.messages.map((m) => m.content).join('\n\n')}`
+    );
+    log.info(
+      `Estimated Token Count: ${tokenCounter.countTokens(
+        openAIRequest.messages.map((m) => m.content).join('\n\n')
+      )}`
+    );
 
     const response = await generationService.sentientSimsGenerate(
       openAIRequest
