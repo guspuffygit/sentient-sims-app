@@ -267,15 +267,6 @@ export class AIService {
     const openAIRequest =
       openAIRequestBuilder.buildOpenAIRequest(promptRequest);
 
-    log.info(
-      `Working? ${openAIRequest.messages.map((m) => m.content).join('\n\n')}`
-    );
-    log.info(
-      `Estimated Token Count: ${tokenCounter.countTokens(
-        openAIRequest.messages.map((m) => m.content).join('\n\n')
-      )}`
-    );
-
     const response = await generationService.sentientSimsGenerate(
       openAIRequest
     );
@@ -336,6 +327,7 @@ export class AIService {
       messages: classificationRequest.messages,
       maxResponseTokens: 15,
       maxTokens: 3900,
+      guidedChoice: classificationRequest.classifiers,
     };
 
     getInputFormatters(apiType).forEach((formatter) => {

@@ -18,6 +18,7 @@ import {
 } from '../models/VLLMChatCompletionRequest';
 import { AllModelSettings } from '../modelSettings';
 import { VLLMError } from '../models/VLLMError';
+import { truncateTokens } from '../util/tokenTruncate';
 
 export class SentientSimsAIService implements GenerationService {
   private settingsService: SettingsService;
@@ -40,24 +41,8 @@ export class SentientSimsAIService implements GenerationService {
     if (model in AllModelSettings) {
       modelSettings = AllModelSettings[model];
     }
-    const completionRequest: VLLMChatCompletionRequest = {
-      model,
-      max_tokens: request.maxResponseTokens,
-      messages: request.messages.map((message) => {
-        return {
-          role: message.role,
-          content: message.content,
-        };
-      }),
-      temperature: modelSettings.temperature,
-      top_p: modelSettings.top_p,
-      top_k: modelSettings.top_k,
-      min_tokens: 20,
-      repetition_penalty: modelSettings.repetition_penalty,
-    };
 
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
-    log.debug(`url: ${`${this.serviceUrl()}/tokenize`}, auth: ${authHeader}`);
     const tokenizeRequest: VLLMTokenizeRequest = {
       model,
       messages: request.messages.map((message) => {
@@ -83,8 +68,24 @@ export class SentientSimsAIService implements GenerationService {
       await tokenizeRequestResponse.json();
     log.info(`idk: ${JSON.stringify(tokenizeResponse, null, 2)}`);
 
+    const messages = truncateTokens(
+      modelSettings.max_tokens,
+      tokenizeResponse,
+      request.messages
+    );
+
+    const completionRequest: VLLMChatCompletionRequest = {
+      model,
+      max_tokens: request.maxResponseTokens,
+      messages,
+      temperature: modelSettings.temperature,
+      top_p: modelSettings.top_p,
+      top_k: modelSettings.top_k,
+      min_tokens: 3,
+      repetition_penalty: modelSettings.repetition_penalty,
+    };
+
     const url = `${this.serviceUrl()}/v1/chat/completions`;
-    log.debug(`url: ${url}, auth: ${authHeader}`);
     const response = await fetchWithRetries(url, {
       method: 'POST',
       headers: {
