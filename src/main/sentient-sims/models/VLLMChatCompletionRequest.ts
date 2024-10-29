@@ -14,15 +14,20 @@ export type VLLMChatCompletionRequest = CompletionCreateParamsNonStreaming & {
   repetition_penalty?: number;
 };
 
-export type VLLMTokenizeRequest = {
-  messages: Array<ChatCompletionMessageParam>;
-
-  /**
-   * ID of the model to use. See the
-   * [model endpoint compatibility](https://platform.openai.com/docs/models/model-endpoint-compatibility)
-   * table for details on which models work with the Chat API.
-   */
+export type VLLMTokenizeTextRequest = {
   model: string;
+  prompt: string;
+
+  add_special_tokens?: boolean;
+};
+
+export type VLLMTokenizeChatRequest = {
+  model: string;
+  messages: ChatCompletionMessageParam[];
+
+  add_generation_prompt?: boolean;
+  continue_final_message?: boolean;
+  add_special_tokens?: boolean;
 };
 
 export type VLLMRTokenizeResponse = {

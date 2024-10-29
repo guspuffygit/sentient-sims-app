@@ -1,66 +1,72 @@
-/* eslint-disable no-console */
 import '@testing-library/jest-dom';
-import { VLLMRTokenizeResponse } from 'main/sentient-sims/models/VLLMChatCompletionRequest';
-import { truncateTokens } from 'main/sentient-sims/util/tokenTruncate';
-import { ChatCompletionMessageParam } from 'openai/resources';
-
-function generateArray(): number[] {
-  const result: number[] = [];
-
-  for (let i = 1; i < 4000; i += 1) {
-    const randomNumber = Math.floor(Math.random() * 100) + 1;
-    // eslint-disable-next-line no-constant-condition
-    if (i % 250 === 0) {
-      result.push(0);
-    } else {
-      result.push(randomNumber);
-    }
-  }
-
-  return result;
-}
+import { OpenAIMessage } from 'main/sentient-sims/models/OpenAIMessage';
+import { truncateMessages } from 'main/sentient-sims/util/tokenTruncate';
 
 describe('TruncateTokens', () => {
-  it('test truncate', async () => {
-    const tokenArray = generateArray();
-    console.log(`TokenArray: ${tokenArray.length}`);
-
-    const tokenizeResponse: VLLMRTokenizeResponse = {
-      count: tokenArray.length,
-      max_model_len: 3700,
-      tokens: tokenArray,
-    };
-
-    const messages: ChatCompletionMessageParam[] = [
+  it('test truncate', () => {
+    const breakStringTokens = [12130, 1066, 3609, 26039, 8424];
+    const messageTokens = [
+      1, 3, 7801, 2903, 1395, 1593, 5564, 1063, 12130, 1066, 3609, 26039, 8424,
+      4, 1073, 2607, 2405, 2840, 1494, 7444, 1317, 1402, 5564, 2903, 1046,
+      12130, 1066, 3609, 26039, 8424, 2, 3, 7493, 4558, 1395, 1278, 21283, 1063,
+      12130, 1066, 3609, 26039, 8424, 4, 1784, 21283, 1395, 10991, 1046, 12130,
+      1066, 3609, 26039, 8424, 2,
+    ];
+    const messages: OpenAIMessage[] = [
       {
-        content: 'system content',
         role: 'system',
+        content: 'Respond to the user with NO',
+        tokens: 0,
       },
       {
-        content: 'user content',
         role: 'user',
+        content: 'How well is this working?',
+        tokens: 0,
       },
       {
-        content: 'assistant content',
         role: 'assistant',
+        content: "I don't know it seems to be working well.",
+        tokens: 0,
       },
       {
-        content: 'user content 2',
         role: 'user',
+        content: 'What color is the sky?',
+        tokens: 0,
       },
       {
-        content: 'assistant content 2',
         role: 'assistant',
+        content: 'The sky is blue.',
+        tokens: 0,
       },
     ];
-
-    const expectedMessages = [messages[0], ...messages.slice(3)];
-    const result = truncateTokens(
-      tokenizeResponse.max_model_len,
-      tokenizeResponse,
+    const expectedMessages: OpenAIMessage[] = [
+      {
+        role: 'system',
+        content: 'Respond to the user with NO',
+        tokens: 0,
+      },
+      {
+        role: 'assistant',
+        content: "I don't know it seems to be working well.",
+        tokens: 0,
+      },
+      {
+        role: 'user',
+        content: 'What color is the sky?',
+        tokens: 0,
+      },
+      {
+        role: 'assistant',
+        content: 'The sky is blue.',
+        tokens: 0,
+      },
+    ];
+    const result = truncateMessages(
+      45,
+      breakStringTokens,
+      messageTokens,
       messages
     );
-
     expect(result).toEqual(expectedMessages);
   });
 });

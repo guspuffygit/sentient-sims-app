@@ -14,14 +14,19 @@ import { AIModel } from '../models/AIModel';
 import {
   VLLMChatCompletionRequest,
   VLLMRTokenizeResponse,
-  VLLMTokenizeRequest,
+  VLLMTokenizeChatRequest,
+  VLLMTokenizeTextRequest,
 } from '../models/VLLMChatCompletionRequest';
 import { AllModelSettings } from '../modelSettings';
 import { VLLMError } from '../models/VLLMError';
-import { truncateTokens } from '../util/tokenTruncate';
+import { OpenAIMessage } from '../models/OpenAIMessage';
+import { tokenizerBreakString } from '../constants';
+import { truncateMessages } from '../util/tokenTruncate';
 
 export class SentientSimsAIService implements GenerationService {
   private settingsService: SettingsService;
+
+  private breakStringTokens: Map<string, number[]> = new Map();
 
   constructor(settingsService: SettingsService) {
     this.settingsService = settingsService;
@@ -31,6 +36,24 @@ export class SentientSimsAIService implements GenerationService {
     return this.settingsService.get(
       SettingsEnum.SENTIENTSIMSAI_ENDPOINT
     ) as string;
+  }
+
+  async getBreakStringTokens(model: string): Promise<number[]> {
+    if (this.breakStringTokens.has(model)) {
+      return this.breakStringTokens.get(model) as number[];
+    }
+
+    const tokenizeResponse = await this.tokenize(model, tokenizerBreakString);
+
+    this.breakStringTokens.set(model, tokenizeResponse.tokens);
+
+    log.debug(
+      `Set ${model} ${tokenizerBreakString} to ${JSON.stringify(
+        tokenizeResponse.tokens
+      )}`
+    );
+
+    return tokenizeResponse.tokens;
   }
 
   async sentientSimsGenerate(
@@ -43,34 +66,15 @@ export class SentientSimsAIService implements GenerationService {
     }
 
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
-    const tokenizeRequest: VLLMTokenizeRequest = {
-      model,
-      messages: request.messages.map((message) => {
-        return {
-          role: message.role,
-          content: `${message.content}<unk>`,
-        };
-      }),
-    };
-    const tokenizeRequestResponse = await fetchWithRetries(
-      `${this.serviceUrl()}/tokenize`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authentication: authHeader,
-        },
-        body: JSON.stringify(tokenizeRequest),
-      }
-    );
 
-    const tokenizeResponse: VLLMRTokenizeResponse =
-      await tokenizeRequestResponse.json();
-    log.info(`idk: ${JSON.stringify(tokenizeResponse, null, 2)}`);
+    const breakTokensPromise = this.getBreakStringTokens(model);
+    const messageTokens = await this.tokenizeMessages(model, request.messages);
+    const breakTokens = await breakTokensPromise;
 
-    const messages = truncateTokens(
+    const messages = truncateMessages(
       modelSettings.max_tokens,
-      tokenizeResponse,
+      breakTokens,
+      messageTokens.tokens,
       request.messages
     );
 
@@ -125,6 +129,76 @@ export class SentientSimsAIService implements GenerationService {
       text,
       request,
     };
+  }
+
+  async tokenize(model: string, text: string): Promise<VLLMRTokenizeResponse> {
+    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
+    const tokenizeRequest: VLLMTokenizeTextRequest = {
+      model,
+      prompt: text,
+    };
+    const response = await fetchWithRetries(`${this.serviceUrl()}/tokenize`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authentication: authHeader,
+      },
+      body: JSON.stringify(tokenizeRequest),
+    });
+
+    if (!response.ok) {
+      try {
+        const errorResponse = await response.json();
+        const errorMessage =
+          errorResponse.error || 'Unknown JSON error occurred';
+        throw new SentientSimsAIError(`SentientSimsAI error: ${errorMessage}`);
+      } catch (e: any) {
+        if (e instanceof SentientSimsAIError) {
+          throw e;
+        }
+
+        // If JSON parsing fails, fall back to plain text error message
+        const textMessage = await response.text();
+        throw new Error(`SentientSimsAI text error: ${textMessage}`);
+      }
+    }
+
+    const result: ChatCompletion | any = await response.json();
+    const error: VLLMError = <VLLMError>result;
+    if (error?.message && result?.object === 'error' && result?.type) {
+      throw new SentientSimsAIError(`${result.type}: ${result.message}`);
+    }
+
+    return response.json();
+  }
+
+  async tokenizeMessages(
+    model: string,
+    messages: OpenAIMessage[]
+  ): Promise<VLLMRTokenizeResponse> {
+    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
+    const tokenizeRequest: VLLMTokenizeChatRequest = {
+      model,
+      messages: messages.map((message) => {
+        return {
+          role: message.role,
+          content: `${message.content}${tokenizerBreakString}`,
+        };
+      }),
+    };
+    const tokenizeRequestResponse = await fetchWithRetries(
+      `${this.serviceUrl()}/tokenize`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authentication: authHeader,
+        },
+        body: JSON.stringify(tokenizeRequest),
+      }
+    );
+
+    return tokenizeRequestResponse.json();
   }
 
   getOutputFromGeneration(generation: ChatCompletion) {
