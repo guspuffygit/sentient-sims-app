@@ -87,7 +87,10 @@ export class SentientSimsAIService implements GenerationService {
       top_k: modelSettings.top_k,
       min_tokens: 3,
       repetition_penalty: modelSettings.repetition_penalty,
+      guided_choice: request.guidedChoice,
     };
+
+    log.debug(`Request: ${JSON.stringify(completionRequest, null, 2)}`);
 
     const url = `${this.serviceUrl()}/v1/chat/completions`;
     const response = await fetchWithRetries(url, {
@@ -117,6 +120,7 @@ export class SentientSimsAIService implements GenerationService {
     }
 
     const result: ChatCompletion | any = await response.json();
+    log.debug(`Info about it: ${response.ok} ${response.status} ${result}`);
     const error: VLLMError = <VLLMError>result;
     if (error?.message && result?.object === 'error' && result?.type) {
       throw new SentientSimsAIError(`${result.type}: ${result.message}`);
@@ -169,7 +173,7 @@ export class SentientSimsAIService implements GenerationService {
       throw new SentientSimsAIError(`${result.type}: ${result.message}`);
     }
 
-    return response.json();
+    return result;
   }
 
   async tokenizeMessages(
