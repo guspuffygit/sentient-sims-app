@@ -28,6 +28,7 @@ import { defaultClassificationPrompt, defaultWantsPrompt } from '../constants';
 import { SettingsService } from './SettingsService';
 import {
   getGenerationService,
+  getModelSettings,
   getTokenCounter,
 } from '../factories/generationServiceFactory';
 import {
@@ -53,11 +54,7 @@ import { AIModel } from '../models/AIModel';
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   const inputFormatters: InputFormatter[] = [];
 
-  if (
-    apiType === ApiType.CustomAI ||
-    apiType === ApiType.SentientSimsAI ||
-    apiType === ApiType.KoboldAI
-  ) {
+  if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
     inputFormatters.push(new MythoMaxFormatter());
   }
 
@@ -245,6 +242,7 @@ export class AIService {
       prePreAction: options.prePreAction,
       stopTokens: options.stopTokens,
       apiType: this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType,
+      modelSettings: getModelSettings(this.settingsService),
     };
 
     let promptRequest =
@@ -329,6 +327,7 @@ export class AIService {
       messages: classificationRequest.messages,
       maxResponseTokens: 15,
       maxTokens: 3900,
+      guidedChoice: classificationRequest.classifiers,
     };
 
     getInputFormatters(apiType).forEach((formatter) => {

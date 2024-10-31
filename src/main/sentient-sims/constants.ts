@@ -64,3 +64,6 @@ export const appApiPort = 25148;
 export const appApiUrl = `http://localhost:${appApiPort}`;
 export const openaiDefaultEndpoint = 'https://api.openai.com/v1';
 export const koboldaiDefaultEndpoint = 'http://localhost:5000';
+export const openaiDefaultModel = 'gpt-4o-mini';
+export const sentientSimsAIDefaultModel = 'Gryphe/MythoMax-L2-13b';
+export const tokenizerBreakString = '<<BREAK>>';

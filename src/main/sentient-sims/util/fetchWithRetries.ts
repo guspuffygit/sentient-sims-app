@@ -8,7 +8,7 @@ export async function fetchWithRetries(
   retries: number = 3,
   delay: number = 10000,
   attempts: number = 0
-): Promise<any> {
+): Promise<Response> {
   const response = await fetch(url, options);
 
   log.debug(`response status: ${response.status}`);

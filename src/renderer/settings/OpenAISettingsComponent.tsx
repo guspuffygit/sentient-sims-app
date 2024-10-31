@@ -2,8 +2,11 @@
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { PropsWithChildren } from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import OpenAIModelSelection from 'renderer/OpenAIModelSelection';
-import { useAIModels } from 'renderer/hooks/useAIModels';
+import AIModelSelection from 'renderer/AIModelSelection';
+import {
+  openaiDefaultEndpoint,
+  openaiDefaultModel,
+} from 'main/sentient-sims/constants';
 import { AIEndpointComponent } from './AIEndpointComponent';
 
 type OpenAISettingsComponentProps = {
@@ -14,13 +17,6 @@ export default function OpenAISettingsComponent({
   apiType,
   children,
 }: OpenAISettingsComponentProps) {
-  const aiModels = useAIModels(ApiType.OpenAI);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onChange = (value: string) => {
-    aiModels.refetch();
-  };
-
   if (apiType !== ApiType.OpenAI) {
     return <></>;
   }
@@ -33,9 +29,14 @@ export default function OpenAISettingsComponent({
         selectedApiType={ApiType.OpenAI}
         settingsEnum={SettingsEnum.OPENAI_ENDPOINT}
         label="OpenAI Endpoint"
-        onChange={onChange}
       />
-      <OpenAIModelSelection aiModels={aiModels} />
+      <AIModelSelection
+        apiType={apiType}
+        defaultModel={openaiDefaultModel}
+        defaultEndpoint={openaiDefaultEndpoint}
+        modelSetting={SettingsEnum.OPENAI_MODEL}
+        endpointSetting={SettingsEnum.OPENAI_ENDPOINT}
+      />
     </>
   );
 }

@@ -6,14 +6,15 @@ import {
   SelectChangeEvent,
   Tooltip,
 } from '@mui/material';
-import RotateLeftIcon from '@mui/icons-material/RotateLeft';
+import UndoIcon from '@mui/icons-material/Undo';
+import SyncIcon from '@mui/icons-material/Sync';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { LoadingButton } from '@mui/lab';
 import { AIModel, compareAIModels } from 'main/sentient-sims/models/AIModel';
-import { openaiDefaultEndpoint } from 'main/sentient-sims/constants';
-import { UseQueryResult } from '@tanstack/react-query';
 import log from 'electron-log';
+import { ApiType } from 'main/sentient-sims/models/ApiType';
 import useSetting, { SettingsHook } from './hooks/useSetting';
+import { useAIModels } from './hooks/useAIModels';
 
 function shouldIncludeModel(model: AIModel): boolean {
   const name = model.name.toLowerCase();
@@ -44,25 +45,28 @@ function shouldIncludeModel(model: AIModel): boolean {
   return true;
 }
 
-type OpenAIModelSelectionProps = {
-  aiModels: UseQueryResult<AIModel[], Error>;
+type AIModelSelectionProps = {
+  apiType: ApiType;
+  defaultModel: string;
+  defaultEndpoint: string;
+  modelSetting: SettingsEnum;
+  endpointSetting: SettingsEnum;
 };
 
-export default function OpenAIModelSelection({
-  aiModels,
-}: OpenAIModelSelectionProps) {
-  const openAIModel: SettingsHook = useSetting(
-    SettingsEnum.OPENAI_MODEL,
-    'gpt-4o-mini'
-  );
-  const openAIEndpoint: SettingsHook = useSetting(
-    SettingsEnum.OPENAI_ENDPOINT,
-    openaiDefaultEndpoint
-  );
+export default function AIModelSelection({
+  apiType,
+  defaultModel,
+  defaultEndpoint,
+  modelSetting,
+  endpointSetting,
+}: AIModelSelectionProps) {
+  const aiModels = useAIModels(apiType);
+  const aiModel: SettingsHook = useSetting(modelSetting, defaultModel);
+  const aiEndpoint: SettingsHook = useSetting(endpointSetting, defaultEndpoint);
 
   const handleChange = (event: SelectChangeEvent) => {
     const model = event.target.value;
-    openAIModel.setSetting(model);
+    aiModel.setSetting(model);
   };
 
   if (aiModels.isFetching || aiModels.isLoading) {
@@ -91,7 +95,7 @@ export default function OpenAIModelSelection({
       .sort(compareAIModels);
 
     let currentSelectedModelAvailable = false;
-    const currentModel = openAIModel.value;
+    const currentModel = aiModel.value;
     models.forEach((model) => {
       selectChildren.push(
         <MenuItem value={model.name}>{model.displayName}</MenuItem>
@@ -101,16 +105,14 @@ export default function OpenAIModelSelection({
       }
     });
     if (!currentSelectedModelAvailable) {
-      log.info(
-        `Currently selected OpenAI model ${currentModel} is not available`
-      );
-      if (openAIEndpoint.value === openaiDefaultEndpoint) {
-        openAIModel.resetSetting();
+      log.info(`Currently selected model ${currentModel} is not available`);
+      if (aiEndpoint.value === defaultEndpoint) {
+        aiModel.resetSetting();
       } else if (models.length > 0) {
-        openAIModel.setSetting(models[0].name);
+        aiModel.setSetting(models[0].name);
       } else {
         log.error(
-          'Unable to set an OpenAI model because none were returned from the API'
+          'Unable to set a default model because none were returned from the API'
         );
       }
     }
@@ -122,22 +124,31 @@ export default function OpenAIModelSelection({
         size="small"
         labelId="openai-model-label"
         id="openai-model"
-        label="OpenAI Model"
-        value={openAIModel.value}
+        label="Model"
+        value={aiModel.value}
         onChange={handleChange}
       >
         {selectChildren}
       </Select>
-      {openAIEndpoint.value === openaiDefaultEndpoint ? (
+      {aiEndpoint.value === defaultEndpoint ? (
         <Tooltip title="Reset to Default">
           <IconButton
             sx={{ marginLeft: 1 }}
-            onClick={() => openAIModel.resetSetting()}
+            onClick={() => aiModel.resetSetting()}
           >
-            <RotateLeftIcon />
+            <UndoIcon />
           </IconButton>
         </Tooltip>
       ) : null}
+      <Tooltip title="Refresh Models">
+        <IconButton
+          sx={{ marginLeft: 1 }}
+          onClick={() => aiModels.refetch()}
+          disabled={aiModels.isFetching || aiModels.isLoading}
+        >
+          <SyncIcon />
+        </IconButton>
+      </Tooltip>
     </div>
   );
 }

@@ -3,6 +3,11 @@ import { FormHelperText } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
+import {
+  sentientSimsAIDefaultModel,
+  sentientSimsAIHost,
+} from 'main/sentient-sims/constants';
+import AIModelSelection from '../AIModelSelection';
 import PatreonUser from '../wrappers/PatreonUser';
 import { AIEndpointComponent } from './AIEndpointComponent';
 
@@ -47,6 +52,13 @@ export function SentientSimsSettingsComponent({
         selectedApiType={apiType}
         settingsEnum={SettingsEnum.SENTIENTSIMSAI_ENDPOINT}
         label="Sentient Sims AI URL"
+      />
+      <AIModelSelection
+        apiType={apiType}
+        defaultModel={sentientSimsAIDefaultModel}
+        defaultEndpoint={sentientSimsAIHost}
+        modelSetting={SettingsEnum.SENTIENTSIMSAI_MODEL}
+        endpointSetting={SettingsEnum.SENTIENTSIMSAI_ENDPOINT}
       />
     </>
   );

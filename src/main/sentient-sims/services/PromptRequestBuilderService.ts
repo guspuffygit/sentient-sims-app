@@ -15,6 +15,7 @@ import {
 import { SentientSim } from '../models/SentientSim';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { ChatCompletionMessageRole } from '../models/ChatCompletionMessageRole';
+import { ModelSettings } from '../modelSettings';
 
 export type GenerationOptions = {
   action?: string;
@@ -30,6 +31,7 @@ const maxGroupSizeLength = 1700;
 
 export type PromptRequestBuilderOptions = GenerationOptions & {
   apiType: ApiType;
+  modelSettings: ModelSettings;
 };
 
 export class PromptRequestBuilderService {
@@ -215,7 +217,7 @@ export class PromptRequestBuilderService {
       memories: groupedMemories,
       action: formattedAction,
       maxResponseTokens: 90,
-      maxTokens: 3900,
+      maxTokens: options.modelSettings.max_tokens,
       assistantPreResponse: formattedAssistantPreResponse,
       prePreAction: formattedPrePreAction,
       preAssistantPreResponse: formattedPreAssistantPreResponse,

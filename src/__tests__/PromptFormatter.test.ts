@@ -151,6 +151,13 @@ describe('Output', () => {
           action:
             '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
           apiType: ApiType.SentientSimsAI,
+          modelSettings: {
+            temperature: undefined,
+            top_p: undefined,
+            top_k: undefined,
+            repetition_penalty: undefined,
+            max_tokens: 5000,
+          },
         }
       );
 

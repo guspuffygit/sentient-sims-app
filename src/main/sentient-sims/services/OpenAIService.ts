@@ -6,6 +6,7 @@ import {
   ChatCompletion,
   CompletionCreateParamsNonStreaming,
 } from 'openai/src/resources/chat/completions';
+import { ResponseFormatJSONSchema } from 'openai/resources';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
@@ -13,6 +14,7 @@ import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { sendPopUpNotification } from '../util/notifyRenderer';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel } from '../models/AIModel';
+import { openaiDefaultEndpoint } from '../constants';
 
 export class OpenAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -120,10 +122,46 @@ export class OpenAIService implements GenerationService {
         };
       }),
     };
+
+    if (
+      request.guidedChoice &&
+      this.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) ===
+        openaiDefaultEndpoint
+    ) {
+      const schema: ResponseFormatJSONSchema = {
+        json_schema: {
+          name: 'thechoice',
+          strict: true,
+          schema: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['choice'],
+            properties: {
+              choice: {
+                type: 'string',
+                description: 'The choice',
+                enum: request.guidedChoice,
+              },
+            },
+          },
+        },
+        type: 'json_schema',
+      };
+      completionRequest.response_format = schema;
+    }
+
     const result = await this.getOpenAIClient().chat.completions.create(
       completionRequest
     );
     let text = this.getOutputFromGeneration(result);
+
+    if (
+      request.guidedChoice &&
+      this.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) ===
+        openaiDefaultEndpoint
+    ) {
+      text = JSON.parse(text).choice.trim();
+    }
 
     if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED)) {
       text = await this.translate(

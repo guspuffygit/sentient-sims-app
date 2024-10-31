@@ -32,6 +32,7 @@ export type OneShotRequest = {
   maxTokens: number;
   userPreResponse?: string;
   assistantPreResponse?: string;
+  guidedChoice?: string[];
 };
 
 export type ClassificationRequest = {
@@ -167,6 +168,7 @@ export class OpenAIRequestBuilder {
     return {
       messages: [systemMessage, userInput, ...messages],
       maxResponseTokens: oneShotRequest.maxResponseTokens,
+      guidedChoice: oneShotRequest.guidedChoice,
     };
   }
 }
