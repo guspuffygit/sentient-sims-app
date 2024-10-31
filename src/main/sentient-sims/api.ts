@@ -110,6 +110,7 @@ export function runApi({
     '/debug/test-ai',
     debugController.healthCheckGenerationService
   );
+  expressApp.get('/debug/test-install', debugController.healthCheckInstall);
   expressApp.get('/debug/send-logs', debugController.sendDebugLogs);
   expressApp.post('/debug/interaction', debugController.sendBugReport);
 

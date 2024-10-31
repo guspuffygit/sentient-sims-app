@@ -47,7 +47,9 @@ export class VersionService {
 
       return { version: versionText.trim() };
     } catch (e: any) {
-      return { version: e?.message || 'null' };
+      throw Error(
+        `Unable to get GameVersion.txt, do you have the correct Mods directory selected? ${e?.message}`
+      );
     }
   }
 }

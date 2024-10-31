@@ -38,4 +38,8 @@ export class VersionController {
   getAppVersion(req: Request, res: Response) {
     res.json(this.versionService.getAppVerson());
   }
+
+  getGameVersion(req: Request, res: Response) {
+    res.json(this.versionService.getGameVersion());
+  }
 }
