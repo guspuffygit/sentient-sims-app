@@ -11,7 +11,6 @@ import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
-import { sendPopUpNotification } from '../util/notifyRenderer';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel } from '../models/AIModel';
 import { openaiDefaultEndpoint } from '../constants';
@@ -78,33 +77,27 @@ export class OpenAIService implements GenerationService {
   async healthCheck(apiKey?: string) {
     const client: OpenAI = this.getOpenAIClient(apiKey);
 
-    const request: CompletionCreateParamsNonStreaming = {
-      stream: false,
-      model: this.getOpenAIModel(),
-      max_tokens: 100,
-      temperature: 0,
-      top_p: 0,
-      messages: [
-        {
-          role: 'user',
-          content: 'Return the text "OK"',
-        },
-      ],
-    };
-
     try {
-      const response = await client.chat.completions.create(request);
-      const text = this.getOutputFromGeneration(response);
+      const response = await client.models.list();
+
+      if (response.data.length > 0) {
+        return {
+          status: 'OK',
+        };
+      }
+
+      const noModelsAvailableErrorMessage = 'No models available';
+
+      log.error(noModelsAvailableErrorMessage);
+
       return {
-        status: text,
+        error: noModelsAvailableErrorMessage,
       };
     } catch (error: any) {
       log.error('Error testing OpenAI API:', error);
 
-      sendPopUpNotification(error?.message);
-
       return {
-        status: 'not working, send logs to debug',
+        error: `not working, ${error?.message}`,
       };
     }
   }

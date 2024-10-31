@@ -3,7 +3,6 @@ import AppCard from './AppCard';
 import UpdateComponent from './UpdateComponent';
 import DebugCard from './DebugCard';
 import { ThankYouCardPatreon } from './ThankYouCard';
-import AIStatusComponent from './AIStatusComponent';
 import { MappingLeaderboardComponent } from './components/MappingLeaderboardComponent';
 
 export default function HomePage() {
@@ -12,7 +11,6 @@ export default function HomePage() {
       <Grid container spacing={2}>
         <Grid item xs={6}>
           <UpdateComponent />
-          <AIStatusComponent />
           <DebugCard />
           <MappingLeaderboardComponent />
         </Grid>

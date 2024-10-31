@@ -1,4 +1,5 @@
 import {
+  Box,
   FormHelperText,
   IconButton,
   MenuItem,
@@ -77,16 +78,6 @@ export default function AIModelSelection({
     );
   }
 
-  if (aiModels.isError) {
-    return (
-      <div>
-        <FormHelperText sx={{ m: 1 }} error>
-          Error: {aiModels.error.message}
-        </FormHelperText>
-      </div>
-    );
-  }
-
   const selectChildren: any[] = [];
 
   if (aiModels?.data?.filter) {
@@ -119,17 +110,23 @@ export default function AIModelSelection({
   }
 
   return (
-    <div>
-      <Select
-        size="small"
-        labelId="openai-model-label"
-        id="openai-model"
-        label="Model"
-        value={aiModel.value}
-        onChange={handleChange}
-      >
-        {selectChildren}
-      </Select>
+    <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
+      {aiModels.isError ? (
+        <FormHelperText sx={{ m: 1 }} error>
+          Error: {aiModels.error.message}
+        </FormHelperText>
+      ) : (
+        <Select
+          size="small"
+          labelId="openai-model-label"
+          id="openai-model"
+          label="Model"
+          value={aiModel.value}
+          onChange={handleChange}
+        >
+          {selectChildren}
+        </Select>
+      )}
       {aiEndpoint.value === defaultEndpoint ? (
         <Tooltip title="Reset to Default">
           <IconButton
@@ -149,6 +146,6 @@ export default function AIModelSelection({
           <SyncIcon />
         </IconButton>
       </Tooltip>
-    </div>
+    </Box>
   );
 }

@@ -1,31 +1,21 @@
-import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { ApiType } from 'main/sentient-sims/models/ApiType';
-import CustomLLMComponent from './CustomLLMComponent';
-import useSetting from './hooks/useSetting';
-import ApiKeyAIComponent from './ApiKeyAIComponent';
+import { FormHelperText } from '@mui/material';
+import { useAISettings } from './providers/AISettingsProvider';
 
-export default function AIStatusComponent() {
-  const apiType = useSetting(
-    SettingsEnum.AI_API_TYPE,
-    ApiType.OpenAI.toString()
+export function AIStatusComponent() {
+  const { aiStatus, aiApiName } = useAISettings();
+
+  return (
+    <>
+      {aiStatus.status ? (
+        <FormHelperText>
+          {aiApiName} Status: {aiStatus.status}
+        </FormHelperText>
+      ) : null}
+      {aiStatus.error ? (
+        <FormHelperText sx={{ m: 1 }} error>
+          Error: {aiStatus.error}
+        </FormHelperText>
+      ) : null}
+    </>
   );
-  switch (apiType.value) {
-    case ApiType.SentientSimsAI:
-      return <CustomLLMComponent aiName="Sentient Sims AI" />;
-    case ApiType.CustomAI:
-      return <CustomLLMComponent aiName="Custom" />;
-    case ApiType.KoboldAI:
-      return <CustomLLMComponent aiName="Kobold AI" />;
-    case ApiType.NovelAI:
-      return (
-        <ApiKeyAIComponent
-          setting={SettingsEnum.NOVELAI_KEY}
-          aiName="NovelAI"
-        />
-      );
-    default:
-      return (
-        <ApiKeyAIComponent setting={SettingsEnum.OPENAI_KEY} aiName="OpenAI" />
-      );
-  }
 }

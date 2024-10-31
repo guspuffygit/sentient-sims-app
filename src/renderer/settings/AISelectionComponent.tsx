@@ -1,6 +1,7 @@
 import { Box, FormHelperText, MenuItem, Select } from '@mui/material';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import HelpButton from 'renderer/components/HelpButton';
+import { useAISettings } from 'renderer/providers/AISettingsProvider';
 
 function getAIHelperText(apiType: ApiType) {
   if (apiType === ApiType.OpenAI) {
@@ -16,24 +17,18 @@ function getAIHelperText(apiType: ApiType) {
   return 'Custom Local or remote AI running on your own PC';
 }
 
-type AISelectionComponentProps = {
-  aiType: any;
-  apiType: ApiType;
-};
+export function AISelectionComponent() {
+  const { aiApiType, aiApiTypeSetting } = useAISettings();
 
-export function AISelectionComponent({
-  aiType,
-  apiType,
-}: AISelectionComponentProps) {
   return (
     <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
       <Select
         size="small"
         labelId="release-type-select-label"
         id="release-type-select"
-        value={apiType}
+        value={aiApiType}
         sx={{ minWidth: 100, marginRight: 2 }}
-        onChange={(change) => aiType.setSetting(change.target.value)}
+        onChange={(change) => aiApiTypeSetting.setSetting(change.target.value)}
       >
         <MenuItem value={ApiType.OpenAI}>OpenAI</MenuItem>
         <MenuItem value={ApiType.SentientSimsAI}>
@@ -42,7 +37,7 @@ export function AISelectionComponent({
         <MenuItem value={ApiType.NovelAI}>NovelAI</MenuItem>
         <MenuItem value={ApiType.KoboldAI}>Kobold AI</MenuItem>
       </Select>
-      <FormHelperText>{getAIHelperText(apiType)}</FormHelperText>
+      <FormHelperText>{getAIHelperText(aiApiType)}</FormHelperText>
       <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/AI-Backends" />
     </Box>
   );

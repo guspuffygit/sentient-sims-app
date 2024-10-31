@@ -1,5 +1,5 @@
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import handleOpenExternalLink from 'renderer/hooks/handleOpenExternalLink';
 
 export type HelpButtonProperties = {
@@ -10,8 +10,10 @@ export default function HelpButton({ url }: HelpButtonProperties) {
   const handleOpenAnimationMappingWiki = handleOpenExternalLink(url);
 
   return (
-    <IconButton onClick={handleOpenAnimationMappingWiki}>
-      <HelpOutlineRoundedIcon />
-    </IconButton>
+    <Tooltip title="Open Wiki to related information">
+      <IconButton onClick={handleOpenAnimationMappingWiki}>
+        <HelpOutlineRoundedIcon />
+      </IconButton>
+    </Tooltip>
   );
 }

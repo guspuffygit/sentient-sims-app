@@ -7,7 +7,6 @@ import { fetchWithTimeout } from '../util/fetchWithTimeout';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { fetchWithRetries } from '../util/fetchWithRetries';
-import { sendPopUpNotification } from '../util/notifyRenderer';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { SentientSimsAIError } from '../exceptions/SentientSimsAIError';
 import { AIModel } from '../models/AIModel';
@@ -229,10 +228,10 @@ export class SentientSimsAIService implements GenerationService {
         status: await response.text(),
       };
     } catch (e: any) {
-      log.error('Error checking custom LLM health', e);
-      sendPopUpNotification(e?.message);
+      log.error('Error checking Sentient Sims AI health', e);
+
       return {
-        status: 'Sentient Sims AI Not healthy',
+        error: e?.message || `${e}`,
       };
     }
   }

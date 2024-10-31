@@ -25,6 +25,7 @@ import { ChatGenerationProvider } from './providers/ChatGenerationProvider';
 import SimsPage from './SimsPage';
 import InteractionsPage from './InteractionsPage';
 import { SnackBarProvider } from './providers/SnackBarProvider';
+import { AISettingsProvider } from './providers/AISettingsProvider';
 
 const updatedAwsConfig = {
   ...awsExports,
@@ -96,11 +97,13 @@ root.render(
       <Authenticator.Provider>
         <QueryClientProvider client={queryClient}>
           <SnackBarProvider>
-            <ChatGenerationProvider>
-              <DebugModeProvider>
-                <RouterProvider router={router} />
-              </DebugModeProvider>
-            </ChatGenerationProvider>
+            <AISettingsProvider>
+              <ChatGenerationProvider>
+                <DebugModeProvider>
+                  <RouterProvider router={router} />
+                </DebugModeProvider>
+              </ChatGenerationProvider>
+            </AISettingsProvider>
           </SnackBarProvider>
         </QueryClientProvider>
       </Authenticator.Provider>
