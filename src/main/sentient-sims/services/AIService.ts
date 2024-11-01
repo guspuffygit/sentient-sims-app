@@ -302,12 +302,20 @@ export class AIService {
     let output = cleanupAIOutput(response.text, stopTokens);
 
     // Remove preAssistantPreResponse from output
-    if (options.preAssistantPreResponse) {
-      if (output.startsWith(options.preAssistantPreResponse.trim())) {
-        output = output
-          .substring(options.preAssistantPreResponse.trim().length)
-          .trim();
-      }
+    if (
+      promptRequest.preAssistantPreResponse &&
+      output.startsWith(promptRequest.preAssistantPreResponse.trim())
+    ) {
+      output = output
+        .substring(promptRequest.preAssistantPreResponse.trim().length)
+        .trim();
+    }
+
+    if (
+      promptRequest.assistantPreResponse &&
+      !output.startsWith(promptRequest.assistantPreResponse)
+    ) {
+      output = [promptRequest.assistantPreResponse, output].join(' ').trim();
     }
 
     newMemory.content = output;

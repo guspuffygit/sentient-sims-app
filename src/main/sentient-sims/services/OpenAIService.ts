@@ -143,6 +143,8 @@ export class OpenAIService implements GenerationService {
       completionRequest.response_format = schema;
     }
 
+    log.debug(`OpenAI Request:\n${JSON.stringify(completionRequest, null, 2)}`);
+
     const result = await this.getOpenAIClient().chat.completions.create(
       completionRequest
     );
