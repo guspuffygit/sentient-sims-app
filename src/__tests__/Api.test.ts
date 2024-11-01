@@ -13,6 +13,7 @@ import { SSEventType } from 'main/sentient-sims/models/InteractionEvents';
 import { DbClient } from 'main/sentient-sims/clients/DbClient';
 import { DatabaseSession } from 'main/sentient-sims/models/DatabaseSession';
 import { SimAge } from 'main/sentient-sims/models/SimAge';
+import { defaultWantsPrefixes } from 'main/sentient-sims/constants';
 import { mockEnvironment } from './util';
 
 describe('Api', () => {
@@ -126,6 +127,10 @@ describe('Api', () => {
       },
     });
 
-    expect(result.text).toContain('I want to');
+    const containsWantPrefix = defaultWantsPrefixes.some((want) =>
+      result.text?.includes(want)
+    );
+
+    expect(containsWantPrefix).toBeTruthy();
   }, 30000);
 });

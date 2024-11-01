@@ -24,7 +24,11 @@ import {
 } from './PromptRequestBuilderService';
 import { containsPlayerSim } from '../util/eventContainsPlayerSim';
 import { ApiType } from '../models/ApiType';
-import { defaultClassificationPrompt, defaultWantsPrompt } from '../constants';
+import {
+  defaultClassificationPrompt,
+  defaultWantsPrefixes,
+  defaultWantsPrompt,
+} from '../constants';
 import { SettingsService } from './SettingsService';
 import {
   getGenerationService,
@@ -146,9 +150,14 @@ export class AIService {
   }
 
   async handleWants(event: WantsInteractionEvent) {
+    const randomAction =
+      defaultWantsPrefixes[
+        Math.floor(Math.random() * defaultWantsPrefixes.length)
+      ];
     return this.runGeneration(event, {
       action: defaultWantsPrompt,
-      assistantPreResponse: 'I want to',
+      preAssistantPreResponse: `{actor.0}:`,
+      assistantPreResponse: randomAction,
     });
   }
 
@@ -238,6 +247,7 @@ export class AIService {
       sexCategoryType: options.sexCategoryType,
       sexLocationType: options.sexLocationType,
       preAssistantPreResponse: options.preAssistantPreResponse,
+      assistantPreResponse: options.assistantPreResponse,
       prePreAction: options.prePreAction,
       stopTokens: options.stopTokens,
       apiType: this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType,
@@ -291,9 +301,13 @@ export class AIService {
 
     let output = cleanupAIOutput(response.text, stopTokens);
 
-    // always append pre response to response
-    if (options.assistantPreResponse) {
-      output = `${options.assistantPreResponse.trim()} ${output.trim()}`;
+    // Remove preAssistantPreResponse from output
+    if (options.preAssistantPreResponse) {
+      if (output.startsWith(options.preAssistantPreResponse.trim())) {
+        output = output
+          .substring(options.preAssistantPreResponse.trim().length)
+          .trim();
+      }
     }
 
     newMemory.content = output;

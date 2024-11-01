@@ -80,7 +80,9 @@ export class SentientSimsAIService implements GenerationService {
     const completionRequest: VLLMChatCompletionRequest = {
       model,
       max_tokens: request.maxResponseTokens,
-      messages,
+      messages: messages.map((m) => {
+        return { content: m.content, role: m.role };
+      }),
       temperature: modelSettings.temperature,
       top_p: modelSettings.top_p,
       top_k: modelSettings.top_k,
@@ -88,6 +90,11 @@ export class SentientSimsAIService implements GenerationService {
       repetition_penalty: modelSettings.repetition_penalty,
       guided_choice: request.guidedChoice,
     };
+
+    if (messages[messages.length - 1].role === 'assistant') {
+      completionRequest.add_generation_prompt = false;
+      completionRequest.continue_final_message = true;
+    }
 
     log.debug(`Request: ${JSON.stringify(completionRequest, null, 2)}`);
 

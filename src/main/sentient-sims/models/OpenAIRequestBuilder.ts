@@ -4,6 +4,7 @@ import { TokenCounter } from 'main/sentient-sims/tokens/TokenCounter';
 import { OpenAICompatibleRequest } from './OpenAICompatibleRequest';
 import { ChatCompletionMessageRole } from './ChatCompletionMessageRole';
 import { OpenAIMessage } from './OpenAIMessage';
+import { filterNullAndUndefined } from '../util/filter';
 
 export type FormattedMemoryMessage = {
   content: string;
@@ -32,6 +33,7 @@ export type OneShotRequest = {
   maxTokens: number;
   userPreResponse?: string;
   assistantPreResponse?: string;
+  preAssistantPreResponse?: string;
   guidedChoice?: string[];
 };
 
@@ -80,13 +82,18 @@ export class OpenAIRequestBuilder {
       tokenCount += userMessage.tokens;
     }
 
-    if (promptRequest.assistantPreResponse) {
+    if (
+      promptRequest.assistantPreResponse ||
+      promptRequest.preAssistantPreResponse
+    ) {
+      const content = filterNullAndUndefined([
+        promptRequest.preAssistantPreResponse,
+        promptRequest.assistantPreResponse,
+      ]).join(' ');
       const assistantMessage: OpenAIMessage = {
         role: 'assistant',
-        content: promptRequest.assistantPreResponse,
-        tokens: this.tokenCounter.countTokens(
-          promptRequest.assistantPreResponse
-        ),
+        content,
+        tokens: this.tokenCounter.countTokens(content),
       };
       memoriesToInsert.push(assistantMessage);
       tokenCount += assistantMessage.tokens;

@@ -10,15 +10,6 @@ export class DefaultFormatter implements InputFormatter {
         promptRequest.prePreAction,
         promptRequest.action,
       ]).join(' ');
-      promptRequest.assistantPreResponse = filterNullAndUndefined([
-        promptRequest.preAssistantPreResponse,
-        promptRequest.assistantPreResponse,
-      ]).join(' ');
-    } else {
-      promptRequest.assistantPreResponse = filterNullAndUndefined([
-        promptRequest.preAssistantPreResponse,
-        promptRequest.assistantPreResponse,
-      ]).join(' ');
     }
 
     return promptRequest;

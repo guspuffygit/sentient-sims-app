@@ -12,6 +12,7 @@ export type VLLMChatCompletionRequest = CompletionCreateParamsNonStreaming & {
   top_k?: number;
   min_tokens?: number;
   repetition_penalty?: number;
+  add_generation_prompt?: boolean;
 };
 
 export type VLLMTokenizeTextRequest = {

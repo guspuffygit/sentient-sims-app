@@ -67,3 +67,4 @@ export const koboldaiDefaultEndpoint = 'http://localhost:5000';
 export const openaiDefaultModel = 'gpt-4o-mini';
 export const sentientSimsAIDefaultModel = 'Gryphe/MythoMax-L2-13b';
 export const tokenizerBreakString = '<<BREAK>>';
+export const defaultWantsPrefixes = ['I want to', 'I would like', 'I feel'];
