@@ -15,10 +15,12 @@ import AppCard from './AppCard';
 import useNewVersionChecker from './hooks/useNewVersionChecker';
 import useSetting, { SettingsHook } from './hooks/useSetting';
 import PatreonUser from './wrappers/PatreonUser';
+import { useVersions } from './providers/VersionsProvider';
 
 const updateClient = new UpdateClient();
 
 export default function UpdateComponent() {
+  const versions = useVersions();
   const { user } = useAuthenticator((context) => [context.user]);
   const patreonUser = new PatreonUser(user);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -49,6 +51,7 @@ export default function UpdateComponent() {
         })
         .finally(() => {
           setIsLoading(false);
+          versions.refresh();
         });
     }
 

@@ -110,7 +110,6 @@ export function runApi({
     '/debug/test-ai',
     debugController.healthCheckGenerationService
   );
-  expressApp.get('/debug/test-install', debugController.healthCheckInstall);
   expressApp.get('/debug/send-logs', debugController.sendDebugLogs);
   expressApp.post('/debug/interaction', debugController.sendBugReport);
 
@@ -142,6 +141,7 @@ export function runApi({
 
   expressApp.get('/versions/mod', versionController.getModVersion);
   expressApp.get('/versions/app', versionController.getAppVersion);
+  expressApp.get('/versions/game', versionController.getGameVersion);
 
   expressApp.post('/update/mod', updateController.updateMod);
 
