@@ -3,6 +3,7 @@ import {
   SSEventType,
 } from 'main/sentient-sims/models/InteractionEvents';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
+import { SimAge } from 'main/sentient-sims/models/SimAge';
 import { containsPlayerSim } from 'main/sentient-sims/util/eventContainsPlayerSim';
 import {
   filterNullAndUndefined,
@@ -33,7 +34,7 @@ describe('containsPlayerSim', () => {
         },
       ],
       name: 'Ricky Rickerson',
-      age: 32,
+      age: SimAge.ADULT,
       sim_id: '772948625141858300',
       gender: 'Male',
       likes: ['Activities_RocketScience', 'Activities_Fitness'],

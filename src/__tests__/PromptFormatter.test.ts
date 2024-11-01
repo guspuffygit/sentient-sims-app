@@ -25,6 +25,7 @@ import {
   OpenAIRequestBuilder,
   PromptRequest2,
 } from 'main/sentient-sims/models/OpenAIRequestBuilder';
+import { SimAge } from 'main/sentient-sims/models/SimAge';
 import { mockDirectoryService } from './util';
 
 describe('Output', () => {
@@ -51,7 +52,7 @@ describe('Output', () => {
               },
             ],
             name: 'Ricky Rickerson',
-            age: 32,
+            age: SimAge.ADULT,
             sim_id: '772948625141858300',
             gender: 'Male',
             likes: ['Activities_RocketScience', 'Activities_Fitness'],
@@ -85,7 +86,7 @@ describe('Output', () => {
               },
             ],
             name: 'Richy Richardson',
-            age: 22,
+            age: SimAge.ADULT,
             sim_id: '772949305175180300',
             gender: 'Male',
             likes: ['Color_Green'],
@@ -200,7 +201,7 @@ describe('Output', () => {
       sentientSim = {
         careers: [],
         name: '',
-        age: 0,
+        age: SimAge.ADULT,
         sim_id: '',
         gender: '',
         likes: [],
