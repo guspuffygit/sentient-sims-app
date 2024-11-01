@@ -50,19 +50,18 @@ import { MythoMaxFormatter } from '../formatter/MythoMaxFormatter';
 import { NovelAIFormatter } from '../formatter/NovelAIFormatter';
 import { getBuffSystemPrompt } from '../systemPrompts';
 import { AIModel } from '../models/AIModel';
+import { DefaultFormatter } from '../formatter/DefaultFormatter';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
-  const inputFormatters: InputFormatter[] = [];
-
   if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
-    inputFormatters.push(new MythoMaxFormatter());
+    return [new MythoMaxFormatter()];
   }
 
   if (apiType === ApiType.NovelAI) {
-    inputFormatters.push(new NovelAIFormatter());
+    return [new NovelAIFormatter()];
   }
 
-  return inputFormatters;
+  return [new DefaultFormatter()];
 }
 
 export class AIService {
