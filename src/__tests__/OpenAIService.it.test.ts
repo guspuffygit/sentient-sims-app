@@ -6,7 +6,7 @@ import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import {
   OneShotRequest,
   OpenAIRequestBuilder,
-  PromptRequest2,
+  PromptRequest,
 } from 'main/sentient-sims/models/OpenAIRequestBuilder';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
 
@@ -23,7 +23,7 @@ describe('OpenAIServiceIT', () => {
 
   it('sentientSimsGenerate', async () => {
     settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, false);
-    const promptRequest: PromptRequest2 = {
+    const promptRequest: PromptRequest = {
       participants: 'Gus',
       location: 'Square cube',
       memories: [],
@@ -65,7 +65,7 @@ describe('OpenAIServiceIT', () => {
     settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, true);
     settingsService.set(SettingsEnum.LOCALIZATION_LANGUAGE, 'Spanish');
     const systemPrompt = 'Return the text "Alright?"';
-    const promptRequest: PromptRequest2 = {
+    const promptRequest: PromptRequest = {
       participants: '',
       location: '',
       memories: [],

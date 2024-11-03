@@ -2,6 +2,7 @@ import log from 'electron-log';
 import {
   ChatContinueInteractionEvent,
   ChatInteractionEvent,
+  ContinueInteractionEvent,
   DoSomethingInteractionEvent,
   InteractionEvent,
   InteractionEvents,
@@ -111,7 +112,7 @@ export class AIService {
       case SSEventType.WANTS:
         return this.handleWants(event as WantsInteractionEvent);
       case SSEventType.CONTINUE:
-        return this.runGeneration(event);
+        return this.handleContinue(event as ContinueInteractionEvent);
       default:
         return { status: InteractionEventStatus.NOOP };
     }
@@ -147,6 +148,10 @@ export class AIService {
     }
 
     return { status: InteractionEventStatus.NOOP };
+  }
+
+  async handleContinue(event: ContinueInteractionEvent) {
+    return this.runGeneration(event);
   }
 
   async handleWants(event: WantsInteractionEvent) {

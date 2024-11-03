@@ -23,7 +23,7 @@ import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
 import {
   OpenAIRequestBuilder,
-  PromptRequest2,
+  PromptRequest,
 } from 'main/sentient-sims/models/OpenAIRequestBuilder';
 import { SimAge } from 'main/sentient-sims/models/SimAge';
 import { mockDirectoryService } from './util';
@@ -248,7 +248,7 @@ describe('Output', () => {
 
   describe('OpenAIRequestBuilder', () => {
     const builder = new OpenAIRequestBuilder(new OpenAITokenCounter());
-    let request: PromptRequest2;
+    let request: PromptRequest;
     beforeEach(() => {
       request = {
         location: 'location',

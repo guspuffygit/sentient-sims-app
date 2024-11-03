@@ -10,7 +10,7 @@ import { getSystemPrompt } from '../systemPrompts';
 import { ApiType } from '../models/ApiType';
 import {
   FormattedMemoryMessage,
-  PromptRequest2,
+  PromptRequest,
 } from '../models/OpenAIRequestBuilder';
 import { SentientSim } from '../models/SentientSim';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
@@ -127,7 +127,7 @@ export class PromptRequestBuilderService {
   async buildPromptRequest(
     event: SSEvent,
     options: PromptRequestBuilderOptions
-  ): Promise<PromptRequest2> {
+  ): Promise<PromptRequest> {
     const location = this.repositoryService.location.getLocation({
       id: event.environment.location_id,
     });

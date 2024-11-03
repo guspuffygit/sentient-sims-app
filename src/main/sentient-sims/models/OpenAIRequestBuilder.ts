@@ -11,7 +11,7 @@ export type FormattedMemoryMessage = {
   role: ChatCompletionMessageRole;
 };
 
-export type PromptRequest2 = {
+export type PromptRequest = {
   location: string;
   dateTime: string;
   participants: string;
@@ -56,7 +56,7 @@ export class OpenAIRequestBuilder {
     this.tokenCounter = tokenCounter;
   }
 
-  buildOpenAIRequest(promptRequest: PromptRequest2): OpenAICompatibleRequest {
+  buildOpenAIRequest(promptRequest: PromptRequest): OpenAICompatibleRequest {
     const systemMessageContent = [
       promptRequest.systemPrompt,
       promptRequest.location,
@@ -120,6 +120,10 @@ export class OpenAIRequestBuilder {
     return {
       messages: [systemMessage, ...memoriesToInsert],
       maxResponseTokens: promptRequest.maxResponseTokens,
+      includesAssistantPreResponse: [
+        promptRequest.assistantPreResponse,
+        promptRequest.preAssistantPreResponse,
+      ].some((s) => s !== null && s !== ''),
     };
   }
 

@@ -89,12 +89,9 @@ export class SentientSimsAIService implements GenerationService {
       min_tokens: 3,
       repetition_penalty: modelSettings.repetition_penalty,
       guided_choice: request.guidedChoice,
+      add_generation_prompt: !request.includesAssistantPreResponse,
+      continue_final_message: request.includesAssistantPreResponse,
     };
-
-    if (messages[messages.length - 1].role === 'assistant') {
-      completionRequest.add_generation_prompt = false;
-      completionRequest.continue_final_message = true;
-    }
 
     log.debug(`Request: ${JSON.stringify(completionRequest, null, 2)}`);
 
