@@ -20,18 +20,3 @@ export function ApiTypeFromValue(value: any): ApiType {
       return ApiType.OpenAI;
   }
 }
-
-export function ApiTypeName(apiType: ApiType): string {
-  switch (apiType) {
-    case ApiType.SentientSimsAI:
-      return 'Sentient Sims AI';
-    case ApiType.KoboldAI:
-      return 'Kobold AI';
-    case ApiType.NovelAI:
-      return 'Novel AI';
-    case ApiType.OpenAI:
-      return 'OpenAI';
-    default:
-      return 'AI';
-  }
-}

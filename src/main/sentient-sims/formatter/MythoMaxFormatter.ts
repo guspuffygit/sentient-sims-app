@@ -1,10 +1,10 @@
 /* eslint-disable class-methods-use-this */
-import { OneShotRequest, PromptRequest } from '../models/OpenAIRequestBuilder';
+import { OneShotRequest, PromptRequest2 } from '../models/OpenAIRequestBuilder';
 import { filterNullAndUndefined } from '../util/filter';
 import { InputFormatter } from './InputOutputFormatting';
 
 export class MythoMaxFormatter implements InputFormatter {
-  formatInput(promptRequest: PromptRequest): PromptRequest {
+  formatInput(promptRequest: PromptRequest2): PromptRequest2 {
     if (promptRequest.action) {
       promptRequest.action = filterNullAndUndefined([
         '### Input:\n',

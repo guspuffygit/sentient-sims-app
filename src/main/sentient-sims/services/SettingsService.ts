@@ -6,8 +6,6 @@ import { ApiType } from '../models/ApiType';
 import {
   koboldaiDefaultEndpoint,
   openaiDefaultEndpoint,
-  openaiDefaultModel,
-  sentientSimsAIDefaultModel,
   sentientSimsAIHost,
 } from '../constants';
 import { disableDebugLogging, enableDebugLogging } from '../util/debugLog';
@@ -22,11 +20,7 @@ export function defaultStore(cwd?: string) {
       },
       [SettingsEnum.OPENAI_MODEL.toString()]: {
         type: 'string',
-        default: openaiDefaultModel,
-      },
-      [SettingsEnum.SENTIENTSIMSAI_MODEL.toString()]: {
-        type: 'string',
-        default: sentientSimsAIDefaultModel,
+        default: 'gpt-4o-mini',
       },
       [SettingsEnum.NOVELAI_MODEL.toString()]: {
         type: 'string',

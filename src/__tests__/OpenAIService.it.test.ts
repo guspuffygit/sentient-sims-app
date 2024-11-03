@@ -4,9 +4,8 @@ import { OpenAIService } from 'main/sentient-sims/services/OpenAIService';
 import { SettingsService } from 'main/sentient-sims/services/SettingsService';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import {
-  OneShotRequest,
   OpenAIRequestBuilder,
-  PromptRequest,
+  PromptRequest2,
 } from 'main/sentient-sims/models/OpenAIRequestBuilder';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
 
@@ -22,8 +21,7 @@ describe('OpenAIServiceIT', () => {
   });
 
   it('sentientSimsGenerate', async () => {
-    settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, false);
-    const promptRequest: PromptRequest = {
+    const promptRequest: PromptRequest2 = {
       participants: 'Gus',
       location: 'Square cube',
       memories: [],
@@ -43,21 +41,7 @@ describe('OpenAIServiceIT', () => {
         promptRequest.participants,
       ].join('\n\n')
     );
-    expect(result.text).toBeTruthy();
-  }, 20000);
-
-  it('sentientSimsGenerateJsonSchema', async () => {
-    settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, false);
-    const promptRequest: OneShotRequest = {
-      messages: ['yes?'],
-      systemPrompt: 'system prompt',
-      maxResponseTokens: 90,
-      maxTokens: 3900,
-      guidedChoice: ['NO'],
-    };
-    const request = builder.buildOneShotOpenAIRequest(promptRequest);
-    const result = await openAIService.sentientSimsGenerate(request);
-    expect(result.text).toEqual('NO');
+    expect(result.text).toContain('Gus');
   }, 20000);
 
   it('translation', async () => {
@@ -65,7 +49,7 @@ describe('OpenAIServiceIT', () => {
     settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, true);
     settingsService.set(SettingsEnum.LOCALIZATION_LANGUAGE, 'Spanish');
     const systemPrompt = 'Return the text "Alright?"';
-    const promptRequest: PromptRequest = {
+    const promptRequest: PromptRequest2 = {
       participants: '',
       location: '',
       memories: [],

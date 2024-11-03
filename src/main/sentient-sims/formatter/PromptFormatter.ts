@@ -5,7 +5,6 @@ import { traitDescriptions } from '../descriptions/traitDescriptions';
 import { getSexCategory, getSexLocation } from '../descriptions/wwDescriptions';
 import { SSEnvironment } from '../models/InteractionEvents';
 import { SentientSim } from '../models/SentientSim';
-import { SimAge } from '../models/SimAge';
 import { removeEmojis } from '../util/filter';
 
 export enum BodyState {
@@ -43,29 +42,6 @@ function formatTraits(traits: string[]): string[] {
   });
 
   return formattedTraits;
-}
-
-function formatAge(age: SimAge): string {
-  switch (age) {
-    case SimAge.BABY:
-      return 'baby';
-    case SimAge.INFANT:
-      return 'infant';
-    case SimAge.TODDLER:
-      return 'toddler';
-    case SimAge.CHILD:
-      return 'child';
-    case SimAge.TEEN:
-      return 'teen';
-    case SimAge.YOUNGADULT:
-      return 'young adult';
-    case SimAge.ADULT:
-      return 'adult';
-    case SimAge.ELDER:
-      return 'elder';
-    default:
-      return 'unknown age';
-  }
 }
 
 function formatCareers(sentientSim: SentientSim): string[] {
@@ -168,9 +144,7 @@ export function formatSentientSim(sentientSim: SentientSim): string {
   const properties = formatProperties(sentientSim);
 
   const prompt = [
-    `${sentientSim.name} is a ${sentientSim.gender} ${formatAge(
-      sentientSim.age
-    )}.`,
+    `${sentientSim.name} is a ${sentientSim.age} year old ${sentientSim.gender}.`,
   ];
 
   if (likes.length > 0) {

@@ -39,11 +39,11 @@
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "test": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest '\\.test\\.ts' '\\.test\\.tsx'",
-    "test:single": "ELECTRON_RUN_AS_NODE=true JEST_DISABLE_COVERAGE=true ./node_modules/.bin/electron ./node_modules/.bin/jest 'TokenTruncate.test.ts'",
+    "test:single": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest 'PromptFormatter.test.ts'",
     "test:e2e": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest 'ChromeDriver.e2e.test.ts'",
     "test:api": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest 'Api.test.ts'",
-    "test:unit": "ELECTRON_RUN_AS_NODE=true JEST_DISABLE_COVERAGE=true ./node_modules/.bin/electron ./node_modules/.bin/jest '(?<!\\.it)\\.test\\.(ts|tsx)$'",
-    "test:watch": "ELECTRON_RUN_AS_NODE=true JEST_DISABLE_COVERAGE=true ./node_modules/.bin/electron ./node_modules/.bin/jest --watch-all '(?<!\\.it)\\.test\\.(ts|tsx)$'"
+    "test:unit": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest '(?<!\\.it)\\.test\\.(ts|tsx)$'",
+    "test:watch": "ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest --watch-all '(?<!\\.it)\\.test\\.(ts|tsx)$'"
   },
   "browserslist": [],
   "prettier": {
@@ -59,6 +59,59 @@
         }
       }
     ]
+  },
+  "jest": {
+    "moduleDirectories": [
+      "node_modules",
+      "release/app/node_modules",
+      "src"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "ts",
+      "tsx",
+      "json"
+    ],
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/.erb/mocks/fileMock.js",
+      "\\.(css|less|sass|scss)$": "identity-obj-proxy"
+    },
+    "setupFiles": [
+      "./.erb/scripts/check-build-exists.ts"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/setup-jest.js"
+    ],
+    "testEnvironment": "jsdom",
+    "testEnvironmentOptions": {
+      "url": "http://localhost:25198/"
+    },
+    "testPathIgnorePatterns": [
+      "release/app/dist",
+      ".erb/dll"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!(@aws-amplify)/)",
+      "node_modules/(?!(@aws-sdk)/)",
+      "node_modules/(?!(uuid)/)"
+    ],
+    "transform": {
+      "\\.(ts|tsx|js|jsx)$": "ts-jest"
+    },
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "./src/**"
+    ],
+    "coveragePathIgnorePatterns": [
+      "main.ts",
+      "menu.ts",
+      "preload.ts",
+      "util.ts",
+      "LLamaTokenizer.ts",
+      "vocab.ts"
+    ],
+    "coverageDirectory": "coverage"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^4.6.4",

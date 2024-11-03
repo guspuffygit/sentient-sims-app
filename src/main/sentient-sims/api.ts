@@ -141,7 +141,6 @@ export function runApi({
 
   expressApp.get('/versions/mod', versionController.getModVersion);
   expressApp.get('/versions/app', versionController.getAppVersion);
-  expressApp.get('/versions/game', versionController.getGameVersion);
 
   expressApp.post('/update/mod', updateController.updateMod);
 

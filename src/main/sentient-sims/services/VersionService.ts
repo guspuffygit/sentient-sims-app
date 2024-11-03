@@ -3,11 +3,9 @@ import * as fs from 'fs';
 import log from 'electron-log';
 import { app } from 'electron';
 import { DirectoryService } from './DirectoryService';
-import { removeNonPrintableCharacters } from '../util/filter';
 
 export type Version = {
   version: string;
-  error?: string;
 };
 
 export class VersionService {
@@ -28,7 +26,7 @@ export class VersionService {
     }
 
     log.log(`Version file does not exist at path: ${path}`);
-    return { version: 'none', error: 'NOT INSTALLED' };
+    return { version: 'none' };
   }
 
   getModVersion(): Version {
@@ -47,12 +45,9 @@ export class VersionService {
         'utf-8'
       );
 
-      return { version: removeNonPrintableCharacters(versionText).trim() };
+      return { version: versionText.trim() };
     } catch (e: any) {
-      return {
-        version: 'none',
-        error: `Unable to get GameVersion.txt, do you have the correct Mods directory selected?\n${e?.message}`,
-      };
+      return { version: e?.message || 'null' };
     }
   }
 }

@@ -82,32 +82,30 @@ export default function SendLogButton() {
           </SpaceBetweenDiv>
         </Box>
       </Modal>
-      <Box sx={{ marginTop: 3 }}>
-        <SpaceBetweenDiv>
-          <div>
-            <Button variant="outlined" onClick={handleClick}>
-              Send Logs
-            </Button>
-          </div>
-          <div>
-            <Button
-              color="secondary"
-              variant="outlined"
-              sx={{ marginRight: 1 }}
-              onClick={() => navigate('/logs')}
-            >
-              Logs
-            </Button>
-            <Button
-              color="secondary"
-              variant="outlined"
-              onClick={() => navigate('/last-exception')}
-            >
-              Last Exceptions
-            </Button>
-          </div>
-        </SpaceBetweenDiv>
-      </Box>
+      <SpaceBetweenDiv>
+        <div>
+          <Button variant="outlined" onClick={handleClick}>
+            Send Logs
+          </Button>
+        </div>
+        <div>
+          <Button
+            color="secondary"
+            variant="outlined"
+            sx={{ marginRight: 1 }}
+            onClick={() => navigate('/logs')}
+          >
+            Logs
+          </Button>
+          <Button
+            color="secondary"
+            variant="outlined"
+            onClick={() => navigate('/last-exception')}
+          >
+            Last Exceptions
+          </Button>
+        </div>
+      </SpaceBetweenDiv>
     </>
   );
 }

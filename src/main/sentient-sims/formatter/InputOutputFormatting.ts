@@ -1,7 +1,7 @@
-import { OneShotRequest, PromptRequest } from '../models/OpenAIRequestBuilder';
+import { OneShotRequest, PromptRequest2 } from '../models/OpenAIRequestBuilder';
 
 export interface InputFormatter {
-  formatInput(promptRequest: PromptRequest): PromptRequest;
+  formatInput(promptRequest: PromptRequest2): PromptRequest2;
   formatOneShotRequest(oneShotRequest: OneShotRequest): OneShotRequest;
 }
 

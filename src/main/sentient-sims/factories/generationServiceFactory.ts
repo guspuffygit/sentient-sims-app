@@ -10,8 +10,6 @@ import { ApiType } from '../models/ApiType';
 import { NovelAIService } from '../services/NovelAIService';
 import { NovelAITokenCounter } from '../tokens/NovelAITokenCounter';
 import { KoboldAIService } from '../services/KoboldAIService';
-import { AllModelSettings, ModelSettings } from '../modelSettings';
-import { stringType } from '../util/typeChecks';
 
 export function getGenerationService(
   settingsService: SettingsService
@@ -46,27 +44,4 @@ export function getTokenCounter(
   }
 
   return new LLaMaTokenCounter();
-}
-
-export function getModelSettings(
-  settingsService: SettingsService
-): ModelSettings {
-  const aiType = settingsService.get(SettingsEnum.AI_API_TYPE);
-
-  let modelSettings = AllModelSettings.default;
-  let model: string | unknown = null;
-
-  if (aiType === ApiType.OpenAI) {
-    model = settingsService.get(SettingsEnum.OPENAI_MODEL);
-  }
-
-  if (aiType === ApiType.SentientSimsAI) {
-    model = settingsService.get(SettingsEnum.SENTIENTSIMSAI_MODEL);
-  }
-
-  if (stringType(model) && model in AllModelSettings) {
-    modelSettings = AllModelSettings[model];
-  }
-
-  return modelSettings;
 }

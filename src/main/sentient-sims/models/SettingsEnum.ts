@@ -2,7 +2,6 @@ export enum SettingsEnum {
   MOD_RELEASE = 'modRelease',
   OPENAI_MODEL = 'openaiModel',
   NOVELAI_MODEL = 'novelaiModel',
-  SENTIENTSIMSAI_MODEL = 'sentientsimsAIModel',
   MODS_DIRECTORY = 'modsDirectory',
   AI_API_TYPE = 'aiApiType',
   ACCESS_TOKEN = 'accessToken',

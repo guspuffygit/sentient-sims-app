@@ -11,9 +11,4 @@ export class VersionClient extends ApiClient {
     const response = await fetch(`${this.apiUrl}/versions/app`);
     return response.json();
   }
-
-  async getGameVersion(): Promise<Version> {
-    const response = await fetch(`${this.apiUrl}/versions/game`);
-    return response.json();
-  }
 }

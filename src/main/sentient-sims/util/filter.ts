@@ -8,7 +8,3 @@ export function removeEmojis(text: string): string {
     ''
   );
 }
-
-export function removeNonPrintableCharacters(text: string): string {
-  return text.replace(/[^a-zA-Z0-9.,+-]/g, '');
-}
