@@ -24,6 +24,7 @@ export type PromptRequest = {
   preAssistantPreResponse?: string;
   prePreAction?: string;
   stopTokens?: string[];
+  continue?: boolean;
 };
 
 export type OneShotRequest = {
@@ -120,10 +121,11 @@ export class OpenAIRequestBuilder {
     return {
       messages: [systemMessage, ...memoriesToInsert],
       maxResponseTokens: promptRequest.maxResponseTokens,
-      includesAssistantPreResponse: [
-        promptRequest.assistantPreResponse,
-        promptRequest.preAssistantPreResponse,
-      ].some((s) => s !== null && s !== ''),
+      includesAssistantPreResponse:
+        [
+          promptRequest.assistantPreResponse,
+          promptRequest.preAssistantPreResponse,
+        ].some((s) => s !== null && s !== '') || promptRequest.continue,
     };
   }
 

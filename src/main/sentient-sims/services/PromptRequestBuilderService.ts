@@ -25,6 +25,7 @@ export type GenerationOptions = {
   stopTokens?: string[];
   sexCategoryType?: number;
   sexLocationType?: number;
+  continue?: boolean;
 };
 
 const maxGroupSizeLength = 1700;
@@ -222,6 +223,7 @@ export class PromptRequestBuilderService {
       prePreAction: formattedPrePreAction,
       preAssistantPreResponse: formattedPreAssistantPreResponse,
       stopTokens: formattedStopTokens,
+      continue: options.continue,
     };
   }
 }

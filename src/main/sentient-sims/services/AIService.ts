@@ -151,7 +151,7 @@ export class AIService {
   }
 
   async handleContinue(event: ContinueInteractionEvent) {
-    return this.runGeneration(event);
+    return this.runGeneration(event, { continue: true });
   }
 
   async handleWants(event: WantsInteractionEvent) {
@@ -257,6 +257,7 @@ export class AIService {
       stopTokens: options.stopTokens,
       apiType: this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType,
       modelSettings: getModelSettings(this.settingsService),
+      continue: options.continue,
     };
 
     let promptRequest =
@@ -321,6 +322,16 @@ export class AIService {
       !output.startsWith(promptRequest.assistantPreResponse)
     ) {
       output = [promptRequest.assistantPreResponse, output].join(' ').trim();
+    }
+
+    const lastMessage =
+      openAIRequest.messages[openAIRequest.messages.length - 1];
+
+    if (
+      lastMessage.role === 'assistant' &&
+      output.startsWith(lastMessage.content)
+    ) {
+      output = output.replace(lastMessage.content, '').trim();
     }
 
     newMemory.content = output;
