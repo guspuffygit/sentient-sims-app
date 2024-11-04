@@ -23,8 +23,9 @@ import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
 import {
   OpenAIRequestBuilder,
-  PromptRequest2,
+  PromptRequest,
 } from 'main/sentient-sims/models/OpenAIRequestBuilder';
+import { SimAge } from 'main/sentient-sims/models/SimAge';
 import { mockDirectoryService } from './util';
 
 describe('Output', () => {
@@ -51,7 +52,7 @@ describe('Output', () => {
               },
             ],
             name: 'Ricky Rickerson',
-            age: 32,
+            age: SimAge.ADULT,
             sim_id: '772948625141858300',
             gender: 'Male',
             likes: ['Activities_RocketScience', 'Activities_Fitness'],
@@ -85,7 +86,7 @@ describe('Output', () => {
               },
             ],
             name: 'Richy Richardson',
-            age: 22,
+            age: SimAge.ADULT,
             sim_id: '772949305175180300',
             gender: 'Male',
             likes: ['Color_Green'],
@@ -151,6 +152,13 @@ describe('Output', () => {
           action:
             '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
           apiType: ApiType.SentientSimsAI,
+          modelSettings: {
+            temperature: undefined,
+            top_p: undefined,
+            top_k: undefined,
+            repetition_penalty: undefined,
+            max_tokens: 5000,
+          },
         }
       );
 
@@ -193,7 +201,7 @@ describe('Output', () => {
       sentientSim = {
         careers: [],
         name: '',
-        age: 0,
+        age: SimAge.ADULT,
         sim_id: '',
         gender: '',
         likes: [],
@@ -240,7 +248,7 @@ describe('Output', () => {
 
   describe('OpenAIRequestBuilder', () => {
     const builder = new OpenAIRequestBuilder(new OpenAITokenCounter());
-    let request: PromptRequest2;
+    let request: PromptRequest;
     beforeEach(() => {
       request = {
         location: 'location',

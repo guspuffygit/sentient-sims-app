@@ -2,6 +2,7 @@ import log from 'electron-log';
 import {
   ChatContinueInteractionEvent,
   ChatInteractionEvent,
+  ContinueInteractionEvent,
   DoSomethingInteractionEvent,
   InteractionEvent,
   InteractionEvents,
@@ -24,10 +25,15 @@ import {
 } from './PromptRequestBuilderService';
 import { containsPlayerSim } from '../util/eventContainsPlayerSim';
 import { ApiType } from '../models/ApiType';
-import { defaultClassificationPrompt, defaultWantsPrompt } from '../constants';
+import {
+  defaultClassificationPrompt,
+  defaultWantsPrefixes,
+  defaultWantsPrompt,
+} from '../constants';
 import { SettingsService } from './SettingsService';
 import {
   getGenerationService,
+  getModelSettings,
   getTokenCounter,
 } from '../factories/generationServiceFactory';
 import {
@@ -49,23 +55,18 @@ import { MythoMaxFormatter } from '../formatter/MythoMaxFormatter';
 import { NovelAIFormatter } from '../formatter/NovelAIFormatter';
 import { getBuffSystemPrompt } from '../systemPrompts';
 import { AIModel } from '../models/AIModel';
+import { DefaultFormatter } from '../formatter/DefaultFormatter';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
-  const inputFormatters: InputFormatter[] = [];
-
-  if (
-    apiType === ApiType.CustomAI ||
-    apiType === ApiType.SentientSimsAI ||
-    apiType === ApiType.KoboldAI
-  ) {
-    inputFormatters.push(new MythoMaxFormatter());
+  if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
+    return [new MythoMaxFormatter()];
   }
 
   if (apiType === ApiType.NovelAI) {
-    inputFormatters.push(new NovelAIFormatter());
+    return [new NovelAIFormatter()];
   }
 
-  return inputFormatters;
+  return [new DefaultFormatter()];
 }
 
 export class AIService {
@@ -111,7 +112,7 @@ export class AIService {
       case SSEventType.WANTS:
         return this.handleWants(event as WantsInteractionEvent);
       case SSEventType.CONTINUE:
-        return this.runGeneration(event);
+        return this.handleContinue(event as ContinueInteractionEvent);
       default:
         return { status: InteractionEventStatus.NOOP };
     }
@@ -149,10 +150,19 @@ export class AIService {
     return { status: InteractionEventStatus.NOOP };
   }
 
+  async handleContinue(event: ContinueInteractionEvent) {
+    return this.runGeneration(event, { continue: true });
+  }
+
   async handleWants(event: WantsInteractionEvent) {
+    const randomAction =
+      defaultWantsPrefixes[
+        Math.floor(Math.random() * defaultWantsPrefixes.length)
+      ];
     return this.runGeneration(event, {
       action: defaultWantsPrompt,
-      assistantPreResponse: 'I want to',
+      preAssistantPreResponse: `{actor.0}:`,
+      assistantPreResponse: randomAction,
     });
   }
 
@@ -242,9 +252,12 @@ export class AIService {
       sexCategoryType: options.sexCategoryType,
       sexLocationType: options.sexLocationType,
       preAssistantPreResponse: options.preAssistantPreResponse,
+      assistantPreResponse: options.assistantPreResponse,
       prePreAction: options.prePreAction,
       stopTokens: options.stopTokens,
       apiType: this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType,
+      modelSettings: getModelSettings(this.settingsService),
+      continue: options.continue,
     };
 
     let promptRequest =
@@ -294,9 +307,31 @@ export class AIService {
 
     let output = cleanupAIOutput(response.text, stopTokens);
 
-    // always append pre response to response
-    if (options.assistantPreResponse) {
-      output = `${options.assistantPreResponse.trim()} ${output.trim()}`;
+    // Remove preAssistantPreResponse from output
+    if (
+      promptRequest.preAssistantPreResponse &&
+      output.startsWith(promptRequest.preAssistantPreResponse.trim())
+    ) {
+      output = output
+        .substring(promptRequest.preAssistantPreResponse.trim().length)
+        .trim();
+    }
+
+    if (
+      promptRequest.assistantPreResponse &&
+      !output.startsWith(promptRequest.assistantPreResponse)
+    ) {
+      output = [promptRequest.assistantPreResponse, output].join(' ').trim();
+    }
+
+    const lastMessage =
+      openAIRequest.messages[openAIRequest.messages.length - 1];
+
+    if (
+      lastMessage.role === 'assistant' &&
+      output.startsWith(lastMessage.content)
+    ) {
+      output = output.replace(lastMessage.content, '').trim();
     }
 
     newMemory.content = output;
@@ -329,6 +364,7 @@ export class AIService {
       messages: classificationRequest.messages,
       maxResponseTokens: 15,
       maxTokens: 3900,
+      guidedChoice: classificationRequest.classifiers,
     };
 
     getInputFormatters(apiType).forEach((formatter) => {

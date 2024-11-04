@@ -17,7 +17,6 @@ export function KoboldAISettingsComponent({ apiType }: KoboldAISettingsProps) {
       type={ApiType.KoboldAI}
       selectedApiType={apiType}
       settingsEnum={SettingsEnum.KOBOLDAI_ENDPOINT}
-      label="KoboldAI URL"
     />
   );
 }

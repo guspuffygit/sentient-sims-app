@@ -12,6 +12,8 @@ import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { SSEventType } from 'main/sentient-sims/models/InteractionEvents';
 import { DbClient } from 'main/sentient-sims/clients/DbClient';
 import { DatabaseSession } from 'main/sentient-sims/models/DatabaseSession';
+import { SimAge } from 'main/sentient-sims/models/SimAge';
+import { defaultWantsPrefixes } from 'main/sentient-sims/constants';
 import { mockEnvironment } from './util';
 
 describe('Api', () => {
@@ -83,7 +85,7 @@ describe('Api', () => {
     const sentientSim: SentientSim = {
       careers: [],
       name: 'Gus Puffy',
-      age: 30,
+      age: SimAge.ADULT,
       sim_id: '192837876',
       gender: 'Male',
       likes: [],
@@ -125,6 +127,10 @@ describe('Api', () => {
       },
     });
 
-    expect(result.text).toContain('I want to');
+    const containsWantPrefix = defaultWantsPrefixes.some((want) =>
+      result.text?.includes(want)
+    );
+
+    expect(containsWantPrefix).toBeTruthy();
   }, 30000);
 });

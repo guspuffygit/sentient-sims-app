@@ -1,18 +1,12 @@
-import {
-  Box,
-  Divider,
-  IconButton,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
-import RotateLeftIcon from '@mui/icons-material/RotateLeft';
-import EditIcon from '@mui/icons-material/Edit';
-import useSetting from 'renderer/hooks/useSetting';
+import { Box, Divider, Typography } from '@mui/material';
 
-import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { ApiType, ApiTypeFromValue } from 'main/sentient-sims/models/ApiType';
+import { ApiType } from 'main/sentient-sims/models/ApiType';
+import {
+  openaiDefaultEndpoint,
+  openaiDefaultModel,
+} from 'main/sentient-sims/constants';
+import { LoadingButton } from '@mui/lab';
 import AppCard from './AppCard';
 import DebugLogsSettingsComponent from './settings/DebugLogsSettingsComponent';
 import LocalizationSettingsComponent from './settings/LocalizationSettingsComponent';
@@ -21,65 +15,55 @@ import { AISelectionComponent } from './settings/AISelectionComponent';
 import { AnimationMappingSettingsComponent } from './settings/AnimationMappingSettingsComponent';
 import { KoboldAISettingsComponent } from './settings/KoboldAISettingsComponent';
 import { SentientSimsSettingsComponent } from './settings/SentientSimsSettingsComponent';
+import ApiKeyAIComponent from './ApiKeyAIComponent';
+import { AIEndpointComponent } from './settings/AIEndpointComponent';
+import AIModelSelection from './AIModelSelection';
+import { ModsDirectoryComponent } from './ModsDirectoryComponent';
+import { AIStatusComponent } from './AIStatusComponent';
+import { useAISettings } from './providers/AISettingsProvider';
 
 export default function SettingsPage() {
-  const aiType = useSetting(
-    SettingsEnum.AI_API_TYPE,
-    ApiType.OpenAI.toString()
-  );
-  const modsDirectory = useSetting(SettingsEnum.MODS_DIRECTORY);
-
-  const handleDirectoryPicker = async () => {
-    try {
-      const filePath = await window.electron.selectDirectory();
-      if (filePath) {
-        log.info(`Changed Mods directory to: ${filePath}`);
-        modsDirectory.setSetting(filePath);
-      }
-    } catch (error) {
-      log.error('Error selecting directory:', error);
-    }
-  };
-
-  const apiType = ApiTypeFromValue(aiType.value);
+  const aiSettings = useAISettings();
 
   return (
     <AppCard>
       <Typography>Settings</Typography>
       <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-      <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
-        <TextField
-          focused
-          id="outlined-basic"
-          label="Mods Directory"
-          variant="outlined"
-          value={modsDirectory.value}
-          size="small"
-          fullWidth
-          InputProps={{
-            readOnly: true,
-          }}
-          sx={{ marginRight: 1 }}
-        />
-        <Tooltip title="Edit">
-          <IconButton onClick={() => handleDirectoryPicker()}>
-            <EditIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Reset to Default">
-          <IconButton onClick={() => modsDirectory.resetSetting()}>
-            <RotateLeftIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
+      <ModsDirectoryComponent />
       <DebugLogsSettingsComponent />
-      <AISelectionComponent aiType={aiType} apiType={apiType} />
-      <OpenAISettingsComponent apiType={apiType}>
+      <AISelectionComponent />
+      <Box display="flex" alignItems="center" sx={{ marginBottom: 3 }}>
+        <LoadingButton
+          loading={aiSettings.aiStatus.loading}
+          onClick={() => aiSettings.testAI()}
+          sx={{ marginRight: 2 }}
+          color="primary"
+          variant="outlined"
+        >
+          Test
+        </LoadingButton>
+        <AIStatusComponent />
+      </Box>
+      <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+      <OpenAISettingsComponent apiType={aiSettings.aiApiType}>
+        <ApiKeyAIComponent setting={SettingsEnum.OPENAI_KEY} aiName="OpenAI" />
+        <AIEndpointComponent
+          type={ApiType.OpenAI}
+          selectedApiType={ApiType.OpenAI}
+          settingsEnum={SettingsEnum.OPENAI_ENDPOINT}
+        />
+        <AIModelSelection
+          apiType={aiSettings.aiApiType}
+          defaultModel={openaiDefaultModel}
+          defaultEndpoint={openaiDefaultEndpoint}
+          modelSetting={SettingsEnum.OPENAI_MODEL}
+          endpointSetting={SettingsEnum.OPENAI_ENDPOINT}
+        />
         <LocalizationSettingsComponent />
       </OpenAISettingsComponent>
-      <KoboldAISettingsComponent apiType={apiType} />
-      <SentientSimsSettingsComponent apiType={apiType} />
-      <AnimationMappingSettingsComponent apiType={apiType} />
+      <KoboldAISettingsComponent apiType={aiSettings.aiApiType} />
+      <SentientSimsSettingsComponent apiType={aiSettings.aiApiType} />
+      <AnimationMappingSettingsComponent apiType={aiSettings.aiApiType} />
     </AppCard>
   );
 }

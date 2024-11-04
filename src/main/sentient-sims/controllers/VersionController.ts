@@ -4,7 +4,6 @@ import log from 'electron-log';
 import { VersionService } from '../services/VersionService';
 import { sendPopUpNotification } from '../util/notifyRenderer';
 
-// Thrown when the mod accesses an old endpoint
 export function modOutOfDate(req: Request, res: Response) {
   try {
     log.error(`Mod using out of date endpoint: ${req.method} ${req.path}`);
@@ -26,9 +25,9 @@ export class VersionController {
   constructor(versionService: VersionService) {
     this.versionService = versionService;
 
-    // Bind the methods to the current instance in the constructor
     this.getModVersion = this.getModVersion.bind(this);
     this.getAppVersion = this.getAppVersion.bind(this);
+    this.getGameVersion = this.getGameVersion.bind(this);
   }
 
   getModVersion(req: Request, res: Response) {
@@ -37,5 +36,9 @@ export class VersionController {
 
   getAppVersion(req: Request, res: Response) {
     res.json(this.versionService.getAppVerson());
+  }
+
+  getGameVersion(req: Request, res: Response) {
+    res.json(this.versionService.getGameVersion());
   }
 }

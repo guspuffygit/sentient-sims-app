@@ -1,10 +1,11 @@
 import { SentientSimCareer } from './SentientSimCareer';
+import { SimAge } from './SimAge';
 
 export type SentientSim = {
   description?: string;
   careers: SentientSimCareer[];
   name: string;
-  age: number;
+  age: SimAge;
   sim_id: string;
   gender: string;
   likes: string[];

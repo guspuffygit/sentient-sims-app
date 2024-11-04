@@ -10,11 +10,12 @@ import { getSystemPrompt } from '../systemPrompts';
 import { ApiType } from '../models/ApiType';
 import {
   FormattedMemoryMessage,
-  PromptRequest2,
+  PromptRequest,
 } from '../models/OpenAIRequestBuilder';
 import { SentientSim } from '../models/SentientSim';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { ChatCompletionMessageRole } from '../models/ChatCompletionMessageRole';
+import { ModelSettings } from '../modelSettings';
 
 export type GenerationOptions = {
   action?: string;
@@ -24,12 +25,14 @@ export type GenerationOptions = {
   stopTokens?: string[];
   sexCategoryType?: number;
   sexLocationType?: number;
+  continue?: boolean;
 };
 
 const maxGroupSizeLength = 1700;
 
 export type PromptRequestBuilderOptions = GenerationOptions & {
   apiType: ApiType;
+  modelSettings: ModelSettings;
 };
 
 export class PromptRequestBuilderService {
@@ -125,7 +128,7 @@ export class PromptRequestBuilderService {
   async buildPromptRequest(
     event: SSEvent,
     options: PromptRequestBuilderOptions
-  ): Promise<PromptRequest2> {
+  ): Promise<PromptRequest> {
     const location = this.repositoryService.location.getLocation({
       id: event.environment.location_id,
     });
@@ -215,11 +218,12 @@ export class PromptRequestBuilderService {
       memories: groupedMemories,
       action: formattedAction,
       maxResponseTokens: 90,
-      maxTokens: 3900,
+      maxTokens: options.modelSettings.max_tokens,
       assistantPreResponse: formattedAssistantPreResponse,
       prePreAction: formattedPrePreAction,
       preAssistantPreResponse: formattedPreAssistantPreResponse,
       stopTokens: formattedStopTokens,
+      continue: options.continue,
     };
   }
 }
