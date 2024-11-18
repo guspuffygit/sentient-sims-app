@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom';
 import { OpenAIMessage } from 'main/sentient-sims/models/OpenAIMessage';
-import { truncateMessages } from 'main/sentient-sims/util/tokenTruncate';
+import {
+  arraysAreEqual,
+  truncateMessages,
+} from 'main/sentient-sims/util/tokenTruncate';
 
 describe('TruncateTokens', () => {
   it('test truncate', () => {
@@ -68,5 +71,14 @@ describe('TruncateTokens', () => {
       messages
     );
     expect(result).toEqual(expectedMessages);
+  });
+
+  it('test equal arrays', () => {
+    expect(arraysAreEqual([], [])).toBeTruthy();
+    expect(arraysAreEqual([1], [1])).toBeTruthy();
+    expect(arraysAreEqual([1, 2], [1])).toBeFalsy();
+    expect(arraysAreEqual([1], [])).toBeFalsy();
+    expect(arraysAreEqual([1], [2])).toBeFalsy();
+    expect(arraysAreEqual([1, 2], [1, 2])).toBeTruthy();
   });
 });

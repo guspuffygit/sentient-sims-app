@@ -9,6 +9,8 @@ import {
   filterNullAndUndefined,
   removeEmojis,
 } from 'main/sentient-sims/util/filter';
+import { getRandomItem } from 'main/sentient-sims/util/getRandomItem';
+import { stringType } from 'main/sentient-sims/util/typeChecks';
 
 describe('Util', () => {
   it('filterNullAndUndefined removes null and undefined values from list', () => {
@@ -20,6 +22,17 @@ describe('Util', () => {
 
   it('removeEmojis removes emojis correctly', () => {
     expect(removeEmojis('😀🤹🏾test')).toEqual('test');
+  });
+
+  it('get random item', () => {
+    const result = getRandomItem([1, 2]);
+    const actualResult = result === 1 || result === 2;
+    expect(actualResult).toBeTruthy();
+  });
+
+  it('type check string', () => {
+    expect(stringType('yes')).toBeTruthy();
+    expect(stringType(2)).toBeFalsy();
   });
 });
 

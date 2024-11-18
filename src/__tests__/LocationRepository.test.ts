@@ -6,6 +6,15 @@ import { LocationRepository } from 'main/sentient-sims/db/LocationRepository';
 import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
 import { mockDirectoryService } from './util';
 
+function locationsAreEqual(a: LocationEntity, b: LocationEntity): boolean {
+  return (
+    a.id === b.id &&
+    a.description === b.description &&
+    a.name === b.name &&
+    a.lot_type === b.lot_type
+  );
+}
+
 describe('LocationRepository', () => {
   it('is_generic', async () => {
     const directoryService = mockDirectoryService();
@@ -20,11 +29,11 @@ describe('LocationRepository', () => {
     const locationRepository = new LocationRepository(dbService);
 
     // Check generic location is returned when id doesnt exist in defaultLocationDescriptions
-    const result = await locationRepository.getLocation({ id: 11111 });
+    const result = locationRepository.getLocation({ id: 11111 });
     expect(result.is_generic).toBeTruthy();
 
     // Check default location description is returned
-    const defaultResult = await locationRepository.getLocation({
+    const defaultResult = locationRepository.getLocation({
       id: 254110336,
     });
     expect(defaultResult.is_generic).toBeFalsy();
@@ -51,15 +60,31 @@ describe('LocationRepository', () => {
       lot_type: 'New Lot Type',
       description: 'New description',
     };
-    await locationRepository.updateLocation(expectedResult);
-    const result = await locationRepository.getLocation({ id: locationId });
-    expect(result.id).toEqual(expectedResult.id);
-    expect(result.name).toEqual(expectedResult.name);
-    expect(result.description).toEqual(expectedResult.description);
-    expect(result.lot_type).toEqual(expectedResult.lot_type);
+    locationRepository.updateLocation(expectedResult);
+    const result = locationRepository.getLocation({ id: locationId });
+    expect(locationsAreEqual(result, expectedResult)).toBeTruthy();
 
-    await locationRepository.deleteLocation({ id: locationId });
-    const defaultResult = await locationRepository.getLocation({
+    const allLocations = locationRepository.getAllLocations();
+    expect(
+      allLocations.some((item) => item.id === expectedResult.id)
+    ).toBeTruthy();
+
+    const modifiedLocations = locationRepository.getModifiedLocations();
+    expect(
+      modifiedLocations.some((item) => item.id === expectedResult.id)
+    ).toBeTruthy();
+
+    const defaultLocations = locationRepository.getDefaultLocations();
+    expect(
+      defaultLocations.some(
+        (item) =>
+          item.id === expectedResult.id &&
+          item.description === expectedResult.description
+      )
+    ).toBeFalsy();
+
+    locationRepository.deleteLocation({ id: locationId });
+    const defaultResult = locationRepository.getLocation({
       id: locationId,
     });
     expect(defaultResult.name).toEqual('The Futures Past');

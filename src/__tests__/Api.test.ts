@@ -156,13 +156,29 @@ describe('Api', () => {
 
     const jwtToken = adminAuthResponse.AuthenticationResult?.IdToken || '';
     const settingsClient = new SettingsClient(apiUrl);
-    settingsClient.updateSetting(SettingsEnum.ACCESS_TOKEN, jwtToken);
-    settingsClient.updateSetting(
+    await settingsClient.updateSetting(SettingsEnum.ACCESS_TOKEN, jwtToken);
+    await settingsClient.updateSetting(
       SettingsEnum.AI_API_TYPE,
       ApiType.SentientSimsAI
     );
     const aiClient = new AIClient(apiUrl);
     const models = await aiClient.getModels();
     expect(models[0].name).toEqual('Gryphe/MythoMax-L2-13b');
+  });
+
+  it('test settings api', async () => {
+    const settingsClient = new SettingsClient(apiUrl);
+    await settingsClient.updateSetting(SettingsEnum.LOCALIZATION_ENABLED, true);
+    const result = await settingsClient.getSetting(
+      SettingsEnum.LOCALIZATION_ENABLED
+    );
+    expect(result.value).toBeTruthy();
+    // await settingsClient.resetSetting(SettingsEnum.LOCALIZATION_ENABLED);
+
+    // const resetResult = await settingsClient.getSetting(
+    //   SettingsEnum.LOCALIZATION_ENABLED
+    // );
+    // console.error(`Settings LOCALIZATION_ENABLED value: ${resetResult.value}`);
+    // expect(resetResult.value).toBeFalsy();
   });
 });

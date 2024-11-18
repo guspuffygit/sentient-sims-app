@@ -79,6 +79,13 @@ describe('ParticipantRepository', () => {
       fullName: 'No Name',
     });
 
+    const allParticipants = participantRepository.getAllParticipants();
+    expect(
+      allParticipants.some(
+        (item) => item.id === '187263' && item.name === 'Travis Scott'
+      )
+    ).toBeTruthy();
+
     expect(noDefaultSimDescription.description).toBeUndefined();
   });
 });

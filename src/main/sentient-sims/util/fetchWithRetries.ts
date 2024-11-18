@@ -4,7 +4,7 @@ import { SentientSimsHTTPStatusCode } from '../models/SentientSimsHTTPStatusCode
 
 export async function fetchWithRetries(
   url: string,
-  options: RequestInit,
+  options: RequestInit = {},
   retries: number = 3,
   delay: number = 10000,
   attempts: number = 0

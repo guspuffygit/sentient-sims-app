@@ -99,5 +99,10 @@ describe('MemoryRepository', () => {
     memoryRepository.deleteAllMemories();
     const noResultsDeleteAll = memoryRepository.getMemories();
     expect(noResultsDeleteAll).toHaveLength(0);
+
+    const throwsError = jest.fn(() => {
+      memoryRepository.getMemory({ id: 99999 });
+    });
+    expect(throwsError).toThrow();
   });
 });

@@ -1,7 +1,7 @@
 /* eslint-disable no-plusplus */
 import { OpenAIMessage } from '../models/OpenAIMessage';
 
-function arraysAreEqual(arr1: number[], arr2: number[]): boolean {
+export function arraysAreEqual(arr1: number[], arr2: number[]): boolean {
   if (arr1.length !== arr2.length) {
     return false;
   }
