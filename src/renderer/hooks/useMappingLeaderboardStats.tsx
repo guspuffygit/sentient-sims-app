@@ -12,7 +12,10 @@ export type UserInfo = {
   id?: string;
 };
 
-const sortByMappedCount = (a: UserAnimationInfo, b: UserAnimationInfo) => {
+export const sortByMappedCount = (
+  a: UserAnimationInfo,
+  b: UserAnimationInfo
+) => {
   return b.mappedCount - a.mappedCount;
 };
 

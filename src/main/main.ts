@@ -172,7 +172,7 @@ app
     });
 
     const filter: WebRequestFilter = {
-      urls: ['http://localhost:25148/login/*'],
+      urls: [`http://localhost:${appApiPort}/login/*`],
     };
 
     session.defaultSession.webRequest.onBeforeRequest(

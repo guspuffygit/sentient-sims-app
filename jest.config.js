@@ -11,7 +11,7 @@ module.exports = {
   },
   setupFiles: ['./.erb/scripts/check-build-exists.ts'],
   setupFilesAfterEnv: ['<rootDir>/setup-jest.js'],
-  testEnvironment: 'jsdom',
+  testEnvironment: 'node',
   testEnvironmentOptions: {
     url: 'http://localhost:25198/',
   },
