@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import log from 'electron-log';
-import { ChatCompletion, ModelsPage } from 'openai/resources';
+import { ChatCompletion } from 'openai/resources';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { fetchWithTimeout } from '../util/fetchWithTimeout';

@@ -3,6 +3,10 @@ export type AIModel = {
   displayName: string;
 };
 
+export type AIModelResponse = {
+  data: AIModel[];
+};
+
 export function compareAIModels(a: AIModel, b: AIModel): number {
   if (a.name < b.name) {
     return -1;
