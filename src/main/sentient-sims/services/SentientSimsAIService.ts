@@ -9,7 +9,7 @@ import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { fetchWithRetries } from '../util/fetchWithRetries';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { SentientSimsAIError } from '../exceptions/SentientSimsAIError';
-import { AIModel } from '../models/AIModel';
+import { AIModel, AIModelResponse } from '../models/AIModel';
 import {
   VLLMChatCompletionRequest,
   VLLMRTokenizeResponse,
@@ -251,17 +251,8 @@ export class SentientSimsAIService implements GenerationService {
         },
         timeout: 5000,
       });
-      const modelsResponse: ModelsPage = await response.json();
-
-      const aiModels: AIModel[] = [];
-      modelsResponse.data.forEach((model) =>
-        aiModels.push({
-          name: model.id,
-          displayName: model.id,
-        })
-      );
-
-      return aiModels;
+      const modelsResponse: AIModelResponse = await response.json();
+      return modelsResponse.data;
     } catch (e: any) {
       log.error('Error getting sentient sims models', e);
 
