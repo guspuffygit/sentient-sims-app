@@ -26,7 +26,7 @@ export class InteractionDescriptionController {
 
   async updateInteraction(req: Request, res: Response) {
     const interaction: InteractionDTO = req.body;
-    this.interactionService.updateUnmappedInteraction(interaction);
+    await this.interactionService.updateUnmappedInteraction(interaction);
     res.json({ done: 'done' });
   }
 

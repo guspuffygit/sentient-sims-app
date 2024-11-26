@@ -458,7 +458,7 @@ export class AIService {
     // Edit them or let them go
     if (event.status === InteractionEventStatus.IGNORED) {
       log.debug(`Interaction mapped to ignored: ${event.interaction_name}`);
-      this.interactionService.updateUnmappedInteraction({
+      await this.interactionService.updateUnmappedInteraction({
         name: event.interaction_name,
         event,
         ignored: true,

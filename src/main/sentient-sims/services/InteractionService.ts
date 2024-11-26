@@ -36,7 +36,7 @@ export class InteractionService {
     return [];
   }
 
-  updateUnmappedInteraction(interaction: InteractionDTO) {
+  async updateUnmappedInteraction(interaction: InteractionDTO) {
     const basicInteration: BasicInteraction = {
       name: interaction.name,
       action: interaction?.action,
@@ -49,7 +49,7 @@ export class InteractionService {
         2
       )}`
     );
-    this.interactionRepository.setInteraction(basicInteration);
+    await this.interactionRepository.setInteraction(basicInteration);
     notifyUnmappedInteractionChanged();
   }
 
