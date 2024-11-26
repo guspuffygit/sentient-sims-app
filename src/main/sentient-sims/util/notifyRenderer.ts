@@ -1,7 +1,10 @@
 import electron from 'electron';
 import log from 'electron-log';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
-import { WWInteractionEvent } from '../models/InteractionEvents';
+import {
+  InteractionMappingEvent,
+  WWInteractionEvent,
+} from '../models/InteractionEvents';
 import { InteractionEventResult } from '../models/InteractionEventResult';
 import { DatabaseSession } from '../models/DatabaseSession';
 import { DeleteMemoryRequest } from '../models/GetMemoryRequest';
@@ -80,4 +83,12 @@ export function notifyUnmappedInteractionChanged() {
 export function notifyDatabaseLoaded(databaseSession: DatabaseSession) {
   log.debug('Sending database loaded');
   notifyAllWindows('on-database-loaded', databaseSession.sessionId);
+}
+
+export function notifyMapInteraction(event: InteractionMappingEvent) {
+  log.debug(
+    'Notifying renderer to begin mapping interaction',
+    JSON.stringify(event, null, 2)
+  );
+  notifyAllWindows('on-map-interaction', event);
 }

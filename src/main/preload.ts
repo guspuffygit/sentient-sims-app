@@ -95,6 +95,11 @@ const electronHandler = {
     return () =>
       ipcRenderer.removeListener('on-api-key-paste-from-clipboard', callback);
   },
+  onMapInteraction: (callback: any) => {
+    ipcRenderer.on('on-map-interaction', callback);
+
+    return () => ipcRenderer.removeListener('on-map-interaction', callback);
+  },
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

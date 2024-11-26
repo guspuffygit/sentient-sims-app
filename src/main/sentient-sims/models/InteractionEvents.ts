@@ -1,8 +1,10 @@
+import { InteractionEventStatus } from './InteractionEventResult';
 import { SentientSim } from './SentientSim';
 
 export enum SSEventType {
   WICKED_WHIMS = 'wickedwhims',
   INTERACTION = 'interaction',
+  INTERACTION_MAPPING = 'interaction_mapping',
   WANTS = 'wants',
   DO_SOMETHING = 'dosomething',
   CONTINUE = 'continue',
@@ -60,6 +62,11 @@ export type ChatContinueInteractionEvent = SSEvent;
 
 export type InteractionEvent = SSEvent & {
   interaction_name: string;
+  testing_action?: string;
+};
+
+export type InteractionMappingEvent = InteractionEvent & {
+  status: InteractionEventStatus;
 };
 
 export type DoSomethingInteractionEvent = SSEvent & {
@@ -75,4 +82,5 @@ export type InteractionEvents =
   | WantsInteractionEvent
   | ContinueInteractionEvent
   | InteractionEvent
-  | DoSomethingInteractionEvent;
+  | DoSomethingInteractionEvent
+  | InteractionMappingEvent;

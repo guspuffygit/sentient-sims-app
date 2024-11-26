@@ -2,7 +2,6 @@
 import { Animation } from 'main/sentient-sims/models/Animation';
 import log from 'electron-log';
 import { SettingsService } from './SettingsService';
-import { sentientSimsAIHost } from '../constants';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { fetchWithRetries } from '../util/fetchWithRetries';
 import { ApiType } from '../models/ApiType';
@@ -24,7 +23,9 @@ export class AnimationsService {
   }
 
   async getAnimations() {
-    const url = `${sentientSimsAIHost}/animations`;
+    const url = `${this.settingsService.get(
+      SettingsEnum.SENTIENTSIMSAI_ENDPOINT
+    )}/animations`;
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     log.debug(`url: ${url}, auth: ${authHeader}`);
     const response = await fetchWithRetries(url, {
@@ -38,7 +39,9 @@ export class AnimationsService {
   }
 
   async setAnimation(animation: Animation) {
-    const url = `${sentientSimsAIHost}/animations`;
+    const url = `${this.settingsService.get(
+      SettingsEnum.SENTIENTSIMSAI_ENDPOINT
+    )}/animations`;
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     log.debug(`url: ${url}, auth: ${authHeader}`);
     const response = await fetchWithRetries(url, {

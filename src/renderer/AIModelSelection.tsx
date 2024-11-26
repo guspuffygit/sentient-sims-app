@@ -79,8 +79,8 @@ export default function AIModelSelection({
   }
 
   const selectChildren: any[] = [];
-
-  if (aiModels?.data?.filter) {
+  if (aiModels?.data) {
+    log.info(`data1: ${JSON.stringify(aiModels.data, null, 2)}`);
     const models = aiModels.data
       .filter((model) => shouldIncludeModel(model))
       .sort(compareAIModels);

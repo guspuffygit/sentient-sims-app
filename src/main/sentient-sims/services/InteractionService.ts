@@ -5,7 +5,7 @@ import {
   InteractionDescription,
 } from '../descriptions/interactionDescriptions';
 import { InteractionRepository } from '../db/InteractionRepository';
-import { InteractionDTO } from '../db/dto/InteractionDTO';
+import { BasicInteraction, InteractionDTO } from '../db/dto/InteractionDTO';
 import { notifyUnmappedInteractionChanged } from '../util/notifyRenderer';
 
 export class InteractionService {
@@ -15,28 +15,41 @@ export class InteractionService {
     this.interactionRepository = interactionRepository;
   }
 
-  getInteractionDescription(interactionName: string) {
+  async getInteractionDescription(
+    interactionName: string
+  ): Promise<InteractionDescription | undefined> {
     let description = interactionDescriptions.get(interactionName);
     if (!description) {
-      description = this.interactionRepository.getInteraction(interactionName);
+      description = await this.interactionRepository.getInteraction(
+        interactionName
+      );
     }
 
     return description;
   }
 
   getUnmappedDescriptions(): InteractionDTO[] {
-    return this.interactionRepository.getAllInteractions();
+    return [];
   }
 
   getModifiedUnmappedDescriptions(): InteractionDTO[] {
-    return this.interactionRepository.getModifiedInteractions();
+    return [];
   }
 
   updateUnmappedInteraction(interaction: InteractionDTO) {
+    const basicInteration: BasicInteraction = {
+      name: interaction.name,
+      action: interaction?.action,
+      ignored: interaction?.ignored,
+    };
     log.debug(
-      `Updated unmapped interaction: ${JSON.stringify(interaction, null, 2)}`
+      `Updated unmapped interaction: ${JSON.stringify(
+        basicInteration,
+        null,
+        2
+      )}`
     );
-    this.interactionRepository.updateInteraction(interaction);
+    this.interactionRepository.setInteraction(basicInteration);
     notifyUnmappedInteractionChanged();
   }
 
@@ -66,12 +79,12 @@ export class InteractionService {
     return lines.join('\n');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   deleteInteraction(name: string) {
-    this.interactionRepository.deleteInteraction(name);
-    notifyUnmappedInteractionChanged();
+    throw new Error('deleteInteraction not implemented');
   }
 
-  getIgnoredInteractions() {
+  async getIgnoredInteractions() {
     return this.interactionRepository.getIgnoredInteractions();
   }
 }

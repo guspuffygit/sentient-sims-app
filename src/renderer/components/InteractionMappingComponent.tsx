@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 import {
   Box,
   Button,
@@ -8,9 +9,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Animation } from 'main/sentient-sims/models/Animation';
 import { IpcRendererEvent } from 'electron';
-import { getSexLocation } from 'main/sentient-sims/descriptions/wwDescriptions';
 import {
   ActorMapping,
   formatListToString,
@@ -18,8 +17,9 @@ import {
   getMappingStringReplacementPairs,
 } from 'main/sentient-sims/formatter/PromptFormatter';
 import {
-  WWEventType,
-  WWInteractionEvent,
+  InteractionEvent,
+  InteractionMappingEvent,
+  SSEventType,
 } from 'main/sentient-sims/models/InteractionEvents';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import {
@@ -33,9 +33,10 @@ import { JSX } from 'react/jsx-runtime';
 import { InteractionEventResult } from 'main/sentient-sims/models/InteractionEventResult';
 import log from 'electron-log';
 import { LoadingButton } from '@mui/lab';
+import { AIClient } from 'main/sentient-sims/clients/AIClient';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { CreateMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
-import { AIClient } from 'main/sentient-sims/clients/AIClient';
+import { InteractionDTO } from 'main/sentient-sims/db/dto/InteractionDTO';
 import SpaceBetweenDiv from './SpaceBetweenDiv';
 
 type SimMappingRowProperties = {
@@ -183,8 +184,10 @@ export function SimMappingRow({
 
 const aiClient = new AIClient();
 
-export function AnimationMappingComponent() {
-  const [event, setEvent] = useState<WWInteractionEvent | undefined | null>();
+export function InteractionMappingComponent() {
+  const [event, setEvent] = useState<
+    InteractionMappingEvent | undefined | null
+  >();
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [testResults, setTestResults] = useState<InteractionEventResult[]>([]);
@@ -197,8 +200,8 @@ export function AnimationMappingComponent() {
   };
 
   useEffect(() => {
-    const removeListener = window.electron.onMapAnimation(
-      (_event: IpcRendererEvent, interactionEvent: WWInteractionEvent) => {
+    const removeListener = window.electron.onMapInteraction(
+      (_event: IpcRendererEvent, interactionEvent: InteractionMappingEvent) => {
         onClose();
         setEvent(interactionEvent);
 
@@ -223,6 +226,11 @@ export function AnimationMappingComponent() {
     };
   }, []);
 
+  function add(piece: string) {
+    // TODO: Input at cursor location instead of the end if the cursor is within the text box
+    setInput((previousInput) => `${previousInput}${piece} `);
+  }
+
   const rows: JSX.Element[] = [];
   if (event?.sentient_sims) {
     event.sentient_sims.forEach((sentientSim) => {
@@ -230,6 +238,21 @@ export function AnimationMappingComponent() {
         <SimMappingRow sentientSim={sentientSim} setInput={setInput} />
       );
     });
+
+    if (event.sentient_sims.length > 2) {
+      const nonInitiatorParticipants: string[] = [];
+      for (let i = 1; i < event.sentient_sims.length; i++) {
+        nonInitiatorParticipants.push(event.sentient_sims[i].name);
+      }
+      rows.push(
+        <Box>
+          <Button onClick={() => add(nonInitiatorParticipants.join(', '))}>
+            non_initiator_participants
+          </Button>
+        </Box>
+      );
+      // {non_initiator_participants}
+    }
   }
 
   const output = replaceKeyValuePairs(
@@ -238,6 +261,7 @@ export function AnimationMappingComponent() {
     getMappingStringErrorPairs(event?.sentient_sims)
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function handleSave(saveToMemory: boolean) {
     if (!event) {
       return;
@@ -251,22 +275,22 @@ export function AnimationMappingComponent() {
       getMappingStringErrorPairs(event.sentient_sims)
     );
 
-    const animation: Animation = {
-      id: event.animation_identifier,
-      name: event.animation_name,
-      author: event.animation_author,
-      act: formattedOutput.actionString,
+    const interaction: InteractionDTO = {
+      name: event.interaction_name,
+      event,
+      action: formattedOutput.actionString,
+      ignored: false,
     };
 
     try {
-      await fetch(`${appApiUrl}/animations`, {
+      await fetch(`${appApiUrl}/interactions`, {
         method: 'POST',
-        body: JSON.stringify(animation),
+        body: JSON.stringify(interaction),
         headers: { 'Content-Type': 'application/json' },
       });
 
       if (!testResults?.[0].memory) {
-        throw Error('No test results present when saving animation');
+        throw Error('No test results present when saving interaction');
       }
 
       if (saveToMemory) {
@@ -285,7 +309,7 @@ export function AnimationMappingComponent() {
         });
       }
     } catch (error) {
-      log.error('An error occurred saving animation:', error);
+      log.error('An error occurred saving interaction:', error);
     }
 
     setLoading(false);
@@ -297,23 +321,34 @@ export function AnimationMappingComponent() {
       return;
     }
 
-    const testOutput = replaceKeyValuePairs(
-      input,
-      getMappingStringReplacementPairs(event?.sentient_sims),
-      getMappingStringErrorPairs(event?.sentient_sims)
-    );
-
     setLoading(true);
 
-    event.testing_action = testOutput.actionString;
-    event.ww_event_type = WWEventType.ACTIVE;
-
     try {
+      const testOutput = replaceKeyValuePairs(
+        input,
+        getMappingStringReplacementPairs(event?.sentient_sims),
+        getMappingStringErrorPairs(event?.sentient_sims)
+      );
+
+      const testEvent: InteractionEvent = {
+        interaction_name: event.interaction_name,
+        testing_action: testOutput.actionString,
+        event_id: event.event_id,
+        location_id: event.location_id,
+        event_type: SSEventType.INTERACTION,
+        environment: event.environment,
+        sentient_sims: event.sentient_sims,
+      };
+
       const results = await Promise.all([
-        aiClient.interactionEvent(event),
-        aiClient.interactionEvent(event),
-        aiClient.interactionEvent(event),
+        aiClient.interactionEvent(testEvent),
+        aiClient.interactionEvent(testEvent),
+        aiClient.interactionEvent(testEvent),
       ]);
+
+      results.forEach((result) => {
+        log.info(`status: ${result.status}`);
+      });
 
       setTestResults(results);
     } catch (error) {
@@ -321,19 +356,6 @@ export function AnimationMappingComponent() {
     }
 
     setLoading(false);
-  }
-
-  let postFix;
-  if (event) {
-    const sexLocation = getSexLocation(event.sex_location);
-    postFix = (
-      <Tooltip
-        title="This is always appended to the end of the prompt"
-        placement="top"
-      >
-        <Chip label={sexLocation} variant="outlined" />
-      </Tooltip>
-    );
   }
 
   let testOutcome;
@@ -372,7 +394,7 @@ export function AnimationMappingComponent() {
             Prompt:
           </Typography>
           <Typography variant="body2" sx={{ lineHeight: 3 }}>
-            {output.outputNodes} {postFix}
+            {output.outputNodes}
           </Typography>
         </Box>
       </>
@@ -393,10 +415,7 @@ export function AnimationMappingComponent() {
           p: 4,
         }}
       >
-        <Typography>
-          {event?.animation_author}: {event?.animation_name} -{' '}
-          {event?.animation_identifier}
-        </Typography>
+        <Typography>Interaction Name: {event?.interaction_name}</Typography>
         <Divider sx={{ marginTop: 1, marginBottom: 1 }} />
         {testOutcome}
         <Divider sx={{ marginTop: 1, marginBottom: 2 }} />
@@ -405,7 +424,7 @@ export function AnimationMappingComponent() {
             <div>
               {testResults.length > 0 ? (
                 <div>
-                  <Tooltip title="This will save the animation mapping, and add Test 1 to your Sims memories.">
+                  <Tooltip title="This will save the interaction mapping, and add Test 1 to your Sims memories.">
                     <LoadingButton
                       loading={loading}
                       color="secondary"
@@ -416,7 +435,7 @@ export function AnimationMappingComponent() {
                       Save + Add Memory
                     </LoadingButton>
                   </Tooltip>
-                  <Tooltip title="This will save the animation mapping without modifying Sims memories.">
+                  <Tooltip title="This will save the interaction mapping without modifying Sims memories.">
                     <LoadingButton
                       loading={loading}
                       color="secondary"

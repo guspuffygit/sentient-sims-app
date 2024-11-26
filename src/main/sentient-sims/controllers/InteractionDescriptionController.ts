@@ -37,6 +37,6 @@ export class InteractionDescriptionController {
   }
 
   async getIgnoredInteractions(req: Request, res: Response) {
-    res.json(this.interactionService.getIgnoredInteractions());
+    res.json(await this.interactionService.getIgnoredInteractions());
   }
 }

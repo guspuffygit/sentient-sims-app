@@ -6,3 +6,9 @@ export type InteractionDTO = {
   action?: string;
   ignored?: boolean;
 };
+
+export type BasicInteraction = {
+  name: string;
+  action?: string;
+  ignored?: boolean;
+};

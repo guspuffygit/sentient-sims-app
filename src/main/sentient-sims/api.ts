@@ -85,7 +85,7 @@ export function runApi({
   const patreonService = new PatreonService(settingsService);
   const patreonController = new PatreonController(patreonService);
   const animationsService = new AnimationsService(settingsService);
-  const interactionRepository = new InteractionRepository();
+  const interactionRepository = new InteractionRepository(settingsService);
   const interactionDescriptionService = new InteractionService(
     interactionRepository
   );
