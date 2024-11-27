@@ -6,6 +6,7 @@ import {
   DoSomethingInteractionEvent,
   InteractionEvent,
   InteractionEvents,
+  InteractionMappingEvent,
   SSEventType,
   WWEventType,
   WWInteractionEvent,
@@ -17,7 +18,10 @@ import {
   InteractionEventResult,
   InteractionEventStatus,
 } from '../models/InteractionEventResult';
-import { notifyMapAnimation } from '../util/notifyRenderer';
+import {
+  notifyMapAnimation,
+  notifyMapInteraction,
+} from '../util/notifyRenderer';
 import {
   GenerationOptions,
   PromptRequestBuilderOptions,
@@ -56,6 +60,7 @@ import { NovelAIFormatter } from '../formatter/NovelAIFormatter';
 import { getBuffSystemPrompt } from '../systemPrompts';
 import { AIModel } from '../models/AIModel';
 import { DefaultFormatter } from '../formatter/DefaultFormatter';
+import { InteractionDescription } from '../descriptions/interactionDescriptions';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
@@ -113,22 +118,23 @@ export class AIService {
         return this.handleWants(event as WantsInteractionEvent);
       case SSEventType.CONTINUE:
         return this.handleContinue(event as ContinueInteractionEvent);
+      case SSEventType.INTERACTION_MAPPING:
+        return this.handleInteractionMapping(event as InteractionMappingEvent);
       default:
         return { status: InteractionEventStatus.NOOP };
     }
   }
 
   async handleInteraction(event: InteractionEvent) {
-    const description = this.interactionService.getInteractionDescription(
-      event.interaction_name
-    );
-
-    if (!description) {
-      this.interactionService.updateUnmappedInteraction({
-        name: event.interaction_name,
-        event,
-      });
-      return { status: InteractionEventStatus.UNMAPPED_INTERACTION };
+    let description: InteractionDescription | undefined;
+    if (event.testing_action) {
+      description = {
+        pre_actions: [event.testing_action],
+      };
+    } else {
+      description = await this.interactionService.getInteractionDescription(
+        event.interaction_name
+      );
     }
 
     if (description?.ignored === true) {
@@ -138,6 +144,10 @@ export class AIService {
     const hasPlayerSim = containsPlayerSim(event);
     if (!hasPlayerSim && !description?.always_run) {
       return { status: InteractionEventStatus.NOT_PLAYER_SIM };
+    }
+
+    if (!description) {
+      return { status: InteractionEventStatus.UNMAPPED_INTERACTION };
     }
 
     if (description?.pre_actions) {
@@ -440,5 +450,33 @@ export class AIService {
     const generationService = getGenerationService(this.settingsService);
 
     return generationService.getModels();
+  }
+
+  async handleInteractionMapping(event: InteractionMappingEvent) {
+    if (event.status === InteractionEventStatus.IGNORED) {
+      log.debug(`Interaction mapped to ignored: ${event.interaction_name}`);
+      await this.interactionService.updateUnmappedInteraction({
+        name: event.interaction_name,
+        event,
+        ignored: true,
+      });
+      return { status: InteractionEventStatus.IGNORED };
+    }
+
+    if (event.status === InteractionEventStatus.UNMAPPED_INTERACTION) {
+      log.debug(
+        `Unmapped interaction will be mapped: ${event.interaction_name}`
+      );
+      if (event.sentient_sims.length <= 2) {
+        notifyMapInteraction(event);
+        return { status: InteractionEventStatus.MAPPING_INTERACTION };
+      }
+      log.debug(
+        `Interaction ${event.interaction_name} has more than 2 sims: ${event.sentient_sims.length}, mapping isnt supported yet for more than 2.`
+      );
+    }
+
+    log.debug(`NOOP interaction mapping: ${event.interaction_name}`);
+    return { status: InteractionEventStatus.NOOP };
   }
 }

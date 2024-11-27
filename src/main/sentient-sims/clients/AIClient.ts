@@ -1,7 +1,7 @@
 import { SentientSimsAIError } from '../exceptions/SentientSimsAIError';
 import { AIModel } from '../models/AIModel';
 import { InteractionEventResult } from '../models/InteractionEventResult';
-import { SSEvent } from '../models/InteractionEvents';
+import { InteractionEvents } from '../models/InteractionEvents';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { ApiClient } from './ApiClient';
@@ -18,7 +18,9 @@ export class AIClient extends ApiClient {
     return response.json();
   }
 
-  async interactionEvent(event: SSEvent): Promise<InteractionEventResult> {
+  async interactionEvent(
+    event: InteractionEvents
+  ): Promise<InteractionEventResult> {
     const response = await fetch(`${this.apiUrl}/ai/v2/event/interaction`, {
       method: 'POST',
       body: JSON.stringify(event),

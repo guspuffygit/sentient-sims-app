@@ -7,6 +7,7 @@ export enum InteractionEventStatus {
   IGNORED = 'ignored',
   UNMAPPED_INTERACTION = 'unmappedinteraction',
   MAPPING_ANIMATION = 'mappinganimation',
+  MAPPING_INTERACTION = 'mappinginteraction',
   NSFW_DISABLED = 'nsfwdisabled',
   NOOP = 'noop',
   NOT_PLAYER_SIM = 'notplayersim',

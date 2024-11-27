@@ -5,7 +5,7 @@ import {
   InteractionDescription,
 } from '../descriptions/interactionDescriptions';
 import { InteractionRepository } from '../db/InteractionRepository';
-import { InteractionDTO } from '../db/dto/InteractionDTO';
+import { BasicInteraction, InteractionDTO } from '../db/dto/InteractionDTO';
 import { notifyUnmappedInteractionChanged } from '../util/notifyRenderer';
 
 export class InteractionService {
@@ -15,63 +15,37 @@ export class InteractionService {
     this.interactionRepository = interactionRepository;
   }
 
-  getInteractionDescription(interactionName: string) {
+  async getInteractionDescription(
+    interactionName: string
+  ): Promise<InteractionDescription | undefined> {
     let description = interactionDescriptions.get(interactionName);
     if (!description) {
-      description = this.interactionRepository.getInteraction(interactionName);
+      description = await this.interactionRepository.getInteraction(
+        interactionName
+      );
     }
 
     return description;
   }
 
-  getUnmappedDescriptions(): InteractionDTO[] {
-    return this.interactionRepository.getAllInteractions();
-  }
-
-  getModifiedUnmappedDescriptions(): InteractionDTO[] {
-    return this.interactionRepository.getModifiedInteractions();
-  }
-
-  updateUnmappedInteraction(interaction: InteractionDTO) {
+  async updateUnmappedInteraction(interaction: InteractionDTO) {
+    const basicInteration: BasicInteraction = {
+      name: interaction.name,
+      action: interaction?.action,
+      ignored: interaction?.ignored,
+    };
     log.debug(
-      `Updated unmapped interaction: ${JSON.stringify(interaction, null, 2)}`
+      `Updated unmapped interaction: ${JSON.stringify(
+        basicInteration,
+        null,
+        2
+      )}`
     );
-    this.interactionRepository.updateInteraction(interaction);
+    await this.interactionRepository.setInteraction(basicInteration);
     notifyUnmappedInteractionChanged();
   }
 
-  getJsonBlock(): string {
-    const modifiedInteractions: { [key: string]: InteractionDescription } = {};
-
-    this.getModifiedUnmappedDescriptions().forEach((interaction) => {
-      const description: InteractionDescription = {
-        ignored: interaction.ignored,
-      };
-      if (interaction.action) {
-        description.pre_actions = [interaction.action];
-      }
-      modifiedInteractions[interaction.name] = description;
-    });
-    const jsonBlock = JSON.stringify(modifiedInteractions, null, 2);
-    const lines = jsonBlock.split('\n');
-
-    if (lines.length <= 2) {
-      return '';
-    }
-
-    // Remove first and last line
-    lines.shift();
-    lines.pop();
-
-    return lines.join('\n');
-  }
-
-  deleteInteraction(name: string) {
-    this.interactionRepository.deleteInteraction(name);
-    notifyUnmappedInteractionChanged();
-  }
-
-  getIgnoredInteractions() {
+  async getIgnoredInteractions() {
     return this.interactionRepository.getIgnoredInteractions();
   }
 }

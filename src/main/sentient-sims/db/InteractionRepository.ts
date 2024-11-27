@@ -1,40 +1,89 @@
 /* eslint-disable class-methods-use-this */
+import log from 'electron-log';
 import {
   InteractionDescription,
   interactionDescriptions,
 } from '../descriptions/interactionDescriptions';
 import { IgnoredInteractionsResponse } from '../models/IgnoredInteractionsResponse';
-import { InteractionDTO } from './dto/InteractionDTO';
+import { SettingsEnum } from '../models/SettingsEnum';
+import { SettingsService } from '../services/SettingsService';
+import { BasicInteraction } from './dto/InteractionDTO';
+import { fetchWithRetries } from '../util/fetchWithRetries';
 
 export class InteractionRepository {
-  private readonly interactions: {
-    [key: string]: InteractionDTO;
-  } = {};
+  private settingsService: SettingsService;
 
-  updateInteraction(interaction: InteractionDTO) {
-    this.interactions[interaction.name] = interaction;
+  private interactions?: Map<string, BasicInteraction>;
+
+  constructor(settingsService: SettingsService) {
+    this.settingsService = settingsService;
   }
 
-  deleteInteraction(name: string) {
-    if (name in this.interactions) {
-      delete this.interactions[name];
+  async fetchInteractions(): Promise<Map<string, BasicInteraction>> {
+    const url = `${this.settingsService.get(
+      SettingsEnum.SENTIENTSIMSAI_ENDPOINT
+    )}/interactions`;
+    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
+    log.debug(`url: ${url}, auth: ${authHeader}`);
+    const response = await fetchWithRetries(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authentication: authHeader,
+      },
+    });
+
+    return response.json();
+  }
+
+  async getInteractions(): Promise<Map<string, BasicInteraction>> {
+    if (!this.interactions) {
+      this.interactions = new Map(
+        Object.entries(await this.fetchInteractions())
+      );
     }
+
+    return new Map<string, BasicInteraction>();
   }
 
-  getAllInteractions(): InteractionDTO[] {
-    return Object.values(this.interactions);
+  async setInteraction(interaction: BasicInteraction) {
+    const url = `${this.settingsService.get(
+      SettingsEnum.SENTIENTSIMSAI_ENDPOINT
+    )}/interactions`;
+    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
+    log.debug(`url: ${url}, auth: ${authHeader}`);
+    const response = await fetchWithRetries(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authentication: authHeader,
+      },
+      body: JSON.stringify(interaction),
+    });
+
+    const result = await response.json();
+
+    this.interactions = new Map(Object.entries(result));
+
+    return result;
   }
 
-  getInteraction(name: string): InteractionDescription | undefined {
-    if (name in this.interactions) {
+  async getInteraction(
+    interactionName: string
+  ): Promise<InteractionDescription | undefined> {
+    if (!this.interactions) {
+      this.interactions = new Map(Object.entries(await this.getInteractions()));
+    }
+
+    const basicInteraction = this.interactions.get(interactionName);
+
+    if (basicInteraction) {
       const interactionDescription: InteractionDescription = {};
-      const interaction: InteractionDTO = this.interactions[name];
 
-      if (interaction.action) {
-        interactionDescription.pre_actions = [interaction.action];
+      if (basicInteraction?.action) {
+        interactionDescription.pre_actions = [basicInteraction.action];
       }
-      if (interaction.ignored) {
-        interactionDescription.ignored = interaction.ignored;
+      if (basicInteraction?.ignored) {
+        interactionDescription.ignored = basicInteraction.ignored;
       }
 
       return interactionDescription;
@@ -43,17 +92,15 @@ export class InteractionRepository {
     return undefined;
   }
 
-  getModifiedInteractions(): InteractionDTO[] {
-    return this.getAllInteractions().filter(
-      (interaction) =>
-        interaction.action !== undefined || interaction.ignored !== undefined
-    );
-  }
+  async getIgnoredInteractions(): Promise<IgnoredInteractionsResponse> {
+    const allInteractions = await this.getInteractions();
+    const ignoredInteractionNames: string[] = [];
 
-  getIgnoredInteractions(): IgnoredInteractionsResponse {
-    const ignoredInteractionNames = this.getAllInteractions()
-      .filter((i) => i.ignored)
-      .map((i) => i.name);
+    allInteractions.forEach((value, key) => {
+      if (value.ignored) {
+        ignoredInteractionNames.push(key);
+      }
+    });
 
     interactionDescriptions.forEach((description, name) => {
       if (description.ignored) {

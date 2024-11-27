@@ -32,6 +32,13 @@ export const AllModelSettings: ModelSettingsType = {
     repetition_penalty: 1.15,
     max_tokens: 7500,
   },
+  'ArliAI/Mistral-Nemo-12B-ArliAI-RPMax-v1.2': {
+    temperature: 0.8,
+    top_p: 0.9,
+    top_k: 40,
+    repetition_penalty: 1.15,
+    max_tokens: 7500,
+  },
   'gpt-4o-mini': {
     temperature: 0.8,
     top_p: 0.9,
