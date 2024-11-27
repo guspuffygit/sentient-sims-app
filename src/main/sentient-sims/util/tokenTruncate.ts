@@ -1,4 +1,5 @@
 /* eslint-disable no-plusplus */
+import log from 'electron-log';
 import { OpenAIMessage } from '../models/OpenAIMessage';
 
 export function arraysAreEqual(arr1: number[], arr2: number[]): boolean {
@@ -48,6 +49,11 @@ export function truncateMessages(
           const eliminatedTokens =
             i - systemPromptLength + breakStringTokensLength - 1;
           if (messagesTokensLength - eliminatedTokens < truncateLength) {
+            log.debug(
+              `Eliminated tokens from prompt: ${messagesTokensLength} - ${eliminatedTokens} = ${
+                messagesTokensLength - eliminatedTokens
+              } < ${truncateLength}`
+            );
             break;
           }
         }

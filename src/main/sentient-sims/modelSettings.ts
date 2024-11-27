@@ -4,6 +4,7 @@ export type ModelSettings = {
   top_k?: number;
   repetition_penalty?: number;
   max_tokens: number;
+  breakTokenString?: string;
 };
 
 export type ModelSettingsType = {
@@ -17,6 +18,7 @@ export const AllModelSettings: ModelSettingsType = {
     top_k: 40,
     repetition_penalty: 1.15,
     max_tokens: 3900,
+    breakTokenString: '<<BREAK>>',
   },
   'Gryphe/MythoMax-L2-13b': {
     temperature: 0.8,
@@ -24,6 +26,7 @@ export const AllModelSettings: ModelSettingsType = {
     top_k: 40,
     repetition_penalty: 1.15,
     max_tokens: 3900,
+    breakTokenString: '<unk>',
   },
   'ArliAI/Mistral-Nemo-12B-ArliAI-RPMax-v1.1': {
     temperature: 0.8,

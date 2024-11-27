@@ -42,12 +42,19 @@ export class SentientSimsAIService implements GenerationService {
       return this.breakStringTokens.get(model) as number[];
     }
 
-    const tokenizeResponse = await this.tokenize(model, tokenizerBreakString);
+    let modelSettings = AllModelSettings.default;
+    if (model in AllModelSettings) {
+      modelSettings = AllModelSettings[model];
+    }
+
+    const breakString = modelSettings?.breakTokenString || tokenizerBreakString;
+
+    const tokenizeResponse = await this.tokenize(model, breakString);
 
     this.breakStringTokens.set(model, tokenizeResponse.tokens);
 
     log.debug(
-      `Set ${model} ${tokenizerBreakString} to ${JSON.stringify(
+      `Set ${model} ${breakString} to ${JSON.stringify(
         tokenizeResponse.tokens
       )}`
     );
@@ -143,6 +150,7 @@ export class SentientSimsAIService implements GenerationService {
     const tokenizeRequest: VLLMTokenizeTextRequest = {
       model,
       prompt: text,
+      add_special_tokens: false,
     };
     const response = await fetchWithRetries(`${this.serviceUrl()}/tokenize`, {
       method: 'POST',
@@ -183,13 +191,19 @@ export class SentientSimsAIService implements GenerationService {
     model: string,
     messages: OpenAIMessage[]
   ): Promise<VLLMRTokenizeResponse> {
+    let modelSettings = AllModelSettings.default;
+    if (model in AllModelSettings) {
+      modelSettings = AllModelSettings[model];
+    }
+    const breakString = modelSettings?.breakTokenString || tokenizerBreakString;
+
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     const tokenizeRequest: VLLMTokenizeChatRequest = {
       model,
       messages: messages.map((message) => {
         return {
           role: message.role,
-          content: `${message.content}${tokenizerBreakString}`,
+          content: `${message.content}${breakString}`,
         };
       }),
     };
