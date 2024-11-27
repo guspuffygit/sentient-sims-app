@@ -50,24 +50,14 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
           </div>
           <div>
             {debugMode.isEnabled ? (
-              <>
-                <Button
-                  color="secondary"
-                  onClick={() => navigate('/chat')}
-                  sx={{ marginLeft: '5px' }}
-                  id="chat"
-                >
-                  Chat
-                </Button>
-                <Button
-                  color="secondary"
-                  onClick={() => navigate('/interactions')}
-                  sx={{ marginLeft: '5px' }}
-                  id="interactions"
-                >
-                  Interactions
-                </Button>
-              </>
+              <Button
+                color="secondary"
+                onClick={() => navigate('/chat')}
+                sx={{ marginLeft: '5px' }}
+                id="chat"
+              >
+                Chat
+              </Button>
             ) : null}
             <Button
               color="secondary"

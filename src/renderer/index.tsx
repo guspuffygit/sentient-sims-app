@@ -23,7 +23,6 @@ import MemoriesPage from './MemoriesPage';
 import LocationsPage from './LocationsPage';
 import { ChatGenerationProvider } from './providers/ChatGenerationProvider';
 import SimsPage from './SimsPage';
-import InteractionsPage from './InteractionsPage';
 import { SnackBarProvider } from './providers/SnackBarProvider';
 import { AISettingsProvider } from './providers/AISettingsProvider';
 import { VersionsProvider } from './providers/VersionsProvider';
@@ -54,10 +53,6 @@ const router = createMemoryRouter([
       {
         path: '/chat',
         element: <ChatPage />,
-      },
-      {
-        path: '/interactions',
-        element: <InteractionsPage />,
       },
       {
         path: '/sims',

@@ -196,24 +196,12 @@ export function runApi({
   expressApp.post('/animations', animationsController.setAnimation);
 
   expressApp.get(
-    '/interactions',
-    interactionDescriptionController.getInteractionDescriptions
-  );
-  expressApp.get(
-    '/interactions/modified',
-    interactionDescriptionController.getModifiedInteractions
-  );
-  expressApp.get(
     '/interactions/ignored',
     interactionDescriptionController.getIgnoredInteractions
   );
   expressApp.post(
     '/interactions',
     interactionDescriptionController.updateInteraction
-  );
-  expressApp.delete(
-    '/interactions/:name',
-    interactionDescriptionController.deleteInteraction
   );
 
   return expressApp.listen(port, () => {
