@@ -11,36 +11,36 @@ export default function LogSendInformationComponent() {
       </Typography>
       <p />
       <Typography variant="body1" gutterBottom>
+        The Open AI API key will be removed from the data when it is sent to the
+        developer.
+      </Typography>
+
+      <Typography variant="body1" gutterBottom>
+        The data will be deleted once it has been reviewed.
+      </Typography>
+
+      <Typography variant="body1" gutterBottom>
         Data sent will include:
       </Typography>
       <p />
       <ul>
         <li>
           <Typography variant="body1" gutterBottom>
-            lastException.txt and lastCrash.txt files from the The Sims 4 folder
+            - lastException.txt and lastCrash.txt files from the The Sims 4
+            folder
           </Typography>
         </li>
         <li>
           <Typography variant="body1" gutterBottom>
-            A list of file and directory names inside the Mods folder
+            - A list of file and directory names inside the Mods folder
           </Typography>
         </li>
         <li>
           <Typography variant="body1" gutterBottom>
-            The files within the Mods/sentient-sims folder
+            - The files within the Mods/sentient-sims folder
           </Typography>
         </li>
       </ul>
-      <p />
-      <Typography variant="body1" gutterBottom>
-        The Open AI API key will be removed from the data when it is sent to the
-        developer.
-      </Typography>
-      <p />
-      <Typography variant="body1" gutterBottom>
-        The data will be deleted once it has been reviewed.
-      </Typography>
-      <p />
       <Typography variant="body1" gutterBottom>
         Copy and paste the generated id to the{' '}
         {
@@ -56,9 +56,6 @@ export default function LogSendInformationComponent() {
         channel in Discord to claim the logs and describe your issue.
       </Typography>
       <p />
-      <Typography variant="body1" gutterBottom>
-        Logs are anonymous until they are claimed!
-      </Typography>
     </>
   );
 }

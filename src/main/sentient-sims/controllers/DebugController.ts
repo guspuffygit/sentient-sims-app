@@ -4,6 +4,7 @@ import { OpenAIKeyNotSetError } from '../services/OpenAIService';
 import { LogSendService, webhookUrl } from '../services/LogSendService';
 import { SettingsService } from '../services/SettingsService';
 import { getGenerationService } from '../factories/generationServiceFactory';
+import { SendLogsRequest } from '../models/SendLogsRequest';
 
 export class DebugController {
   private readonly settingsService: SettingsService;
@@ -47,7 +48,10 @@ export class DebugController {
   }
 
   async sendDebugLogs(req: Request, res: Response) {
-    res.json(await this.logSendService.sendLogsToDiscord(webhookUrl));
+    const sendLogsRequest: SendLogsRequest = req.body;
+    res.json(
+      await this.logSendService.sendLogsToDiscord(webhookUrl, sendLogsRequest)
+    );
   }
 
   async sendBugReport(req: Request, res: Response) {

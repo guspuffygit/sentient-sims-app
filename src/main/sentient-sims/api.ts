@@ -110,7 +110,7 @@ export function runApi({
     '/debug/test-ai',
     debugController.healthCheckGenerationService
   );
-  expressApp.get('/debug/send-logs', debugController.sendDebugLogs);
+  expressApp.post('/debug/send-logs', debugController.sendDebugLogs);
   expressApp.post('/debug/interaction', debugController.sendBugReport);
 
   expressApp.post('/ai/v2/generate', aiController.sentientSimsGenerate);

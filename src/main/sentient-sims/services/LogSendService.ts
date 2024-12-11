@@ -12,6 +12,7 @@ import { SettingsEnum } from '../models/SettingsEnum';
 import { InteractionBugReport } from '../models/InteractionBugReport';
 import { SSEventType, WWInteractionEvent } from '../models/InteractionEvents';
 import { sendPopUpNotification } from '../util/notifyRenderer';
+import { SendLogsRequest } from '../models/SendLogsRequest';
 
 export const webhookUrl = [
   'https://d',
@@ -54,7 +55,7 @@ export class LogSendService {
     ).join('');
   }
 
-  async sendLogsToDiscord(url: string) {
+  async sendLogsToDiscord(url: string, sendLogsRequest: SendLogsRequest) {
     const logId = LogSendService.newLogId();
     const errors: any[] = [];
 
@@ -69,7 +70,10 @@ export class LogSendService {
 
       const formData = new FormData();
 
-      this.appendInformationToFormData(formData, logId, errors);
+      this.appendInformationToFormData(formData, logId, errors, [
+        `Discord Username: ${sendLogsRequest.discordUsername}`,
+        `Error Description: ${sendLogsRequest.errorDescription}`,
+      ]);
       this.appendZipFileToFormData(logZip, formData, errors);
 
       const response = await this.sendFormData(formData, errors, url);

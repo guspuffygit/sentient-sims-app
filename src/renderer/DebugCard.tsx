@@ -7,7 +7,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import ReplayIcon from '@mui/icons-material/Replay';
+import CachedIcon from '@mui/icons-material/Cached';
 import { Version } from 'main/sentient-sims/services/VersionService';
 import React from 'react';
 import AppCard from './AppCard';
@@ -58,7 +58,7 @@ export default function DebugCard() {
   return (
     <AppCard>
       <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-        <Typography>Debug</Typography>
+        <Typography>Debug Info</Typography>
         <Tooltip title="Test Again">
           <IconButton
             style={{
@@ -71,7 +71,7 @@ export default function DebugCard() {
             onClick={() => onTest()}
             disabled={versions.loading || aiStatus.loading}
           >
-            <ReplayIcon />
+            <CachedIcon />
           </IconButton>
         </Tooltip>
       </Box>
