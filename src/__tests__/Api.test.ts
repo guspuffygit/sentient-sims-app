@@ -173,12 +173,5 @@ describe('Api', () => {
       SettingsEnum.LOCALIZATION_ENABLED
     );
     expect(result.value).toBeTruthy();
-    // await settingsClient.resetSetting(SettingsEnum.LOCALIZATION_ENABLED);
-
-    // const resetResult = await settingsClient.getSetting(
-    //   SettingsEnum.LOCALIZATION_ENABLED
-    // );
-    // console.error(`Settings LOCALIZATION_ENABLED value: ${resetResult.value}`);
-    // expect(resetResult.value).toBeFalsy();
-  });
+  }, 30000);
 });
