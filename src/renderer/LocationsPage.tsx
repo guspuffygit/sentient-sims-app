@@ -1,10 +1,19 @@
 /* eslint-disable promise/always-return */
-import { Button, Card, CardActions, CardContent } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  ImageList,
+  ImageListItem,
+} from '@mui/material';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import log from 'electron-log';
 import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { appApiUrl } from 'main/sentient-sims/constants';
+import { ListScreenshotsResponse } from 'main/sentient-sims/models/ListScreenshotsResponse';
 import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
@@ -15,6 +24,69 @@ type SelectedLocation = {
   location: LocationEntity;
   index: number;
 };
+
+const itemData = [
+  {
+    img: 'http://localhost:25148/files/screenshots/07-18-24_4-24-35 PM.png',
+    title: 'Bed',
+    author: 'swabdesign',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1525097487452-6278ff080c31',
+    title: 'Books',
+    author: 'Pavel Nekoranec',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1523413651479-597eb2da0ad6',
+    title: 'Sink',
+    author: 'Charles Deluvio',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1563298723-dcfebaa392e3',
+    title: 'Kitchen',
+    author: 'Christian Mackie',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1588436706487-9d55d73a39e3',
+    title: 'Blinds',
+    author: 'Darren Richardson',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1574180045827-681f8a1a9622',
+    title: 'Chairs',
+    author: 'Taylor Simpson',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1530731141654-5993c3016c77',
+    title: 'Laptop',
+    author: 'Ben Kolde',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1481277542470-605612bd2d61',
+    title: 'Doors',
+    author: 'Philipp Berndt',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1517487881594-2787fef5ebf7',
+    title: 'Coffee',
+    author: 'Jen P.',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1516455207990-7a41ce80f7ee',
+    title: 'Storage',
+    author: 'Douglas Sheppard',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1597262975002-c5c3b14bbd62',
+    title: 'Candle',
+    author: 'Fi Bell',
+  },
+  {
+    img: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4',
+    title: 'Coffee table',
+    author: 'Hutomo Abrianto',
+  },
+];
 
 const columns: GridColDef[] = [
   // { field: 'id', headerName: 'ID', width: 70, hideable: true },
@@ -32,6 +104,7 @@ export default function LocationsPage() {
   const [locations, setLocations] = useState<LocationEntity[]>([]);
   const [editedLocation, setEditedLocation] = useState<SelectedLocation | null | undefined>();
   const { status } = useWebsocket();
+  const [screenshots, setScreenshots] = useState<string[]>([]);
 
   function getLocations() {
     fetch(`${appApiUrl}/locations`, {
@@ -40,6 +113,21 @@ export default function LocationsPage() {
       .then((res) => res.json())
       .then((locationsResponse: LocationEntity[]) => {
         setLocations(locationsResponse);
+      })
+      .catch(() => {
+        // ignore
+      });
+  }
+
+  function getScreenshots() {
+    fetch(`${appApiUrl}/files/screenshots`, {
+      headers: { 'Content-Type': 'application/json' },
+    })
+      .then((res) => res.json())
+      .then((screenshotsResponse: ListScreenshotsResponse) => {
+        setScreenshots(
+          screenshotsResponse.data.map((screenshot) => screenshot.name)
+        );
       })
       .catch(() => {
         // ignore
@@ -60,6 +148,7 @@ export default function LocationsPage() {
 
   useEffect(() => {
     getLocations();
+    getScreenshots();
   }, []);
 
   useOnDatabaseLoaded(() => {
@@ -242,6 +331,30 @@ export default function LocationsPage() {
       </AppCard>
     );
   }
+
+  return (
+    <Card sx={{ minWidth: 275, marginBottom: 2, overflowY: 'scroll' }}>
+      <Box sx={{ margin: 2 }}>
+        <ImageList
+          sx={{ minWidth: 275, height: 450 }}
+          variant="woven"
+          cols={5}
+          gap={8}
+        >
+          {screenshots.map((item) => (
+            <ImageListItem key={item}>
+              <img
+                srcSet={`${appApiUrl}/files/screenshots/${item}?w=161&fit=crop&auto=format&dpr=2 2x`}
+                src={`${appApiUrl}/files/screenshots/${item}?w=161&fit=crop&auto=format`}
+                alt={item}
+                loading="lazy"
+              />
+            </ImageListItem>
+          ))}
+        </ImageList>
+      </Box>
+    </Card>
+  );
 
   return (
     <div>

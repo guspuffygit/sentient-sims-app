@@ -47,6 +47,7 @@ import { InteractionDescription } from '../descriptions/interactionDescriptions'
 import { PromptHistoryMode } from '../models/PromptHistoryMode';
 import { sendModNotification } from '../websocketServer';
 import { ModAddBuff, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
+import { GenerateLotDescriptionRequest } from '../models/GenerateLotDescriptionRequest';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
@@ -486,4 +487,6 @@ Write me a buff description based on the conversation so that ${buffRequest.name
   playTts(text: string) {
     playTTS(text);
   }
+
+  async generateLotDescription(request: GenerateLotDescriptionRequest) {}
 }

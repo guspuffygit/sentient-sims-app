@@ -8,6 +8,7 @@ import { InteractionEventStatus } from '../models/InteractionEventResult';
 import { BuffEventRequest, BuffDescriptionRequest, ClassificationRequest } from '../models/OpenAIRequestBuilder';
 import { CatchErrors } from './decorators/CatchError';
 import { DbService } from '../services/DbService';
+import { GenerateLotDescriptionRequest } from '../models/GenerateLotDescriptionRequest';
 
 export class AIController {
   private readonly aiService: AIService;
@@ -24,6 +25,7 @@ export class AIController {
     this.buffEvent = this.buffEvent.bind(this);
     this.getModels = this.getModels.bind(this);
     this.tts = this.tts.bind(this);
+    this.generateLotDescription = this.generateLotDescription.bind(this);
   }
 
   @CatchErrors()
@@ -99,5 +101,22 @@ export class AIController {
     playTTS(text as string);
 
     res.status(200).json({ text });
+  }
+
+  async generateLotDescription(req: Request, res: Response) {
+    try {
+      const generateLotDescriptionRequest: GenerateLotDescriptionRequest =
+        req.body;
+      const result = await this.aiService.generateLotDescription(
+        generateLotDescriptionRequest
+      );
+      res.json(result);
+    } catch (err: any) {
+      log.error('Error getting models', err);
+      // sendPopUpNotification(err?.message);
+      res.status(500).json({
+        error: err?.message,
+      });
+    }
   }
 }

@@ -39,6 +39,7 @@ import { MappingService } from './services/MappingService';
 import { VoiceController } from './controllers/VoiceController';
 import { WebsocketController } from './controllers/WebsocketController';
 import { LoginController } from './controllers/LoginController';
+import { ScreenshotService } from './services/ScreenshotService';
 
 export type ApiOptions = {
   port: number;
@@ -52,7 +53,10 @@ export function runApi({ getAssetPath, port, settingsService, directoryService }
   const versionService = new VersionService(directoryService);
   const versionController = new VersionController(versionService);
   const updateService = new UpdateService(directoryService);
-  const fileController = new FileController(lastExceptionService);
+  const fileController = new FileController(
+    lastExceptionService,
+    new ScreenshotService(directoryService)
+  );
   const dbService = new DbService(directoryService);
   const dbController = new DbController(dbService);
   const locationRepository = new LocationRepository(dbService);
@@ -94,6 +98,7 @@ export function runApi({ getAssetPath, port, settingsService, directoryService }
   expressApp.post('/debug/interaction', debugController.sendBugReport);
 
   expressApp.post('/ai/v2/generate', aiController.sentientSimsGenerate);
+  expressApp.post('/ai/v2/generate/lot', aiController.sentientSimsGenerate);
   expressApp.post('/ai/v2/event/interaction', aiController.interactionEvent);
   expressApp.post('/ai/v2/event/classification', aiController.classificationEvent);
   expressApp.post('/ai/v2/event/classification', aiController.classificationEvent);
@@ -102,6 +107,8 @@ export function runApi({ getAssetPath, port, settingsService, directoryService }
   expressApp.get('/ai/v2/models', aiController.getModels);
   expressApp.get('/ai/v2/tts', aiController.tts);
 
+  expressApp.get('/files/screenshots', fileController.listRecentScreenshots);
+  expressApp.get('/files/screenshots/:filename', fileController.getScreenshot);
   expressApp.get('/files/last-exception', fileController.getLastExceptionFiles);
   expressApp.delete('/files/last-exception', fileController.deleteLastExceptionFiles);
   expressApp.get('/files/:filename', assetsController.getAssetsFile);
