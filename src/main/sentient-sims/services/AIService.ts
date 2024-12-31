@@ -61,6 +61,7 @@ import { getBuffSystemPrompt } from '../systemPrompts';
 import { AIModel } from '../models/AIModel';
 import { DefaultFormatter } from '../formatter/DefaultFormatter';
 import { InteractionDescription } from '../descriptions/interactionDescriptions';
+import { GenerateLotDescriptionRequest } from '../models/GenerateLotDescriptionRequest';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
@@ -479,4 +480,6 @@ export class AIService {
     log.debug(`NOOP interaction mapping: ${event.interaction_name}`);
     return { status: InteractionEventStatus.NOOP };
   }
+
+  async generateLotDescription(request: GenerateLotDescriptionRequest) {}
 }

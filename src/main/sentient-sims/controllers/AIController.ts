@@ -13,6 +13,7 @@ import {
   BuffRequest,
   ClassificationRequest,
 } from '../models/OpenAIRequestBuilder';
+import { GenerateLotDescriptionRequest } from '../models/GenerateLotDescriptionRequest';
 
 export class AIController {
   private readonly aiService: AIService;
@@ -25,6 +26,7 @@ export class AIController {
     this.classificationEvent = this.classificationEvent.bind(this);
     this.buffEvent = this.buffEvent.bind(this);
     this.getModels = this.getModels.bind(this);
+    this.generateLotDescription = this.generateLotDescription.bind(this);
   }
 
   async sentientSimsGenerate(req: Request, res: Response) {
@@ -105,6 +107,23 @@ export class AIController {
   async getModels(req: Request, res: Response) {
     try {
       const result = await this.aiService.getModels();
+      res.json(result);
+    } catch (err: any) {
+      log.error('Error getting models', err);
+      // sendPopUpNotification(err?.message);
+      res.status(500).json({
+        error: err?.message,
+      });
+    }
+  }
+
+  async generateLotDescription(req: Request, res: Response) {
+    try {
+      const generateLotDescriptionRequest: GenerateLotDescriptionRequest =
+        req.body;
+      const result = await this.aiService.generateLotDescription(
+        generateLotDescriptionRequest
+      );
       res.json(result);
     } catch (err: any) {
       log.error('Error getting models', err);

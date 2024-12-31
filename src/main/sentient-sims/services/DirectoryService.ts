@@ -150,4 +150,8 @@ export class DirectoryService {
   getGameVersion() {
     return path.join(this.getSims4Folder(), 'GameVersion.txt');
   }
+
+  getScreenshotsFolder() {
+    return path.join(this.getSims4Folder(), 'Screenshots');
+  }
 }

@@ -95,4 +95,10 @@ export class LocationsController {
       return res.json({ error: err.message });
     }
   }
+
+  async getScreenshots(req: Request, res: Response) {
+    const { limit } = req.params;
+
+    this.locationRepository;
+  }
 }

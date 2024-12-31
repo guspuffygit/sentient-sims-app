@@ -37,6 +37,7 @@ import { RepositoryService } from './services/RepositoryService';
 import { PromptRequestBuilderService } from './services/PromptRequestBuilderService';
 import { InteractionDescriptionController } from './controllers/InteractionDescriptionController';
 import { InteractionRepository } from './db/InteractionRepository';
+import { ScreenshotService } from './services/ScreenshotService';
 
 export type ApiOptions = {
   port: number;
@@ -55,7 +56,10 @@ export function runApi({
   const versionService = new VersionService(directoryService);
   const versionController = new VersionController(versionService);
   const updateService = new UpdateService(directoryService);
-  const fileController = new FileController(lastExceptionService);
+  const fileController = new FileController(
+    lastExceptionService,
+    new ScreenshotService(directoryService)
+  );
   const dbService = new DbService(directoryService);
   const dbController = new DbController(dbService);
   const locationRepository = new LocationRepository(dbService);
@@ -114,6 +118,7 @@ export function runApi({
   expressApp.post('/debug/interaction', debugController.sendBugReport);
 
   expressApp.post('/ai/v2/generate', aiController.sentientSimsGenerate);
+  expressApp.post('/ai/v2/generate/lot', aiController.sentientSimsGenerate);
   expressApp.post('/ai/v2/event/interaction', aiController.interactionEvent);
   expressApp.post(
     '/ai/v2/event/classification',
@@ -122,6 +127,8 @@ export function runApi({
   expressApp.post('/ai/v2/event/buff', aiController.buffEvent);
   expressApp.get('/ai/v2/models', aiController.getModels);
 
+  expressApp.get('/files/screenshots', fileController.listRecentScreenshots);
+  expressApp.get('/files/screenshots/:filename', fileController.getScreenshot);
   expressApp.get('/files/last-exception', fileController.getLastExceptionFiles);
   expressApp.delete(
     '/files/last-exception',
