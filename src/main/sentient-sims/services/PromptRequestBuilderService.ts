@@ -4,7 +4,7 @@ import {
   formatSentientSim,
   formatDateTime,
 } from '../formatter/PromptFormatter';
-import { SSEvent } from '../models/InteractionEvents';
+import { SSEvent, SSRelationships } from '../models/InteractionEvents';
 import { RepositoryService } from './RepositoryService';
 import { getSystemPrompt } from '../systemPrompts';
 import { ApiType } from '../models/ApiType';
@@ -16,6 +16,8 @@ import { SentientSim } from '../models/SentientSim';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { ChatCompletionMessageRole } from '../models/ChatCompletionMessageRole';
 import { ModelSettings } from '../modelSettings';
+import { defaultRelationshipBitDescriptions } from '../descriptions/relationshipDescriptions';
+import { LocationEntity } from '../db/entities/LocationEntity';
 
 export type GenerationOptions = {
   action?: string;
@@ -42,7 +44,11 @@ export class PromptRequestBuilderService {
     this.repositoryService = repositoryService;
   }
 
-  async formatSims(sentientSims: SentientSim[]): Promise<string[]> {
+  async formatSims(
+    sentientSims: SentientSim[],
+    relationships: SSRelationships,
+    location: LocationEntity
+  ): Promise<string[]> {
     const participants =
       await this.repositoryService.participant.getParticipants(
         sentientSims.map((sentientSim) => {
@@ -57,8 +63,11 @@ export class PromptRequestBuilderService {
       );
 
     const formattedParticipants: string[] = [];
+    const sims = new Map<string, SentientSim>();
 
     sentientSims.forEach((sentientSim) => {
+      sims.set(sentientSim.sim_id, sentientSim);
+
       participants.forEach((participant) => {
         if (participant.id === sentientSim.sim_id && participant.description) {
           sentientSim.description = participant.description;
@@ -67,6 +76,29 @@ export class PromptRequestBuilderService {
 
       formattedParticipants.push(formatSentientSim(sentientSim));
     });
+
+    const relationshipDescriptions: string[] = [];
+    relationships.relationship_bits.forEach((bit) => {
+      if (defaultRelationshipBitDescriptions.has(bit.name)) {
+        const bitDescription = defaultRelationshipBitDescriptions.get(bit.name);
+        if (!bitDescription?.ignored && bitDescription?.description) {
+          relationshipDescriptions.push(
+            formatAction(
+              bitDescription.description,
+              [
+                sims.get(bit.sim_one_id) as SentientSim,
+                sims.get(bit.sim_two_id) as SentientSim,
+              ],
+              location
+            )
+          );
+        }
+      }
+    });
+
+    if (relationshipDescriptions.length > 0) {
+      formattedParticipants.push(relationshipDescriptions.join(' '));
+    }
 
     return formattedParticipants;
   }
@@ -125,6 +157,8 @@ export class PromptRequestBuilderService {
     return messages;
   }
 
+  formatRelationships(relationships: SSRelationships): string[] {}
+
   async buildPromptRequest(
     event: SSEvent,
     options: PromptRequestBuilderOptions
@@ -132,6 +166,14 @@ export class PromptRequestBuilderService {
     const location = this.repositoryService.location.getLocation({
       id: event.environment.location_id,
     });
+
+    if (event.relationships) {
+      event.relationships.relationship_bits.forEach((bit) => {
+        log.debug(
+          `Relationship bit: ${bit.sim_one_id} -> ${bit.sim_two_id}: ${bit.name}`
+        );
+      });
+    }
 
     const dateTime = formatDateTime(event.environment);
 
@@ -205,7 +247,11 @@ export class PromptRequestBuilderService {
       options.sexLocationType
     );
 
-    const simsPromise = this.formatSims(event.sentient_sims);
+    const simsPromise = this.formatSims(
+      event.sentient_sims,
+      event.relationships,
+      location
+    );
     const memories = this.getMemories(event.sentient_sims);
     const groupedMemories = this.groupMemories(memories);
     const sims = await simsPromise;
