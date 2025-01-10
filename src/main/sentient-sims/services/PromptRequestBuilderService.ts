@@ -157,8 +157,6 @@ export class PromptRequestBuilderService {
     return messages;
   }
 
-  formatRelationships(relationships: SSRelationships): string[] {}
-
   async buildPromptRequest(
     event: SSEvent,
     options: PromptRequestBuilderOptions
