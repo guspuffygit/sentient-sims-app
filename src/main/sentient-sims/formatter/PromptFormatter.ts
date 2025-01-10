@@ -272,6 +272,34 @@ export function formatAction(
         `{actor.${i}.himself/herself}`,
         'himself'
       );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.uncle/aunt}`,
+        'uncle'
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.brother/sister}`,
+        'brother'
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.husband/wife}`,
+        'husband'
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.nephew/niece}`,
+        'nephew'
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.son/daughter}`,
+        'son'
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.dad/mom}`,
+        'dad'
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.father/mother}`,
+        'father'
+      );
     } else {
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.he/she}`,
@@ -288,6 +316,34 @@ export function formatAction(
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.himself/herself}`,
         'herself'
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.uncle/aunt}`,
+        'aunt'
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.brother/sister}`,
+        'sister'
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.husband/wife}`,
+        'wife'
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.nephew/niece}`,
+        'niece'
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.son/daughter}`,
+        'daughter'
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.dad/mom}`,
+        'mom'
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.father/mother}`,
+        'mother'
       );
     }
 
