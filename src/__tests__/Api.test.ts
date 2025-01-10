@@ -121,6 +121,9 @@ describe('Api', () => {
       event_type: SSEventType.WANTS,
       location_id: 0,
       sentient_sims: [sentientSim],
+      relationships: {
+        relationship_bits: [],
+      },
       environment: {
         location_id: 0,
         world_id: 0,

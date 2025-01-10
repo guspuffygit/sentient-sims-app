@@ -77,6 +77,9 @@ describe('containsPlayerSim', () => {
       event_type: SSEventType.INTERACTION,
       location_id: 0,
       sentient_sims: [sim],
+      relationships: {
+        relationship_bits: [],
+      },
       environment: {
         location_id: 871623123,
         world_id: 0,

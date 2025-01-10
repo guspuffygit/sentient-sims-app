@@ -113,6 +113,9 @@ describe('Output', () => {
         ],
         event_id: '2daaac8e-bd86-4afe-a9f8-60cf3132e057',
         event_type: SSEventType.INTERACTION,
+        relationships: {
+          relationship_bits: [],
+        },
         environment: {
           location_id: 2891968416,
           world_id: 0,
