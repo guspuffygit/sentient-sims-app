@@ -61,7 +61,7 @@ export type SSRelationshipBit = {
 };
 
 export type SSRelationships = {
-  relationship_bits: SSRelationshipBit[];
+  relationship_bits?: SSRelationshipBit[];
 };
 
 export type SSEvent = {

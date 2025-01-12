@@ -78,23 +78,28 @@ export class PromptRequestBuilderService {
     });
 
     const relationshipDescriptions: string[] = [];
-    relationships.relationship_bits.forEach((bit) => {
-      if (defaultRelationshipBitDescriptions.has(bit.name)) {
-        const bitDescription = defaultRelationshipBitDescriptions.get(bit.name);
-        if (!bitDescription?.ignored && bitDescription?.description) {
-          relationshipDescriptions.push(
-            formatAction(
-              bitDescription.description,
-              [
-                sims.get(bit.sim_one_id) as SentientSim,
-                sims.get(bit.sim_two_id) as SentientSim,
-              ],
-              location
-            )
+    // TODO: Fix relationship bits from interaction mapping
+    if (relationships.relationship_bits) {
+      relationships.relationship_bits.forEach((bit) => {
+        if (defaultRelationshipBitDescriptions.has(bit.name)) {
+          const bitDescription = defaultRelationshipBitDescriptions.get(
+            bit.name
           );
+          if (!bitDescription?.ignored && bitDescription?.description) {
+            relationshipDescriptions.push(
+              formatAction(
+                bitDescription.description,
+                [
+                  sims.get(bit.sim_one_id) as SentientSim,
+                  sims.get(bit.sim_two_id) as SentientSim,
+                ],
+                location
+              )
+            );
+          }
         }
-      }
-    });
+      });
+    }
 
     if (relationshipDescriptions.length > 0) {
       formattedParticipants.push(relationshipDescriptions.join(' '));
@@ -164,14 +169,6 @@ export class PromptRequestBuilderService {
     const location = this.repositoryService.location.getLocation({
       id: event.environment.location_id,
     });
-
-    if (event.relationships) {
-      event.relationships.relationship_bits.forEach((bit) => {
-        log.debug(
-          `Relationship bit: ${bit.sim_one_id} -> ${bit.sim_two_id}: ${bit.name}`
-        );
-      });
-    }
 
     const dateTime = formatDateTime(event.environment);
 
