@@ -244,8 +244,8 @@ export class PromptRequestBuilderService {
 
     const simsPromise = this.formatSims(
       event.sentient_sims,
-      event.relationships,
-      location
+      location,
+      event.relationships
     );
     const memories = this.getMemories(event.sentient_sims);
     const groupedMemories = this.groupMemories(memories);
