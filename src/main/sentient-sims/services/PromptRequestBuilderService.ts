@@ -46,8 +46,8 @@ export class PromptRequestBuilderService {
 
   async formatSims(
     sentientSims: SentientSim[],
-    relationships: SSRelationships,
-    location: LocationEntity
+    location: LocationEntity,
+    relationships?: SSRelationships
   ): Promise<string[]> {
     const participants =
       await this.repositoryService.participant.getParticipants(
@@ -79,7 +79,7 @@ export class PromptRequestBuilderService {
 
     const relationshipDescriptions: string[] = [];
     // TODO: Fix relationship bits from interaction mapping
-    if (relationships.relationship_bits) {
+    if (relationships && relationships.relationship_bits) {
       relationships.relationship_bits.forEach((bit) => {
         if (defaultRelationshipBitDescriptions.has(bit.name)) {
           const bitDescription = defaultRelationshipBitDescriptions.get(

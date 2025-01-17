@@ -71,7 +71,7 @@ export type SSEvent = {
   location_id: number;
   environment: SSEnvironment;
   sentient_sims: SentientSim[];
-  relationships: SSRelationships;
+  relationships?: SSRelationships;
 };
 
 export type WWInteractionEvent = SSEvent & {
