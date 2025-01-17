@@ -45,6 +45,11 @@ export enum SSRelationshipBitType {
   NoGroup = 1,
 }
 
+export enum SSOutcomeResult {
+  BIDIRECTIONAL = 0,
+  UNIDIRECTIONAL = 1,
+}
+
 export type SSRelationshipBit = {
   sim_one_id: string;
   sim_two_id: string;
@@ -62,6 +67,11 @@ export type SSRelationshipBit = {
 
 export type SSRelationships = {
   relationship_bits?: SSRelationshipBit[];
+};
+
+export type SSInteractionOutcome = {
+  result: SSOutcomeResult;
+  loot_list: string[];
 };
 
 export type SSEvent = {
@@ -93,6 +103,7 @@ export type ChatContinueInteractionEvent = SSEvent;
 export type InteractionEvent = SSEvent & {
   interaction_name: string;
   testing_action?: string;
+  interaction_outcome: SSInteractionOutcome;
 };
 
 export type InteractionMappingEvent = InteractionEvent & {
