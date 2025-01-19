@@ -47,6 +47,7 @@ function defaultMessages(systemPrompt: string): MessageInputProps[] {
 
 export interface ChatGeneration {
   messages: MessageInputProps[];
+  input?: string | null;
   loading: boolean;
   generateChat: () => Promise<void>;
   countTokens: () => void;
@@ -67,6 +68,7 @@ export default function useChatGeneration(): ChatGeneration {
   const [messages, setMessages] = useState<MessageInputProps[]>(
     defaultMessages(defaultSystemPrompt)
   );
+  const [input, setInput] = useState<string | undefined | null>();
 
   const resetMessages = useCallback(() => {
     if (apiType.value === ApiType.OpenAI) {
@@ -114,6 +116,13 @@ export default function useChatGeneration(): ChatGeneration {
           }
 
           setMessages(updatedMessages);
+          if (result.input) {
+            try {
+              setInput(JSON.stringify(result.input, null, 2));
+            } catch (e: any) {
+              log.error(`Unable to stringify input`, e);
+            }
+          }
           generationLoadedCallback();
         }
       }
@@ -216,6 +225,7 @@ export default function useChatGeneration(): ChatGeneration {
   };
 
   return {
+    input,
     messages,
     loading,
     generateChat,

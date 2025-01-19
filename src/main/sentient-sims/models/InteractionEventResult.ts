@@ -20,4 +20,5 @@ export type InteractionEventResult = {
   memory?: MemoryEntity;
   text?: string;
   request?: OpenAICompatibleRequest;
+  input?: any;
 };

@@ -1,8 +1,15 @@
-import { Box, Button, CardActions, Grid, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  CardActions,
+  Grid,
+  Modal,
+  Typography,
+} from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import SendIcon from '@mui/icons-material/Send';
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import log from 'electron-log';
 import { ChatBoxComponent } from './ChatBoxComponent';
 import ChatResultsModal from './ChatResultsModal';
@@ -11,6 +18,7 @@ import { useChatGenerationContext } from './providers/ChatGenerationProvider';
 export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const {
+    input,
     messages,
     loading,
     generateChat,
@@ -44,6 +52,11 @@ export default function ChatPage() {
       results,
     });
   };
+
+  const [openInputView, setOpenInputView] = useState(false);
+  function onOpenInputView() {
+    setOpenInputView(true);
+  }
 
   return (
     <>
@@ -99,6 +112,11 @@ export default function ChatPage() {
             <div>
               <Grid container alignItems="center">
                 <Grid item>
+                  {input ? (
+                    <Button onClick={() => onOpenInputView()} color="secondary">
+                      Event JSON
+                    </Button>
+                  ) : null}
                   <Button onClick={countTokens} color="primary">
                     Count
                   </Button>
@@ -118,6 +136,38 @@ export default function ChatPage() {
           </>
         )}
         {resultsModal.resultsModal}
+        <Modal open={openInputView} onClose={() => setOpenInputView(false)}>
+          <Box
+            height={650}
+            overflow="auto"
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 1000,
+              bgcolor: 'background.paper',
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: '#151515',
+                border: '1px solid #ddd',
+                borderRadius: '5px',
+                padding: '15px',
+                overflowX: 'auto', // Allows horizontal scrolling if the code is too wide
+                fontFamily: "'Courier New', Courier, monospace",
+                fontSize: '14px',
+                lineHeight: '1.5',
+                whiteSpace: 'pre-wrap', // Maintains line breaks
+              }}
+            >
+              {input}
+            </div>
+          </Box>
+        </Modal>
       </CardActions>
     </>
   );

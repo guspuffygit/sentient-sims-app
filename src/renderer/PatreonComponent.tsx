@@ -3,7 +3,6 @@ import { Box, Button, Typography } from '@mui/material';
 import { PropsWithChildren } from 'react';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import PatreonUser from './wrappers/PatreonUser';
-import { useDebugMode } from './providers/DebugModeProvider';
 
 export const getPatreonOauthUrl = (): string => {
   const redirectUrl = `${appApiUrl}/patreon-redirect`;
@@ -71,13 +70,11 @@ function SubscribedPatreon({ patreonUser }: SubscribedPatreonProps) {
       <Typography variant="h5" align="center">
         {text}
       </Typography>
-      {/* <EditAvatarComponent /> */}
     </div>
   );
 }
 
 export default function PatreonComponent() {
-  const debugMode = useDebugMode();
   const { user } = useAuthenticator((context) => [context.user]);
   if (!user) {
     return null;
@@ -92,24 +89,5 @@ export default function PatreonComponent() {
     }
   }
 
-  return (
-    <>
-      <Box>
-        {debugMode.isEnabled ? (
-          <div>
-            <Typography>User: {user?.attributes?.email}</Typography>
-            <Typography>
-              Patreon Linked? {`${patreonUser.isPatreonLinked()}`}
-            </Typography>
-            <Typography>Tier: {patreonUser.getSubscriptionLevel()}</Typography>
-            <Typography>
-              Founder Status: {patreonUser.getFounderStatus()}
-            </Typography>
-            <Typography>Patreon ID: {patreonUser.getPatreonId()}</Typography>
-          </div>
-        ) : null}
-      </Box>
-      <CenteredBox>{content}</CenteredBox>
-    </>
-  );
+  return <CenteredBox>{content}</CenteredBox>;
 }

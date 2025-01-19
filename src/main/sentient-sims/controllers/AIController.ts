@@ -53,6 +53,7 @@ export class AIController {
 
     try {
       const result = await this.aiService.interactionEvent(event);
+      result.input = event;
       res.json(result);
       if (result.text) {
         sendChatGeneration(result);

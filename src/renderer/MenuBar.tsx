@@ -8,6 +8,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import useAuthCredentials from './hooks/useAuthCredentials';
 import { useDebugMode } from './providers/DebugModeProvider';
 import handleOpenExternalLink from './hooks/handleOpenExternalLink';
+import LogoutButton from './components/LogoutButton';
 
 export type MenuBarProperties = {
   hideSideBar: boolean;
@@ -92,14 +93,7 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
               Settings
             </Button>
             {user ? (
-              <Button
-                color="warning"
-                onClick={signOut}
-                sx={{ marginLeft: '5px' }}
-                id="logout"
-              >
-                Logout
-              </Button>
+              <LogoutButton signOut={signOut} />
             ) : (
               <Button
                 color="warning"
