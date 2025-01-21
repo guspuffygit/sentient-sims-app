@@ -1,11 +1,13 @@
 import { HasNotHappened } from '../filters/HasNotHappened';
 import { InitiatorIsActiveSim } from '../filters/InitiatorIsActiveSim';
+import { InteractionDescriptionOutcome } from '../models/InteractionDescriptionOutcome';
 
 export type InteractionDescription = {
   pre_actions?: string[];
   ignored?: boolean;
   filters?: any[];
   always_run?: boolean;
+  outcomes?: InteractionDescriptionOutcome[];
 };
 
 export const interactionDescriptions: Map<String, InteractionDescription> =
