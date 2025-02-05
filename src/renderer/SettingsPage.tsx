@@ -3,6 +3,8 @@ import { Box, Divider, Typography } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import {
+  novelaiDefaultEndpoint,
+  novelaiDefaultModel,
   openaiDefaultEndpoint,
   openaiDefaultModel,
 } from 'main/sentient-sims/constants';
@@ -21,6 +23,7 @@ import AIModelSelection from './AIModelSelection';
 import { ModsDirectoryComponent } from './ModsDirectoryComponent';
 import { AIStatusComponent } from './AIStatusComponent';
 import { useAISettings } from './providers/AISettingsProvider';
+import NovelAISettingsComponent from './settings/NovelAISettingsComponent';
 
 export default function SettingsPage() {
   const aiSettings = useAISettings();
@@ -61,6 +64,25 @@ export default function SettingsPage() {
         />
         <LocalizationSettingsComponent />
       </OpenAISettingsComponent>
+      <NovelAISettingsComponent apiType={aiSettings.aiApiType}>
+        <ApiKeyAIComponent
+          setting={SettingsEnum.NOVELAI_KEY}
+          aiName="NovelAI"
+        />
+        <AIEndpointComponent
+          type={ApiType.NovelAI}
+          selectedApiType={ApiType.NovelAI}
+          settingsEnum={SettingsEnum.NOVELAI_ENDPOINT}
+        />
+        <AIModelSelection
+          apiType={aiSettings.aiApiType}
+          defaultModel={novelaiDefaultModel}
+          defaultEndpoint={novelaiDefaultEndpoint}
+          modelSetting={SettingsEnum.NOVELAI_MODEL}
+          endpointSetting={SettingsEnum.NOVELAI_ENDPOINT}
+        />
+        <LocalizationSettingsComponent />
+      </NovelAISettingsComponent>
       <KoboldAISettingsComponent apiType={aiSettings.aiApiType} />
       <SentientSimsSettingsComponent apiType={aiSettings.aiApiType} />
       <AnimationMappingSettingsComponent apiType={aiSettings.aiApiType} />

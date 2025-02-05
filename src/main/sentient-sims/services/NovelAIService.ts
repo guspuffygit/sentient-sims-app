@@ -115,6 +115,11 @@ type NovelAISubscription = {
   };
 };
 
+type NovelAIError = {
+  status?: number;
+  message?: string;
+};
+
 type NovelAIGenerateResponse = {
   output?: string;
   error?: string;
@@ -130,7 +135,7 @@ export class NovelAIService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return 'https://api.novelai.net';
+    return this.settingsService.get(SettingsEnum.NOVELAI_ENDPOINT) as string;
   }
 
   getNovelAIKey(): string | undefined {
@@ -151,6 +156,8 @@ export class NovelAIService implements GenerationService {
   async healthCheck(apiKey?: string) {
     const key = apiKey ?? this.getNovelAIKey();
 
+    log.info(`${this.serviceUrl()}/user/subscription`);
+
     const response = await fetch(`${this.serviceUrl()}/user/subscription`, {
       headers: {
         'Content-Type': 'application/json',
@@ -164,6 +171,17 @@ export class NovelAIService implements GenerationService {
       return {
         status: `Subscription ${subscription.active}, Max Context ${subscription?.perks?.contextTokens}, Tier ${subscription.tier}`,
       };
+    }
+
+    try {
+      const novelAIError: NovelAIError = await response.json();
+      if (novelAIError.message) {
+        return {
+          status: `NovelAI Error: ${novelAIError.message}`,
+        };
+      }
+    } catch (err: any) {
+      // ignore
     }
 
     return {

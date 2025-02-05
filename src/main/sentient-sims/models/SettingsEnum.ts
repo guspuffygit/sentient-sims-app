@@ -16,6 +16,7 @@ export enum SettingsEnum {
   OPENAI_ENDPOINT = 'openaiEndpoint',
   KOBOLDAI_ENDPOINT = 'koboldAIEndpoint',
   SENTIENTSIMSAI_ENDPOINT = 'sentientsimsAIEndpoint',
+  NOVELAI_ENDPOINT = 'novelAIEndpoint',
 }
 
 export enum DeprecatedSettingsEnum {

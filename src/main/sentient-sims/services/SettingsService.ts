@@ -5,6 +5,7 @@ import { DeprecatedSettingsEnum, SettingsEnum } from '../models/SettingsEnum';
 import { ApiType } from '../models/ApiType';
 import {
   koboldaiDefaultEndpoint,
+  novelaiDefaultEndpoint,
   openaiDefaultEndpoint,
   openaiDefaultModel,
   sentientSimsAIDefaultModel,
@@ -89,6 +90,10 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.KOBOLDAI_ENDPOINT.toString()]: {
         type: 'string',
         default: koboldaiDefaultEndpoint,
+      },
+      [SettingsEnum.NOVELAI_ENDPOINT.toString()]: {
+        type: 'string',
+        default: novelaiDefaultEndpoint,
       },
     },
     migrations: {
