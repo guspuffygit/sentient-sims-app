@@ -14,6 +14,7 @@ import { LoadingButton } from '@mui/lab';
 import { AIModel, compareAIModels } from 'main/sentient-sims/models/AIModel';
 import log from 'electron-log';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
+import { useEffect, useMemo, JSX } from 'react';
 import useSetting, { SettingsHook } from './hooks/useSetting';
 import { useAIModels } from './hooks/useAIModels';
 
@@ -70,42 +71,57 @@ export default function AIModelSelection({
     aiModel.setSetting(model);
   };
 
-  if (aiModels.isFetching || aiModels.isLoading) {
-    return (
-      <LoadingButton loading size="large" variant="outlined" disabled>
-        <span>models</span>
-      </LoadingButton>
-    );
-  }
+  const selectChildren = useMemo(() => {
+    const menuItems: JSX.Element[] = [];
+    const models: AIModel[] = [];
 
-  const selectChildren: any[] = [];
-  if (aiModels?.data) {
-    const models = aiModels.data
+    if (!aiModels?.data)
+      return {
+        menuItems,
+        models,
+      };
+
+    aiModels.data
       .filter((model) => shouldIncludeModel(model))
-      .sort(compareAIModels);
+      .sort(compareAIModels)
+      .forEach((model) => models.push(model));
 
-    let currentSelectedModelAvailable = false;
-    const currentModel = aiModel.value;
-    models.forEach((model) => {
-      selectChildren.push(
-        <MenuItem value={model.name}>{model.displayName}</MenuItem>
-      );
-      if (model.name === currentModel) {
-        currentSelectedModelAvailable = true;
-      }
-    });
-    if (!currentSelectedModelAvailable) {
-      log.info(`Currently selected model ${currentModel} is not available`);
+    const currentSelectedModelAvailable = models.some(
+      (model) => model.name === aiModel.value
+    );
+
+    models.forEach((model) =>
+      menuItems.push(
+        <MenuItem key={model.name} value={model.name}>
+          {model.displayName}
+        </MenuItem>
+      )
+    );
+
+    return { menuItems, models, currentSelectedModelAvailable };
+  }, [aiModels?.data, aiModel.value]);
+
+  useEffect(() => {
+    if (!selectChildren.currentSelectedModelAvailable) {
+      log.info(`Currently selected model ${aiModel.value} is not available`);
       if (aiEndpoint.value === defaultEndpoint) {
         aiModel.resetSetting();
-      } else if (models.length > 0) {
-        aiModel.setSetting(models[0].name);
+      } else if (selectChildren.models.length > 0) {
+        aiModel.setSetting(selectChildren.models[0].name);
       } else {
         log.error(
           'Unable to set a default model because none were returned from the API'
         );
       }
     }
+  }, [selectChildren, aiModel, aiEndpoint, defaultEndpoint]);
+
+  if (aiModels.isFetching || aiModels.isLoading) {
+    return (
+      <LoadingButton loading size="large" variant="outlined" disabled>
+        <span>models</span>
+      </LoadingButton>
+    );
   }
 
   return (
@@ -123,7 +139,7 @@ export default function AIModelSelection({
           value={aiModel.value}
           onChange={handleChange}
         >
-          {selectChildren}
+          {selectChildren.menuItems}
         </Select>
       )}
       {aiEndpoint.value === defaultEndpoint ? (

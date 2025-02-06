@@ -81,7 +81,6 @@ export default function SettingsPage() {
           modelSetting={SettingsEnum.NOVELAI_MODEL}
           endpointSetting={SettingsEnum.NOVELAI_ENDPOINT}
         />
-        <LocalizationSettingsComponent />
       </NovelAISettingsComponent>
       <KoboldAISettingsComponent apiType={aiSettings.aiApiType} />
       <SentientSimsSettingsComponent apiType={aiSettings.aiApiType} />

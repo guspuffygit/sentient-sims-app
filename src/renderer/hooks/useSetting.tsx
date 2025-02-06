@@ -27,7 +27,7 @@ export default function useSetting(
     try {
       const response = await fetch(`${appApiUrl}/settings/app/${settingName}`);
       const result = await response.json();
-      setValue(result.value);
+      setValue((prev: any) => (prev !== result.value ? result.value : prev));
     } catch (err: any) {
       log.error(`Unable to get setting ${settingName}`, err);
     } finally {
@@ -66,7 +66,7 @@ export default function useSetting(
   }, [handleGetSetting]);
 
   useEffect(() => {
-    return window.electron.onSettingChange(
+    const unsubscribe = window.electron.onSettingChange(
       (_event: any, setting: SettingsEnum, newValue: any) => {
         if (setting === settingsEnum) {
           log.debug(`New value: ${newValue}`);
@@ -74,6 +74,10 @@ export default function useSetting(
         }
       }
     );
+
+    return () => {
+      unsubscribe();
+    };
   });
 
   return {
