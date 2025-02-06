@@ -41,6 +41,6 @@ jobs:
           npm test
 
       - name: Upload Coverage Report as Artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v4
         with: 
           path: './coverage/lcov-report/'
