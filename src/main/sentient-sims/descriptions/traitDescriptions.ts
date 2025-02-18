@@ -1,5 +1,7 @@
 export const traitDescriptions: Map<String, string> = new Map(
   Object.entries({
+    'absent-minded':
+      'gets lost in their thoughts and occasionally forget what they are doing, or where they are going',
     active: 'is active',
     Activities_Acting: 'activities related to acting',
     Activities_Baking: 'baking activities',
@@ -363,6 +365,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     Chronicler: 'is a chronicler',
     ClubPresident: 'is the Club President',
     Clumsy: 'is clumsy',
+    'Cold-Blooded':
+      'is very bold and manipulative, deceiving others with calm and focused demeanour',
     ColdHearted: 'is cold-hearted',
     Collector: 'is a Collector',
     Color_Black: 'the color black',
@@ -602,6 +606,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     Highflier: 'is a highflier',
     HighFlyer: 'is a High Flyer',
     HighMaintenance: 'is high maintenance',
+    'High-Spirited': 'is very energetic and playful',
+    'High-Strung': 'gets tense often',
     Hilarious: 'is hilarious',
     HolidayTradition_FatherWinterBaby:
       'is a special familial connection to Father Winter',
@@ -864,6 +870,7 @@ export const traitDescriptions: Map<String, string> = new Map(
     Lifestyles_Techie: 'is a Techie',
     Lifestyles_Technophobe: 'is a technophobe',
     Lifestyles_Workaholic: 'is the Workaholic',
+    'Light-Hearted': 'is light-hearted',
     LivingVicariously: 'is living vicariously',
     Loner: 'is a loner',
     Longevity: 'is the longevity trait',
@@ -1079,6 +1086,7 @@ export const traitDescriptions: Map<String, string> = new Map(
     Savant: 'is a savant',
     ScoutingAptitude: 'is a scouting aptitude',
     SeasonedGamer: 'is a seasoned gamer',
+    'Short-temptered': 'gets angry and tense quickly',
     SeldomSleepy: 'is seldom sleepy',
     SelfAbsorbed: 'is self-absorbed',
     SelfAssured: 'is self-assured',
@@ -1096,7 +1104,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     SpeedReader: 'is a speed reader',
     SpiceHound: 'is a Spice Hound',
     Squeamish: 'is squeamish',
-    SteelBladder: 'is a Steel Bladder',
+    SteelBladder: 'has the ability to hold their pee for a long time',
+    'Stone-hearted': 'is indifferent and lacks understanding of emotions',
     Stormchaser: 'is a storm chaser',
     StovesAndGrillsMaster: 'is a Stove and Grill Master',
     Strangerville_Infected: 'is Strangerville Infected',
@@ -1114,6 +1123,7 @@ export const traitDescriptions: Map<String, string> = new Map(
     TheKnack: 'is The Knack trait',
     TheMaster:
       'is TheMaster, having supernatural control and the ability to always succeed with Command Powers on Vampire Offspring',
+    'Thrill-seeking': 'is thrill-seeking',
     Timid: 'is timid',
     Toddler_Angelic: 'is angelic',
     Toddler_Charmer: 'is a Toddler Charmer',
@@ -1218,6 +1228,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     Vegetarian: 'is a vegetarian',
     Waterproof: 'is waterproof',
     WebMaster: 'is a WebMaster',
+    'Well-Balanced':
+      'is emotionally stable and good at handling negative emotions',
     WerewolfPack_FriendA: 'is a Friend of the Werewolf Pack',
     WerewolfPack_FriendB: 'is a friend of the Werewolf Pack',
     WorldlyKnowledge: 'is knowledgeable in worldly matters',
