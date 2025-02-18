@@ -437,7 +437,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     Dauntless: 'is dauntless',
     Daredevil:
       'is reckless and daring, is confident and active and unaffected by stress',
-    Darling: 'is very attractive to their loved ones',
+    chingyu1023_LovelyTrait_LovelyTrait:
+      'is very attractive to their loved ones', // Darling
     Decor_ArtDeco: 'Art Deco decor',
     Decor_Basics: 'basic decor',
     Decor_Boho: 'Boho decor',
