@@ -1,3 +1,4 @@
+
 import { Box, Divider, Typography } from '@mui/material';
 
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
@@ -24,6 +25,8 @@ import { ModsDirectoryComponent } from './ModsDirectoryComponent';
 import { AIStatusComponent } from './AIStatusComponent';
 import { useAISettings } from './providers/AISettingsProvider';
 import NovelAISettingsComponent from './settings/NovelAISettingsComponent';
+// [NEW] Added import for GeminiSettingsComponent
+import GeminiSettingsComponent from './settings/GeminiSettingsComponent';
 
 export default function SettingsPage() {
   const aiSettings = useAISettings();
@@ -84,6 +87,22 @@ export default function SettingsPage() {
       </NovelAISettingsComponent>
       <KoboldAISettingsComponent apiType={aiSettings.aiApiType} />
       <SentientSimsSettingsComponent apiType={aiSettings.aiApiType} />
+      {/* [NEW] Added GeminiSettingsComponent to display Gemini-specific settings */}
+      <GeminiSettingsComponent apiType={aiSettings.aiApiType}>
+        <ApiKeyAIComponent setting={SettingsEnum.GEMINI_KEYS} aiName="Gemini" />
+        <AIEndpointComponent
+          type={ApiType.Gemini}
+          selectedApiType={ApiType.Gemini}
+          settingsEnum={SettingsEnum.GEMINI_ENDPOINT}
+        />
+        <AIModelSelection
+          apiType={aiSettings.aiApiType}
+          defaultModel="gemini-2.0-flash-exp" // [NEW] Default Gemini model
+          defaultEndpoint="https://generativelanguage.googleapis.com/v1beta" // [NEW] Default Gemini endpoint
+          modelSetting={SettingsEnum.GEMINI_MODEL}
+          endpointSetting={SettingsEnum.GEMINI_ENDPOINT}
+        />
+      </GeminiSettingsComponent>
       <AnimationMappingSettingsComponent apiType={aiSettings.aiApiType} />
     </AppCard>
   );
