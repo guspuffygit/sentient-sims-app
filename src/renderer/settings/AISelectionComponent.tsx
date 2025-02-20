@@ -13,6 +13,10 @@ function getAIHelperText(apiType: ApiType) {
   if (apiType === ApiType.KoboldAI) {
     return 'KoboldAI backend self hosted.';
   }
+  // [NEW] Added helper text for Gemini
+  if (apiType === ApiType.Gemini) {
+    return 'Google Gemini AI using your personal API keys (supports multiple keys separated by commas).';
+  }
 
   return 'Custom Local or remote AI running on your own PC';
 }
@@ -36,6 +40,8 @@ export function AISelectionComponent() {
         </MenuItem>
         <MenuItem value={ApiType.NovelAI}>NovelAI</MenuItem>
         <MenuItem value={ApiType.KoboldAI}>Kobold AI</MenuItem>
+        {/* [NEW] Added Gemini as a selectable option in the dropdown */}
+        <MenuItem value={ApiType.Gemini}>Gemini</MenuItem>
       </Select>
       <FormHelperText>{getAIHelperText(aiApiType)}</FormHelperText>
       <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/AI-Backends" />
