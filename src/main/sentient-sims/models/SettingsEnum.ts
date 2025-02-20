@@ -17,6 +17,10 @@ export enum SettingsEnum {
   KOBOLDAI_ENDPOINT = 'koboldAIEndpoint',
   SENTIENTSIMSAI_ENDPOINT = 'sentientsimsAIEndpoint',
   NOVELAI_ENDPOINT = 'novelAIEndpoint',
+  // [NEW] Added settings for Gemini API integration
+  GEMINI_KEYS = 'geminiKeys', // Supports multiple keys separated by commas (e.g., "key1,key2,key3")
+  GEMINI_ENDPOINT = 'geminiEndpoint', // Endpoint for Gemini API
+  GEMINI_MODEL = 'geminiModel', // Selected Gemini model (e.g., "gemini-2.0-flash-exp")
 }
 
 export enum DeprecatedSettingsEnum {
