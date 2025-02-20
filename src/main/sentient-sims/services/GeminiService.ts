@@ -106,12 +106,13 @@ export class GeminiService implements GenerationService {
       }
     }
 
-    if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED)) {
+    // [CHANGED] Перевод применяем только к сгенерированному тексту, не меняя основной запрос
+    if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED) && text) {
       const language = this.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE);
       if (language) {
-        const translationGenAI = this.getGenAIClient();
+        const translationGenAI = this.getGenAIClient(); // Случайный ключ для перевода
         const translationModel = translationGenAI.getGenerativeModel({
-          model: this.getGeminiModel(),
+          model: this.getGeminiModel(), // Та же модель, что и для генерации
           safetySettings: this.safetySettings,
         });
 
