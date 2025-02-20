@@ -95,6 +95,19 @@ export function defaultStore(cwd?: string) {
         type: 'string',
         default: novelaiDefaultEndpoint,
       },
+      // [NEW] Added Gemini-specific settings to the schema
+      [SettingsEnum.GEMINI_KEYS.toString()]: {
+        type: 'string',
+        default: '', // Comma-separated list of Gemini API keys (e.g., "key1,key2,key3")
+      },
+      [SettingsEnum.GEMINI_ENDPOINT.toString()]: {
+        type: 'string',
+        default: 'https://generativelanguage.googleapis.com/v1beta', // Default Gemini API endpoint
+      },
+      [SettingsEnum.GEMINI_MODEL.toString()]: {
+        type: 'string',
+        default: 'gemini-2.0-flash-exp', // Default Gemini model
+      },
     },
     migrations: {
       '3.1.0': (store) => {
