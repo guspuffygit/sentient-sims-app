@@ -1,6 +1,7 @@
 /* eslint-disable no-plusplus */
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { getCareerTrackLevel } from '../descriptions/careerDescriptions';
+import { moodDescriptions } from '../descriptions/moodDescriptions';
 import { traitDescriptions } from '../descriptions/traitDescriptions';
 import { getSexCategory, getSexLocation } from '../descriptions/wwDescriptions';
 import { SSEnvironment } from '../models/InteractionEvents';
@@ -43,6 +44,12 @@ function formatTraits(traits: string[]): string[] {
   });
 
   return formattedTraits;
+}
+
+function formatMoods(moods: string[]): string[] {
+  return moods
+    .filter((mood) => mood in moodDescriptions)
+    .map((mood) => moodDescriptions[mood].description);
 }
 
 function formatAge(age: SimAge): string {
@@ -162,7 +169,7 @@ function formatProperties(sentientSim: SentientSim): string[] {
 export function formatSentientSim(sentientSim: SentientSim): string {
   const likes = formatTraits(sentientSim.likes);
   const dislikes = formatTraits(sentientSim.dislikes);
-  const moods = formatTraits(sentientSim.moods);
+  const moods = formatMoods(sentientSim.moods);
   const personalityTraits = formatTraits(sentientSim.personality_traits);
   const careers = formatCareers(sentientSim);
   const properties = formatProperties(sentientSim);
