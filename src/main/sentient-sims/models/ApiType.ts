@@ -7,7 +7,7 @@ export enum ApiType {
   Gemini = 'gemini',
 }
 
-export function ApiTypeFromValue(value: any): ApiType | null {
+export function ApiTypeFromValue(value: any): ApiType {
   switch (value) {
     case ApiType.SentientSimsAI:
       return ApiType.SentientSimsAI;
@@ -24,7 +24,7 @@ export function ApiTypeFromValue(value: any): ApiType | null {
   }
 }
 
-export function ApiTypeName(apiType: ApiType | null): string {
+export function ApiTypeName(apiType: ApiType): string {
   switch (apiType) {
     case ApiType.SentientSimsAI:
       return 'Sentient Sims AI';

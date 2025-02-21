@@ -15,5 +15,12 @@
     "allowJs": true,
     "outDir": ".erb/dll"
   },
-  "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]
+  "exclude": [
+    "test",
+    "release/build",
+    "release/app/dist",
+    ".erb/dll",
+    "node_modules/@aws-amplify",
+    "node_modules/@patternfly",
+  ]
 }
