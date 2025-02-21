@@ -1,5 +1,9 @@
 import log from 'electron-log';
-import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
+import {
+  GoogleGenerativeAI,
+  HarmBlockThreshold,
+  HarmCategory,
+} from '@google/generative-ai';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
@@ -8,24 +12,11 @@ import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel } from '../models/AIModel';
 import { fetchWithRetries } from '../util/fetchWithRetries';
 import { getRandomItem } from '../util/getRandomItem';
-
-export class GeminiKeysNotSetError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'GeminiKeysNotSetError';
-  }
-}
-
-export class GeminiAPIError extends Error {
-  constructor(public status: number, message: string) {
-    super(message);
-    this.name = 'GeminiAPIError';
-  }
-}
+import { GeminiKeysNotSetError } from '../exceptions/GeminiKeyNotSetError';
+import { GeminiAPIError } from '../exceptions/GeminiAPIError';
 
 export class GeminiService implements GenerationService {
   private readonly settingsService: SettingsService;
-  private genAI?: GoogleGenerativeAI;
 
   constructor(settingsService: SettingsService) {
     this.settingsService = settingsService;
@@ -40,11 +31,18 @@ export class GeminiService implements GenerationService {
   }
 
   getGeminiKeys(): string[] {
-    const keysString = this.settingsService.get(SettingsEnum.GEMINI_KEYS) as string;
+    const keysString = this.settingsService.get(
+      SettingsEnum.GEMINI_KEYS
+    ) as string;
     if (!keysString || keysString.trim() === '') {
-      throw new GeminiKeysNotSetError('No Gemini API keys set. Please configure them in settings (e.g., key1,key2,key3).');
+      throw new GeminiKeysNotSetError(
+        'No Gemini API keys set. Please configure them in settings (e.g., key1,key2,key3).'
+      );
     }
-    return keysString.split(',').map(key => key.trim()).filter(key => key.length > 0);
+    return keysString
+      .split(',')
+      .map((key) => key.trim())
+      .filter((key) => key.length > 0);
   }
 
   private getGenAIClient(): GoogleGenerativeAI {
@@ -54,23 +52,39 @@ export class GeminiService implements GenerationService {
   }
 
   private readonly safetySettings = [
-    { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-    { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
-    { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
-    { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+    {
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
   ];
 
-  async sentientSimsGenerate(request: OpenAICompatibleRequest, retries: number = 3): Promise<SimsGenerateResponse> {
+  async sentientSimsGenerate(
+    request: OpenAICompatibleRequest,
+    retries: number = 3
+  ): Promise<SimsGenerateResponse> {
     const genAI = this.getGenAIClient();
     const model = genAI.getGenerativeModel({
       model: this.getGeminiModel(),
       safetySettings: this.safetySettings,
-      systemInstruction: request.messages.find(msg => msg.role === 'system')?.content,
+      systemInstruction: request.messages.find((msg) => msg.role === 'system')
+        ?.content,
     });
 
     const contents = request.messages
-      .filter(msg => msg.role !== 'system')
-      .map(msg => ({
+      .filter((msg) => msg.role !== 'system')
+      .map((msg) => ({
         role: msg.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: msg.content }],
       }));
@@ -87,35 +101,46 @@ export class GeminiService implements GenerationService {
     };
     log.debug(`Full Gemini Request: ${JSON.stringify(fullRequest, null, 2)}`);
 
-    let text: string;
-    for (let attempt = 1; attempt <= retries; attempt++) {
+    let text: string | undefined;
+    for (let attempt = 0; attempt < retries; attempt += 1) {
       try {
+        // eslint-disable-next-line no-await-in-loop
         const result = await model.generateContent(fullRequest);
         text = result.response.text();
         log.debug(`Gemini Response: ${text}`);
         break;
       } catch (error: any) {
-        const status = error.status || (error.response?.status);
         const message = error.message || 'Unknown error';
-        log.error(`Gemini Error on attempt ${attempt}/${retries}: ${message}`, error);
+        log.error(
+          `Gemini Error on attempt ${attempt}/${retries}: ${message}`,
+          error
+        );
         if (attempt === retries) throw error;
       }
     }
 
     if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED) && text) {
-      const language = this.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE);
+      const language = this.settingsService.get(
+        SettingsEnum.LOCALIZATION_LANGUAGE
+      );
       if (language) {
-        const translationGenAI = this.getGenAIClient(); // Случайный ключ для перевода
+        const translationGenAI = this.getGenAIClient();
         const translationModel = translationGenAI.getGenerativeModel({
-          model: this.getGeminiModel(), // Та же модель, что и для генерации
+          model: this.getGeminiModel(),
           safetySettings: this.safetySettings,
         });
 
         const translationRequest = {
-          contents: [{
-            role: 'user',
-            parts: [{ text: `Do not include any additional text like "Here is your translation" or other explanations—just the response itself in ${language}. Translate this text to ${language}: ${text}` }],
-          }],
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text: `Do not include any additional text like "Here is your translation" or other explanations—just the response itself in ${language}. Translate this text to ${language}: ${text}`,
+                },
+              ],
+            },
+          ],
           generationConfig: {
             maxOutputTokens: request.maxResponseTokens,
             temperature: 0.8,
@@ -123,18 +148,29 @@ export class GeminiService implements GenerationService {
           },
           safetySettings: this.safetySettings,
         };
-        log.debug(`Gemini Translation Request: ${JSON.stringify(translationRequest, null, 2)}`);
+        log.debug(
+          `Gemini Translation Request: ${JSON.stringify(
+            translationRequest,
+            null,
+            2
+          )}`
+        );
 
-        for (let attempt = 1; attempt <= retries; attempt++) {
+        for (let attempt = 0; attempt < retries; attempt += 1) {
           try {
-            const translationResult = await translationModel.generateContent(translationRequest);
+            // eslint-disable-next-line no-await-in-loop
+            const translationResult = await translationModel.generateContent(
+              translationRequest
+            );
             text = translationResult.response.text();
             log.debug(`Gemini Translated Response: ${text}`);
             break;
           } catch (error: any) {
-            const status = error.status || (error.response?.status);
             const message = error.message || 'Unknown error';
-            log.error(`Gemini Translation Error on attempt ${attempt}/${retries}: ${message}`, error);
+            log.error(
+              `Gemini Translation Error on attempt ${attempt}/${retries}: ${message}`,
+              error
+            );
             if (attempt === retries) throw error;
           }
         }
@@ -183,7 +219,10 @@ export class GeminiService implements GenerationService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new GeminiAPIError(response.status, `Failed to fetch Gemini models: ${response.status} - ${errorText}`);
+        throw new GeminiAPIError(
+          response.status,
+          `Failed to fetch Gemini models: ${response.status} - ${errorText}`
+        );
       }
 
       const data = await response.json();
@@ -200,7 +239,10 @@ export class GeminiService implements GenerationService {
       }
       return [
         { name: 'gemini-1.5-flash', displayName: 'Gemini 1.5 Flash' },
-        { name: 'gemini-2.0-flash-exp', displayName: 'Gemini 2.0 Flash Experimental' },
+        {
+          name: 'gemini-2.0-flash-exp',
+          displayName: 'Gemini 2.0 Flash Experimental',
+        },
       ];
     }
   }

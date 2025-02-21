@@ -13,7 +13,6 @@ function getAIHelperText(apiType: ApiType) {
   if (apiType === ApiType.KoboldAI) {
     return 'KoboldAI backend self hosted.';
   }
-  // [NEW] Added helper text for Gemini
   if (apiType === ApiType.Gemini) {
     return 'Google Gemini AI using your personal API keys (supports multiple keys separated by commas).';
   }

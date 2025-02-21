@@ -1,8 +1,8 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { PropsWithChildren } from 'react';
-import LocalizationSettingsComponent from './LocalizationSettingsComponent'; // [NEW] Импорт компонента перевода
+import LocalizationSettingsComponent from './LocalizationSettingsComponent';
 
-// [NEW] Component to manage Gemini-specific settings in the UI
 type GeminiSettingsComponentProps = {
   apiType: ApiType;
 } & PropsWithChildren;
@@ -18,7 +18,7 @@ export default function GeminiSettingsComponent({
   return (
     <>
       {children}
-      <LocalizationSettingsComponent /> {/* [NEW] Добавляем галку для перевода */}
+      <LocalizationSettingsComponent />
     </>
   );
 }

@@ -12,9 +12,8 @@ import SyncIcon from '@mui/icons-material/Sync';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { LoadingButton } from '@mui/lab';
 import { AIModel, compareAIModels } from 'main/sentient-sims/models/AIModel';
-import log from 'electron-log';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
-import { useEffect, useMemo, JSX } from 'react';
+import { useMemo, JSX } from 'react';
 import useSetting, { SettingsHook } from './hooks/useSetting';
 import { useAIModels } from './hooks/useAIModels';
 
@@ -100,22 +99,6 @@ export default function AIModelSelection({
 
     return { menuItems, models, currentSelectedModelAvailable };
   }, [aiModels?.data, aiModel.value]);
-
-  // [CHANGED] Fixed infinite update loop by checking if reset is needed only once
-  useEffect(() => {
-    if (!aiModels.isLoading && !aiModels.isFetching && !selectChildren.currentSelectedModelAvailable) {
-      log.info(`Currently selected model ${aiModel.value} is not available`);
-      if (aiEndpoint.value === defaultEndpoint) {
-        aiModel.resetSetting();
-      } else if (selectChildren.models.length > 0) {
-        aiModel.setSetting(selectChildren.models[0].name);
-      } else {
-        log.error(
-          'Unable to set a default model because none were returned from the API'
-        );
-      }
-    }
-  }, [aiModels.isLoading, aiModels.isFetching, selectChildren.currentSelectedModelAvailable, aiModel, aiEndpoint, defaultEndpoint]);
 
   if (aiModels.isFetching || aiModels.isLoading) {
     return (

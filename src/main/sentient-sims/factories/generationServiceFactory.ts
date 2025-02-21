@@ -12,6 +12,7 @@ import { NovelAITokenCounter } from '../tokens/NovelAITokenCounter';
 import { KoboldAIService } from '../services/KoboldAIService';
 import { AllModelSettings, ModelSettings } from '../modelSettings';
 import { stringType } from '../util/typeChecks';
+import { GeminiService } from '../services/GeminiService';
 
 export function getGenerationService(
   settingsService: SettingsService
@@ -27,6 +28,10 @@ export function getGenerationService(
 
   if (aiType === ApiType.NovelAI) {
     return new NovelAIService(settingsService);
+  }
+
+  if (aiType === ApiType.Gemini) {
+    return new GeminiService(settingsService);
   }
 
   return new OpenAIService(settingsService);
@@ -62,6 +67,10 @@ export function getModelSettings(
 
   if (aiType === ApiType.SentientSimsAI) {
     model = settingsService.get(SettingsEnum.SENTIENTSIMSAI_MODEL);
+  }
+
+  if (aiType === ApiType.Gemini) {
+    model = settingsService.get(SettingsEnum.GEMINI_MODEL);
   }
 
   if (stringType(model) && model in AllModelSettings) {

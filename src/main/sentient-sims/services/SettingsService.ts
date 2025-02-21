@@ -4,6 +4,8 @@ import path from 'path';
 import { DeprecatedSettingsEnum, SettingsEnum } from '../models/SettingsEnum';
 import { ApiType } from '../models/ApiType';
 import {
+  defaultGeminiModel,
+  geminiDefaultEndpoint,
   koboldaiDefaultEndpoint,
   novelaiDefaultEndpoint,
   openaiDefaultEndpoint,
@@ -95,18 +97,17 @@ export function defaultStore(cwd?: string) {
         type: 'string',
         default: novelaiDefaultEndpoint,
       },
-      // [NEW] Added Gemini-specific settings to the schema
       [SettingsEnum.GEMINI_KEYS.toString()]: {
         type: 'string',
         default: '', // Comma-separated list of Gemini API keys (e.g., "key1,key2,key3")
       },
       [SettingsEnum.GEMINI_ENDPOINT.toString()]: {
         type: 'string',
-        default: 'https://generativelanguage.googleapis.com/v1beta', // Default Gemini API endpoint
+        default: geminiDefaultEndpoint,
       },
       [SettingsEnum.GEMINI_MODEL.toString()]: {
         type: 'string',
-        default: 'gemini-2.0-flash-exp', // Default Gemini model
+        default: defaultGeminiModel,
       },
     },
     migrations: {
@@ -144,6 +145,9 @@ export class SettingsService {
   }
 
   setSetting(key: string, value: any) {
+    if (value === undefined) {
+      return value;
+    }
     this.store.set(key, value);
 
     if (key !== SettingsEnum.ACCESS_TOKEN) {

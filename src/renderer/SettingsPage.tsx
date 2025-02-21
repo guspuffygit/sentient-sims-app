@@ -1,9 +1,10 @@
-
 import { Box, Divider, Typography } from '@mui/material';
 
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import {
+  defaultGeminiModel,
+  geminiDefaultEndpoint,
   novelaiDefaultEndpoint,
   novelaiDefaultModel,
   openaiDefaultEndpoint,
@@ -25,7 +26,6 @@ import { ModsDirectoryComponent } from './ModsDirectoryComponent';
 import { AIStatusComponent } from './AIStatusComponent';
 import { useAISettings } from './providers/AISettingsProvider';
 import NovelAISettingsComponent from './settings/NovelAISettingsComponent';
-// [NEW] Added import for GeminiSettingsComponent
 import GeminiSettingsComponent from './settings/GeminiSettingsComponent';
 
 export default function SettingsPage() {
@@ -97,8 +97,8 @@ export default function SettingsPage() {
         />
         <AIModelSelection
           apiType={aiSettings.aiApiType}
-          defaultModel="gemini-2.0-flash-exp" // [NEW] Default Gemini model
-          defaultEndpoint="https://generativelanguage.googleapis.com/v1beta" // [NEW] Default Gemini endpoint
+          defaultModel={defaultGeminiModel}
+          defaultEndpoint={geminiDefaultEndpoint}
           modelSetting={SettingsEnum.GEMINI_MODEL}
           endpointSetting={SettingsEnum.GEMINI_ENDPOINT}
         />

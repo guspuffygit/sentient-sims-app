@@ -70,3 +70,6 @@ export const novelaiDefaultModel = 'kayra-v1';
 export const sentientSimsAIDefaultModel = 'Gryphe/MythoMax-L2-13b';
 export const tokenizerBreakString = '<<BREAK>>';
 export const defaultWantsPrefixes = ['I want to', 'I would like', 'I feel'];
+export const defaultGeminiModel = 'gemini-2.0-flash-exp';
+export const geminiDefaultEndpoint =
+  'https://generativelanguage.googleapis.com/v1beta';
