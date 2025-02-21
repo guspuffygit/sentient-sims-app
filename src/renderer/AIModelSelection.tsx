@@ -101,8 +101,9 @@ export default function AIModelSelection({
     return { menuItems, models, currentSelectedModelAvailable };
   }, [aiModels?.data, aiModel.value]);
 
+  // [CHANGED] Fixed infinite update loop by checking if reset is needed only once
   useEffect(() => {
-    if (!selectChildren.currentSelectedModelAvailable) {
+    if (!aiModels.isLoading && !aiModels.isFetching && !selectChildren.currentSelectedModelAvailable) {
       log.info(`Currently selected model ${aiModel.value} is not available`);
       if (aiEndpoint.value === defaultEndpoint) {
         aiModel.resetSetting();
@@ -114,7 +115,7 @@ export default function AIModelSelection({
         );
       }
     }
-  }, [selectChildren, aiModel, aiEndpoint, defaultEndpoint]);
+  }, [aiModels.isLoading, aiModels.isFetching, selectChildren.currentSelectedModelAvailable, aiModel, aiEndpoint, defaultEndpoint]);
 
   if (aiModels.isFetching || aiModels.isLoading) {
     return (
