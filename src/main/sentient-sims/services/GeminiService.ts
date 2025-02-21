@@ -7,6 +7,7 @@ import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel } from '../models/AIModel';
 import { fetchWithRetries } from '../util/fetchWithRetries';
+import { getRandomItem } from '../util/getRandomItem';
 
 export class GeminiKeysNotSetError extends Error {
   constructor(message: string) {
@@ -20,10 +21,6 @@ export class GeminiAPIError extends Error {
     super(message);
     this.name = 'GeminiAPIError';
   }
-}
-
-function getRandomItem<T>(items: T[]): T {
-  return items[Math.floor(Math.random() * items.length)];
 }
 
 export class GeminiService implements GenerationService {
@@ -53,7 +50,6 @@ export class GeminiService implements GenerationService {
   private getGenAIClient(): GoogleGenerativeAI {
     const keys = this.getGeminiKeys();
     const randomKey = getRandomItem(keys);
-    log.debug(`Using Gemini API key: ${randomKey.substring(0, 5)}... (randomly selected from ${keys.length} keys)`);
     return new GoogleGenerativeAI(randomKey);
   }
 
@@ -106,7 +102,6 @@ export class GeminiService implements GenerationService {
       }
     }
 
-    // [CHANGED] Перевод применяем только к сгенерированному тексту, не меняя основной запрос
     if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED) && text) {
       const language = this.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE);
       if (language) {
