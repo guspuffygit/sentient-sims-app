@@ -416,8 +416,10 @@ export const traitDescriptions: Map<String, string> = new Map(
     CorporateWorker_CharismaticCrooner:
       'is a charismatic crooner, skilled in using their vocal tones to build better relationships with co-workers and enhance their singing ability',
     CorporateWorker_LegendaryStamina: 'is legendary stamina',
-    chingyu1023_CowardlyTrait2_CowardlyTrait2: 'is a coward, terrified of everything',
-    chingyu1023_CrazyTrait_CrazyTrait: 'is wild and fun loving, would do anything for love',
+    chingyu1023_CowardlyTrait2_CowardlyTrait2:
+      'is a coward, terrified of everything',
+    chingyu1023_CrazyTrait_CrazyTrait:
+      'is wild and fun loving, would do anything for love',
     Creative: 'is creative',
     CreativelyGifted: 'is creatively gifted',
     CreativeVisionary: 'is a creative visionary',
@@ -462,8 +464,10 @@ export const traitDescriptions: Map<String, string> = new Map(
     Decor_Tudor: 'Tudor-style decor',
     Decor_Vintage: 'vintage decor',
     Delightful: 'is pleasant to be with',
-    chingyu1023_EmotionalDetachment_EmotionalDetachmentTrait: 'has delayed emotional response to extreme emotions',
-    chingyu1023_DeterminedTrait2_DeterminedTrait: 'does not allow any difficulties to stop them',
+    chingyu1023_EmotionalDetachment_EmotionalDetachmentTrait:
+      'has delayed emotional response to extreme emotions',
+    chingyu1023_DeterminedTrait2_DeterminedTrait:
+      'does not allow any difficulties to stop them',
     Diffident: 'lacks confidence in their abilities and decisions',
     'Disliking Children':
       'gets tense around kids because they find kids annoying',
@@ -474,7 +478,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     chingyu1023_EccentricTrait_EccentricTrait: 'is eccentric',
     eco_master: 'is an eco master',
     EcoEngineer: 'is an Eco-Engineer',
-    chingyu1023_EmotionalTrait_EmotionalTrait: 'is emotional and highly sensitive',
+    chingyu1023_EmotionalTrait_EmotionalTrait:
+      'is emotional and highly sensitive',
     Encouraging: 'is very supporting of their friends, loved ones and family',
     entrepreneur: 'is an entrepreneur',
     Entrepreneur_TheKnowledge: 'is an Entrepreneur with the Knowledge trait',
@@ -485,7 +490,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     EternalBond: 'has an Eternal Bond with their spouse',
     Evil: 'is Evil',
     Evil_BegoniaScent: 'is the Evil_BegoniaScent trait',
-    chingyu1023_ExcitableTrait_ExcitableTrait: 'is quick to respond to anything new or stimulating',
+    chingyu1023_ExcitableTrait_ExcitableTrait:
+      'is quick to respond to anything new or stimulating',
     Excursion_Mountaineer_Rank1: 'is an Excursion Mountaineer Rank 1',
     Excursion_Mountaineer_Rank2:
       'is an experienced mountaineer, with a good knowledge of climbing routes and greater success in outdoor activities',
@@ -629,7 +635,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     Highflier: 'is a highflier',
     HighFlyer: 'is a High Flyer',
     HighMaintenance: 'is high maintenance',
-    chingyu1023_HighSpiritedTrait_HighSpiritedTrait: 'is very energetic and playful',
+    chingyu1023_HighSpiritedTrait_HighSpiritedTrait:
+      'is very energetic and playful',
     chingyu1023_HighStrungTrait_HighStrungTrait: 'gets tense often',
     Hilarious: 'is hilarious',
     HolidayTradition_FatherWinterBaby:
@@ -767,7 +774,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     HSExit_Graduate_Early: 'is graduated from High School early',
     HSExit_Graduate_Honors: 'is graduated from High School with honors',
     HSExit_Graduate_Valedictorian: 'is a High School Valedictorian graduate',
-    chingyu1023_HumbleTrait_HumbleTrait: "is humble and modest and doesn't express excessive pride",
+    chingyu1023_HumbleTrait_HumbleTrait:
+      "is humble and modest and doesn't express excessive pride",
     Human_Infant_Element_FrequentlyHiccups: 'frequently gets hiccups',
     Human_Infant_Element_FrequentlySneezes: 'frequently sneezes',
     Human_Infant_Element_Gassy: 'is a gassy infant',
@@ -840,7 +848,8 @@ export const traitDescriptions: Map<String, string> = new Map(
       'is the Security Trigger Unlock trait',
     Humanoid_Robots_MainTrait:
       'is a humanoid robot with the main trait of being the loneliest',
-    chingyu1023_HyperactiveTrait_HyperTrait: 'tends to be very energized and has trouble getting focused',
+    chingyu1023_HyperactiveTrait_HyperTrait:
+      'tends to be very energized and has trouble getting focused',
     Iconic: 'is iconic',
     chingyu1023_ImpassiveTrait_ImpassiveTrait: 'has almost not emotions',
     chingyu1023_ImpulsiveTrait_ImpulsiveTrait: 'is impulsive',
@@ -861,7 +870,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     IslandAncestors:
       'is connected to theislands of Sulani and can partake in their culture, summon elementals, and experience the blessings or consequences of their favor',
     Jealous: 'is jealous',
-    chingyu1023_JoylessTrait_JoylessTrait: "is joyless, hasn't experienced joy for a long period of time",
+    chingyu1023_JoylessTrait_JoylessTrait:
+      "is joyless, hasn't experienced joy for a long period of time",
     JungleExplorer_TreasureHunter:
       'is a skilled treasure hunter with a sharp eye for finding valuable relics in treasure chests',
     JungleExplorer_TreasureHunter_BG: 'is a Jungle Explorer Treasure Hunter',
@@ -896,7 +906,7 @@ export const traitDescriptions: Map<String, string> = new Map(
     Lifestyles_Techie: 'is a Techie',
     Lifestyles_Technophobe: 'is a technophobe',
     Lifestyles_Workaholic: 'is the Workaholic',
-    chingyu1023_LightHeartedTrait_LightHeartedTrait': 'is light-hearted',
+    chingyu1023_LightHeartedTrait_LightHeartedTrait: 'is light-hearted',
     LivingVicariously: 'is living vicariously',
     Loner: 'is a loner',
     Longevity: 'is the longevity trait',
@@ -910,13 +920,15 @@ export const traitDescriptions: Map<String, string> = new Map(
     MasterTrainer: 'is a Master Trainer',
     Materialistic: 'is materialistic',
     Mean: 'is mean',
-    chingyu1023_MelancholyTrait_MelancholyTrait: 'is melancholic, has a hard time getting daily tasks done',
+    chingyu1023_MelancholyTrait_MelancholyTrait:
+      'is melancholic, has a hard time getting daily tasks done',
     MeltMaster: 'is a Sandwich Melt Master',
     Memorable: 'is memorable',
     MentallyGifted: 'is mentally gifted',
     Mentor: 'is a mentor',
     Mischievous: 'is mischievous',
-    chingyu1023_MoodyTrait_MoodyTrait: 'is moody, can experience sudden mood swings',
+    chingyu1023_MoodyTrait_MoodyTrait:
+      'is moody, can experience sudden mood swings',
     MorningPerson: 'is a Morning Person',
     Motivating: 'is motivating',
     Muser: 'is a muser',
@@ -1116,7 +1128,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     Savant: 'is a savant',
     ScoutingAptitude: 'is a scouting aptitude',
     SeasonedGamer: 'is a seasoned gamer',
-    'chingyu1023_ShorttemperedTrait_ShorttemperedTrait': 'gets angry and tense quickly',
+    chingyu1023_ShorttemperedTrait_ShorttemperedTrait:
+      'gets angry and tense quickly',
     SeldomSleepy: 'is seldom sleepy',
     SelfAbsorbed: 'is self-absorbed',
     SelfAssured: 'is self-assured',
@@ -1129,7 +1142,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     SleightofHand: 'can perform sleight of hand tricks',
     Slob: 'is a slob',
     'Slow-To-Warm-Up': 'is slow to warm up to new people',
-    chingyu1023_SmugTrait_SmugTrait: 'has excessive pride in their achievements, is very confident',
+    chingyu1023_SmugTrait_SmugTrait:
+      'has excessive pride in their achievements, is very confident',
     Snob: 'is a snob',
     Sociable: 'is sociable',
     SociallyAwkward: 'is socially awkward',
@@ -1139,7 +1153,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     SpiceHound: 'is a Spice Hound',
     Squeamish: 'is squeamish',
     SteelBladder: 'has the ability to hold their pee for a long time',
-    chingyu1023_StonyHeartedTrait_StonyHeartedTrait: 'is indifferent and lacks understanding of emotions',
+    chingyu1023_StonyHeartedTrait_StonyHeartedTrait:
+      'is indifferent and lacks understanding of emotions',
     Stormchaser: 'is a storm chaser',
     StovesAndGrillsMaster: 'is a Stove and Grill Master',
     Strangerville_Infected: 'is Strangerville Infected',
@@ -1153,7 +1168,8 @@ export const traitDescriptions: Map<String, string> = new Map(
     Temperature_ColdAcclimation: 'is acclimated cold weather',
     Temperature_HeatAcclimation: 'is acclimated hot weather',
     Temperature_IceMan: 'is unaffected by cold temperatures',
-    chingyu1023_TenderTrait_TenderTrait: "is tender, gets sad when they're supposed to be angry",
+    chingyu1023_TenderTrait_TenderTrait:
+      "is tender, gets sad when they're supposed to be angry",
     TheKnack: 'is The Knack trait',
     TheMaster:
       'is TheMaster, having supernatural control and the ability to always succeed with Command Powers on Vampire Offspring',
