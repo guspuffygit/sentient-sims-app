@@ -1,13 +1,15 @@
 /* eslint-disable no-plusplus */
 import { LocationEntity } from '../db/entities/LocationEntity';
+import { allTraits } from '../descriptions/allTraits';
 import { getCareerTrackLevel } from '../descriptions/careerDescriptions';
 import { moodDescriptions } from '../descriptions/moodDescriptions';
-import { traitDescriptions } from '../descriptions/traitDescriptions';
 import { getSexCategory, getSexLocation } from '../descriptions/wwDescriptions';
 import { SSEnvironment } from '../models/InteractionEvents';
 import { SentientSim } from '../models/SentientSim';
 import { SimAge } from '../models/SimAge';
 import { removeEmojis } from '../util/filter';
+import { TraitType } from '../models/TraitType';
+import { SentientSimTrait } from '../models/SentientSimTrait';
 
 export enum BodyState {
   OUTFIT = 1,
@@ -34,22 +36,35 @@ export function formatListToString(items: string[]): string {
   return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
 }
 
-function formatTraits(traits: string[]): string[] {
+function formatTraits(
+  traits: SentientSimTrait[],
+  types: TraitType[]
+): string[] {
   const formattedTraits: string[] = [];
 
-  traits.forEach((trait) => {
-    if (traitDescriptions.has(trait)) {
-      formattedTraits.push(traitDescriptions.get(trait) as string);
-    }
-  });
+  traits
+    .filter((trait) => types.includes(trait.type))
+    .filter((trait) => trait.name in allTraits)
+    .filter((trait) => !allTraits[trait.name]?.ignored)
+    .forEach((trait) => {
+      const traitDescription = allTraits[trait.name];
+      if (traitDescription?.description) {
+        formattedTraits.push(traitDescription.description);
+      }
+    });
 
   return formattedTraits;
 }
 
 function formatMoods(moods: string[]): string[] {
   return moods
-    .filter((mood) => mood in moodDescriptions)
-    .map((mood) => moodDescriptions[mood].description);
+    .filter(
+      (mood) =>
+        mood in moodDescriptions &&
+        !moodDescriptions[mood]?.ignored &&
+        moodDescriptions[mood]?.description
+    )
+    .map((mood) => moodDescriptions[mood].description as string);
 }
 
 function formatAge(age: SimAge): string {
@@ -167,10 +182,18 @@ function formatProperties(sentientSim: SentientSim): string[] {
 }
 
 export function formatSentientSim(sentientSim: SentientSim): string {
-  const likes = formatTraits(sentientSim.likes);
-  const dislikes = formatTraits(sentientSim.dislikes);
+  const likes = formatTraits(sentientSim.traits, [TraitType.LIKE]);
+  const dislikes = formatTraits(sentientSim.traits, [TraitType.DISLIKE]);
   const moods = formatMoods(sentientSim.moods);
-  const personalityTraits = formatTraits(sentientSim.personality_traits);
+  const personalityTraits = formatTraits(sentientSim.traits, [
+    TraitType.ASPIRATION,
+    TraitType.FEAR,
+    TraitType.GAMEPLAY_OBJECT_PREFERENCE,
+    TraitType.GHOST,
+    TraitType.WALKSTYLE,
+    TraitType.PERSONALITY,
+    TraitType.LIFESTYLE,
+  ]);
   const careers = formatCareers(sentientSim);
   const properties = formatProperties(sentientSim);
 

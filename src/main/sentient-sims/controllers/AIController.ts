@@ -65,6 +65,8 @@ export class AIController {
       });
       sendPopUpNotification(err?.message);
     }
+
+    log.debug(`Sims: ${JSON.stringify(event.sentient_sims, null, 2)}`);
   }
 
   async classificationEvent(req: Request, res: Response) {

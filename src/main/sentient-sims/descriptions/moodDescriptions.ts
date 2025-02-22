@@ -1,10 +1,6 @@
-export type MoodDescription = {
-  ignored: boolean;
-  description: string;
-  name: string;
-};
+import { TraitDescription } from '../models/TraitDescription';
 
-export const moodDescriptions: Record<string, MoodDescription> = {
+export const moodDescriptions: Record<string, TraitDescription> = {
   Mood_Angry: {
     ignored: false,
     description: 'is feeling angry',

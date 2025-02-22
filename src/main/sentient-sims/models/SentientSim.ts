@@ -1,4 +1,5 @@
 import { SentientSimCareer } from './SentientSimCareer';
+import { SentientSimTrait } from './SentientSimTrait';
 import { SimAge } from './SimAge';
 
 export type SentientSim = {
@@ -8,12 +9,11 @@ export type SentientSim = {
   age: SimAge;
   sim_id: string;
   gender: string;
-  likes: string[];
-  dislikes: string[];
-  aspirations: string[];
+  // likes: string[];
+  // dislikes: string[];
+  // personality_traits: string[];
+  traits: SentientSimTrait[];
   moods: string[];
-  motives: string[];
-  personality_traits: string[];
   is_ghost: boolean;
   grubby: boolean;
   in_pool: boolean;
