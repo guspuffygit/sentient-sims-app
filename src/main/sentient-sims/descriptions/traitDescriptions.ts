@@ -3,6 +3,7 @@ import { TraitDescription } from '../models/TraitDescription';
 export type TraitMapping = TraitDescription & {
   class?: string;
   xml?: string;
+  trait_type?: string;
 };
 
 export const traitDescriptions: Record<string, TraitDescription> = {

@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-import { useEffect, useState, JSX, ChangeEvent } from 'react';
+import { useEffect, useState, ChangeEvent, useMemo } from 'react';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import {
   Box,
@@ -17,12 +17,18 @@ import {
 import log from 'electron-log';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { atomOneDarkReasonable } from 'react-syntax-highlighter/dist/esm/styles/hljs';
-import { TraitMapping } from 'main/sentient-sims/descriptions/traitDescriptions2';
+import { TraitMapping } from 'main/sentient-sims/descriptions/traitDescriptions';
+import { TraitXMLType } from 'main/sentient-sims/models/TraitType';
 import AppCard from './AppCard';
 
 type TraitResponse = {
   data: TraitMapping[];
 };
+
+const selectMenuItems = [<MenuItem value="">NO FILTER</MenuItem>];
+Object.values(TraitXMLType).forEach((trait) => {
+  selectMenuItems.push(<MenuItem value={trait}>{trait}</MenuItem>);
+});
 
 export default function TraitsPage() {
   const [traits, setTraits] = useState<TraitMapping[]>([]);
@@ -30,8 +36,16 @@ export default function TraitsPage() {
   const [inputField, setInputField] = useState('');
   const [filterTraitType, setFilterTraitType] = useState<string>('');
 
+  const filteredTraits = useMemo(() => {
+    if (filterTraitType) {
+      return traits.filter((trait) => trait.trait_type === filterTraitType);
+    }
+
+    return traits;
+  }, [traits, filterTraitType]);
+
   useEffect(() => {
-    fetch(`${appApiUrl}/traits?searchClass=Preference`)
+    fetch(`${appApiUrl}/traits`)
       .then((result) => result.json())
       .then((response: TraitResponse) => {
         log.debug(JSON.stringify(response.data, null, 2));
@@ -40,10 +54,12 @@ export default function TraitsPage() {
   }, []);
 
   useEffect(() => {
-    if (traits.length > 0) {
-      setInputField(traits[selectedIndex]?.description || '');
+    if (filteredTraits.length > 0) {
+      setInputField(filteredTraits[selectedIndex]?.description || '');
+    } else {
+      setInputField('');
     }
-  }, [selectedIndex, traits]);
+  }, [selectedIndex, filteredTraits]);
 
   const updateIgnored = (value: number | string) => {
     setTraits((previousTraits) => {
@@ -92,49 +108,31 @@ export default function TraitsPage() {
   const handleBack = () => {
     if (selectedIndex > 0) {
       updateDescription();
-      if (filterTraitType) {
-        log.debug(`Filter trait type: ${filterTraitType}`);
-        for (let i = selectedIndex - 1; i > 0; i += -1) {
-          if (traits[i]?.trait_type === filterTraitType) {
-            setSelectedIndex(i);
-            setInputField(traits[i]?.description || '');
-            break;
-          }
-        }
-      } else {
-        const newIndex = selectedIndex - 1;
-        setSelectedIndex(newIndex);
-        setInputField(traits[newIndex]?.description || '');
-      }
+      const newIndex = selectedIndex - 1;
+      setSelectedIndex(newIndex);
+      setInputField(filteredTraits[newIndex]?.description || '');
     }
   };
 
   const handleForward = () => {
-    if (selectedIndex + 1 < traits.length) {
+    if (selectedIndex + 1 < filteredTraits.length) {
       updateDescription();
-      if (filterTraitType) {
-        for (let i = selectedIndex + 1; i < traits.length; i += +1) {
-          if (traits[i]?.trait_type === filterTraitType) {
-            setSelectedIndex(i);
-            setInputField(traits[i]?.description || '');
-            break;
-          }
-        }
-      } else {
-        const newIndex = selectedIndex + 1;
-        setSelectedIndex(newIndex);
-        setInputField(traits[newIndex]?.description || '');
-      }
+      const newIndex = selectedIndex + 1;
+      setSelectedIndex(newIndex);
+      setInputField(filteredTraits[newIndex]?.description || '');
     }
   };
 
   const handleSkip = () => {
     updateDescription();
     // eslint-disable-next-line no-plusplus
-    for (let i = selectedIndex + 1; i < traits.length; i++) {
-      if (!traits[i]?.description && traits[i]?.ignored === undefined) {
+    for (let i = selectedIndex + 1; i < filteredTraits.length; i++) {
+      if (
+        !filteredTraits[i]?.description &&
+        filteredTraits[i]?.ignored === undefined
+      ) {
         setSelectedIndex(i);
-        setInputField(traits[i]?.description || '');
+        setInputField(filteredTraits[i]?.description || '');
         break;
       }
     }
@@ -147,7 +145,7 @@ export default function TraitsPage() {
   const exportResults = () => {
     const results: Record<string, TraitMapping> = {};
 
-    traits
+    filteredTraits
       .filter((trait) => trait.description || trait?.ignored)
       .sort((a, b) => a.name.localeCompare(b.name))
       .forEach((trait) => {
@@ -161,27 +159,17 @@ export default function TraitsPage() {
     log.info(JSON.stringify(results, null, 2));
   };
 
-  const data: JSX.Element[] = [];
-
-  traits.forEach((trait) => {
-    data.push(<Typography>{trait.name}</Typography>);
-  });
-
-  if (traits.length === 0) {
-    return null;
-  }
-
-  const xml: string | string[] = traits[selectedIndex]?.xml || [];
+  const xml: string | string[] = filteredTraits[selectedIndex]?.xml || [];
 
   let ignored = 0;
-  if (traits[selectedIndex].ignored === true) {
+  if (filteredTraits[selectedIndex]?.ignored === true) {
     ignored = 1;
-  } else if (traits[selectedIndex].ignored === false) {
+  } else if (filteredTraits[selectedIndex]?.ignored === false) {
     ignored = 2;
   }
 
   let unmapped = 0;
-  traits.forEach((trait) => {
+  filteredTraits.forEach((trait) => {
     if (!trait?.description && trait?.ignored === undefined) {
       unmapped += 1;
     }
@@ -192,9 +180,11 @@ export default function TraitsPage() {
       <Box sx={{ m: 1 }} display="flex">
         <Grid container spacing={2}>
           <Grid item xs={2}>
-            <FormHelperText>Name: {traits[selectedIndex].name}</FormHelperText>
             <FormHelperText>
-              Class: {traits[selectedIndex].class}
+              Name: {filteredTraits[selectedIndex]?.name}
+            </FormHelperText>
+            <FormHelperText>
+              Class: {filteredTraits[selectedIndex]?.class}
             </FormHelperText>
           </Grid>
           <Grid item xs={5}>
@@ -226,9 +216,7 @@ export default function TraitsPage() {
                 label="Trait Type"
                 onChange={handleChangeTraitType}
               >
-                <MenuItem value="">NO FILTER</MenuItem>
-                <MenuItem value="LIKE">LIKE</MenuItem>
-                <MenuItem value="DISLIKE">DISLIKE</MenuItem>
+                {selectMenuItems}
               </Select>
               <TextField
                 id="outlined-basic"
@@ -243,7 +231,8 @@ export default function TraitsPage() {
           <Grid item xs={1}>
             <Box sx={{ m: 1 }} display="flex">
               <Typography>
-                {selectedIndex + 1} / {traits.length} - Unmapped: {unmapped}
+                {selectedIndex + 1} / {filteredTraits.length} - Unmapped:{' '}
+                {unmapped}
               </Typography>
               <Button onClick={() => handleBack()}>Back</Button>
               <Button onClick={() => handleForward()}>Next</Button>
