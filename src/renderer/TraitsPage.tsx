@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-import { useEffect, useState, ChangeEvent, useMemo } from 'react';
+import { useEffect, useState, ChangeEvent, use, useMemoMemo } from 'react';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import {
   Box,
@@ -177,9 +177,9 @@ export default function TraitsPage() {
 
   return (
     <AppCard>
-      <Box sx={{ m: 1 }} display="flex">
-        <Grid container spacing={2}>
-          <Grid item xs={2}>
+      <Box sx={{ m: 2 }}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} sm={4}>
             <FormHelperText>
               Name: {filteredTraits[selectedIndex]?.name}
             </FormHelperText>
@@ -187,8 +187,68 @@ export default function TraitsPage() {
               Class: {filteredTraits[selectedIndex]?.class}
             </FormHelperText>
           </Grid>
-          <Grid item xs={5}>
-            <Box display="flex">
+
+          <Grid item xs={12} sm={4} container spacing={1}>
+            <Grid item xs={6}>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={ignored}
+                label="Ignored?"
+                onChange={handleChangeIgnored}
+                fullWidth
+              >
+                <MenuItem value={0}>Ignored?</MenuItem>
+                <MenuItem value={1}>True</MenuItem>
+                <MenuItem value={2}>False</MenuItem>
+              </Select>
+            </Grid>
+            <Grid item xs={6}>
+              <Select
+                labelId="trait-type-label"
+                id="trait-type"
+                value={filterTraitType}
+                label="Trait Type"
+                onChange={handleChangeTraitType}
+                fullWidth
+              >
+                {selectMenuItems}
+              </Select>
+            </Grid>
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <Typography>
+              {selectedIndex + 1} / {filteredTraits.length} - Unmapped:{' '}
+              {unmapped}
+            </Typography>
+          </Grid>
+
+          {/* Row 2: TextField */}
+          <Grid item xs={12} sm={6}>
+            <TextField
+              id="outlined-basic"
+              label="Outlined"
+              variant="outlined"
+              fullWidth
+              value={inputField}
+              onChange={handleDescriptionChange}
+            />
+          </Grid>
+
+          {/* Row 4: Buttons */}
+          <Grid
+            item
+            xs={12}
+            container
+            spacing={1}
+            justifyContent="center"
+            sm={5}
+          >
+            <Grid item>
+              <Button onClick={handleBack}>Back</Button>
+            </Grid>
+            <Grid item>
               <Button
                 onClick={() => {
                   updateIgnored(1);
@@ -198,47 +258,16 @@ export default function TraitsPage() {
               >
                 Next (IGNORE)
               </Button>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={ignored}
-                label="Ignored?"
-                onChange={handleChangeIgnored}
-              >
-                <MenuItem value={0}>Ignored?</MenuItem>
-                <MenuItem value={1}>True</MenuItem>
-                <MenuItem value={2}>False</MenuItem>
-              </Select>
-              <Select
-                labelId="trait-type-label"
-                id="trait-type"
-                value={filterTraitType}
-                label="Trait Type"
-                onChange={handleChangeTraitType}
-              >
-                {selectMenuItems}
-              </Select>
-              <TextField
-                id="outlined-basic"
-                label="Outlined"
-                variant="outlined"
-                fullWidth
-                value={inputField}
-                onChange={handleDescriptionChange}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={1}>
-            <Box sx={{ m: 1 }} display="flex">
-              <Typography>
-                {selectedIndex + 1} / {filteredTraits.length} - Unmapped:{' '}
-                {unmapped}
-              </Typography>
-              <Button onClick={() => handleBack()}>Back</Button>
-              <Button onClick={() => handleForward()}>Next</Button>
-              <Button onClick={() => handleSkip()}>Skip</Button>
-              <Button onClick={() => exportResults()}>Export</Button>
-            </Box>
+            </Grid>
+            <Grid item>
+              <Button onClick={handleForward}>Next</Button>
+            </Grid>
+            <Grid item>
+              <Button onClick={handleSkip}>Skip</Button>
+            </Grid>
+            <Grid item>
+              <Button onClick={exportResults}>Export</Button>
+            </Grid>
           </Grid>
         </Grid>
       </Box>
