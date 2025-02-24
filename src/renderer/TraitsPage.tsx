@@ -84,6 +84,8 @@ export default function TraitsPage() {
       prefix = 'John Doe is attracted to a partner who';
     } else if (traitType === 'FEAR') {
       prefix = 'John Doe fears';
+    } else if (traitType === 'ASPIRATION') {
+      prefix = 'John Doe';
     }
   }
 
