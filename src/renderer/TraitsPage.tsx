@@ -1,7 +1,14 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-import { useEffect, useState, ChangeEvent, use, useMemoMemo } from 'react';
+import {
+  useEffect,
+  useState,
+  ChangeEvent,
+  useMemo,
+  useCallback,
+  JSX,
+} from 'react';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import {
   Box,
@@ -18,22 +25,23 @@ import log from 'electron-log';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { atomOneDarkReasonable } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { TraitMapping } from 'main/sentient-sims/descriptions/traitDescriptions';
-import { TraitXMLType } from 'main/sentient-sims/models/TraitType';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import { LoadingButton } from '@mui/lab';
+import { ExportTraitsRequest } from 'main/sentient-sims/services/MappingService';
 import AppCard from './AppCard';
+import useSetting from './hooks/useSetting';
 
 type TraitResponse = {
   data: TraitMapping[];
 };
 
-const selectMenuItems = [<MenuItem value="">NO FILTER</MenuItem>];
-Object.values(TraitXMLType).forEach((trait) => {
-  selectMenuItems.push(<MenuItem value={trait}>{trait}</MenuItem>);
-});
-
 export default function TraitsPage() {
+  const [loadingTraits, setLoadingTraits] = useState(false);
+  const [loadingExport, setLoadingExport] = useState(false);
   const [traits, setTraits] = useState<TraitMapping[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [inputField, setInputField] = useState('');
+  const extractedPath = useSetting<string>(SettingsEnum.TRAIT_MAPPING_PATH, '');
   const [filterTraitType, setFilterTraitType] = useState<string>('');
 
   const filteredTraits = useMemo(() => {
@@ -44,14 +52,59 @@ export default function TraitsPage() {
     return traits;
   }, [traits, filterTraitType]);
 
-  useEffect(() => {
-    fetch(`${appApiUrl}/traits`)
+  const traitTypes: Record<string, number> = useMemo(() => {
+    const traitTypeCounts: Record<string, number> = {};
+    traits.forEach((trait) => {
+      if (trait.trait_type) {
+        if (trait.trait_type in traitTypeCounts) {
+          traitTypeCounts[trait.trait_type] += 1;
+        } else {
+          traitTypeCounts[trait.trait_type] = 1;
+        }
+      }
+    });
+    return traitTypeCounts;
+  }, [traits]);
+
+  let prefix = '';
+  if (filteredTraits[selectedIndex]?.trait_type) {
+    const traitType = filteredTraits[selectedIndex]?.trait_type;
+    const traitClass = filteredTraits[selectedIndex]?.class;
+    if (
+      traitType === 'DISLIKE' &&
+      traitClass &&
+      traitClass === 'AttractionPreference'
+    ) {
+      prefix = 'John Doe is turned off by a partner who';
+    } else if (
+      traitType === 'LIKE' &&
+      traitClass &&
+      traitClass === 'AttractionPreference'
+    ) {
+      prefix = 'John Doe is attracted to a partner who';
+    }
+  }
+
+  const selectMenuItems: JSX.Element[] = [];
+  Object.keys(traitTypes).forEach((traitTypeKey) => {
+    selectMenuItems.push(
+      <MenuItem value={traitTypeKey}>
+        {traitTypeKey}: {traitTypes[traitTypeKey]}
+      </MenuItem>
+    );
+  });
+
+  const loadItems = useCallback(() => {
+    setLoadingTraits(true);
+    const params = new URLSearchParams({ extractedPath: extractedPath.value });
+    fetch(`${appApiUrl}/traits?${params.toString()}`)
       .then((result) => result.json())
       .then((response: TraitResponse) => {
         log.debug(JSON.stringify(response.data, null, 2));
         setTraits(response.data);
-      });
-  }, []);
+      })
+      .finally(() => setLoadingTraits(false));
+  }, [extractedPath.value]);
 
   useEffect(() => {
     if (filteredTraits.length > 0) {
@@ -63,19 +116,20 @@ export default function TraitsPage() {
 
   const updateIgnored = (value: number | string) => {
     setTraits((previousTraits) => {
-      const updatedTraits = [...previousTraits];
+      const updatedTraits: TraitMapping[] = [];
+      previousTraits.forEach((trait) => {
+        if (trait.name === filteredTraits[selectedIndex].name) {
+          if (value === 1) {
+            trait.ignored = true;
+          } else if (value === 2) {
+            trait.ignored = false;
+          } else {
+            trait.ignored = undefined;
+          }
+        }
+        updatedTraits.push(trait);
+      });
 
-      let ignored: boolean | undefined;
-      if (value === 1) {
-        ignored = true;
-      } else if (value === 2) {
-        ignored = false;
-      }
-
-      updatedTraits[selectedIndex] = {
-        ...updatedTraits[selectedIndex],
-        ignored,
-      };
       return updatedTraits;
     });
   };
@@ -86,21 +140,24 @@ export default function TraitsPage() {
 
   const handleChangeTraitType = (event: SelectChangeEvent<string>) => {
     setFilterTraitType(event.target.value);
+    setSelectedIndex(0);
+    setInputField(filteredTraits[0]?.description || '');
   };
 
   function updateDescription() {
     setTraits((previousTraits) => {
-      const updatedTraits = [...previousTraits];
+      const updatedTraits: TraitMapping[] = [];
+      previousTraits.forEach((trait) => {
+        if (trait.name === filteredTraits[selectedIndex].name) {
+          let description: string | undefined;
+          if (inputField) {
+            description = inputField;
+          }
+          trait.description = description;
+        }
+        updatedTraits.push(trait);
+      });
 
-      let description: string | undefined;
-      if (inputField) {
-        description = inputField;
-      }
-
-      updatedTraits[selectedIndex] = {
-        ...updatedTraits[selectedIndex],
-        description,
-      };
       return updatedTraits;
     });
   }
@@ -142,11 +199,16 @@ export default function TraitsPage() {
     setInputField(event.target.value);
   };
 
+  const handleExtractedPathChange = (event: ChangeEvent<HTMLInputElement>) => {
+    extractedPath.setSetting(event.target.value);
+  };
+
   const exportResults = () => {
+    setLoadingExport(true);
     const results: Record<string, TraitMapping> = {};
 
-    filteredTraits
-      .filter((trait) => trait.description || trait?.ignored)
+    traits
+      // .filter((trait) => trait.description || trait?.ignored)
       .sort((a, b) => a.name.localeCompare(b.name))
       .forEach((trait) => {
         results[trait.name] = {
@@ -156,7 +218,16 @@ export default function TraitsPage() {
         };
       });
 
-    log.info(JSON.stringify(results, null, 2));
+    const exportTraitsRequest: ExportTraitsRequest = {
+      extractedPath: extractedPath.value,
+      traits: results,
+    };
+
+    fetch(`${appApiUrl}/traits/export`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(exportTraitsRequest),
+    }).finally(() => setLoadingExport(false));
   };
 
   const xml: string | string[] = filteredTraits[selectedIndex]?.xml || [];
@@ -199,8 +270,8 @@ export default function TraitsPage() {
                 fullWidth
               >
                 <MenuItem value={0}>Ignored?</MenuItem>
-                <MenuItem value={1}>True</MenuItem>
-                <MenuItem value={2}>False</MenuItem>
+                <MenuItem value={1}>ignored=true</MenuItem>
+                <MenuItem value={2}>ignored=false</MenuItem>
               </Select>
             </Grid>
             <Grid item xs={6}>
@@ -212,6 +283,7 @@ export default function TraitsPage() {
                 onChange={handleChangeTraitType}
                 fullWidth
               >
+                <MenuItem value="">NO FILTER</MenuItem>
                 {selectMenuItems}
               </Select>
             </Grid>
@@ -222,10 +294,19 @@ export default function TraitsPage() {
               {selectedIndex + 1} / {filteredTraits.length} - Unmapped:{' '}
               {unmapped}
             </Typography>
+            <TextField
+              id="extracted-path"
+              label="S4tk Extracted Path"
+              variant="outlined"
+              fullWidth
+              value={extractedPath.value}
+              onChange={handleExtractedPathChange}
+            />
           </Grid>
 
           {/* Row 2: TextField */}
           <Grid item xs={12} sm={6}>
+            <Typography>{prefix}</Typography>
             <TextField
               id="outlined-basic"
               label="Outlined"
@@ -266,7 +347,17 @@ export default function TraitsPage() {
               <Button onClick={handleSkip}>Skip</Button>
             </Grid>
             <Grid item>
-              <Button onClick={exportResults}>Export</Button>
+              <LoadingButton loading={loadingExport} onClick={exportResults}>
+                Export
+              </LoadingButton>
+            </Grid>
+            <Grid item>
+              <LoadingButton
+                loading={loadingTraits}
+                onClick={() => loadItems()}
+              >
+                Load
+              </LoadingButton>
             </Grid>
           </Grid>
         </Grid>

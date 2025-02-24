@@ -5,17 +5,9 @@ import fs from 'fs';
 import path from 'path';
 import { moodDescriptions } from '../descriptions/moodDescriptions';
 import { attractionPreferenceDescriptions } from '../descriptions/attractionPreferenceDescriptions';
-import { TraitMapping } from '../descriptions/traitDescriptions2';
+import { TraitMapping } from '../descriptions/traitDescriptions';
 import { allTraits } from '../descriptions/allTraits';
-
-const extractedPath = path.join(process.cwd(), 'extracted');
-const traitsPath = path.join(extractedPath, 'Trait');
-const moodsPath = path.join(extractedPath, 'Mood');
-const stringsPath = path.join(extractedPath, 'strings.json');
-
-export const stringMap: Record<string, string> = JSON.parse(
-  fs.readFileSync(stringsPath, 'utf-8')
-);
+import { TraitDescription } from '../models/TraitDescription';
 
 export type Instance = {
   class: string;
@@ -88,8 +80,25 @@ const textProperties: Record<string, string> = {
   trait_description: '',
 };
 
+type TraitsParameters = {
+  searchClass?: string;
+  extractedPath: string;
+};
+
+export type ExportTraitsRequest = {
+  extractedPath: string;
+  traits: Record<string, TraitDescription>;
+};
+
 export class MappingService {
-  async getTraits(searchClass?: string) {
+  async getTraits({ searchClass, extractedPath }: TraitsParameters) {
+    log.debug(`extracted path: ${extractedPath}`);
+    const traitsPath = path.join(extractedPath, 'Trait');
+    const stringsPath = path.join(extractedPath, 'strings.json');
+    const stringMap: Record<string, string> = JSON.parse(
+      fs.readFileSync(stringsPath, 'utf-8')
+    );
+
     log.debug(`Strings count: ${Object.keys(stringMap).length}`);
 
     const xmlFiles = getXmlFilesSync(traitsPath, []);
@@ -190,8 +199,8 @@ export class MappingService {
     };
   }
 
-  async getUnmappedTraits() {
-    const result = await this.getTraits();
+  async getUnmappedTraits(traitsParameters: TraitsParameters) {
+    const result = await this.getTraits(traitsParameters);
     const unmappedTraits = result.data.filter((mood) => !mood.description);
     log.debug(`Unmapped ${unmappedTraits.length}/${result.data.length}`);
     return {
@@ -200,6 +209,7 @@ export class MappingService {
   }
 
   async getMoods() {
+    const moodsPath = '';
     const xmlFiles = getXmlFilesSync(moodsPath, []);
 
     const instances: Instance[] = [];
@@ -267,5 +277,22 @@ export class MappingService {
     return {
       data: result.data.filter((mood) => !mood.description),
     };
+  }
+
+  async exportTraits({ extractedPath, traits }: ExportTraitsRequest) {
+    const exportedPath = path.join(extractedPath, 'extracted.json');
+    const count = 0;
+    Object.keys(traits).forEach((traitKey) => {
+      const trait = traits[traitKey];
+      if (trait.name.endsWith('_TurnOff')) {
+        const turnOn = traits[trait.name.replace('_TurnOff', '_TurnOn')];
+        if (turnOn) {
+          traits[trait.name.replace('_TurnOff', '_TurnOn')].description =
+            trait.description;
+        }
+      }
+    });
+    log.debug(`Count: ${count}`);
+    fs.writeFileSync(exportedPath, JSON.stringify(traits, null, 2), 'utf-8');
   }
 }

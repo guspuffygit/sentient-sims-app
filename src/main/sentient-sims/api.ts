@@ -204,6 +204,7 @@ export function runApi({
   );
   expressApp.get('/traits', mappingController.getTraits);
   expressApp.get('/traits/unmapped', mappingController.getUnmappedTraits);
+  expressApp.post('/traits/export', mappingController.exportTraits);
   expressApp.get('/moods', mappingController.getMoods);
   expressApp.get('/moods/unmapped', mappingController.getUnmappedMoods);
   expressApp.post(

@@ -3,20 +3,20 @@ import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { appApiUrl } from 'main/sentient-sims/constants';
 
-export type SettingsHook = {
-  value: any;
+export type SettingsHook<T> = {
+  value: T;
   isLoading: boolean;
-  setSetting: (settingValue: any) => Promise<void>;
+  setSetting: (settingValue: T) => Promise<void>;
   resetSetting: () => Promise<void>;
 };
 
-export default function useSetting(
+export default function useSetting<T = any>(
   settingsEnum: SettingsEnum,
   defaultValue: any = ''
-): SettingsHook {
+): SettingsHook<T> {
   const settingName = settingsEnum.toString();
   const [isLoading, setIsLoading] = useState(false);
-  const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState<T>(defaultValue);
   const [bounceTimeout, setBounceTimeout] = useState<ReturnType<
     typeof setTimeout
   > | null>();

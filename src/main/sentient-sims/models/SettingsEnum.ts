@@ -21,6 +21,7 @@ export enum SettingsEnum {
   GEMINI_KEYS = 'geminiKeys', // Supports multiple keys separated by commas (e.g., "key1,key2,key3")
   GEMINI_ENDPOINT = 'geminiEndpoint', // Endpoint for Gemini API
   GEMINI_MODEL = 'geminiModel', // Selected Gemini model (e.g., "gemini-2.0-flash-exp")
+  TRAIT_MAPPING_PATH = 'traitMappingPath',
 }
 
 export enum DeprecatedSettingsEnum {

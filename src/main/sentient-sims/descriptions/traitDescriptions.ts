@@ -19,6 +19,626 @@ export const traitDescriptions: Record<string, TraitDescription> = {
     name: 'archaeologySkill_GiveAuthenticationMail_Prohibit',
     ignored: true,
   },
+  Attraction_Activities_Broke_TurnOff: {
+    name: 'Attraction_Activities_Broke_TurnOff',
+    description: 'are broke',
+  },
+  Attraction_Activities_Broke_TurnOn: {
+    name: 'Attraction_Activities_Broke_TurnOn',
+    description: 'are broke',
+  },
+  Attraction_Activities_CareerMinded_TurnOff: {
+    name: 'Attraction_Activities_CareerMinded_TurnOff',
+    description: 'are career oriented',
+  },
+  Attraction_Activities_CareerMinded_TurnOn: {
+    name: 'Attraction_Activities_CareerMinded_TurnOn',
+    description: 'are career oriented',
+  },
+  Attraction_Activities_HighlySkilled_TurnOff: {
+    name: 'Attraction_Activities_HighlySkilled_TurnOff',
+    description: 'are highly skilled',
+  },
+  Attraction_Activities_HighlySkilled_TurnOn: {
+    name: 'Attraction_Activities_HighlySkilled_TurnOn',
+    description: 'are highly skilled',
+  },
+  Attraction_Activities_SelfEmployed_TurnOff: {
+    name: 'Attraction_Activities_SelfEmployed_TurnOff',
+    description: 'are self employed',
+  },
+  Attraction_Activities_SelfEmployed_TurnOn: {
+    name: 'Attraction_Activities_SelfEmployed_TurnOn',
+    description: 'are self employed',
+  },
+  Attraction_Activities_Slacker_TurnOff: {
+    name: 'Attraction_Activities_Slacker_TurnOff',
+    description: 'are slackers',
+  },
+  Attraction_Activities_Slacker_TurnOn: {
+    name: 'Attraction_Activities_Slacker_TurnOn',
+    description: 'are slackers',
+  },
+  Attraction_Activities_Taken_TurnOff: {
+    name: 'Attraction_Activities_Taken_TurnOff',
+    description: 'are already in a relationship',
+  },
+  Attraction_Activities_Taken_TurnOn: {
+    name: 'Attraction_Activities_Taken_TurnOn',
+    description: 'are already in a relationship',
+  },
+  Attraction_Activities_Wealthy_TurnOff: {
+    name: 'Attraction_Activities_Wealthy_TurnOff',
+    description: 'are wealthy',
+  },
+  Attraction_Activities_Wealthy_TurnOn: {
+    name: 'Attraction_Activities_Wealthy_TurnOn',
+    description: 'are wealthy',
+  },
+  Attraction_Characteristics_Ambitionless_TurnOff: {
+    name: 'Attraction_Characteristics_Ambitionless_TurnOff',
+    description: 'are ambitionless',
+  },
+  Attraction_Characteristics_Ambitionless_TurnOn: {
+    name: 'Attraction_Characteristics_Ambitionless_TurnOn',
+    description: 'are ambitionless',
+  },
+  Attraction_Characteristics_Ambitious_TurnOff: {
+    name: 'Attraction_Characteristics_Ambitious_TurnOff',
+    description: 'are ambitious',
+  },
+  Attraction_Characteristics_Ambitious_TurnOn: {
+    name: 'Attraction_Characteristics_Ambitious_TurnOn',
+    description: 'are ambitious',
+  },
+  Attraction_Characteristics_Argumentative_TurnOff: {
+    name: 'Attraction_Characteristics_Argumentative_TurnOff',
+    description: 'are argumentative',
+  },
+  Attraction_Characteristics_Argumentative_TurnOn: {
+    name: 'Attraction_Characteristics_Argumentative_TurnOn',
+    description: 'are argumentative',
+  },
+  Attraction_Characteristics_Cerebral_TurnOff: {
+    name: 'Attraction_Characteristics_Cerebral_TurnOff',
+    description: 'are smart and nerdy',
+  },
+  Attraction_Characteristics_Cerebral_TurnOn: {
+    name: 'Attraction_Characteristics_Cerebral_TurnOn',
+    description: 'are smart and nerdy',
+  },
+  Attraction_Characteristics_Clean_TurnOff: {
+    name: 'Attraction_Characteristics_Clean_TurnOff',
+    description: 'are clean',
+  },
+  Attraction_Characteristics_Clean_TurnOn: {
+    name: 'Attraction_Characteristics_Clean_TurnOn',
+    description: 'are clean',
+  },
+  Attraction_Characteristics_Egotistical_TurnOff: {
+    name: 'Attraction_Characteristics_Egotistical_TurnOff',
+    description: 'are egotistical',
+  },
+  Attraction_Characteristics_Egotistical_TurnOn: {
+    name: 'Attraction_Characteristics_Egotistical_TurnOn',
+    description: 'are egotistical',
+  },
+  Attraction_Characteristics_EmotionalDecisionMakers_TurnOff: {
+    name: 'Attraction_Characteristics_EmotionalDecisionMakers_TurnOff',
+    description: 'are emotional decision makers',
+  },
+  Attraction_Characteristics_EmotionalDecisionMakers_TurnOn: {
+    name: 'Attraction_Characteristics_EmotionalDecisionMakers_TurnOn',
+    description: 'are emotional decision makers',
+  },
+  Attraction_Characteristics_FamilyMotivated_TurnOff: {
+    name: 'Attraction_Characteristics_FamilyMotivated_TurnOff',
+    description: 'are family motivated',
+  },
+  Attraction_Characteristics_FamilyMotivated_TurnOn: {
+    name: 'Attraction_Characteristics_FamilyMotivated_TurnOn',
+    description: 'are family motivated',
+  },
+  Attraction_Characteristics_Funny_TurnOff: {
+    name: 'Attraction_Characteristics_Funny_TurnOff',
+    description: 'are funny',
+  },
+  Attraction_Characteristics_Funny_TurnOn: {
+    name: 'Attraction_Characteristics_Funny_TurnOn',
+    description: 'are funny',
+  },
+  Attraction_Characteristics_Hardworking_TurnOff: {
+    name: 'Attraction_Characteristics_Hardworking_TurnOff',
+    description: 'are hardworking',
+  },
+  Attraction_Characteristics_Hardworking_TurnOn: {
+    name: 'Attraction_Characteristics_Hardworking_TurnOn',
+    description: 'are hardworking',
+  },
+  Attraction_Characteristics_HighEnergy_TurnOff: {
+    name: 'Attraction_Characteristics_HighEnergy_TurnOff',
+    description: 'are high energy',
+  },
+  Attraction_Characteristics_HighEnergy_TurnOn: {
+    name: 'Attraction_Characteristics_HighEnergy_TurnOn',
+    description: 'are high energy',
+  },
+  Attraction_Characteristics_Homebody_TurnOff: {
+    name: 'Attraction_Characteristics_Homebody_TurnOff',
+    description: 'are a homebody',
+  },
+  Attraction_Characteristics_Homebody_TurnOn: {
+    name: 'Attraction_Characteristics_Homebody_TurnOn',
+    description: 'are a homebody',
+  },
+  Attraction_Characteristics_Idealist_TurnOff: {
+    name: 'Attraction_Characteristics_Idealist_TurnOff',
+    description: 'are an idealist',
+  },
+  Attraction_Characteristics_Idealist_TurnOn: {
+    name: 'Attraction_Characteristics_Idealist_TurnOn',
+    description: 'are an idealist',
+  },
+  Attraction_Characteristics_Messy_TurnOff: {
+    name: 'Attraction_Characteristics_Messy_TurnOff',
+    description: 'are messy',
+  },
+  Attraction_Characteristics_Messy_TurnOn: {
+    name: 'Attraction_Characteristics_Messy_TurnOn',
+    description: 'are messy',
+  },
+  Attraction_Characteristics_NatureEnthusiast_TurnOff: {
+    name: 'Attraction_Characteristics_NatureEnthusiast_TurnOff',
+    description: 'a nature enthusiast',
+  },
+  Attraction_Characteristics_NatureEnthusiast_TurnOn: {
+    name: 'Attraction_Characteristics_NatureEnthusiast_TurnOn',
+    description: 'a nature enthusiast',
+  },
+  Attraction_Characteristics_Optimistic_TurnOff: {
+    name: 'Attraction_Characteristics_Optimistic_TurnOff',
+    description: 'are optimistic',
+  },
+  Attraction_Characteristics_Optimistic_TurnOn: {
+    name: 'Attraction_Characteristics_Optimistic_TurnOn',
+    description: 'are optimistic',
+  },
+  Attraction_Characteristics_Pessimistic_TurnOff: {
+    name: 'Attraction_Characteristics_Pessimistic_TurnOff',
+    description: 'are pessimistic',
+  },
+  Attraction_Characteristics_Pessimistic_TurnOn: {
+    name: 'Attraction_Characteristics_Pessimistic_TurnOn',
+    description: 'are pessimistic',
+  },
+  Attraction_Characteristics_PetEnthusiast_TurnOff: {
+    name: 'Attraction_Characteristics_PetEnthusiast_TurnOff',
+    description: 'loves pets',
+  },
+  Attraction_Characteristics_PetEnthusiast_TurnOn: {
+    name: 'Attraction_Characteristics_PetEnthusiast_TurnOn',
+    description: 'loves pets',
+  },
+  Attraction_Characteristics_RomanceEnthusiast_TurnOff: {
+    name: 'Attraction_Characteristics_RomanceEnthusiast_TurnOff',
+    description: 'are a romantic enthusiast',
+  },
+  Attraction_Characteristics_Spirited_TurnOff: {
+    name: 'Attraction_Characteristics_Spirited_TurnOff',
+    description: 'are outgoing and cheerful',
+  },
+  Attraction_Characteristics_Spirited_TurnOn: {
+    name: 'Attraction_Characteristics_Spirited_TurnOn',
+    description: 'are outgoing and cheerful',
+  },
+  Attraction_Fashion_Basics_TurnOff: {
+    name: 'Attraction_Fashion_Basics_TurnOff',
+    description: 'have basic fashion sense',
+  },
+  Attraction_Fashion_Basics_TurnOn: {
+    name: 'Attraction_Fashion_Basics_TurnOn',
+    description: 'have basic fashion sense',
+  },
+  Attraction_Fashion_Boho_TurnOff: {
+    name: 'Attraction_Fashion_Boho_TurnOff',
+    description: 'are into Boho fashion',
+  },
+  Attraction_Fashion_Boho_TurnOn: {
+    name: 'Attraction_Fashion_Boho_TurnOn',
+    description: 'are into Boho fashion',
+  },
+  Attraction_Fashion_Costumes_TurnOff: {
+    name: 'Attraction_Fashion_Costumes_TurnOff',
+    description: 'wear costumes',
+  },
+  Attraction_Fashion_Costumes_TurnOn: {
+    name: 'Attraction_Fashion_Costumes_TurnOn',
+    description: 'wear costumes',
+  },
+  Attraction_Fashion_Country_TurnOff: {
+    name: 'Attraction_Fashion_Country_TurnOff',
+    description: 'are into Country fashion',
+  },
+  Attraction_Fashion_Country_TurnOn: {
+    name: 'Attraction_Fashion_Country_TurnOn',
+    description: 'are into Country fashion',
+  },
+  Attraction_Fashion_Hipster_TurnOff: {
+    name: 'Attraction_Fashion_Hipster_TurnOff',
+    description: 'are into Hipster fashion',
+  },
+  Attraction_Fashion_Hipster_TurnOn: {
+    name: 'Attraction_Fashion_Hipster_TurnOn',
+    description: 'are into Hipster fashion',
+  },
+  Attraction_Fashion_Outdoorsy_TurnOff: {
+    name: 'Attraction_Fashion_Outdoorsy_TurnOff',
+    description: 'are outdoorsy',
+  },
+  Attraction_Fashion_Outdoorsy_TurnOn: {
+    name: 'Attraction_Fashion_Outdoorsy_TurnOn',
+    description: 'are outdoorsy',
+  },
+  Attraction_Fashion_Polished_TurnOff: {
+    name: 'Attraction_Fashion_Polished_TurnOff',
+    description: 'are into polished fashion',
+  },
+  Attraction_Fashion_Polished_TurnOn: {
+    name: 'Attraction_Fashion_Polished_TurnOn',
+    description: 'are into polished fashion',
+  },
+  Attraction_Fashion_Preppy_TurnOff: {
+    name: 'Attraction_Fashion_Preppy_TurnOff',
+    description: 'are into preppy fashion',
+  },
+  Attraction_Fashion_Preppy_TurnOn: {
+    name: 'Attraction_Fashion_Preppy_TurnOn',
+    description: 'are into preppy fashion',
+  },
+  Attraction_Fashion_Rocker_TurnOff: {
+    name: 'Attraction_Fashion_Rocker_TurnOff',
+    description: 'are into Rocker fashion',
+  },
+  Attraction_Fashion_Rocker_TurnOn: {
+    name: 'Attraction_Fashion_Rocker_TurnOn',
+    description: 'are into Rocker fashion',
+  },
+  Attraction_Fashion_Streetwear_TurnOff: {
+    name: 'Attraction_Fashion_Streetwear_TurnOff',
+    description: 'are into Streetwear fashion',
+  },
+  Attraction_Fashion_Streetwear_TurnOn: {
+    name: 'Attraction_Fashion_Streetwear_TurnOn',
+    description: 'are into Streetwear fashion',
+  },
+  Attraction_HairColor_Auburn_TurnOff: {
+    name: 'Attraction_HairColor_Auburn_TurnOff',
+    description: 'have auburn hair',
+  },
+  Attraction_HairColor_Auburn_TurnOn: {
+    name: 'Attraction_HairColor_Auburn_TurnOn',
+    description: 'have auburn hair',
+  },
+  Attraction_HairColor_Black_TurnOff: {
+    name: 'Attraction_HairColor_Black_TurnOff',
+    description: 'have black hair',
+  },
+  Attraction_HairColor_Black_TurnOn: {
+    name: 'Attraction_HairColor_Black_TurnOn',
+    description: 'have black hair',
+  },
+  Attraction_HairColor_Blonde_TurnOff: {
+    name: 'Attraction_HairColor_Blonde_TurnOff',
+    description: 'have blonde hair',
+  },
+  Attraction_HairColor_Blonde_TurnOn: {
+    name: 'Attraction_HairColor_Blonde_TurnOn',
+    description: 'have blonde hair',
+  },
+  Attraction_HairColor_Brown_TurnOff: {
+    name: 'Attraction_HairColor_Brown_TurnOff',
+    description: 'have brown hair',
+  },
+  Attraction_HairColor_Brown_TurnOn: {
+    name: 'Attraction_HairColor_Brown_TurnOn',
+    description: 'have brown hair',
+  },
+  Attraction_HairColor_DarkBlue_TurnOff: {
+    name: 'Attraction_HairColor_DarkBlue_TurnOff',
+    description: 'have dark blue hair',
+  },
+  Attraction_HairColor_DarkBlue_TurnOn: {
+    name: 'Attraction_HairColor_DarkBlue_TurnOn',
+    description: 'have dark blue hair',
+  },
+  Attraction_HairColor_Gray_TurnOff: {
+    name: 'Attraction_HairColor_Gray_TurnOff',
+    description: 'have gray hair',
+  },
+  Attraction_HairColor_Gray_TurnOn: {
+    name: 'Attraction_HairColor_Gray_TurnOn',
+    description: 'have gray hair',
+  },
+  Attraction_HairColor_Green_TurnOff: {
+    name: 'Attraction_HairColor_Green_TurnOff',
+    description: 'have green hair',
+  },
+  Attraction_HairColor_Green_TurnOn: {
+    name: 'Attraction_HairColor_Green_TurnOn',
+    description: 'have green hair',
+  },
+  Attraction_HairColor_HotPink_TurnOff: {
+    name: 'Attraction_HairColor_HotPink_TurnOff',
+    description: 'have hot pink hair',
+  },
+  Attraction_HairColor_HotPink_TurnOn: {
+    name: 'Attraction_HairColor_HotPink_TurnOn',
+    description: 'have hot pink hair',
+  },
+  Attraction_HairColor_Orange_TurnOff: {
+    name: 'Attraction_HairColor_Orange_TurnOff',
+    description: 'have orange hair',
+  },
+  Attraction_HairColor_Orange_TurnOn: {
+    name: 'Attraction_HairColor_Orange_TurnOn',
+    description: 'have orange hair',
+  },
+  Attraction_HairColor_Platinum_TurnOff: {
+    name: 'Attraction_HairColor_Platinum_TurnOff',
+    description: 'have platinum blonde hair',
+  },
+  Attraction_HairColor_Platinum_TurnOn: {
+    name: 'Attraction_HairColor_Platinum_TurnOn',
+    description: 'have platinum blonde hair',
+  },
+  Attraction_HairColor_PurplePastel_TurnOff: {
+    name: 'Attraction_HairColor_PurplePastel_TurnOff',
+    description: 'have purple pastel hair',
+  },
+  Attraction_HairColor_PurplePastel_TurnOn: {
+    name: 'Attraction_HairColor_PurplePastel_TurnOn',
+    description: 'have purple pastel hair',
+  },
+  Attraction_HairColor_Red_TurnOff: {
+    name: 'Attraction_HairColor_Red_TurnOff',
+    description: 'have red hair',
+  },
+  Attraction_HairColor_Red_TurnOn: {
+    name: 'Attraction_HairColor_Red_TurnOn',
+    description: 'have red hair',
+  },
+  Attraction_HairColor_Turquoise_TurnOff: {
+    name: 'Attraction_HairColor_Turquoise_TurnOff',
+    description: 'have turquoise hair',
+  },
+  Attraction_HairColor_Turquoise_TurnOn: {
+    name: 'Attraction_HairColor_Turquoise_TurnOn',
+    description: 'have turquoise hair',
+  },
+  Attraction_HairColor_White_TurnOff: {
+    name: 'Attraction_HairColor_White_TurnOff',
+    description: 'have white hair',
+  },
+  Attraction_HairColor_White_TurnOn: {
+    name: 'Attraction_HairColor_White_TurnOn',
+    description: 'have white hair',
+  },
+  Attraction_OutfitColor_Black_TurnOff: {
+    name: 'Attraction_OutfitColor_Black_TurnOff',
+    description: 'wear black outfits',
+  },
+  Attraction_OutfitColor_Black_TurnOn: {
+    name: 'Attraction_OutfitColor_Black_TurnOn',
+    description: 'wear black outfits',
+  },
+  Attraction_OutfitColor_Blue_TurnOff: {
+    name: 'Attraction_OutfitColor_Blue_TurnOff',
+    description: 'wear blue outfits',
+  },
+  Attraction_OutfitColor_Blue_TurnOn: {
+    name: 'Attraction_OutfitColor_Blue_TurnOn',
+    description: 'wear blue outfits',
+  },
+  Attraction_OutfitColor_Brown_TurnOff: {
+    name: 'Attraction_OutfitColor_Brown_TurnOff',
+    description: 'wear brown outfits',
+  },
+  Attraction_OutfitColor_Brown_TurnOn: {
+    name: 'Attraction_OutfitColor_Brown_TurnOn',
+    description: 'wear brown outfits',
+  },
+  Attraction_OutfitColor_Gray_TurnOff: {
+    name: 'Attraction_OutfitColor_Gray_TurnOff',
+    description: 'wear gray outfits',
+  },
+  Attraction_OutfitColor_Gray_TurnOn: {
+    name: 'Attraction_OutfitColor_Gray_TurnOn',
+    description: 'wear gray outfits',
+  },
+  Attraction_OutfitColor_Green_TurnOff: {
+    name: 'Attraction_OutfitColor_Green_TurnOff',
+    description: 'wear green outfits',
+  },
+  Attraction_OutfitColor_Green_TurnOn: {
+    name: 'Attraction_OutfitColor_Green_TurnOn',
+    description: 'wear green outfits',
+  },
+  Attraction_OutfitColor_Orange_TurnOff: {
+    name: 'Attraction_OutfitColor_Orange_TurnOff',
+    description: 'wear orange outfits',
+  },
+  Attraction_OutfitColor_Orange_TurnOn: {
+    name: 'Attraction_OutfitColor_Orange_TurnOn',
+    description: 'wear orange outfits',
+  },
+  Attraction_OutfitColor_Pink_TurnOff: {
+    name: 'Attraction_OutfitColor_Pink_TurnOff',
+    description: 'wear pink outfits',
+  },
+  Attraction_OutfitColor_Pink_TurnOn: {
+    name: 'Attraction_OutfitColor_Pink_TurnOn',
+    description: 'wear pink outfits',
+  },
+  Attraction_OutfitColor_Purple_TurnOff: {
+    name: 'Attraction_OutfitColor_Purple_TurnOff',
+    description: 'wear purple outfits',
+  },
+  Attraction_OutfitColor_Purple_TurnOn: {
+    name: 'Attraction_OutfitColor_Purple_TurnOn',
+    description: 'wear purple outfits',
+  },
+  Attraction_OutfitColor_Red_TurnOff: {
+    name: 'Attraction_OutfitColor_Red_TurnOff',
+    description: 'wear red outfits',
+  },
+  Attraction_OutfitColor_Red_TurnOn: {
+    name: 'Attraction_OutfitColor_Red_TurnOn',
+    description: 'wear red outfits',
+  },
+  Attraction_OutfitColor_White_TurnOff: {
+    name: 'Attraction_OutfitColor_White_TurnOff',
+    description: 'wear white outfits',
+  },
+  Attraction_OutfitColor_White_TurnOn: {
+    name: 'Attraction_OutfitColor_White_TurnOn',
+    description: 'wear white outfits',
+  },
+  Attraction_OutfitColor_Yellow_TurnOff: {
+    name: 'Attraction_OutfitColor_Yellow_TurnOff',
+    description: 'wear yellow outfits',
+  },
+  Attraction_OutfitColor_Yellow_TurnOn: {
+    name: 'Attraction_OutfitColor_Yellow_TurnOn',
+    description: 'wear yellow outfits',
+  },
+  Attraction_RomanceStyles_Affection_TurnOff: {
+    name: 'Attraction_RomanceStyles_Affection_TurnOff',
+    description: 'display affection',
+  },
+  Attraction_RomanceStyles_Affection_TurnOn: {
+    name: 'Attraction_RomanceStyles_Affection_TurnOn',
+    description: 'display affection',
+  },
+  Attraction_RomanceStyles_Flirting_TurnOff: {
+    name: 'Attraction_RomanceStyles_Flirting_TurnOff',
+    description: 'are flirty',
+  },
+  Attraction_RomanceStyles_Flirting_TurnOn: {
+    name: 'Attraction_RomanceStyles_Flirting_TurnOn',
+    description: 'are flirty',
+  },
+  Attraction_RomanceStyles_GiftGiving_TurnOff: {
+    name: 'Attraction_RomanceStyles_GiftGiving_TurnOff',
+    description: 'are giving and receiving gift enthusiasts',
+  },
+  Attraction_RomanceStyles_GiftGiving_TurnOn: {
+    name: 'Attraction_RomanceStyles_GiftGiving_TurnOn',
+    description: 'are giving and receiving gift enthusiasts',
+  },
+  Attraction_RomanceStyles_PhysicalIntimacy_TurnOff: {
+    name: 'Attraction_RomanceStyles_PhysicalIntimacy_TurnOff',
+    description: 'are physically intimate',
+  },
+  Attraction_RomanceStyles_PhysicalIntimacy_TurnOn: {
+    name: 'Attraction_RomanceStyles_PhysicalIntimacy_TurnOn',
+    description: 'are physically intimate',
+  },
+  Attraction_RomanceStyles_Woohoo_TurnOff: {
+    name: 'Attraction_RomanceStyles_Woohoo_TurnOff',
+    description: 'are very sexually active',
+  },
+  Attraction_RomanceStyles_Woohoo_TurnOn: {
+    name: 'Attraction_RomanceStyles_Woohoo_TurnOn',
+    description: 'are very sexually active',
+  },
+  Attraction_SkillArchetypes_Academic_TurnOff: {
+    name: 'Attraction_SkillArchetypes_Academic_TurnOff',
+    description: 'are academic',
+  },
+  Attraction_SkillArchetypes_Academic_TurnOn: {
+    name: 'Attraction_SkillArchetypes_Academic_TurnOn',
+    description: 'are academic',
+  },
+  'Attraction_SkillArchetypes_Arts&Crafts_TurnOff': {
+    name: 'Attraction_SkillArchetypes_Arts&Crafts_TurnOff',
+    description: 'are into arts and crafts',
+  },
+  'Attraction_SkillArchetypes_Arts&Crafts_TurnOn': {
+    name: 'Attraction_SkillArchetypes_Arts&Crafts_TurnOn',
+    description: 'are into arts and crafts',
+  },
+  Attraction_SkillArchetypes_Cooking_TurnOff: {
+    name: 'Attraction_SkillArchetypes_Cooking_TurnOff',
+    description: 'are into cooking',
+  },
+  Attraction_SkillArchetypes_Cooking_TurnOn: {
+    name: 'Attraction_SkillArchetypes_Cooking_TurnOn',
+    description: 'are into cooking',
+  },
+  Attraction_SkillArchetypes_DrinkMaking_TurnOff: {
+    name: 'Attraction_SkillArchetypes_DrinkMaking_TurnOff',
+    description: 'are into crafting cocktails',
+  },
+  Attraction_SkillArchetypes_DrinkMaking_TurnOn: {
+    name: 'Attraction_SkillArchetypes_DrinkMaking_TurnOn',
+    description: 'are into crafting cocktails',
+  },
+  Attraction_SkillArchetypes_Engineering_TurnOff: {
+    name: 'Attraction_SkillArchetypes_Engineering_TurnOff',
+    description: 'are into engineering',
+  },
+  Attraction_SkillArchetypes_Engineering_TurnOn: {
+    name: 'Attraction_SkillArchetypes_Engineering_TurnOn',
+    description: 'are into engineering',
+  },
+  'Attraction_SkillArchetypes_Health&Sports_TurnOff': {
+    name: 'Attraction_SkillArchetypes_Health&Sports_TurnOff',
+    description: 'are into health and sports',
+  },
+  'Attraction_SkillArchetypes_Health&Sports_TurnOn': {
+    name: 'Attraction_SkillArchetypes_Health&Sports_TurnOn',
+    description: 'are into health and sports',
+  },
+  Attraction_SkillArchetypes_Interpersonal_TurnOff: {
+    name: 'Attraction_SkillArchetypes_Interpersonal_TurnOff',
+    description: 'have good interpersonal skills',
+  },
+  Attraction_SkillArchetypes_Interpersonal_TurnOn: {
+    name: 'Attraction_SkillArchetypes_Interpersonal_TurnOn',
+    description: 'have good interpersonal skills',
+  },
+  'Attraction_SkillArchetypes_Media&Tech_TurnOff': {
+    name: 'Attraction_SkillArchetypes_Media&Tech_TurnOff',
+    description: 'have good media and tech skills',
+  },
+  'Attraction_SkillArchetypes_Media&Tech_TurnOn': {
+    name: 'Attraction_SkillArchetypes_Media&Tech_TurnOn',
+    description: 'have good media and tech skills',
+  },
+  Attraction_SkillArchetypes_Nature_TurnOff: {
+    name: 'Attraction_SkillArchetypes_Nature_TurnOff',
+    description: 'have nature skills',
+  },
+  Attraction_SkillArchetypes_Nature_TurnOn: {
+    name: 'Attraction_SkillArchetypes_Nature_TurnOn',
+    description: 'have nature skills',
+  },
+  Attraction_SkillArchetypes_Performer_TurnOff: {
+    name: 'Attraction_SkillArchetypes_Performer_TurnOff',
+    description: 'are a performer',
+  },
+  Attraction_SkillArchetypes_Performer_TurnOn: {
+    name: 'Attraction_SkillArchetypes_Performer_TurnOn',
+    description: 'are a performer',
+  },
+  Attraction_SkillArchetypes_SenseOfHumor_TurnOff: {
+    name: 'Attraction_SkillArchetypes_SenseOfHumor_TurnOff',
+    description: 'have a sense of humor',
+  },
+  Attraction_SkillArchetypes_SenseOfHumor_TurnOn: {
+    name: 'Attraction_SkillArchetypes_SenseOfHumor_TurnOn',
+    description: 'have a sense of humor',
+  },
   challenge_Kindness_Ambassador: {
     name: 'challenge_Kindness_Ambassador',
     description: 'has stronger friendships and fewer negative emotions',
@@ -57,6 +677,78 @@ export const traitDescriptions: Record<string, TraitDescription> = {
   },
   fameTraits_Shine_On_Rank5: {
     name: 'fameTraits_Shine_On_Rank5',
+    ignored: true,
+  },
+  foodPreferences_Infants_Applesauce: {
+    name: 'foodPreferences_Infants_Applesauce',
+    ignored: true,
+  },
+  foodPreferences_Infants_bananaSlices: {
+    name: 'foodPreferences_Infants_bananaSlices',
+    ignored: true,
+  },
+  foodPreferences_Infants_crushedCarrots: {
+    name: 'foodPreferences_Infants_crushedCarrots',
+    ignored: true,
+  },
+  foodPreferences_Infants_homemadeHummus: {
+    name: 'foodPreferences_Infants_homemadeHummus',
+    ignored: true,
+  },
+  foodPreferences_Infants_iceCream: {
+    name: 'foodPreferences_Infants_iceCream',
+    ignored: true,
+  },
+  foodPreferences_Infants_mashedMango: {
+    name: 'foodPreferences_Infants_mashedMango',
+    ignored: true,
+  },
+  foodPreferences_Infants_mashedPeas: {
+    name: 'foodPreferences_Infants_mashedPeas',
+    ignored: true,
+  },
+  foodPreferences_Infants_oatmealCereal: {
+    name: 'foodPreferences_Infants_oatmealCereal',
+    ignored: true,
+  },
+  foodPreferences_Infants_OatyOs: {
+    name: 'foodPreferences_Infants_OatyOs',
+    ignored: true,
+  },
+  foodPreferences_Infants_papayaPaste: {
+    name: 'foodPreferences_Infants_papayaPaste',
+    ignored: true,
+  },
+  foodPreferences_Infants_peanutButterPuffs: {
+    name: 'foodPreferences_Infants_peanutButterPuffs',
+    ignored: true,
+  },
+  foodPreferences_Infants_pumpkinPuree: {
+    name: 'foodPreferences_Infants_pumpkinPuree',
+    ignored: true,
+  },
+  foodPreferences_Infants_ricePorridge: {
+    name: 'foodPreferences_Infants_ricePorridge',
+    ignored: true,
+  },
+  foodPreferences_Infants_smashedAvocado: {
+    name: 'foodPreferences_Infants_smashedAvocado',
+    ignored: true,
+  },
+  foodPreferences_Infants_smashedLemon: {
+    name: 'foodPreferences_Infants_smashedLemon',
+    ignored: true,
+  },
+  foodPreferences_Infants_sweetPotatoPuree: {
+    name: 'foodPreferences_Infants_sweetPotatoPuree',
+    ignored: true,
+  },
+  foodPreferences_Infants_yogurt: {
+    name: 'foodPreferences_Infants_yogurt',
+    ignored: true,
+  },
+  foodPreferences_Infants_yogurtMelts: {
+    name: 'foodPreferences_Infants_yogurtMelts',
     ignored: true,
   },
   love_Explorer: {
@@ -145,9 +837,633 @@ export const traitDescriptions: Record<string, TraitDescription> = {
     name: 'trait_AtDaycare',
     ignored: true,
   },
+  trait_Attraction_Activities_Broke_TurnOff: {
+    name: 'trait_Attraction_Activities_Broke_TurnOff',
+    description: 'is broke',
+  },
+  trait_Attraction_Activities_Broke_TurnOn: {
+    name: 'trait_Attraction_Activities_Broke_TurnOn',
+    description: 'is broke',
+  },
+  trait_Attraction_Activities_CareerMinded_TurnOff: {
+    name: 'trait_Attraction_Activities_CareerMinded_TurnOff',
+    description: 'is career focused',
+  },
+  trait_Attraction_Activities_CareerMinded_TurnOn: {
+    name: 'trait_Attraction_Activities_CareerMinded_TurnOn',
+    description: 'is career focused',
+  },
+  trait_Attraction_Activities_HighlySkilled_TurnOff: {
+    name: 'trait_Attraction_Activities_HighlySkilled_TurnOff',
+    description: 'is highly skilled',
+  },
+  trait_Attraction_Activities_HighlySkilled_TurnOn: {
+    name: 'trait_Attraction_Activities_HighlySkilled_TurnOn',
+    description: 'is highly skilled',
+  },
+  trait_Attraction_Activities_SelfEmployed_TurnOff: {
+    name: 'trait_Attraction_Activities_SelfEmployed_TurnOff',
+    description: 'is self employed',
+  },
+  trait_Attraction_Activities_SelfEmployed_TurnOn: {
+    name: 'trait_Attraction_Activities_SelfEmployed_TurnOn',
+    description: 'is self employed',
+  },
+  trait_Attraction_Activities_Slacker_TurnOff: {
+    name: 'trait_Attraction_Activities_Slacker_TurnOff',
+    description: 'is a slacker',
+  },
+  trait_Attraction_Activities_Slacker_TurnOn: {
+    name: 'trait_Attraction_Activities_Slacker_TurnOn',
+    description: 'is a slacker',
+  },
+  trait_Attraction_Activities_Taken_TurnOff: {
+    name: 'trait_Attraction_Activities_Taken_TurnOff',
+    description: 'is in a relationship and taken',
+  },
+  trait_Attraction_Activities_Taken_TurnOn: {
+    name: 'trait_Attraction_Activities_Taken_TurnOn',
+    description: 'is in a relationship and taken',
+  },
+  trait_Attraction_Activities_Wealthy_TurnOff: {
+    name: 'trait_Attraction_Activities_Wealthy_TurnOff',
+    description: 'is wealthy',
+  },
+  trait_Attraction_Activities_Wealthy_TurnOn: {
+    name: 'trait_Attraction_Activities_Wealthy_TurnOn',
+    description: 'is wealthy',
+  },
   trait_Attraction_ChangeAttractionSettings_TurnOff: {
     name: 'trait_Attraction_ChangeAttractionSettings_TurnOff',
     ignored: true,
+  },
+  trait_Attraction_Characteristics_Ambitionless_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Ambitionless_TurnOff',
+    description: 'is ambitionless',
+  },
+  trait_Attraction_Characteristics_Ambitionless_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Ambitionless_TurnOn',
+    description: 'is ambitionless',
+  },
+  trait_Attraction_Characteristics_Ambitious_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Ambitious_TurnOff',
+    description: 'is ambitious',
+  },
+  trait_Attraction_Characteristics_Ambitious_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Ambitious_TurnOn',
+    description: 'is ambitious',
+  },
+  trait_Attraction_Characteristics_Argumentative_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Argumentative_TurnOff',
+    description: 'is argumentative',
+  },
+  trait_Attraction_Characteristics_Argumentative_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Argumentative_TurnOn',
+    description: 'is argumentative',
+  },
+  trait_Attraction_Characteristics_Cerebral_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Cerebral_TurnOff',
+    description: 'is smart and nerdy',
+  },
+  trait_Attraction_Characteristics_Cerebral_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Cerebral_TurnOn',
+    description: 'is smart and nerdy',
+  },
+  trait_Attraction_Characteristics_Clean_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Clean_TurnOff',
+    description: 'is clean',
+  },
+  trait_Attraction_Characteristics_Clean_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Clean_TurnOn',
+    description: 'is clean',
+  },
+  trait_Attraction_Characteristics_Egotistical_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Egotistical_TurnOff',
+    description: 'is egotistical',
+  },
+  trait_Attraction_Characteristics_Egotistical_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Egotistical_TurnOn',
+    description: 'is egotistical',
+  },
+  trait_Attraction_Characteristics_EmotionalDecisionMakers_TurnOff: {
+    name: 'trait_Attraction_Characteristics_EmotionalDecisionMakers_TurnOff',
+    description: 'is an emotional decision maker',
+  },
+  trait_Attraction_Characteristics_EmotionalDecisionMakers_TurnOn: {
+    name: 'trait_Attraction_Characteristics_EmotionalDecisionMakers_TurnOn',
+    description: 'is an emotional decision maker',
+  },
+  trait_Attraction_Characteristics_FamilyMotivated_TurnOff: {
+    name: 'trait_Attraction_Characteristics_FamilyMotivated_TurnOff',
+    description: 'is family motivated',
+  },
+  trait_Attraction_Characteristics_FamilyMotivated_TurnOn: {
+    name: 'trait_Attraction_Characteristics_FamilyMotivated_TurnOn',
+    description: 'is family motivated',
+  },
+  trait_Attraction_Characteristics_Funny_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Funny_TurnOff',
+    description: 'is funny',
+  },
+  trait_Attraction_Characteristics_Funny_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Funny_TurnOn',
+    description: 'is funny',
+  },
+  trait_Attraction_Characteristics_Hardworking_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Hardworking_TurnOff',
+    description: 'is hardworking',
+  },
+  trait_Attraction_Characteristics_Hardworking_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Hardworking_TurnOn',
+    description: 'is hardworking',
+  },
+  trait_Attraction_Characteristics_HighEnergy_TurnOff: {
+    name: 'trait_Attraction_Characteristics_HighEnergy_TurnOff',
+    description: 'is high energy',
+  },
+  trait_Attraction_Characteristics_HighEnergy_TurnOn: {
+    name: 'trait_Attraction_Characteristics_HighEnergy_TurnOn',
+    description: 'is high energy',
+  },
+  trait_Attraction_Characteristics_Homebody_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Homebody_TurnOff',
+    description: 'is a homebody',
+  },
+  trait_Attraction_Characteristics_Homebody_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Homebody_TurnOn',
+    description: 'is a homebody',
+  },
+  trait_Attraction_Characteristics_Idealist_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Idealist_TurnOff',
+    description: 'is an idealist',
+  },
+  trait_Attraction_Characteristics_Idealist_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Idealist_TurnOn',
+    description: 'is an idealist',
+  },
+  trait_Attraction_Characteristics_Messy_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Messy_TurnOff',
+    description: 'is messy',
+  },
+  trait_Attraction_Characteristics_Messy_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Messy_TurnOn',
+    description: 'is messy',
+  },
+  trait_Attraction_Characteristics_NatureEnthusiast_TurnOff: {
+    name: 'trait_Attraction_Characteristics_NatureEnthusiast_TurnOff',
+    description: 'is a nature enthusiast',
+  },
+  trait_Attraction_Characteristics_NatureEnthusiast_TurnOn: {
+    name: 'trait_Attraction_Characteristics_NatureEnthusiast_TurnOn',
+    description: 'is a nature enthusiast',
+  },
+  trait_Attraction_Characteristics_Optimistic_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Optimistic_TurnOff',
+    description: 'is optimistic',
+  },
+  trait_Attraction_Characteristics_Optimistic_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Optimistic_TurnOn',
+    description: 'is optimistic',
+  },
+  trait_Attraction_Characteristics_Pessimistic_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Pessimistic_TurnOff',
+    description: 'is pessimistic',
+  },
+  trait_Attraction_Characteristics_Pessimistic_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Pessimistic_TurnOn',
+    description: 'is pessimistic',
+  },
+  trait_Attraction_Characteristics_PetEnthusiast_TurnOff: {
+    name: 'trait_Attraction_Characteristics_PetEnthusiast_TurnOff',
+    description: 'likes pets',
+  },
+  trait_Attraction_Characteristics_PetEnthusiast_TurnOn: {
+    name: 'trait_Attraction_Characteristics_PetEnthusiast_TurnOn',
+    description: 'likes pets',
+  },
+  trait_Attraction_Characteristics_RomanceEnthusiast_TurnOff: {
+    name: 'trait_Attraction_Characteristics_RomanceEnthusiast_TurnOff',
+    description: 'is very romantic',
+  },
+  trait_Attraction_Characteristics_RomanceEnthusiast_TurnOn: {
+    name: 'trait_Attraction_Characteristics_RomanceEnthusiast_TurnOn',
+    description: 'is very romantic',
+  },
+  trait_Attraction_Characteristics_Spirited_TurnOff: {
+    name: 'trait_Attraction_Characteristics_Spirited_TurnOff',
+    description: 'is spirited',
+  },
+  trait_Attraction_Characteristics_Spirited_TurnOn: {
+    name: 'trait_Attraction_Characteristics_Spirited_TurnOn',
+    description: 'is spirited',
+  },
+  trait_Attraction_Fashion_Basics_TurnOff: {
+    name: 'trait_Attraction_Fashion_Basics_TurnOff',
+    description: 'has basic fashion',
+  },
+  trait_Attraction_Fashion_Basics_TurnOn: {
+    name: 'trait_Attraction_Fashion_Basics_TurnOn',
+    description: 'has basic fashion',
+  },
+  trait_Attraction_Fashion_Boho_TurnOff: {
+    name: 'trait_Attraction_Fashion_Boho_TurnOff',
+    description: 'has boho fashion',
+  },
+  trait_Attraction_Fashion_Boho_TurnOn: {
+    name: 'trait_Attraction_Fashion_Boho_TurnOn',
+    description: 'has boho fashion',
+  },
+  trait_Attraction_Fashion_Costumes_TurnOff: {
+    name: 'trait_Attraction_Fashion_Costumes_TurnOff',
+    description: 'wears costumes',
+  },
+  trait_Attraction_Fashion_Costumes_TurnOn: {
+    name: 'trait_Attraction_Fashion_Costumes_TurnOn',
+    description: 'wears costumes',
+  },
+  trait_Attraction_Fashion_Country_TurnOff: {
+    name: 'trait_Attraction_Fashion_Country_TurnOff',
+    description: 'has country fashion',
+  },
+  trait_Attraction_Fashion_Country_TurnOn: {
+    name: 'trait_Attraction_Fashion_Country_TurnOn',
+    description: 'has country fashion',
+  },
+  trait_Attraction_Fashion_Hipster_TurnOff: {
+    name: 'trait_Attraction_Fashion_Hipster_TurnOff',
+    description: 'wears hipster fashion',
+  },
+  trait_Attraction_Fashion_Hipster_TurnOn: {
+    name: 'trait_Attraction_Fashion_Hipster_TurnOn',
+    description: 'wears hipster fashion',
+  },
+  trait_Attraction_Fashion_Outdoorsy_TurnOff: {
+    name: 'trait_Attraction_Fashion_Outdoorsy_TurnOff',
+    description: 'has outdoorsy fashion',
+  },
+  trait_Attraction_Fashion_Outdoorsy_TurnOn: {
+    name: 'trait_Attraction_Fashion_Outdoorsy_TurnOn',
+    description: 'has outdoorsy fashion',
+  },
+  trait_Attraction_Fashion_Polished_TurnOff: {
+    name: 'trait_Attraction_Fashion_Polished_TurnOff',
+    description: 'has polished fashion',
+  },
+  trait_Attraction_Fashion_Polished_TurnOn: {
+    name: 'trait_Attraction_Fashion_Polished_TurnOn',
+    description: 'has polished fashion',
+  },
+  trait_Attraction_Fashion_Preppy_TurnOff: {
+    name: 'trait_Attraction_Fashion_Preppy_TurnOff',
+    description: 'has preppy fashion',
+  },
+  trait_Attraction_Fashion_Preppy_TurnOn: {
+    name: 'trait_Attraction_Fashion_Preppy_TurnOn',
+    description: 'has preppy fashion',
+  },
+  trait_Attraction_Fashion_Rocker_TurnOff: {
+    name: 'trait_Attraction_Fashion_Rocker_TurnOff',
+    description: 'has rocker fashion',
+  },
+  trait_Attraction_Fashion_Rocker_TurnOn: {
+    name: 'trait_Attraction_Fashion_Rocker_TurnOn',
+    description: 'has rocker fashion',
+  },
+  trait_Attraction_Fashion_Streetwear_TurnOff: {
+    name: 'trait_Attraction_Fashion_Streetwear_TurnOff',
+    description: 'has streetwear fashion',
+  },
+  trait_Attraction_Fashion_Streetwear_TurnOn: {
+    name: 'trait_Attraction_Fashion_Streetwear_TurnOn',
+    description: 'has streetwear fashion',
+  },
+  trait_Attraction_HairColor_Auburn_TurnOff: {
+    name: 'trait_Attraction_HairColor_Auburn_TurnOff',
+    description: 'has auburn hair',
+  },
+  trait_Attraction_HairColor_Auburn_TurnOn: {
+    name: 'trait_Attraction_HairColor_Auburn_TurnOn',
+    description: 'has auburn hair',
+  },
+  trait_Attraction_HairColor_Black_TurnOff: {
+    name: 'trait_Attraction_HairColor_Black_TurnOff',
+    description: 'has black hair',
+  },
+  trait_Attraction_HairColor_Black_TurnOn: {
+    name: 'trait_Attraction_HairColor_Black_TurnOn',
+    description: 'has black hair',
+  },
+  trait_Attraction_HairColor_Blonde_TurnOff: {
+    name: 'trait_Attraction_HairColor_Blonde_TurnOff',
+    description: 'has blonde hair',
+  },
+  trait_Attraction_HairColor_Blonde_TurnOn: {
+    name: 'trait_Attraction_HairColor_Blonde_TurnOn',
+    description: 'has blonde hair',
+  },
+  trait_Attraction_HairColor_Brown_TurnOff: {
+    name: 'trait_Attraction_HairColor_Brown_TurnOff',
+    description: 'has brown hair',
+  },
+  trait_Attraction_HairColor_Brown_TurnOn: {
+    name: 'trait_Attraction_HairColor_Brown_TurnOn',
+    description: 'has brown hair',
+  },
+  trait_Attraction_HairColor_DarkBlue_TurnOff: {
+    name: 'trait_Attraction_HairColor_DarkBlue_TurnOff',
+    description: 'has dark blue hair',
+  },
+  trait_Attraction_HairColor_DarkBlue_TurnOn: {
+    name: 'trait_Attraction_HairColor_DarkBlue_TurnOn',
+    description: 'has dark blue hair',
+  },
+  trait_Attraction_HairColor_Gray_TurnOff: {
+    name: 'trait_Attraction_HairColor_Gray_TurnOff',
+    description: 'has gray hair',
+  },
+  trait_Attraction_HairColor_Gray_TurnOn: {
+    name: 'trait_Attraction_HairColor_Gray_TurnOn',
+    description: 'has gray hair',
+  },
+  trait_Attraction_HairColor_Green_TurnOff: {
+    name: 'trait_Attraction_HairColor_Green_TurnOff',
+    description: 'has green hair',
+  },
+  trait_Attraction_HairColor_Green_TurnOn: {
+    name: 'trait_Attraction_HairColor_Green_TurnOn',
+    description: 'has green hair',
+  },
+  trait_Attraction_HairColor_HotPink_TurnOff: {
+    name: 'trait_Attraction_HairColor_HotPink_TurnOff',
+    description: 'has hot pink hair',
+  },
+  trait_Attraction_HairColor_HotPink_TurnOn: {
+    name: 'trait_Attraction_HairColor_HotPink_TurnOn',
+    description: 'has hot pink hair',
+  },
+  trait_Attraction_HairColor_Orange_TurnOff: {
+    name: 'trait_Attraction_HairColor_Orange_TurnOff',
+    description: 'has orange hair',
+  },
+  trait_Attraction_HairColor_Orange_TurnOn: {
+    name: 'trait_Attraction_HairColor_Orange_TurnOn',
+    description: 'has orange hair',
+  },
+  trait_Attraction_HairColor_Platinum_TurnOff: {
+    name: 'trait_Attraction_HairColor_Platinum_TurnOff',
+    description: 'has platinum blonde hair',
+  },
+  trait_Attraction_HairColor_Platinum_TurnOn: {
+    name: 'trait_Attraction_HairColor_Platinum_TurnOn',
+    description: 'has platinum blonde hair',
+  },
+  trait_Attraction_HairColor_PurplePastel_TurnOff: {
+    name: 'trait_Attraction_HairColor_PurplePastel_TurnOff',
+    description: 'has purple pastel hair',
+  },
+  trait_Attraction_HairColor_PurplePastel_TurnOn: {
+    name: 'trait_Attraction_HairColor_PurplePastel_TurnOn',
+    description: 'has purple pastel hair',
+  },
+  trait_Attraction_HairColor_Red_TurnOff: {
+    name: 'trait_Attraction_HairColor_Red_TurnOff',
+    description: 'has red hair',
+  },
+  trait_Attraction_HairColor_Red_TurnOn: {
+    name: 'trait_Attraction_HairColor_Red_TurnOn',
+    description: 'has red hair',
+  },
+  trait_Attraction_HairColor_Turquoise_TurnOff: {
+    name: 'trait_Attraction_HairColor_Turquoise_TurnOff',
+    description: 'has turquoise hair',
+  },
+  trait_Attraction_HairColor_Turquoise_TurnOn: {
+    name: 'trait_Attraction_HairColor_Turquoise_TurnOn',
+    description: 'has turquoise hair',
+  },
+  trait_Attraction_HairColor_White_TurnOff: {
+    name: 'trait_Attraction_HairColor_White_TurnOff',
+    description: 'has white hair',
+  },
+  trait_Attraction_HairColor_White_TurnOn: {
+    name: 'trait_Attraction_HairColor_White_TurnOn',
+    description: 'has white hair',
+  },
+  trait_Attraction_OutfitColor_Black_TurnOff: {
+    name: 'trait_Attraction_OutfitColor_Black_TurnOff',
+    description: 'wears black outfits',
+  },
+  trait_Attraction_OutfitColor_Black_TurnOn: {
+    name: 'trait_Attraction_OutfitColor_Black_TurnOn',
+    description: 'wears black outfits',
+  },
+  trait_Attraction_OutfitColor_Blue_TurnOff: {
+    name: 'trait_Attraction_OutfitColor_Blue_TurnOff',
+    description: 'wears blue outfits',
+  },
+  trait_Attraction_OutfitColor_Blue_TurnOn: {
+    name: 'trait_Attraction_OutfitColor_Blue_TurnOn',
+    description: 'wears blue outfits',
+  },
+  trait_Attraction_OutfitColor_Brown_TurnOff: {
+    name: 'trait_Attraction_OutfitColor_Brown_TurnOff',
+    description: 'wears brown outfits',
+  },
+  trait_Attraction_OutfitColor_Brown_TurnOn: {
+    name: 'trait_Attraction_OutfitColor_Brown_TurnOn',
+    description: 'wears brown outfits',
+  },
+  trait_Attraction_OutfitColor_Gray_TurnOff: {
+    name: 'trait_Attraction_OutfitColor_Gray_TurnOff',
+    description: 'wears gray outfits',
+  },
+  trait_Attraction_OutfitColor_Gray_TurnOn: {
+    name: 'trait_Attraction_OutfitColor_Gray_TurnOn',
+    description: 'wears gray outfits',
+  },
+  trait_Attraction_OutfitColor_Green_TurnOff: {
+    name: 'trait_Attraction_OutfitColor_Green_TurnOff',
+    description: 'wears green outfits',
+  },
+  trait_Attraction_OutfitColor_Green_TurnOn: {
+    name: 'trait_Attraction_OutfitColor_Green_TurnOn',
+    description: 'wears green outfits',
+  },
+  trait_Attraction_OutfitColor_Orange_TurnOff: {
+    name: 'trait_Attraction_OutfitColor_Orange_TurnOff',
+    description: 'wears orange outfits',
+  },
+  trait_Attraction_OutfitColor_Orange_TurnOn: {
+    name: 'trait_Attraction_OutfitColor_Orange_TurnOn',
+    description: 'wears orange outfits',
+  },
+  trait_Attraction_OutfitColor_Pink_TurnOff: {
+    name: 'trait_Attraction_OutfitColor_Pink_TurnOff',
+    description: 'wears pink outfits',
+  },
+  trait_Attraction_OutfitColor_Pink_TurnOn: {
+    name: 'trait_Attraction_OutfitColor_Pink_TurnOn',
+    description: 'wears pink outfits',
+  },
+  trait_Attraction_OutfitColor_Purple_TurnOff: {
+    name: 'trait_Attraction_OutfitColor_Purple_TurnOff',
+    description: 'wears purple outfits',
+  },
+  trait_Attraction_OutfitColor_Purple_TurnOn: {
+    name: 'trait_Attraction_OutfitColor_Purple_TurnOn',
+    description: 'wears purple outfits',
+  },
+  trait_Attraction_OutfitColor_Red_TurnOff: {
+    name: 'trait_Attraction_OutfitColor_Red_TurnOff',
+    description: 'wears red outfits',
+  },
+  trait_Attraction_OutfitColor_Red_TurnOn: {
+    name: 'trait_Attraction_OutfitColor_Red_TurnOn',
+    description: 'wears red outfits',
+  },
+  trait_Attraction_OutfitColor_White_TurnOff: {
+    name: 'trait_Attraction_OutfitColor_White_TurnOff',
+    description: 'wears white outfits',
+  },
+  trait_Attraction_OutfitColor_White_TurnOn: {
+    name: 'trait_Attraction_OutfitColor_White_TurnOn',
+    description: 'wears white outfits',
+  },
+  trait_Attraction_OutfitColor_Yellow_TurnOff: {
+    name: 'trait_Attraction_OutfitColor_Yellow_TurnOff',
+    description: 'wears yellow outfits',
+  },
+  trait_Attraction_OutfitColor_Yellow_TurnOn: {
+    name: 'trait_Attraction_OutfitColor_Yellow_TurnOn',
+    description: 'wears yellow outfits',
+  },
+  trait_Attraction_RomanceStyles_Affection_TurnOff: {
+    name: 'trait_Attraction_RomanceStyles_Affection_TurnOff',
+    description: 'is romantically affectionate',
+  },
+  trait_Attraction_RomanceStyles_Affection_TurnOn: {
+    name: 'trait_Attraction_RomanceStyles_Affection_TurnOn',
+    description: 'is romantically affectionate',
+  },
+  trait_Attraction_RomanceStyles_Flirting_TurnOff: {
+    name: 'trait_Attraction_RomanceStyles_Flirting_TurnOff',
+    description: 'is romantically flirty',
+  },
+  trait_Attraction_RomanceStyles_Flirting_TurnOn: {
+    name: 'trait_Attraction_RomanceStyles_Flirting_TurnOn',
+    description: 'is romantically flirty',
+  },
+  trait_Attraction_RomanceStyles_GiftGiving_TurnOff: {
+    name: 'trait_Attraction_RomanceStyles_GiftGiving_TurnOff',
+    description: 'romantically gives gifts',
+  },
+  trait_Attraction_RomanceStyles_GiftGiving_TurnOn: {
+    name: 'trait_Attraction_RomanceStyles_GiftGiving_TurnOn',
+    description: 'romantically gives gifts',
+  },
+  trait_Attraction_RomanceStyles_PhysicalIntimacy_TurnOff: {
+    name: 'trait_Attraction_RomanceStyles_PhysicalIntimacy_TurnOff',
+    description: 'is romantically physically intimate',
+  },
+  trait_Attraction_RomanceStyles_PhysicalIntimacy_TurnOn: {
+    name: 'trait_Attraction_RomanceStyles_PhysicalIntimacy_TurnOn',
+    description: 'is romantically physically intimate',
+  },
+  trait_Attraction_RomanceStyles_Woohoo_TurnOff: {
+    name: 'trait_Attraction_RomanceStyles_Woohoo_TurnOff',
+    description: 'is romantically sexual',
+  },
+  trait_Attraction_RomanceStyles_Woohoo_TurnOn: {
+    name: 'trait_Attraction_RomanceStyles_Woohoo_TurnOn',
+    description: 'is romantically sexual',
+  },
+  trait_Attraction_SkillArchetypes_Academic_TurnOff: {
+    name: 'trait_Attraction_SkillArchetypes_Academic_TurnOff',
+    description: 'is academic',
+  },
+  trait_Attraction_SkillArchetypes_Academic_TurnOn: {
+    name: 'trait_Attraction_SkillArchetypes_Academic_TurnOn',
+    description: 'is academic',
+  },
+  'trait_Attraction_SkillArchetypes_Arts&Crafts_TurnOff': {
+    name: 'trait_Attraction_SkillArchetypes_Arts&Crafts_TurnOff',
+    description: 'likes arts and crafts',
+  },
+  'trait_Attraction_SkillArchetypes_Arts&Crafts_TurnOn': {
+    name: 'trait_Attraction_SkillArchetypes_Arts&Crafts_TurnOn',
+    description: 'likes arts and crafts',
+  },
+  trait_Attraction_SkillArchetypes_Cooking_TurnOff: {
+    name: 'trait_Attraction_SkillArchetypes_Cooking_TurnOff',
+    description: 'likes cooking',
+  },
+  trait_Attraction_SkillArchetypes_Cooking_TurnOn: {
+    name: 'trait_Attraction_SkillArchetypes_Cooking_TurnOn',
+    description: 'likes cooking',
+  },
+  trait_Attraction_SkillArchetypes_DrinkMaking_TurnOff: {
+    name: 'trait_Attraction_SkillArchetypes_DrinkMaking_TurnOff',
+    description: 'likes drink making',
+  },
+  trait_Attraction_SkillArchetypes_DrinkMaking_TurnOn: {
+    name: 'trait_Attraction_SkillArchetypes_DrinkMaking_TurnOn',
+    description: 'likes drink making',
+  },
+  trait_Attraction_SkillArchetypes_Engineering_TurnOff: {
+    name: 'trait_Attraction_SkillArchetypes_Engineering_TurnOff',
+    description: 'likes engineering',
+  },
+  trait_Attraction_SkillArchetypes_Engineering_TurnOn: {
+    name: 'trait_Attraction_SkillArchetypes_Engineering_TurnOn',
+    description: 'likes engineering',
+  },
+  'trait_Attraction_SkillArchetypes_Health&Sports_TurnOff': {
+    name: 'trait_Attraction_SkillArchetypes_Health&Sports_TurnOff',
+    description: 'likes health and sports',
+  },
+  'trait_Attraction_SkillArchetypes_Health&Sports_TurnOn': {
+    name: 'trait_Attraction_SkillArchetypes_Health&Sports_TurnOn',
+    description: 'likes health and sports',
+  },
+  trait_Attraction_SkillArchetypes_Interpersonal_TurnOff: {
+    name: 'trait_Attraction_SkillArchetypes_Interpersonal_TurnOff',
+    description: 'is interpersonal',
+  },
+  trait_Attraction_SkillArchetypes_Interpersonal_TurnOn: {
+    name: 'trait_Attraction_SkillArchetypes_Interpersonal_TurnOn',
+    description: 'is interpersonal',
+  },
+  'trait_Attraction_SkillArchetypes_Media&Tech_TurnOff': {
+    name: 'trait_Attraction_SkillArchetypes_Media&Tech_TurnOff',
+    description: 'likes media and tech',
+  },
+  'trait_Attraction_SkillArchetypes_Media&Tech_TurnOn': {
+    name: 'trait_Attraction_SkillArchetypes_Media&Tech_TurnOn',
+    description: 'likes media and tech',
+  },
+  trait_Attraction_SkillArchetypes_Nature_TurnOff: {
+    name: 'trait_Attraction_SkillArchetypes_Nature_TurnOff',
+    description: 'likes nature',
+  },
+  trait_Attraction_SkillArchetypes_Nature_TurnOn: {
+    name: 'trait_Attraction_SkillArchetypes_Nature_TurnOn',
+    description: 'likes nature',
+  },
+  trait_Attraction_SkillArchetypes_Performer_TurnOff: {
+    name: 'trait_Attraction_SkillArchetypes_Performer_TurnOff',
+    description: 'is a performer',
+  },
+  trait_Attraction_SkillArchetypes_Performer_TurnOn: {
+    name: 'trait_Attraction_SkillArchetypes_Performer_TurnOn',
+    description: 'is a performer',
+  },
+  trait_Attraction_SkillArchetypes_SenseOfHumor_TurnOff: {
+    name: 'trait_Attraction_SkillArchetypes_SenseOfHumor_TurnOff',
+    description: 'has a sense of humor',
+  },
+  trait_Attraction_SkillArchetypes_SenseOfHumor_TurnOn: {
+    name: 'trait_Attraction_SkillArchetypes_SenseOfHumor_TurnOn',
+    description: 'has a sense of humor',
   },
   trait_Attuned: {
     name: 'trait_Attuned',
@@ -8259,6 +9575,1242 @@ export const traitDescriptions: Record<string, TraitDescription> = {
   trait_Sim_Reputation_Host: {
     name: 'trait_Sim_Reputation_Host',
     ignored: true,
+  },
+  Trait_SimPreference_Dislikes_Activities_Acting: {
+    name: 'Trait_SimPreference_Dislikes_Activities_Acting',
+    description: 'acting',
+  },
+  Trait_SimPreference_Dislikes_Activities_Baking: {
+    name: 'Trait_SimPreference_Dislikes_Activities_Baking',
+    description: 'baking activities',
+  },
+  Trait_SimPreference_Dislikes_Activities_Bowling: {
+    name: 'Trait_SimPreference_Dislikes_Activities_Bowling',
+    description: 'bowling activities',
+  },
+  trait_SimPreference_Dislikes_Activities_Comedy: {
+    name: 'trait_SimPreference_Dislikes_Activities_Comedy',
+    description: 'comedy activities',
+  },
+  trait_SimPreference_Dislikes_Activities_Cooking: {
+    name: 'trait_SimPreference_Dislikes_Activities_Cooking',
+    description: 'cooking activities',
+  },
+  Trait_SimPreference_Dislikes_Activities_CrossStitch: {
+    name: 'Trait_SimPreference_Dislikes_Activities_CrossStitch',
+    description: 'cross-stitch activities',
+  },
+  Trait_SimPreference_Dislikes_Activities_Dancing: {
+    name: 'Trait_SimPreference_Dislikes_Activities_Dancing',
+    description: 'dancing',
+  },
+  Trait_SimPreference_Dislikes_Activities_Debating: {
+    name: 'Trait_SimPreference_Dislikes_Activities_Debating',
+    description:
+      'activities related to debating due to their preference for research and debate',
+  },
+  Trait_SimPreference_Dislikes_Activities_DJMixing: {
+    name: 'Trait_SimPreference_Dislikes_Activities_DJMixing',
+    description: 'DJ Mixing activities',
+  },
+  trait_SimPreference_Dislikes_Activities_EquestrianSkill: {
+    name: 'trait_SimPreference_Dislikes_Activities_EquestrianSkill',
+    description:
+      'activities related to the Equestrian Skill, such as horse riding',
+  },
+  trait_SimPreference_Dislikes_Activities_Fishing: {
+    name: 'trait_SimPreference_Dislikes_Activities_Fishing',
+    description: 'fishing',
+  },
+  trait_SimPreference_Dislikes_Activities_Fitness: {
+    name: 'trait_SimPreference_Dislikes_Activities_Fitness',
+    description: 'fitness activities',
+  },
+  trait_SimPreference_Dislikes_Activities_Gardening: {
+    name: 'trait_SimPreference_Dislikes_Activities_Gardening',
+    description: 'gardening activities',
+  },
+  trait_SimPreference_Dislikes_Activities_GemologySkill: {
+    name: 'trait_SimPreference_Dislikes_Activities_GemologySkill',
+    description: 'gemology',
+  },
+  trait_SimPreference_Dislikes_Activities_Guitar: {
+    name: 'trait_SimPreference_Dislikes_Activities_Guitar',
+    description: 'playing the guitar',
+  },
+  trait_SimPreference_Dislikes_Activities_Handiness: {
+    name: 'trait_SimPreference_Dislikes_Activities_Handiness',
+    description: 'being handy',
+  },
+  trait_SimPreference_Dislikes_Activities_Knitting: {
+    name: 'trait_SimPreference_Dislikes_Activities_Knitting',
+    description: 'knitting activities',
+  },
+  Trait_SimPreference_Dislikes_Activities_MediaProduction: {
+    name: 'Trait_SimPreference_Dislikes_Activities_MediaProduction',
+    description: 'media production activities',
+  },
+  trait_SimPreference_Dislikes_Activities_Mischief: {
+    name: 'trait_SimPreference_Dislikes_Activities_Mischief',
+    description: 'mischievous activities',
+  },
+  trait_SimPreference_Dislikes_Activities_Mixology: {
+    name: 'trait_SimPreference_Dislikes_Activities_Mixology',
+    description: 'Mixology activities',
+  },
+  trait_SimPreference_Dislikes_Activities_NectarMaking: {
+    name: 'trait_SimPreference_Dislikes_Activities_NectarMaking',
+    description: 'activities related to nectar making',
+  },
+  trait_SimPreference_Dislikes_Activities_Painting: {
+    name: 'trait_SimPreference_Dislikes_Activities_Painting',
+    description: 'painting activities',
+  },
+  Trait_SimPreference_Dislikes_Activities_Photography: {
+    name: 'Trait_SimPreference_Dislikes_Activities_Photography',
+    description: 'photography',
+  },
+  trait_SimPreference_Dislikes_Activities_Piano: {
+    name: 'trait_SimPreference_Dislikes_Activities_Piano',
+    description: 'playing the piano',
+  },
+  Trait_SimPreference_Dislikes_Activities_PipeOrgan: {
+    name: 'Trait_SimPreference_Dislikes_Activities_PipeOrgan',
+    description: 'playing the pipe organ',
+  },
+  trait_SimPreference_Dislikes_Activities_Programming: {
+    name: 'trait_SimPreference_Dislikes_Activities_Programming',
+    description: 'programming activities',
+  },
+  Trait_SimPreference_Dislikes_Activities_Robotics: {
+    name: 'Trait_SimPreference_Dislikes_Activities_Robotics',
+    description: 'activities related to robotics',
+  },
+  Trait_SimPreference_Dislikes_Activities_RockClimbing: {
+    name: 'Trait_SimPreference_Dislikes_Activities_RockClimbing',
+    description: 'rock climbing activities',
+  },
+  trait_SimPreference_Dislikes_Activities_RocketScience: {
+    name: 'trait_SimPreference_Dislikes_Activities_RocketScience',
+    description: 'activities related to Rocket Science',
+  },
+  trait_SimPreference_Dislikes_Activities_RomanceSkill: {
+    name: 'trait_SimPreference_Dislikes_Activities_RomanceSkill',
+    description: 'romance',
+  },
+  Trait_SimPreference_Dislikes_Activities_Singing: {
+    name: 'Trait_SimPreference_Dislikes_Activities_Singing',
+    description: 'singing',
+  },
+  Trait_SimPreference_Dislikes_Activities_Skiing: {
+    name: 'Trait_SimPreference_Dislikes_Activities_Skiing',
+    description: 'skiing',
+  },
+  Trait_SimPreference_Dislikes_Activities_Snowboarding: {
+    name: 'Trait_SimPreference_Dislikes_Activities_Snowboarding',
+    description: 'snowboarding activities',
+  },
+  trait_SimPreference_Dislikes_Activities_Thanatology: {
+    name: 'trait_SimPreference_Dislikes_Activities_Thanatology',
+    description: 'thanatology',
+  },
+  trait_SimPreference_Dislikes_Activities_VideoGaming: {
+    name: 'trait_SimPreference_Dislikes_Activities_VideoGaming',
+    description: 'video gaming',
+  },
+  trait_SimPreference_Dislikes_Activities_Violin: {
+    name: 'trait_SimPreference_Dislikes_Activities_Violin',
+    description: 'playing the violin',
+  },
+  Trait_SimPreference_Dislikes_Activities_Wellness: {
+    name: 'Trait_SimPreference_Dislikes_Activities_Wellness',
+    description: 'activities related to wellness',
+  },
+  trait_SimPreference_Dislikes_Activities_Writing: {
+    name: 'trait_SimPreference_Dislikes_Activities_Writing',
+    description: 'writing activities',
+  },
+  trait_SimPreference_Dislikes_Characteristic_Ambitionless: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_Ambitionless',
+    description: 'is ambitionless',
+  },
+  trait_SimPreference_Dislikes_Characteristic_Argumentative: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_Argumentative',
+    description: 'is argumentative',
+  },
+  trait_SimPreference_Dislikes_Characteristic_Cerebral: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_Cerebral',
+    description: 'is cerebral',
+  },
+  trait_SimPreference_Dislikes_Characteristic_Egotistical: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_Egotistical',
+    description: 'is egotistical',
+  },
+  trait_SimPreference_Dislikes_Characteristic_EmotionalDecisionMaker: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_EmotionalDecisionMaker',
+    description: 'is an emotional decision-maker',
+  },
+  trait_SimPreference_Dislikes_Characteristic_Funny: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_Funny',
+    description: 'is funny',
+  },
+  trait_SimPreference_Dislikes_Characteristic_HardWorker: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_HardWorker',
+    description: 'is a hard worker',
+  },
+  trait_SimPreference_Dislikes_Characteristic_HighEnergy: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_HighEnergy',
+    description: 'is high energy',
+  },
+  trait_SimPreference_Dislikes_Characteristic_Homebody: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_Homebody',
+    description: 'is a homebody',
+  },
+  trait_SimPreference_Dislikes_Characteristic_Idealist: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_Idealist',
+    description: 'is an idealist',
+  },
+  trait_SimPreference_Dislikes_Characteristic_KidEnthusiast: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_KidEnthusiast',
+    description: 'is a kid enthusiast',
+  },
+  trait_SimPreference_Dislikes_Characteristic_Mischievous: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_Mischievous',
+    description: 'is mischievous',
+  },
+  trait_SimPreference_Dislikes_Characteristic_NatureEnthusiast: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_NatureEnthusiast',
+    description: 'is a nature enthusiast',
+  },
+  trait_SimPreference_Dislikes_Characteristic_Optimist: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_Optimist',
+    description: 'is optimistic',
+  },
+  trait_SimPreference_Dislikes_Characteristic_Pessimist: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_Pessimist',
+    description: 'is pessimistic',
+  },
+  trait_SimPreference_Dislikes_Characteristic_PetEnthusiast: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_PetEnthusiast',
+    description: 'is a pet enthusiast',
+  },
+  trait_SimPreference_Dislikes_Characteristic_RomanceEnthusiast: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_RomanceEnthusiast',
+    description: 'is a Romance Enthusiast',
+  },
+  trait_SimPreference_Dislikes_Characteristic_Spirited: {
+    name: 'trait_SimPreference_Dislikes_Characteristic_Spirited',
+    description: 'is spirited',
+  },
+  trait_SimPreference_Dislikes_Color_Black: {
+    name: 'trait_SimPreference_Dislikes_Color_Black',
+    description: 'the color black',
+  },
+  trait_SimPreference_Dislikes_Color_Blue: {
+    name: 'trait_SimPreference_Dislikes_Color_Blue',
+    description: 'the color blue',
+  },
+  trait_SimPreference_Dislikes_Color_Brown: {
+    name: 'trait_SimPreference_Dislikes_Color_Brown',
+    description: 'the color brown',
+  },
+  trait_SimPreference_Dislikes_Color_Gray: {
+    name: 'trait_SimPreference_Dislikes_Color_Gray',
+    description: 'the color gray',
+  },
+  trait_SimPreference_Dislikes_Color_Green: {
+    name: 'trait_SimPreference_Dislikes_Color_Green',
+    description: 'the color green',
+  },
+  trait_SimPreference_Dislikes_Color_Orange: {
+    name: 'trait_SimPreference_Dislikes_Color_Orange',
+    description: 'the color orange',
+  },
+  trait_SimPreference_Dislikes_Color_Pink: {
+    name: 'trait_SimPreference_Dislikes_Color_Pink',
+    description: 'the color pink',
+  },
+  trait_SimPreference_Dislikes_Color_Purple: {
+    name: 'trait_SimPreference_Dislikes_Color_Purple',
+    description: 'the color purple',
+  },
+  trait_SimPreference_Dislikes_Color_Red: {
+    name: 'trait_SimPreference_Dislikes_Color_Red',
+    description: 'the color red',
+  },
+  trait_SimPreference_Dislikes_Color_White: {
+    name: 'trait_SimPreference_Dislikes_Color_White',
+    description: 'the color white',
+  },
+  trait_SimPreference_Dislikes_Color_Yellow: {
+    name: 'trait_SimPreference_Dislikes_Color_Yellow',
+    description: 'the color yellow',
+  },
+  trait_SimPreference_Dislikes_Communication_Affection: {
+    name: 'trait_SimPreference_Dislikes_Communication_Affection',
+    description: 'communication and affection',
+  },
+  trait_SimPreference_Dislikes_Communication_Arguments: {
+    name: 'trait_SimPreference_Dislikes_Communication_Arguments',
+    description:
+      'engaging in arguments and finds communication through disagreements stimulating',
+  },
+  trait_SimPreference_Dislikes_Communication_Complaints: {
+    name: 'trait_SimPreference_Dislikes_Communication_Complaints',
+    description:
+      'is a preference for communication and tends to express complaints more often',
+  },
+  trait_SimPreference_Dislikes_Communication_Compliments: {
+    name: 'trait_SimPreference_Dislikes_Communication_Compliments',
+    description: 'communication that involves giving compliments',
+  },
+  trait_SimPreference_Dislikes_Communication_Deception: {
+    name: 'trait_SimPreference_Dislikes_Communication_Deception',
+    description: 'and engaging in deceptive communication',
+  },
+  trait_SimPreference_Dislikes_Communication_DeepThoughts: {
+    name: 'trait_SimPreference_Dislikes_Communication_DeepThoughts',
+    description: 'is a preference for deep and meaningful conversations',
+  },
+  trait_SimPreference_Dislikes_Communication_Flirtation: {
+    name: 'trait_SimPreference_Dislikes_Communication_Flirtation',
+    description: 'to communicate through flirtation',
+  },
+  trait_SimPreference_Dislikes_Communication_Gossip: {
+    name: 'trait_SimPreference_Dislikes_Communication_Gossip',
+    description: 'gossiping and discussing the latest news with other people',
+  },
+  trait_SimPreference_Dislikes_Communication_Hobbies: {
+    name: 'trait_SimPreference_Dislikes_Communication_Hobbies',
+    description: 'to discuss hobbies with others',
+  },
+  trait_SimPreference_Dislikes_Communication_Interests: {
+    name: 'trait_SimPreference_Dislikes_Communication_Interests',
+    description: 'discussing interests',
+  },
+  trait_SimPreference_Dislikes_Communication_Jokes: {
+    name: 'trait_SimPreference_Dislikes_Communication_Jokes',
+    description: 'communication through jokes',
+  },
+  trait_SimPreference_Dislikes_Communication_Malicious: {
+    name: 'trait_SimPreference_Dislikes_Communication_Malicious',
+    description: 'is a preference for malicious interactions',
+  },
+  trait_SimPreference_Dislikes_Communication_PhysicalIntimacy: {
+    name: 'trait_SimPreference_Dislikes_Communication_PhysicalIntimacy',
+    description:
+      'physical intimacy andis likely to seek out opportunities for affectionate interactions',
+  },
+  trait_SimPreference_Dislikes_Communication_PottyHumor: {
+    name: 'trait_SimPreference_Dislikes_Communication_PottyHumor',
+    description: 'is a preference for potty humor',
+  },
+  trait_SimPreference_Dislikes_Communication_Pranks: {
+    name: 'trait_SimPreference_Dislikes_Communication_Pranks',
+    description: 'pulling pranks on others',
+  },
+  trait_SimPreference_Dislikes_Communication_SillyBehavior: {
+    name: 'trait_SimPreference_Dislikes_Communication_SillyBehavior',
+    description: 'engaging in silly behavior',
+  },
+  trait_SimPreference_Dislikes_Communication_SmallTalk: {
+    name: 'trait_SimPreference_Dislikes_Communication_SmallTalk',
+    description: 'engaging in small talk with others',
+  },
+  trait_SimPreference_Dislikes_Communication_Stories: {
+    name: 'trait_SimPreference_Dislikes_Communication_Stories',
+    description: 'engaging in conversations and storytelling',
+  },
+  trait_SimPreference_Dislikes_Decor_ArtDeco: {
+    name: 'trait_SimPreference_Dislikes_Decor_ArtDeco',
+    description: 'Art Deco decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Basics: {
+    name: 'trait_SimPreference_Dislikes_Decor_Basics',
+    description: 'basic decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Boho: {
+    name: 'trait_SimPreference_Dislikes_Decor_Boho',
+    description: 'Boho decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Contemporary: {
+    name: 'trait_SimPreference_Dislikes_Decor_Contemporary',
+    description: 'contemporary decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Cosmolux: {
+    name: 'trait_SimPreference_Dislikes_Decor_Cosmolux',
+    description: 'Cosmolux decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Cute: {
+    name: 'trait_SimPreference_Dislikes_Decor_Cute',
+    description: 'cute decor',
+  },
+  trait_SimPreference_Dislikes_Decor_FrenchCountry: {
+    name: 'trait_SimPreference_Dislikes_Decor_FrenchCountry',
+    description: 'French Country decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Garden: {
+    name: 'trait_SimPreference_Dislikes_Decor_Garden',
+    description: 'garden decor',
+  },
+  trait_SimPreference_Dislikes_Decor_GothicFarmhouse: {
+    name: 'trait_SimPreference_Dislikes_Decor_GothicFarmhouse',
+    description: 'Gothic Farmhouse decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Industrial: {
+    name: 'trait_SimPreference_Dislikes_Decor_Industrial',
+    description: 'industrial decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Island: {
+    name: 'trait_SimPreference_Dislikes_Decor_Island',
+    description: 'island decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Luxe: {
+    name: 'trait_SimPreference_Dislikes_Decor_Luxe',
+    description: 'luxe decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Mission: {
+    name: 'trait_SimPreference_Dislikes_Decor_Mission',
+    description: 'Mission decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Modern: {
+    name: 'trait_SimPreference_Dislikes_Decor_Modern',
+    description: 'modern decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Patio: {
+    name: 'trait_SimPreference_Dislikes_Decor_Patio',
+    description: 'patio decor',
+  },
+  trait_SimPreference_Dislikes_Decor_QueenAnne: {
+    name: 'trait_SimPreference_Dislikes_Decor_QueenAnne',
+    description: 'Queen Anne decor',
+  },
+  trait_SimPreference_Dislikes_Decor_ScandinavianContemporary: {
+    name: 'trait_SimPreference_Dislikes_Decor_ScandinavianContemporary',
+    description: 'Scandinavian contemporary decor and mid-century style',
+  },
+  trait_SimPreference_Dislikes_Decor_Shabby: {
+    name: 'trait_SimPreference_Dislikes_Decor_Shabby',
+    description: 'shabby decor',
+  },
+  trait_SimPreference_Dislikes_Decor_SuburbanContempo: {
+    name: 'trait_SimPreference_Dislikes_Decor_SuburbanContempo',
+    description: 'suburban contemporary decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Tudor: {
+    name: 'trait_SimPreference_Dislikes_Decor_Tudor',
+    description: 'Tudor-style decor',
+  },
+  trait_SimPreference_Dislikes_Decor_Vintage: {
+    name: 'trait_SimPreference_Dislikes_Decor_Vintage',
+    description: 'vintage decor',
+  },
+  trait_SimPreference_Dislikes_Fashion_Basics: {
+    name: 'trait_SimPreference_Dislikes_Fashion_Basics',
+    description: 'basic fashion',
+  },
+  trait_SimPreference_Dislikes_Fashion_Boho: {
+    name: 'trait_SimPreference_Dislikes_Fashion_Boho',
+    description: 'Boho Fashion',
+  },
+  trait_SimPreference_Dislikes_Fashion_Country: {
+    name: 'trait_SimPreference_Dislikes_Fashion_Country',
+    description: 'country fashion',
+  },
+  trait_SimPreference_Dislikes_Fashion_Hipster: {
+    name: 'trait_SimPreference_Dislikes_Fashion_Hipster',
+    description: 'hipster fashion',
+  },
+  trait_SimPreference_Dislikes_Fashion_Outdoorsy: {
+    name: 'trait_SimPreference_Dislikes_Fashion_Outdoorsy',
+    description: 'outdoorsy fashion',
+  },
+  trait_SimPreference_Dislikes_Fashion_Polished: {
+    name: 'trait_SimPreference_Dislikes_Fashion_Polished',
+    description: 'polished fashion',
+  },
+  trait_SimPreference_Dislikes_Fashion_Preppy: {
+    name: 'trait_SimPreference_Dislikes_Fashion_Preppy',
+    description: 'preppy fashion',
+  },
+  trait_SimPreference_Dislikes_Fashion_Rocker: {
+    name: 'trait_SimPreference_Dislikes_Fashion_Rocker',
+    description: 'rocker fashion',
+  },
+  trait_SimPreference_Dislikes_Fashion_Streetwear: {
+    name: 'trait_SimPreference_Dislikes_Fashion_Streetwear',
+    description: 'streetwear fashion',
+  },
+  trait_SimPreference_Dislikes_Music_Alternative: {
+    name: 'trait_SimPreference_Dislikes_Music_Alternative',
+    description: 'alternative music',
+  },
+  Trait_SimPreference_Dislikes_Music_Americana: {
+    name: 'Trait_SimPreference_Dislikes_Music_Americana',
+    description: 'Americana music',
+  },
+  Trait_SimPreference_Dislikes_Music_Backyard: {
+    name: 'Trait_SimPreference_Dislikes_Music_Backyard',
+    description: 'music in the backyard',
+  },
+  Trait_SimPreference_Dislikes_Music_Baroque: {
+    name: 'Trait_SimPreference_Dislikes_Music_Baroque',
+    description: 'Baroque music',
+  },
+  trait_SimPreference_Dislikes_Music_Batuu: {
+    name: 'trait_SimPreference_Dislikes_Music_Batuu',
+    description: 'Batuu music',
+  },
+  trait_SimPreference_Dislikes_Music_Blues: {
+    name: 'trait_SimPreference_Dislikes_Music_Blues',
+    description: 'blues music',
+  },
+  trait_SimPreference_Dislikes_Music_Brazilian: {
+    name: 'trait_SimPreference_Dislikes_Music_Brazilian',
+    description: 'Brazilian music, particularly Carnival beats',
+  },
+  trait_SimPreference_Dislikes_Music_Classical: {
+    name: 'trait_SimPreference_Dislikes_Music_Classical',
+    description: 'classical music',
+  },
+  trait_SimPreference_Dislikes_Music_CottageCore: {
+    name: 'trait_SimPreference_Dislikes_Music_CottageCore',
+    description: 'Cottagecore music',
+  },
+  Trait_SimPreference_Dislikes_Music_DJ: {
+    name: 'Trait_SimPreference_Dislikes_Music_DJ',
+    description: 'music from DJ booths',
+  },
+  Trait_SimPreference_Dislikes_Music_EasyListening: {
+    name: 'Trait_SimPreference_Dislikes_Music_EasyListening',
+    description: 'listening to easy listening music',
+  },
+  trait_SimPreference_Dislikes_Music_Electronica: {
+    name: 'trait_SimPreference_Dislikes_Music_Electronica',
+    description: 'electronica music',
+  },
+  Trait_SimPreference_Dislikes_Music_Focus: {
+    name: 'Trait_SimPreference_Dislikes_Music_Focus',
+    description:
+      'is a strong preference for music and tends to focus better when listening to it',
+  },
+  trait_SimPreference_Dislikes_Music_HipHop: {
+    name: 'trait_SimPreference_Dislikes_Music_HipHop',
+    description: 'hip hop music',
+  },
+  Trait_SimPreference_Dislikes_Music_Island: {
+    name: 'Trait_SimPreference_Dislikes_Music_Island',
+    description: 'island music',
+  },
+  Trait_SimPreference_Dislikes_Music_JapaneseFolk: {
+    name: 'Trait_SimPreference_Dislikes_Music_JapaneseFolk',
+    description: 'listening to Japanese folk music',
+  },
+  Trait_SimPreference_Dislikes_Music_Jazz: {
+    name: 'Trait_SimPreference_Dislikes_Music_Jazz',
+    description: 'jazz music',
+  },
+  trait_SimPreference_Dislikes_Music_Kids: {
+    name: 'trait_SimPreference_Dislikes_Music_Kids',
+    description: 'kids radio music',
+  },
+  Trait_SimPreference_Dislikes_Music_Latin: {
+    name: 'Trait_SimPreference_Dislikes_Music_Latin',
+    description: 'Latin music',
+  },
+  Trait_SimPreference_Dislikes_Music_LatinPop: {
+    name: 'Trait_SimPreference_Dislikes_Music_LatinPop',
+    description: 'listening to Latin pop music',
+  },
+  trait_SimPreference_Dislikes_Music_Lullabies: {
+    name: 'trait_SimPreference_Dislikes_Music_Lullabies',
+    description: 'lullabies music',
+  },
+  Trait_SimPreference_Dislikes_Music_Metal: {
+    name: 'Trait_SimPreference_Dislikes_Music_Metal',
+    description: 'metal music',
+  },
+  Trait_SimPreference_Dislikes_Music_NewAge: {
+    name: 'Trait_SimPreference_Dislikes_Music_NewAge',
+    description: 'listening to New Age music',
+  },
+  Trait_SimPreference_Dislikes_Music_NuDisco: {
+    name: 'Trait_SimPreference_Dislikes_Music_NuDisco',
+    description: 'listening to NuDisco music',
+  },
+  trait_SimPreference_Dislikes_Music_Oldies: {
+    name: 'trait_SimPreference_Dislikes_Music_Oldies',
+    description: 'oldies music',
+  },
+  trait_SimPreference_Dislikes_Music_Pop: {
+    name: 'trait_SimPreference_Dislikes_Music_Pop',
+    description: 'pop music',
+  },
+  Trait_SimPreference_Dislikes_Music_Ranch: {
+    name: 'Trait_SimPreference_Dislikes_Music_Ranch',
+    description: 'ranch music',
+  },
+  trait_SimPreference_Dislikes_Music_Retro: {
+    name: 'trait_SimPreference_Dislikes_Music_Retro',
+    description: 'retro music',
+  },
+  trait_SimPreference_Dislikes_Music_RnB: {
+    name: 'trait_SimPreference_Dislikes_Music_RnB',
+    description: 'R&B music',
+  },
+  trait_SimPreference_Dislikes_Music_Romance: {
+    name: 'trait_SimPreference_Dislikes_Music_Romance',
+    description: 'music with a romantic theme',
+  },
+  Trait_SimPreference_Dislikes_Music_SingerSongwriter: {
+    name: 'Trait_SimPreference_Dislikes_Music_SingerSongwriter',
+    description: 'loves singer-songwriter music',
+  },
+  trait_SimPreference_Dislikes_Music_Spooky: {
+    name: 'trait_SimPreference_Dislikes_Music_Spooky',
+    description: 'spooky music',
+  },
+  trait_SimPreference_Dislikes_Music_SPop: {
+    name: 'trait_SimPreference_Dislikes_Music_SPop',
+    description: 'S-Pop music',
+  },
+  Trait_SimPreference_Dislikes_Music_StrangeTunes: {
+    name: 'Trait_SimPreference_Dislikes_Music_StrangeTunes',
+    description: 'strange tunes',
+  },
+  Trait_SimPreference_Dislikes_Music_SummerStrut: {
+    name: 'Trait_SimPreference_Dislikes_Music_SummerStrut',
+    description: 'listening to the Summer Strut music',
+  },
+  Trait_SimPreference_Dislikes_Music_TweenPop: {
+    name: 'Trait_SimPreference_Dislikes_Music_TweenPop',
+    description: 'tween pop music',
+  },
+  trait_SimPreference_Dislikes_Music_WinterHoliday: {
+    name: 'trait_SimPreference_Dislikes_Music_WinterHoliday',
+    description: 'Winter Holiday music',
+  },
+  Trait_SimPreference_Dislikes_Music_World: {
+    name: 'Trait_SimPreference_Dislikes_Music_World',
+    description: 'world music',
+  },
+  Trait_SimPreference_Likes_Activities_Acting: {
+    name: 'Trait_SimPreference_Likes_Activities_Acting',
+    description: 'activities related to acting',
+  },
+  Trait_SimPreference_Likes_Activities_Baking: {
+    name: 'Trait_SimPreference_Likes_Activities_Baking',
+    description: 'baking activities',
+  },
+  Trait_SimPreference_Likes_Activities_Bowling: {
+    name: 'Trait_SimPreference_Likes_Activities_Bowling',
+    description: 'bowling activities',
+  },
+  trait_SimPreference_Likes_Activities_Comedy: {
+    name: 'trait_SimPreference_Likes_Activities_Comedy',
+    description: 'comedy activities',
+  },
+  trait_SimPreference_Likes_Activities_Cooking: {
+    name: 'trait_SimPreference_Likes_Activities_Cooking',
+    description: 'cooking activities',
+  },
+  Trait_SimPreference_Likes_Activities_CrossStitch: {
+    name: 'Trait_SimPreference_Likes_Activities_CrossStitch',
+    description: 'cross-stitch activities',
+  },
+  Trait_SimPreference_Likes_Activities_Dancing: {
+    name: 'Trait_SimPreference_Likes_Activities_Dancing',
+    description: 'dancing',
+  },
+  Trait_SimPreference_Likes_Activities_Debating: {
+    name: 'Trait_SimPreference_Likes_Activities_Debating',
+    description:
+      'activities related to debating due to their preference for research and debate',
+  },
+  Trait_SimPreference_Likes_Activities_DJMixing: {
+    name: 'Trait_SimPreference_Likes_Activities_DJMixing',
+    description: 'DJ Mixing activities',
+  },
+  trait_SimPreference_Likes_Activities_EquestrianSkill: {
+    name: 'trait_SimPreference_Likes_Activities_EquestrianSkill',
+    description:
+      'activities related to the Equestrian Skill, such as horse riding',
+  },
+  trait_SimPreference_Likes_Activities_Fishing: {
+    name: 'trait_SimPreference_Likes_Activities_Fishing',
+    description: 'fishing',
+  },
+  trait_SimPreference_Likes_Activities_Fitness: {
+    name: 'trait_SimPreference_Likes_Activities_Fitness',
+    description: 'fitness activities',
+  },
+  trait_SimPreference_Likes_Activities_Gardening: {
+    name: 'trait_SimPreference_Likes_Activities_Gardening',
+    description: 'gardening activities',
+  },
+  trait_SimPreference_Likes_Activities_GemologySkill: {
+    name: 'trait_SimPreference_Likes_Activities_GemologySkill',
+    description: 'gemology',
+  },
+  trait_SimPreference_Likes_Activities_Guitar: {
+    name: 'trait_SimPreference_Likes_Activities_Guitar',
+    description: 'playing the guitar',
+  },
+  trait_SimPreference_Likes_Activities_Handiness: {
+    name: 'trait_SimPreference_Likes_Activities_Handiness',
+    description: 'being handy',
+  },
+  trait_SimPreference_Likes_Activities_Knitting: {
+    name: 'trait_SimPreference_Likes_Activities_Knitting',
+    description: 'knitting activities',
+  },
+  Trait_SimPreference_Likes_Activities_MediaProduction: {
+    name: 'Trait_SimPreference_Likes_Activities_MediaProduction',
+    description: 'media production activities',
+  },
+  trait_SimPreference_Likes_Activities_Mischief: {
+    name: 'trait_SimPreference_Likes_Activities_Mischief',
+    description: 'mischievous activities',
+  },
+  trait_SimPreference_Likes_Activities_Mixology: {
+    name: 'trait_SimPreference_Likes_Activities_Mixology',
+    description: 'Mixology activities',
+  },
+  trait_SimPreference_Likes_Activities_NectarMaking: {
+    name: 'trait_SimPreference_Likes_Activities_NectarMaking',
+    description: 'activities related to nectar making',
+  },
+  trait_SimPreference_Likes_Activities_Painting: {
+    name: 'trait_SimPreference_Likes_Activities_Painting',
+    description: 'painting activities',
+  },
+  Trait_SimPreference_Likes_Activities_Photography: {
+    name: 'Trait_SimPreference_Likes_Activities_Photography',
+    description: 'photography',
+  },
+  trait_SimPreference_Likes_Activities_Piano: {
+    name: 'trait_SimPreference_Likes_Activities_Piano',
+    description: 'playing the piano',
+  },
+  Trait_SimPreference_Likes_Activities_PipeOrgan: {
+    name: 'Trait_SimPreference_Likes_Activities_PipeOrgan',
+    description: 'playing the pipe organ',
+  },
+  trait_SimPreference_Likes_Activities_Programming: {
+    name: 'trait_SimPreference_Likes_Activities_Programming',
+    description: 'programming activities',
+  },
+  Trait_SimPreference_Likes_Activities_Robotics: {
+    name: 'Trait_SimPreference_Likes_Activities_Robotics',
+    description: 'activities related to robotics',
+  },
+  Trait_SimPreference_Likes_Activities_RockClimbing: {
+    name: 'Trait_SimPreference_Likes_Activities_RockClimbing',
+    description: 'rock climbing activities',
+  },
+  trait_SimPreference_Likes_Activities_RocketScience: {
+    name: 'trait_SimPreference_Likes_Activities_RocketScience',
+    description: 'activities related to Rocket Science',
+  },
+  trait_SimPreference_Likes_Activities_RomanceSkill: {
+    name: 'trait_SimPreference_Likes_Activities_RomanceSkill',
+    description: 'romance',
+  },
+  Trait_SimPreference_Likes_Activities_Singing: {
+    name: 'Trait_SimPreference_Likes_Activities_Singing',
+    description: 'singing',
+  },
+  Trait_SimPreference_Likes_Activities_Skiing: {
+    name: 'Trait_SimPreference_Likes_Activities_Skiing',
+    description: 'skiing',
+  },
+  Trait_SimPreference_Likes_Activities_Snowboarding: {
+    name: 'Trait_SimPreference_Likes_Activities_Snowboarding',
+    description: 'snowboarding activities',
+  },
+  trait_SimPreference_Likes_Activities_Thanatology: {
+    name: 'trait_SimPreference_Likes_Activities_Thanatology',
+    description: 'thanatology',
+  },
+  trait_SimPreference_Likes_Activities_VideoGaming: {
+    name: 'trait_SimPreference_Likes_Activities_VideoGaming',
+    description: 'video gaming',
+  },
+  trait_SimPreference_Likes_Activities_Violin: {
+    name: 'trait_SimPreference_Likes_Activities_Violin',
+    description: 'playing the violin',
+  },
+  Trait_SimPreference_Likes_Activities_Wellness: {
+    name: 'Trait_SimPreference_Likes_Activities_Wellness',
+    description: 'activities related to wellness',
+  },
+  trait_SimPreference_Likes_Activities_Writing: {
+    name: 'trait_SimPreference_Likes_Activities_Writing',
+    description: 'writing activities',
+  },
+  trait_SimPreference_Likes_Characteristic_Ambitionless: {
+    name: 'trait_SimPreference_Likes_Characteristic_Ambitionless',
+    description: 'is ambitionless',
+  },
+  trait_SimPreference_Likes_Characteristic_Argumentative: {
+    name: 'trait_SimPreference_Likes_Characteristic_Argumentative',
+    description: 'is argumentative',
+  },
+  trait_SimPreference_Likes_Characteristic_Cerebral: {
+    name: 'trait_SimPreference_Likes_Characteristic_Cerebral',
+    description: 'is cerebral',
+  },
+  trait_SimPreference_Likes_Characteristic_Egotistical: {
+    name: 'trait_SimPreference_Likes_Characteristic_Egotistical',
+    description: 'is egotistical',
+  },
+  trait_SimPreference_Likes_Characteristic_EmotionalDecisionMaker: {
+    name: 'trait_SimPreference_Likes_Characteristic_EmotionalDecisionMaker',
+    description: 'is an emotional decision-maker',
+  },
+  trait_SimPreference_Likes_Characteristic_Funny: {
+    name: 'trait_SimPreference_Likes_Characteristic_Funny',
+    description: 'is funny',
+  },
+  trait_SimPreference_Likes_Characteristic_HardWorker: {
+    name: 'trait_SimPreference_Likes_Characteristic_HardWorker',
+    description: 'is a hard worker',
+  },
+  trait_SimPreference_Likes_Characteristic_HighEnergy: {
+    name: 'trait_SimPreference_Likes_Characteristic_HighEnergy',
+    description: 'is high energy',
+  },
+  trait_SimPreference_Likes_Characteristic_Homebody: {
+    name: 'trait_SimPreference_Likes_Characteristic_Homebody',
+    description: 'is a homebody',
+  },
+  trait_SimPreference_Likes_Characteristic_Idealist: {
+    name: 'trait_SimPreference_Likes_Characteristic_Idealist',
+    description: 'is an idealist',
+  },
+  trait_SimPreference_Likes_Characteristic_KidEnthusiast: {
+    name: 'trait_SimPreference_Likes_Characteristic_KidEnthusiast',
+    description: 'is a kid enthusiast',
+  },
+  trait_SimPreference_Likes_Characteristic_Mischievous: {
+    name: 'trait_SimPreference_Likes_Characteristic_Mischievous',
+    description: 'is mischievous',
+  },
+  trait_SimPreference_Likes_Characteristic_NatureEnthusiast: {
+    name: 'trait_SimPreference_Likes_Characteristic_NatureEnthusiast',
+    description: 'is a nature enthusiast',
+  },
+  trait_SimPreference_Likes_Characteristic_Optimist: {
+    name: 'trait_SimPreference_Likes_Characteristic_Optimist',
+    description: 'is optimistic',
+  },
+  trait_SimPreference_Likes_Characteristic_Pessimist: {
+    name: 'trait_SimPreference_Likes_Characteristic_Pessimist',
+    description: 'is pessimistic',
+  },
+  trait_SimPreference_Likes_Characteristic_PetEnthusiast: {
+    name: 'trait_SimPreference_Likes_Characteristic_PetEnthusiast',
+    description: 'is a pet enthusiast',
+  },
+  trait_SimPreference_Likes_Characteristic_RomanceEnthusiast: {
+    name: 'trait_SimPreference_Likes_Characteristic_RomanceEnthusiast',
+    description: 'is a Romance Enthusiast',
+  },
+  trait_SimPreference_Likes_Characteristic_Spirited: {
+    name: 'trait_SimPreference_Likes_Characteristic_Spirited',
+    description: 'is spirited',
+  },
+  trait_SimPreference_Likes_Color_Black: {
+    name: 'trait_SimPreference_Likes_Color_Black',
+    description: 'the color black',
+  },
+  trait_SimPreference_Likes_Color_Blue: {
+    name: 'trait_SimPreference_Likes_Color_Blue',
+    description: 'the color blue',
+  },
+  trait_SimPreference_Likes_Color_Brown: {
+    name: 'trait_SimPreference_Likes_Color_Brown',
+    description: 'the color brown',
+  },
+  trait_SimPreference_Likes_Color_Gray: {
+    name: 'trait_SimPreference_Likes_Color_Gray',
+    description: 'the color gray',
+  },
+  trait_SimPreference_Likes_Color_Green: {
+    name: 'trait_SimPreference_Likes_Color_Green',
+    description: 'the color green',
+  },
+  trait_SimPreference_Likes_Color_Orange: {
+    name: 'trait_SimPreference_Likes_Color_Orange',
+    description: 'the color orange',
+  },
+  trait_SimPreference_Likes_Color_Pink: {
+    name: 'trait_SimPreference_Likes_Color_Pink',
+    description: 'the color pink',
+  },
+  trait_SimPreference_Likes_Color_Purple: {
+    name: 'trait_SimPreference_Likes_Color_Purple',
+    description: 'the color purple',
+  },
+  trait_SimPreference_Likes_Color_Red: {
+    name: 'trait_SimPreference_Likes_Color_Red',
+    description: 'the color red',
+  },
+  trait_SimPreference_Likes_Color_White: {
+    name: 'trait_SimPreference_Likes_Color_White',
+    description: 'the color white',
+  },
+  trait_SimPreference_Likes_Color_Yellow: {
+    name: 'trait_SimPreference_Likes_Color_Yellow',
+    description: 'the color yellow',
+  },
+  trait_SimPreference_Likes_Communication_Affection: {
+    name: 'trait_SimPreference_Likes_Communication_Affection',
+    description: 'communication and affection',
+  },
+  trait_SimPreference_Likes_Communication_Arguments: {
+    name: 'trait_SimPreference_Likes_Communication_Arguments',
+    description:
+      'engaging in arguments and finds communication through disagreements stimulating',
+  },
+  trait_SimPreference_Likes_Communication_Complaints: {
+    name: 'trait_SimPreference_Likes_Communication_Complaints',
+    description:
+      'is a preference for communication and tends to express complaints more often',
+  },
+  trait_SimPreference_Likes_Communication_Compliments: {
+    name: 'trait_SimPreference_Likes_Communication_Compliments',
+    description: 'communication that involves giving compliments',
+  },
+  trait_SimPreference_Likes_Communication_Deception: {
+    name: 'trait_SimPreference_Likes_Communication_Deception',
+    description: 'and engaging in deceptive communication',
+  },
+  trait_SimPreference_Likes_Communication_DeepThoughts: {
+    name: 'trait_SimPreference_Likes_Communication_DeepThoughts',
+    description: 'is a preference for deep and meaningful conversations',
+  },
+  trait_SimPreference_Likes_Communication_Flirtation: {
+    name: 'trait_SimPreference_Likes_Communication_Flirtation',
+    description: 'to communicate through flirtation',
+  },
+  trait_SimPreference_Likes_Communication_Gossip: {
+    name: 'trait_SimPreference_Likes_Communication_Gossip',
+    description: 'gossiping and discussing the latest news with other people',
+  },
+  trait_SimPreference_Likes_Communication_Hobbies: {
+    name: 'trait_SimPreference_Likes_Communication_Hobbies',
+    description: 'to discuss hobbies with others',
+  },
+  trait_SimPreference_Likes_Communication_Interests: {
+    name: 'trait_SimPreference_Likes_Communication_Interests',
+    description: 'discussing interests',
+  },
+  trait_SimPreference_Likes_Communication_Jokes: {
+    name: 'trait_SimPreference_Likes_Communication_Jokes',
+    description: 'communication through jokes',
+  },
+  trait_SimPreference_Likes_Communication_Malicious: {
+    name: 'trait_SimPreference_Likes_Communication_Malicious',
+    description: 'is a preference for malicious interactions',
+  },
+  trait_SimPreference_Likes_Communication_PhysicalIntimacy: {
+    name: 'trait_SimPreference_Likes_Communication_PhysicalIntimacy',
+    description:
+      'physical intimacy andis likely to seek out opportunities for affectionate interactions',
+  },
+  trait_SimPreference_Likes_Communication_PottyHumor: {
+    name: 'trait_SimPreference_Likes_Communication_PottyHumor',
+    description: 'is a preference for potty humor',
+  },
+  trait_SimPreference_Likes_Communication_Pranks: {
+    name: 'trait_SimPreference_Likes_Communication_Pranks',
+    description: 'pulling pranks on others',
+  },
+  trait_SimPreference_Likes_Communication_SillyBehavior: {
+    name: 'trait_SimPreference_Likes_Communication_SillyBehavior',
+    description: 'engaging in silly behavior',
+  },
+  trait_SimPreference_Likes_Communication_SmallTalk: {
+    name: 'trait_SimPreference_Likes_Communication_SmallTalk',
+    description: 'engaging in small talk with others',
+  },
+  trait_SimPreference_Likes_Communication_Stories: {
+    name: 'trait_SimPreference_Likes_Communication_Stories',
+    description: 'engaging in conversations and storytelling',
+  },
+  trait_SimPreference_Likes_Decor_ArtDeco: {
+    name: 'trait_SimPreference_Likes_Decor_ArtDeco',
+    description: 'Art Deco decor',
+  },
+  trait_SimPreference_Likes_Decor_Basics: {
+    name: 'trait_SimPreference_Likes_Decor_Basics',
+    description: 'basic decor',
+  },
+  trait_SimPreference_Likes_Decor_Boho: {
+    name: 'trait_SimPreference_Likes_Decor_Boho',
+    description: 'Boho decor',
+  },
+  trait_SimPreference_Likes_Decor_Contemporary: {
+    name: 'trait_SimPreference_Likes_Decor_Contemporary',
+    description: 'contemporary decor',
+  },
+  trait_SimPreference_Likes_Decor_Cosmolux: {
+    name: 'trait_SimPreference_Likes_Decor_Cosmolux',
+    description: 'Cosmolux decor',
+  },
+  trait_SimPreference_Likes_Decor_Cute: {
+    name: 'trait_SimPreference_Likes_Decor_Cute',
+    description: 'cute decor',
+  },
+  trait_SimPreference_Likes_Decor_FrenchCountry: {
+    name: 'trait_SimPreference_Likes_Decor_FrenchCountry',
+    description: 'French Country decor',
+  },
+  trait_SimPreference_Likes_Decor_Garden: {
+    name: 'trait_SimPreference_Likes_Decor_Garden',
+    description: 'garden decor',
+  },
+  trait_SimPreference_Likes_Decor_GothicFarmhouse: {
+    name: 'trait_SimPreference_Likes_Decor_GothicFarmhouse',
+    description: 'Gothic Farmhouse decor',
+  },
+  trait_SimPreference_Likes_Decor_Industrial: {
+    name: 'trait_SimPreference_Likes_Decor_Industrial',
+    description: 'industrial decor',
+  },
+  trait_SimPreference_Likes_Decor_Island: {
+    name: 'trait_SimPreference_Likes_Decor_Island',
+    description: 'island decor',
+  },
+  trait_SimPreference_Likes_Decor_Luxe: {
+    name: 'trait_SimPreference_Likes_Decor_Luxe',
+    description: 'luxe decor',
+  },
+  trait_SimPreference_Likes_Decor_Mission: {
+    name: 'trait_SimPreference_Likes_Decor_Mission',
+    description: 'Mission decor',
+  },
+  trait_SimPreference_Likes_Decor_Modern: {
+    name: 'trait_SimPreference_Likes_Decor_Modern',
+    description: 'modern decor',
+  },
+  trait_SimPreference_Likes_Decor_Patio: {
+    name: 'trait_SimPreference_Likes_Decor_Patio',
+    description: 'patio decor',
+  },
+  trait_SimPreference_Likes_Decor_QueenAnne: {
+    name: 'trait_SimPreference_Likes_Decor_QueenAnne',
+    description: 'Queen Anne decor',
+  },
+  trait_SimPreference_Likes_Decor_ScandinavianContemporary: {
+    name: 'trait_SimPreference_Likes_Decor_ScandinavianContemporary',
+    description: 'Scandinavian contemporary decor and mid-century style',
+  },
+  trait_SimPreference_Likes_Decor_Shabby: {
+    name: 'trait_SimPreference_Likes_Decor_Shabby',
+    description: 'shabby decor',
+  },
+  trait_SimPreference_Likes_Decor_SuburbanContempo: {
+    name: 'trait_SimPreference_Likes_Decor_SuburbanContempo',
+    description: 'suburban contemporary decor',
+  },
+  trait_SimPreference_Likes_Decor_Tudor: {
+    name: 'trait_SimPreference_Likes_Decor_Tudor',
+    description: 'Tudor-style decor',
+  },
+  trait_SimPreference_Likes_Decor_Vintage: {
+    name: 'trait_SimPreference_Likes_Decor_Vintage',
+    description: 'vintage decor',
+  },
+  trait_SimPreference_Likes_Fashion_Basics: {
+    name: 'trait_SimPreference_Likes_Fashion_Basics',
+    description: 'basic fashion',
+  },
+  trait_SimPreference_Likes_Fashion_Boho: {
+    name: 'trait_SimPreference_Likes_Fashion_Boho',
+    description: 'Boho Fashion',
+  },
+  trait_SimPreference_Likes_Fashion_Country: {
+    name: 'trait_SimPreference_Likes_Fashion_Country',
+    description: 'country fashion',
+  },
+  trait_SimPreference_Likes_Fashion_Hipster: {
+    name: 'trait_SimPreference_Likes_Fashion_Hipster',
+    description: 'hipster fashion',
+  },
+  trait_SimPreference_Likes_Fashion_Outdoorsy: {
+    name: 'trait_SimPreference_Likes_Fashion_Outdoorsy',
+    description: 'outdoorsy fashion',
+  },
+  trait_SimPreference_Likes_Fashion_Polished: {
+    name: 'trait_SimPreference_Likes_Fashion_Polished',
+    description: 'polished fashion',
+  },
+  trait_SimPreference_Likes_Fashion_Preppy: {
+    name: 'trait_SimPreference_Likes_Fashion_Preppy',
+    description: 'preppy fashion',
+  },
+  trait_SimPreference_Likes_Fashion_Rocker: {
+    name: 'trait_SimPreference_Likes_Fashion_Rocker',
+    description: 'rocker fashion',
+  },
+  trait_SimPreference_Likes_Fashion_Streetwear: {
+    name: 'trait_SimPreference_Likes_Fashion_Streetwear',
+    description: 'streetwear fashion',
+  },
+  trait_SimPreference_Likes_Music_Alternative: {
+    name: 'trait_SimPreference_Likes_Music_Alternative',
+    description: 'alternative music',
+  },
+  Trait_SimPreference_Likes_Music_Americana: {
+    name: 'Trait_SimPreference_Likes_Music_Americana',
+    description: 'Americana music',
+  },
+  Trait_SimPreference_Likes_Music_Backyard: {
+    name: 'Trait_SimPreference_Likes_Music_Backyard',
+    description: 'music in the backyard',
+  },
+  Trait_SimPreference_Likes_Music_Baroque: {
+    name: 'Trait_SimPreference_Likes_Music_Baroque',
+    description: 'Baroque music',
+  },
+  trait_SimPreference_Likes_Music_Batuu: {
+    name: 'trait_SimPreference_Likes_Music_Batuu',
+    description: 'Batuu music',
+  },
+  trait_SimPreference_Likes_Music_Blues: {
+    name: 'trait_SimPreference_Likes_Music_Blues',
+    description: 'blues music',
+  },
+  trait_SimPreference_Likes_Music_Brazilian: {
+    name: 'trait_SimPreference_Likes_Music_Brazilian',
+    description: 'Brazilian music, particularly Carnival beats',
+  },
+  trait_SimPreference_Likes_Music_Classical: {
+    name: 'trait_SimPreference_Likes_Music_Classical',
+    description: 'classical music',
+  },
+  trait_SimPreference_Likes_Music_CottageCore: {
+    name: 'trait_SimPreference_Likes_Music_CottageCore',
+    description: 'Cottagecore music',
+  },
+  Trait_SimPreference_Likes_Music_DJ: {
+    name: 'Trait_SimPreference_Likes_Music_DJ',
+    description: 'music from DJ booths',
+  },
+  Trait_SimPreference_Likes_Music_EasyListening: {
+    name: 'Trait_SimPreference_Likes_Music_EasyListening',
+    description: 'listening to easy listening music',
+  },
+  trait_SimPreference_Likes_Music_Electronica: {
+    name: 'trait_SimPreference_Likes_Music_Electronica',
+    description: 'electronica music',
+  },
+  Trait_SimPreference_Likes_Music_Focus: {
+    name: 'Trait_SimPreference_Likes_Music_Focus',
+    description:
+      'is a strong preference for music and tends to focus better when listening to it',
+  },
+  trait_SimPreference_Likes_Music_HipHop: {
+    name: 'trait_SimPreference_Likes_Music_HipHop',
+    description: 'hip hop music',
+  },
+  Trait_SimPreference_Likes_Music_Island: {
+    name: 'Trait_SimPreference_Likes_Music_Island',
+    description: 'island music',
+  },
+  Trait_SimPreference_Likes_Music_JapaneseFolk: {
+    name: 'Trait_SimPreference_Likes_Music_JapaneseFolk',
+    description: 'listening to Japanese folk music',
+  },
+  Trait_SimPreference_Likes_Music_Jazz: {
+    name: 'Trait_SimPreference_Likes_Music_Jazz',
+    description: 'jazz music',
+  },
+  trait_SimPreference_Likes_Music_Kids: {
+    name: 'trait_SimPreference_Likes_Music_Kids',
+    description: 'kids radio music',
+  },
+  Trait_SimPreference_Likes_Music_Latin: {
+    name: 'Trait_SimPreference_Likes_Music_Latin',
+    description: 'Latin music',
+  },
+  Trait_SimPreference_Likes_Music_LatinPop: {
+    name: 'Trait_SimPreference_Likes_Music_LatinPop',
+    description: 'listening to Latin pop music',
+  },
+  trait_SimPreference_Likes_Music_Lullabies: {
+    name: 'trait_SimPreference_Likes_Music_Lullabies',
+    description: 'lullabies music',
+  },
+  Trait_SimPreference_Likes_Music_Metal: {
+    name: 'Trait_SimPreference_Likes_Music_Metal',
+    description: 'metal music',
+  },
+  Trait_SimPreference_Likes_Music_NewAge: {
+    name: 'Trait_SimPreference_Likes_Music_NewAge',
+    description: 'listening to New Age music',
+  },
+  Trait_SimPreference_Likes_Music_NuDisco: {
+    name: 'Trait_SimPreference_Likes_Music_NuDisco',
+    description: 'listening to NuDisco music',
+  },
+  trait_SimPreference_Likes_Music_Oldies: {
+    name: 'trait_SimPreference_Likes_Music_Oldies',
+    description: 'oldies music',
+  },
+  trait_SimPreference_Likes_Music_Pop: {
+    name: 'trait_SimPreference_Likes_Music_Pop',
+    description: 'pop music',
+  },
+  Trait_SimPreference_Likes_Music_Ranch: {
+    name: 'Trait_SimPreference_Likes_Music_Ranch',
+    description: 'ranch music',
+  },
+  trait_SimPreference_Likes_Music_Retro: {
+    name: 'trait_SimPreference_Likes_Music_Retro',
+    description: 'retro music',
+  },
+  trait_SimPreference_Likes_Music_RnB: {
+    name: 'trait_SimPreference_Likes_Music_RnB',
+    description: 'R&B music',
+  },
+  trait_SimPreference_Likes_Music_Romance: {
+    name: 'trait_SimPreference_Likes_Music_Romance',
+    description: 'music with a romantic theme',
+  },
+  Trait_SimPreference_Likes_Music_SingerSongwriter: {
+    name: 'Trait_SimPreference_Likes_Music_SingerSongwriter',
+    description: 'loves singer-songwriter music',
+  },
+  trait_SimPreference_Likes_Music_Spooky: {
+    name: 'trait_SimPreference_Likes_Music_Spooky',
+    description: 'spooky music',
+  },
+  trait_SimPreference_Likes_Music_SPop: {
+    name: 'trait_SimPreference_Likes_Music_SPop',
+    description: 'S-Pop music',
+  },
+  Trait_SimPreference_Likes_Music_StrangeTunes: {
+    name: 'Trait_SimPreference_Likes_Music_StrangeTunes',
+    description: 'strange tunes',
+  },
+  Trait_SimPreference_Likes_Music_SummerStrut: {
+    name: 'Trait_SimPreference_Likes_Music_SummerStrut',
+    description: 'listening to the Summer Strut music',
+  },
+  Trait_SimPreference_Likes_Music_TweenPop: {
+    name: 'Trait_SimPreference_Likes_Music_TweenPop',
+    description: 'tween pop music',
+  },
+  trait_SimPreference_Likes_Music_WinterHoliday: {
+    name: 'trait_SimPreference_Likes_Music_WinterHoliday',
+    description: 'Winter Holiday music',
+  },
+  Trait_SimPreference_Likes_Music_World: {
+    name: 'Trait_SimPreference_Likes_Music_World',
+    description: 'world music',
   },
   Trait_SimPreference_NoOpinion_Activities_Acting: {
     name: 'Trait_SimPreference_NoOpinion_Activities_Acting',
