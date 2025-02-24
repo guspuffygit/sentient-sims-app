@@ -3396,47 +3396,47 @@ export const traitDescriptions: Record<string, TraitDescription> = {
   },
   trait_Fear_BeingAlone: {
     name: 'trait_Fear_BeingAlone',
-    description: 'fears being alone without a relationship',
+    description: 'being alone without a relationship',
   },
   trait_Fear_BeingCheatedOn: {
     name: 'trait_Fear_BeingCheatedOn',
     ignored: false,
-    description: 'fears being cheated on',
+    description: 'being cheated on',
   },
   trait_Fear_BeingJudged: {
     name: 'trait_Fear_BeingJudged',
     ignored: false,
-    description: 'fears being judged',
+    description: 'being judged',
   },
   trait_Fear_Cowplant: {
     name: 'trait_Fear_Cowplant',
     ignored: false,
-    description: 'is fearful of Cowplants',
+    description: 'Cowplants',
   },
   trait_Fear_CrowdedPlaces: {
     name: 'trait_Fear_CrowdedPlaces',
     ignored: false,
-    description: 'is fearful of crowded places',
+    description: 'crowded places',
   },
   trait_Fear_Dark: {
     name: 'trait_Fear_Dark',
     ignored: false,
-    description: 'is afraid of the dark',
+    description: 'the dark',
   },
   trait_Fear_DeadEndJob: {
     name: 'trait_Fear_DeadEndJob',
     ignored: false,
-    description: 'is fearful about their dead-end job',
+    description: 'their dead-end job',
   },
   trait_Fear_Death: {
     name: 'trait_Fear_Death',
     ignored: false,
-    description: 'is fearful of death',
+    description: 'death',
   },
   Trait_Fear_DisappointingParents: {
     name: 'Trait_Fear_DisappointingParents',
     ignored: false,
-    description: 'is afraid of disappointing their parents',
+    description: 'disappointing their parents',
   },
   trait_Fear_DisappointingParents_ParentDeceasedFlag: {
     name: 'trait_Fear_DisappointingParents_ParentDeceasedFlag',
@@ -3444,65 +3444,64 @@ export const traitDescriptions: Record<string, TraitDescription> = {
   },
   trait_Fear_Eviction: {
     name: 'trait_Fear_Eviction',
-    description:
-      'is terrified that they are about to get evicted from their home',
+    description: 'that they are about to get evicted from their home',
   },
   Trait_Fear_Failing_AfterSchoolActivities: {
     name: 'Trait_Fear_Failing_AfterSchoolActivities',
     ignored: false,
     description:
-      'occasionally relives a moment of failure and has great fear from it',
+      'when they occasionally relive a moment of failure from their past',
   },
   Trait_Fear_Failing_Class: {
     name: 'Trait_Fear_Failing_Class',
     ignored: false,
-    description: 'is feeling pressure of passing their classes',
+    description: 'potentially failing their classes',
   },
   Trait_Fear_Failing_Tests: {
     name: 'Trait_Fear_Failing_Tests',
     ignored: false,
-    description: 'is fearful of failing tests',
+    description: 'potentially failing tests in school',
   },
   trait_Fear_Failure: {
     name: 'trait_Fear_Failure',
     ignored: false,
-    description: 'has a fear of failure',
+    description: 'failure',
   },
   trait_Fear_Fire: {
     name: 'trait_Fear_Fire',
     ignored: false,
-    description: 'is scared of fire',
+    description: 'fire',
   },
   trait_Fear_Ghosts: {
     name: 'trait_Fear_Ghosts',
     ignored: false,
-    description: 'is scared of ghosts',
+    description: 'ghosts',
   },
   Trait_Fear_Homework: {
     name: 'Trait_Fear_Homework',
-    description: 'has anxiety when doing homework',
+    description: 'anxiety when doing homework',
   },
   trait_Fear_Horses: {
     name: 'trait_Fear_Horses',
-    description: 'is afraid of horses',
+    description: 'horses',
   },
   trait_Fear_Horses_Progress: {
     name: 'trait_Fear_Horses_Progress',
-    description: 'has a fear of horses',
+    description: 'horses',
   },
   trait_Fear_Inferior: {
     name: 'trait_Fear_Inferior',
     ignored: false,
-    description: 'struggles with confidence',
+    description: 'failing to be confident',
   },
   trait_Fear_Intimacy: {
     name: 'trait_Fear_Intimacy',
-    description: 'is afraid of physical and emotional connections',
+    description: 'physical and emotional connections',
   },
   trait_Fear_Swimming: {
     name: 'trait_Fear_Swimming',
     ignored: false,
-    description: 'is fearful of swimming',
+    description: 'swimming',
   },
   trait_Fear_Unfulfilled: {
     name: 'trait_Fear_Unfulfilled',
