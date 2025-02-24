@@ -2,12 +2,13 @@
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { getCareerTrackLevel } from '../descriptions/careerDescriptions';
 import { moodDescriptions } from '../descriptions/moodDescriptions';
-import { traitDescriptions } from '../descriptions/traitDescriptions';
 import { getSexCategory, getSexLocation } from '../descriptions/wwDescriptions';
 import { SSEnvironment } from '../models/InteractionEvents';
 import { SentientSim } from '../models/SentientSim';
 import { SimAge } from '../models/SimAge';
 import { removeEmojis } from '../util/filter';
+import { traitDescriptions } from '../descriptions/traitDescriptions';
+import { TraitType } from '../models/TraitType';
 
 export enum BodyState {
   OUTFIT = 1,
@@ -34,22 +35,15 @@ export function formatListToString(items: string[]): string {
   return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
 }
 
-function formatTraits(traits: string[]): string[] {
-  const formattedTraits: string[] = [];
-
-  traits.forEach((trait) => {
-    if (traitDescriptions.has(trait)) {
-      formattedTraits.push(traitDescriptions.get(trait) as string);
-    }
-  });
-
-  return formattedTraits;
-}
-
 function formatMoods(moods: string[]): string[] {
   return moods
-    .filter((mood) => mood in moodDescriptions)
-    .map((mood) => moodDescriptions[mood].description);
+    .filter(
+      (mood) =>
+        mood in moodDescriptions &&
+        !moodDescriptions[mood]?.ignored &&
+        moodDescriptions[mood]?.description
+    )
+    .map((mood) => moodDescriptions[mood].description as string);
 }
 
 function formatAge(age: SimAge): string {
@@ -167,10 +161,37 @@ function formatProperties(sentientSim: SentientSim): string[] {
 }
 
 export function formatSentientSim(sentientSim: SentientSim): string {
-  const likes = formatTraits(sentientSim.likes);
-  const dislikes = formatTraits(sentientSim.dislikes);
+  const likes: string[] = [];
+  const dislikes: string[] = [];
+  const attractions: string[] = [];
+  const turnOffs: string[] = [];
+  const fears: string[] = [];
+  const genericTraits: string[] = [];
+  sentientSim.traits
+    .filter((trait) => trait in traitDescriptions)
+    .map((trait) => traitDescriptions[trait])
+    .filter((trait) => !trait?.ignored && trait?.description)
+    .forEach((trait) => {
+      if (trait.trait_type === TraitType.LIKE) {
+        if (trait.class === 'AttractionPreference') {
+          attractions.push(trait.description as string);
+        } else {
+          likes.push(trait.description as string);
+        }
+      } else if (trait.trait_type === TraitType.DISLIKE) {
+        if (trait.class === 'AttractionPreference') {
+          turnOffs.push(trait.description as string);
+        } else {
+          dislikes.push(trait.description as string);
+        }
+      } else if (trait.trait_type === TraitType.FEAR) {
+        fears.push(trait.description as string);
+      } else {
+        genericTraits.push(trait.description as string);
+      }
+    });
+
   const moods = formatMoods(sentientSim.moods);
-  const personalityTraits = formatTraits(sentientSim.personality_traits);
   const careers = formatCareers(sentientSim);
   const properties = formatProperties(sentientSim);
 
@@ -188,10 +209,28 @@ export function formatSentientSim(sentientSim: SentientSim): string {
     prompt.push(`${sentientSim.name} hates ${formatListToString(dislikes)}.`);
   }
 
-  if (personalityTraits.length > 0) {
+  if (attractions.length > 0) {
     prompt.push(
-      `${sentientSim.name} ${formatListToString(personalityTraits)}.`
+      `${sentientSim.name} is attracted to a partner who ${formatListToString(
+        attractions
+      )}.`
     );
+  }
+
+  if (turnOffs.length > 0) {
+    prompt.push(
+      `${sentientSim.name} is turned off by a partner who ${formatListToString(
+        turnOffs
+      )}.`
+    );
+  }
+
+  if (fears.length > 0) {
+    prompt.push(`${sentientSim.name} fears ${formatListToString(fears)}.`);
+  }
+
+  if (genericTraits.length > 0) {
+    prompt.push(`${sentientSim.name} ${formatListToString(genericTraits)}.`);
   }
 
   if (moods.length > 0) {

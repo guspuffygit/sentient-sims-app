@@ -37,6 +37,8 @@ import { RepositoryService } from './services/RepositoryService';
 import { PromptRequestBuilderService } from './services/PromptRequestBuilderService';
 import { InteractionDescriptionController } from './controllers/InteractionDescriptionController';
 import { InteractionRepository } from './db/InteractionRepository';
+import { MappingController } from './controllers/MappingController';
+import { MappingService } from './services/MappingService';
 
 export type ApiOptions = {
   port: number;
@@ -102,6 +104,7 @@ export function runApi({
   const aiController = new AIController(aiService);
   const animationsController = new AnimationsController(animationsService);
   const assetsController = new AssetsController(getAssetPath);
+  const mappingController = new MappingController(new MappingService());
   const expressApp = express();
   expressApp.use(express.json({ limit: 52428800 }));
 
@@ -199,6 +202,11 @@ export function runApi({
     '/interactions/ignored',
     interactionDescriptionController.getIgnoredInteractions
   );
+  expressApp.get('/traits', mappingController.getTraits);
+  expressApp.get('/traits/unmapped', mappingController.getUnmappedTraits);
+  expressApp.post('/traits/export', mappingController.exportTraits);
+  expressApp.get('/moods', mappingController.getMoods);
+  expressApp.get('/moods/unmapped', mappingController.getUnmappedMoods);
   expressApp.post(
     '/interactions',
     interactionDescriptionController.updateInteraction

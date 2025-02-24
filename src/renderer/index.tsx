@@ -26,6 +26,7 @@ import SimsPage from './SimsPage';
 import { SnackBarProvider } from './providers/SnackBarProvider';
 import { AISettingsProvider } from './providers/AISettingsProvider';
 import { VersionsProvider } from './providers/VersionsProvider';
+import TraitsPage from './TraitsPage';
 
 const updatedAwsConfig = {
   ...awsExports,
@@ -45,6 +46,10 @@ const router = createMemoryRouter([
       {
         path: '/',
         element: <HomePage />,
+      },
+      {
+        path: '/traits',
+        element: <TraitsPage />,
       },
       {
         path: '/settings',

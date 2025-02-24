@@ -23,7 +23,7 @@ import useSetting, { SettingsHook } from 'renderer/hooks/useSetting';
 interface AISettingsContextType {
   aiApiName: string;
   aiApiType: ApiType;
-  aiApiTypeSetting: SettingsHook;
+  aiApiTypeSetting: SettingsHook<string>;
   aiStatus: AITestStatus;
   testAI: (openAIKey?: string) => Promise<void>;
 }

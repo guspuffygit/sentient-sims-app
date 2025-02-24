@@ -62,8 +62,14 @@ export default function AIModelSelection({
   endpointSetting,
 }: AIModelSelectionProps) {
   const aiModels = useAIModels(apiType);
-  const aiModel: SettingsHook = useSetting(modelSetting, defaultModel);
-  const aiEndpoint: SettingsHook = useSetting(endpointSetting, defaultEndpoint);
+  const aiModel: SettingsHook<string> = useSetting<string>(
+    modelSetting,
+    defaultModel
+  );
+  const aiEndpoint: SettingsHook<string> = useSetting<string>(
+    endpointSetting,
+    defaultEndpoint
+  );
 
   const handleChange = (event: SelectChangeEvent) => {
     const model = event.target.value;

@@ -9,7 +9,7 @@ import { EndAdornmentIconButton } from './components/EndAdornmentIconButton';
 import { EndAdornmentTooltip } from './components/EndAdornmentTooltip';
 
 interface ModalProps {
-  setting: SettingsHook;
+  setting: SettingsHook<string>;
   aiName: string;
 }
 

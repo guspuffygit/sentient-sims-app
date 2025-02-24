@@ -24,7 +24,7 @@ export default function UpdateComponent() {
   const { user } = useAuthenticator((context) => [context.user]);
   const patreonUser = new PatreonUser(user);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const releaseType: SettingsHook = useSetting(
+  const releaseType: SettingsHook<string> = useSetting<string>(
     SettingsEnum.MOD_RELEASE,
     'main'
   );
