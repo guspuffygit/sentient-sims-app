@@ -34,6 +34,7 @@ export enum TraitType {
   INFANT_CARRIER = 'INFANT_CARRIER',
   GAMEPLAY_GENERIC = 'GAMEPLAY_GENERIC',
   HORSE_ACCOLADE = 'HORSE_ACCOLADE',
+  MASTERY_PERK = 'MASTERY_PERK',
 }
 
 export function toTraitType(someString?: string): TraitType {

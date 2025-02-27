@@ -45,6 +45,11 @@ function getFormattedXml(xmlString?: string) {
   return [];
 }
 
+type TraitCount = {
+  unmapped: number;
+  mapped: number;
+};
+
 export default function TraitsPage() {
   const [loadingTraits, setLoadingTraits] = useState(false);
   const [loadingExport, setLoadingExport] = useState(false);
@@ -62,14 +67,21 @@ export default function TraitsPage() {
     return traits;
   }, [traits, filterTraitType]);
 
-  const traitTypes: Record<string, number> = useMemo(() => {
-    const traitTypeCounts: Record<string, number> = {};
+  const traitCounts: Record<string, TraitCount> = useMemo(() => {
+    const traitTypeCounts: Record<string, TraitCount> = {};
     traits.forEach((trait) => {
       if (trait.trait_type) {
+        const unmapped = !trait?.description && trait?.ignored === undefined;
         if (trait.trait_type in traitTypeCounts) {
-          traitTypeCounts[trait.trait_type] += 1;
+          traitTypeCounts[trait.trait_type].mapped += 1;
+          if (unmapped) {
+            traitTypeCounts[trait.trait_type].unmapped += 1;
+          }
         } else {
-          traitTypeCounts[trait.trait_type] = 1;
+          traitTypeCounts[trait.trait_type] = {
+            mapped: 1,
+            unmapped: unmapped ? 1 : 0,
+          };
         }
       }
     });
@@ -104,12 +116,26 @@ export default function TraitsPage() {
   }
 
   const selectMenuItems: JSX.Element[] = [];
-  Object.keys(traitTypes).forEach((traitTypeKey) => {
-    selectMenuItems.push(
-      <MenuItem value={traitTypeKey}>
-        {traitTypeKey}: {traitTypes[traitTypeKey]}
-      </MenuItem>
-    );
+  Object.keys(traitCounts).forEach((traitTypeKey) => {
+    if (
+      traitCounts[traitTypeKey].mapped ===
+      traitCounts[traitTypeKey].mapped - traitCounts[traitTypeKey].unmapped
+    ) {
+      selectMenuItems.push(
+        <MenuItem value={traitTypeKey}>
+          {traitTypeKey}: {traitCounts[traitTypeKey].mapped}
+        </MenuItem>
+      );
+    } else {
+      selectMenuItems.push(
+        <MenuItem value={traitTypeKey}>
+          {traitTypeKey}:{' '}
+          {traitCounts[traitTypeKey].mapped -
+            traitCounts[traitTypeKey].unmapped}
+          /{traitCounts[traitTypeKey].mapped}
+        </MenuItem>
+      );
+    }
   });
 
   const loadItems = useCallback(() => {
