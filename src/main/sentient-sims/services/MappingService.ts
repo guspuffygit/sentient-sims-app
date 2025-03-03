@@ -14,6 +14,7 @@ import {
   TraitMapping,
 } from '../descriptions/traitDescriptions';
 import { toTraitType, TraitType } from '../models/TraitType';
+import { phonemize } from '../tts/phonemize';
 
 export type Instance = {
   class: string;
@@ -63,7 +64,17 @@ export function toInstance(instanceXML: InstanceXML, xml: string): Instance {
 }
 
 const modelId = 'onnx-community/Kokoro-82M-v1.0-ONNX';
-let tts: any = null;
+let tts: KokoroTTS | undefined;
+KokoroTTS.from_pretrained(modelId, {
+  dtype: 'q8', // Or any desired precision
+  device: 'cpu', // Change as needed
+})
+  // eslint-disable-next-line promise/always-return
+  .then((model: KokoroTTS) => {
+    tts = model;
+    log.debug(`tts loaded successfully i`);
+  })
+  .catch((err: any) => log.error(`Error loading tts:`, err));
 
 export function getXmlFilesSync(dir: string, fileList: string[] = []) {
   const files = fs.readdirSync(dir);
@@ -297,28 +308,38 @@ export class MappingService {
   }
 
   async streamAudio(req: Request, res: Response) {
-    // Load the model if needed.
-    if (tts === null) {
-      log.debug('Loading tts');
-      tts = await KokoroTTS.from_pretrained(modelId, {
-        dtype: 'q8', // Or any desired precision
-        device: 'cpu', // Change as needed
-      });
+    const { text } = req.query;
+
+    log.debug(`TTS text: ${text}`);
+
+    if (tts === undefined) {
+      res.status(500).json({ error: 'TTS was not loaded' });
+      return;
     }
 
     // Set headers for a WAV audio stream.
     res.setHeader('Content-Type', 'audio/wav');
-    // Optionally, you can also use Transfer-Encoding for chunked responses:
-    // res.setHeader("Transfer-Encoding", "chunked");
 
     // Use the streaming method from your TTS instance.
-    for await (const { audio } of tts.stream('Is this working?', {
+    const audio = await tts.generate(text, {
+      // Use `tts.list_voices()` to list all available voices
       voice: 'af_heart',
-    })) {
-      // Convert the audio data (if it is a typed array) to a Node Buffer.
-      res.write(Buffer.from(audio.data));
-    }
+      speed: 1,
+    });
+
+    res.write(Buffer.from(audio.toWav()));
 
     res.end();
+  }
+
+  async phonemize(req: Request, res: Response) {
+    const { text, language } = req.query;
+    if (language !== 'a' && language !== 'b') {
+      res.status(400).json({ error: 'bad request' });
+      return;
+    }
+
+    const output = await phonemize(text as string, language);
+    res.json({ text: output });
   }
 }

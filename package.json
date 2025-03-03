@@ -93,6 +93,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.1",
     "react-window": "^1.8.9",
+    "sharp": "^0.33.5",
     "uuid": "9.0.1",
     "vkbeautify": "^0.99.3",
     "xml2js": "^0.6.0"

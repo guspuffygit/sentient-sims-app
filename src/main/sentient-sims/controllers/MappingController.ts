@@ -67,4 +67,8 @@ export class MappingController {
   async testingIt(req: Request, res: Response) {
     this.mappingService.streamAudio(req, res);
   }
+
+  async phonemize(req: Request, res: Response) {
+    this.mappingService.phonemize(req, res);
+  }
 }

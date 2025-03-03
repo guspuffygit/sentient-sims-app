@@ -208,6 +208,7 @@ export function runApi({
   expressApp.get('/moods', mappingController.getMoods);
   expressApp.get('/moods/unmapped', mappingController.getUnmappedMoods);
   expressApp.get('/testingit', mappingController.testingIt);
+  expressApp.get('/phonemize', mappingController.phonemize);
   expressApp.post(
     '/interactions',
     interactionDescriptionController.updateInteraction
