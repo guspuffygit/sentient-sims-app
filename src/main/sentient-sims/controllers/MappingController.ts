@@ -16,6 +16,7 @@ export class MappingController {
     this.getMoods = this.getMoods.bind(this);
     this.getUnmappedMoods = this.getUnmappedMoods.bind(this);
     this.exportTraits = this.exportTraits.bind(this);
+    this.testingIt = this.testingIt.bind(this);
   }
 
   async getTraits(req: Request, res: Response) {
@@ -61,5 +62,9 @@ export class MappingController {
       `Length of Traits: ${Object.keys(exportTraitsRequest.traits).length}`
     );
     res.json(await this.mappingService.exportTraits(req.body));
+  }
+
+  async testingIt(req: Request, res: Response) {
+    this.mappingService.streamAudio(req, res);
   }
 }

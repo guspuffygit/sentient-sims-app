@@ -100,6 +100,11 @@ const electronHandler = {
 
     return () => ipcRenderer.removeListener('on-map-interaction', callback);
   },
+  onVoice: (callback: any) => {
+    ipcRenderer.on('on-voice', callback);
+
+    return () => ipcRenderer.removeListener('on-voice', callback);
+  },
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

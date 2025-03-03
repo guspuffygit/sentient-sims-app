@@ -68,6 +68,14 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
                 >
                   Traits
                 </Button>
+                <Button
+                  color="secondary"
+                  onClick={() => navigate('/kokoro')}
+                  sx={{ marginLeft: '5px' }}
+                  id="traits"
+                >
+                  Kokoro
+                </Button>
               </>
             ) : null}
             <Button

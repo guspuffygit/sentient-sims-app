@@ -207,6 +207,7 @@ export function runApi({
   expressApp.post('/traits/export', mappingController.exportTraits);
   expressApp.get('/moods', mappingController.getMoods);
   expressApp.get('/moods/unmapped', mappingController.getUnmappedMoods);
+  expressApp.get('/testingit', mappingController.testingIt);
   expressApp.post(
     '/interactions',
     interactionDescriptionController.updateInteraction

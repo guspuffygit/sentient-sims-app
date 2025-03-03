@@ -1,8 +1,10 @@
 /* eslint-disable class-methods-use-this */
+import { Request, Response } from 'express';
 import log from 'electron-log';
 import { XMLParser } from 'fast-xml-parser';
 import fs from 'fs';
 import path from 'path';
+import { KokoroTTS } from 'kokoro-js';
 import {
   moodDescriptions,
   MoodMapping,
@@ -59,6 +61,9 @@ export function toInstance(instanceXML: InstanceXML, xml: string): Instance {
     xml,
   };
 }
+
+const modelId = 'onnx-community/Kokoro-82M-v1.0-ONNX';
+let tts: any = null;
 
 export function getXmlFilesSync(dir: string, fileList: string[] = []) {
   const files = fs.readdirSync(dir);
@@ -289,5 +294,31 @@ export class MappingService {
       );
     });
     fs.writeFileSync(exportedPath, theOutput, 'utf-8');
+  }
+
+  async streamAudio(req: Request, res: Response) {
+    // Load the model if needed.
+    if (tts === null) {
+      log.debug('Loading tts');
+      tts = await KokoroTTS.from_pretrained(modelId, {
+        dtype: 'q8', // Or any desired precision
+        device: 'cpu', // Change as needed
+      });
+    }
+
+    // Set headers for a WAV audio stream.
+    res.setHeader('Content-Type', 'audio/wav');
+    // Optionally, you can also use Transfer-Encoding for chunked responses:
+    // res.setHeader("Transfer-Encoding", "chunked");
+
+    // Use the streaming method from your TTS instance.
+    for await (const { audio } of tts.stream('Is this working?', {
+      voice: 'af_heart',
+    })) {
+      // Convert the audio data (if it is a typed array) to a Node Buffer.
+      res.write(Buffer.from(audio.data));
+    }
+
+    res.end();
   }
 }

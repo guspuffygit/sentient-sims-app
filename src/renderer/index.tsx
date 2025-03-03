@@ -27,6 +27,7 @@ import { SnackBarProvider } from './providers/SnackBarProvider';
 import { AISettingsProvider } from './providers/AISettingsProvider';
 import { VersionsProvider } from './providers/VersionsProvider';
 import TraitsPage from './TraitsPage';
+import KokoroPage from './KokoroPage';
 
 const updatedAwsConfig = {
   ...awsExports,
@@ -50,6 +51,10 @@ const router = createMemoryRouter([
       {
         path: '/traits',
         element: <TraitsPage />,
+      },
+      {
+        path: '/kokoro',
+        element: <KokoroPage />,
       },
       {
         path: '/settings',
