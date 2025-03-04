@@ -4,7 +4,8 @@ import log from 'electron-log';
 import { XMLParser } from 'fast-xml-parser';
 import fs from 'fs';
 import path from 'path';
-import { KokoroTTS } from 'kokoro-js';
+// import { KokoroTTS } from 'kokoro-js';
+import OpenAI from 'openai';
 import {
   moodDescriptions,
   MoodMapping,
@@ -15,6 +16,9 @@ import {
 } from '../descriptions/traitDescriptions';
 import { toTraitType, TraitType } from '../models/TraitType';
 import { phonemize } from '../tts/phonemize';
+import { SettingsEnum } from '../models/SettingsEnum';
+import { SettingsService } from './SettingsService';
+import { OpenAIKeyNotSetError } from './OpenAIService';
 
 export type Instance = {
   class: string;
@@ -64,17 +68,17 @@ export function toInstance(instanceXML: InstanceXML, xml: string): Instance {
 }
 
 const modelId = 'onnx-community/Kokoro-82M-v1.0-ONNX';
-let tts: KokoroTTS | undefined;
-KokoroTTS.from_pretrained(modelId, {
-  dtype: 'q8', // Or any desired precision
-  device: 'cpu', // Change as needed
-})
-  // eslint-disable-next-line promise/always-return
-  .then((model: KokoroTTS) => {
-    tts = model;
-    log.debug(`tts loaded successfully i`);
-  })
-  .catch((err: any) => log.error(`Error loading tts:`, err));
+// let tts: KokoroTTS | undefined;
+// KokoroTTS.from_pretrained(modelId, {
+//   dtype: 'q8', // Or any desired precision
+//   device: 'cpu', // Change as needed
+// })
+//   // eslint-disable-next-line promise/always-return
+//   .then((model: KokoroTTS) => {
+//     tts = model;
+//     log.debug(`tts loaded successfully i`);
+//   })
+//   .catch((err: any) => log.error(`Error loading tts:`, err));
 
 export function getXmlFilesSync(dir: string, fileList: string[] = []) {
   const files = fs.readdirSync(dir);
@@ -312,22 +316,22 @@ export class MappingService {
 
     log.debug(`TTS text: ${text}`);
 
-    if (tts === undefined) {
-      res.status(500).json({ error: 'TTS was not loaded' });
-      return;
-    }
+    // if (tts === undefined) {
+    //   res.status(500).json({ error: 'TTS was not loaded' });
+    //   return;
+    // }
 
-    // Set headers for a WAV audio stream.
-    res.setHeader('Content-Type', 'audio/wav');
+    // // Set headers for a WAV audio stream.
+    // res.setHeader('Content-Type', 'audio/wav');
 
-    // Use the streaming method from your TTS instance.
-    const audio = await tts.generate(text, {
-      // Use `tts.list_voices()` to list all available voices
-      voice: 'af_heart',
-      speed: 1,
-    });
+    // // Use the streaming method from your TTS instance.
+    // const audio = await tts.generate(text, {
+    //   // Use `tts.list_voices()` to list all available voices
+    //   voice: 'af_heart',
+    //   speed: 1,
+    // });
 
-    res.write(Buffer.from(audio.toWav()));
+    // res.write(Buffer.from(audio.toWav()));
 
     res.end();
   }
@@ -341,5 +345,55 @@ export class MappingService {
 
     const output = await phonemize(text as string, language);
     res.json({ text: output });
+  }
+
+  getOpenAIKey(): string | undefined {
+    // Check app settings
+    const openAIKeyFromSettings = new SettingsService().get(
+      SettingsEnum.OPENAI_KEY
+    );
+    if (openAIKeyFromSettings) {
+      log.debug('Using openai key from settings');
+      return openAIKeyFromSettings as string;
+    }
+
+    // Check environment variable
+    const openAIKeyFromEnv = process.env.OPENAI_KEY;
+    if (openAIKeyFromEnv) {
+      log.debug('Using openai key from environment');
+      return openAIKeyFromEnv;
+    }
+
+    throw new OpenAIKeyNotSetError(
+      'No OpenAI Key set, Edit OpenAI Key to set it'
+    );
+  }
+
+  private getOpenAIClient(): OpenAI {
+    return new OpenAI({
+      dangerouslyAllowBrowser: process.env.NODE_ENV === 'test',
+      apiKey: this.getOpenAIKey(),
+    });
+  }
+
+  async openai(req: Request, res: Response) {
+    const { text } = req.query;
+
+    log.debug(`OpenAI TTS text: ${text}`);
+
+    // Set headers for a WAV audio stream.
+    res.setHeader('Content-Type', 'audio/wav');
+
+    const response = await this.getOpenAIClient().audio.speech.create({
+      input: text as string,
+      model: 'tts-1',
+      voice: 'nova',
+      response_format: 'wav',
+      speed: 1,
+    });
+
+    res.write(Buffer.from(await response.arrayBuffer()));
+
+    res.end();
   }
 }

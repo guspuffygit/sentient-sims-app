@@ -17,6 +17,7 @@ export class MappingController {
     this.getUnmappedMoods = this.getUnmappedMoods.bind(this);
     this.exportTraits = this.exportTraits.bind(this);
     this.testingIt = this.testingIt.bind(this);
+    this.openai = this.openai.bind(this);
   }
 
   async getTraits(req: Request, res: Response) {
@@ -70,5 +71,9 @@ export class MappingController {
 
   async phonemize(req: Request, res: Response) {
     this.mappingService.phonemize(req, res);
+  }
+
+  async openai(req: Request, res: Response) {
+    this.mappingService.openai(req, res);
   }
 }
