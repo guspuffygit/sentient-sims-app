@@ -28,23 +28,25 @@ export default function KokoroPage() {
 
   const runTTS = useCallback(async () => {
     const response = await fetch(
-      `${appApiUrl}/openai?text=${encodeURIComponent(text)}`
+      `${appApiUrl}/ai/v2/tts?text=${encodeURIComponent(text)}`
     );
 
     const arrayBuffer = await response.arrayBuffer();
-    // Decode audio and play
+
     const audioContext = new (window.AudioContext ||
       (window as any).webkitAudioContext)();
-    const source = audioContext.createBufferSource();
 
-    // Decode audio and play
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+    const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
     source.connect(audioContext.destination);
 
-    // eslint-disable-next-line consistent-return
+    source.start();
+
     return () => {
       source.stop();
+      source.disconnect();
       audioContext.close();
     };
   }, [text]);

@@ -392,6 +392,10 @@ export class MappingService {
       speed: 1,
     });
 
+    if (!response.ok) {
+      throw Error(`Died: ${response.status}`);
+    }
+
     res.write(Buffer.from(await response.arrayBuffer()));
 
     res.end();

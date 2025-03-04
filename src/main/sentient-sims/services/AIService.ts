@@ -479,4 +479,9 @@ export class AIService {
     log.debug(`NOOP interaction mapping: ${event.interaction_name}`);
     return { status: InteractionEventStatus.NOOP };
   }
+
+  async tts(text: string) {
+    const generationService = getGenerationService(this.settingsService);
+    return generationService.tts(text);
+  }
 }

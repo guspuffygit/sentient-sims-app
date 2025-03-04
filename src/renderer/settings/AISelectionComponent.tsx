@@ -3,7 +3,7 @@ import { ApiType } from 'main/sentient-sims/models/ApiType';
 import HelpButton from 'renderer/components/HelpButton';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 
-function getAIHelperText(apiType: ApiType) {
+export function getAIHelperText(apiType: ApiType) {
   if (apiType === ApiType.OpenAI) {
     return 'OpenAI AI using the same API as ChatGPT and your personal API key.';
   }

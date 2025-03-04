@@ -2,6 +2,7 @@
 /* eslint-disable promise/always-return */
 import log from 'electron-log';
 import OpenAI from 'openai';
+import { Request, Response } from 'express';
 import {
   ChatCompletion,
   CompletionCreateParamsNonStreaming,
@@ -213,5 +214,23 @@ export class OpenAIService implements GenerationService {
     });
 
     return aiModels;
+  }
+
+  async tts(text: string): Promise<Buffer> {
+    log.debug(`OpenAI TTS text: ${text}`);
+
+    const response = await this.getOpenAIClient().audio.speech.create({
+      input: text as string,
+      model: 'tts-1',
+      voice: 'nova',
+      response_format: 'wav',
+      speed: 1,
+    });
+
+    if (!response.ok) {
+      throw Error(`Died: ${response.status}`);
+    }
+
+    return Buffer.from(await response.arrayBuffer());
   }
 }

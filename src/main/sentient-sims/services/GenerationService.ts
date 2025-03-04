@@ -10,4 +10,5 @@ export interface GenerationService {
   ): Promise<SimsGenerateResponse>;
   healthCheck(apiKey?: string): Promise<AIHealthCheckResponse>;
   getModels(): Promise<AIModel[]>;
+  tts(text: string): Promise<Buffer>;
 }

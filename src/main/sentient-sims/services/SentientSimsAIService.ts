@@ -279,4 +279,9 @@ export class SentientSimsAIService implements GenerationService {
       SettingsEnum.SENTIENTSIMSAI_MODEL
     ) as string;
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  tts(text: string): Promise<Buffer> {
+    throw new Error('Method not implemented.');
+  }
 }

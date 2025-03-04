@@ -260,4 +260,9 @@ export class NovelAIService implements GenerationService {
       },
     ];
   }
+
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+  tts(text: string): Promise<Buffer> {
+    throw new Error('Method not implemented.');
+  }
 }

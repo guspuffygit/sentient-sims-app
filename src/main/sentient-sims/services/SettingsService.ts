@@ -109,6 +109,18 @@ export function defaultStore(cwd?: string) {
         type: 'string',
         default: defaultGeminiModel,
       },
+      [SettingsEnum.TTS_ENABLED.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
+      [SettingsEnum.TTS_ENABLED.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
+      [SettingsEnum.TTS_API_TYPE.toString()]: {
+        type: 'string',
+        default: 'sentientsimsai',
+      },
     },
     migrations: {
       '3.1.0': (store) => {
