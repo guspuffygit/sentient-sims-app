@@ -4224,11 +4224,13 @@ export const simsTraitDescriptions: Record<string, TraitMapping> = {
   },
   trait_Fear_BeingBurgled: {
     name: 'trait_Fear_BeingBurgled',
+    description: 'being burgled by a burglar',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
   trait_Fear_BeingCanceled: {
     name: 'trait_Fear_BeingCanceled',
+    description: 'being cancelled online because of their actions or words',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
@@ -10076,26 +10078,31 @@ export const simsTraitDescriptions: Record<string, TraitMapping> = {
   },
   trait_MasteryPerk_AspirationalCreator: {
     name: 'trait_MasteryPerk_AspirationalCreator',
+    description: 'is a masterful creator',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_AspirationalThinker: {
     name: 'trait_MasteryPerk_AspirationalThinker',
+    description: 'is a masterful thinker',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_AuraActive: {
     name: 'trait_MasteryPerk_AuraActive',
+    description: 'is a masterful coach and mentor',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_AuraCreative: {
     name: 'trait_MasteryPerk_AuraCreative',
+    description: 'is a masterful creative mentor and coach',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_AuraMental: {
     name: 'trait_MasteryPerk_AuraMental',
+    description: 'is a masterful mental coach and mentor',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
@@ -10119,56 +10126,71 @@ export const simsTraitDescriptions: Record<string, TraitMapping> = {
   },
   trait_MasteryPerk_FinalTouch: {
     name: 'trait_MasteryPerk_FinalTouch',
+    description: 'is masterful and crafting quality items',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_InTheZone: {
     name: 'trait_MasteryPerk_InTheZone',
+    description: 'is masterful at becoming seriously focused',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_MentalExercise: {
     name: 'trait_MasteryPerk_MentalExercise',
+    description: 'is masterful at building muscle with brain power',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_PigeonholedActive: {
     name: 'trait_MasteryPerk_PigeonholedActive',
+    description:
+      'is masterful at improving active skills but has a harder time with other skills',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_PigeonholedCreative: {
     name: 'trait_MasteryPerk_PigeonholedCreative',
+    description:
+      'is masterful at improving creative skills but has a harder time with other skills',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_PigeonholedMental: {
     name: 'trait_MasteryPerk_PigeonholedMental',
+    description:
+      'is masterful at improving mental skills but has a harder time with other skills',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_PigeonholedSocial: {
     name: 'trait_MasteryPerk_PigeonholedSocial',
+    description:
+      'is masterful at improving social skills but has a harder time with other skills',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_PowerfulPerformer: {
     name: 'trait_MasteryPerk_PowerfulPerformer',
+    description: 'is a talented performer at any skill',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_SecondWind: {
     name: 'trait_MasteryPerk_SecondWind',
+    description: 'is good at getting a second wind when exercising',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_SecretSpice: {
     name: 'trait_MasteryPerk_SecretSpice',
+    description: 'is a masterful chef',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_SkillfulSleep: {
     name: 'trait_MasteryPerk_SkillfulSleep',
+    ignored: true,
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
@@ -10180,11 +10202,14 @@ export const simsTraitDescriptions: Record<string, TraitMapping> = {
   },
   trait_MasteryPerk_Spacebender: {
     name: 'trait_MasteryPerk_Spacebender',
+    description:
+      'is able to bend the fabric of space and time, is able to teleport',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
   trait_MasteryPerk_StrongerWithAge: {
     name: 'trait_MasteryPerk_StrongerWithAge',
+    description: 'has improved stamina',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
@@ -15899,6 +15924,12 @@ export const simsTraitDescriptions: Record<string, TraitMapping> = {
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
+  trait_SmallBusiness_Perks_MuscleMemory: {
+    name: 'trait_SmallBusiness_Perks_MuscleMemory',
+    ignored: true,
+    class: 'Trait',
+    trait_type: TraitType.HIDDEN,
+  },
   trait_SmallBusiness_Perks_SimoCoin: {
     name: 'trait_SmallBusiness_Perks_SimoCoin',
     ignored: true,
@@ -15911,8 +15942,20 @@ export const simsTraitDescriptions: Record<string, TraitMapping> = {
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
+  trait_SmallBusiness_Perks_TipJar: {
+    name: 'trait_SmallBusiness_Perks_TipJar',
+    ignored: true,
+    class: 'Trait',
+    trait_type: TraitType.HIDDEN,
+  },
   trait_SmallBusiness_Perks_UltrasonicWhistle: {
     name: 'trait_SmallBusiness_Perks_UltrasonicWhistle',
+    ignored: true,
+    class: 'Trait',
+    trait_type: TraitType.HIDDEN,
+  },
+  trait_SmallBusiness_Perks_ViralSocialMedia: {
+    name: 'trait_SmallBusiness_Perks_ViralSocialMedia',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
