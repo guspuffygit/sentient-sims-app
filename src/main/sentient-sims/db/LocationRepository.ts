@@ -1,5 +1,8 @@
 /* eslint-disable class-methods-use-this */
-import { defaultLocationDescriptions } from '../descriptions/locationDescriptions';
+import {
+  defaultLocationDescriptions,
+  defaultLotDescription,
+} from '../descriptions/locationDescriptions';
 import { DeleteLocationRequest } from '../models/DeleteLocationRequest';
 import { GetLocationRequest } from '../models/GetLocationRequest';
 import { Repository } from './Repository';
@@ -21,22 +24,28 @@ export class LocationRepository extends Repository {
       return results[0];
     }
 
-    return (
-      defaultLocationDescriptions.get(locationRequest.id.toString()) || {
-        id: locationRequest.id,
-        name: 'the home',
-        lot_type: 'Residence',
-        description: [
-          'The suburban residence was nestled within a quiet neighborhood, surrounded by neatly trimmed lawns and white picket fences.',
-          'The house boasted a timeless charm.',
-          'A neatly manicured garden with blooming flowers lined the walkway leading up to the front porch.',
-          'The front door, provided a welcoming entrance.',
-          'Inside, the air was fresh and crisp, with the scent of freshly brewed coffee wafting through the air.',
-          'The living room was cozy, with comfortable sofas and armchairs creating the perfect ambiance for a relaxing time at home.',
-        ].join(' '),
-        is_generic: true,
-      }
+    const locationEntity = defaultLocationDescriptions.get(
+      locationRequest.id.toString()
     );
+    const defaultLocation = {
+      id: locationRequest.id,
+      name: 'the home',
+      lot_type: 'Residence',
+      description: defaultLotDescription,
+      is_generic: true,
+    };
+
+    if (!locationEntity) {
+      return defaultLocation;
+    }
+
+    return {
+      id: locationRequest.id,
+      name: locationEntity.name || defaultLocation.name,
+      lot_type: locationEntity.lot_type || defaultLocation.lot_type,
+      description: locationEntity.description || defaultLocation.description,
+      is_generic: locationEntity.description === defaultLocation.description,
+    };
   }
 
   /**

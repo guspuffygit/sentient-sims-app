@@ -1,5 +1,14 @@
 import { LocationEntity } from '../db/entities/LocationEntity';
 
+export const defaultLotDescription: string = [
+  'The suburban residence was nestled within a quiet neighborhood, surrounded by neatly trimmed lawns and white picket fences.',
+  'The house boasted a timeless charm.',
+  'A neatly manicured garden with blooming flowers lined the walkway leading up to the front porch.',
+  'The front door, provided a welcoming entrance.',
+  'Inside, the air was fresh and crisp, with the scent of freshly brewed coffee wafting through the air.',
+  'The living room was cozy, with comfortable sofas and armchairs creating the perfect ambiance for a relaxing time at home.',
+].join(' ');
+
 // Default zone descriptions for certain areas, can be overridden
 export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
   Object.entries({
@@ -942,6 +951,63 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
         'Adjacent to the main bar area are the private karaoke rooms, each painted in bold, contrasting colors like purple and yellow, creating a lively and private atmosphere for guests.',
         'These rooms feature comfortable seating arrangements from plush sofas to sleek chairs, catering to small groups. Bright and whimsical decorations, alongside modern karaoke equipment, adorn these rooms, making them perfect spots for guests to sing their hearts out in a more secluded setting.',
       ].join(' '),
+    },
+    '581238932': {
+      id: 581238932,
+      is_default: true,
+      name: 'Sarpong House',
+      lot_type: 'Residence',
+      description: [
+        'The Sarpong house sits above a little shop on a busy street.',
+        'On the main level, an industrial look with exposed brick and large doors and windows to the street.',
+        'The main floor is an open concept with the kitchen flowing right into the living room with a mounted TV.',
+        'Upstairs, is a simple bedroom with a walk out balcony that has a grill and little table.',
+        'A small desk is across from the bed across a catwalk where you can view down to the floor below.',
+        'On the rooftop is a small bedroom for a child with a door to the outside roof.',
+        'The roof features a telescope and a small garden.',
+      ].join(' '),
+    },
+    '3993632859': {
+      id: 3993632859,
+      is_default: true,
+      name: 'New Harbor Park',
+      lot_type: 'Park',
+      description: [
+        'New Harbor Park is nestled in the middle of Iverstad, a little post industrial city.',
+        'The park features a community center that is currently being built and under construction with warning signs around it.',
+        'A few large trees outline the park area, where an inset playground is built with some monkey bars.',
+        'There is a small square fountain with a reflection pond around it.',
+        'A small building with two bathrooms on one end of the park.',
+        'The wall between the construction and the rest of the park is decorated with community art and paintings.',
+      ].join(' '),
+    },
+    '434896998': {
+      id: 434896998,
+      is_default: true,
+      name: 'The Rogue Note',
+      lot_type: 'Lounge',
+      description: [
+        'The Rogue Note is an upscale lounge in the heart of of Gammelvik.',
+        'Red velvet love seats line the walls as the middle of the lounge has small round tables and chairs.',
+        'Low red lighting gives the lounge a moody quiet vibe.',
+        'A bar with two chairs is in the back of the room.',
+        'In the basement is a small room with a piano and stage for small performances.',
+        'The upstairs is only bathrooms.',
+      ].join(' '),
+    },
+    '3996254301': {
+      id: 3996254301,
+      is_default: true,
+      name: 'The Inked Inlet',
+      lot_type: 'Residence',
+      description: defaultLotDescription,
+    },
+    '3998875742': {
+      id: 3998875742,
+      is_default: true,
+      name: 'The Lighthouse Lookout',
+      lot_type: 'Residence',
+      description: defaultLotDescription,
     },
   })
 );
