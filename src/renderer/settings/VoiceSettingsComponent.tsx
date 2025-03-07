@@ -76,6 +76,7 @@ export default function VoiceSettingsComponent() {
                   }
                 >
                   <MenuItem value={ApiType.ElevenLabs}>ElevenLabs</MenuItem>
+                  <MenuItem value={ApiType.Kokoro}>Kokoro FastAPI</MenuItem>
                 </Select>
               </Stack>
             </Box>

@@ -8,10 +8,19 @@ import {
   defaultKokoroAITTSSettings,
   KokoroAITTSSettings,
 } from 'main/sentient-sims/models/KokoroAITTSSettings';
+import { sentientSimsAIHost } from 'main/sentient-sims/constants';
 import { TTSHook } from './TTSHook';
 
 export function useRemoteKokoroTTS(): TTSHook {
   const aiSettings = useAISettings();
+  const sentientSimsAIEndpointSetting = useSetting<string>(
+    SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
+    sentientSimsAIHost,
+  );
+  const sentientSimsAITokenSetting = useSetting<string>(
+    SettingsEnum.ACCESS_TOKEN,
+    '',
+  );
   const kokoroTTSSettings = useSetting<KokoroAITTSSettings>(
     SettingsEnum.KOKOROAI_TTS_SETTINGS,
     defaultKokoroAITTSSettings,
@@ -20,6 +29,7 @@ export function useRemoteKokoroTTS(): TTSHook {
 
   const tts = useCallback(
     async (text: string): Promise<void> => {
+      log.debug(`Remote Kokoro`);
       if (!text.trim()) return;
 
       const requestBody = {
@@ -30,13 +40,14 @@ export function useRemoteKokoroTTS(): TTSHook {
         speed: 1.0,
       };
 
-      const url = 'https://api.kokorotts.com/v1/audio/speech';
+      const url = `${sentientSimsAIEndpointSetting.value}/v1/audio/speech`;
       log.debug(`URL: ${url} Body: ${JSON.stringify(requestBody, null, 2)}`);
 
       try {
         const response = await axios.post(url, requestBody, {
           headers: {
             'Content-Type': 'application/json',
+            Authentication: sentientSimsAITokenSetting.value,
           },
           responseType: 'blob',
         });

@@ -64,9 +64,9 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
       return elevenLabsTTS;
     }
     if (aiSettings.ttsApiType === ApiType.Kokoro) {
-      if (isWebGPUSupported) {
-        return webGPUKokoroTTS;
-      }
+      // if (isWebGPUSupported) {
+      //   return webGPUKokoroTTS;
+      // }
 
       return remoteKokoroTTS;
     }
