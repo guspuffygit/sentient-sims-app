@@ -7,6 +7,7 @@ import { ApiType } from '../models/ApiType';
 import {
   defaultElevenLabsEndpoint,
   defaultGeminiModel,
+  defaultKokoroEndpoint,
   defaultTTSEnabled,
   defaultTTSVolume,
   geminiDefaultEndpoint,
@@ -122,7 +123,7 @@ export function defaultStore(cwd?: string) {
       },
       [SettingsEnum.TTS_API_TYPE.toString()]: {
         type: 'string',
-        default: ApiType.ElevenLabs.toString(),
+        default: ApiType.SentientSimsAI.toString(),
       },
       [SettingsEnum.TTS_VOLUME.toString()]: {
         type: 'number',
@@ -135,6 +136,10 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.SENTIENTSIMSAI_TTS_SETTINGS.toString()]: {
         type: 'object',
         default: defaultSentientSimsAITTSSettings,
+      },
+      [SettingsEnum.KOKOROAI_ENDPOINT.toString()]: {
+        type: 'string',
+        default: defaultKokoroEndpoint,
       },
       [SettingsEnum.KOKOROAI_TTS_SETTINGS.toString()]: {
         type: 'object',

@@ -1,0 +1,118 @@
+import { useState, useCallback } from 'react';
+import log from 'electron-log';
+import { useAISettings } from 'renderer/providers/AISettingsProvider';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import useSetting from 'renderer/hooks/useSetting';
+import { sentientSimsAIHost } from 'main/sentient-sims/constants';
+import {
+  defaultSentientSimsAITTSSettings,
+  SentientSimsAITTSSettings,
+} from 'main/sentient-sims/models/SentientSimsAITTSSettings';
+import { TTSHook } from './TTSHook';
+
+export function useSentientSimsTTS(): TTSHook {
+  const aiSettings = useAISettings();
+  const sentientSimsAIEndpointSetting = useSetting<string>(
+    SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
+    sentientSimsAIHost,
+  );
+  const sentientSimsAITokenSetting = useSetting<string>(
+    SettingsEnum.ACCESS_TOKEN,
+    '',
+  );
+  const sentientSimsAITTSSettings = useSetting<SentientSimsAITTSSettings>(
+    SettingsEnum.SENTIENTSIMSAI_TTS_SETTINGS,
+    defaultSentientSimsAITTSSettings,
+  );
+  const [audioSource, setAudioSource] = useState<HTMLAudioElement | null>(null);
+  const [error, setError] = useState<string | undefined>();
+
+  const tts = useCallback(
+    async (text: string): Promise<void> => {
+      setError(undefined);
+      if (!text.trim()) return;
+
+      log.debug(`Sentient Sims TTS: ${text}`);
+
+      if (sentientSimsAITTSSettings.value.voice.length === 0) {
+        setError('At least one Sentient Sims Voice must be selected');
+        return;
+      }
+
+      const requestBody = {
+        model: sentientSimsAITTSSettings.value.model,
+        input: text,
+        voice: sentientSimsAITTSSettings.value.voice.join('+'),
+        response_format: sentientSimsAITTSSettings.value.response_format,
+        speed: 1.0,
+      };
+
+      const url = `${sentientSimsAIEndpointSetting.value}/v1/audio/speech`;
+      log.debug(`URL: ${url} Body: ${JSON.stringify(requestBody, null, 2)}`);
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authentication: sentientSimsAITokenSetting.value,
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+          const errorMessage = `Unable to stream audio: ${response.status}`;
+          log.error(errorMessage);
+
+          try {
+            const bodyResponse = await response.text();
+            log.error(bodyResponse);
+            setError(bodyResponse);
+          } catch (err: any) {
+            setError(errorMessage);
+          }
+
+          return;
+        }
+
+        const audioUrl = URL.createObjectURL(await response.blob());
+        log.debug(`Audio URL: ${audioUrl}`);
+
+        const audio = new Audio(audioUrl);
+        audio.volume = aiSettings.ttsVolume;
+
+        setAudioSource(audio); // Store reference for stopping
+
+        await new Promise<void>((resolve) => {
+          audio.onended = () => {
+            setAudioSource(null);
+            resolve();
+          };
+          audio.play();
+        });
+      } catch (err: any) {
+        const errorMessage = `TTS request failed: ${error}`;
+        log.error(errorMessage);
+        setError(errorMessage);
+      }
+    },
+    [
+      sentientSimsAITTSSettings.value.model,
+      sentientSimsAITTSSettings.value.voice,
+      sentientSimsAITTSSettings.value.response_format,
+      sentientSimsAIEndpointSetting.value,
+      sentientSimsAITokenSetting.value,
+      aiSettings.ttsVolume,
+      error,
+    ],
+  );
+
+  const stopTTS = useCallback(() => {
+    if (audioSource) {
+      audioSource.pause();
+      setAudioSource(null);
+    }
+  }, [audioSource]);
+
+  return { speak: tts, stop: stopTTS, isPlaying: !!audioSource, error };
+}

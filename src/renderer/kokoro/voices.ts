@@ -1,6 +1,15 @@
 import log from 'electron-log';
 
-export const VOICES = Object.freeze({
+export type KokoroVoice = {
+  name: string;
+  language: string;
+  gender: 'Female' | 'Male';
+  traits?: string;
+  targetQuality: string;
+  overallGrade: string;
+};
+
+export const VOICES: Readonly<Record<string, KokoroVoice>> = Object.freeze({
   af_heart: {
     name: 'Heart',
     language: 'en-us',

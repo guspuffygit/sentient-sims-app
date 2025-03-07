@@ -26,6 +26,7 @@ export enum SettingsEnum {
   TTS_VOLUME = 'ttsVolume',
   OPENAI_TTS_SETTINGS = 'openaiTtsSettings',
   SENTIENTSIMSAI_TTS_SETTINGS = 'sentientsimsaiTtsSettings',
+  KOKOROAI_ENDPOINT = 'kokoroaiEndpoint',
   KOKOROAI_TTS_SETTINGS = 'kokoroaiTtsSettings',
   ELEVENLABS_KEY = 'elevenlabsKey',
   ELEVENLABS_ENDPOINT = 'elevenlabsEndpoint',

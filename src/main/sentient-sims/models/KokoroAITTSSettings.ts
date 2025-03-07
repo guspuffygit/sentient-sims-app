@@ -28,20 +28,27 @@ export enum KokoroAISpeechVoice {
   Fable = 'bm_fable',
 }
 
+export enum KokoroType {
+  Remote = 'remote',
+  WebGPU = 'webgpu',
+}
+
 export enum KokoroAISpeechModel {
   KOKORO = 'kokoro',
 }
 
 export type KokoroAITTSSettings = {
   model: (string & {}) | KokoroAISpeechModel;
-  voice: KokoroAISpeechVoice;
+  voice: KokoroAISpeechVoice[];
   response_format: 'wav';
+  type: KokoroType;
 };
 
 export const defaultKokoroAITTSSettings: KokoroAITTSSettings = {
   model: KokoroAISpeechModel.KOKORO,
-  voice: KokoroAISpeechVoice.Alloy,
+  voice: [KokoroAISpeechVoice.Heart],
   response_format: 'wav',
+  type: KokoroType.Remote,
 };
 
 export function toSpeechModel(model?: string): KokoroAISpeechModel {
@@ -62,4 +69,12 @@ export function toSpeechVoice(voice?: string): KokoroAISpeechVoice {
   }
 
   throw Error(`Unknown KokoroSpeechVoice ${voice}`);
+}
+
+export function toKokoroType(type?: string): KokoroType {
+  if (Object.values(KokoroType).includes(type as KokoroType)) {
+    return type as KokoroType;
+  }
+
+  throw Error(`Unknown KokoroType ${type}`);
 }

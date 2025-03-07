@@ -1,32 +1,36 @@
 import { FormHelperText } from '@mui/material';
-import log from 'electron-log';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
+import {
+  defaultKokoroAITTSSettings,
+  KokoroAITTSSettings,
+  KokoroType,
+} from 'main/sentient-sims/models/KokoroAITTSSettings';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import useSetting from 'renderer/hooks/useSetting';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { useTTS } from 'renderer/providers/AudioContextProvider';
 
 export default function WebGpuDebug() {
   const tts = useTTS();
   const aiSettings = useAISettings();
+  const kokoroaiTtsSettings = useSetting<KokoroAITTSSettings>(
+    SettingsEnum.KOKOROAI_TTS_SETTINGS,
+    defaultKokoroAITTSSettings,
+  );
 
   if (
-    tts.isWebGPUSupported ||
-    !aiSettings.ttsEnabled ||
-    aiSettings.ttsApiType !== ApiType.Kokoro
+    !tts.isWebGPUSupported &&
+    aiSettings.ttsEnabled &&
+    aiSettings.ttsApiType === ApiType.Kokoro &&
+    kokoroaiTtsSettings.value.type === KokoroType.WebGPU
   ) {
-    log.debug(
-      `isWebGPUSupported: ${
-        tts.isWebGPUSupported
-      }. !aiSettings.ttsEnabled: ${!aiSettings.ttsEnabled} aiSettings.ttsApiType !== ApiType.Kokoro: ${
-        aiSettings.aiApiType !== ApiType.Kokoro
-      }`,
+    return (
+      <FormHelperText error>
+        WebGPU is not supported in this runtime environment to use Kokoro
+        WebGPU. Use a third-party TTS service instead.
+      </FormHelperText>
     );
-    return null;
   }
 
-  return (
-    <FormHelperText error>
-      Kokoro requires WebGPU to function and WebGPU is not supported in this
-      runtime environment. Use a third-party TTS service instead.
-    </FormHelperText>
-  );
+  return null;
 }

@@ -34,13 +34,13 @@ export enum SentientSimsAISpeechModel {
 
 export type SentientSimsAITTSSettings = {
   model: (string & {}) | SentientSimsAISpeechModel;
-  voice: SentientSimsAISpeechVoice;
+  voice: SentientSimsAISpeechVoice[];
   response_format: 'wav';
 };
 
 export const defaultSentientSimsAITTSSettings: SentientSimsAITTSSettings = {
   model: SentientSimsAISpeechModel.KOKORO,
-  voice: SentientSimsAISpeechVoice.Alloy,
+  voice: [SentientSimsAISpeechVoice.Heart],
   response_format: 'wav',
 };
 

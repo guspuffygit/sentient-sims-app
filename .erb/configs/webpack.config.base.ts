@@ -58,6 +58,13 @@ const configuration: webpack.Configuration = {
       warning.message.includes(
         'Critical dependency: the request of a dependency is an expression',
       ),
+    (warning) =>
+      warning.message.includes(
+        `Module Warning (from ./node_modules/sass-loader/dist/cjs.js):
+Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+
+More info: https://sass-lang.com/d/legacy-js-api`,
+      ),
   ],
 
   plugins: [

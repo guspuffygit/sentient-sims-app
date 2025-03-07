@@ -10,8 +10,8 @@ import {
 import log from 'electron-log';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { useElevenLabsTTS } from 'renderer/voice/useElevenLabsTTS';
-import { useRemoteKokoroTTS } from 'renderer/voice/useRemoteKokoroTTS';
-import { useWebGPUKokoro } from 'renderer/voice/useWebGPUKokoro';
+import { useKokoroTTS } from 'renderer/voice/useKokoroTTS';
+import { useSentientSimsTTS } from 'renderer/voice/useSentientSimsTTS';
 import { useAISettings } from './AISettingsProvider';
 
 interface TTSAudioContextType {
@@ -51,32 +51,25 @@ async function checkWebGPU(): Promise<boolean> {
 
 export function AudioContextProvider({ children }: AudioContextProviderProps) {
   const aiSettings = useAISettings();
+  const sentientSimsTTS = useSentientSimsTTS();
   const elevenLabsTTS = useElevenLabsTTS();
-  const remoteKokoroTTS = useRemoteKokoroTTS();
   const [isWebGPUSupported, setIsWebGPUSupported] = useState<boolean | null>(
     null,
   );
-  const webGPUKokoroTTS = useWebGPUKokoro({ isWebGPUSupported });
+  const remoteKokoroTTS = useKokoroTTS({ isWebGPUSupported });
 
   // eslint-disable-next-line consistent-return
-  const tts = useCallback(() => {
+  const tts = useMemo(() => {
+    if (aiSettings.ttsApiType === ApiType.SentientSimsAI) {
+      return sentientSimsTTS;
+    }
     if (aiSettings.ttsApiType === ApiType.ElevenLabs) {
       return elevenLabsTTS;
     }
     if (aiSettings.ttsApiType === ApiType.Kokoro) {
-      if (isWebGPUSupported) {
-        return webGPUKokoroTTS;
-      }
-
       return remoteKokoroTTS;
     }
-  }, [
-    aiSettings.ttsApiType,
-    elevenLabsTTS,
-    isWebGPUSupported,
-    remoteKokoroTTS,
-    webGPUKokoroTTS,
-  ]);
+  }, [aiSettings.ttsApiType, elevenLabsTTS, remoteKokoroTTS, sentientSimsTTS]);
 
   useEffect(() => {
     async function checkSupport() {
@@ -91,13 +84,13 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
     async (text: string) => {
       if (!text.trim()) return;
 
-      tts()?.speak(text);
+      tts?.speak(text);
     },
     [tts],
   );
 
   const stop = useCallback(() => {
-    tts()?.stop();
+    tts?.stop();
   }, [tts]);
 
   useEffect(() => {
@@ -112,13 +105,12 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
   }, [speak]);
 
   const contextValue = useMemo(() => {
-    const ttsInstance = tts();
     return {
       speak,
       stop,
       isWebGPUSupported,
-      isPlaying: ttsInstance?.isPlaying,
-      error: ttsInstance?.error,
+      isPlaying: tts?.isPlaying,
+      error: tts?.error,
     };
   }, [speak, stop, isWebGPUSupported, tts]);
 

@@ -1,4 +1,3 @@
-import { LoadingButton } from '@mui/lab';
 import {
   Box,
   FormHelperText,
@@ -16,7 +15,9 @@ import {
   toSpeechModel,
 } from 'main/sentient-sims/models/ElevenLabsTTSSettings';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import { useMemo } from 'react';
 import APIKeyInput from 'renderer/APIKeyInput';
+import { TestVoiceButton } from 'renderer/components/VoiceTestButton';
 import useSetting from 'renderer/hooks/useSetting';
 import { useTTS } from 'renderer/providers/AudioContextProvider';
 
@@ -32,10 +33,11 @@ export default function ElevenLabsVoiceSettingsComponent() {
     '',
   );
 
-  const modelMenuItems: any[] = [];
-  Object.values(ElevenLabsSpeechModel).forEach((model) =>
-    modelMenuItems.push(<MenuItem value={model}>{model}</MenuItem>),
-  );
+  const modelMenuItems = useMemo(() => {
+    return Object.values(ElevenLabsSpeechModel).map((model) => (
+      <MenuItem value={model}>{model}</MenuItem>
+    ));
+  }, []);
 
   function handleModelChange(model: string) {
     sentientsimsaiTtsSettings.setSetting({
@@ -53,10 +55,6 @@ export default function ElevenLabsVoiceSettingsComponent() {
       output_format: sentientsimsaiTtsSettings.value.output_format,
       voice_settings: sentientsimsaiTtsSettings.value.voice_settings,
     });
-  }
-
-  async function testVoice() {
-    await tts.speak('Hello, this is a demo of my voice.');
   }
 
   return (
@@ -100,14 +98,7 @@ export default function ElevenLabsVoiceSettingsComponent() {
               onChange={(change) => handleVoiceChange(change.target.value)}
               sx={{ marginRight: 4 }}
             />
-            <LoadingButton
-              color="primary"
-              variant="outlined"
-              onClick={() => testVoice()}
-              loading={tts.isPlaying}
-            >
-              Test
-            </LoadingButton>
+            <TestVoiceButton />
           </Stack>
         </Box>
         <APIKeyInput setting={elevenlabsKeySetting} aiName="ElevenLabs" />

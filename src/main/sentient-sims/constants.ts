@@ -76,3 +76,4 @@ export const geminiDefaultEndpoint =
 export const defaultTTSEnabled = false;
 export const defaultTTSVolume = 0.75;
 export const defaultElevenLabsEndpoint = 'https://api.elevenlabs.io/v1';
+export const defaultKokoroEndpoint = 'https://api.kokorotts.com';

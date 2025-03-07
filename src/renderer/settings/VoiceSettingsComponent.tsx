@@ -14,7 +14,6 @@ import { ApiType, ApiTypeFromValue } from 'main/sentient-sims/models/ApiType';
 import { JSX } from 'react';
 import { VolumeDown, VolumeUp } from '@mui/icons-material';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
-import WebGpuDebug from 'renderer/components/WebGpuDebug';
 import OpenAIVoiceSettingsComponent from './voice/OpenAIVoiceSettingsComponent';
 import SentientSimsAIVoiceSettingsComponent from './voice/SentientSimsAIVoiceComponent';
 import KokoroAIVoiceSettingsComponent from './voice/KokoroAIVoiceSettingsComponent';
@@ -50,9 +49,6 @@ export default function VoiceSettingsComponent() {
         />
         <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/Voice#tts" />
       </Box>
-      <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
-        <WebGpuDebug />
-      </Box>
       {aiSettings.ttsEnabled ? (
         <Grid container spacing={3} alignItems="center">
           <Grid item xs={12} sm={8}>
@@ -75,7 +71,9 @@ export default function VoiceSettingsComponent() {
                     )
                   }
                 >
-                  <MenuItem value={ApiType.ElevenLabs}>ElevenLabs</MenuItem>
+                  <MenuItem value={ApiType.SentientSimsAI}>
+                    Sentient Sims AI TTS
+                  </MenuItem>
                 </Select>
               </Stack>
             </Box>
@@ -98,7 +96,12 @@ export default function VoiceSettingsComponent() {
                   }
                   step={0.01}
                   min={0.0}
-                  max={1.0}
+                  max={1}
+                  marks={[
+                    { value: 0, label: '0' },
+                    { value: 0.5, label: '0.5' },
+                    { value: 1.0, label: '1' },
+                  ]}
                 />
                 <VolumeUp />
               </Stack>
