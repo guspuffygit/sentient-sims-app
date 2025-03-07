@@ -101,7 +101,7 @@ export default function SimsPage() {
         });
       }
     },
-    [sims]
+    [sims],
   );
 
   async function handleSave() {
@@ -157,7 +157,7 @@ export default function SimsPage() {
         },
       }));
     },
-    []
+    [],
   );
   if (sims.length > 0) {
     let editSimBox;

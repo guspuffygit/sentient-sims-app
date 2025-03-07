@@ -13,7 +13,7 @@ export class DebugController {
 
   constructor(
     settingsService: SettingsService,
-    logSendService: LogSendService
+    logSendService: LogSendService,
   ) {
     this.settingsService = settingsService;
     this.logSendService = logSendService;
@@ -50,7 +50,7 @@ export class DebugController {
   async sendDebugLogs(req: Request, res: Response) {
     const sendLogsRequest: SendLogsRequest = req.body;
     res.json(
-      await this.logSendService.sendLogsToDiscord(webhookUrl, sendLogsRequest)
+      await this.logSendService.sendLogsToDiscord(webhookUrl, sendLogsRequest),
     );
   }
 

@@ -7,6 +7,7 @@ import {
   Typography,
   styled,
 } from '@mui/material';
+import { v4 as uuidv4 } from 'uuid';
 import AppCard from 'renderer/AppCard';
 import EditIcon from '@mui/icons-material/Edit';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -37,7 +38,7 @@ function LeaderboardRow({
   const what = `#${index + 1} ${name}`;
 
   return (
-    <SpaceBetweenDiv>
+    <SpaceBetweenDiv key={uuidv4()}>
       <div>
         {isMe ? (
           <HighlightedTypography>{what}</HighlightedTypography>
@@ -82,14 +83,15 @@ export function MappingLeaderboardComponent() {
             name={userAnimationInfo.displayName}
             count={userAnimationInfo.mappedCount}
             index={i}
-          />
+            key={uuidv4()}
+          />,
         );
       }
     }
   }
 
   function handleInputChange(
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
     setUsername(event.target.value);
   }

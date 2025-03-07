@@ -29,7 +29,7 @@ export class DbService {
     if (databaseSession.action === 'perform_migrate_single_slot_save') {
       if (
         DirectoryService.fileExistsSync(
-          `${this.directoryService.getSingleSlotSentientSimsDB()}.backup`
+          `${this.directoryService.getSingleSlotSentientSimsDB()}.backup`,
         )
       ) {
         log.info('Database is already migrated');
@@ -37,31 +37,31 @@ export class DbService {
       }
       if (
         !DirectoryService.fileExistsSync(
-          this.directoryService.getSingleSlotSentientSimsDB()
+          this.directoryService.getSingleSlotSentientSimsDB(),
         )
       ) {
         log.info('No single slot save exists');
         return;
       }
       log.info(
-        `Migrating single slot save to new slot:\n${unsavedDb}\n${savedDb}`
+        `Migrating single slot save to new slot:\n${unsavedDb}\n${savedDb}`,
       );
       fs.copyFileSync(
         this.directoryService.getSingleSlotSentientSimsDB(),
-        unsavedDb
+        unsavedDb,
       );
       fs.copyFileSync(
         this.directoryService.getSingleSlotSentientSimsDB(),
-        savedDb
+        savedDb,
       );
       log.info(`Done copying, moving single slot save to backup`);
       fs.renameSync(
         this.directoryService.getSingleSlotSentientSimsDB(),
-        `${this.directoryService.getSingleSlotSentientSimsDB()}.backup`
+        `${this.directoryService.getSingleSlotSentientSimsDB()}.backup`,
       );
     } else if (
       DirectoryService.fileExistsSync(
-        this.directoryService.getSingleSlotSentientSimsDB()
+        this.directoryService.getSingleSlotSentientSimsDB(),
       )
     ) {
       log.info('Single slot save exists, sending notification to mod');
@@ -119,7 +119,7 @@ export class DbService {
         } catch (err: any) {
           log.error(
             `Unable to remove unsaved db sessionId: ${databaseSession.sessionId}`,
-            err
+            err,
           );
         }
       });

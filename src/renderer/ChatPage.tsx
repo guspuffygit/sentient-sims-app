@@ -36,7 +36,7 @@ export default function ChatPage() {
       setTimeout(() => {
         messagesEndRef?.current?.scrollIntoView();
       }, 500);
-    }, [])
+    }, []),
   );
 
   const resultsModal = ChatResultsModal();

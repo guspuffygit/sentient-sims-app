@@ -40,11 +40,11 @@ describe('Formatter', () => {
     const expectedFileName = 'lastException-1901283.txt';
     const lastExceptionFile = path.join(
       directoryService.getSims4Folder(),
-      expectedFileName
+      expectedFileName,
     );
 
     directoryService.createDirectoryIfNotExist(
-      directoryService.getSims4Folder()
+      directoryService.getSims4Folder(),
     );
 
     fs.copyFileSync('./src/__tests__/lastException.txt', lastExceptionFile);

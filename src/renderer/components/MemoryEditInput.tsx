@@ -7,7 +7,7 @@ export type MemoryEditInputProperties = {
   value?: string;
   label: string;
   handleEdit: (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
   forceShow?: boolean;
 };

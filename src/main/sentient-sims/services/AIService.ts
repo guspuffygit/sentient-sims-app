@@ -21,6 +21,7 @@ import {
 import {
   notifyMapAnimation,
   notifyMapInteraction,
+  playTTS,
 } from '../util/notifyRenderer';
 import {
   GenerationOptions,
@@ -87,7 +88,7 @@ export class AIService {
     settingsService: SettingsService,
     promptRequestBuilderService: PromptRequestBuilderService,
     animationsService: AnimationsService,
-    interactionService: InteractionService
+    interactionService: InteractionService,
   ) {
     this.settingsService = settingsService;
     this.promptRequestBuilderService = promptRequestBuilderService;
@@ -101,7 +102,7 @@ export class AIService {
   }
 
   async interactionEvent(
-    event: InteractionEvents
+    event: InteractionEvents,
   ): Promise<InteractionEventResult> {
     switch (event.event_type) {
       case SSEventType.DO_SOMETHING:
@@ -133,7 +134,7 @@ export class AIService {
       };
     } else {
       description = await this.interactionService.getInteractionDescription(
-        event.interaction_name
+        event.interaction_name,
       );
     }
 
@@ -189,7 +190,7 @@ export class AIService {
 
     const animation = await this.animationsService.getAnimation(
       event.animation_author,
-      event.animation_identifier
+      event.animation_identifier,
     );
 
     if (event.ww_event_type === WWEventType.ASKING) {
@@ -252,7 +253,7 @@ export class AIService {
 
   async runGeneration(
     event: InteractionEvents,
-    options: GenerationOptions = {}
+    options: GenerationOptions = {},
   ): Promise<InteractionEventResult> {
     const generationService = getGenerationService(this.settingsService);
     const tokenCounter = getTokenCounter(this.settingsService);
@@ -273,7 +274,7 @@ export class AIService {
     let promptRequest =
       await this.promptRequestBuilderService.buildPromptRequest(
         event,
-        promptOptions
+        promptOptions,
       );
 
     // save memory before any model specific formatting
@@ -292,9 +293,8 @@ export class AIService {
     const openAIRequest =
       openAIRequestBuilder.buildOpenAIRequest(promptRequest);
 
-    const response = await generationService.sentientSimsGenerate(
-      openAIRequest
-    );
+    const response =
+      await generationService.sentientSimsGenerate(openAIRequest);
 
     const stopTokens = [];
     // TODO: model specific OUTPUT formatting cleanup stop tokens
@@ -346,6 +346,8 @@ export class AIService {
 
     newMemory.content = output;
 
+    this.playTts(output);
+
     return {
       status: InteractionEventStatus.GENERATED,
       text: output,
@@ -355,18 +357,18 @@ export class AIService {
   }
 
   async runClassification(
-    classificationRequest: ClassificationRequest
+    classificationRequest: ClassificationRequest,
   ): Promise<InteractionEventResult> {
     const generationService = getGenerationService(this.settingsService);
     const tokenCounter = getTokenCounter(this.settingsService);
 
     const apiType: ApiType = this.settingsService.get(
-      SettingsEnum.AI_API_TYPE
+      SettingsEnum.AI_API_TYPE,
     ) as ApiType;
 
     const systemPrompt = defaultClassificationPrompt.replaceAll(
       '{classifiers}',
-      classificationRequest.classifiers.join(', ')
+      classificationRequest.classifiers.join(', '),
     );
 
     let oneShotRequest: OneShotRequest = {
@@ -386,9 +388,8 @@ export class AIService {
     const openAIRequest =
       openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
 
-    const response = await generationService.sentientSimsGenerate(
-      openAIRequest
-    );
+    const response =
+      await generationService.sentientSimsGenerate(openAIRequest);
 
     const output = cleanAIClassificationOutput(response.text);
 
@@ -410,7 +411,7 @@ export class AIService {
     const tokenCounter = getTokenCounter(this.settingsService);
 
     const apiType: ApiType = this.settingsService.get(
-      SettingsEnum.AI_API_TYPE
+      SettingsEnum.AI_API_TYPE,
     ) as ApiType;
 
     const systemPrompt = getBuffSystemPrompt(apiType)
@@ -433,9 +434,8 @@ export class AIService {
     const openAIRequest =
       openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
 
-    const response = await generationService.sentientSimsGenerate(
-      openAIRequest
-    );
+    const response =
+      await generationService.sentientSimsGenerate(openAIRequest);
 
     const output = cleanupAIOutput(response.text);
 
@@ -465,18 +465,23 @@ export class AIService {
 
     if (event.status === InteractionEventStatus.UNMAPPED_INTERACTION) {
       log.debug(
-        `Unmapped interaction will be mapped: ${event.interaction_name}`
+        `Unmapped interaction will be mapped: ${event.interaction_name}`,
       );
       if (event.sentient_sims.length <= 2) {
         notifyMapInteraction(event);
         return { status: InteractionEventStatus.MAPPING_INTERACTION };
       }
       log.debug(
-        `Interaction ${event.interaction_name} has more than 2 sims: ${event.sentient_sims.length}, mapping isnt supported yet for more than 2.`
+        `Interaction ${event.interaction_name} has more than 2 sims: ${event.sentient_sims.length}, mapping isnt supported yet for more than 2.`,
       );
     }
 
     log.debug(`NOOP interaction mapping: ${event.interaction_name}`);
     return { status: InteractionEventStatus.NOOP };
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  playTts(text: string) {
+    playTTS(text);
   }
 }

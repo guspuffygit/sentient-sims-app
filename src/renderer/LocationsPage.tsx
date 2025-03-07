@@ -99,7 +99,7 @@ export default function LocationsPage() {
         });
       }
     },
-    [locations]
+    [locations],
   );
 
   async function handleSave() {
@@ -162,7 +162,7 @@ export default function LocationsPage() {
         },
       }));
     },
-    []
+    [],
   );
 
   const handleLotTypeEdit = useCallback(
@@ -177,7 +177,7 @@ export default function LocationsPage() {
         },
       }));
     },
-    []
+    [],
   );
 
   const handleDescriptionEdit = useCallback(
@@ -192,7 +192,7 @@ export default function LocationsPage() {
         },
       }));
     },
-    []
+    [],
   );
   if (locations.length > 0) {
     let editLocationBox;

@@ -141,7 +141,7 @@ export class NovelAIService implements GenerationService {
   getNovelAIKey(): string | undefined {
     // Check app settings
     const novelAIKeyFromSettings = this.settingsService.get(
-      SettingsEnum.NOVELAI_KEY
+      SettingsEnum.NOVELAI_KEY,
     );
     if (novelAIKeyFromSettings) {
       log.debug('Using novelai key from settings');
@@ -149,7 +149,7 @@ export class NovelAIService implements GenerationService {
     }
 
     throw new NovelAIKeyNotSetError(
-      'No NovelAI Key set, Edit NovelAI Key to set it'
+      'No NovelAI Key set, Edit NovelAI Key to set it',
     );
   }
 
@@ -190,7 +190,7 @@ export class NovelAIService implements GenerationService {
   }
 
   async sentientSimsGenerate(
-    request: OpenAICompatibleRequest
+    request: OpenAICompatibleRequest,
   ): Promise<SimsGenerateResponse> {
     const prompt = request.messages.map((m) => m.content).join('\n');
     log.debug(`prompt: ${JSON.stringify(prompt)}`);

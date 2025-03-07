@@ -13,7 +13,7 @@ describe('PromptFormatter', () => {
   it('should trim sentence', () => {
     const imcompleteSentence = 'This is a sentence. This is a';
     expect(trimIncompleteSentence(imcompleteSentence)).toEqual(
-      'This is a sentence.'
+      'This is a sentence.',
     );
   });
 
@@ -23,7 +23,7 @@ describe('PromptFormatter', () => {
     const lineThree = 'Line three.';
     const multipleParagraphs = [lineOne, lineTwo, lineThree];
     expect(removeLastParagraph(multipleParagraphs.join('\n\n'))).toEqual(
-      [lineOne, lineTwo].join('\n\n')
+      [lineOne, lineTwo].join('\n\n'),
     );
   });
 
@@ -42,7 +42,7 @@ describe('PromptFormatter', () => {
         level: 'TEST',
         timestamp: '1731953773368',
         message: 'test',
-      })
+      }),
     ).toEqual('2024-11-18 18:16:13,368 - TEST - test');
   });
 });

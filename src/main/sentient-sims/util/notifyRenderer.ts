@@ -56,6 +56,11 @@ export function sendChatGeneration(response: InteractionEventResult) {
   notifyAllWindows('on-chat-generation', response);
 }
 
+export function playTTS(text: string) {
+  log.debug('Sending on-voice');
+  notifyAllWindows('on-voice', text);
+}
+
 export function sendPopUpNotification(message?: string) {
   if (message) {
     notifyAllWindows('popup-notification', message);
@@ -65,7 +70,7 @@ export function sendPopUpNotification(message?: string) {
 export function notifyMapAnimation(event: WWInteractionEvent) {
   log.debug(
     'Notifying renderer to begin mapping animation',
-    JSON.stringify(event, null, 2)
+    JSON.stringify(event, null, 2),
   );
   notifyAllWindows('on-map-animation', event);
 }
@@ -88,7 +93,7 @@ export function notifyDatabaseLoaded(databaseSession: DatabaseSession) {
 export function notifyMapInteraction(event: InteractionMappingEvent) {
   log.debug(
     'Notifying renderer to begin mapping interaction',
-    JSON.stringify(event, null, 2)
+    JSON.stringify(event, null, 2),
   );
   notifyAllWindows('on-map-interaction', event);
 }

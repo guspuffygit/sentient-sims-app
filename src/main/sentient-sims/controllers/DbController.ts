@@ -20,7 +20,7 @@ export class DbController {
     try {
       const databaseSession: DatabaseSession = req.body;
       log.debug(
-        `Loading database: ${databaseSession.sessionId} : ${databaseSession.saveId}`
+        `Loading database: ${databaseSession.sessionId} : ${databaseSession.saveId}`,
       );
 
       await this.dbService.loadDatabase(databaseSession);
@@ -35,7 +35,7 @@ export class DbController {
     try {
       const databaseSession: DatabaseSession = req.body;
       log.debug(
-        `Saving database: ${databaseSession.sessionId} : ${databaseSession.saveId}`
+        `Saving database: ${databaseSession.sessionId} : ${databaseSession.saveId}`,
       );
 
       await this.dbService.saveDatabase(databaseSession);

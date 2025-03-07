@@ -15,7 +15,7 @@ export default function PopupNotificationModal() {
         open: true,
         message: notificationMessage,
       });
-    }
+    },
   );
 
   const onClose = () => {

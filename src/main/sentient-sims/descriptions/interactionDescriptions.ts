@@ -9986,5 +9986,5 @@ export const interactionDescriptions: Map<String, InteractionDescription> =
       'TURBODRIVER:WickedWhims_AffSuper_Peeping_FindWindow_Trigger': {
         ignored: true,
       },
-    })
+    }),
   );

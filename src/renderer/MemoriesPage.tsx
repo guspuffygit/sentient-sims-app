@@ -36,11 +36,11 @@ export default function MemoriesPage() {
     (deleteMemoryRequest: DeleteMemoryRequest) => {
       setMemories((previousMemories) =>
         previousMemories.filter(
-          (memory) => memory.id !== deleteMemoryRequest.id
-        )
+          (memory) => memory.id !== deleteMemoryRequest.id,
+        ),
       );
     },
-    []
+    [],
   );
 
   const editMemory = useCallback((memory: MemoryEntity) => {
@@ -58,7 +58,7 @@ export default function MemoriesPage() {
     const removeListener = window.electron.onNewMemoryAdded(
       (_event: any, memory: MemoryEntity) => {
         addMemory(memory);
-      }
+      },
     );
 
     return () => {
@@ -123,7 +123,7 @@ export default function MemoriesPage() {
         });
       }
     },
-    [memories]
+    [memories],
   );
 
   useEffect(() => {
@@ -131,7 +131,7 @@ export default function MemoriesPage() {
       (_event: any, deleteMemoryRequest: DeleteMemoryRequest) => {
         deleteMemory(deleteMemoryRequest);
         handleSetSelectedMemory(-1);
-      }
+      },
     );
 
     return () => {
@@ -144,7 +144,7 @@ export default function MemoriesPage() {
       (_event: any, memory: MemoryEntity) => {
         editMemory(memory);
         handleSetSelectedMemory(-1);
-      }
+      },
     );
 
     return () => {
@@ -207,7 +207,7 @@ export default function MemoriesPage() {
         },
       }));
     },
-    []
+    [],
   );
 
   const handleContentEdit = useCallback(
@@ -224,7 +224,7 @@ export default function MemoriesPage() {
         },
       }));
     },
-    []
+    [],
   );
 
   const handlePreActionEdit = useCallback(
@@ -241,7 +241,7 @@ export default function MemoriesPage() {
         },
       }));
     },
-    []
+    [],
   );
   if (memories.length > 0) {
     const renderText: any[] = [];
@@ -254,7 +254,7 @@ export default function MemoriesPage() {
           className="hoverHighlightTypography"
         >
           {[memory.observation, memory.content].filter((m) => m).join(' ')}
-        </Typography>
+        </Typography>,
       );
       renderText.push(<Typography> </Typography>);
     });

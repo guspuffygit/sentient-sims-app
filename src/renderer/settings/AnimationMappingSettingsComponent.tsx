@@ -15,11 +15,11 @@ export function AnimationMappingSettingsComponent({
 }: AnimationMappingSettingsComponentProps) {
   const animationMappingEnabled = useSetting(
     SettingsEnum.MAPPING_NOTIFICATION_ENABLED,
-    true
+    true,
   );
 
   const onAnimationMappingEnabledChange = (
-    change: ChangeEvent<HTMLInputElement>
+    change: ChangeEvent<HTMLInputElement>,
   ) => {
     animationMappingEnabled.setSetting(change.target.checked);
   };

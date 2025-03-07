@@ -1,5 +1,9 @@
 import log from 'electron-log';
-import { appApiUrl } from 'main/sentient-sims/constants';
+import {
+  appApiUrl,
+  defaultTTSEnabled,
+  defaultTTSVolume,
+} from 'main/sentient-sims/constants';
 import {
   AIHealthCheckResponse,
   AITestStatus,
@@ -23,13 +27,19 @@ import useSetting, { SettingsHook } from 'renderer/hooks/useSetting';
 interface AISettingsContextType {
   aiApiName: string;
   aiApiType: ApiType;
-  aiApiTypeSetting: SettingsHook<string>;
+  ttsApiType: ApiType;
+  ttsEnabled: boolean;
+  ttsVolume: number;
+  aiApiTypeSetting: SettingsHook<ApiType>;
+  ttsApiTypeSetting: SettingsHook<ApiType>;
+  ttsEnabledSetting: SettingsHook<boolean>;
+  ttsVolumeSetting: SettingsHook<number>;
   aiStatus: AITestStatus;
   testAI: (openAIKey?: string) => Promise<void>;
 }
 
 const AISettingsContext = createContext<AISettingsContextType | undefined>(
-  undefined
+  undefined,
 );
 
 interface AISettingsProviderProps {
@@ -90,22 +100,53 @@ export function AISettingsProvider({ children }: AISettingsProviderProps) {
     });
   };
 
-  const aiApiTypeSetting = useSetting(
+  const aiApiTypeSetting = useSetting<ApiType>(
     SettingsEnum.AI_API_TYPE,
-    ApiType.OpenAI.toString()
+    ApiType.SentientSimsAI,
+  );
+
+  const ttsApiTypeSetting = useSetting<ApiType>(
+    SettingsEnum.TTS_API_TYPE,
+    ApiType.SentientSimsAI,
+  );
+
+  const ttsEnabledSetting = useSetting<boolean>(
+    SettingsEnum.TTS_ENABLED,
+    defaultTTSEnabled,
+  );
+
+  const ttsVolumeSetting = useSetting<number>(
+    SettingsEnum.TTS_VOLUME,
+    defaultTTSVolume,
   );
 
   const aiApiType = ApiTypeFromValue(aiApiTypeSetting.value);
+
+  const ttsApiType = ApiTypeFromValue(ttsApiTypeSetting.value);
 
   const contextValue = useMemo(() => {
     return {
       aiApiType,
       aiStatus,
+      ttsApiType,
+      ttsEnabled: ttsEnabledSetting.value,
+      ttsVolume: ttsVolumeSetting.value,
       aiApiTypeSetting,
+      ttsApiTypeSetting,
+      ttsEnabledSetting,
+      ttsVolumeSetting,
       aiApiName: ApiTypeName(aiApiType),
       testAI,
     };
-  }, [aiApiType, aiStatus, aiApiTypeSetting]);
+  }, [
+    aiApiType,
+    aiStatus,
+    ttsApiType,
+    ttsEnabledSetting,
+    ttsVolumeSetting,
+    aiApiTypeSetting,
+    ttsApiTypeSetting,
+  ]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

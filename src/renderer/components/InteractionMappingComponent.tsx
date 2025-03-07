@@ -52,14 +52,14 @@ type ReplacementOutput = {
 
 export function replaceActorStringWithSimNames(
   targetString: string,
-  replacements: ActorMapping[]
+  replacements: ActorMapping[],
 ): string {
   let actionString: string = targetString;
 
   replacements.forEach((replacement) => {
     actionString = actionString.replaceAll(
       replacement.actor,
-      replacement.mapping
+      replacement.mapping,
     );
   });
 
@@ -69,7 +69,7 @@ export function replaceActorStringWithSimNames(
 export function replaceKeyValuePairs(
   targetString: string,
   replacements: ActorMapping[],
-  errors: Map<string, string>
+  errors: Map<string, string>,
 ): ReplacementOutput {
   let actionString: string[] = [targetString];
   let newLines: ReactNode[] = [targetString];
@@ -90,7 +90,7 @@ export function replaceKeyValuePairs(
           acc.push(
             <Tooltip title={replacement.actor} placement="top">
               <Chip label={replacement.mapping} variant="filled" />
-            </Tooltip>
+            </Tooltip>,
           );
         }
         return acc;
@@ -131,7 +131,7 @@ export function replaceKeyValuePairs(
           acc.push(
             <Tooltip title={errorMessage} placement="top">
               <Chip label={error} color="error" />
-            </Tooltip>
+            </Tooltip>,
           );
         }
         return acc;
@@ -208,17 +208,17 @@ export function InteractionMappingComponent() {
         if (interactionEvent?.testing_action) {
           const formattedInput = replaceActorStringWithSimNames(
             interactionEvent.testing_action,
-            getMappingStringReplacementPairs(interactionEvent.sentient_sims)
+            getMappingStringReplacementPairs(interactionEvent.sentient_sims),
           );
           setInput(formattedInput);
         } else {
           const simNames = interactionEvent.sentient_sims.map(
-            (sim) => sim.name
+            (sim) => sim.name,
           );
           const simNamesList = formatListToString(simNames);
           setInput(`${simNamesList} are `);
         }
-      }
+      },
     );
 
     return () => {
@@ -235,7 +235,7 @@ export function InteractionMappingComponent() {
   if (event?.sentient_sims) {
     event.sentient_sims.forEach((sentientSim) => {
       rows.push(
-        <SimMappingRow sentientSim={sentientSim} setInput={setInput} />
+        <SimMappingRow sentientSim={sentientSim} setInput={setInput} />,
       );
     });
 
@@ -249,7 +249,7 @@ export function InteractionMappingComponent() {
           <Button onClick={() => add(nonInitiatorParticipants.join(', '))}>
             non_initiator_participants
           </Button>
-        </Box>
+        </Box>,
       );
       // {non_initiator_participants}
     }
@@ -258,7 +258,7 @@ export function InteractionMappingComponent() {
   const output = replaceKeyValuePairs(
     input,
     getMappingStringReplacementPairs(event?.sentient_sims),
-    getMappingStringErrorPairs(event?.sentient_sims)
+    getMappingStringErrorPairs(event?.sentient_sims),
   );
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -272,7 +272,7 @@ export function InteractionMappingComponent() {
     const formattedOutput = replaceKeyValuePairs(
       input,
       getMappingStringReplacementPairs(event.sentient_sims),
-      getMappingStringErrorPairs(event.sentient_sims)
+      getMappingStringErrorPairs(event.sentient_sims),
     );
 
     const interaction: InteractionDTO = {
@@ -327,7 +327,7 @@ export function InteractionMappingComponent() {
       const testOutput = replaceKeyValuePairs(
         input,
         getMappingStringReplacementPairs(event?.sentient_sims),
-        getMappingStringErrorPairs(event?.sentient_sims)
+        getMappingStringErrorPairs(event?.sentient_sims),
       );
 
       const testEvent: InteractionEvent = {
@@ -363,12 +363,12 @@ export function InteractionMappingComponent() {
     testOutcome = [];
     testResults.forEach((result, index) => {
       testOutcome.push(
-        <Typography sx={{ marginBottom: 1 }}>Test {index + 1}:</Typography>
+        <Typography sx={{ marginBottom: 1 }}>Test {index + 1}:</Typography>,
       );
       testOutcome.push(
         <Typography variant="body2" sx={{ marginBottom: 1 }}>
           {result.text}
-        </Typography>
+        </Typography>,
       );
     });
   } else {

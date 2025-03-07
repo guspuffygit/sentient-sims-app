@@ -12,12 +12,12 @@ import Alert from '@mui/material/Alert';
 type SnackBarContextType = {
   showMessage: (
     message: string,
-    severity?: 'success' | 'info' | 'warning' | 'error'
+    severity?: 'success' | 'info' | 'warning' | 'error',
   ) => void;
 };
 
 const SnackBarContext = createContext<SnackBarContextType | undefined>(
-  undefined
+  undefined,
 );
 
 type SnackBarProviderProps = {
@@ -34,18 +34,18 @@ export function SnackBarProvider({ children }: SnackBarProviderProps) {
   const showMessage = useCallback(
     (
       msg: string,
-      severityType: 'success' | 'info' | 'warning' | 'error' = 'info'
+      severityType: 'success' | 'info' | 'warning' | 'error' = 'info',
     ) => {
       setMessage(msg);
       setSeverity(severityType);
       setOpen(true);
     },
-    []
+    [],
   );
 
   const handleClose = (
     event: React.SyntheticEvent<any, Event> | Event,
-    reason?: string
+    reason?: string,
   ) => {
     if (reason === 'clickaway') {
       return;

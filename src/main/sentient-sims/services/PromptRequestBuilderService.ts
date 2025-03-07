@@ -47,7 +47,7 @@ export class PromptRequestBuilderService {
   async formatSims(
     sentientSims: SentientSim[],
     location: LocationEntity,
-    relationships?: SSRelationships
+    relationships?: SSRelationships,
   ): Promise<string[]> {
     const participants =
       await this.repositoryService.participant.getParticipants(
@@ -59,7 +59,7 @@ export class PromptRequestBuilderService {
             log.error(JSON.stringify(sentientSim, null, 2));
             throw err;
           }
-        })
+        }),
       );
 
     const formattedParticipants: string[] = [];
@@ -83,7 +83,7 @@ export class PromptRequestBuilderService {
       relationships.relationship_bits.forEach((bit) => {
         if (defaultRelationshipBitDescriptions.has(bit.name)) {
           const bitDescription = defaultRelationshipBitDescriptions.get(
-            bit.name
+            bit.name,
           );
           if (!bitDescription?.ignored && bitDescription?.description) {
             relationshipDescriptions.push(
@@ -93,8 +93,8 @@ export class PromptRequestBuilderService {
                   sims.get(bit.sim_one_id) as SentientSim,
                   sims.get(bit.sim_two_id) as SentientSim,
                 ],
-                location
-              )
+                location,
+              ),
             );
           }
         }
@@ -110,7 +110,7 @@ export class PromptRequestBuilderService {
 
   getMemories(sentientSims: SentientSim[]) {
     const participantIds = sentientSims.map(
-      (sentientSim) => sentientSim.sim_id
+      (sentientSim) => sentientSim.sim_id,
     );
 
     return this.repositoryService.memory.getParticipantsMemories({
@@ -164,7 +164,7 @@ export class PromptRequestBuilderService {
 
   async buildPromptRequest(
     event: SSEvent,
-    options: PromptRequestBuilderOptions
+    options: PromptRequestBuilderOptions,
   ): Promise<PromptRequest> {
     const location = this.repositoryService.location.getLocation({
       id: event.environment.location_id,
@@ -179,7 +179,7 @@ export class PromptRequestBuilderService {
         event.sentient_sims,
         location,
         options.sexCategoryType,
-        options.sexLocationType
+        options.sexLocationType,
       );
     }
 
@@ -190,7 +190,7 @@ export class PromptRequestBuilderService {
         event.sentient_sims,
         location,
         options.sexCategoryType,
-        options.sexLocationType
+        options.sexLocationType,
       );
     }
 
@@ -202,7 +202,7 @@ export class PromptRequestBuilderService {
         event.sentient_sims,
         location,
         options.sexCategoryType,
-        options.sexLocationType
+        options.sexLocationType,
       );
       log.debug(`formattedPrePreAction: ${formattedPrePreAction}`);
     }
@@ -215,8 +215,8 @@ export class PromptRequestBuilderService {
           event.sentient_sims,
           location,
           options.sexCategoryType,
-          options.sexLocationType
-        )
+          options.sexLocationType,
+        ),
       );
     });
 
@@ -228,7 +228,7 @@ export class PromptRequestBuilderService {
         event.sentient_sims,
         location,
         options.sexCategoryType,
-        options.sexLocationType
+        options.sexLocationType,
       );
       log.debug(`preAssistantPreResponse: ${formattedPreAssistantPreResponse}`);
     }
@@ -239,13 +239,13 @@ export class PromptRequestBuilderService {
       event.sentient_sims,
       location,
       options.sexCategoryType,
-      options.sexLocationType
+      options.sexLocationType,
     );
 
     const simsPromise = this.formatSims(
       event.sentient_sims,
       location,
-      event.relationships
+      event.relationships,
     );
     const memories = this.getMemories(event.sentient_sims);
     const groupedMemories = this.groupMemories(memories);

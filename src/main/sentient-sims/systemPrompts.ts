@@ -12,7 +12,7 @@ import { SSEventType } from './models/InteractionEvents';
 
 export function getSystemPrompt(
   eventType: SSEventType,
-  apiType: ApiType
+  apiType: ApiType,
 ): string {
   if (
     eventType === SSEventType.CHAT ||

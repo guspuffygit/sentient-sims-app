@@ -35,14 +35,14 @@ export function SentientSimsSettingsComponent({
     errors.push(
       <FormHelperText sx={{ marginBottom: 2 }} error>
         You must be logged in to use the Sentient Sims AI API
-      </FormHelperText>
+      </FormHelperText>,
     );
   }
   if (showMemberError) {
     errors.push(
       <FormHelperText sx={{ marginBottom: 2 }} error>
         You must be a Founder or Patron to use the Sentient Sims Uncensored AI
-      </FormHelperText>
+      </FormHelperText>,
     );
   }
 

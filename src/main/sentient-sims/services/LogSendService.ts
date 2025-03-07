@@ -41,7 +41,7 @@ export class LogSendService {
     settingsService: SettingsService,
     directoryService: DirectoryService,
     lastExceptionService: LastExceptionService,
-    versionService: VersionService
+    versionService: VersionService,
   ) {
     this.settingsService = settingsService;
     this.directoryService = directoryService;
@@ -51,7 +51,7 @@ export class LogSendService {
 
   static newLogId() {
     return Array.from({ length: 10 }, () =>
-      Math.random().toString(36).charAt(2)
+      Math.random().toString(36).charAt(2),
     ).join('');
   }
 
@@ -82,12 +82,12 @@ export class LogSendService {
 
       if (!response || !response.ok) {
         errors.push(
-          `Failed to post message: ${response?.status} ${response?.statusText}.`
+          `Failed to post message: ${response?.status} ${response?.statusText}.`,
         );
         if (response) {
           const responseJson = await response.json();
           log.error(
-            `Response JSON Error:\n${JSON.stringify(responseJson, null, 2)}`
+            `Response JSON Error:\n${JSON.stringify(responseJson, null, 2)}`,
           );
           errors.push(responseJson);
         }
@@ -110,7 +110,7 @@ export class LogSendService {
 
   async sendBugReport(
     url: string,
-    { event, username, memory, bugDetails }: InteractionBugReport
+    { event, username, memory, bugDetails }: InteractionBugReport,
   ) {
     const logId = LogSendService.newLogId();
     const errors: any[] = [];
@@ -145,7 +145,7 @@ export class LogSendService {
             `WW Event Type: ${wwEvent.ww_event_type}`,
             `Sex Category: ${wwEvent.sex_category}`,
             `Sex Location: ${wwEvent.sex_location}`,
-          ].join('\n')
+          ].join('\n'),
         );
       }
 
@@ -153,7 +153,7 @@ export class LogSendService {
         formData,
         logId,
         errors,
-        interactionBugInfo
+        interactionBugInfo,
       );
 
       const response = await this.sendFormData(formData, errors, url);
@@ -162,7 +162,7 @@ export class LogSendService {
 
       if (!response || !response.ok) {
         errors.push(
-          `Failed to post message: ${response?.status} ${response?.statusText}.`
+          `Failed to post message: ${response?.status} ${response?.statusText}.`,
         );
         if (response) {
           errors.push(await response.json());
@@ -196,7 +196,7 @@ export class LogSendService {
     formData: FormData,
     logId: string,
     errors: any[],
-    extraInfo: string[] = []
+    extraInfo: string[] = [],
   ) {
     try {
       formData.append(
@@ -212,7 +212,7 @@ export class LogSendService {
           `App Version: ${app.getVersion()}`,
           `Game Version: ${this.versionService.getGameVersion().version}`,
           ...this.getSettings(),
-        ].join('\n')
+        ].join('\n'),
       );
     } catch (err: any) {
       this.handleAppendError('Error attaching log information', err, errors);
@@ -222,11 +222,11 @@ export class LogSendService {
   private appendFilesListToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
       const filesList = this.directoryService.listFilesRecursively(
-        this.directoryService.getModsFolder()
+        this.directoryService.getModsFolder(),
       );
       zipFile.addFile(
         'fileList.txt',
-        Buffer.from(filesList.join('\n'), 'utf-8')
+        Buffer.from(filesList.join('\n'), 'utf-8'),
       );
     } catch (err: any) {
       this.handleAppendError('Error adding file list', err, errors);
@@ -249,14 +249,14 @@ export class LogSendService {
         .forEach((lastExceptionFile) => {
           zipFile.addFile(
             lastExceptionFile.filename,
-            Buffer.from(lastExceptionFile.text, 'utf-8')
+            Buffer.from(lastExceptionFile.text, 'utf-8'),
           );
         });
     } catch (err: any) {
       this.handleAppendError(
         'Error attaching lastException files',
         err,
-        errors
+        errors,
       );
     }
   }
@@ -282,7 +282,7 @@ export class LogSendService {
   private appendZipFileToFormData(
     zipFile: AdmZip,
     formData: FormData,
-    errors: any[]
+    errors: any[],
   ) {
     try {
       const blob = new Blob([zipFile.toBuffer()], { type: 'application/zip' });

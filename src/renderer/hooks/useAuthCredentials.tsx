@@ -22,7 +22,7 @@ function refreshAuth() {
       log.debug('Updated auth token');
       window.electron.setSetting(
         SettingsEnum.ACCESS_TOKEN,
-        session.getIdToken().getJwtToken()
+        session.getIdToken().getJwtToken(),
       );
     })
     .catch((error: any) => {
@@ -38,9 +38,12 @@ export default function useAuthCredentials() {
   useEffect(() => {
     refreshAuth();
 
-    const intervalId = setInterval(() => {
-      refreshAuth();
-    }, 15 * 60 * 1000); // 15 minutes in milliseconds
+    const intervalId = setInterval(
+      () => {
+        refreshAuth();
+      },
+      15 * 60 * 1000,
+    ); // 15 minutes in milliseconds
 
     // Clean up the interval when the component unmounts
     return () => clearInterval(intervalId);

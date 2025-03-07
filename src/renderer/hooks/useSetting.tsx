@@ -12,7 +12,7 @@ export type SettingsHook<T> = {
 
 export default function useSetting<T = any>(
   settingsEnum: SettingsEnum,
-  defaultValue: any = ''
+  defaultValue: any = '',
 ): SettingsHook<T> {
   const settingName = settingsEnum.toString();
   const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +45,7 @@ export default function useSetting<T = any>(
     // debounce so that we dont send a bunch of requests back and forth
     const timeout = setTimeout(() => {
       log.debug(
-        `Setting debounce running: ${settingsEnum.toString()}, value: ${settingValue}`
+        `Setting debounce running: ${settingsEnum.toString()}, value: ${settingValue}`,
       );
       window.electron.setSetting(settingsEnum, settingValue);
     }, 600);
@@ -72,7 +72,7 @@ export default function useSetting<T = any>(
           log.debug(`New value: ${newValue}`);
           setValue(newValue);
         }
-      }
+      },
     );
 
     return () => {

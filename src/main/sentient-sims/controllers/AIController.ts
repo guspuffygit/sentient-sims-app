@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import log from 'electron-log';
 import { InteractionEvents } from '../models/InteractionEvents';
 import {
+  playTTS,
   sendChatGeneration,
   sendPopUpNotification,
 } from '../util/notifyRenderer';
@@ -25,6 +26,7 @@ export class AIController {
     this.classificationEvent = this.classificationEvent.bind(this);
     this.buffEvent = this.buffEvent.bind(this);
     this.getModels = this.getModels.bind(this);
+    this.tts = this.tts.bind(this);
   }
 
   async sentientSimsGenerate(req: Request, res: Response) {
@@ -116,5 +118,19 @@ export class AIController {
         error: err?.message,
       });
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async tts(req: Request, res: Response) {
+    const { text } = req.query;
+
+    if (!text) {
+      res.status(400).json({ error: 'Must include text query parameter' });
+      return;
+    }
+
+    playTTS(text as string);
+
+    res.status(200).json({ text });
   }
 }

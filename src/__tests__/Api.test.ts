@@ -72,7 +72,7 @@ describe('Api', () => {
     const expectedVersion: Version = { version: 'expectedversion' };
     fs.writeFileSync(
       directoryService.getModVersionFile(),
-      JSON.stringify(expectedVersion)
+      JSON.stringify(expectedVersion),
     );
 
     const versionClient = new VersionClient(apiUrl);
@@ -134,7 +134,7 @@ describe('Api', () => {
     });
 
     const containsWantPrefix = defaultWantsPrefixes.some((want) =>
-      result.text?.includes(want)
+      result.text?.includes(want),
     );
 
     expect(containsWantPrefix).toBeTruthy();
@@ -158,7 +158,7 @@ describe('Api', () => {
     await settingsClient.updateSetting(SettingsEnum.ACCESS_TOKEN, jwtToken);
     await settingsClient.updateSetting(
       SettingsEnum.AI_API_TYPE,
-      ApiType.SentientSimsAI
+      ApiType.SentientSimsAI,
     );
     const aiClient = new AIClient(apiUrl);
     const models = await aiClient.getModels();
@@ -169,7 +169,7 @@ describe('Api', () => {
     const settingsClient = new SettingsClient(apiUrl);
     await settingsClient.updateSetting(SettingsEnum.LOCALIZATION_ENABLED, true);
     const result = await settingsClient.getSetting(
-      SettingsEnum.LOCALIZATION_ENABLED
+      SettingsEnum.LOCALIZATION_ENABLED,
     );
     expect(result.value).toBeTruthy();
   }, 30000);

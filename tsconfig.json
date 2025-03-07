@@ -2,17 +2,21 @@
   "compilerOptions": {
     "incremental": true,
     "target": "es2021",
-    "module": "commonjs",
+    "module": "NodeNext",
     "lib": ["dom", "es2021"],
     "jsx": "react-jsx",
     "strict": true,
     "sourceMap": true,
     "baseUrl": "./src",
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "allowJs": true,
+    "types": [
+      "@webgpu/types",
+      "@types/node"
+    ],
     "outDir": ".erb/dll"
   },
   "exclude": [
@@ -22,5 +26,12 @@
     ".erb/dll",
     "node_modules/@aws-amplify",
     "node_modules/@patternfly",
+  ],
+  "include": [
+    "**/*",
+    ".erb/configs/**/*.ts",
+    ".erb/scripts/**/*.ts",
+    ".erb/scripts/**/*.js",
+    ".erb/mocks/**/*.js",
   ]
 }

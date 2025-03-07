@@ -8,7 +8,7 @@ import { ApiType } from '../models/ApiType';
 
 export function getAnimationKey(
   animationAuthor: string,
-  animationIdentifier: string
+  animationIdentifier: string,
 ) {
   return `${animationAuthor}:${animationIdentifier}`;
 }
@@ -24,7 +24,7 @@ export class AnimationsService {
 
   async getAnimations() {
     const url = `${this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_ENDPOINT
+      SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
     )}/animations`;
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     log.debug(`url: ${url}, auth: ${authHeader}`);
@@ -40,7 +40,7 @@ export class AnimationsService {
 
   async setAnimation(animation: Animation) {
     const url = `${this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_ENDPOINT
+      SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
     )}/animations`;
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     log.debug(`url: ${url}, auth: ${authHeader}`);
@@ -80,7 +80,7 @@ export class AnimationsService {
 
   isAnimationMappingEnabled(): boolean {
     return this.settingsService.get(
-      SettingsEnum.MAPPING_NOTIFICATION_ENABLED
+      SettingsEnum.MAPPING_NOTIFICATION_ENABLED,
     ) as boolean;
   }
 }

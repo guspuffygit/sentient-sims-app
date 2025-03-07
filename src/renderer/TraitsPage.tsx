@@ -124,7 +124,7 @@ export default function TraitsPage() {
       selectMenuItems.push(
         <MenuItem value={traitTypeKey}>
           {traitTypeKey}: {traitCounts[traitTypeKey].mapped}
-        </MenuItem>
+        </MenuItem>,
       );
     } else {
       selectMenuItems.push(
@@ -133,7 +133,7 @@ export default function TraitsPage() {
           {traitCounts[traitTypeKey].mapped -
             traitCounts[traitTypeKey].unmapped}
           /{traitCounts[traitTypeKey].mapped}
-        </MenuItem>
+        </MenuItem>,
       );
     }
   });
@@ -289,7 +289,7 @@ export default function TraitsPage() {
   };
 
   const xml: string | string[] = getFormattedXml(
-    filteredTraits[selectedIndex]?.xml
+    filteredTraits[selectedIndex]?.xml,
   );
 
   let ignored = 0;

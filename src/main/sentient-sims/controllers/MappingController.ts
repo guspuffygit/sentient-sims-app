@@ -29,7 +29,7 @@ export class MappingController {
       await this.mappingService.getTraits({
         searchClass,
         extractedPath,
-      })
+      }),
     );
   }
 
@@ -42,7 +42,7 @@ export class MappingController {
       await this.mappingService.getUnmappedTraits({
         searchClass,
         extractedPath,
-      })
+      }),
     );
   }
 
@@ -58,7 +58,7 @@ export class MappingController {
     const exportTraitsRequest: ExportTraitsRequest = req.body;
     log.debug(`ExtractedPath: ${exportTraitsRequest.extractedPath}`);
     log.debug(
-      `Length of Traits: ${Object.keys(exportTraitsRequest.traits).length}`
+      `Length of Traits: ${Object.keys(exportTraitsRequest.traits).length}`,
     );
     res.json(await this.mappingService.exportTraits(req.body));
   }

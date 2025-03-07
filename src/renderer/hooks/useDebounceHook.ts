@@ -14,7 +14,7 @@ export function useDebounceHook() {
       setTimeout(() => {
         func();
         setTimeoutId(null);
-      }, delay)
+      }, delay),
     );
   };
 }

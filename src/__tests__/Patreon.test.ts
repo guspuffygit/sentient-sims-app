@@ -16,7 +16,7 @@ describe('Patreon', () => {
     };
 
     const { disableNightly, nightlyText } = getNightlyAccess(
-      mockPatreonUserInstance as any
+      mockPatreonUserInstance as any,
     );
     expect(disableNightly).toEqual(false);
     expect(nightlyText).toEqual('Founder Early Access');
@@ -29,7 +29,7 @@ describe('Patreon', () => {
     };
 
     const { disableNightly, nightlyText } = getNightlyAccess(
-      mockPatreonUserInstance as any
+      mockPatreonUserInstance as any,
     );
     expect(disableNightly).toEqual(false);
     expect(nightlyText).toEqual('Patreon Early Access');
@@ -42,7 +42,7 @@ describe('Patreon', () => {
     };
 
     const { disableNightly, nightlyText } = getNightlyAccess(
-      mockPatreonUserInstance as any
+      mockPatreonUserInstance as any,
     );
     expect(disableNightly).toEqual(true);
     expect(nightlyText).toEqual('Patreon Early Access');

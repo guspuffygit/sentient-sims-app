@@ -16,7 +16,7 @@ let modWs: WebSocket;
 
 export const startWebSocketServer = (
   logsService: LogsService,
-  settingsService: SettingsService
+  settingsService: SettingsService,
 ) => {
   const rendererServer = new WebSocketServer({ port: rendererWebsocketPort });
   rendererServer.on('connection', function handleRenderer(ws: WebSocket) {

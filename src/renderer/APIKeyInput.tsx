@@ -27,7 +27,7 @@ export default function APIKeyInput({ setting, aiName }: ModalProps) {
         setting.setSetting(pastedText);
       }
     },
-    [setting]
+    [setting],
   );
 
   useEffect(() => {

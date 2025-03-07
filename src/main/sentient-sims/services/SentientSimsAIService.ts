@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import log from 'electron-log';
-import { ChatCompletion } from 'openai/resources';
+import { ChatCompletion } from 'openai/resources/index.mjs';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { fetchWithTimeout } from '../util/fetchWithTimeout';
@@ -33,7 +33,7 @@ export class SentientSimsAIService implements GenerationService {
 
   serviceUrl(): string {
     return this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_ENDPOINT
+      SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
     ) as string;
   }
 
@@ -55,15 +55,15 @@ export class SentientSimsAIService implements GenerationService {
 
     log.debug(
       `Set ${model} ${breakString} to ${JSON.stringify(
-        tokenizeResponse.tokens
-      )}`
+        tokenizeResponse.tokens,
+      )}`,
     );
 
     return tokenizeResponse.tokens;
   }
 
   async sentientSimsGenerate(
-    request: OpenAICompatibleRequest
+    request: OpenAICompatibleRequest,
   ): Promise<SimsGenerateResponse> {
     const model = this.getModel();
     let modelSettings = AllModelSettings.default;
@@ -81,7 +81,7 @@ export class SentientSimsAIService implements GenerationService {
       modelSettings.max_tokens,
       breakTokens,
       messageTokens.tokens,
-      request.messages
+      request.messages,
     );
 
     const completionRequest: VLLMChatCompletionRequest = {
@@ -189,7 +189,7 @@ export class SentientSimsAIService implements GenerationService {
 
   async tokenizeMessages(
     model: string,
-    messages: OpenAIMessage[]
+    messages: OpenAIMessage[],
   ): Promise<VLLMRTokenizeResponse> {
     let modelSettings = AllModelSettings.default;
     if (model in AllModelSettings) {
@@ -216,7 +216,7 @@ export class SentientSimsAIService implements GenerationService {
           Authentication: authHeader,
         },
         body: JSON.stringify(tokenizeRequest),
-      }
+      },
     );
 
     return tokenizeRequestResponse.json();
@@ -276,7 +276,7 @@ export class SentientSimsAIService implements GenerationService {
 
   getModel(): string {
     return this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_MODEL
+      SettingsEnum.SENTIENTSIMSAI_MODEL,
     ) as string;
   }
 }

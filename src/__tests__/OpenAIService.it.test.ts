@@ -41,7 +41,7 @@ describe('OpenAIServiceIT', () => {
         promptRequest.location,
         promptRequest.dateTime,
         promptRequest.participants,
-      ].join('\n\n')
+      ].join('\n\n'),
     );
     expect(result.text).toBeTruthy();
   }, 20000);
@@ -79,7 +79,7 @@ describe('OpenAIServiceIT', () => {
     console.log(`Translation: ${result.text}`);
     const possibleMatches = ['acuerdo?', 'bien?', 'acuerdo'];
     const isMatch = possibleMatches.some((item) =>
-      result.text.toLocaleLowerCase().includes(item)
+      result.text.toLocaleLowerCase().includes(item),
     );
     expect(isMatch).toBeTruthy();
   }, 20000);

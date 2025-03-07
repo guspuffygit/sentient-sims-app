@@ -100,6 +100,7 @@ export function ThankYouCardPatreon() {
               name={`@${thankYouUser.name}`}
               url={`${thankYouUser.avatar}?size=128`}
               type={AvatarType.DEV}
+              key={`@${thankYouUser.name}`}
             />
           );
         })}
@@ -118,6 +119,7 @@ export function ThankYouCardPatreon() {
                 name={`@${thankYouUser.name}`}
                 url={`${thankYouUser.avatar}?size=128`}
                 type={AvatarType.TIER_2}
+                key={`@${thankYouUser.name}`}
               />
             );
           })}
@@ -137,6 +139,7 @@ export function ThankYouCardPatreon() {
                 name={`@${thankYouUser.name}`}
                 url={thankYouUser.avatar}
                 type={AvatarType.TIER_1}
+                key={`@${thankYouUser.name}`}
               />
             );
           })}

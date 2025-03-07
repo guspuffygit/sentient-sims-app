@@ -36,7 +36,7 @@ export default function SendLogButton() {
         setOpen(false);
         // eslint-disable-next-line no-alert
         alert(
-          `To get support, copy paste this id into the #support channel in Discord!\n\n${responseJson.logId}`
+          `To get support, copy paste this id into the #support channel in Discord!\n\n${responseJson.logId}`,
         );
       } else {
         // eslint-disable-next-line no-alert

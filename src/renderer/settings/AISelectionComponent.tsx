@@ -1,9 +1,9 @@
 import { Box, FormHelperText, MenuItem, Select } from '@mui/material';
-import { ApiType } from 'main/sentient-sims/models/ApiType';
+import { ApiType, ApiTypeFromValue } from 'main/sentient-sims/models/ApiType';
 import HelpButton from 'renderer/components/HelpButton';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 
-function getAIHelperText(apiType: ApiType) {
+export function getAIHelperText(apiType: ApiType) {
   if (apiType === ApiType.OpenAI) {
     return 'OpenAI AI using the same API as ChatGPT and your personal API key.';
   }
@@ -31,7 +31,9 @@ export function AISelectionComponent() {
         id="release-type-select"
         value={aiApiType}
         sx={{ minWidth: 100, marginRight: 2 }}
-        onChange={(change) => aiApiTypeSetting.setSetting(change.target.value)}
+        onChange={(change) =>
+          aiApiTypeSetting.setSetting(ApiTypeFromValue(change.target.value))
+        }
       >
         <MenuItem value={ApiType.OpenAI}>OpenAI</MenuItem>
         <MenuItem value={ApiType.SentientSimsAI}>
@@ -39,7 +41,6 @@ export function AISelectionComponent() {
         </MenuItem>
         <MenuItem value={ApiType.NovelAI}>NovelAI</MenuItem>
         <MenuItem value={ApiType.KoboldAI}>Kobold AI</MenuItem>
-        {/* [NEW] Added Gemini as a selectable option in the dropdown */}
         <MenuItem value={ApiType.Gemini}>Gemini</MenuItem>
       </Select>
       <FormHelperText>{getAIHelperText(aiApiType)}</FormHelperText>

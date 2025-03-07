@@ -26,7 +26,7 @@ export default function UpdateComponent() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const releaseType: SettingsHook<string> = useSetting<string>(
     SettingsEnum.MOD_RELEASE,
-    'main'
+    'main',
   );
   const { updateState, handleCheckForUpdates } = useNewVersionChecker({
     setIsLoading,
@@ -59,7 +59,7 @@ export default function UpdateComponent() {
   };
 
   const handleChangeReleaseType = async (
-    event: SelectChangeEvent
+    event: SelectChangeEvent,
   ): Promise<void> => {
     const newType = event.target.value;
     log.debug(`Changed release type to: ${newType}`);

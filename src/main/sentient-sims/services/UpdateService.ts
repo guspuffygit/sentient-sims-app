@@ -68,7 +68,7 @@ export class UpdateService {
       const sentientSimsFolder = this.directoryService.getSentientSimsFolder();
       if (!fs.existsSync(sentientSimsFolder)) {
         log.info(
-          `Sentient Sims folder did not exist, creating: ${sentientSimsFolder}`
+          `Sentient Sims folder did not exist, creating: ${sentientSimsFolder}`,
         );
         fs.mkdirSync(sentientSimsFolder);
       }
@@ -81,7 +81,7 @@ export class UpdateService {
             zipEntry.entryName,
             sentientSimsFolder,
             /* maintainEntryPath */ false,
-            /* overwrite */ true
+            /* overwrite */ true,
           );
         }
       });

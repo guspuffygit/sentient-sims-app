@@ -5,7 +5,7 @@ import useChatGeneration, {
 } from 'renderer/hooks/useChatGeneration';
 
 export const ChatGenerationContext = createContext<ChatGeneration | undefined>(
-  undefined
+  undefined,
 );
 
 // Provider component
@@ -19,7 +19,7 @@ export function useChatGenerationContext() {
 
   if (!context) {
     throw new Error(
-      'useChatGenerationContext must be used within a ChatProvider'
+      'useChatGenerationContext must be used within a ChatProvider',
     );
   }
   return context;

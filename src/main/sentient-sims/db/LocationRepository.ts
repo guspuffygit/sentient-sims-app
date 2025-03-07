@@ -25,7 +25,7 @@ export class LocationRepository extends Repository {
     }
 
     const locationEntity = defaultLocationDescriptions.get(
-      locationRequest.id.toString()
+      locationRequest.id.toString(),
     );
     const defaultLocation = {
       id: locationRequest.id,
@@ -57,7 +57,7 @@ export class LocationRepository extends Repository {
     return this.dbService
       .getDb()
       .prepare(
-        'INSERT OR REPLACE INTO location(id, name, lot_type, description) VALUES(?, ?, ?, ?)'
+        'INSERT OR REPLACE INTO location(id, name, lot_type, description) VALUES(?, ?, ?, ?)',
       )
       .run([
         location.id,

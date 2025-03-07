@@ -29,7 +29,7 @@ export default function LastExceptionPage() {
         <ListItemButton onClick={() => setSelectedException(lastExceptionFile)}>
           <ListItemText primary={`${lastExceptionFile.filename}`} />
         </ListItemButton>
-      </ListItem>
+      </ListItem>,
     );
   });
 

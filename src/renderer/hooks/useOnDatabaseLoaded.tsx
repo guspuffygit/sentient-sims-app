@@ -5,7 +5,7 @@ export function useOnDatabaseLoaded(callback: (sessionId: string) => void) {
     const removeListener = window.electron.onDatabaseLoaded(
       (_event: any, sessionId: string) => {
         callback(sessionId);
-      }
+      },
     );
 
     return () => {

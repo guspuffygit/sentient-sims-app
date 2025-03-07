@@ -14,7 +14,7 @@ export type UserInfo = {
 
 export const sortByMappedCount = (
   a: UserAnimationInfo,
-  b: UserAnimationInfo
+  b: UserAnimationInfo,
 ) => {
   return b.mappedCount - a.mappedCount;
 };

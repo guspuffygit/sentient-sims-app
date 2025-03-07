@@ -27,6 +27,8 @@ import { SnackBarProvider } from './providers/SnackBarProvider';
 import { AISettingsProvider } from './providers/AISettingsProvider';
 import { VersionsProvider } from './providers/VersionsProvider';
 import TraitsPage from './TraitsPage';
+import KokoroPage from './KokoroPage';
+import { AudioContextProvider } from './providers/AudioContextProvider';
 
 const updatedAwsConfig = {
   ...awsExports,
@@ -50,6 +52,10 @@ const router = createMemoryRouter([
       {
         path: '/traits',
         element: <TraitsPage />,
+      },
+      {
+        path: '/kokoro',
+        element: <KokoroPage />,
       },
       {
         path: '/settings',
@@ -100,16 +106,18 @@ root.render(
           <SnackBarProvider>
             <VersionsProvider>
               <AISettingsProvider>
-                <ChatGenerationProvider>
-                  <DebugModeProvider>
-                    <RouterProvider router={router} />
-                  </DebugModeProvider>
-                </ChatGenerationProvider>
+                <AudioContextProvider>
+                  <ChatGenerationProvider>
+                    <DebugModeProvider>
+                      <RouterProvider router={router} />
+                    </DebugModeProvider>
+                  </ChatGenerationProvider>
+                </AudioContextProvider>
               </AISettingsProvider>
             </VersionsProvider>
           </SnackBarProvider>
         </QueryClientProvider>
       </Authenticator.Provider>
     </React.StrictMode>
-  </ThemeProvider>
+  </ThemeProvider>,
 );

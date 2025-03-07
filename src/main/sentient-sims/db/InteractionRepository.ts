@@ -21,7 +21,7 @@ export class InteractionRepository {
 
   async fetchInteractions(): Promise<Map<string, BasicInteraction>> {
     const url = `${this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_ENDPOINT
+      SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
     )}/interactions`;
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     log.debug(`url: ${url}, auth: ${authHeader}`);
@@ -38,7 +38,7 @@ export class InteractionRepository {
   async getInteractions(): Promise<Map<string, BasicInteraction>> {
     if (!this.interactions) {
       this.interactions = new Map(
-        Object.entries(await this.fetchInteractions())
+        Object.entries(await this.fetchInteractions()),
       );
     }
 
@@ -47,7 +47,7 @@ export class InteractionRepository {
 
   async setInteraction(interaction: BasicInteraction) {
     const url = `${this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_ENDPOINT
+      SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
     )}/interactions`;
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     log.debug(`url: ${url}, auth: ${authHeader}`);
@@ -68,7 +68,7 @@ export class InteractionRepository {
   }
 
   async getInteraction(
-    interactionName: string
+    interactionName: string,
   ): Promise<InteractionDescription | undefined> {
     if (!this.interactions) {
       this.interactions = new Map(Object.entries(await this.getInteractions()));

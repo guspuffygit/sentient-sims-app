@@ -7,7 +7,7 @@ export async function fetchWithRetries(
   options: RequestInit = {},
   retries: number = 3,
   delay: number = 10000,
-  attempts: number = 0
+  attempts: number = 0,
 ): Promise<Response> {
   const response = await fetch(url, options);
 
@@ -21,7 +21,7 @@ export async function fetchWithRetries(
         return fetchWithRetries(url, options, retries, delay, attempts + 1);
       }
       throw new Error(
-        'Sentient Sims AI Server is in maintenance mode, check #api-status in discord for details and try again later.'
+        'Sentient Sims AI Server is in maintenance mode, check #api-status in discord for details and try again later.',
       );
     }
     case SentientSimsHTTPStatusCode.NO_WORKERS_EXCEPTION: {
@@ -34,7 +34,7 @@ export async function fetchWithRetries(
     }
     case SentientSimsHTTPStatusCode.NOT_MEMBER_EXCEPTION: {
       throw new Error(
-        'Must be a Founder or Patron to use the Sentient Sims Uncensored AI Server.'
+        'Must be a Founder or Patron to use the Sentient Sims Uncensored AI Server.',
       );
     }
     default: {

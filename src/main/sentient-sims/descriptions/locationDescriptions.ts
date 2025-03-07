@@ -1009,5 +1009,5 @@ export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
       lot_type: 'Residence',
       description: defaultLotDescription,
     },
-  })
+  }),
 );

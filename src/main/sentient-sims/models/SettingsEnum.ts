@@ -17,11 +17,19 @@ export enum SettingsEnum {
   KOBOLDAI_ENDPOINT = 'koboldAIEndpoint',
   SENTIENTSIMSAI_ENDPOINT = 'sentientsimsAIEndpoint',
   NOVELAI_ENDPOINT = 'novelAIEndpoint',
-  // [NEW] Added settings for Gemini API integration
   GEMINI_KEYS = 'geminiKeys', // Supports multiple keys separated by commas (e.g., "key1,key2,key3")
-  GEMINI_ENDPOINT = 'geminiEndpoint', // Endpoint for Gemini API
-  GEMINI_MODEL = 'geminiModel', // Selected Gemini model (e.g., "gemini-2.0-flash-exp")
+  GEMINI_ENDPOINT = 'geminiEndpoint',
+  GEMINI_MODEL = 'geminiModel',
   TRAIT_MAPPING_PATH = 'traitMappingPath',
+  TTS_ENABLED = 'ttsEnabled',
+  TTS_API_TYPE = 'ttsApiType',
+  TTS_VOLUME = 'ttsVolume',
+  OPENAI_TTS_SETTINGS = 'openaiTtsSettings',
+  SENTIENTSIMSAI_TTS_SETTINGS = 'sentientsimsaiTtsSettings',
+  KOKOROAI_TTS_SETTINGS = 'kokoroaiTtsSettings',
+  ELEVENLABS_KEY = 'elevenlabsKey',
+  ELEVENLABS_ENDPOINT = 'elevenlabsEndpoint',
+  ELEVENLABS_TTS_SETTINGS = 'elevenlabsTtsSettings',
 }
 
 export enum DeprecatedSettingsEnum {

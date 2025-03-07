@@ -35,7 +35,7 @@ export default function ipcHandlers() {
       settingsService.set(setting, value);
 
       notifySettingChanged(setting, value);
-    }
+    },
   );
   ipcMain.on('reset-setting', (_event: IpcMainEvent, setting: SettingsEnum) => {
     const value = settingsService.resetSetting(setting.toString());
@@ -57,7 +57,7 @@ export default function ipcHandlers() {
       if (wnd.webContents?.isDestroyed() === false) {
         wnd.webContents.send(
           'on-api-key-paste-from-clipboard',
-          clipboardResults
+          clipboardResults,
         );
       }
     });

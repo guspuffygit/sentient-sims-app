@@ -64,10 +64,13 @@ const installExtensions = async () => {
   return installer
     .default(
       extensions.map((name) => installer[name]),
-      forceDownload
+      forceDownload,
     )
     .catch(console.log);
 };
+
+app.commandLine.appendSwitch('enable-unsafe-webgpu');
+app.commandLine.appendSwitch('enable-features', 'Vulkan');
 
 const createWindow = async () => {
   if (isDebug) {
@@ -200,7 +203,7 @@ app
           session.defaultSession.clearStorageData();
           mainWindow?.loadURL(resolveHtmlPath('index.html'));
         }
-      }
+      },
     );
   })
   .catch(console.log);

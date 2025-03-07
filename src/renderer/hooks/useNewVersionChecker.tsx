@@ -46,7 +46,7 @@ export default function useNewVersionChecker({
       log.debug(`modVersion: ${modVersion.version}`);
       const response = await isNewVersionAvailable(
         modVersion.version,
-        versionType
+        versionType,
       );
       const currentTime = getCurrentTime();
 

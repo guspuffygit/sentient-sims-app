@@ -71,5 +71,5 @@ export const defaultRelationshipBitDescriptions: Map<
       name: 'family_Target_IsStepsiblingOf_Actor',
       description: '{actor.1} and {actor.0} are step siblings.',
     },
-  })
+  }),
 );

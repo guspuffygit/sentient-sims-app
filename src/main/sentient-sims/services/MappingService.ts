@@ -115,7 +115,7 @@ export class MappingService {
     const traitsPath = path.join(extractedPath, 'Trait');
     const stringsPath = path.join(extractedPath, 'strings.json');
     const parsedStrings: any = JSON.parse(
-      fs.readFileSync(stringsPath, 'utf-8')
+      fs.readFileSync(stringsPath, 'utf-8'),
     );
     const stringMap: Record<string, string> = {};
     if (parsedStrings?.Entries && Array.isArray(parsedStrings.Entries)) {
@@ -156,7 +156,7 @@ export class MappingService {
               ) {
                 xml = xml.replace(
                   tInstance['#text'],
-                  stringMap[tInstance['#text']]
+                  stringMap[tInstance['#text']],
                 );
                 if ('#text' in tInstance) {
                   tInstance['#text'] = stringMap[tInstance['#text']];
@@ -264,7 +264,7 @@ export class MappingService {
     });
 
     log.debug(
-      `There are ${traits.length} moods:\n${JSON.stringify(traitsMap, null, 2)}`
+      `There are ${traits.length} moods:\n${JSON.stringify(traitsMap, null, 2)}`,
     );
 
     return {
@@ -285,7 +285,7 @@ export class MappingService {
     Object.keys(TraitType).forEach((traitType) => {
       theOutput = theOutput.replaceAll(
         `"trait_type": "${traitType}"`,
-        `"trait_type": TraitType.${traitType}`
+        `"trait_type": TraitType.${traitType}`,
       );
     });
     fs.writeFileSync(exportedPath, theOutput, 'utf-8');

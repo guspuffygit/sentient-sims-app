@@ -11,7 +11,7 @@ const encoder: Encoder = new Encoder(
   nerdstash2Tokenizer.vocab,
   nerdstash2Tokenizer.merges,
   nerdstash2Tokenizer.specialTokens,
-  nerdstash2Tokenizer.config
+  nerdstash2Tokenizer.config,
 );
 
 export class NovelAITokenCounter implements TokenCounter {

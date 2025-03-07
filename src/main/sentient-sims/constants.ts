@@ -73,3 +73,6 @@ export const defaultWantsPrefixes = ['I want to', 'I would like', 'I feel'];
 export const defaultGeminiModel = 'gemini-2.0-flash-exp';
 export const geminiDefaultEndpoint =
   'https://generativelanguage.googleapis.com/v1beta';
+export const defaultTTSEnabled = false;
+export const defaultTTSVolume = 0.75;
+export const defaultElevenLabsEndpoint = 'https://api.elevenlabs.io/v1';

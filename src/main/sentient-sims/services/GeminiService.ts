@@ -32,11 +32,11 @@ export class GeminiService implements GenerationService {
 
   getGeminiKeys(): string[] {
     const keysString = this.settingsService.get(
-      SettingsEnum.GEMINI_KEYS
+      SettingsEnum.GEMINI_KEYS,
     ) as string;
     if (!keysString || keysString.trim() === '') {
       throw new GeminiKeysNotSetError(
-        'No Gemini API keys set. Please configure them in settings (e.g., key1,key2,key3).'
+        'No Gemini API keys set. Please configure them in settings (e.g., key1,key2,key3).',
       );
     }
     return keysString
@@ -72,7 +72,7 @@ export class GeminiService implements GenerationService {
 
   async sentientSimsGenerate(
     request: OpenAICompatibleRequest,
-    retries: number = 3
+    retries: number = 3,
   ): Promise<SimsGenerateResponse> {
     const genAI = this.getGenAIClient();
     const model = genAI.getGenerativeModel({
@@ -113,7 +113,7 @@ export class GeminiService implements GenerationService {
         const message = error.message || 'Unknown error';
         log.error(
           `Gemini Error on attempt ${attempt}/${retries}: ${message}`,
-          error
+          error,
         );
         if (attempt === retries) throw error;
       }
@@ -121,7 +121,7 @@ export class GeminiService implements GenerationService {
 
     if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED) && text) {
       const language = this.settingsService.get(
-        SettingsEnum.LOCALIZATION_LANGUAGE
+        SettingsEnum.LOCALIZATION_LANGUAGE,
       );
       if (language) {
         const translationGenAI = this.getGenAIClient();
@@ -152,16 +152,15 @@ export class GeminiService implements GenerationService {
           `Gemini Translation Request: ${JSON.stringify(
             translationRequest,
             null,
-            2
-          )}`
+            2,
+          )}`,
         );
 
         for (let attempt = 0; attempt < retries; attempt += 1) {
           try {
-            // eslint-disable-next-line no-await-in-loop
-            const translationResult = await translationModel.generateContent(
-              translationRequest
-            );
+            const translationResult =
+              // eslint-disable-next-line no-await-in-loop
+              await translationModel.generateContent(translationRequest);
             text = translationResult.response.text();
             log.debug(`Gemini Translated Response: ${text}`);
             break;
@@ -169,7 +168,7 @@ export class GeminiService implements GenerationService {
             const message = error.message || 'Unknown error';
             log.error(
               `Gemini Translation Error on attempt ${attempt}/${retries}: ${message}`,
-              error
+              error,
             );
             if (attempt === retries) throw error;
           }
@@ -221,7 +220,7 @@ export class GeminiService implements GenerationService {
         const errorText = await response.text();
         throw new GeminiAPIError(
           response.status,
-          `Failed to fetch Gemini models: ${response.status} - ${errorText}`
+          `Failed to fetch Gemini models: ${response.status} - ${errorText}`,
         );
       }
 

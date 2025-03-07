@@ -22,7 +22,7 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
   useAuthCredentials();
 
   const handleOpenWiki = handleOpenExternalLink(
-    'https://github.com/guspuffygit/sentient-sims-app/wiki'
+    'https://github.com/guspuffygit/sentient-sims-app/wiki',
   );
 
   return (
@@ -67,6 +67,14 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
                   id="traits"
                 >
                   Traits
+                </Button>
+                <Button
+                  color="secondary"
+                  onClick={() => navigate('/kokoro')}
+                  sx={{ marginLeft: '5px' }}
+                  id="traits"
+                >
+                  Kokoro
                 </Button>
               </>
             ) : null}

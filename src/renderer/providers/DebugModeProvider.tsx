@@ -15,7 +15,7 @@ interface DebugModeContextType {
 }
 
 const DebugModeContext = createContext<DebugModeContextType | undefined>(
-  undefined
+  undefined,
 );
 
 // Provider component

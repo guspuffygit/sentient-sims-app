@@ -47,7 +47,7 @@ export class DirectoryService {
     return [
       path.join(
         this.getSentientSimsFolder(),
-        'sentient-sims-descriptions.ts4script'
+        'sentient-sims-descriptions.ts4script',
       ),
       this.getZippedModFile(),
     ];
@@ -96,7 +96,7 @@ export class DirectoryService {
       if (fs.statSync(fullPath).isFile()) {
         // Check if the filename contains any of the specified keywords
         const hasKeywords = keywords.some((keyword) =>
-          new RegExp(keyword, 'i').test(item)
+          new RegExp(keyword, 'i').test(item),
         );
         if (hasKeywords) {
           files.push(fullPath);
@@ -110,7 +110,7 @@ export class DirectoryService {
   getSentientSimsDb(databaseSession: DatabaseSession) {
     return path.join(
       this.getSentientSimsFolder(),
-      `${databaseSession.saveId}-sentient-sims.db`
+      `${databaseSession.saveId}-sentient-sims.db`,
     );
   }
 
@@ -121,7 +121,7 @@ export class DirectoryService {
   getSentientSimsDbUnsaved(databaseSession: DatabaseSession) {
     return path.join(
       this.getSentientSimsFolder(),
-      `${databaseSession.sessionId}-sentient-sims-unsaved.db`
+      `${databaseSession.sessionId}-sentient-sims-unsaved.db`,
     );
   }
 

@@ -41,7 +41,7 @@ function formatMoods(moods: string[]): string[] {
       (mood) =>
         mood in moodDescriptions &&
         !moodDescriptions[mood]?.ignored &&
-        moodDescriptions[mood]?.description
+        moodDescriptions[mood]?.description,
     )
     .map((mood) => moodDescriptions[mood].description as string);
 }
@@ -78,7 +78,7 @@ function formatCareers(sentientSim: SentientSim): string[] {
       const description = careerDescription.sentient_sims_description;
       const formattedCareer = description.replaceAll(
         '{sim_name}',
-        sentientSim.name
+        sentientSim.name,
       );
       formattedCareers.push(formattedCareer);
     }
@@ -147,13 +147,13 @@ function formatProperties(sentientSim: SentientSim): string[] {
 
   if (sentientSim.on_fire) {
     formattedProperties.push(
-      'is currently burning on fire with flames on their clothing'
+      'is currently burning on fire with flames on their clothing',
     );
   }
 
   if (sentientSim.is_dying) {
     formattedProperties.push(
-      'is actively dying with the Grim Reaper present about to take their life'
+      'is actively dying with the Grim Reaper present about to take their life',
     );
   }
 
@@ -197,7 +197,7 @@ export function formatSentientSim(sentientSim: SentientSim): string {
 
   const prompt = [
     `${sentientSim.name} is a ${sentientSim.gender} ${formatAge(
-      sentientSim.age
+      sentientSim.age,
     )}.`,
   ];
 
@@ -212,16 +212,16 @@ export function formatSentientSim(sentientSim: SentientSim): string {
   if (attractions.length > 0) {
     prompt.push(
       `${sentientSim.name} is attracted to a partner who ${formatListToString(
-        attractions
-      )}.`
+        attractions,
+      )}.`,
     );
   }
 
   if (turnOffs.length > 0) {
     prompt.push(
       `${sentientSim.name} is turned off by a partner who ${formatListToString(
-        turnOffs
-      )}.`
+        turnOffs,
+      )}.`,
     );
   }
 
@@ -270,7 +270,7 @@ export function formatAction(
   sentientSims: SentientSim[],
   location: LocationEntity,
   sexCategoryType?: number,
-  sexLocationType?: number
+  sexLocationType?: number,
 ) {
   let formattedAction = action;
 
@@ -284,7 +284,7 @@ export function formatAction(
     }
     formattedAction = formattedAction.replaceAll(
       '{non_initiator_participants}',
-      formatListToString(sentientSimNames)
+      formatListToString(sentientSimNames),
     );
   }
 
@@ -292,7 +292,7 @@ export function formatAction(
     const sentientSimNames = sentientSims.map((sim) => sim.name);
     formattedAction = formattedAction.replaceAll(
       '{participants}',
-      formatListToString(sentientSimNames)
+      formatListToString(sentientSimNames),
     );
   }
 
@@ -301,95 +301,95 @@ export function formatAction(
   for (let i = 0; i < sentientSims.length; i++) {
     formattedAction = formattedAction.replaceAll(
       `{actor.${i}}`,
-      sentientSims[i].name
+      sentientSims[i].name,
     );
 
     if (sentientSims[i].gender === 'Male') {
       formattedAction = formattedAction.replaceAll(`{actor.${i}.he/she}`, 'he');
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.him/her}`,
-        'him'
+        'him',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.his/her}`,
-        'his'
+        'his',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.himself/herself}`,
-        'himself'
+        'himself',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.uncle/aunt}`,
-        'uncle'
+        'uncle',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.brother/sister}`,
-        'brother'
+        'brother',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.husband/wife}`,
-        'husband'
+        'husband',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.nephew/niece}`,
-        'nephew'
+        'nephew',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.son/daughter}`,
-        'son'
+        'son',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.dad/mom}`,
-        'dad'
+        'dad',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.father/mother}`,
-        'father'
+        'father',
       );
     } else {
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.he/she}`,
-        'she'
+        'she',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.him/her}`,
-        'her'
+        'her',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.his/her}`,
-        'her'
+        'her',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.himself/herself}`,
-        'herself'
+        'herself',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.uncle/aunt}`,
-        'aunt'
+        'aunt',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.brother/sister}`,
-        'sister'
+        'sister',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.husband/wife}`,
-        'wife'
+        'wife',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.nephew/niece}`,
-        'niece'
+        'niece',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.son/daughter}`,
-        'daughter'
+        'daughter',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.dad/mom}`,
-        'mom'
+        'mom',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.father/mother}`,
-        'mother'
+        'mother',
       );
     }
 
@@ -398,7 +398,7 @@ export function formatAction(
       if (sexCategory) {
         formattedAction = formattedAction.replaceAll(
           `{sex_category}`,
-          sexCategory
+          sexCategory,
         );
       }
     }
@@ -408,7 +408,7 @@ export function formatAction(
       if (sexLocation) {
         formattedAction = formattedAction.replaceAll(
           `{sex_location}`,
-          sexLocation
+          sexLocation,
         );
       }
     }
@@ -418,7 +418,7 @@ export function formatAction(
 }
 
 export function getMappingStringReplacementPairs(
-  sentientSims?: SentientSim[]
+  sentientSims?: SentientSim[],
 ): ActorMapping[] {
   const mappings: ActorMapping[] = [];
 
@@ -490,7 +490,7 @@ export function getMappingStringErrorPairs(sentientSims?: SentientSim[]) {
       she: 'Replace she with she.Firstname Lastname',
       her: 'Replace her with her.Firstname Lastname',
       herself: 'Replace himself with herself.Firstname Lastname',
-    })
+    }),
   );
 
   if (!sentientSims) {
@@ -503,11 +503,11 @@ export function getMappingStringErrorPairs(sentientSims?: SentientSim[]) {
     if (spaceIndex !== -1) {
       errors.set(
         name.substring(0, spaceIndex),
-        'Use the full name of the sim when describing the animation'
+        'Use the full name of the sim when describing the animation',
       );
       errors.set(
         name.substring(spaceIndex + 1),
-        'Use the full name of the sim when describing the animation'
+        'Use the full name of the sim when describing the animation',
       );
     }
   });
@@ -529,7 +529,7 @@ export function trimIncompleteSentence(text: string): string {
   const lastPunctIndex = Math.max(
     text.lastIndexOf('.'),
     text.lastIndexOf('?'),
-    text.lastIndexOf('!')
+    text.lastIndexOf('!'),
   );
 
   if (lastPunctIndex >= 0) {

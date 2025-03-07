@@ -64,11 +64,11 @@ export default function AIModelSelection({
   const aiModels = useAIModels(apiType);
   const aiModel: SettingsHook<string> = useSetting<string>(
     modelSetting,
-    defaultModel
+    defaultModel,
   );
   const aiEndpoint: SettingsHook<string> = useSetting<string>(
     endpointSetting,
-    defaultEndpoint
+    defaultEndpoint,
   );
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -92,15 +92,15 @@ export default function AIModelSelection({
       .forEach((model) => models.push(model));
 
     const currentSelectedModelAvailable = models.some(
-      (model) => model.name === aiModel.value
+      (model) => model.name === aiModel.value,
     );
 
     models.forEach((model) =>
       menuItems.push(
         <MenuItem key={model.name} value={model.name}>
           {model.displayName}
-        </MenuItem>
-      )
+        </MenuItem>,
+      ),
     );
 
     return { menuItems, models, currentSelectedModelAvailable };

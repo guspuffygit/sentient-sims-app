@@ -4,9 +4,9 @@ import log from 'electron-log';
 import OpenAI from 'openai';
 import {
   ChatCompletion,
-  CompletionCreateParamsNonStreaming,
-} from 'openai/src/resources/chat/completions';
-import { ResponseFormatJSONSchema } from 'openai/resources';
+  ResponseFormatJSONSchema,
+} from 'openai/resources/index.js';
+import { ChatCompletionCreateParams } from 'openai/resources/chat/completions.js';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
@@ -42,7 +42,7 @@ export class OpenAIService implements GenerationService {
   getOpenAIKey(): string | undefined {
     // Check app settings
     const openAIKeyFromSettings = this.settingsService.get(
-      SettingsEnum.OPENAI_KEY
+      SettingsEnum.OPENAI_KEY,
     );
     if (openAIKeyFromSettings) {
       log.debug('Using openai key from settings');
@@ -57,7 +57,7 @@ export class OpenAIService implements GenerationService {
     }
 
     throw new OpenAIKeyNotSetError(
-      'No OpenAI Key set, Edit OpenAI Key to set it'
+      'No OpenAI Key set, Edit OpenAI Key to set it',
     );
   }
 
@@ -103,9 +103,9 @@ export class OpenAIService implements GenerationService {
   }
 
   async sentientSimsGenerate(
-    request: OpenAICompatibleRequest
+    request: OpenAICompatibleRequest,
   ): Promise<SimsGenerateResponse> {
-    const completionRequest: CompletionCreateParamsNonStreaming = {
+    const completionRequest: ChatCompletionCreateParams = {
       model: this.getOpenAIModel(),
       max_tokens: request.maxResponseTokens,
       messages: request.messages.map((message) => {
@@ -145,9 +145,8 @@ export class OpenAIService implements GenerationService {
 
     log.debug(`OpenAI Request:\n${JSON.stringify(completionRequest, null, 2)}`);
 
-    const result = await this.getOpenAIClient().chat.completions.create(
-      completionRequest
-    );
+    const result =
+      await this.getOpenAIClient().chat.completions.create(completionRequest);
     let text = this.getOutputFromGeneration(result);
 
     if (
@@ -161,7 +160,7 @@ export class OpenAIService implements GenerationService {
     if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED)) {
       text = await this.translate(
         text,
-        this.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE) as string
+        this.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE) as string,
       );
     }
 
@@ -181,8 +180,7 @@ export class OpenAIService implements GenerationService {
   }
 
   async translate(text: string, language: string) {
-    const request: CompletionCreateParamsNonStreaming = {
-      stream: false,
+    const request: ChatCompletionCreateParams = {
       model: this.getOpenAIModel(),
       messages: [
         {
@@ -195,9 +193,8 @@ export class OpenAIService implements GenerationService {
         },
       ],
     };
-    const result = await this.getOpenAIClient().chat.completions.create(
-      request
-    );
+    const result =
+      await this.getOpenAIClient().chat.completions.create(request);
     return this.getOutputFromGeneration(result);
   }
 

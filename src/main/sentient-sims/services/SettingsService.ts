@@ -2,9 +2,13 @@ import log from 'electron-log';
 import Store from 'electron-store';
 import path from 'path';
 import { DeprecatedSettingsEnum, SettingsEnum } from '../models/SettingsEnum';
+import { defaultOpenAITTSSettings } from '../models/OpenAITTSSettings';
 import { ApiType } from '../models/ApiType';
 import {
+  defaultElevenLabsEndpoint,
   defaultGeminiModel,
+  defaultTTSEnabled,
+  defaultTTSVolume,
   geminiDefaultEndpoint,
   koboldaiDefaultEndpoint,
   novelaiDefaultEndpoint,
@@ -14,6 +18,9 @@ import {
   sentientSimsAIHost,
 } from '../constants';
 import { disableDebugLogging, enableDebugLogging } from '../util/debugLog';
+import { defaultSentientSimsAITTSSettings } from '../models/SentientSimsAITTSSettings';
+import { defaultKokoroAITTSSettings } from '../models/KokoroAITTSSettings';
+import { defaultElevenLabsTTSSettings } from '../models/ElevenLabsTTSSettings';
 
 export function defaultStore(cwd?: string) {
   return new Store({
@@ -46,7 +53,7 @@ export function defaultStore(cwd?: string) {
           'Documents',
           'Electronic Arts',
           'The Sims 4',
-          'Mods'
+          'Mods',
         ),
       },
       [SettingsEnum.ACCESS_TOKEN.toString()]: {
@@ -109,6 +116,42 @@ export function defaultStore(cwd?: string) {
         type: 'string',
         default: defaultGeminiModel,
       },
+      [SettingsEnum.TTS_ENABLED.toString()]: {
+        type: 'boolean',
+        default: defaultTTSEnabled,
+      },
+      [SettingsEnum.TTS_API_TYPE.toString()]: {
+        type: 'string',
+        default: ApiType.ElevenLabs.toString(),
+      },
+      [SettingsEnum.TTS_VOLUME.toString()]: {
+        type: 'number',
+        default: defaultTTSVolume,
+      },
+      [SettingsEnum.OPENAI_TTS_SETTINGS.toString()]: {
+        type: 'object',
+        default: defaultOpenAITTSSettings,
+      },
+      [SettingsEnum.SENTIENTSIMSAI_TTS_SETTINGS.toString()]: {
+        type: 'object',
+        default: defaultSentientSimsAITTSSettings,
+      },
+      [SettingsEnum.KOKOROAI_TTS_SETTINGS.toString()]: {
+        type: 'object',
+        default: defaultKokoroAITTSSettings,
+      },
+      [SettingsEnum.ELEVENLABS_KEY.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.ELEVENLABS_ENDPOINT.toString()]: {
+        type: 'string',
+        default: defaultElevenLabsEndpoint,
+      },
+      [SettingsEnum.ELEVENLABS_TTS_SETTINGS.toString()]: {
+        type: 'object',
+        default: defaultElevenLabsTTSSettings,
+      },
     },
     migrations: {
       '3.1.0': (store) => {
@@ -119,7 +162,7 @@ export function defaultStore(cwd?: string) {
           ) {
             store.set(
               SettingsEnum.AI_API_TYPE,
-              ApiType.SentientSimsAI.toString()
+              ApiType.SentientSimsAI.toString(),
             );
           } else {
             store.set(SettingsEnum.AI_API_TYPE, ApiType.CustomAI.toString());

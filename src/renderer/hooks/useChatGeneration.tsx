@@ -66,7 +66,7 @@ export default function useChatGeneration(): ChatGeneration {
     () => void
   >(() => {});
   const [messages, setMessages] = useState<MessageInputProps[]>(
-    defaultMessages(defaultSystemPrompt)
+    defaultMessages(defaultSystemPrompt),
   );
   const [input, setInput] = useState<string | undefined | null>();
 
@@ -100,9 +100,8 @@ export default function useChatGeneration(): ChatGeneration {
               updatedMessages[updatedMessages.length - 1].message.role ===
               'assistant'
             ) {
-              updatedMessages[
-                updatedMessages.length - 1
-              ].message.content += ` ${result.text}`;
+              updatedMessages[updatedMessages.length - 1].message.content +=
+                ` ${result.text}`;
             } else {
               updatedMessages.push({
                 id: generateUUID(),
@@ -125,7 +124,7 @@ export default function useChatGeneration(): ChatGeneration {
           }
           generationLoadedCallback();
         }
-      }
+      },
     );
     return () => {
       removeListener();
@@ -184,7 +183,7 @@ export default function useChatGeneration(): ChatGeneration {
       };
       setMessages(updatedMessages);
     },
-    [messages]
+    [messages],
   );
 
   const deleteMessage = (index: number) => {

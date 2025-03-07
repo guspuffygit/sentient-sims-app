@@ -130,7 +130,7 @@ export class OpenAIRequestBuilder {
   }
 
   buildOneShotOpenAIRequest(
-    oneShotRequest: OneShotRequest
+    oneShotRequest: OneShotRequest,
   ): OpenAICompatibleRequest {
     const systemMessage: OpenAIMessage = {
       role: 'system',
@@ -148,7 +148,7 @@ export class OpenAIRequestBuilder {
         role: 'assistant',
         content: oneShotRequest.assistantPreResponse,
         tokens: this.tokenCounter.countTokens(
-          oneShotRequest.assistantPreResponse
+          oneShotRequest.assistantPreResponse,
         ),
       };
       messages.push(assistantMessage);

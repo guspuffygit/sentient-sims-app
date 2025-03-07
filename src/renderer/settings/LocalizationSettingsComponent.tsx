@@ -6,11 +6,11 @@ import useSetting from '../hooks/useSetting';
 export default function LocalizationSettingsComponent() {
   const localizationEnabled = useSetting(
     SettingsEnum.LOCALIZATION_ENABLED,
-    false
+    false,
   );
   const localizationLanguage = useSetting(
     SettingsEnum.LOCALIZATION_LANGUAGE,
-    ''
+    '',
   );
 
   return (

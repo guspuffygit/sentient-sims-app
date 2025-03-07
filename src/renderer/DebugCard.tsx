@@ -9,6 +9,7 @@ import { useAISettings } from './providers/AISettingsProvider';
 import { useVersions } from './providers/VersionsProvider';
 import { VersionFormHelper } from './components/VersionFormHelper';
 import PatreonDebug from './components/PatreonDebug';
+import WebGpuDebug from './components/WebGpuDebug';
 
 export default function DebugCard() {
   const versions = useVersions();
@@ -44,6 +45,7 @@ export default function DebugCard() {
       <VersionFormHelper text="Game Version" version={versions.game} />
       <AIStatusComponent />
       <PatreonDebug />
+      <WebGpuDebug />
       <SendLogButton />
     </AppCard>
   );

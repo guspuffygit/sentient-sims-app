@@ -15,7 +15,7 @@ import { stringType } from '../util/typeChecks';
 import { GeminiService } from '../services/GeminiService';
 
 export function getGenerationService(
-  settingsService: SettingsService
+  settingsService: SettingsService,
 ): GenerationService {
   const aiType = settingsService.get(SettingsEnum.AI_API_TYPE);
   if (aiType === ApiType.SentientSimsAI || aiType === ApiType.CustomAI) {
@@ -38,7 +38,7 @@ export function getGenerationService(
 }
 
 export function getTokenCounter(
-  settingsService: SettingsService
+  settingsService: SettingsService,
 ): TokenCounter {
   const aiType = settingsService.get(SettingsEnum.AI_API_TYPE);
 
@@ -54,7 +54,7 @@ export function getTokenCounter(
 }
 
 export function getModelSettings(
-  settingsService: SettingsService
+  settingsService: SettingsService,
 ): ModelSettings {
   const aiType = settingsService.get(SettingsEnum.AI_API_TYPE);
 

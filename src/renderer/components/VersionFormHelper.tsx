@@ -16,7 +16,7 @@ export function VersionFormHelper({ text, version }: VersionFormHelperProps) {
         elements.push(
           <FormHelperText error>
             {text}: {errors[i]}
-          </FormHelperText>
+          </FormHelperText>,
         );
       } else {
         elements.push(<FormHelperText error>{errors[i]}</FormHelperText>);

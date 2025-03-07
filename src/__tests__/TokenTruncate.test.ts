@@ -68,7 +68,7 @@ describe('TruncateTokens', () => {
       45,
       breakStringTokens,
       messageTokens,
-      messages
+      messages,
     );
     expect(result).toEqual(expectedMessages);
   });
