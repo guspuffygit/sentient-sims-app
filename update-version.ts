@@ -2,6 +2,8 @@ import * as fs from 'fs';
 
 const version = process.argv[2];
 
+console.log(version);
+
 const packageLockFile = './release/app/package-lock.json';
 const packageLock = JSON.parse(fs.readFileSync(packageLockFile, 'utf-8'));
 
