@@ -601,9 +601,6 @@ export const interactionDescriptions: Map<String, InteractionDescription> =
       mixer_social_Flatter_targeted_Friendly_alwaysOn: {
         pre_actions: ['{actor.0} is beginning to flatter {actor.1}.'],
       },
-      mixer_social_Hug_targeted_Friendly_MiddleScore: {
-        pre_actions: ['{actor.0} is beginning to hug {actor.1}.'],
-      },
       mixer_social_TellEngagingStory_group_Friendly_MiddleScore: {
         pre_actions: [
           '{actor.0} is captivating {actor.1} with an engaging story now.',

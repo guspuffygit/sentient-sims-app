@@ -6,6 +6,7 @@ export enum ModWebsocketMessageType {
   MIGRATE_SINGLE_SLOT_SAVE = 'migrate_single_slot_save',
   MEMORY_DELETED = 'memory_deleted',
   MEMORY_EDITED = 'memory_edited',
+  MEMORY_CREATED = 'memory_created',
 }
 
 export type ModWebsocketMessage = {

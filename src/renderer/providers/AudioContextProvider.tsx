@@ -84,9 +84,11 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
     async (text: string) => {
       if (!text.trim()) return;
 
-      tts?.speak(text);
+      if (aiSettings.ttsEnabled) {
+        tts?.speak(text);
+      }
     },
-    [tts],
+    [aiSettings.ttsEnabled, tts],
   );
 
   const stop = useCallback(() => {

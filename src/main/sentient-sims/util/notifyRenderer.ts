@@ -26,6 +26,10 @@ export function notifySettingChanged(setting: any, value: any) {
 export function notifyNewMemoryAdded(memory: MemoryEntity) {
   log.debug('Sending new memory added to renderer');
   notifyAllWindows('on-new-memory-added', memory);
+  sendModNotification({
+    type: ModWebsocketMessageType.MEMORY_CREATED,
+    memory,
+  });
 }
 
 export function notifyMemoryDeleted(deleteMemoryRequest: DeleteMemoryRequest) {
