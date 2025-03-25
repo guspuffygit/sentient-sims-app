@@ -54,6 +54,14 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
               <>
                 <Button
                   color="secondary"
+                  onClick={() => navigate('/offlinememory')}
+                  sx={{ marginLeft: '5px' }}
+                  id="offlinememory"
+                >
+                  OfflineMemory
+                </Button>
+                <Button
+                  color="secondary"
                   onClick={() => navigate('/chat')}
                   sx={{ marginLeft: '5px' }}
                   id="chat"

@@ -6,6 +6,7 @@ import { ParticipantRepository } from '../db/ParticipantRepository';
 import { ParticipantDTO } from '../db/dto/ParticipantDTO';
 import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
+import { SaveGame, ToSaveGameType } from '../models/SaveGame';
 
 export class ParticipantsController {
   private readonly participantRepository: ParticipantRepository;
@@ -36,7 +37,16 @@ export class ParticipantsController {
 
   async getAllParticipants(req: Request, res: Response) {
     try {
-      const result = this.participantRepository.getAllParticipants();
+      const saveGameName = req.query.saveGameId as string | undefined;
+      const saveGameType = req.query.saveGameType as string | undefined;
+      let saveGame: SaveGame | undefined;
+      if (saveGameName && saveGameType) {
+        saveGame = {
+          name: saveGameName,
+          type: ToSaveGameType(saveGameType),
+        };
+      }
+      const result = this.participantRepository.getAllParticipants(saveGame);
       return res.json(result);
     } catch (err: any) {
       log.error('Error getting all participants', err);

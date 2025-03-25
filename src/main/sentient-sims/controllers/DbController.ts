@@ -14,6 +14,7 @@ export class DbController {
     this.loadDatabase = this.loadDatabase.bind(this);
     this.saveDatabase = this.saveDatabase.bind(this);
     this.unloadDatabase = this.unloadDatabase.bind(this);
+    this.getSaveGames = this.getSaveGames.bind(this);
   }
 
   async loadDatabase(req: Request, res: Response) {
@@ -52,6 +53,17 @@ export class DbController {
 
       this.dbService.unloadDatabase();
       return res.json({ text: 'Db unloaded' });
+    } catch (err: any) {
+      log.error('Error saving database', err);
+      return res.json({ error: err.message });
+    }
+  }
+
+  getSaveGames(req: Request, res: Response) {
+    try {
+      log.debug(`Getting save games`);
+
+      return res.json(this.dbService.listSaveGames());
     } catch (err: any) {
       log.error('Error saving database', err);
       return res.json({ error: err.message });

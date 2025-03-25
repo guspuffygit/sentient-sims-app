@@ -6,6 +6,7 @@ import log from 'electron-log';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { SettingsService } from './SettingsService';
 import { DatabaseSession } from '../models/DatabaseSession';
+import { SaveGame, SaveGameType } from '../models/SaveGame';
 
 export class DirectoryService {
   readonly settingsService: SettingsService;
@@ -125,12 +126,43 @@ export class DirectoryService {
     );
   }
 
+  getSentientSimsSaveGame(saveGame: SaveGame): string {
+    if (saveGame.type === SaveGameType.SAVED) {
+      return path.join(
+        this.getSentientSimsFolder(),
+        `${saveGame.name}-sentient-sims.db`,
+      );
+    }
+
+    if (saveGame.type === SaveGameType.UNSAVED) {
+      return path.join(
+        this.getSentientSimsFolder(),
+        `${saveGame.name}-sentient-sims-unsaved.db`,
+      );
+    }
+
+    throw Error(`Unknown SaveGameType: ${saveGame.type}`);
+  }
+
   listSentientSimsDbUnsaved() {
     try {
       const folderPath = this.getSentientSimsFolder();
       const files = fs.readdirSync(folderPath);
       return files
         .filter((file) => file.includes('-sentient-sims-unsaved.db'))
+        .map((file) => path.join(folderPath, file));
+    } catch (error) {
+      log.error('Error reading directory:', error);
+      return [];
+    }
+  }
+
+  listSentientSimsDbSaved() {
+    try {
+      const folderPath = this.getSentientSimsFolder();
+      const files = fs.readdirSync(folderPath);
+      return files
+        .filter((file) => file.includes('-sentient-sims.db'))
         .map((file) => path.join(folderPath, file));
     } catch (error) {
       log.error('Error reading directory:', error);

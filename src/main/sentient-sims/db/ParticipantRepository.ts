@@ -7,6 +7,7 @@ import { Repository } from './Repository';
 import { ParticipantEntity } from './entities/ParticipantEntity';
 import { ParticipantDTO } from './dto/ParticipantDTO';
 import { notifySimsChanged } from '../util/notifyRenderer';
+import { SaveGame } from '../models/SaveGame';
 
 export class ParticipantRepository extends Repository {
   /**
@@ -60,9 +61,9 @@ export class ParticipantRepository extends Repository {
     return Promise.all(results);
   }
 
-  getAllParticipants(): ParticipantDTO[] {
+  getAllParticipants(saveGame?: SaveGame): ParticipantDTO[] {
     const participants = this.dbService
-      .getDb()
+      .getDb(saveGame)
       .prepare('SELECT * FROM participant')
       .safeIntegers()
       .all() as ParticipantEntity[];

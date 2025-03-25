@@ -1,5 +1,6 @@
 /* eslint-disable promise/always-return */
 import * as fs from 'fs';
+import path from 'path';
 import log from 'electron-log';
 import DatabaseConstructor, { Database } from 'better-sqlite3';
 import electron from 'electron';
@@ -10,6 +11,7 @@ import { DatabaseSession } from '../models/DatabaseSession';
 import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { notifyDatabaseLoaded } from '../util/notifyRenderer';
+import { SaveGame, SaveGameType } from '../models/SaveGame';
 
 export class DbService {
   private directoryService: DirectoryService;
@@ -102,6 +104,30 @@ export class DbService {
     notifyDatabaseLoaded(databaseSession);
   }
 
+  getDatabaseTemp(saveGame: SaveGame): Database {
+    const saveGameDb = this.directoryService.getSentientSimsSaveGame(saveGame);
+
+    log.info(`loadDatabaseTemp db: ${saveGameDb}`);
+
+    let tempDb: Database;
+    try {
+      tempDb = new DatabaseConstructor(saveGameDb);
+    } catch (err: any) {
+      log.error('Error opening temp database', err);
+      throw err;
+    }
+
+    try {
+      migrate(tempDb); // Await the migration
+      log.info('Temp DB Migration complete');
+    } catch (migrationErr: any) {
+      log.error('Temp DB migration failed', migrationErr);
+      throw migrationErr;
+    }
+
+    return tempDb;
+  }
+
   cleanupUnsavedDatabases(databaseSession: DatabaseSession) {
     let unsavedDatabases;
     try {
@@ -154,11 +180,44 @@ export class DbService {
     });
   }
 
-  getDb() {
+  getDb(saveGame?: SaveGame) {
+    if (saveGame) {
+      return this.getDatabaseTemp(saveGame);
+    }
+
     if (this?.db) {
       return this.db;
     }
 
     throw new DatabaseNotLoadedError();
+  }
+
+  listSaveGames(): SaveGame[] {
+    const saveGames: SaveGame[] = [];
+    const unsavedGames = this.directoryService.listSentientSimsDbUnsaved();
+    unsavedGames.forEach((game) => {
+      const unsaveGameName = path
+        .basename(game)
+        .replace('-sentient-sims-unsaved.db', '');
+      if (
+        !unsaveGameName.includes('-shm') &&
+        !unsaveGameName.includes('-wal')
+      ) {
+        saveGames.push({
+          name: unsaveGameName,
+          type: SaveGameType.UNSAVED,
+        });
+      }
+    });
+
+    const savedGames = this.directoryService.listSentientSimsDbSaved();
+    savedGames.forEach((game) => {
+      saveGames.push({
+        name: path.basename(game).replace('-sentient-sims.db', ''),
+        type: SaveGameType.SAVED,
+      });
+    });
+
+    return saveGames;
   }
 }

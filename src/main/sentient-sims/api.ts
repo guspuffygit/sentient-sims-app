@@ -193,6 +193,7 @@ export function runApi({
   expressApp.post('/db/load', dbController.loadDatabase);
   expressApp.post('/db/save', dbController.saveDatabase);
   expressApp.get('/db/unload', dbController.unloadDatabase);
+  expressApp.get('/db/list', dbController.getSaveGames);
 
   expressApp.get('/animations', animationsController.getAnimations);
   expressApp.get(

@@ -28,6 +28,7 @@ import { AISettingsProvider } from './providers/AISettingsProvider';
 import { VersionsProvider } from './providers/VersionsProvider';
 import TraitsPage from './TraitsPage';
 import { AudioContextProvider } from './providers/AudioContextProvider';
+import OfflineMemory from './OfflineMemory';
 
 const updatedAwsConfig = {
   ...awsExports,
@@ -59,6 +60,10 @@ const router = createMemoryRouter([
       {
         path: '/chat',
         element: <ChatPage />,
+      },
+      {
+        path: '/offlinememory',
+        element: <OfflineMemory />,
       },
       {
         path: '/sims',
