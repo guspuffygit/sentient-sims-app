@@ -15,6 +15,7 @@ import electron, {
   shell,
   session,
   WebRequestFilter,
+  protocol,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -203,6 +204,62 @@ app
           session.defaultSession.clearStorageData();
           mainWindow?.loadURL(resolveHtmlPath('index.html'));
         }
+      },
+    );
+
+    protocol.registerSchemesAsPrivileged([
+      { scheme: 'intercept', privileges: { standard: true, secure: true } },
+    ]);
+
+    // Intercept the custom protocol and return your own JSON response
+    protocol.interceptStringProtocol('intercept', (request, callback) => {
+      if (request.url === 'intercept://graphql') {
+        const fakeData = JSON.stringify({ data: { stonks: '🚀 to the moon' } });
+        // eslint-disable-next-line promise/no-callback-in-promise
+        callback({ mimeType: 'application/json', data: fakeData });
+      }
+    });
+
+    // The JSON that must match the POST body exactly
+    const expectedBody = JSON.stringify([
+      {
+        operationName: 'GuildInfo',
+        variables: { guild: '1098029759201542144' },
+        extensions: {
+          persistedQuery: {
+            version: 1,
+            sha256Hash:
+              '7950df406dacbf940f043ba4facc8757572b1fcec9e48bf081c445166acba6f8',
+          },
+        },
+      },
+    ]);
+
+    // Intercept requests to the GraphQL endpoint
+    session.defaultSession.webRequest.onBeforeRequest(
+      { urls: ['https://stonks.widgetbot.io/api/graphql'] },
+      // eslint-disable-next-line consistent-return
+      (details, callback) => {
+        // Only check POST requests with uploadData (i.e. request body)
+        if (
+          details.method === 'POST' &&
+          details.uploadData &&
+          details.uploadData.length
+        ) {
+          // Combine all parts of the uploaded data into a single string
+          const postedData = details.uploadData
+            .map((part) => (part.bytes ? part.bytes.toString() : ''))
+            .join('');
+
+          // Only redirect if the POST body exactly matches the expected JSON
+          if (postedData === expectedBody) {
+            // eslint-disable-next-line promise/no-callback-in-promise
+            return callback({ redirectURL: 'intercept://graphql' });
+          }
+        }
+        // Otherwise, proceed normally
+        // eslint-disable-next-line promise/no-callback-in-promise
+        callback({});
       },
     );
   })

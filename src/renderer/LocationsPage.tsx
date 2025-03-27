@@ -11,6 +11,7 @@ import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
 import { useOnDatabaseLoaded } from './hooks/useOnDatabaseLoaded';
+import { useWebsocket } from './providers/WebsocketProvider';
 
 type SelectedLocation = {
   location: LocationEntity;
@@ -34,6 +35,7 @@ export default function LocationsPage() {
   const [editedLocation, setEditedLocation] = useState<
     SelectedLocation | null | undefined
   >();
+  const { status } = useWebsocket();
 
   function getLocations() {
     fetch(`${appApiUrl}/locations`, {
@@ -194,117 +196,122 @@ export default function LocationsPage() {
     },
     [],
   );
-  if (locations.length > 0) {
-    let editLocationBox;
 
-    if (editedLocation) {
-      editLocationBox = (
-        <AppCard
-          cardActions={
-            <CardActions
-              sx={{
-                justifyContent: 'space-between',
-                marginLeft: 1,
-                marginRight: 1,
-                marginBottom: 1,
-              }}
-            >
-              <div>
-                <Button
-                  sx={{ marginRight: 1 }}
-                  color="secondary"
-                  variant="outlined"
-                  onClick={() => handleSave()}
-                >
-                  Save
-                </Button>
-                <Button
-                  color="secondary"
-                  variant="outlined"
-                  onClick={() => handleSetSelectedLocation(-1)}
-                >
-                  Cancel
-                </Button>
-              </div>
-              <div>
-                <Button
-                  color="error"
-                  variant="outlined"
-                  onClick={() => handleDelete()}
-                >
-                  Delete
-                </Button>
-              </div>
-            </CardActions>
-          }
-        >
-          <MemoryEditInput
-            label="Name"
-            rows={1}
-            handleEdit={handleNameEdit}
-            forceShow
-            value={editedLocation?.location?.name}
-          />
-          <MemoryEditInput
-            label="Lot Type"
-            rows={1}
-            handleEdit={handleLotTypeEdit}
-            forceShow
-            value={editedLocation?.location?.lot_type}
-          />
-          <MemoryEditInput
-            label="Description"
-            handleEdit={handleDescriptionEdit}
-            rows={5}
-            forceShow
-            value={editedLocation?.location?.description}
-          />
-        </AppCard>
-      );
-    }
-
+  if (!status.mod || locations.length === 0) {
     return (
-      <div>
-        <Card
-          sx={{
-            minWidth: 275,
-            maxHeight: editedLocation ? 400 : 700,
-            marginBottom: 2,
-            overflow: 'auto',
-          }}
-        >
-          <CardContent>
-            <div style={{ height: editedLocation ? 315 : 700, width: '100%' }}>
-              <DataGrid
-                rows={locations}
-                columns={columns}
-                slots={{
-                  footer: BlankDataGridFooterComponent,
-                }}
-                onRowSelectionModelChange={(selectedRow) => {
-                  try {
-                    for (let i = 0; i < locations.length; i++) {
-                      const location = locations[i];
-                      if (location.id === selectedRow[0]) {
-                        setEditedLocation({
-                          location,
-                          index: i,
-                        });
-                        break;
-                      }
-                    }
-                  } catch (err: any) {
-                    log.error('ouch', err);
-                  }
-                }}
-              />
-            </div>
-          </CardContent>
-        </Card>
-        {editLocationBox}
-      </div>
+      <AppCard>
+        Not connected to The Sims 4. Start a Sims 4 game to connect.
+      </AppCard>
     );
   }
 
-  return <AppCard>No game loaded yet</AppCard>;
+  let editLocationBox;
+
+  if (editedLocation) {
+    editLocationBox = (
+      <AppCard
+        cardActions={
+          <CardActions
+            sx={{
+              justifyContent: 'space-between',
+              marginLeft: 1,
+              marginRight: 1,
+              marginBottom: 1,
+            }}
+          >
+            <div>
+              <Button
+                sx={{ marginRight: 1 }}
+                color="secondary"
+                variant="outlined"
+                onClick={() => handleSave()}
+              >
+                Save
+              </Button>
+              <Button
+                color="secondary"
+                variant="outlined"
+                onClick={() => handleSetSelectedLocation(-1)}
+              >
+                Cancel
+              </Button>
+            </div>
+            <div>
+              <Button
+                color="error"
+                variant="outlined"
+                onClick={() => handleDelete()}
+              >
+                Delete
+              </Button>
+            </div>
+          </CardActions>
+        }
+      >
+        <MemoryEditInput
+          label="Name"
+          rows={1}
+          handleEdit={handleNameEdit}
+          forceShow
+          value={editedLocation?.location?.name}
+        />
+        <MemoryEditInput
+          label="Lot Type"
+          rows={1}
+          handleEdit={handleLotTypeEdit}
+          forceShow
+          value={editedLocation?.location?.lot_type}
+        />
+        <MemoryEditInput
+          label="Description"
+          handleEdit={handleDescriptionEdit}
+          rows={5}
+          forceShow
+          value={editedLocation?.location?.description}
+        />
+      </AppCard>
+    );
+  }
+
+  return (
+    <div>
+      <Card
+        sx={{
+          minWidth: 275,
+          maxHeight: editedLocation ? 400 : 700,
+          marginBottom: 2,
+          overflow: 'auto',
+        }}
+      >
+        <CardContent>
+          <div style={{ height: editedLocation ? 315 : 700, width: '100%' }}>
+            <DataGrid
+              rows={locations}
+              columns={columns}
+              slots={{
+                footer: BlankDataGridFooterComponent,
+              }}
+              onRowSelectionModelChange={(selectedRow) => {
+                try {
+                  for (let i = 0; i < locations.length; i++) {
+                    const location = locations[i];
+                    if (location.id === selectedRow[0]) {
+                      setEditedLocation({
+                        location,
+                        index: i,
+                      });
+                      break;
+                    }
+                  }
+                } catch (err: any) {
+                  log.error('ouch', err);
+                }
+              }}
+            />
+          </div>
+        </CardContent>
+      </Card>
+      {editLocationBox}
+    </div>
+  );
 }

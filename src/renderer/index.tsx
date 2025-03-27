@@ -29,6 +29,7 @@ import { VersionsProvider } from './providers/VersionsProvider';
 import TraitsPage from './TraitsPage';
 import { AudioContextProvider } from './providers/AudioContextProvider';
 import OfflineMemory from './OfflineMemory';
+import { WebsocketProvider } from './providers/WebsocketProvider';
 
 const updatedAwsConfig = {
   ...awsExports,
@@ -104,17 +105,19 @@ root.render(
       <Authenticator.Provider>
         <QueryClientProvider client={queryClient}>
           <SnackBarProvider>
-            <VersionsProvider>
-              <AISettingsProvider>
-                <AudioContextProvider>
-                  <ChatGenerationProvider>
-                    <DebugModeProvider>
-                      <RouterProvider router={router} />
-                    </DebugModeProvider>
-                  </ChatGenerationProvider>
-                </AudioContextProvider>
-              </AISettingsProvider>
-            </VersionsProvider>
+            <WebsocketProvider>
+              <VersionsProvider>
+                <AISettingsProvider>
+                  <AudioContextProvider>
+                    <ChatGenerationProvider>
+                      <DebugModeProvider>
+                        <RouterProvider router={router} />
+                      </DebugModeProvider>
+                    </ChatGenerationProvider>
+                  </AudioContextProvider>
+                </AISettingsProvider>
+              </VersionsProvider>
+            </WebsocketProvider>
           </SnackBarProvider>
         </QueryClientProvider>
       </Authenticator.Provider>

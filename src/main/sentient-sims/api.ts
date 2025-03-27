@@ -40,6 +40,7 @@ import { InteractionRepository } from './db/InteractionRepository';
 import { MappingController } from './controllers/MappingController';
 import { MappingService } from './services/MappingService';
 import { VoiceController } from './controllers/VoiceController';
+import { WebsocketController } from './controllers/WebsocketController';
 
 export type ApiOptions = {
   port: number;
@@ -216,6 +217,10 @@ export function runApi({
     interactionDescriptionController.updateInteraction,
   );
   expressApp.get('/voice/phonemize', voiceController.phonemize);
+  expressApp.get(
+    '/websocket/isconnected',
+    new WebsocketController().isConnected,
+  );
 
   return expressApp.listen(port, () => {
     log.debug(`Server is running on port ${port}`);

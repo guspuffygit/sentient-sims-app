@@ -17,6 +17,7 @@ import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
 import { useOnDatabaseLoaded } from './hooks/useOnDatabaseLoaded';
+import { useWebsocket } from './providers/WebsocketProvider';
 
 type SelectedSim = {
   sim: ParticipantDTO;
@@ -36,6 +37,7 @@ const columns: GridColDef[] = [
 export default function SimsPage() {
   const [sims, setSims] = useState<ParticipantDTO[]>([]);
   const [editedSim, setEditedSim] = useState<SelectedSim | null | undefined>();
+  const { status } = useWebsocket();
 
   function getSims() {
     fetch(`${appApiUrl}/participants`, {
@@ -159,6 +161,15 @@ export default function SimsPage() {
     },
     [],
   );
+
+  if (!status.mod) {
+    return (
+      <AppCard>
+        Not connected to The Sims 4. Start a Sims 4 game to connect.
+      </AppCard>
+    );
+  }
+
   if (sims.length > 0) {
     let editSimBox;
 
@@ -260,5 +271,7 @@ export default function SimsPage() {
     );
   }
 
-  return <AppCard>No game loaded yet</AppCard>;
+  return (
+    <AppCard>Edit a Sim&apos;s description in game to see them here.</AppCard>
+  );
 }

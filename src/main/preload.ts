@@ -105,6 +105,12 @@ const electronHandler = {
 
     return () => ipcRenderer.removeListener('on-voice', callback);
   },
+  onWebsocketStatusChange: (callback: any) => {
+    ipcRenderer.on('websocket-status-change', callback);
+
+    return () =>
+      ipcRenderer.removeListener('websocket-status-change', callback);
+  },
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

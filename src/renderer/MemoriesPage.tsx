@@ -14,6 +14,7 @@ import { appApiUrl } from 'main/sentient-sims/constants';
 import { DeleteMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
 import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
+import { useWebsocket } from './providers/WebsocketProvider';
 
 type SelectedMemory = {
   memory: MemoryEntity;
@@ -27,6 +28,7 @@ export default function MemoriesPage() {
   const [editedMemory, setEditedMemory] = useState<
     SelectedMemory | null | undefined
   >();
+  const { status } = useWebsocket();
 
   const addMemory = useCallback((memory: MemoryEntity) => {
     setMemories((previousMemories) => [...previousMemories, memory]);
@@ -243,6 +245,15 @@ export default function MemoriesPage() {
     },
     [],
   );
+
+  if (!status.mod) {
+    return (
+      <AppCard>
+        Not connected to The Sims 4. Start a Sims 4 game to connect.
+      </AppCard>
+    );
+  }
+
   if (memories.length > 0) {
     const renderText: any[] = [];
 
@@ -344,5 +355,5 @@ export default function MemoriesPage() {
     );
   }
 
-  return <AppCard>No game loaded yet</AppCard>;
+  return <AppCard>Interactions between Sims in game will appear here.</AppCard>;
 }

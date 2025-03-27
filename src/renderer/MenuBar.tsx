@@ -9,6 +9,7 @@ import useAuthCredentials from './hooks/useAuthCredentials';
 import { useDebugMode } from './providers/DebugModeProvider';
 import handleOpenExternalLink from './hooks/handleOpenExternalLink';
 import LogoutButton from './components/LogoutButton';
+// import { GlowingGreenOrb } from './components/GlowingGreenOrb';
 
 export type MenuBarProperties = {
   hideSideBar: boolean;
@@ -33,7 +34,7 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
         sx={{ backgroundColor: '#313339' }}
       >
         <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <div>
+          <Box display="flex" alignItems="center">
             <IconButton
               color="secondary"
               onClick={() => navigate('/')}
@@ -44,11 +45,39 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
             <Button
               color="secondary"
               onClick={handleOpenWiki}
-              sx={{ marginLeft: '5px' }}
+              sx={{ marginLeft: '5px', marginRight: '10px' }}
             >
               Wiki
             </Button>
-          </div>
+            {/* <Box display="flex" alignItems="center">
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  backgroundColor: '#313339',
+                  boxShadow: `
+                    0 0 8px 4px #fff,
+                    0 0 10px 5px #f0f,
+                    0 0 12px 6px #0ff
+                  `,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <img
+                  src={`${appApiUrl}/files/icon.png`}
+                  alt="App Icon"
+                  style={{
+                    width: 30,
+                    height: 30,
+                  }}
+                />
+              </Box>
+            </Box> */}
+            {/* <GlowingGreenOrb /> */}
+          </Box>
           <div>
             {debugMode.isEnabled ? (
               <>
