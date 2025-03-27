@@ -11,7 +11,7 @@ describe('Fetch', () => {
   it('fetch with timeout', async () => {
     await expect(
       fetchWithTimeout('https://www.google.com', { timeout: 1 }),
-    ).rejects.toThrow('The operation was aborted.');
+    ).rejects.toThrow('This operation was aborted');
 
     await fetchWithTimeout('https://www.google.com', {});
   });
