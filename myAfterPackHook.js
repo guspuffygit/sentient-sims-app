@@ -12,8 +12,8 @@ function extractBetterSQLite(context, url) {
 
 exports.default = async function(context) {
   if (process.env.BUILD_ARCHITECTURE === 'arm64') {
-    extractBetterSQLite(context, 'https://github.com/WiseLibs/better-sqlite3/releases/download/v9.1.1/better-sqlite3-v9.1.1-electron-v113-darwin-arm64.tar.gz');
+    extractBetterSQLite(context, 'https://github.com/WiseLibs/better-sqlite3/releases/download/v9.6.0/better-sqlite3-v9.6.0-electron-v118-darwin-arm64.tar.gz');
   } else if (process.env.BUILD_ARCHITECTURE === 'x64') {
-    extractBetterSQLite(context, 'https://github.com/WiseLibs/better-sqlite3/releases/download/v9.1.1/better-sqlite3-v9.1.1-electron-v113-darwin-x64.tar.gz');
+    extractBetterSQLite(context, 'https://github.com/WiseLibs/better-sqlite3/releases/download/v9.6.0/better-sqlite3-v9.6.0-electron-v118-darwin-x64.tar.gz');
   }
 }
