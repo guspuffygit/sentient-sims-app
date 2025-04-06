@@ -1,4 +1,4 @@
-import PatreonUser from '../../../renderer/wrappers/PatreonUser';
+import PatreonUser from '../wrappers/PatreonUser';
 
 export function getNightlyAccess(patreonUser: PatreonUser) {
   const disableNightly = !patreonUser.isMember();

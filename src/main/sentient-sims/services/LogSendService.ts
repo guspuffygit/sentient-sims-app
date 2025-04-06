@@ -13,6 +13,7 @@ import { InteractionBugReport } from '../models/InteractionBugReport';
 import { SSEventType, WWInteractionEvent } from '../models/InteractionEvents';
 import { sendPopUpNotification } from '../util/notifyRenderer';
 import { SendLogsRequest } from '../models/SendLogsRequest';
+import { GetPatreonDebugText } from '../util/patreonUtil';
 
 export const webhookUrl = [
   'https://d',
@@ -74,6 +75,17 @@ export class LogSendService {
         `Discord Username: ${sendLogsRequest.discordUsername}`,
         `Error Description: ${sendLogsRequest.errorDescription}`,
       ]);
+      if (sendLogsRequest.amplifyUser) {
+        const patreonDebugTexts: string[] = GetPatreonDebugText(
+          sendLogsRequest.amplifyUser,
+        );
+        this.appendInformationToFormData(
+          formData,
+          logId,
+          errors,
+          patreonDebugTexts,
+        );
+      }
       this.appendZipFileToFormData(logZip, formData, errors);
 
       const response = await this.sendFormData(formData, errors, url);

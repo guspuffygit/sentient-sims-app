@@ -4,10 +4,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { SendLogsRequest } from 'main/sentient-sims/models/SendLogsRequest';
+import { useAuthenticator } from '@aws-amplify/ui-react';
 import LogSendInformationComponent from './LogSendInformationComponent';
 import SpaceBetweenDiv from './components/SpaceBetweenDiv';
 
 export default function SendLogButton() {
+  const { user } = useAuthenticator((context) => [context.user]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -26,6 +28,11 @@ export default function SendLogButton() {
         discordUsername,
         errorDescription,
       };
+
+      if (user) {
+        sendLogsRequest.amplifyUser = user;
+      }
+
       const response = await fetch(`${appApiUrl}/debug/send-logs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
