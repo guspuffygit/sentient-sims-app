@@ -2,7 +2,7 @@ import { useAuthenticator } from '@aws-amplify/ui-react';
 import { Box, Button, Typography } from '@mui/material';
 import { PropsWithChildren } from 'react';
 import { appApiUrl } from 'main/sentient-sims/constants';
-import PatreonUser from 'main/sentient-sims/wrappers/PatreonUser';
+import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import { useDebugMode } from './providers/DebugModeProvider';
 
 export const getPatreonOauthUrl = (): string => {

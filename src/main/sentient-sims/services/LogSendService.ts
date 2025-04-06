@@ -71,21 +71,20 @@ export class LogSendService {
 
       const formData = new FormData();
 
-      this.appendInformationToFormData(formData, logId, errors, [
+      const extraData = [
         `Discord Username: ${sendLogsRequest.discordUsername}`,
         `Error Description: ${sendLogsRequest.errorDescription}`,
-      ]);
+      ];
+
       if (sendLogsRequest.amplifyUser) {
         const patreonDebugTexts: string[] = GetPatreonDebugText(
           sendLogsRequest.amplifyUser,
         );
-        this.appendInformationToFormData(
-          formData,
-          logId,
-          errors,
-          patreonDebugTexts,
-        );
+        log.debug(`idk: ${JSON.stringify(patreonDebugTexts, null, 2)}`);
+        patreonDebugTexts.forEach((text) => extraData.push(text));
       }
+
+      this.appendInformationToFormData(formData, logId, errors, extraData);
       this.appendZipFileToFormData(logZip, formData, errors);
 
       const response = await this.sendFormData(formData, errors, url);

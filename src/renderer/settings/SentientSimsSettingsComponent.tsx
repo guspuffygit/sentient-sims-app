@@ -8,7 +8,7 @@ import {
   sentientSimsAIDefaultModel,
   sentientSimsAIHost,
 } from 'main/sentient-sims/constants';
-import PatreonUser from 'main/sentient-sims/wrappers/PatreonUser';
+import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import AIModelSelection from '../AIModelSelection';
 import { AIEndpointComponent } from './AIEndpointComponent';
 

@@ -11,7 +11,7 @@ import { useAuthenticator } from '@aws-amplify/ui-react';
 import log from 'electron-log';
 import { UpdateClient } from 'main/sentient-sims/clients/UpdateClient';
 import { getNightlyAccess } from 'main/sentient-sims/util/nightlyAccess';
-import PatreonUser from 'main/sentient-sims/wrappers/PatreonUser';
+import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import AppCard from './AppCard';
 import useNewVersionChecker from './hooks/useNewVersionChecker';
 import useSetting, { SettingsHook } from './hooks/useSetting';

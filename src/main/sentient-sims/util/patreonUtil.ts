@@ -1,5 +1,5 @@
 import { AmplifyUser } from '@aws-amplify/ui';
-import PatreonUser from 'main/sentient-sims/wrappers/PatreonUser';
+import { PatreonUser } from '../wrappers/PatreonUser';
 
 export function GetPatreonDebugText(user: AmplifyUser): string[] {
   const patreonUser = new PatreonUser(user);
