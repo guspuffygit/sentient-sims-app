@@ -145,10 +145,12 @@ const createWindow = async () => {
   // Remove this after testing
   autoUpdater.allowPrerelease = true;
   autoUpdater.checkForUpdatesAndNotify();
-  autoUpdater.signals.updateDownloaded((info) => {
-    log.info(`Quitting and installing forcefully: ${info.version}`);
-    autoUpdater.quitAndInstall(false, true);
-  });
+  if (process.platform !== 'darwin') {
+    autoUpdater.signals.updateDownloaded((info) => {
+      log.info(`Quitting and installing forcefully: ${info.version}`);
+      autoUpdater.quitAndInstall(false, true);
+    });
+  }
   autoUpdater
     .checkForUpdates()
     .then((updateResult) => {
