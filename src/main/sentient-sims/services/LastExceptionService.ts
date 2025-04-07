@@ -7,6 +7,7 @@ import { DirectoryService } from './DirectoryService';
 export type LastExceptionFile = {
   filename: string;
   text: string;
+  created: Date;
 };
 
 export class LastExceptionService {
@@ -38,12 +39,16 @@ export class LastExceptionService {
           lastExceptionString = `${stackTrace}`.replace(/\r\n/g, '\n');
         });
       } catch (parseError: any) {
-        const message = 'Error parsing lastException file';
+        const message = `Error parsing lastException file: ${filename}`;
         log.error(message, parseError);
       }
+
+      const stats = fs.statSync(lastExceptionFile);
+
       files.push({
         filename,
         text: lastExceptionString,
+        created: stats.ctime,
       });
     });
 

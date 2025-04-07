@@ -80,7 +80,6 @@ export class LogSendService {
         const patreonDebugTexts: string[] = GetPatreonDebugText(
           sendLogsRequest.amplifyUser,
         );
-        log.debug(`idk: ${JSON.stringify(patreonDebugTexts, null, 2)}`);
         patreonDebugTexts.forEach((text) => extraData.push(text));
       }
 
@@ -261,6 +260,7 @@ export class LogSendService {
           zipFile.addFile(
             lastExceptionFile.filename,
             Buffer.from(lastExceptionFile.text, 'utf-8'),
+            `Created ${lastExceptionFile.created.toUTCString()}`,
           );
         });
     } catch (err: any) {
