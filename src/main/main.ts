@@ -34,14 +34,6 @@ import {
 
 log.initialize({ preload: true });
 
-class AppUpdater {
-  constructor() {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
-  }
-}
-
 let mainWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
@@ -148,9 +140,13 @@ const createWindow = async () => {
     directoryService,
   });
 
-  // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
-  new AppUpdater();
+  log.transports.file.level = 'info';
+  autoUpdater.logger = log;
+  try {
+    autoUpdater.checkForUpdatesAndNotify();
+  } catch (err) {
+    log.error(`Unable to check for updates and notify`, err);
+  }
 };
 
 /**
