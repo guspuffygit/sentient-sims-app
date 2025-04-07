@@ -195,7 +195,13 @@ export class LogSendService {
       // Dont send tokens or secrets in the logs
       if (!settingsEnum.includes('Key') && !settingsEnum.includes('Token')) {
         const settingsValue = this.settingsService.getSetting(settingsEnum);
-        settings.push(`${settingsEnum}: ${settingsValue}`);
+        if (
+          Object.prototype.toString.call(settingsValue) === '[object Object]'
+        ) {
+          settings.push(`${settingsEnum}: ${JSON.stringify(settingsValue)}`);
+        } else {
+          settings.push(`${settingsEnum}: ${settingsValue}`);
+        }
       }
     });
 
@@ -222,7 +228,9 @@ export class LogSendService {
           `App Version: ${app.getVersion()}`,
           `Game Version: ${this.versionService.getGameVersion().version}`,
           ...this.getSettings(),
-        ].join('\n'),
+        ]
+          .join('\n')
+          .slice(0, 1999),
       );
     } catch (err: any) {
       this.handleAppendError('Error attaching log information', err, errors);

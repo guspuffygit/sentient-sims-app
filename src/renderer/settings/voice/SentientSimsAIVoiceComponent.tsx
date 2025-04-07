@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting from 'renderer/hooks/useSetting';
+import { JSX } from 'react';
 import {
   defaultSentientSimsAITTSSettings,
   SentientSimsAISpeechModel,
@@ -21,8 +22,32 @@ import {
 import { VOICES } from 'renderer/kokoro/voices';
 import { TestVoiceButton } from 'renderer/components/VoiceTestButton';
 import { useTTS } from 'renderer/providers/AudioContextProvider';
+import { useAuthenticator } from '@aws-amplify/ui-react';
+import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 
 export default function SentientSimsAIVoiceSettingsComponent() {
+  const { user } = useAuthenticator((context) => [context.user]);
+
+  const patreonUser = new PatreonUser(user);
+
+  const showLogInError = !user;
+  const showMemberError = !patreonUser.isMember();
+
+  const errors: JSX.Element[] = [];
+  if (showLogInError) {
+    errors.push(
+      <FormHelperText sx={{ marginBottom: 2 }} error>
+        You must be logged in to use the Sentient Sims AI API
+      </FormHelperText>,
+    );
+  }
+  if (showMemberError) {
+    errors.push(
+      <FormHelperText sx={{ marginBottom: 2 }} error>
+        You must be a Founder or Patron to use the Sentient Sims Uncensored AI
+      </FormHelperText>,
+    );
+  }
   const tts = useTTS();
   const sentientsimsaiTtsSettings = useSetting<SentientSimsAITTSSettings>(
     SettingsEnum.SENTIENTSIMSAI_TTS_SETTINGS,
@@ -73,6 +98,7 @@ export default function SentientSimsAIVoiceSettingsComponent() {
   return (
     <Grid item xs={12} sm={8}>
       <Box>
+        <Box>{errors}</Box>
         <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
           <Stack
             direction="row"
@@ -128,7 +154,7 @@ export default function SentientSimsAIVoiceSettingsComponent() {
             <FormHelperText>
               You can select multiple voices to create a custom voice
             </FormHelperText>
-            <TestVoiceButton />
+            <TestVoiceButton disabled={showLogInError || showMemberError} />
           </Stack>
         </Box>
         {tts?.error ? (

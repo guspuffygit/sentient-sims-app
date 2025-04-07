@@ -32,7 +32,7 @@ import VoiceSettingsComponent from './settings/VoiceSettingsComponent';
 
 enum SettingsTabSelectionValue {
   Settings = 'settings',
-  // Voice = 'voice',
+  Voice = 'voice',
 }
 
 export default function SettingsPage() {
@@ -127,7 +127,7 @@ export default function SettingsPage() {
           </GeminiSettingsComponent>
           <AnimationMappingSettingsComponent apiType={aiSettings.aiApiType} />
         </TabPanel>
-        <TabPanel value="hideme">
+        <TabPanel value={SettingsTabSelectionValue.Voice}>
           <VoiceSettingsComponent />
         </TabPanel>
       </TabContext>

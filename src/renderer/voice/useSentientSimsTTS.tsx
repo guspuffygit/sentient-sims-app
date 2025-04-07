@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+/* eslint-disable no-await-in-loop */
+import { useState, useCallback, useRef } from 'react';
 import log from 'electron-log';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
@@ -24,14 +25,21 @@ export function useSentientSimsTTS(): TTSHook {
     SettingsEnum.SENTIENTSIMSAI_TTS_SETTINGS,
     defaultSentientSimsAITTSSettings,
   );
+  const queueRef = useRef<string[]>([]);
+  const processing = useRef(false);
+  const [, setTick] = useState(0);
+
   const [audioSource, setAudioSource] = useState<HTMLAudioElement | null>(null);
   const [error, setError] = useState<string | undefined>();
 
-  const tts = useCallback(
-    async (text: string): Promise<void> => {
-      setError(undefined);
-      if (!text.trim()) return;
+  const processQueue = useCallback(async (): Promise<void> => {
+    if (processing.current) return; // Exit if processing is already underway
+    processing.current = true;
 
+    setError(undefined);
+
+    while (queueRef.current.length > 0) {
+      const text = queueRef.current.shift();
       log.debug(`Sentient Sims TTS: ${text}`);
 
       if (sentientSimsAITTSSettings.value.voice.length === 0) {
@@ -95,16 +103,27 @@ export function useSentientSimsTTS(): TTSHook {
         log.error(errorMessage);
         setError(errorMessage);
       }
+    }
+
+    processing.current = false;
+  }, [
+    sentientSimsAITTSSettings.value.model,
+    sentientSimsAITTSSettings.value.voice,
+    sentientSimsAITTSSettings.value.response_format,
+    sentientSimsAIEndpointSetting.value,
+    sentientSimsAITokenSetting.value,
+    aiSettings.ttsVolume,
+    error,
+  ]);
+
+  const speak = useCallback(
+    (text: string) => {
+      queueRef.current.push(text);
+      // Optionally update state if you want to re-render when the queue changes
+      setTick((t) => t + 1);
+      processQueue();
     },
-    [
-      sentientSimsAITTSSettings.value.model,
-      sentientSimsAITTSSettings.value.voice,
-      sentientSimsAITTSSettings.value.response_format,
-      sentientSimsAIEndpointSetting.value,
-      sentientSimsAITokenSetting.value,
-      aiSettings.ttsVolume,
-      error,
-    ],
+    [processQueue],
   );
 
   const stopTTS = useCallback(() => {
@@ -114,5 +133,5 @@ export function useSentientSimsTTS(): TTSHook {
     }
   }, [audioSource]);
 
-  return { speak: tts, stop: stopTTS, isPlaying: !!audioSource, error };
+  return { speak, stop: stopTTS, isPlaying: !!audioSource, error };
 }
