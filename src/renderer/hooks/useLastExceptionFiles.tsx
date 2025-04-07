@@ -10,6 +10,12 @@ export default function useLastExceptionFiles() {
   async function getLastExceptionFiles() {
     const response = await fetch(`${appApiUrl}/files/last-exception`);
     const jsonResponse = await response.json();
+    // convert Date string back to Date object
+    jsonResponse.forEach(
+      // eslint-disable-next-line no-return-assign
+      (lastExceptionFile: any) =>
+        (lastExceptionFile.created = new Date(lastExceptionFile.created)),
+    );
     setLastExceptionFiles(jsonResponse);
   }
 
@@ -24,8 +30,13 @@ export default function useLastExceptionFiles() {
     await getLastExceptionFiles();
   }
 
+  async function refresh() {
+    return getLastExceptionFiles();
+  }
+
   return {
     lastExceptionFiles,
     deleteFiles,
+    refresh,
   };
 }

@@ -19,7 +19,7 @@ export default function LastExceptionPage() {
   const [selectedException, setSelectedException] = useState<
     LastExceptionFile | undefined
   >();
-  const { lastExceptionFiles, deleteFiles } = useLastExceptionFiles();
+  const { lastExceptionFiles, deleteFiles, refresh } = useLastExceptionFiles();
 
   const renderRows: any = [];
 
@@ -27,15 +27,14 @@ export default function LastExceptionPage() {
     renderRows.push(
       <ListItem key={lastExceptionFile.filename} component="div" disablePadding>
         <ListItemButton onClick={() => setSelectedException(lastExceptionFile)}>
-          <ListItemText primary={`${lastExceptionFile.filename}`} />
+          <ListItemText
+            primary={`${lastExceptionFile.filename}`}
+            secondary={lastExceptionFile.created.toUTCString()}
+          />
         </ListItemButton>
       </ListItem>,
     );
   });
-
-  if (lastExceptionFiles.length === 0) {
-    return <AppCard>No lastException files exist</AppCard>;
-  }
 
   return (
     <AppCard>
@@ -73,8 +72,16 @@ export default function LastExceptionPage() {
             <div />
             <div style={{ marginRight: 2 }}>
               <Button
+                onClick={() => refresh()}
+                variant="outlined"
+                sx={{ marginRight: 2 }}
+              >
+                Refresh
+              </Button>
+              <Button
                 color="error"
                 variant="outlined"
+                disabled={lastExceptionFiles.length === 0}
                 onClick={() => deleteFiles()}
               >
                 Clear All
@@ -83,7 +90,11 @@ export default function LastExceptionPage() {
           </SpaceBetweenDiv>
           <div>
             <Divider sx={{ margin: 2 }} />
-            <List component="nav">{renderRows}</List>
+            {lastExceptionFiles.length === 0 ? (
+              <Typography>No lastException files exist</Typography>
+            ) : (
+              <List component="nav">{renderRows}</List>
+            )}
           </div>
         </div>
       )}
