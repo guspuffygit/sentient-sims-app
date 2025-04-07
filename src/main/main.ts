@@ -33,15 +33,6 @@ import {
 } from './sentient-sims/util/debugLog';
 
 log.initialize({ preload: true });
-
-class AppUpdater {
-  constructor() {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
-  }
-}
-
 let mainWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
@@ -148,9 +139,29 @@ const createWindow = async () => {
     directoryService,
   });
 
-  // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
-  new AppUpdater();
+  // Auto update
+  log.transports.file.level = 'info';
+  autoUpdater.logger = log;
+  // Remove this after testing
+  autoUpdater.allowPrerelease = true;
+  autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.signals.updateDownloaded((info) => {
+    log.info(`Quitting and installing forcefully: ${info.version}`);
+    autoUpdater.quitAndInstall(false, true);
+  });
+  autoUpdater
+    .checkForUpdates()
+    .then((updateResult) => {
+      if (updateResult && updateResult.updateInfo) {
+        log.info(`New update is ready: ${updateResult.updateInfo.version}`);
+        electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
+          if (wnd.webContents?.isDestroyed() === false) {
+            wnd.webContents.send('new-update-ready');
+          }
+        });
+      }
+    })
+    .catch((err) => log.error(`Error checking for updates`, err));
 };
 
 /**
