@@ -5,12 +5,13 @@ import {
   Grid,
   MenuItem,
   Select,
+  Slider,
   Stack,
   Typography,
 } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting from 'renderer/hooks/useSetting';
-import { JSX } from 'react';
+import { JSX, useMemo } from 'react';
 import {
   defaultSentientSimsAITTSSettings,
   SentientSimsAISpeechModel,
@@ -24,6 +25,8 @@ import { TestVoiceButton } from 'renderer/components/VoiceTestButton';
 import { useTTS } from 'renderer/providers/AudioContextProvider';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
+import SpeedIcon from '@mui/icons-material/Speed';
+import log from 'electron-log';
 
 export default function SentientSimsAIVoiceSettingsComponent() {
   const { user } = useAuthenticator((context) => [context.user]);
@@ -73,6 +76,16 @@ export default function SentientSimsAIVoiceSettingsComponent() {
       model: toSpeechModel(model),
       voice: sentientsimsaiTtsSettings.value.voice,
       response_format: sentientsimsaiTtsSettings.value.response_format,
+      speed: sentientsimsaiTtsSettings.value.speed,
+    });
+  }
+
+  function handleSpeedChange(speed: number) {
+    sentientsimsaiTtsSettings.setSetting({
+      model: sentientsimsaiTtsSettings.value.model,
+      voice: sentientsimsaiTtsSettings.value.voice,
+      response_format: sentientsimsaiTtsSettings.value.response_format,
+      speed,
     });
   }
 
@@ -92,8 +105,19 @@ export default function SentientSimsAIVoiceSettingsComponent() {
       model: sentientsimsaiTtsSettings.value.model,
       voice: voices,
       response_format: sentientsimsaiTtsSettings.value.response_format,
+      speed: sentientsimsaiTtsSettings.value.speed,
     });
   }
+
+  const speed = useMemo(() => {
+    if (sentientsimsaiTtsSettings.value.speed) {
+      return sentientsimsaiTtsSettings.value.speed;
+    }
+
+    return defaultSentientSimsAITTSSettings.speed;
+  }, [sentientsimsaiTtsSettings.value.speed]);
+
+  log.info(speed);
 
   return (
     <Grid item xs={12} sm={8}>
@@ -155,6 +179,29 @@ export default function SentientSimsAIVoiceSettingsComponent() {
               You can select multiple voices to create a custom voice
             </FormHelperText>
             <TestVoiceButton disabled={showLogInError || showMemberError} />
+          </Stack>
+        </Box>
+        <Box sx={{ width: 300 }}>
+          <Stack
+            spacing={2}
+            direction="row"
+            sx={{ alignItems: 'center', mb: 1 }}
+          >
+            <Typography>Speed:</Typography>
+            <Slider
+              aria-label="Speed"
+              value={speed}
+              onChange={(change, value) => handleSpeedChange(value as number)}
+              step={0.01}
+              min={0.4}
+              max={2}
+              marks={[
+                { value: 0.4, label: '0.4' },
+                { value: 1.0, label: '1' },
+                { value: 2.0, label: '2' },
+              ]}
+            />
+            <SpeedIcon />
           </Stack>
         </Box>
         {tts?.error ? (

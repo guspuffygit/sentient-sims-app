@@ -44,7 +44,7 @@ export function useSentientSimsTTS(): TTSHook {
 
       if (sentientSimsAITTSSettings.value.voice.length === 0) {
         setError('At least one Sentient Sims Voice must be selected');
-        return;
+        break;
       }
 
       const requestBody = {
@@ -52,7 +52,9 @@ export function useSentientSimsTTS(): TTSHook {
         input: text,
         voice: sentientSimsAITTSSettings.value.voice.join('+'),
         response_format: sentientSimsAITTSSettings.value.response_format,
-        speed: 1.0,
+        speed:
+          sentientSimsAITTSSettings.value.speed ??
+          defaultSentientSimsAITTSSettings.speed,
       };
 
       const url = `${sentientSimsAIEndpointSetting.value}/v1/audio/speech`;
@@ -80,7 +82,7 @@ export function useSentientSimsTTS(): TTSHook {
             setError(errorMessage);
           }
 
-          return;
+          break;
         }
 
         const audioUrl = URL.createObjectURL(await response.blob());
@@ -102,14 +104,16 @@ export function useSentientSimsTTS(): TTSHook {
         const errorMessage = `TTS request failed: ${error}`;
         log.error(errorMessage);
         setError(errorMessage);
+        break;
       }
     }
 
     processing.current = false;
   }, [
-    sentientSimsAITTSSettings.value.model,
     sentientSimsAITTSSettings.value.voice,
+    sentientSimsAITTSSettings.value.model,
     sentientSimsAITTSSettings.value.response_format,
+    sentientSimsAITTSSettings.value.speed,
     sentientSimsAIEndpointSetting.value,
     sentientSimsAITokenSetting.value,
     aiSettings.ttsVolume,
@@ -118,10 +122,12 @@ export function useSentientSimsTTS(): TTSHook {
 
   const speak = useCallback(
     (text: string) => {
+      log.debug(`Sentient Sims Voice Speak called: ${text}`);
       queueRef.current.push(text);
       // Optionally update state if you want to re-render when the queue changes
       setTick((t) => t + 1);
       processQueue();
+      log.debug(`Queue done processing?`);
     },
     [processQueue],
   );

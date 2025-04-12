@@ -36,12 +36,14 @@ export type SentientSimsAITTSSettings = {
   model: (string & {}) | SentientSimsAISpeechModel;
   voice: SentientSimsAISpeechVoice[];
   response_format: 'wav';
+  speed?: number;
 };
 
 export const defaultSentientSimsAITTSSettings: SentientSimsAITTSSettings = {
   model: SentientSimsAISpeechModel.KOKORO,
   voice: [SentientSimsAISpeechVoice.Heart],
   response_format: 'wav',
+  speed: 1.0,
 };
 
 export function toSpeechModel(model?: string): SentientSimsAISpeechModel {
