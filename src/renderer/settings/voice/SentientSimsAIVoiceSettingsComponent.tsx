@@ -26,9 +26,8 @@ import { useTTS } from 'renderer/providers/AudioContextProvider';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import SpeedIcon from '@mui/icons-material/Speed';
-import log from 'electron-log';
 
-export default function SentientSimsAIVoiceSettingsComponent() {
+export function SentientSimsAIVoiceSettingsComponent() {
   const { user } = useAuthenticator((context) => [context.user]);
 
   const patreonUser = new PatreonUser(user);
@@ -116,8 +115,6 @@ export default function SentientSimsAIVoiceSettingsComponent() {
 
     return defaultSentientSimsAITTSSettings.speed;
   }, [sentientsimsaiTtsSettings.value.speed]);
-
-  log.info(speed);
 
   return (
     <Grid item xs={12} sm={8}>

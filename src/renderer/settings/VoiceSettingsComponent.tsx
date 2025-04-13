@@ -14,10 +14,10 @@ import { ApiType, ApiTypeFromValue } from 'main/sentient-sims/models/ApiType';
 import { JSX } from 'react';
 import { VolumeDown, VolumeUp } from '@mui/icons-material';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
-import OpenAIVoiceSettingsComponent from './voice/OpenAIVoiceSettingsComponent';
-import SentientSimsAIVoiceSettingsComponent from './voice/SentientSimsAIVoiceComponent';
-import KokoroAIVoiceSettingsComponent from './voice/KokoroAIVoiceSettingsComponent';
-import ElevenLabsVoiceSettingsComponent from './voice/ElevenLabsVoiceComponent';
+import { OpenAIVoiceSettingsComponent } from './voice/OpenAIVoiceSettingsComponent';
+import { SentientSimsAIVoiceSettingsComponent } from './voice/SentientSimsAIVoiceSettingsComponent';
+import { KokoroAIVoiceSettingsComponent } from './voice/KokoroAIVoiceSettingsComponent';
+import { ElevenLabsVoiceSettingsComponent } from './voice/ElevenLabsVoiceSettingsComponent';
 
 export default function VoiceSettingsComponent() {
   const aiSettings = useAISettings();

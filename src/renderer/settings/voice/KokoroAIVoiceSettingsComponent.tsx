@@ -28,7 +28,7 @@ import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { AIEndpointComponent } from '../AIEndpointComponent';
 
-export default function KokoroAIVoiceSettingsComponent() {
+export function KokoroAIVoiceSettingsComponent() {
   const aiSettings = useAISettings();
   const tts = useTTS();
   const kokoroaiTtsSettings = useSetting<KokoroAITTSSettings>(

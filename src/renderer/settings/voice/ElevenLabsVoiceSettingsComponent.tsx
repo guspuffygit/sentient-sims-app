@@ -21,7 +21,7 @@ import { TestVoiceButton } from 'renderer/components/VoiceTestButton';
 import useSetting from 'renderer/hooks/useSetting';
 import { useTTS } from 'renderer/providers/AudioContextProvider';
 
-export default function ElevenLabsVoiceSettingsComponent() {
+export function ElevenLabsVoiceSettingsComponent() {
   const tts = useTTS();
   const sentientsimsaiTtsSettings = useSetting<ElevenLabsTTSSettings>(
     SettingsEnum.ELEVENLABS_TTS_SETTINGS,

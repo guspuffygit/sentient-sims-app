@@ -10,7 +10,7 @@ import {
 } from 'main/sentient-sims/models/OpenAITTSSettings';
 import useSetting from 'renderer/hooks/useSetting';
 
-export default function OpenAIVoiceSettingsComponent() {
+export function OpenAIVoiceSettingsComponent() {
   const openaiTtsSettings = useSetting<OpenAITTSSettings>(
     SettingsEnum.OPENAI_TTS_SETTINGS,
     defaultOpenAITTSSettings,
