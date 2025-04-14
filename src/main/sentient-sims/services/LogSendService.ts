@@ -83,7 +83,10 @@ export class LogSendService {
         patreonDebugTexts.forEach((text) => extraData.push(text));
       }
 
-      this.appendInformationToFormData(formData, logId, errors, extraData);
+      const content = this.getContent(logId, extraData);
+
+      this.appendInformationToFormData(formData, errors, content);
+      this.appendContentToZipFile(content, logZip, errors);
       this.appendZipFileToFormData(logZip, formData, errors);
 
       const response = await this.sendFormData(formData, errors, url);
@@ -116,6 +119,21 @@ export class LogSendService {
       logId,
       errors,
     };
+  }
+
+  getContent(logId: string, extraData: string[] = []) {
+    return [
+      ...extraData,
+      `Log id: ${logId}`,
+      `Platform: ${os.platform()}`,
+      `Architecture: ${os.arch()}`,
+      `OS Release: ${os.release()}`,
+      `Mods Folder: ${this.directoryService.getModsFolder()}`,
+      `Mod Version: ${this.versionService.getModVersion().version}`,
+      `App Version: ${app.getVersion()}`,
+      `Game Version: ${this.versionService.getGameVersion().version}`,
+      ...this.getSettings(),
+    ].join('\n');
   }
 
   async sendBugReport(
@@ -159,12 +177,8 @@ export class LogSendService {
         );
       }
 
-      this.appendInformationToFormData(
-        formData,
-        logId,
-        errors,
-        interactionBugInfo,
-      );
+      const content = this.getContent(logId, interactionBugInfo);
+      this.appendInformationToFormData(formData, errors, content);
 
       const response = await this.sendFormData(formData, errors, url);
 
@@ -210,28 +224,11 @@ export class LogSendService {
 
   private appendInformationToFormData(
     formData: FormData,
-    logId: string,
     errors: any[],
-    extraInfo: string[] = [],
+    content: string,
   ) {
     try {
-      formData.append(
-        'content',
-        [
-          ...extraInfo,
-          `Log id: ${logId}`,
-          `Platform: ${os.platform()}`,
-          `Architecture: ${os.arch()}`,
-          `OS Release: ${os.release()}`,
-          `Mods Folder: ${this.directoryService.getModsFolder()}`,
-          `Mod Version: ${this.versionService.getModVersion().version}`,
-          `App Version: ${app.getVersion()}`,
-          `Game Version: ${this.versionService.getGameVersion().version}`,
-          ...this.getSettings(),
-        ]
-          .join('\n')
-          .slice(0, 1999),
-      );
+      formData.append('content', content.slice(0, 1900));
     } catch (err: any) {
       this.handleAppendError('Error attaching log information', err, errors);
     }
@@ -255,6 +252,18 @@ export class LogSendService {
     try {
       const logFile = this.directoryService.getLogsFile();
       zipFile.addLocalFile(logFile);
+    } catch (err: any) {
+      this.handleAppendError('Error attaching mod log file', err, errors);
+    }
+  }
+
+  private appendContentToZipFile(
+    content: string,
+    zipFile: AdmZip,
+    errors: any[],
+  ) {
+    try {
+      zipFile.addFile('systemconfig.txt', Buffer.from(content, 'utf-8'));
     } catch (err: any) {
       this.handleAppendError('Error attaching mod log file', err, errors);
     }
