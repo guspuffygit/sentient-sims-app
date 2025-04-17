@@ -14,6 +14,7 @@ import { SSEventType, WWInteractionEvent } from '../models/InteractionEvents';
 import { sendPopUpNotification } from '../util/notifyRenderer';
 import { SendLogsRequest } from '../models/SendLogsRequest';
 import { GetPatreonDebugText } from '../util/patreonUtil';
+import { CaughtError } from '../models/CaughtError';
 
 export const webhookUrl = [
   'https://d',
@@ -63,12 +64,6 @@ export class LogSendService {
     try {
       const logZip = new AdmZip();
 
-      this.appendFilesListToZipFile(logZip, errors);
-      this.appendLogsFileToZipFile(logZip, errors);
-      this.appendLastExceptionFilesToZipFile(logZip, errors);
-      this.appendAppLogsToZipFile(logZip, errors);
-      this.appendConfigFileToZipFile(logZip, errors);
-
       const formData = new FormData();
 
       const extraData = [
@@ -83,10 +78,32 @@ export class LogSendService {
         patreonDebugTexts.forEach((text) => extraData.push(text));
       }
 
-      const content = this.getContent(logId, extraData);
+      const endData: string[] = [];
+
+      if (sendLogsRequest.caughtError) {
+        try {
+          endData.push(
+            `CaughtError: ${JSON.stringify(sendLogsRequest.caughtError, null, 2)}`,
+          );
+        } catch (err) {
+          log.error(`Error attaching caughtError info to debug logs`, err);
+        }
+      }
+
+      const content = this.getContent(logId, extraData, endData);
 
       this.appendInformationToFormData(formData, errors, content);
       this.appendContentToZipFile(content, logZip, errors);
+      this.appendFilesListToZipFile(logZip, errors);
+      this.appendLogsFileToZipFile(logZip, errors);
+      this.appendErrorDatabaseToZipFile(
+        logZip,
+        errors,
+        sendLogsRequest?.caughtError,
+      );
+      this.appendLastExceptionFilesToZipFile(logZip, errors);
+      this.appendAppLogsToZipFile(logZip, errors);
+      this.appendConfigFileToZipFile(logZip, errors);
       this.appendZipFileToFormData(logZip, formData, errors);
 
       const response = await this.sendFormData(formData, errors, url);
@@ -121,7 +138,7 @@ export class LogSendService {
     };
   }
 
-  getContent(logId: string, extraData: string[] = []) {
+  getContent(logId: string, extraData: string[] = [], endData: string[] = []) {
     return [
       ...extraData,
       `Log id: ${logId}`,
@@ -133,6 +150,7 @@ export class LogSendService {
       `App Version: ${app.getVersion()}`,
       `Game Version: ${this.versionService.getGameVersion().version}`,
       ...this.getSettings(),
+      ...endData,
     ].join('\n');
   }
 
@@ -254,6 +272,23 @@ export class LogSendService {
       zipFile.addLocalFile(logFile);
     } catch (err: any) {
       this.handleAppendError('Error attaching mod log file', err, errors);
+    }
+  }
+
+  private appendErrorDatabaseToZipFile(
+    zipFile: AdmZip,
+    errors: any[],
+    caughtError?: CaughtError,
+  ) {
+    try {
+      if (caughtError?.databaseSession) {
+        const errorDb = this.directoryService.getSentientSimsErrorDb(
+          caughtError.databaseSession,
+        );
+        zipFile.addLocalFile(errorDb);
+      }
+    } catch (err: any) {
+      this.handleAppendError('Error attaching error db file', err, errors);
     }
   }
 

@@ -1,7 +1,8 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 import { SettingsEnum } from './sentient-sims/models/SettingsEnum';
+import { CaughtError } from './sentient-sims/models/CaughtError';
 
 const electronHandler = {
   onDebugModeToggle: (callback: any) => {
@@ -14,6 +15,14 @@ const electronHandler = {
   },
   onPopupNotification: (callback: any) => {
     return ipcRenderer.on('popup-notification', callback);
+  },
+  onCaughtErrorPopupNotification: (
+    callback: (_event: IpcRendererEvent, caughtError: CaughtError) => any,
+  ) => {
+    ipcRenderer.on('caught-error-popup-notification', callback);
+
+    return () =>
+      ipcRenderer.removeListener('caught-error-popup-notification', callback);
   },
   selectDirectory: () => {
     return ipcRenderer.invoke('dialog:selectDirectory');

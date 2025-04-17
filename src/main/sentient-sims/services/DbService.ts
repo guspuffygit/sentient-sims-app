@@ -18,6 +18,8 @@ export class DbService {
 
   private db?: Database;
 
+  private databaseSession?: DatabaseSession | null;
+
   constructor(directoryService: DirectoryService) {
     this.directoryService = directoryService;
   }
@@ -101,6 +103,8 @@ export class DbService {
       }
     }
 
+    this.databaseSession = databaseSession;
+
     notifyDatabaseLoaded(databaseSession);
   }
 
@@ -164,6 +168,30 @@ export class DbService {
     this.cleanupUnsavedDatabases(databaseSession);
   }
 
+  async copyErrorDatabase(): Promise<DatabaseSession | null> {
+    try {
+      if (this.databaseSession) {
+        const unsavedDb = this.directoryService.getSentientSimsDbUnsaved(
+          this.databaseSession,
+        );
+        const errorDb = this.directoryService.getSentientSimsErrorDb(
+          this.databaseSession,
+        );
+
+        if (DirectoryService.fileExistsSync(unsavedDb)) {
+          fs.copyFileSync(unsavedDb, errorDb);
+          return this.databaseSession;
+        }
+
+        log.info(`No currently loaded unsaved db exists`);
+      }
+    } catch (err) {
+      log.error(`Unable to copy unsaved db to error database`, err);
+    }
+
+    return null;
+  }
+
   unloadDatabase() {
     this.db = undefined;
 
@@ -171,6 +199,8 @@ export class DbService {
     this.directoryService
       .listSentientSimsDbUnsaved()
       .forEach((unsavedDb) => fs.rmSync(unsavedDb));
+
+    this.databaseSession = null;
 
     electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
       if (wnd.webContents?.isDestroyed() === false) {

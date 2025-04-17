@@ -115,6 +115,13 @@ export class DirectoryService {
     );
   }
 
+  getSentientSimsErrorDb(databaseSession: DatabaseSession) {
+    return path.join(
+      this.getSentientSimsFolder(),
+      `${databaseSession.saveId}-sentient-sims-error.db`,
+    );
+  }
+
   getSingleSlotSentientSimsDB() {
     return path.join(this.getSentientSimsFolder(), 'sentient-sims.db');
   }

@@ -3,7 +3,7 @@
 import { Box, IconButton, Tooltip, Typography } from '@mui/material';
 import CachedIcon from '@mui/icons-material/Cached';
 import AppCard from './AppCard';
-import SendLogButton from './SendLogButton';
+import { SendLogButton } from './SendLogButton';
 import { AIStatusComponent } from './AIStatusComponent';
 import { useAISettings } from './providers/AISettingsProvider';
 import { useVersions } from './providers/VersionsProvider';

@@ -10,6 +10,7 @@ import { DatabaseSession } from '../models/DatabaseSession';
 import { DeleteMemoryRequest } from '../models/GetMemoryRequest';
 import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
+import { CaughtError } from '../models/CaughtError';
 
 function notifyAllWindows(message: string, ...args: any[]) {
   electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
@@ -69,6 +70,10 @@ export function sendPopUpNotification(message?: string) {
   if (message) {
     notifyAllWindows('popup-notification', message);
   }
+}
+
+export function sendPopUpCaughtErrorNotification(caughtError: CaughtError) {
+  notifyAllWindows('caught-error-popup-notification', caughtError);
 }
 
 export function notifyMapAnimation(event: WWInteractionEvent) {

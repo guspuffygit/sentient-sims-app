@@ -38,28 +38,35 @@ export class SentientSimsAIService implements GenerationService {
   }
 
   async getBreakStringTokens(model: string): Promise<number[]> {
-    if (this.breakStringTokens.has(model)) {
-      return this.breakStringTokens.get(model) as number[];
+    try {
+      if (this.breakStringTokens.has(model)) {
+        return this.breakStringTokens.get(model) as number[];
+      }
+
+      let modelSettings = AllModelSettings.default;
+      if (model in AllModelSettings) {
+        modelSettings = AllModelSettings[model];
+      }
+
+      const breakString =
+        modelSettings?.breakTokenString || tokenizerBreakString;
+
+      const tokenizeResponse = await this.tokenize(model, breakString);
+
+      this.breakStringTokens.set(model, tokenizeResponse.tokens);
+
+      log.debug(
+        `Set ${model} ${breakString} to ${JSON.stringify(
+          tokenizeResponse.tokens,
+        )}`,
+      );
+
+      return tokenizeResponse.tokens;
+    } catch (err) {
+      const errorMessage = `Unable to tokenize break string tokens`;
+      log.error(errorMessage, err);
+      throw new Error(errorMessage);
     }
-
-    let modelSettings = AllModelSettings.default;
-    if (model in AllModelSettings) {
-      modelSettings = AllModelSettings[model];
-    }
-
-    const breakString = modelSettings?.breakTokenString || tokenizerBreakString;
-
-    const tokenizeResponse = await this.tokenize(model, breakString);
-
-    this.breakStringTokens.set(model, tokenizeResponse.tokens);
-
-    log.debug(
-      `Set ${model} ${breakString} to ${JSON.stringify(
-        tokenizeResponse.tokens,
-      )}`,
-    );
-
-    return tokenizeResponse.tokens;
   }
 
   async sentientSimsGenerate(
@@ -73,9 +80,10 @@ export class SentientSimsAIService implements GenerationService {
 
     const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
 
-    const breakTokensPromise = this.getBreakStringTokens(model);
-    const messageTokens = await this.tokenizeMessages(model, request.messages);
-    const breakTokens = await breakTokensPromise;
+    const [messageTokens, breakTokens] = await Promise.all([
+      this.tokenizeMessages(model, request.messages),
+      this.getBreakStringTokens(model),
+    ]);
 
     const messages = truncateMessages(
       modelSettings.max_tokens,

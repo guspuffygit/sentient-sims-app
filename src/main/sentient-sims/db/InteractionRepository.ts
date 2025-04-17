@@ -37,9 +37,13 @@ export class InteractionRepository {
 
   async getInteractions(): Promise<Map<string, BasicInteraction>> {
     if (!this.interactions) {
-      this.interactions = new Map(
-        Object.entries(await this.fetchInteractions()),
-      );
+      try {
+        this.interactions = new Map(
+          Object.entries(await this.fetchInteractions()),
+        );
+      } catch (err) {
+        log.error(`Unable to fetch interactions from Sentient Sims API`, err);
+      }
     }
 
     return new Map<string, BasicInteraction>();

@@ -104,7 +104,7 @@ export function runApi({
     interactionDescriptionService,
   );
   const voiceController = new VoiceController();
-  const aiController = new AIController(aiService);
+  const aiController = new AIController(aiService, dbService);
   const animationsController = new AnimationsController(animationsService);
   const assetsController = new AssetsController(getAssetPath);
   const mappingController = new MappingController(new MappingService());

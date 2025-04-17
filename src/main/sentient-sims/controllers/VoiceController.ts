@@ -1,12 +1,14 @@
 /* eslint-disable class-methods-use-this */
 import { Request, Response } from 'express';
 import { phonemize } from '../voice/phonemize';
+import { CatchErrors } from './decorators/CatchError';
 
 export class VoiceController {
   constructor() {
     this.phonemize = this.phonemize.bind(this);
   }
 
+  @CatchErrors({ statusCode: 400 })
   async phonemize(req: Request, res: Response) {
     const { text, language } = req.query;
 
