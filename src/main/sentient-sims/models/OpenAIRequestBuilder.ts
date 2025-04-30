@@ -5,6 +5,7 @@ import { OpenAICompatibleRequest } from './OpenAICompatibleRequest';
 import { ChatCompletionMessageRole } from './ChatCompletionMessageRole';
 import { OpenAIMessage } from './OpenAIMessage';
 import { filterNullAndUndefined } from '../util/filter';
+import { PromptHistoryMode } from './PromptHistoryMode';
 
 export type FormattedMemoryMessage = {
   content: string;
@@ -25,6 +26,7 @@ export type PromptRequest = {
   prePreAction?: string;
   stopTokens?: string[];
   continue?: boolean;
+  promptHistoryMode?: PromptHistoryMode;
 };
 
 export type OneShotRequest = {
@@ -114,6 +116,14 @@ export class OpenAIRequestBuilder {
         content: memory.content,
         tokens: newTokens,
       };
+
+      if (
+        memoryMessage.role === 'user' &&
+        promptRequest.promptHistoryMode === PromptHistoryMode.NO_USER_HISTORY
+      ) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
       memoriesToInsert.unshift(memoryMessage);
     }

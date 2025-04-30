@@ -18,6 +18,7 @@ import { ChatCompletionMessageRole } from '../models/ChatCompletionMessageRole';
 import { ModelSettings } from '../modelSettings';
 import { defaultRelationshipBitDescriptions } from '../descriptions/relationshipDescriptions';
 import { LocationEntity } from '../db/entities/LocationEntity';
+import { PromptHistoryMode } from '../models/PromptHistoryMode';
 
 export type GenerationOptions = {
   action?: string;
@@ -28,6 +29,7 @@ export type GenerationOptions = {
   sexCategoryType?: number;
   sexLocationType?: number;
   continue?: boolean;
+  promptHistoryMode?: PromptHistoryMode;
 };
 
 const maxGroupSizeLength = 1700;
@@ -265,6 +267,7 @@ export class PromptRequestBuilderService {
       preAssistantPreResponse: formattedPreAssistantPreResponse,
       stopTokens: formattedStopTokens,
       continue: options.continue,
+      promptHistoryMode: options.promptHistoryMode,
     };
   }
 }

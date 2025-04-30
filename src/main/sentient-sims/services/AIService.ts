@@ -62,6 +62,7 @@ import { getBuffSystemPrompt } from '../systemPrompts';
 import { AIModel } from '../models/AIModel';
 import { DefaultFormatter } from '../formatter/DefaultFormatter';
 import { InteractionDescription } from '../descriptions/interactionDescriptions';
+import { PromptHistoryMode } from '../models/PromptHistoryMode';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
@@ -174,6 +175,7 @@ export class AIService {
       action: defaultWantsPrompt,
       preAssistantPreResponse: `{actor.0}:`,
       assistantPreResponse: randomAction,
+      promptHistoryMode: PromptHistoryMode.NO_USER_HISTORY,
     });
   }
 
@@ -269,6 +271,7 @@ export class AIService {
       apiType: this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType,
       modelSettings: getModelSettings(this.settingsService),
       continue: options.continue,
+      promptHistoryMode: options.promptHistoryMode,
     };
 
     let promptRequest =

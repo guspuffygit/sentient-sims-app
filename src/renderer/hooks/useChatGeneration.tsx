@@ -57,6 +57,7 @@ export interface ChatGeneration {
   addNewMessage: (role: ChatCompletionMessageRole) => void;
   generateMultipleChat: (count: number) => Promise<string[]>;
   handleGenerationLoaded: Dispatch<SetStateAction<() => void>>;
+  maxResponseTokensState: [number, Dispatch<SetStateAction<number>>];
 }
 
 export default function useChatGeneration(): ChatGeneration {
@@ -69,6 +70,7 @@ export default function useChatGeneration(): ChatGeneration {
     defaultMessages(defaultSystemPrompt),
   );
   const [input, setInput] = useState<string | undefined | null>();
+  const maxResponseTokensState = useState(90);
 
   const resetMessages = useCallback(() => {
     if (apiType.value === ApiType.OpenAI) {
@@ -151,9 +153,9 @@ export default function useChatGeneration(): ChatGeneration {
     });
     return {
       messages: requestMessages,
-      maxResponseTokens: 90,
+      maxResponseTokens: maxResponseTokensState[0],
     };
-  }, [messages]);
+  }, [maxResponseTokensState, messages]);
 
   const countTokens = () => {
     // TODO: Reimplement this
@@ -235,5 +237,6 @@ export default function useChatGeneration(): ChatGeneration {
     countTokens,
     generateMultipleChat,
     handleGenerationLoaded: setGenerationLoadedCallback,
+    maxResponseTokensState,
   };
 }

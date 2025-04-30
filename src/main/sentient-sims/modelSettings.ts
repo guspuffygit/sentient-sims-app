@@ -5,6 +5,7 @@ export type ModelSettings = {
   repetition_penalty?: number;
   max_tokens: number;
   breakTokenString?: string;
+  maxResponseTokens?: number;
 };
 
 export type ModelSettingsType = {
@@ -41,6 +42,20 @@ export const AllModelSettings: ModelSettingsType = {
     top_k: 40,
     repetition_penalty: 1.15,
     max_tokens: 7500,
+  },
+  'Qwen/Qwen3-235B-A22B': {
+    temperature: 0.6,
+    top_p: 0.95,
+    top_k: 20,
+    repetition_penalty: 1.15,
+    max_tokens: 7500,
+  },
+  'Qwen/Qwen3-30B-A3B': {
+    temperature: 0.6,
+    top_p: 0.95,
+    top_k: 20,
+    repetition_penalty: 1.15,
+    max_tokens: 16000,
   },
   'gpt-4o-mini': {
     temperature: 0.8,

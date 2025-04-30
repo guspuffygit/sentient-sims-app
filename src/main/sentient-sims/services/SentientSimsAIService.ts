@@ -110,7 +110,7 @@ export class SentientSimsAIService implements GenerationService {
 
     log.debug(`Request: ${JSON.stringify(completionRequest, null, 2)}`);
 
-    const url = `${this.serviceUrl()}/v1/chat/completions`;
+    const url = `http://127.0.0.1:8080/v1/chat/completions`;
     const response = await fetchWithRetries(url, {
       method: 'POST',
       headers: {

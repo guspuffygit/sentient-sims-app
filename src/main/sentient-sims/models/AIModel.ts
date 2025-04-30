@@ -16,3 +16,13 @@ export function compareAIModels(a: AIModel, b: AIModel): number {
   }
   return 0;
 }
+
+export function compareAIModelDisplayName(a: AIModel, b: AIModel): number {
+  if (a.displayName < b.displayName) {
+    return -1;
+  }
+  if (a.displayName > b.displayName) {
+    return 1;
+  }
+  return 0;
+}
