@@ -156,6 +156,7 @@ export class AIService {
       const action = getRandomItem(description.pre_actions);
       return this.runGeneration(event, {
         action,
+        prePreAction: 'At {location} ({location_type}), ',
       });
     }
 
@@ -163,7 +164,14 @@ export class AIService {
   }
 
   async handleContinue(event: ContinueInteractionEvent) {
-    return this.runGeneration(event, { continue: true });
+    let result = await this.runGeneration(event, { continue: true });
+    if (!result.text) {
+      result = await this.runGeneration(event, {
+        continue: true,
+        preAssistantPreResponse: ' ',
+      });
+    }
+    return result;
   }
 
   async handleWants(event: WantsInteractionEvent) {
@@ -226,6 +234,7 @@ export class AIService {
 
     return this.runGeneration(event, {
       action,
+      prePreAction: 'At {location} ({location_type}), ',
       sexCategoryType: event.sex_category,
       sexLocationType: event.sex_location,
     });
@@ -234,6 +243,7 @@ export class AIService {
   async handleDoSomething(doSomethingEvent: DoSomethingInteractionEvent) {
     return this.runGeneration(doSomethingEvent, {
       action: doSomethingEvent.action,
+      prePreAction: 'At {location} ({location_type}), ',
     });
   }
 

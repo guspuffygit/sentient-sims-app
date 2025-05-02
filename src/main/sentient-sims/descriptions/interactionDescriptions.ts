@@ -39,6 +39,9 @@ export const interactionDescriptions: Map<String, InteractionDescription> =
       mixer_social_NoxiousCloud_targeted_mischief_skills: {
         pre_actions: ['{actor.0} is rudely farting near {actor.1} as a prank.'],
       },
+      socialMixer_Greetings_BowGreeting: {
+        pre_actions: ['{participants} are all greeting each other with a bow.'],
+      },
       mixer_social_SlapEmSilly_targeted_mischief_skills: {
         pre_actions: ['{actor.0} is mischievously slapping {actor.1} silly.'],
       },
@@ -559,7 +562,7 @@ export const interactionDescriptions: Map<String, InteractionDescription> =
       },
       mixer_social_StartPreposterousRumor_group_mischief_skills: {
         pre_actions: [
-          '{actor.0} is starting a conversation with {actor.1} in order to start a preposterous rumor.',
+          '{actor.0} is conversating and a starting preposterous rumor with {non_initiator_participants}.',
         ],
       },
       mixer_social_InstillWithFalseConfidence_targeted_mischief_skills: {

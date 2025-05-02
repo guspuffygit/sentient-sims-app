@@ -10,6 +10,7 @@ import { getSystemPrompt } from '../systemPrompts';
 import { ApiType } from '../models/ApiType';
 import {
   FormattedMemoryMessage,
+  PreFormattedMemoryMessage,
   PromptRequest,
 } from '../models/OpenAIRequestBuilder';
 import { SentientSim } from '../models/SentientSim';
@@ -122,12 +123,29 @@ export class PromptRequestBuilderService {
 
   // eslint-disable-next-line class-methods-use-this
   groupMemories(memories: MemoryEntity[]): FormattedMemoryMessage[] {
-    const messages: FormattedMemoryMessage[] = [];
+    const messages: PreFormattedMemoryMessage[] = [];
 
-    function addMessage(role: ChatCompletionMessageRole, text: string) {
+    const locations: Record<number, LocationEntity> = {};
+
+    const addMessage = (
+      role: ChatCompletionMessageRole,
+      text: string,
+      locationId: number,
+    ) => {
+      if (!locations[locationId]) {
+        locations[locationId] = this.repositoryService.location.getLocation({
+          id: locationId,
+        });
+      }
+
+      const location = locations[locationId];
+
       // Combine messages from the same role
       if (messages.length > 0 && messages[messages.length - 1].role === role) {
-        if (messages[messages.length - 1].content.length < maxGroupSizeLength) {
+        if (
+          messages[messages.length - 1].content.length < maxGroupSizeLength &&
+          location.id === messages[messages.length - 1].location
+        ) {
           messages[messages.length - 1].content += ` ${text.trim()}`;
           return;
         }
@@ -137,31 +155,45 @@ export class PromptRequestBuilderService {
           messages.push({
             content: 'Continue talking and interacting',
             role: 'user',
+            location: locationId,
           });
         }
       }
 
-      messages.push({
-        content: text,
-        role,
-      });
-    }
+      if (role === 'assistant') {
+        messages.push({
+          content: text,
+          role,
+          location: locationId,
+        });
+      } else {
+        messages.push({
+          content: `At ${location.name} (${location.lot_type}), ${text}`,
+          role,
+          location: locationId,
+        });
+      }
+    };
 
     memories.forEach((memory) => {
       if (memory.pre_action && memory.pre_action.trim()) {
-        addMessage('user', memory.pre_action);
+        addMessage('user', memory.pre_action, memory.location_id);
       }
 
       if (memory.observation && memory.observation.trim()) {
-        addMessage('user', memory.observation);
+        addMessage('user', memory.observation, memory.location_id);
       }
 
       if (memory.content && memory.content.trim()) {
-        addMessage('assistant', memory.content);
+        addMessage('assistant', memory.content, memory.location_id);
       }
     });
 
-    return messages;
+    const formattedMessages: FormattedMemoryMessage[] = [];
+    messages.forEach((message) =>
+      formattedMessages.push({ content: message.content, role: message.role }),
+    );
+    return formattedMessages;
   }
 
   async buildPromptRequest(
@@ -252,11 +284,18 @@ export class PromptRequestBuilderService {
     const memories = this.getMemories(event.sentient_sims);
     const groupedMemories = this.groupMemories(memories);
     const sims = await simsPromise;
+    const formattedLocation = formatAction(
+      'Location: {location} ({location_type}), {location_description}',
+      event.sentient_sims,
+      location,
+      options.sexCategoryType,
+      options.sexLocationType,
+    );
 
     return {
       systemPrompt: formattedSystemPrompt,
       participants: sims.join('\n'),
-      location: location.description,
+      location: formattedLocation,
       dateTime,
       memories: groupedMemories,
       action: formattedAction,

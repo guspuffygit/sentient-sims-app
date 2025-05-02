@@ -297,6 +297,14 @@ export function formatAction(
   }
 
   formattedAction = formattedAction.replaceAll('{location}', location.name);
+  formattedAction = formattedAction.replaceAll(
+    '{location_type}',
+    location.lot_type,
+  );
+  formattedAction = formattedAction.replaceAll(
+    '{location_description}',
+    location.description,
+  );
 
   for (let i = 0; i < sentientSims.length; i++) {
     formattedAction = formattedAction.replaceAll(

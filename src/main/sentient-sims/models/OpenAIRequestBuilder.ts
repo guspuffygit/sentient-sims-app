@@ -12,6 +12,10 @@ export type FormattedMemoryMessage = {
   role: ChatCompletionMessageRole;
 };
 
+export type PreFormattedMemoryMessage = FormattedMemoryMessage & {
+  location: number;
+};
+
 export type PromptRequest = {
   location: string;
   dateTime: string;

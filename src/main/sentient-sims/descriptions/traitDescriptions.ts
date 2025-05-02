@@ -9423,7 +9423,7 @@ export const simsTraitDescriptions: Record<string, TraitMapping> = {
   },
   trait_isBear: {
     name: 'trait_isBear',
-    description: 'is a bear',
+    description: 'is wearing a full size bear costume',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
