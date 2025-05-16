@@ -29,7 +29,7 @@ export const AllModelSettings: ModelSettingsType = {
     repetition_penalty: 1.15,
     max_tokens: 3900,
     breakTokenString: '<unk>',
-    breakStringTokens: [1, 0],
+    breakStringTokens: [0],
   },
   'ArliAI/Mistral-Nemo-12B-ArliAI-RPMax-v1.1': {
     temperature: 0.8,
