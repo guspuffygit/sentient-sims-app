@@ -48,6 +48,11 @@ export class SentientSimsAIService implements GenerationService {
         modelSettings = AllModelSettings[model];
       }
 
+      if (modelSettings.breakStringTokens) {
+        log.debug('returning tokens as is');
+        return modelSettings.breakStringTokens;
+      }
+
       const breakString =
         modelSettings?.breakTokenString || tokenizerBreakString;
 
