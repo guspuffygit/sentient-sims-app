@@ -23,7 +23,9 @@ export default function DebugCard() {
   return (
     <AppCard>
       <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-        <Typography>Debug Info</Typography>
+        <Typography variant="h6" gutterBottom>
+          Debug Info
+        </Typography>
         <Tooltip title="Refresh">
           <IconButton
             style={{

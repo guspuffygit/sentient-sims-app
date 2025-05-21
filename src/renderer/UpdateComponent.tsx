@@ -1,28 +1,29 @@
 /* eslint no-alert: off, consistent-return: off, no-useless-return: off */
 import { useState } from 'react';
-import { CardActions, MenuItem, Select, Typography } from '@mui/material';
+import {
+  Box,
+  CardActions,
+  IconButton,
+  Tooltip,
+  Typography,
+} from '@mui/material';
+import CachedIcon from '@mui/icons-material/Cached';
 import { LoadingButton } from '@mui/lab';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Auth } from 'aws-amplify';
-import { SelectChangeEvent } from '@mui/material/Select/SelectInput';
 import { ModUpdate } from 'main/sentient-sims/services/UpdateService';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { useAuthenticator } from '@aws-amplify/ui-react';
-import log from 'electron-log';
 import { UpdateClient } from 'main/sentient-sims/clients/UpdateClient';
-import { getNightlyAccess } from 'main/sentient-sims/util/nightlyAccess';
-import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import AppCard from './AppCard';
 import useNewVersionChecker from './hooks/useNewVersionChecker';
 import useSetting, { SettingsHook } from './hooks/useSetting';
 import { useVersions } from './providers/VersionsProvider';
+import { ReleaseTypeSelector } from './components/ReleaseTypeSelector';
 
 const updateClient = new UpdateClient();
 
 export default function UpdateComponent() {
   const versions = useVersions();
-  const { user } = useAuthenticator((context) => [context.user]);
-  const patreonUser = new PatreonUser(user);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const releaseType: SettingsHook<string> = useSetting<string>(
     SettingsEnum.MOD_RELEASE,
@@ -58,15 +59,18 @@ export default function UpdateComponent() {
     return;
   };
 
-  const handleChangeReleaseType = async (
-    event: SelectChangeEvent,
-  ): Promise<void> => {
-    const newType = event.target.value;
-    log.debug(`Changed release type to: ${newType}`);
-    await releaseType.setSetting(newType);
-  };
-
-  const { disableNightly, nightlyText } = getNightlyAccess(patreonUser);
+  let updateText = 'Update now';
+  let headerText = (
+    <Typography color="text.secondary">Status: Up to date</Typography>
+  );
+  if (versions.mod.version === 'none') {
+    updateText = 'Install';
+    headerText = (
+      <Typography color="text.secondary">Ready to install</Typography>
+    );
+  } else if (updateState.newVersionAvailable) {
+    headerText = <Typography variant="h6">New Version Ready</Typography>;
+  }
 
   return (
     <AppCard
@@ -76,35 +80,31 @@ export default function UpdateComponent() {
         >
           <div>
             <LoadingButton
-              onClick={handleCheckForUpdates}
+              onClick={() => handleUpdate(false)}
               loading={isLoading}
-              color="primary"
-              variant="outlined"
-              sx={{ marginRight: 2 }}
+              disabled={!updateState.newVersionAvailable}
+              color="success"
+              variant="contained"
             >
-              Refresh
-            </LoadingButton>
-            {updateState.newVersionAvailable && (
-              <LoadingButton
-                onClick={() => handleUpdate(false)}
-                loading={isLoading}
-                color="success"
-                variant="contained"
-              >
-                Update{' '}
+              {updateText}{' '}
+              {updateState.newVersionAvailable && (
                 <CheckCircleIcon sx={{ marginLeft: 2, color: 'white' }} />
-              </LoadingButton>
-            )}
+              )}
+            </LoadingButton>
           </div>
           <div>
-            <LoadingButton
-              onClick={() => handleUpdate(true)}
-              loading={isLoading}
-              color="warning"
-              variant="outlined"
-            >
-              Force Update
-            </LoadingButton>
+            {versions.mod.version !== 'none' && (
+              <Tooltip title="Force reinstalls the latest version of the mod">
+                <LoadingButton
+                  onClick={() => handleUpdate(true)}
+                  loading={isLoading}
+                  color="warning"
+                  variant="outlined"
+                >
+                  Reinstall
+                </LoadingButton>
+              </Tooltip>
+            )}
           </div>
         </CardActions>
       }
@@ -113,32 +113,36 @@ export default function UpdateComponent() {
         style={{ margin: 1, display: 'flex', justifyContent: 'space-between' }}
       >
         <div>
-          {updateState.newVersionAvailable ? (
-            <Typography variant="h6">New Version Ready</Typography>
-          ) : (
-            <Typography variant="h6" color="text.secondary">
-              Everything is up to date
+          <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
+            <Typography variant="h6" sx={{ marginBottom: 0 }}>
+              Mod Update
             </Typography>
-          )}
+            {versions.mod.version !== 'none' ? (
+              <Tooltip title="Refresh">
+                <IconButton
+                  style={{
+                    maxWidth: '30px',
+                    maxHeight: '30px',
+                    minWidth: '30px',
+                    minHeight: '30px',
+                  }}
+                  sx={{ marginLeft: 1 }}
+                  onClick={handleCheckForUpdates}
+                  disabled={versions.loading || isLoading}
+                >
+                  <CachedIcon />
+                </IconButton>
+              </Tooltip>
+            ) : null}
+          </Box>
+          {headerText}
 
           <Typography sx={{ fontSize: 14 }} color="text.secondary">
             Last Checked: {updateState.lastChecked}
           </Typography>
         </div>
         <div>
-          <Select
-            size="small"
-            labelId="release-type-select-label"
-            id="release-type-select"
-            value={releaseType.value}
-            sx={{ minWidth: 100 }}
-            onChange={handleChangeReleaseType}
-          >
-            <MenuItem value="main">Stable</MenuItem>
-            <MenuItem disabled={disableNightly} value="develop">
-              {nightlyText}
-            </MenuItem>
-          </Select>
+          <ReleaseTypeSelector />
         </div>
       </div>
     </AppCard>

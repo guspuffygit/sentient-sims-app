@@ -4,6 +4,7 @@ import {
   IconButton,
   Modal,
   TextField,
+  Tooltip,
   Typography,
   styled,
 } from '@mui/material';
@@ -139,14 +140,24 @@ export function MappingLeaderboardComponent() {
               <Typography sx={{ marginRight: 1 }}>
                 {me?.data?.displayName ?? 'Anonymous'}
               </Typography>
-              <IconButton size="small" onClick={() => handleOpen()}>
-                <EditIcon />
-              </IconButton>
-              {me?.data?.displayName ? (
-                <IconButton size="small" onClick={() => deleteDisplayName()}>
-                  <ClearIcon />
+              <Tooltip
+                title="Edit your username on the leaderboard"
+                placement="top"
+              >
+                <IconButton size="small" onClick={() => handleOpen()}>
+                  <EditIcon />
                 </IconButton>
-              ) : null}
+              </Tooltip>
+              {me?.data?.displayName && (
+                <Tooltip
+                  title="Delete your username on the leaderboard"
+                  placement="top"
+                >
+                  <IconButton size="small" onClick={() => deleteDisplayName()}>
+                    <ClearIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
             </Box>
           </div>
           <Box

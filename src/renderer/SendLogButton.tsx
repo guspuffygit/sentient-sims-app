@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material';
+import { Box, Button, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import SpaceBetweenDiv from './components/SpaceBetweenDiv';
@@ -20,9 +20,11 @@ export function SendLogButton() {
       <Box sx={{ marginTop: 3 }}>
         <SpaceBetweenDiv>
           <div>
-            <Button variant="outlined" onClick={handleClick}>
-              Send Logs
-            </Button>
+            <Tooltip title="Send your app, game, and mod logs to the developer">
+              <Button variant="outlined" onClick={handleClick}>
+                Send Logs
+              </Button>
+            </Tooltip>
           </div>
           <div>
             {debugMode.isEnabled ? (
@@ -35,13 +37,15 @@ export function SendLogButton() {
                 Logs
               </Button>
             ) : null}
-            <Button
-              color="secondary"
-              variant="outlined"
-              onClick={() => navigate('/last-exception')}
-            >
-              Last Exceptions
-            </Button>
+            <Tooltip title="View Sims 4 Last Exceptions if they exist">
+              <Button
+                color="secondary"
+                variant="outlined"
+                onClick={() => navigate('/last-exception')}
+              >
+                Last Exceptions
+              </Button>
+            </Tooltip>
           </div>
         </SpaceBetweenDiv>
       </Box>
