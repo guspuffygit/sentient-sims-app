@@ -575,6 +575,9 @@ export function removeStopTokens(text: string, stopTokens?: string[]) {
 export function cleanupAIOutput(text: string, stopTokens?: string[]): string {
   let output: string = text.trim();
 
+  const index = output.indexOf(':');
+  output = index !== -1 ? output.substring(index + 1) : output;
+  output = output.replaceAll('*', '');
   output = removeStopTokens(output, stopTokens);
   output = removeLastParagraph(output);
   output = trimIncompleteSentence(output);

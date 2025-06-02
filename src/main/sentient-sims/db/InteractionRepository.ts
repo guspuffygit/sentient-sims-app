@@ -5,10 +5,9 @@ import {
   interactionDescriptions,
 } from '../descriptions/interactionDescriptions';
 import { IgnoredInteractionsResponse } from '../models/IgnoredInteractionsResponse';
-import { SettingsEnum } from '../models/SettingsEnum';
 import { SettingsService } from '../services/SettingsService';
 import { BasicInteraction } from './dto/InteractionDTO';
-import { fetchWithRetries } from '../util/fetchWithRetries';
+import axiosClient from '../clients/AxiosClient';
 
 export class InteractionRepository {
   private settingsService: SettingsService;
@@ -20,19 +19,11 @@ export class InteractionRepository {
   }
 
   async fetchInteractions(): Promise<Map<string, BasicInteraction>> {
-    const url = `${this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
-    )}/interactions`;
-    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
-    log.debug(`url: ${url}, auth: ${authHeader}`);
-    const response = await fetchWithRetries(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authentication: authHeader,
-      },
+    const response = await axiosClient({
+      url: '/interactions',
     });
 
-    return response.json();
+    return response.data;
   }
 
   async getInteractions(): Promise<Map<string, BasicInteraction>> {
@@ -50,21 +41,13 @@ export class InteractionRepository {
   }
 
   async setInteraction(interaction: BasicInteraction) {
-    const url = `${this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
-    )}/interactions`;
-    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
-    log.debug(`url: ${url}, auth: ${authHeader}`);
-    const response = await fetchWithRetries(url, {
+    const response = await axiosClient({
+      url: '/interactions',
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authentication: authHeader,
-      },
-      body: JSON.stringify(interaction),
+      data: interaction,
     });
 
-    const result = await response.json();
+    const result = response.data;
 
     this.interactions = new Map(Object.entries(result));
 

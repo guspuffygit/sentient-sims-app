@@ -115,9 +115,14 @@ export class OpenAIRequestBuilder {
         break;
       }
 
+      if (memory.content.length <= 1) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
       const memoryMessage: OpenAIMessage = {
         role: memory.role,
-        content: memory.content,
+        content: memory.content.replaceAll('*', ''),
         tokens: newTokens,
       };
 

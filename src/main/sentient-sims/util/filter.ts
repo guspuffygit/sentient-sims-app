@@ -4,7 +4,7 @@ export function filterNullAndUndefined<T>(arr: (T | null | undefined)[]): T[] {
 
 export function removeEmojis(text: string): string {
   return text.replace(
-    /[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2580-\u27BF]|\uD83E[\uDD10-\uDDFF]/g,
+    /[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\uFE0F]|[\u2580-\u27BF]|\uD83E[\uDD10-\uDDFF]/g,
     '',
   );
 }

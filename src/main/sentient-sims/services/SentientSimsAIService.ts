@@ -1,14 +1,15 @@
+/* eslint-disable no-plusplus */
 /* eslint-disable class-methods-use-this */
 import log from 'electron-log';
-import { ChatCompletion } from 'openai/resources/index.mjs';
+import {
+  ChatCompletion,
+  ResponseFormatJSONSchema,
+} from 'openai/resources/index.mjs';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
-import { fetchWithTimeout } from '../util/fetchWithTimeout';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
-import { fetchWithRetries } from '../util/fetchWithRetries';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
-import { SentientSimsAIError } from '../exceptions/SentientSimsAIError';
 import { AIModel, AIModelResponse } from '../models/AIModel';
 import {
   VLLMChatCompletionRequest,
@@ -17,10 +18,11 @@ import {
   VLLMTokenizeTextRequest,
 } from '../models/VLLMChatCompletionRequest';
 import { AllModelSettings } from '../modelSettings';
-import { VLLMError } from '../models/VLLMError';
 import { OpenAIMessage } from '../models/OpenAIMessage';
 import { tokenizerBreakString } from '../constants';
 import { truncateMessages } from '../util/tokenTruncate';
+import { TokenizeException } from '../exceptions/TokenizeException';
+import axiosClient from '../clients/AxiosClient';
 
 export class SentientSimsAIService implements GenerationService {
   private settingsService: SettingsService;
@@ -83,8 +85,6 @@ export class SentientSimsAIService implements GenerationService {
       modelSettings = AllModelSettings[model];
     }
 
-    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
-
     const [messageTokens, breakTokens] = await Promise.all([
       this.tokenizeMessages(model, request.messages),
       this.getBreakStringTokens(model),
@@ -108,48 +108,45 @@ export class SentientSimsAIService implements GenerationService {
       top_k: modelSettings.top_k,
       min_tokens: 3,
       repetition_penalty: modelSettings.repetition_penalty,
-      guided_choice: request.guidedChoice,
       add_generation_prompt: !request.includesAssistantPreResponse,
       continue_final_message: request.includesAssistantPreResponse,
     };
 
+    if (request.guidedChoice) {
+      const schema: ResponseFormatJSONSchema = {
+        json_schema: {
+          name: 'thechoice',
+          strict: true,
+          schema: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['choice'],
+            properties: {
+              choice: {
+                type: 'string',
+                description: 'The choice',
+                enum: request.guidedChoice,
+              },
+            },
+          },
+        },
+        type: 'json_schema',
+      };
+      completionRequest.response_format = schema;
+    }
+
     log.debug(`Request: ${JSON.stringify(completionRequest, null, 2)}`);
 
-    const url = `${this.serviceUrl()}/v1/chat/completions`;
-    const response = await fetchWithRetries(url, {
+    const response = await axiosClient({
+      url: '/v1/chat/completions',
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authentication: authHeader,
-      },
-      body: JSON.stringify(completionRequest),
+      data: completionRequest,
     });
 
-    if (!response.ok) {
-      try {
-        const errorResponse = await response.json();
-        const errorMessage =
-          errorResponse.error || 'Unknown JSON error occurred';
-        throw new SentientSimsAIError(`SentientSimsAI error: ${errorMessage}`);
-      } catch (e: any) {
-        if (e instanceof SentientSimsAIError) {
-          throw e;
-        }
-
-        // If JSON parsing fails, fall back to plain text error message
-        const textMessage = await response.text();
-        throw new Error(`SentientSimsAI text error: ${textMessage}`);
-      }
-    }
-
-    const result: ChatCompletion | any = await response.json();
-    log.debug(`Info about it: ${response.ok} ${response.status} ${result}`);
-    const error: VLLMError = <VLLMError>result;
-    if (error?.message && result?.object === 'error' && result?.type) {
-      throw new SentientSimsAIError(`${result.type}: ${result.message}`);
-    }
-
-    log.debug(`Output: ${JSON.stringify(result, null, 2)}`);
+    const result: ChatCompletion = response.data;
+    log.debug(
+      `Info about it: ${response.status} ${JSON.stringify(result, null, 2)}`,
+    );
 
     const text = this.getOutputFromGeneration(result);
     return {
@@ -159,45 +156,18 @@ export class SentientSimsAIService implements GenerationService {
   }
 
   async tokenize(model: string, text: string): Promise<VLLMRTokenizeResponse> {
-    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     const tokenizeRequest: VLLMTokenizeTextRequest = {
       model,
       prompt: text,
       add_special_tokens: false,
     };
-    const response = await fetchWithRetries(`${this.serviceUrl()}/tokenize`, {
+    const response = await axiosClient({
+      url: '/tokenize',
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authentication: authHeader,
-      },
-      body: JSON.stringify(tokenizeRequest),
+      data: tokenizeRequest,
     });
 
-    if (!response.ok) {
-      try {
-        const errorResponse = await response.json();
-        const errorMessage =
-          errorResponse.error || 'Unknown JSON error occurred';
-        throw new SentientSimsAIError(`SentientSimsAI error: ${errorMessage}`);
-      } catch (e: any) {
-        if (e instanceof SentientSimsAIError) {
-          throw e;
-        }
-
-        // If JSON parsing fails, fall back to plain text error message
-        const textMessage = await response.text();
-        throw new Error(`SentientSimsAI text error: ${textMessage}`);
-      }
-    }
-
-    const result: ChatCompletion | any = await response.json();
-    const error: VLLMError = <VLLMError>result;
-    if (error?.message && result?.object === 'error' && result?.type) {
-      throw new SentientSimsAIError(`${result.type}: ${result.message}`);
-    }
-
-    return result;
+    return response.data;
   }
 
   async tokenizeMessages(
@@ -210,7 +180,6 @@ export class SentientSimsAIService implements GenerationService {
     }
     const breakString = modelSettings?.breakTokenString || tokenizerBreakString;
 
-    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
     const tokenizeRequest: VLLMTokenizeChatRequest = {
       model,
       messages: messages.map((message) => {
@@ -220,19 +189,24 @@ export class SentientSimsAIService implements GenerationService {
         };
       }),
     };
-    const tokenizeRequestResponse = await fetchWithRetries(
-      `${this.serviceUrl()}/tokenize`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authentication: authHeader,
-        },
-        body: JSON.stringify(tokenizeRequest),
-      },
-    );
 
-    return tokenizeRequestResponse.json();
+    const tokenizeRequestResponse = await axiosClient({
+      url: '/tokenize',
+      method: 'POST',
+      data: tokenizeRequest,
+    });
+
+    const result: VLLMRTokenizeResponse =
+      // eslint-disable-next-line no-await-in-loop
+      await tokenizeRequestResponse.data;
+
+    if (result?.tokens && result?.count) {
+      return result;
+    }
+
+    log.error(`tokenizeMessages response is not valid: ${result}`);
+
+    throw new TokenizeException(result);
   }
 
   getOutputFromGeneration(generation: ChatCompletion) {
@@ -245,18 +219,14 @@ export class SentientSimsAIService implements GenerationService {
   }
 
   async healthCheck() {
-    const url = `${this.serviceUrl()}/health`;
-    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
-    log.debug(`testHealth: ${url}`);
     try {
-      const response = await fetchWithTimeout(url, {
-        headers: {
-          Authentication: authHeader,
-        },
+      const response = await axiosClient({
+        url: '/health',
         timeout: 5000,
+        responseType: 'text',
       });
       return {
-        status: await response.text(),
+        status: await response.data,
       };
     } catch (e: any) {
       log.error('Error checking Sentient Sims AI health', e);
@@ -268,17 +238,12 @@ export class SentientSimsAIService implements GenerationService {
   }
 
   async getModels(): Promise<AIModel[]> {
-    const url = `${this.serviceUrl()}/models`;
-    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
-    log.debug(`getModels: ${url}`);
     try {
-      const response = await fetchWithTimeout(url, {
-        headers: {
-          Authentication: authHeader,
-        },
+      const response = await axiosClient({
+        url: '/models',
         timeout: 5000,
       });
-      const modelsResponse: AIModelResponse = await response.json();
+      const modelsResponse: AIModelResponse = response.data;
       return modelsResponse.data;
     } catch (e: any) {
       log.error('Error getting sentient sims models', e);

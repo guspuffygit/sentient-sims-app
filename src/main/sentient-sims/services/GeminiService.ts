@@ -10,10 +10,10 @@ import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel } from '../models/AIModel';
-import { fetchWithRetries } from '../util/fetchWithRetries';
 import { getRandomItem } from '../util/getRandomItem';
 import { GeminiKeysNotSetError } from '../exceptions/GeminiKeyNotSetError';
 import { GeminiAPIError } from '../exceptions/GeminiAPIError';
+import axiosClient from '../clients/AxiosClient';
 
 export class GeminiService implements GenerationService {
   private readonly settingsService: SettingsService;
@@ -209,22 +209,12 @@ export class GeminiService implements GenerationService {
     const url = `${this.serviceUrl()}/models?key=${randomKey}`;
 
     try {
-      const response = await fetchWithRetries(url, {
+      const response = await axiosClient({
+        url,
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new GeminiAPIError(
-          response.status,
-          `Failed to fetch Gemini models: ${response.status} - ${errorText}`,
-        );
-      }
-
-      const data = await response.json();
+      const { data } = response;
       log.debug(`Gemini Models Response: ${JSON.stringify(data, null, 2)}`);
 
       return (data.models || []).map((model: any) => ({
@@ -233,16 +223,7 @@ export class GeminiService implements GenerationService {
       }));
     } catch (error: any) {
       log.error('Error fetching Gemini models', error);
-      if (error instanceof GeminiAPIError) {
-        throw error;
-      }
-      return [
-        { name: 'gemini-1.5-flash', displayName: 'Gemini 1.5 Flash' },
-        {
-          name: 'gemini-2.0-flash-exp',
-          displayName: 'Gemini 2.0 Flash Experimental',
-        },
-      ];
+      throw error;
     }
   }
 }

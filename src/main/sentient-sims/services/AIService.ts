@@ -58,7 +58,6 @@ import { InteractionService } from './InteractionService';
 import { InputFormatter } from '../formatter/InputOutputFormatting';
 import { MythoMaxFormatter } from '../formatter/MythoMaxFormatter';
 import { NovelAIFormatter } from '../formatter/NovelAIFormatter';
-import { getBuffSystemPrompt } from '../systemPrompts';
 import { AIModel } from '../models/AIModel';
 import { DefaultFormatter } from '../formatter/DefaultFormatter';
 import { InteractionDescription } from '../descriptions/interactionDescriptions';
@@ -357,15 +356,25 @@ export class AIService {
       output = output.replace(lastMessage.content, '').trim();
     }
 
-    newMemory.content = output;
+    output = output.trim();
 
-    this.playTts(output);
+    if (output.length > 1) {
+      newMemory.content = output;
 
+      this.playTts(output);
+
+      return {
+        status: InteractionEventStatus.GENERATED,
+        text: output,
+        request: response.request,
+        memory: newMemory,
+      };
+    }
+
+    log.error(`There wasn't any output from the AI`);
     return {
-      status: InteractionEventStatus.GENERATED,
-      text: output,
+      status: InteractionEventStatus.NOOP,
       request: response.request,
-      memory: newMemory,
     };
   }
 
@@ -427,13 +436,20 @@ export class AIService {
       SettingsEnum.AI_API_TYPE,
     ) as ApiType;
 
-    const systemPrompt = getBuffSystemPrompt(apiType)
-      .replaceAll('{mood}', buffRequest.mood)
-      .replaceAll('{name}', buffRequest.name);
+    const systemPrompt = `\
+You will write a game buff description that will be displayed about the character ${buffRequest.name}.
+${buffRequest.name} has just completed chatting and is feeling ${buffRequest.mood} from the conversation.
+Use the details of the conversation to craft the buff description to tell why ${buffRequest.name} is feeling ${buffRequest.mood}.
+Return only the description text itself without any commentary or formatting without breaking the 4th wall.
+Write me a buff description based on the conversation so that ${buffRequest.name} knows why they have received the "${buffRequest.mood}" buff based on this conversation:\n
+`;
 
     let oneShotRequest: OneShotRequest = {
-      systemPrompt,
+      systemPrompt:
+        'Response to the request without extra commentary or formatting, only return the answer to the request.',
       messages: buffRequest.messages,
+      userPreResponse: systemPrompt,
+      assistantPreResponse: `Buff Title: ${buffRequest.mood}\nBuff Description: ${buffRequest.name} is feeling ${buffRequest.mood} because`,
       maxResponseTokens: 90,
       maxTokens: 3900,
     };
@@ -450,7 +466,7 @@ export class AIService {
     const response =
       await generationService.sentientSimsGenerate(openAIRequest);
 
-    const output = cleanupAIOutput(response.text);
+    const output = `${buffRequest.name} ${cleanupAIOutput(response.text)}`;
 
     return {
       status: InteractionEventStatus.GENERATED,
