@@ -215,7 +215,11 @@ export class SentientSimsAIService implements GenerationService {
       return output.trim();
     }
 
-    throw new Error(`Output wasnt truthy ${output}`);
+    log.error(
+      `Output wasnt truthy from SentientSims AI:\n${JSON.stringify(generation, null, 2)}`,
+    );
+
+    throw new Error(`Output wasnt truthy from SentientSims AI ${output}`);
   }
 
   async healthCheck() {

@@ -176,7 +176,9 @@ export class OpenAIService implements GenerationService {
       return output.trim();
     }
 
-    throw new Error(`Output wasnt truthy ${output}`);
+    log.error(`Output wasnt truthy from OpenAI API:\n${generation}`);
+
+    throw new Error(`Output wasnt truthy from OpenAI API ${output}`);
   }
 
   async translate(text: string, language: string) {
