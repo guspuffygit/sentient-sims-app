@@ -68,3 +68,23 @@ jobs:
           BUILD_ARCHITECTURE: ${{ matrix.platform.arch }}
         run: |
           npm exec electron-builder -- --publish always ${{ matrix.platform.cmd }}
+          VERSION=$(jq -r .version release/app/package.json)
+          if [ "$BUILD_ARCHITECTURE" = "x64" ]; then
+            timeout 20m bash -c '
+              while true; do
+                gh release download "v$VERSION" \
+                  --repo ${{ github.repository }} \
+                  --pattern "SentientSims-${VERSION}-mac.zip" \
+                  --dir . && \
+                gh release download v${VERSION} \
+                  --repo ${{ github.repository }} \
+                  --pattern "SentientSims-${VERSION}-arm64-mac.zip" \
+                  --dir . && \
+                unzip -q SentientSims-${VERSION}-arm64-mac.zip -d mac-arm64 && \
+                unzip -q SentientSims-${VERSION}-mac.zip -d mac && break
+                sleep 5
+              done
+            '
+            npx tsx build-mac-universal.ts
+            npm exec electron-builder -- --publish never --prepackaged universal/SentientSims.app --mac --universal -c.mac.target.arch='universal'
+          fi
