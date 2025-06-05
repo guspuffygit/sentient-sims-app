@@ -76,7 +76,7 @@ jobs:
           if [ "$BUILD_ARCHITECTURE" = "x64" ]; then
             npx tsx ci-prepare-mac-universal-artifacts.ts
             npx tsx build-mac-universal.ts
-            npm exec electron-builder -- --publish never --prepackaged universal/SentientSims.app --mac --universal -c.mac.target.arch='universal'
+            npm exec electron-builder -- --publish always --prepackaged universal/SentientSims.app --mac --universal -c.mac.target.arch='universal'
           fi
         env:
           # These values are used for auto updates signing
