@@ -14,6 +14,7 @@ import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel } from '../models/AIModel';
 import { openaiDefaultEndpoint } from '../constants';
+import { VLLMChatCompletionRequest } from '../models/VLLMChatCompletionRequest';
 
 export class OpenAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -105,15 +106,35 @@ export class OpenAIService implements GenerationService {
   async sentientSimsGenerate(
     request: OpenAICompatibleRequest,
   ): Promise<SimsGenerateResponse> {
-    const completionRequest: ChatCompletionCreateParams = {
+    const messages = request.messages.map((message) => {
+      return {
+        role: message.role,
+        content: message.content,
+      };
+    });
+    const thinkingRequest: VLLMChatCompletionRequest = {
+      model: 'parasail-qwen3-30b-a3b',
+      max_tokens: 8000,
+      stop: ['</think>'],
+      messages,
+    };
+
+    const thinkingResult =
+      await this.getOpenAIClient().chat.completions.create(thinkingRequest);
+    const thinkingText = `${this.getOutputFromGeneration(thinkingResult)}\n</think>`;
+    log.debug(`THINKING: ${thinkingText}`);
+
+    messages.push({
+      role: 'assistant',
+      content: thinkingText,
+    });
+
+    const completionRequest: VLLMChatCompletionRequest = {
       model: this.getOpenAIModel(),
       max_tokens: request.maxResponseTokens,
-      messages: request.messages.map((message) => {
-        return {
-          role: message.role,
-          content: message.content,
-        };
-      }),
+      messages,
+      continue_final_message: true,
+      add_generation_prompt: false,
     };
 
     if (
