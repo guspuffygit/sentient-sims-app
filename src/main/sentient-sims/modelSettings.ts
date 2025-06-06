@@ -7,6 +7,7 @@ export type ModelSettings = {
   breakTokenString?: string;
   breakStringTokens?: number[];
   maxResponseTokens?: number;
+  stop?: string[];
 };
 
 export type ModelSettingsType = {
@@ -30,6 +31,7 @@ export const AllModelSettings: ModelSettingsType = {
     max_tokens: 3900,
     breakTokenString: '<unk>',
     breakStringTokens: [0],
+    stop: ['### Input:', '### Instruction:', '### Response:'],
   },
   'ArliAI/Mistral-Nemo-12B-ArliAI-RPMax-v1.1': {
     temperature: 0.8,

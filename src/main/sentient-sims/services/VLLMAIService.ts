@@ -119,6 +119,7 @@ export class VLLMAIService implements GenerationService {
       repetition_penalty: modelSettings.repetition_penalty,
       add_generation_prompt: !request.includesAssistantPreResponse,
       continue_final_message: request.includesAssistantPreResponse,
+      stop: modelSettings.stop,
     };
 
     if (request.guidedChoice) {
