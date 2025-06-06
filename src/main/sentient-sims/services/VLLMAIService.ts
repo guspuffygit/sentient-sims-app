@@ -115,7 +115,7 @@ export class VLLMAIService implements GenerationService {
       temperature: modelSettings.temperature,
       top_p: modelSettings.top_p,
       top_k: modelSettings.top_k,
-      min_tokens: 3,
+      min_tokens: 5,
       repetition_penalty: modelSettings.repetition_penalty,
       add_generation_prompt: !request.includesAssistantPreResponse,
       continue_final_message: request.includesAssistantPreResponse,
@@ -142,6 +142,7 @@ export class VLLMAIService implements GenerationService {
         type: 'json_schema',
       };
       completionRequest.response_format = schema;
+      completionRequest.min_tokens = undefined;
     }
 
     log.debug(`Request: ${JSON.stringify(completionRequest, null, 2)}`);
