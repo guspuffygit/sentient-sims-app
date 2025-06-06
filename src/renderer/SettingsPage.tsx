@@ -15,7 +15,7 @@ import { SyntheticEvent, useState } from 'react';
 import AppCard from './AppCard';
 import DebugLogsSettingsComponent from './settings/DebugLogsSettingsComponent';
 import LocalizationSettingsComponent from './settings/LocalizationSettingsComponent';
-import OpenAISettingsComponent from './settings/OpenAISettingsComponent';
+import OpenAICompatibleSettingsComponent from './settings/OpenAISettingsComponent';
 import { AISelectionComponent } from './settings/AISelectionComponent';
 import { AnimationMappingSettingsComponent } from './settings/AnimationMappingSettingsComponent';
 import { KoboldAISettingsComponent } from './settings/KoboldAISettingsComponent';
@@ -68,14 +68,17 @@ export default function SettingsPage() {
             <AIStatusComponent />
           </Box>
           <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-          <OpenAISettingsComponent apiType={aiSettings.aiApiType}>
+          <OpenAICompatibleSettingsComponent
+            apiType={ApiType.OpenAI}
+            selectedApiType={aiSettings.aiApiType}
+          >
             <ApiKeyAIComponent
               setting={SettingsEnum.OPENAI_KEY}
               aiName="OpenAI"
             />
             <AIEndpointComponent
               type={ApiType.OpenAI}
-              selectedApiType={ApiType.OpenAI}
+              selectedApiType={aiSettings.aiApiType}
               settingsEnum={SettingsEnum.OPENAI_ENDPOINT}
             />
             <AIModelSelection
@@ -86,7 +89,29 @@ export default function SettingsPage() {
               endpointSetting={SettingsEnum.OPENAI_ENDPOINT}
             />
             <LocalizationSettingsComponent />
-          </OpenAISettingsComponent>
+          </OpenAICompatibleSettingsComponent>
+          <OpenAICompatibleSettingsComponent
+            apiType={ApiType.VLLM}
+            selectedApiType={aiSettings.aiApiType}
+          >
+            <ApiKeyAIComponent
+              setting={SettingsEnum.VLLM_APIKEY}
+              optional
+              aiName="VLLM"
+            />
+            <AIEndpointComponent
+              type={ApiType.VLLM}
+              selectedApiType={aiSettings.aiApiType}
+              settingsEnum={SettingsEnum.VLLM_ENDPOINT}
+            />
+            <AIModelSelection
+              apiType={aiSettings.aiApiType}
+              defaultModel={openaiDefaultModel}
+              defaultEndpoint={openaiDefaultEndpoint}
+              modelSetting={SettingsEnum.VLLM_MODEL}
+              endpointSetting={SettingsEnum.VLLM_ENDPOINT}
+            />
+          </OpenAICompatibleSettingsComponent>
           <NovelAISettingsComponent apiType={aiSettings.aiApiType}>
             <ApiKeyAIComponent
               setting={SettingsEnum.NOVELAI_KEY}

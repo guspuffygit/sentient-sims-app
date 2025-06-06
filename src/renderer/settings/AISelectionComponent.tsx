@@ -42,6 +42,7 @@ export function AISelectionComponent() {
         <MenuItem value={ApiType.NovelAI}>NovelAI</MenuItem>
         <MenuItem value={ApiType.KoboldAI}>Kobold AI</MenuItem>
         <MenuItem value={ApiType.Gemini}>Gemini</MenuItem>
+        <MenuItem value={ApiType.VLLM}>VLLM</MenuItem>
       </Select>
       <FormHelperText>{getAIHelperText(aiApiType)}</FormHelperText>
       <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/AI-Backends" />

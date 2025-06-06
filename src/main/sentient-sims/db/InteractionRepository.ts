@@ -7,7 +7,8 @@ import {
 import { IgnoredInteractionsResponse } from '../models/IgnoredInteractionsResponse';
 import { SettingsService } from '../services/SettingsService';
 import { BasicInteraction } from './dto/InteractionDTO';
-import axiosClient from '../clients/AxiosClient';
+import { axiosClient } from '../clients/AxiosClient';
+import { SettingsEnum } from '../models/SettingsEnum';
 
 export class InteractionRepository {
   private settingsService: SettingsService;
@@ -21,6 +22,12 @@ export class InteractionRepository {
   async fetchInteractions(): Promise<Map<string, BasicInteraction>> {
     const response = await axiosClient({
       url: '/interactions',
+      baseURL: `${this.settingsService.get(
+        SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
+      )}`,
+      headers: {
+        Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+      },
     });
 
     return response.data;
@@ -45,6 +52,12 @@ export class InteractionRepository {
       url: '/interactions',
       method: 'POST',
       data: interaction,
+      baseURL: `${this.settingsService.get(
+        SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
+      )}`,
+      headers: {
+        Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+      },
     });
 
     const result = response.data;

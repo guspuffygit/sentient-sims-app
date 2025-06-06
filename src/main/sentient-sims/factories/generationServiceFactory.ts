@@ -13,6 +13,7 @@ import { KoboldAIService } from '../services/KoboldAIService';
 import { AllModelSettings, ModelSettings } from '../modelSettings';
 import { stringType } from '../util/typeChecks';
 import { GeminiService } from '../services/GeminiService';
+import { VLLMAIService } from '../services/VLLMAIService';
 
 export function getGenerationService(
   settingsService: SettingsService,
@@ -32,6 +33,10 @@ export function getGenerationService(
 
   if (aiType === ApiType.Gemini) {
     return new GeminiService(settingsService);
+  }
+
+  if (aiType === ApiType.VLLM) {
+    return new VLLMAIService(settingsService);
   }
 
   return new OpenAIService(settingsService);
@@ -71,6 +76,10 @@ export function getModelSettings(
 
   if (aiType === ApiType.Gemini) {
     model = settingsService.get(SettingsEnum.GEMINI_MODEL);
+  }
+
+  if (aiType === ApiType.VLLM) {
+    model = settingsService.get(SettingsEnum.VLLM_MODEL);
   }
 
   if (stringType(model) && model in AllModelSettings) {

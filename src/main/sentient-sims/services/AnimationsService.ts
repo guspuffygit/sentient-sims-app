@@ -3,7 +3,7 @@ import { Animation } from 'main/sentient-sims/models/Animation';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { ApiType } from '../models/ApiType';
-import axiosClient from '../clients/AxiosClient';
+import { axiosClient } from '../clients/AxiosClient';
 
 export function getAnimationKey(
   animationAuthor: string,
@@ -24,6 +24,12 @@ export class AnimationsService {
   async getAnimations() {
     const response = await axiosClient({
       url: '/animations',
+      baseURL: `${this.settingsService.get(
+        SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
+      )}`,
+      headers: {
+        Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+      },
     });
 
     return response.data;
@@ -34,6 +40,12 @@ export class AnimationsService {
       url: '/animations',
       method: 'POST',
       data: animation,
+      baseURL: `${this.settingsService.get(
+        SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
+      )}`,
+      headers: {
+        Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+      },
     });
 
     const result = response.data;

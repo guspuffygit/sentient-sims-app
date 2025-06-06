@@ -4,13 +4,15 @@ import { PropsWithChildren } from 'react';
 
 type OpenAISettingsComponentProps = {
   apiType: ApiType;
+  selectedApiType: ApiType;
 } & PropsWithChildren;
 
-export default function OpenAISettingsComponent({
+export default function OpenAICompatibleSettingsComponent({
   apiType,
+  selectedApiType,
   children,
 }: OpenAISettingsComponentProps) {
-  if (apiType !== ApiType.OpenAI) {
+  if (apiType !== selectedApiType) {
     return <></>;
   }
 

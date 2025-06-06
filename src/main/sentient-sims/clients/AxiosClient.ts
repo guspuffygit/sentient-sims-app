@@ -2,27 +2,17 @@ import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import log from 'electron-log';
 import { UnexpectedStringResponseError } from '../exceptions/UnexpectedStringResponseError';
 import { SentientSimsHTTPStatusCode } from '../models/SentientSimsHTTPStatusCode';
-import { SettingsService } from '../services/SettingsService';
-import { SettingsEnum } from '../models/SettingsEnum';
 
-const axiosClient = axios.create({
+export const axiosClient = axios.create({
   validateStatus: (status) => {
     return status <= 205;
   },
 });
 
-const settingsService = new SettingsService();
-
 axiosClient.interceptors.request.use((config) => {
   if (config.retryCount === undefined) {
     config.retryCount = 0;
   }
-
-  config.baseURL = `${settingsService.get(
-    SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
-  )}`;
-
-  config.headers.Authentication = `${settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
 
   return config;
 });
@@ -104,5 +94,3 @@ axiosClient.interceptors.response.use(
     }
   },
 );
-
-export default axiosClient;

@@ -10,6 +10,7 @@ import {
   defaultKokoroEndpoint,
   defaultTTSEnabled,
   defaultTTSVolume,
+  defaultVLLMEndpoint,
   geminiDefaultEndpoint,
   koboldaiDefaultEndpoint,
   novelaiDefaultEndpoint,
@@ -156,6 +157,10 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.ELEVENLABS_TTS_SETTINGS.toString()]: {
         type: 'object',
         default: defaultElevenLabsTTSSettings,
+      },
+      [SettingsEnum.VLLM_ENDPOINT.toString()]: {
+        type: 'string',
+        default: defaultVLLMEndpoint,
       },
     },
     migrations: {

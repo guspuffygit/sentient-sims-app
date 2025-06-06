@@ -11,9 +11,15 @@ import { EndAdornmentTooltip } from './components/EndAdornmentTooltip';
 interface ModalProps {
   setting: SettingsHook<string>;
   aiName: string;
+  // eslint-disable-next-line react/require-default-props
+  optional?: boolean;
 }
 
-export default function APIKeyInput({ setting, aiName }: ModalProps) {
+export default function APIKeyInput({
+  setting,
+  aiName,
+  optional = false,
+}: ModalProps) {
   const [keyVisibility, setKeyVisibility] = useState(false);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,7 +55,7 @@ export default function APIKeyInput({ setting, aiName }: ModalProps) {
       onChange={handleInputChange}
       size="small"
       fullWidth
-      required
+      required={!optional}
       InputProps={{
         endAdornment: (
           <InputAdornment position="end">

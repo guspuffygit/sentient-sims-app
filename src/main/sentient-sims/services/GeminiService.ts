@@ -13,7 +13,7 @@ import { AIModel } from '../models/AIModel';
 import { getRandomItem } from '../util/getRandomItem';
 import { GeminiKeysNotSetError } from '../exceptions/GeminiKeyNotSetError';
 import { GeminiAPIError } from '../exceptions/GeminiAPIError';
-import axiosClient from '../clients/AxiosClient';
+import { axiosClient } from '../clients/AxiosClient';
 
 export class GeminiService implements GenerationService {
   private readonly settingsService: SettingsService;
