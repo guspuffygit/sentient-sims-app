@@ -33,6 +33,20 @@ export const AllModelSettings: ModelSettingsType = {
     breakStringTokens: [0],
     stop: ['### Input:', '### Instruction:', '### Response:'],
   },
+  'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8': {
+    temperature: 0.6,
+    top_p: 0.9,
+    max_tokens: 16000,
+    breakTokenString: '<|finetune_right_pad|>',
+    breakStringTokens: [200018],
+  },
+  'meta-llama/Llama-4-Scout-17B-16E-Instruct': {
+    temperature: 0.6,
+    top_p: 0.9,
+    max_tokens: 16000,
+    breakTokenString: '<|finetune_right_pad|>',
+    breakStringTokens: [200018],
+  },
   'ArliAI/Mistral-Nemo-12B-ArliAI-RPMax-v1.1': {
     temperature: 0.8,
     top_p: 0.9,
