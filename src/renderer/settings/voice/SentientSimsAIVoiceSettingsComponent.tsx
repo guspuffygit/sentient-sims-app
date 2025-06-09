@@ -62,13 +62,16 @@ export function SentientSimsAIVoiceSettingsComponent() {
   );
 
   const voiceMenuItems: any[] = [];
-  Object.entries(SentientSimsAISpeechVoice).forEach((key) =>
-    voiceMenuItems.push(
-      <MenuItem value={key[1]}>{`${key[0]} (${VOICES[key[1]].gender}) : ${
-        VOICES[key[1]].language === 'en-us' ? 'American' : 'British'
-      }`}</MenuItem>,
-    ),
-  );
+  Object.entries(SentientSimsAISpeechVoice).forEach((key) => {
+    // this voice doesn't work for some reason
+    if (key[1] !== SentientSimsAISpeechVoice.Isabella) {
+      voiceMenuItems.push(
+        <MenuItem value={key[1]}>{`${key[0]} (${VOICES[key[1]].gender}) : ${
+          VOICES[key[1]].language === 'en-us' ? 'American' : 'British'
+        }`}</MenuItem>,
+      );
+    }
+  });
 
   function handleModelChange(model: string) {
     sentientsimsaiTtsSettings.setSetting({
@@ -91,9 +94,18 @@ export function SentientSimsAIVoiceSettingsComponent() {
   function handleVoiceChange(voice: string | SentientSimsAISpeechVoice[]) {
     const voices: SentientSimsAISpeechVoice[] = [];
     if (typeof voice === 'string') {
-      voice.split(',').forEach((v) => voices.push(toSpeechVoice(v)));
+      voice.split(',').forEach((v) => {
+        const speechVoice = toSpeechVoice(v);
+        if (speechVoice !== SentientSimsAISpeechVoice.Isabella) {
+          voices.push(speechVoice);
+        }
+      });
     } else {
-      voice.forEach((v) => voices.push(v));
+      voice.forEach((v) => {
+        if (v !== SentientSimsAISpeechVoice.Isabella) {
+          voices.push(v);
+        }
+      });
     }
 
     if (voices.length > 4) {
@@ -202,7 +214,11 @@ export function SentientSimsAIVoiceSettingsComponent() {
           </Stack>
         </Box>
         {tts?.error ? (
-          <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+          <Box
+            display="flex"
+            alignItems="center"
+            sx={{ marginBottom: 2, marginTop: 2 }}
+          >
             <FormHelperText error>Error: {tts?.error}</FormHelperText>
           </Box>
         ) : null}
