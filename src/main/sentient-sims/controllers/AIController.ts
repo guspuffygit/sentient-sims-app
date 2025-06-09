@@ -7,7 +7,8 @@ import { AIService } from '../services/AIService';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { InteractionEventStatus } from '../models/InteractionEventResult';
 import {
-  BuffRequest,
+  BuffEventRequest,
+  BuffDescriptionRequest,
   ClassificationRequest,
 } from '../models/OpenAIRequestBuilder';
 import { CatchErrors } from './decorators/CatchError';
@@ -67,14 +68,22 @@ export class AIController {
   }
 
   @CatchErrors()
-  async buffEvent(req: Request, res: Response) {
-    const event: BuffRequest = req.body;
+  async buffDescription(req: Request, res: Response) {
+    const event: BuffDescriptionRequest = req.body;
 
-    const result = await this.aiService.runBuff(event);
+    const result = await this.aiService.runBuffDescription(event);
     res.json(result);
     if (result.text) {
       sendChatGeneration(result);
     }
+  }
+
+  @CatchErrors()
+  async buffEvent(req: Request, res: Response) {
+    const event: BuffEventRequest = req.body;
+
+    res.json({ ok: 'ok' });
+    await this.aiService.runBuff(event);
   }
 
   @CatchErrors({ statusCode: 500 })

@@ -50,7 +50,14 @@ export type ClassificationRequest = {
   messages: string[];
 };
 
-export type BuffRequest = {
+export type BuffEventRequest = {
+  sim_id: string;
+  name: string;
+  classifiers: string[];
+  messages: string[];
+};
+
+export type BuffDescriptionRequest = {
   name: string;
   mood: string;
   messages: string[];

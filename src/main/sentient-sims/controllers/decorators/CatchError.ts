@@ -33,24 +33,26 @@ export function CatchErrors(catchErrorsParameters?: CatchErrorsParameters) {
         const statusCode =
           catchErrorsParameters?.statusCode ?? defaultStatusCode;
         log.error(`Error in ${String(context.name)}:`, err);
-        res.status(statusCode).json({ error: err?.message });
+        try {
+          res.status(statusCode).json({ error: err?.message });
+        } finally {
+          // ask the user if they want to send logs
+          // Send Logs + the error stuff
+          const caughtError: CaughtError = {
+            message: err?.message,
+            statusCode,
+            body: req.body,
+            url: req.url,
+            method: req.method,
+          };
+          if (this?.dbService) {
+            log.debug(`DbService was there`);
+            const dbService = this?.dbService as DbService;
+            caughtError.databaseSession = await dbService.copyErrorDatabase();
+          }
 
-        // ask the user if they want to send logs
-        // Send Logs + the error stuff
-        const caughtError: CaughtError = {
-          message: err?.message,
-          statusCode,
-          body: req.body,
-          url: req.url,
-          method: req.method,
-        };
-        if (this?.dbService) {
-          log.debug(`DbService was there`);
-          const dbService = this?.dbService as DbService;
-          caughtError.databaseSession = await dbService.copyErrorDatabase();
+          sendPopUpCaughtErrorNotification(caughtError);
         }
-
-        sendPopUpCaughtErrorNotification(caughtError);
       }
     };
   };

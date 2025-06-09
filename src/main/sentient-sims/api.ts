@@ -125,7 +125,12 @@ export function runApi({
     '/ai/v2/event/classification',
     aiController.classificationEvent,
   );
-  expressApp.post('/ai/v2/event/buff', aiController.buffEvent);
+  expressApp.post(
+    '/ai/v2/event/classification',
+    aiController.classificationEvent,
+  );
+  expressApp.post('/ai/v2/event/buff', aiController.buffDescription);
+  expressApp.post('/ai/v3/event/buff', aiController.buffEvent);
   expressApp.get('/ai/v2/models', aiController.getModels);
   expressApp.get('/ai/v2/tts', aiController.tts);
 

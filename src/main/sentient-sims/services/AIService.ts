@@ -22,6 +22,7 @@ import {
   notifyMapAnimation,
   notifyMapInteraction,
   playTTS,
+  sendChatGeneration,
 } from '../util/notifyRenderer';
 import {
   GenerationOptions,
@@ -42,7 +43,8 @@ import {
   getTokenCounter,
 } from '../factories/generationServiceFactory';
 import {
-  BuffRequest,
+  BuffEventRequest,
+  BuffDescriptionRequest,
   ClassificationRequest,
   OneShotRequest,
   OpenAIRequestBuilder,
@@ -62,6 +64,11 @@ import { AIModel } from '../models/AIModel';
 import { DefaultFormatter } from '../formatter/DefaultFormatter';
 import { InteractionDescription } from '../descriptions/interactionDescriptions';
 import { PromptHistoryMode } from '../models/PromptHistoryMode';
+import { sendModNotification } from '../websocketServer';
+import {
+  ModAddBuff,
+  ModWebsocketMessageType,
+} from '../models/ModWebsocketMessage';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
@@ -428,7 +435,50 @@ export class AIService {
     };
   }
 
-  async runBuff(buffRequest: BuffRequest): Promise<InteractionEventResult> {
+  async runBuff(event: BuffEventRequest) {
+    const classificationResult = await this.runClassification({
+      name: event.name,
+      classifiers: event.classifiers,
+      messages: event.messages,
+    });
+
+    if (
+      classificationResult.status !== InteractionEventStatus.CLASSIFIED ||
+      !classificationResult.text
+    ) {
+      return;
+    }
+
+    sendChatGeneration(classificationResult);
+
+    const buffDescriptionResult = await this.runBuffDescription({
+      name: event.name,
+      mood: classificationResult.text,
+      messages: event.messages,
+    });
+
+    if (
+      buffDescriptionResult.status !== InteractionEventStatus.GENERATED ||
+      !buffDescriptionResult.text
+    ) {
+      return;
+    }
+
+    sendChatGeneration(buffDescriptionResult);
+
+    const modAddBuff: ModAddBuff = {
+      type: ModWebsocketMessageType.ADD_BUFF,
+      sim_id: event.sim_id,
+      mood: classificationResult.text,
+      buff_description: buffDescriptionResult.text,
+    };
+
+    sendModNotification(modAddBuff);
+  }
+
+  async runBuffDescription(
+    buffRequest: BuffDescriptionRequest,
+  ): Promise<InteractionEventResult> {
     const generationService = getGenerationService(this.settingsService);
     const tokenCounter = getTokenCounter(this.settingsService);
 
