@@ -44,6 +44,10 @@ export class DirectoryService {
     return path.join(this.getModsFolder(), 'sentient-sims.zip');
   }
 
+  getSentientSimsScriptsFolder(): string {
+    return path.join(this.getSentientSimsFolder(), 'Scripts');
+  }
+
   filesToDelete(): string[] {
     return [
       path.join(

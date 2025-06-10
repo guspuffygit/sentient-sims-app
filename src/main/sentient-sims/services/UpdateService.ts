@@ -73,9 +73,20 @@ export class UpdateService {
         fs.mkdirSync(sentientSimsFolder);
       }
 
+      const scriptsFolderExists = fs.existsSync(
+        this.directoryService.getSentientSimsScriptsFolder(),
+      );
+
       const zip = new AdmZip(zippedModFile);
-      zip.getEntries().forEach((zipEntry) => {
-        if (!zipEntry.isDirectory) {
+      zip
+        .getEntries()
+        .filter((zipEntry) => !zipEntry.isDirectory)
+        .filter((zipEntry) => {
+          return !(
+            zipEntry.name === 'sentient-sims.ts4script' && scriptsFolderExists
+          );
+        })
+        .forEach((zipEntry) => {
           log.log(zipEntry.name);
           zip.extractEntryTo(
             zipEntry.entryName,
@@ -83,8 +94,7 @@ export class UpdateService {
             /* maintainEntryPath */ false,
             /* overwrite */ true,
           );
-        }
-      });
+        });
 
       log.info(`Update completed.`);
     } finally {
