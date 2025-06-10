@@ -57,7 +57,7 @@ export function useSentientSimsTTS(): TTSHook {
           defaultSentientSimsAITTSSettings.speed,
       };
 
-      const url = `${sentientSimsAIEndpointSetting.value}/v1/audio/speech`;
+      const url = `${sentientSimsAIEndpointSetting.value}/v2/audio/speech`;
       log.debug(`URL: ${url} Body: ${JSON.stringify(requestBody, null, 2)}`);
 
       try {
@@ -66,6 +66,7 @@ export function useSentientSimsTTS(): TTSHook {
           headers: {
             'Content-Type': 'application/json',
             Authentication: sentientSimsAITokenSetting.value,
+            'sentient-sims-model': requestBody.model,
           },
           body: JSON.stringify(requestBody),
         });

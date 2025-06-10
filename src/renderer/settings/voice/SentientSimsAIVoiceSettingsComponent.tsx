@@ -15,10 +15,12 @@ import { JSX, useMemo } from 'react';
 import {
   defaultSentientSimsAITTSSettings,
   SentientSimsAISpeechModel,
-  SentientSimsAISpeechVoice,
+  SentientSimsAISpeechKokoroVoice,
   SentientSimsAITTSSettings,
   toSpeechModel,
   toSpeechVoice,
+  SentientSimsAISpeechVoice,
+  SentientSimsAISpeechOrpheusVoice,
 } from 'main/sentient-sims/models/SentientSimsAITTSSettings';
 import { VOICES } from 'renderer/kokoro/voices';
 import { TestVoiceButton } from 'renderer/components/VoiceTestButton';
@@ -62,21 +64,38 @@ export function SentientSimsAIVoiceSettingsComponent() {
   );
 
   const voiceMenuItems: any[] = [];
-  Object.entries(SentientSimsAISpeechVoice).forEach((key) => {
-    // this voice doesn't work for some reason
-    if (key[1] !== SentientSimsAISpeechVoice.Isabella) {
-      voiceMenuItems.push(
-        <MenuItem value={key[1]}>{`${key[0]} (${VOICES[key[1]].gender}) : ${
-          VOICES[key[1]].language === 'en-us' ? 'American' : 'British'
-        }`}</MenuItem>,
-      );
-    }
-  });
+  if (
+    sentientsimsaiTtsSettings.value.model === SentientSimsAISpeechModel.KOKORO
+  ) {
+    Object.entries(SentientSimsAISpeechKokoroVoice).forEach((key) => {
+      // this voice doesn't work for some reason
+      if (key[1] !== SentientSimsAISpeechKokoroVoice.Isabella) {
+        voiceMenuItems.push(
+          <MenuItem value={key[1]}>{`${key[0]} (${VOICES[key[1]].gender}) : ${
+            VOICES[key[1]].language === 'en-us' ? 'American' : 'British'
+          }`}</MenuItem>,
+        );
+      }
+    });
+  } else {
+    Object.entries(SentientSimsAISpeechOrpheusVoice).forEach((key) => {
+      voiceMenuItems.push(<MenuItem value={key[1]}>{key[0]}</MenuItem>);
+    });
+  }
 
   function handleModelChange(model: string) {
+    const speechModel = toSpeechModel(model);
+
+    let voice: SentientSimsAISpeechVoice[] = [
+      SentientSimsAISpeechKokoroVoice.Heart,
+    ];
+    if (speechModel === SentientSimsAISpeechModel.ORPHEUS) {
+      voice = [SentientSimsAISpeechOrpheusVoice.Tara];
+    }
+
     sentientsimsaiTtsSettings.setSetting({
-      model: toSpeechModel(model),
-      voice: sentientsimsaiTtsSettings.value.voice,
+      model: speechModel,
+      voice,
       response_format: sentientsimsaiTtsSettings.value.response_format,
       speed: sentientsimsaiTtsSettings.value.speed,
     });
@@ -96,13 +115,13 @@ export function SentientSimsAIVoiceSettingsComponent() {
     if (typeof voice === 'string') {
       voice.split(',').forEach((v) => {
         const speechVoice = toSpeechVoice(v);
-        if (speechVoice !== SentientSimsAISpeechVoice.Isabella) {
+        if (speechVoice !== SentientSimsAISpeechKokoroVoice.Isabella) {
           voices.push(speechVoice);
         }
       });
     } else {
       voice.forEach((v) => {
-        if (v !== SentientSimsAISpeechVoice.Isabella) {
+        if (v !== SentientSimsAISpeechKokoroVoice.Isabella) {
           voices.push(v);
         }
       });
@@ -163,7 +182,10 @@ export function SentientSimsAIVoiceSettingsComponent() {
               labelId="voice"
               id="voice"
               label="Voice"
-              multiple
+              multiple={
+                sentientsimsaiTtsSettings.value.model ===
+                SentientSimsAISpeechModel.KOKORO
+              }
               value={sentientsimsaiTtsSettings.value.voice}
               onChange={(change) => handleVoiceChange(change.target.value)}
               renderValue={(selected) => (
@@ -184,36 +206,42 @@ export function SentientSimsAIVoiceSettingsComponent() {
             justifyContent="space-between"
             sx={{ alignItems: 'center', mb: 1, width: '100%' }}
           >
-            <FormHelperText>
-              You can select multiple voices to create a custom voice
-            </FormHelperText>
+            {sentientsimsaiTtsSettings.value.model ===
+              SentientSimsAISpeechModel.KOKORO && (
+              <FormHelperText>
+                You can select multiple voices to create a custom voice
+              </FormHelperText>
+            )}
             <TestVoiceButton disabled={showLogInError || showMemberError} />
           </Stack>
         </Box>
-        <Box sx={{ width: 300 }}>
-          <Stack
-            spacing={2}
-            direction="row"
-            sx={{ alignItems: 'center', mb: 1 }}
-          >
-            <Typography>Speed:</Typography>
-            <Slider
-              aria-label="Speed"
-              value={speed}
-              onChange={(change, value) => handleSpeedChange(value as number)}
-              step={0.01}
-              min={0.4}
-              max={2}
-              marks={[
-                { value: 0.4, label: '0.4' },
-                { value: 1.0, label: '1' },
-                { value: 2.0, label: '2' },
-              ]}
-            />
-            <SpeedIcon />
-          </Stack>
-        </Box>
-        {tts?.error ? (
+        {sentientsimsaiTtsSettings.value.model ===
+          SentientSimsAISpeechModel.KOKORO && (
+          <Box sx={{ width: 300 }}>
+            <Stack
+              spacing={2}
+              direction="row"
+              sx={{ alignItems: 'center', mb: 1 }}
+            >
+              <Typography>Speed:</Typography>
+              <Slider
+                aria-label="Speed"
+                value={speed}
+                onChange={(change, value) => handleSpeedChange(value as number)}
+                step={0.01}
+                min={0.4}
+                max={2}
+                marks={[
+                  { value: 0.4, label: '0.4' },
+                  { value: 1.0, label: '1' },
+                  { value: 2.0, label: '2' },
+                ]}
+              />
+              <SpeedIcon />
+            </Stack>
+          </Box>
+        )}
+        {tts?.error && (
           <Box
             display="flex"
             alignItems="center"
@@ -221,7 +249,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
           >
             <FormHelperText error>Error: {tts?.error}</FormHelperText>
           </Box>
-        ) : null}
+        )}
       </Box>
     </Grid>
   );

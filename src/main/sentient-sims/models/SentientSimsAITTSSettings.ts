@@ -1,4 +1,4 @@
-export enum SentientSimsAISpeechVoice {
+export enum SentientSimsAISpeechKokoroVoice {
   Heart = 'af_heart',
   Alloy = 'af_alloy',
   Aoede = 'af_aoede',
@@ -28,8 +28,23 @@ export enum SentientSimsAISpeechVoice {
   Fable = 'bm_fable',
 }
 
+export enum SentientSimsAISpeechOrpheusVoice {
+  Tara = 'tara',
+  Leah = 'leah',
+  Jess = 'jess',
+  Leo = 'leo',
+  Dan = 'dan',
+  Mia = 'mia',
+  Zac = 'zac',
+}
+
+export type SentientSimsAISpeechVoice =
+  | SentientSimsAISpeechKokoroVoice
+  | SentientSimsAISpeechOrpheusVoice;
+
 export enum SentientSimsAISpeechModel {
   KOKORO = 'kokoro',
+  ORPHEUS = 'canopylabs/orpheus-3b-0.1-ft',
 }
 
 export type SentientSimsAITTSSettings = {
@@ -41,7 +56,7 @@ export type SentientSimsAITTSSettings = {
 
 export const defaultSentientSimsAITTSSettings: SentientSimsAITTSSettings = {
   model: SentientSimsAISpeechModel.KOKORO,
-  voice: [SentientSimsAISpeechVoice.Heart],
+  voice: [SentientSimsAISpeechKokoroVoice.Heart],
   response_format: 'wav',
   speed: 1.0,
 };
@@ -60,12 +75,20 @@ export function toSpeechModel(model?: string): SentientSimsAISpeechModel {
 
 export function toSpeechVoice(voice?: string): SentientSimsAISpeechVoice {
   if (
-    Object.values(SentientSimsAISpeechVoice).includes(
-      voice as SentientSimsAISpeechVoice,
+    Object.values(SentientSimsAISpeechKokoroVoice).includes(
+      voice as SentientSimsAISpeechKokoroVoice,
     )
   ) {
-    return voice as SentientSimsAISpeechVoice;
+    return voice as SentientSimsAISpeechKokoroVoice;
   }
 
-  throw Error(`Unknown SentientSimsSpeechVoice ${voice}`);
+  if (
+    Object.values(SentientSimsAISpeechOrpheusVoice).includes(
+      voice as SentientSimsAISpeechOrpheusVoice,
+    )
+  ) {
+    return voice as SentientSimsAISpeechOrpheusVoice;
+  }
+
+  throw Error(`Unknown SentientSimsAISpeechVoice ${voice}`);
 }
