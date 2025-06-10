@@ -15,12 +15,14 @@ import {
   notifyNewMemoryAdded,
 } from '../util/notifyRenderer';
 import { MemoryParticipantDTO } from './dto/MemoryParticipantDTO';
+import { bigintReplacer } from '../util/stringify';
 
 export class MemoryRepository extends Repository {
   getMemory(getMemoryRequest: GetMemoryRequest): MemoryEntity {
     const results = this.dbService
       .getDb()
       .prepare('SELECT * FROM memory WHERE id = ?')
+      .safeIntegers()
       .all([getMemoryRequest.id]) as MemoryEntity[];
     if (results.length > 0) {
       return results[0];
@@ -35,6 +37,7 @@ export class MemoryRepository extends Repository {
     const memoryParticipants = this.dbService
       .getDb()
       .prepare('SELECT * FROM memory_participants WHERE memory_id = ?')
+      .safeIntegers()
       .all([
         getMemoryParticipantsRequest.memory_id,
       ]) as MemoryParticipantEntity[];
@@ -75,6 +78,7 @@ export class MemoryRepository extends Repository {
     return this.dbService
       .getDb()
       .prepare(query)
+      .safeIntegers()
       .all(bigIntParticipantIds) as MemoryEntity[];
   }
 
@@ -91,6 +95,7 @@ export class MemoryRepository extends Repository {
           ORDER BY subquery.timestamp ASC;
         `,
       )
+      .safeIntegers()
       .all() as MemoryEntity[];
   }
 
@@ -98,14 +103,16 @@ export class MemoryRepository extends Repository {
     const result = this.dbService
       .getDb()
       .prepare(
-        'UPDATE memory SET pre_action = ?, observation = ?, content = ?, timestamp = ?, location_id = ? WHERE id = ?',
+        'UPDATE memory SET pre_action = ?, observation = ?, content = ?, timestamp = ?, location_id = ?, game_timestamp = ? WHERE id = ?',
       )
+      .safeIntegers()
       .run(
         memory.pre_action,
         memory.observation,
         memory.content,
         memory.timestamp,
         memory.location_id,
+        memory.game_timestamp,
         memory.id,
       );
 
@@ -133,14 +140,16 @@ export class MemoryRepository extends Repository {
       const updateMemoryResult = this.dbService
         .getDb()
         .prepare(
-          'INSERT OR REPLACE INTO memory(id, pre_action, observation, content, location_id) VALUES(?, ?, ?, ?, ?)',
+          'INSERT OR REPLACE INTO memory(id, pre_action, observation, content, location_id, game_timestamp) VALUES(?, ?, ?, ?, ?, ?)',
         )
+        .safeIntegers()
         .run([
           createMemoryRequest.memory.id,
           createMemoryRequest.memory.pre_action,
           createMemoryRequest.memory.observation,
           createMemoryRequest.memory.content,
           createMemoryRequest.memory.location_id,
+          createMemoryRequest.memory.game_timestamp,
         ]);
 
       createMemoryRequest.participants.forEach((participant) => {
@@ -159,7 +168,7 @@ export class MemoryRepository extends Repository {
 
     notifyNewMemoryAdded(memory);
 
-    log.info(`Memory added:\n${JSON.stringify(memory, null, 2)}`);
+    log.info(`Memory added:\n${JSON.stringify(memory, bigintReplacer, 2)}`);
 
     return memory;
   }
