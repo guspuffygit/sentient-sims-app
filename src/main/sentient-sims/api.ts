@@ -121,6 +121,7 @@ export function runApi({
 
   expressApp.post('/ai/v2/generate', aiController.sentientSimsGenerate);
   expressApp.post('/ai/v2/event/interaction', aiController.interactionEvent);
+  expressApp.post('/ai/v2/event/reflect', aiController.reflectEvent);
   expressApp.post(
     '/ai/v2/event/classification',
     aiController.classificationEvent,

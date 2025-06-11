@@ -42,6 +42,7 @@ describe('Output', () => {
       const event: InteractionEvent = {
         // TODO: Deprecated
         location_id: 0,
+        game_timestamp: 0,
         sentient_sims: [
           {
             careers: [

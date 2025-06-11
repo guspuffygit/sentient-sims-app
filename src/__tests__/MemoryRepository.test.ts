@@ -24,6 +24,7 @@ describe('MemoryRepository', () => {
     ];
     const memory: MemoryEntity = {
       location_id: 90369424,
+      game_timestamp: 0,
       pre_action: 'dioawjd',
       content: 'foiwje9if91082u',
       observation: 'joijofi10298',
