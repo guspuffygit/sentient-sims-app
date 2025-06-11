@@ -8,6 +8,7 @@ export enum ModWebsocketMessageType {
   MEMORY_EDITED = 'memory_edited',
   MEMORY_CREATED = 'memory_created',
   ADD_BUFF = 'add_buff',
+  ADD_SLEEPING_BUFF = 'add_sleeping_buff',
 }
 
 export type ModWebsocketMessage = {

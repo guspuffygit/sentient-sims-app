@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import log from 'electron-log';
 import {
   ChatContinueInteractionEvent,
@@ -7,6 +8,7 @@ import {
   InteractionEvent,
   InteractionEvents,
   InteractionMappingEvent,
+  ReflectEvent,
   SSEventType,
   WWEventType,
   WWInteractionEvent,
@@ -299,6 +301,7 @@ export class AIService {
     // save memory before any model specific formatting
     const newMemory: MemoryEntity = {
       location_id: event.environment.location_id,
+      game_timestamp: event.game_timestamp,
     };
     if (promptRequest.action) {
       newMemory.pre_action = promptRequest.action;
@@ -435,7 +438,10 @@ export class AIService {
     };
   }
 
-  async runBuff(event: BuffEventRequest) {
+  async runBuff(
+    event: BuffEventRequest,
+    addBuffType: ModWebsocketMessageType = ModWebsocketMessageType.ADD_BUFF,
+  ) {
     const classificationResult = await this.runClassification({
       name: event.name,
       classifiers: event.classifiers,
@@ -467,7 +473,7 @@ export class AIService {
     sendChatGeneration(buffDescriptionResult);
 
     const modAddBuff: ModAddBuff = {
-      type: ModWebsocketMessageType.ADD_BUFF,
+      type: addBuffType,
       sim_id: event.sim_id,
       mood: classificationResult.text,
       buff_description: buffDescriptionResult.text,
@@ -559,8 +565,26 @@ Write me a buff description based on the conversation so that ${buffRequest.name
     return { status: InteractionEventStatus.NOOP };
   }
 
-  // eslint-disable-next-line class-methods-use-this
   playTts(text: string) {
     playTTS(text);
+  }
+
+  async runReflectEvent(reflectEvent: ReflectEvent, memories: MemoryEntity[]) {
+    if (memories.length < 4) {
+      log.debug(
+        `Not enough memories to reflect for ${reflectEvent.sentient_sims[0].sim_id}`,
+      );
+      return;
+    }
+    log.info(
+      `Reflect event ran for sim: ${reflectEvent.sentient_sims[0].sim_id}`,
+    );
+    const buffRequest: BuffEventRequest = {
+      sim_id: reflectEvent.sentient_sims[0].sim_id,
+      name: reflectEvent.sentient_sims[0].name,
+      classifiers: reflectEvent.classifiers,
+      messages: [],
+    };
+    await this.runBuff(buffRequest, ModWebsocketMessageType.ADD_SLEEPING_BUFF);
   }
 }

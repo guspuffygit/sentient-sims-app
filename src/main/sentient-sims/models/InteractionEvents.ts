@@ -72,6 +72,7 @@ export type SSEvent = {
   environment: SSEnvironment;
   sentient_sims: SentientSim[];
   relationships?: SSRelationships;
+  game_timestamp: number;
 };
 
 export type WWInteractionEvent = SSEvent & {
@@ -89,6 +90,10 @@ export type WantsInteractionEvent = SSEvent;
 export type ContinueInteractionEvent = SSEvent;
 
 export type ChatContinueInteractionEvent = SSEvent;
+
+export type ReflectEvent = SSEvent & {
+  classifiers: string[];
+};
 
 export type InteractionEvent = SSEvent & {
   interaction_name: string;

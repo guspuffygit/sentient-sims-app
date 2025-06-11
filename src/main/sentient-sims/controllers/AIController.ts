@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import { Request, Response } from 'express';
 import log from 'electron-log';
-import { InteractionEvents } from '../models/InteractionEvents';
+import { InteractionEvents, ReflectEvent } from '../models/InteractionEvents';
 import { playTTS, sendChatGeneration } from '../util/notifyRenderer';
 import { AIService } from '../services/AIService';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
@@ -13,6 +13,7 @@ import {
 } from '../models/OpenAIRequestBuilder';
 import { CatchErrors } from './decorators/CatchError';
 import { DbService } from '../services/DbService';
+import { MemoryRepository } from '../db/MemoryRepository';
 
 export class AIController {
   private readonly aiService: AIService;
@@ -29,6 +30,7 @@ export class AIController {
     this.buffEvent = this.buffEvent.bind(this);
     this.getModels = this.getModels.bind(this);
     this.tts = this.tts.bind(this);
+    this.reflectEvent = this.reflectEvent.bind(this);
   }
 
   @CatchErrors()
@@ -54,6 +56,25 @@ export class AIController {
     if (result.text) {
       sendChatGeneration(result);
     }
+  }
+
+  @CatchErrors()
+  async reflectEvent(req: Request, res: Response) {
+    const reflectEvent: ReflectEvent = req.body;
+
+    log.info(
+      `Sim id: ${reflectEvent}, minGameTimestamp: ${reflectEvent.game_timestamp}`,
+    );
+
+    res.json({ ok: 'ok' });
+    const memories = new MemoryRepository(
+      this.dbService,
+    ).getParticipantsMemories({
+      participant_ids: [reflectEvent.sentient_sims[0].sim_id],
+      min_game_timestamp: reflectEvent.game_timestamp,
+    });
+    log.debug(`Grabbed Memories: ${JSON.stringify(memories, null, 2)}`);
+    await this.aiService.runReflectEvent(reflectEvent, memories);
   }
 
   @CatchErrors()

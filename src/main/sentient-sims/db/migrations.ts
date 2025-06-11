@@ -104,7 +104,7 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
     `,
     '007-add-memory-game-timestamp': `
       ALTER TABLE memory
-      ADD COLUMN GAME_TIMESTAMP INTEGER NOT NULL DEFAULT 0;
+      ADD COLUMN game_timestamp INTEGER NOT NULL DEFAULT 0;
     `,
   }),
 );
