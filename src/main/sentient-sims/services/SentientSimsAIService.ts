@@ -5,6 +5,7 @@ import { RawAxiosRequestHeaders } from 'axios';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { axiosClient } from '../clients/AxiosClient';
 import { VLLMAIService } from './VLLMAIService';
+import { DecodeToken, isTokenExpired } from '../auth/tokenVerifier';
 
 export class SentientSimsAIService extends VLLMAIService {
   serviceUrl(): string {
@@ -26,6 +27,16 @@ export class SentientSimsAIService extends VLLMAIService {
   }
 
   async healthCheck() {
+    for (let i = 0; i < 60; i++) {
+      const payload = DecodeToken(
+        `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+      );
+      if (isTokenExpired(payload)) {
+        // eslint-disable-next-line no-await-in-loop, no-promise-executor-return
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+
     try {
       const response = await axiosClient({
         url: '/health',
