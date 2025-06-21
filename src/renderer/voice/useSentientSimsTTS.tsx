@@ -53,8 +53,6 @@ export function useSentientSimsTTS(): TTSHook {
 
       if (sentientSimsAITTSSettings.value.voice.length === 0) {
         setError('At least one Sentient Sims Voice must be selected');
-        sentenceQueueRef.current = [];
-        audioUrlQueueRef.current = [];
         break;
       }
 
@@ -91,8 +89,6 @@ export function useSentientSimsTTS(): TTSHook {
           } catch (err: any) {
             setError(errorMessage);
           }
-          sentenceQueueRef.current = [];
-          audioUrlQueueRef.current = [];
           break;
         }
 
@@ -104,8 +100,6 @@ export function useSentientSimsTTS(): TTSHook {
         const errorMessage = `TTS request failed: ${err.message}`;
         log.error(errorMessage);
         setError(errorMessage);
-        sentenceQueueRef.current = [];
-        audioUrlQueueRef.current = [];
         break;
       }
     }
@@ -153,7 +147,7 @@ export function useSentientSimsTTS(): TTSHook {
         });
       } else {
         await new Promise((resolve) => {
-          setTimeout(resolve, 100);
+          setTimeout(resolve, 10);
         });
       }
     }
@@ -166,12 +160,6 @@ export function useSentientSimsTTS(): TTSHook {
   const speak = useCallback(
     async (text: string) => {
       log.debug(`Sentient Sims Voice Speak called: ${text}`);
-
-      if (currentAudioRef.current) {
-        currentAudioRef.current.pause();
-      }
-      sentenceQueueRef.current = [];
-      audioUrlQueueRef.current = [];
 
       try {
         const request: SentenceTokenizeRequest = { paragraph: text };
@@ -187,7 +175,9 @@ export function useSentientSimsTTS(): TTSHook {
         const { sentences } = response.data;
 
         if (sentences?.length > 0) {
-          sentenceQueueRef.current = sentences;
+          sentences.forEach((sentence) =>
+            sentenceQueueRef.current.push(sentence),
+          );
           log.debug(
             `Queued ${sentences.length} sentences. Starting fetcher and player.`,
           );
