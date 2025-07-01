@@ -3,7 +3,11 @@ import { LocationEntity } from '../db/entities/LocationEntity';
 import { getCareerTrackLevel } from '../descriptions/careerDescriptions';
 import { moodDescriptions } from '../descriptions/moodDescriptions';
 import { getSexCategory, getSexLocation } from '../descriptions/wwDescriptions';
-import { SSEnvironment } from '../models/InteractionEvents';
+import {
+  SSEnvironment,
+  SSSeasonSegment,
+  SSSeasonType,
+} from '../models/InteractionEvents';
 import { SentientSim } from '../models/SentientSim';
 import { SimAge } from '../models/SimAge';
 import { removeEmojis } from '../util/filter';
@@ -614,5 +618,42 @@ export function formatDateTime(environment: SSEnvironment): string {
   const amPm = environment.time.hour >= 12 ? 'PM' : 'AM';
   const hourIn12HourFormat = environment.time.hour % 12 || 12; // Convert 0 hour to 12 for 12 AM.
 
-  return `The day is ${dayName} at ${hourIn12HourFormat}:${minute} ${amPm}.`;
+  return `<DATE>The day is ${dayName} at ${hourIn12HourFormat}:${minute} ${amPm}.</DATE>`;
+}
+
+export function formatSeason(environment: SSEnvironment): string {
+  let segmentString = '';
+  switch (environment.season?.season_segment) {
+    case SSSeasonSegment.EARLY:
+      segmentString += 'Early';
+      break;
+    case SSSeasonSegment.MID:
+      segmentString += 'Mid';
+      break;
+    case SSSeasonSegment.LATE:
+      segmentString += 'Late';
+      break;
+    default:
+      segmentString += 'Eternal';
+      break;
+  }
+
+  let seasonString = '';
+  switch (environment.season?.season_type) {
+    case SSSeasonType.SPRING:
+      seasonString += 'Spring';
+      break;
+    case SSSeasonType.WINTER:
+      seasonString += 'Winter';
+      break;
+    case SSSeasonType.FALL:
+      seasonString += 'Fall';
+      break;
+    case SSSeasonType.SUMMER:
+    default:
+      seasonString += 'Summer';
+      break;
+  }
+
+  return `<SEASON>${segmentString} ${seasonString}</SEASON>`;
 }

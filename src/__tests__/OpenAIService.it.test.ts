@@ -27,6 +27,7 @@ describe('OpenAIServiceIT', () => {
       participants: 'Gus',
       location: 'Square cube',
       memories: [],
+      season: 'Eternal Summer',
       action: 'Looks around',
       systemPrompt: 'system prompt',
       maxResponseTokens: 90,
@@ -40,6 +41,7 @@ describe('OpenAIServiceIT', () => {
         promptRequest.systemPrompt,
         promptRequest.location,
         promptRequest.dateTime,
+        promptRequest.season,
         promptRequest.participants,
       ].join('\n\n'),
     );
@@ -68,6 +70,7 @@ describe('OpenAIServiceIT', () => {
     const promptRequest: PromptRequest = {
       participants: '',
       location: '',
+      season: '',
       memories: [],
       systemPrompt,
       maxResponseTokens: 3900,

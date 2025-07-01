@@ -3,6 +3,7 @@ import {
   formatAction,
   formatSentientSim,
   formatDateTime,
+  formatSeason,
 } from '../formatter/PromptFormatter';
 import { SSEvent, SSRelationships } from '../models/InteractionEvents';
 import { RepositoryService } from './RepositoryService';
@@ -205,6 +206,7 @@ export class PromptRequestBuilderService {
     });
 
     const dateTime = formatDateTime(event.environment);
+    const season = formatSeason(event.environment);
 
     let formattedAction;
     if (options.action) {
@@ -297,6 +299,7 @@ export class PromptRequestBuilderService {
       participants: sims.join('\n'),
       location: formattedLocation,
       dateTime,
+      season,
       memories: groupedMemories,
       action: formattedAction,
       maxResponseTokens: 90,

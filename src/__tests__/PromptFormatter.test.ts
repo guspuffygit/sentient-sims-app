@@ -257,6 +257,7 @@ describe('Output', () => {
       request = {
         location: 'location',
         participants: 'sim 1',
+        season: 'Eternal Summer',
         systemPrompt: 'system',
         memories: [
           {

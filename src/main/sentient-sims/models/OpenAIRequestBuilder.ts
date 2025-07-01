@@ -19,6 +19,7 @@ export type PreFormattedMemoryMessage = FormattedMemoryMessage & {
 export type PromptRequest = {
   location: string;
   dateTime: string;
+  season: string;
   participants: string;
   systemPrompt: string;
   memories: FormattedMemoryMessage[];
@@ -75,6 +76,7 @@ export class OpenAIRequestBuilder {
       promptRequest.systemPrompt,
       promptRequest.location,
       promptRequest.dateTime,
+      promptRequest.season,
       promptRequest.participants,
     ].join('\n\n');
     const systemMessage: OpenAIMessage = {
