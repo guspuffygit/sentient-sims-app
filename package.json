@@ -102,6 +102,7 @@
   "devDependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.693.0",
     "@electron/notarize": "^1.2.3",
+    "@electron/osx-sign": "^2.0.0",
     "@electron/rebuild": "^3.2.10",
     "@electron/universal": "^2.0.3",
     "@eslint/js": "^9.21.0",
