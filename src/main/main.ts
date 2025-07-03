@@ -15,10 +15,10 @@ import electron, {
   shell,
   session,
   WebRequestFilter,
+  dialog,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import { dialog } from 'electron/main';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import registerDebugToggleHotkey from './sentient-sims/registerDebugToggleHotkey';
@@ -147,7 +147,7 @@ const createWindow = async () => {
     autoUpdater.checkForUpdatesAndNotify();
     if (mainWindow) {
       autoUpdater.on('update-downloaded', async (info) => {
-        await dialog.showMessageBox(mainWindow as BrowserWindow, {
+        await dialog.showMessageBox({
           type: 'question',
           buttons: ['Install and Restart'],
           defaultId: 0,
