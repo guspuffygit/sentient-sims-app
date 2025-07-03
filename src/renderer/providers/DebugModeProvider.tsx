@@ -11,10 +11,11 @@ import React, {
 // Define the context for the debug mode
 interface DebugModeContextType {
   isEnabled: boolean;
+  enableDebugMode: () => void;
 }
 
 const DebugModeContext = createContext<DebugModeContextType | undefined>(
-  undefined
+  undefined,
 );
 
 // Provider component
@@ -40,8 +41,12 @@ export function DebugModeProvider({ children }: DebugModeProviderProps) {
     });
   }, []);
 
+  const enableDebugMode = () => {
+    setDebugModeEnabled(true);
+  };
+
   const contextValue = useMemo(() => {
-    return { isEnabled: debugModeEnabled };
+    return { isEnabled: debugModeEnabled, enableDebugMode };
   }, [debugModeEnabled]);
 
   return (

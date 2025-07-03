@@ -5,7 +5,7 @@ import log from 'electron-log';
 
 export async function isNewVersionAvailable(
   currentVersionId: string,
-  type = 'main'
+  type = 'main',
 ): Promise<boolean> {
   log.debug(`current version: ${currentVersionId}`);
   try {
@@ -28,7 +28,7 @@ export async function isNewVersionAvailable(
     if (latestVersionId !== yourVersionId) {
       // A new version is available
       log.info(
-        `New version available. Current: ${yourVersionId} Latest: ${latestVersionId}`
+        `New version available. Current: ${yourVersionId} Latest: ${latestVersionId}`,
       );
       return true;
     }

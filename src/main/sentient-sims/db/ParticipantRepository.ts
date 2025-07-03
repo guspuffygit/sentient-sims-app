@@ -7,6 +7,7 @@ import { Repository } from './Repository';
 import { ParticipantEntity } from './entities/ParticipantEntity';
 import { ParticipantDTO } from './dto/ParticipantDTO';
 import { notifySimsChanged } from '../util/notifyRenderer';
+import { SaveGame } from '../models/SaveGame';
 
 export class ParticipantRepository extends Repository {
   /**
@@ -15,7 +16,7 @@ export class ParticipantRepository extends Repository {
    * sim descriptions if one exists.
    */
   async getParticipant(
-    participantRequest: GetParticipantRequest
+    participantRequest: GetParticipantRequest,
   ): Promise<ParticipantDTO> {
     const result = this.dbService
       .getDb()
@@ -51,7 +52,7 @@ export class ParticipantRepository extends Repository {
   }
 
   async getParticipants(
-    getParticipantsRequest: GetParticipantsRequest
+    getParticipantsRequest: GetParticipantsRequest,
   ): Promise<ParticipantDTO[]> {
     const results: Promise<ParticipantDTO>[] = [];
     getParticipantsRequest.forEach((participantRequest) => {
@@ -60,9 +61,9 @@ export class ParticipantRepository extends Repository {
     return Promise.all(results);
   }
 
-  getAllParticipants(): ParticipantDTO[] {
+  getAllParticipants(saveGame?: SaveGame): ParticipantDTO[] {
     const participants = this.dbService
-      .getDb()
+      .getDb(saveGame)
       .prepare('SELECT * FROM participant')
       .safeIntegers()
       .all() as ParticipantEntity[];
@@ -80,7 +81,7 @@ export class ParticipantRepository extends Repository {
     const result = this.dbService
       .getDb()
       .prepare(
-        'INSERT OR REPLACE INTO participant(id, description, name) VALUES(?, ?, ?)'
+        'INSERT OR REPLACE INTO participant(id, description, name) VALUES(?, ?, ?)',
       )
       .safeIntegers()
       .run([BigInt(participant.id), participant.description, participant.name]);

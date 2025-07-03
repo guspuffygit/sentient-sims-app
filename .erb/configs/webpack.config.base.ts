@@ -23,7 +23,7 @@ const configuration: webpack.Configuration = {
             // Remove this line to enable type checking in webpack builds
             transpileOnly: true,
             compilerOptions: {
-              module: 'esnext',
+              module: 'NodeNext',
             },
           },
         },
@@ -48,6 +48,24 @@ const configuration: webpack.Configuration = {
     // There is no need to add aliases here, the paths in tsconfig get mirrored
     plugins: [new TsconfigPathsPlugins()],
   },
+
+  ignoreWarnings: [
+    (warning) =>
+      warning.message.includes(
+        'Critical dependency: Accessing import.meta directly is unsupported',
+      ),
+    (warning) =>
+      warning.message.includes(
+        'Critical dependency: the request of a dependency is an expression',
+      ),
+    (warning) =>
+      warning.message.includes(
+        `Module Warning (from ./node_modules/sass-loader/dist/cjs.js):
+Deprecation The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+
+More info: https://sass-lang.com/d/legacy-js-api`,
+      ),
+  ],
 
   plugins: [
     new webpack.EnvironmentPlugin({

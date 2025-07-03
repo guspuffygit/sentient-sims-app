@@ -12,9 +12,11 @@ import { NovelAITokenCounter } from '../tokens/NovelAITokenCounter';
 import { KoboldAIService } from '../services/KoboldAIService';
 import { AllModelSettings, ModelSettings } from '../modelSettings';
 import { stringType } from '../util/typeChecks';
+import { GeminiService } from '../services/GeminiService';
+import { VLLMAIService } from '../services/VLLMAIService';
 
 export function getGenerationService(
-  settingsService: SettingsService
+  settingsService: SettingsService,
 ): GenerationService {
   const aiType = settingsService.get(SettingsEnum.AI_API_TYPE);
   if (aiType === ApiType.SentientSimsAI || aiType === ApiType.CustomAI) {
@@ -29,11 +31,19 @@ export function getGenerationService(
     return new NovelAIService(settingsService);
   }
 
+  if (aiType === ApiType.Gemini) {
+    return new GeminiService(settingsService);
+  }
+
+  if (aiType === ApiType.VLLM) {
+    return new VLLMAIService(settingsService);
+  }
+
   return new OpenAIService(settingsService);
 }
 
 export function getTokenCounter(
-  settingsService: SettingsService
+  settingsService: SettingsService,
 ): TokenCounter {
   const aiType = settingsService.get(SettingsEnum.AI_API_TYPE);
 
@@ -49,7 +59,7 @@ export function getTokenCounter(
 }
 
 export function getModelSettings(
-  settingsService: SettingsService
+  settingsService: SettingsService,
 ): ModelSettings {
   const aiType = settingsService.get(SettingsEnum.AI_API_TYPE);
 
@@ -62,6 +72,14 @@ export function getModelSettings(
 
   if (aiType === ApiType.SentientSimsAI) {
     model = settingsService.get(SettingsEnum.SENTIENTSIMSAI_MODEL);
+  }
+
+  if (aiType === ApiType.Gemini) {
+    model = settingsService.get(SettingsEnum.GEMINI_MODEL);
+  }
+
+  if (aiType === ApiType.VLLM) {
+    model = settingsService.get(SettingsEnum.VLLM_MODEL);
   }
 
   if (stringType(model) && model in AllModelSettings) {

@@ -56,6 +56,13 @@ To verify changes are linted correctly, run:
 npm run lint
 ```
 
+## Compiling Typescript
+
+To verify changes are compiled correctly with typescript, run:
+```bash
+npm run compile
+```
+
 ## Testing
 
 There are integration and unit tests that can be ran locally to verify changes.

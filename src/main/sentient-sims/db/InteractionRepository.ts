@@ -5,10 +5,10 @@ import {
   interactionDescriptions,
 } from '../descriptions/interactionDescriptions';
 import { IgnoredInteractionsResponse } from '../models/IgnoredInteractionsResponse';
-import { SettingsEnum } from '../models/SettingsEnum';
 import { SettingsService } from '../services/SettingsService';
 import { BasicInteraction } from './dto/InteractionDTO';
-import { fetchWithRetries } from '../util/fetchWithRetries';
+import { axiosClient } from '../clients/AxiosClient';
+import { SettingsEnum } from '../models/SettingsEnum';
 
 export class InteractionRepository {
   private settingsService: SettingsService;
@@ -20,47 +20,47 @@ export class InteractionRepository {
   }
 
   async fetchInteractions(): Promise<Map<string, BasicInteraction>> {
-    const url = `${this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_ENDPOINT
-    )}/interactions`;
-    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
-    log.debug(`url: ${url}, auth: ${authHeader}`);
-    const response = await fetchWithRetries(url, {
+    const response = await axiosClient({
+      url: '/interactions',
+      baseURL: `${this.settingsService.get(
+        SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
+      )}`,
       headers: {
-        'Content-Type': 'application/json',
-        Authentication: authHeader,
+        Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
     });
 
-    return response.json();
+    return response.data;
   }
 
   async getInteractions(): Promise<Map<string, BasicInteraction>> {
     if (!this.interactions) {
-      this.interactions = new Map(
-        Object.entries(await this.fetchInteractions())
-      );
+      try {
+        this.interactions = new Map(
+          Object.entries(await this.fetchInteractions()),
+        );
+      } catch (err) {
+        log.error(`Unable to fetch interactions from Sentient Sims API`, err);
+      }
     }
 
     return new Map<string, BasicInteraction>();
   }
 
   async setInteraction(interaction: BasicInteraction) {
-    const url = `${this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_ENDPOINT
-    )}/interactions`;
-    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
-    log.debug(`url: ${url}, auth: ${authHeader}`);
-    const response = await fetchWithRetries(url, {
+    const response = await axiosClient({
+      url: '/interactions',
       method: 'POST',
+      data: interaction,
+      baseURL: `${this.settingsService.get(
+        SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
+      )}`,
       headers: {
-        'Content-Type': 'application/json',
-        Authentication: authHeader,
+        Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
-      body: JSON.stringify(interaction),
     });
 
-    const result = await response.json();
+    const result = response.data;
 
     this.interactions = new Map(Object.entries(result));
 
@@ -68,7 +68,7 @@ export class InteractionRepository {
   }
 
   async getInteraction(
-    interactionName: string
+    interactionName: string,
   ): Promise<InteractionDescription | undefined> {
     if (!this.interactions) {
       this.interactions = new Map(Object.entries(await this.getInteractions()));

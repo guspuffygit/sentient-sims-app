@@ -10,6 +10,7 @@ import { DatabaseSession } from '../models/DatabaseSession';
 import { DeleteMemoryRequest } from '../models/GetMemoryRequest';
 import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
+import { CaughtError } from '../models/CaughtError';
 
 function notifyAllWindows(message: string, ...args: any[]) {
   electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
@@ -26,6 +27,10 @@ export function notifySettingChanged(setting: any, value: any) {
 export function notifyNewMemoryAdded(memory: MemoryEntity) {
   log.debug('Sending new memory added to renderer');
   notifyAllWindows('on-new-memory-added', memory);
+  sendModNotification({
+    type: ModWebsocketMessageType.MEMORY_CREATED,
+    memory,
+  });
 }
 
 export function notifyMemoryDeleted(deleteMemoryRequest: DeleteMemoryRequest) {
@@ -56,16 +61,25 @@ export function sendChatGeneration(response: InteractionEventResult) {
   notifyAllWindows('on-chat-generation', response);
 }
 
+export function playTTS(text: string) {
+  log.debug('Sending on-voice');
+  notifyAllWindows('on-voice', text);
+}
+
 export function sendPopUpNotification(message?: string) {
   if (message) {
     notifyAllWindows('popup-notification', message);
   }
 }
 
+export function sendPopUpCaughtErrorNotification(caughtError: CaughtError) {
+  notifyAllWindows('caught-error-popup-notification', caughtError);
+}
+
 export function notifyMapAnimation(event: WWInteractionEvent) {
   log.debug(
     'Notifying renderer to begin mapping animation',
-    JSON.stringify(event, null, 2)
+    JSON.stringify(event, null, 2),
   );
   notifyAllWindows('on-map-animation', event);
 }
@@ -88,7 +102,7 @@ export function notifyDatabaseLoaded(databaseSession: DatabaseSession) {
 export function notifyMapInteraction(event: InteractionMappingEvent) {
   log.debug(
     'Notifying renderer to begin mapping interaction',
-    JSON.stringify(event, null, 2)
+    JSON.stringify(event, null, 2),
   );
   notifyAllWindows('on-map-interaction', event);
 }

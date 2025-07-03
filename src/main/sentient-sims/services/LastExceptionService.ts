@@ -7,6 +7,7 @@ import { DirectoryService } from './DirectoryService';
 export type LastExceptionFile = {
   filename: string;
   text: string;
+  created: Date;
 };
 
 export class LastExceptionService {
@@ -20,7 +21,7 @@ export class LastExceptionService {
     const files = ['lastException', 'lastCleanException', 'lastUIException'];
     return this.directoryService.findFilesWithKeywords(
       this.directoryService.getSims4Folder(),
-      files
+      files,
     );
   }
 
@@ -38,12 +39,16 @@ export class LastExceptionService {
           lastExceptionString = `${stackTrace}`.replace(/\r\n/g, '\n');
         });
       } catch (parseError: any) {
-        const message = 'Error parsing lastException file';
+        const message = `Error parsing lastException file: ${filename}`;
         log.error(message, parseError);
       }
+
+      const stats = fs.statSync(lastExceptionFile);
+
       files.push({
         filename,
         text: lastExceptionString,
+        created: stats.ctime,
       });
     });
 
@@ -56,7 +61,7 @@ export class LastExceptionService {
     const files = this.getLastExceptionFiles();
     files.forEach((lastExceptionFile) => {
       log.info(
-        `Removing last exception file: ${path.basename(lastExceptionFile)}`
+        `Removing last exception file: ${path.basename(lastExceptionFile)}`,
       );
       fs.rmSync(lastExceptionFile);
     });

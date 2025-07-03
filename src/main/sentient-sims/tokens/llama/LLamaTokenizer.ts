@@ -153,7 +153,7 @@ function decompressMerges(binaryMerges: string) {
 
 function decodeVocabulary(base64Vocab: string) {
   const byteArray = Uint8Array.from(base64decode(base64Vocab), (c) =>
-    c.charCodeAt(0)
+    c.charCodeAt(0),
   );
   const textDecoder = new TextDecoder('utf-8');
   return textDecoder.decode(byteArray).split('\n');
@@ -172,7 +172,7 @@ function hexToUtf8Byte(hex: string) {
 function mapCharactersToTokenIds(
   prompt: string,
   addBosToken: boolean,
-  addPrecedingSpace: boolean
+  addPrecedingSpace: boolean,
 ) {
   const tokenIds = [];
   // Special "beginning of string" token.
@@ -202,8 +202,8 @@ function mapCharactersToTokenIds(
           // but if this happens regardless, let's follow the protocol and tokenize to <UNK> token instead of crashing.
           log.error(
             `Encountered unknown character ${character} (partial UTF-8 byte ${byte} + hex + ${utf8ByteToHex(
-              byte
-            )})`
+              byte,
+            )})`,
           );
           tokenIds[tokenIds.length - 1] = 0;
         }
@@ -228,7 +228,7 @@ function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
   const tokenIds = mapCharactersToTokenIds(
     prompt,
     addBosToken,
-    addPrecedingSpace
+    addPrecedingSpace,
   );
 
   // Set up priority queue to efficiently iterate merge possibilities in priority order
@@ -247,7 +247,7 @@ function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
   }) {
     const mergeIdentifierString = getMergeIdentifierString(
       leftNode.tokenId,
-      leftNode.next.tokenId
+      leftNode.next.tokenId,
     );
     // Merge priority is primarily determined by the location of the merge in the "merges" data,
     // secondarily determined by the relative position of the node in the linked list
@@ -353,7 +353,7 @@ function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
 function decode(
   tokenIds: readonly number[],
   addBosToken = true,
-  addPrecedingSpace = true
+  addPrecedingSpace = true,
 ) {
   const utf8byteVals: number[] = [];
   const startIndex = addBosToken ? 1 : 0;

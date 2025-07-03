@@ -1,6 +1,6 @@
 import { AmplifyUser } from '@aws-amplify/ui';
 
-export default class PatreonUser {
+export class PatreonUser {
   private readonly user?: AmplifyUser;
 
   constructor(user?: AmplifyUser) {

@@ -4,9 +4,11 @@ import {
   IconButton,
   Modal,
   TextField,
+  Tooltip,
   Typography,
   styled,
 } from '@mui/material';
+import { v4 as uuidv4 } from 'uuid';
 import AppCard from 'renderer/AppCard';
 import EditIcon from '@mui/icons-material/Edit';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -37,7 +39,7 @@ function LeaderboardRow({
   const what = `#${index + 1} ${name}`;
 
   return (
-    <SpaceBetweenDiv>
+    <SpaceBetweenDiv key={uuidv4()}>
       <div>
         {isMe ? (
           <HighlightedTypography>{what}</HighlightedTypography>
@@ -82,14 +84,15 @@ export function MappingLeaderboardComponent() {
             name={userAnimationInfo.displayName}
             count={userAnimationInfo.mappedCount}
             index={i}
-          />
+            key={uuidv4()}
+          />,
         );
       }
     }
   }
 
   function handleInputChange(
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
     setUsername(event.target.value);
   }
@@ -137,14 +140,24 @@ export function MappingLeaderboardComponent() {
               <Typography sx={{ marginRight: 1 }}>
                 {me?.data?.displayName ?? 'Anonymous'}
               </Typography>
-              <IconButton size="small" onClick={() => handleOpen()}>
-                <EditIcon />
-              </IconButton>
-              {me?.data?.displayName ? (
-                <IconButton size="small" onClick={() => deleteDisplayName()}>
-                  <ClearIcon />
+              <Tooltip
+                title="Edit your username on the leaderboard"
+                placement="top"
+              >
+                <IconButton size="small" onClick={() => handleOpen()}>
+                  <EditIcon />
                 </IconButton>
-              ) : null}
+              </Tooltip>
+              {me?.data?.displayName && (
+                <Tooltip
+                  title="Delete your username on the leaderboard"
+                  placement="top"
+                >
+                  <IconButton size="small" onClick={() => deleteDisplayName()}>
+                    <ClearIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
             </Box>
           </div>
           <Box

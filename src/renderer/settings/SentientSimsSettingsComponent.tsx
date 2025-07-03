@@ -8,8 +8,8 @@ import {
   sentientSimsAIDefaultModel,
   sentientSimsAIHost,
 } from 'main/sentient-sims/constants';
+import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import AIModelSelection from '../AIModelSelection';
-import PatreonUser from '../wrappers/PatreonUser';
 import { AIEndpointComponent } from './AIEndpointComponent';
 
 type SentientSimsSettingsComponentProps = {
@@ -35,14 +35,14 @@ export function SentientSimsSettingsComponent({
     errors.push(
       <FormHelperText sx={{ marginBottom: 2 }} error>
         You must be logged in to use the Sentient Sims AI API
-      </FormHelperText>
+      </FormHelperText>,
     );
   }
   if (showMemberError) {
     errors.push(
       <FormHelperText sx={{ marginBottom: 2 }} error>
         You must be a Founder or Patron to use the Sentient Sims Uncensored AI
-      </FormHelperText>
+      </FormHelperText>,
     );
   }
 

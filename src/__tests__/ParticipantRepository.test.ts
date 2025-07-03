@@ -64,7 +64,7 @@ describe('ParticipantRepository', () => {
         { id: noDescription.id, fullName: 'some name' },
       ]);
     expect(descriptionChangedResult[0].description).toEqual(
-      noDescription.description
+      noDescription.description,
     );
 
     const defaultSimDescription = await participantRepository.getParticipant({
@@ -82,8 +82,8 @@ describe('ParticipantRepository', () => {
     const allParticipants = participantRepository.getAllParticipants();
     expect(
       allParticipants.some(
-        (item) => item.id === '187263' && item.name === 'Travis Scott'
-      )
+        (item) => item.id === '187263' && item.name === 'Travis Scott',
+      ),
     ).toBeTruthy();
 
     expect(noDefaultSimDescription.description).toBeUndefined();

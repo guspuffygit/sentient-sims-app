@@ -66,12 +66,12 @@ describe('LocationRepository', () => {
 
     const allLocations = locationRepository.getAllLocations();
     expect(
-      allLocations.some((item) => item.id === expectedResult.id)
+      allLocations.some((item) => item.id === expectedResult.id),
     ).toBeTruthy();
 
     const modifiedLocations = locationRepository.getModifiedLocations();
     expect(
-      modifiedLocations.some((item) => item.id === expectedResult.id)
+      modifiedLocations.some((item) => item.id === expectedResult.id),
     ).toBeTruthy();
 
     const defaultLocations = locationRepository.getDefaultLocations();
@@ -79,8 +79,8 @@ describe('LocationRepository', () => {
       defaultLocations.some(
         (item) =>
           item.id === expectedResult.id &&
-          item.description === expectedResult.description
-      )
+          item.description === expectedResult.description,
+      ),
     ).toBeFalsy();
 
     locationRepository.deleteLocation({ id: locationId });

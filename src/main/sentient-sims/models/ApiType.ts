@@ -1,9 +1,13 @@
 export enum ApiType {
   OpenAI = 'openai',
+  VLLM = 'vllm',
   SentientSimsAI = 'sentientsimsai',
   CustomAI = 'customai',
   NovelAI = 'novelai',
   KoboldAI = 'koboldai',
+  Gemini = 'gemini',
+  Kokoro = 'kokoro',
+  ElevenLabs = 'elevenlabs',
 }
 
 export function ApiTypeFromValue(value: any): ApiType {
@@ -16,6 +20,14 @@ export function ApiTypeFromValue(value: any): ApiType {
       return ApiType.KoboldAI;
     case ApiType.NovelAI:
       return ApiType.NovelAI;
+    case ApiType.Gemini:
+      return ApiType.Gemini;
+    case ApiType.Kokoro:
+      return ApiType.Kokoro;
+    case ApiType.ElevenLabs:
+      return ApiType.ElevenLabs;
+    case ApiType.VLLM:
+      return ApiType.VLLM;
     default:
       return ApiType.OpenAI;
   }
@@ -31,6 +43,14 @@ export function ApiTypeName(apiType: ApiType): string {
       return 'Novel AI';
     case ApiType.OpenAI:
       return 'OpenAI';
+    case ApiType.VLLM:
+      return 'VLLM';
+    case ApiType.Gemini:
+      return 'Gemini';
+    case ApiType.Kokoro:
+      return 'Kokoro';
+    case ApiType.ElevenLabs:
+      return 'ElevenLabs';
     default:
       return 'AI';
   }

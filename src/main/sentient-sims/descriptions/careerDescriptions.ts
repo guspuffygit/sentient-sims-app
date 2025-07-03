@@ -1828,7 +1828,7 @@ export const careerDescriptions: CareerDescriptions = {
 };
 
 export function getCareerTrackLevel(
-  sentientSimCareer: SentientSimCareer
+  sentientSimCareer: SentientSimCareer,
 ): CareerTrackLevel | undefined {
   if (careerDescriptions[sentientSimCareer.name]) {
     const careerTrack = careerDescriptions[sentientSimCareer.name];

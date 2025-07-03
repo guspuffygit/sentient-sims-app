@@ -16,13 +16,12 @@ export class InteractionService {
   }
 
   async getInteractionDescription(
-    interactionName: string
+    interactionName: string,
   ): Promise<InteractionDescription | undefined> {
     let description = interactionDescriptions.get(interactionName);
     if (!description) {
-      description = await this.interactionRepository.getInteraction(
-        interactionName
-      );
+      description =
+        await this.interactionRepository.getInteraction(interactionName);
     }
 
     return description;
@@ -38,8 +37,8 @@ export class InteractionService {
       `Updated unmapped interaction: ${JSON.stringify(
         basicInteration,
         null,
-        2
-      )}`
+        2,
+      )}`,
     );
     await this.interactionRepository.setInteraction(basicInteration);
     notifyUnmappedInteractionChanged();

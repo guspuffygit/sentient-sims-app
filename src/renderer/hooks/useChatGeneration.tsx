@@ -47,6 +47,7 @@ function defaultMessages(systemPrompt: string): MessageInputProps[] {
 
 export interface ChatGeneration {
   messages: MessageInputProps[];
+  input?: string | null;
   loading: boolean;
   generateChat: () => Promise<void>;
   countTokens: () => void;
@@ -56,6 +57,7 @@ export interface ChatGeneration {
   addNewMessage: (role: ChatCompletionMessageRole) => void;
   generateMultipleChat: (count: number) => Promise<string[]>;
   handleGenerationLoaded: Dispatch<SetStateAction<() => void>>;
+  maxResponseTokensState: [number, Dispatch<SetStateAction<number>>];
 }
 
 export default function useChatGeneration(): ChatGeneration {
@@ -65,8 +67,10 @@ export default function useChatGeneration(): ChatGeneration {
     () => void
   >(() => {});
   const [messages, setMessages] = useState<MessageInputProps[]>(
-    defaultMessages(defaultSystemPrompt)
+    defaultMessages(defaultSystemPrompt),
   );
+  const [input, setInput] = useState<string | undefined | null>();
+  const maxResponseTokensState = useState(90);
 
   const resetMessages = useCallback(() => {
     if (apiType.value === ApiType.OpenAI) {
@@ -98,9 +102,8 @@ export default function useChatGeneration(): ChatGeneration {
               updatedMessages[updatedMessages.length - 1].message.role ===
               'assistant'
             ) {
-              updatedMessages[
-                updatedMessages.length - 1
-              ].message.content += ` ${result.text}`;
+              updatedMessages[updatedMessages.length - 1].message.content +=
+                ` ${result.text}`;
             } else {
               updatedMessages.push({
                 id: generateUUID(),
@@ -114,9 +117,16 @@ export default function useChatGeneration(): ChatGeneration {
           }
 
           setMessages(updatedMessages);
+          if (result.input) {
+            try {
+              setInput(JSON.stringify(result.input, null, 2));
+            } catch (e: any) {
+              log.error(`Unable to stringify input`, e);
+            }
+          }
           generationLoadedCallback();
         }
-      }
+      },
     );
     return () => {
       removeListener();
@@ -143,9 +153,9 @@ export default function useChatGeneration(): ChatGeneration {
     });
     return {
       messages: requestMessages,
-      maxResponseTokens: 90,
+      maxResponseTokens: maxResponseTokensState[0],
     };
-  }, [messages]);
+  }, [maxResponseTokensState, messages]);
 
   const countTokens = () => {
     // TODO: Reimplement this
@@ -175,7 +185,7 @@ export default function useChatGeneration(): ChatGeneration {
       };
       setMessages(updatedMessages);
     },
-    [messages]
+    [messages],
   );
 
   const deleteMessage = (index: number) => {
@@ -216,6 +226,7 @@ export default function useChatGeneration(): ChatGeneration {
   };
 
   return {
+    input,
     messages,
     loading,
     generateChat,
@@ -226,5 +237,6 @@ export default function useChatGeneration(): ChatGeneration {
     countTokens,
     generateMultipleChat,
     handleGenerationLoaded: setGenerationLoadedCallback,
+    maxResponseTokensState,
   };
 }

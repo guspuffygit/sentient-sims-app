@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom';
 import { getNightlyAccess } from 'main/sentient-sims/util/nightlyAccess';
-import PatreonUser from 'renderer/wrappers/PatreonUser';
+import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 
-jest.mock('renderer/wrappers/PatreonUser');
+jest.mock('main/sentient-sims/wrappers/PatreonUser');
 describe('Patreon', () => {
   beforeEach(() => {
     // Clear all instances and calls to the mock constructor and methods:
@@ -16,7 +16,7 @@ describe('Patreon', () => {
     };
 
     const { disableNightly, nightlyText } = getNightlyAccess(
-      mockPatreonUserInstance as any
+      mockPatreonUserInstance as any,
     );
     expect(disableNightly).toEqual(false);
     expect(nightlyText).toEqual('Founder Early Access');
@@ -29,7 +29,7 @@ describe('Patreon', () => {
     };
 
     const { disableNightly, nightlyText } = getNightlyAccess(
-      mockPatreonUserInstance as any
+      mockPatreonUserInstance as any,
     );
     expect(disableNightly).toEqual(false);
     expect(nightlyText).toEqual('Patreon Early Access');
@@ -42,7 +42,7 @@ describe('Patreon', () => {
     };
 
     const { disableNightly, nightlyText } = getNightlyAccess(
-      mockPatreonUserInstance as any
+      mockPatreonUserInstance as any,
     );
     expect(disableNightly).toEqual(true);
     expect(nightlyText).toEqual('Patreon Early Access');

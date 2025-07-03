@@ -55,12 +55,14 @@ describe('Output', () => {
             age: SimAge.ADULT,
             sim_id: '772948625141858300',
             gender: 'Male',
-            likes: ['Activities_RocketScience', 'Activities_Fitness'],
-            dislikes: [],
-            aspirations: ['Muser'],
+            traits: [
+              'trait_SimPreference_Likes_Activities_RocketScience',
+              'trait_SimPreference_Likes_Activities_Fitness',
+              'trait_Evil',
+              'trait_Glutton',
+              'trait_CommitmentIssues',
+            ],
             moods: ['Mood_Flirty'],
-            motives: [],
-            personality_traits: ['Evil', 'Glutton', 'CommitmentIssues'],
             is_ghost: false,
             grubby: false,
             in_pool: false,
@@ -89,12 +91,15 @@ describe('Output', () => {
             age: SimAge.ADULT,
             sim_id: '772949305175180300',
             gender: 'Male',
-            likes: ['Color_Green'],
-            dislikes: ['Music_Pop', 'Activities_VideoGaming'],
-            aspirations: ['HomeTurf'],
+            traits: [
+              'trait_SimPreference_Likes_Color_Green',
+              'trait_SimPreference_Dislikes_Music_Pop',
+              'trait_SimPreference_Dislikes_Activities_VideoGaming',
+              'trait_Ambitious',
+              'trait_Romantic',
+              'trait_Outgoing',
+            ],
             moods: ['Mood_Flirty'],
-            motives: [],
-            personality_traits: ['Ambitious', 'Romantic', 'Outgoing'],
             is_ghost: false,
             grubby: false,
             in_pool: false,
@@ -113,6 +118,9 @@ describe('Output', () => {
         ],
         event_id: '2daaac8e-bd86-4afe-a9f8-60cf3132e057',
         event_type: SSEventType.INTERACTION,
+        relationships: {
+          relationship_bits: [],
+        },
         environment: {
           location_id: 2891968416,
           world_id: 0,
@@ -140,10 +148,10 @@ describe('Output', () => {
       const repositoryService = new RepositoryService(
         new LocationRepository(dbService),
         new MemoryRepository(dbService),
-        new ParticipantRepository(dbService)
+        new ParticipantRepository(dbService),
       );
       const promptRequestBuilderService = new PromptRequestBuilderService(
-        repositoryService
+        repositoryService,
       );
 
       const result = await promptRequestBuilderService.buildPromptRequest(
@@ -159,13 +167,13 @@ describe('Output', () => {
             repetition_penalty: undefined,
             max_tokens: 5000,
           },
-        }
+        },
       );
 
       console.log(JSON.stringify(result, null, 2));
 
       expect(result?.action).toEqual(
-        'Ricky Rickerson and Richy Richardson are having a friendly conversation, sharing fishing tips.'
+        'Ricky Rickerson and Richy Richardson are having a friendly conversation, sharing fishing tips.',
       );
 
       // System prompt should contain sim names for an interaction
@@ -189,7 +197,7 @@ describe('Output', () => {
 
     it('three items', () => {
       expect(formatListToString(['hello', 'hi', 'how'])).toEqual(
-        'hello, hi, and how'
+        'hello, hi, and how',
       );
     });
   });
@@ -204,12 +212,8 @@ describe('Output', () => {
         age: SimAge.ADULT,
         sim_id: '',
         gender: '',
-        likes: [],
-        dislikes: [],
-        aspirations: [],
         moods: [],
-        motives: [],
-        personality_traits: [],
+        traits: [],
         is_ghost: false,
         grubby: false,
         in_pool: false,
@@ -241,7 +245,7 @@ describe('Output', () => {
       sentientSim.upper_body = BodyState.NUDE;
       sentientSim.lower_body = BodyState.NUDE;
       expect(formatWWProperties(sentientSim)).toEqual(
-        `${sentientSim.name} is completely naked.`
+        `${sentientSim.name} is completely naked.`,
       );
     });
   });
@@ -253,6 +257,7 @@ describe('Output', () => {
       request = {
         location: 'location',
         participants: 'sim 1',
+        season: 'Eternal Summer',
         systemPrompt: 'system',
         memories: [
           {
@@ -287,7 +292,7 @@ describe('Output', () => {
       expect(result.messages[0].content).toContain('sim 1');
       expect(result.messages[0].content).toContain('system');
       expect(result.messages[0].content).toContain(
-        'The day is Monday at 7:51 AM.'
+        'The day is Monday at 7:51 AM.',
       );
       expect(result.messages[0].role).toBe('system');
       expect(result.messages[0].tokens).toBeGreaterThan(5);
@@ -326,7 +331,7 @@ describe('Output', () => {
       expect(result.messages[0].role).toBe('system');
       expect(result.messages[0].tokens).toBeGreaterThan(5);
       console.log(
-        `THIS IS IT SEARCH FOR THIS: ${JSON.stringify(result, null, 2)}`
+        `THIS IS IT SEARCH FOR THIS: ${JSON.stringify(result, null, 2)}`,
       );
       expect(result.messages[1].content).toBe('A');
       expect(result.messages[1].role).toBe('assistant');

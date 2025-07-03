@@ -37,6 +37,10 @@ import { RepositoryService } from './services/RepositoryService';
 import { PromptRequestBuilderService } from './services/PromptRequestBuilderService';
 import { InteractionDescriptionController } from './controllers/InteractionDescriptionController';
 import { InteractionRepository } from './db/InteractionRepository';
+import { MappingController } from './controllers/MappingController';
+import { MappingService } from './services/MappingService';
+import { VoiceController } from './controllers/VoiceController';
+import { WebsocketController } from './controllers/WebsocketController';
 import { ScreenshotService } from './services/ScreenshotService';
 
 export type ApiOptions = {
@@ -68,14 +72,14 @@ export function runApi({
   const repositoryService = new RepositoryService(
     locationRepository,
     memoryRepository,
-    participantRepository
+    participantRepository,
   );
   const promptBuilderService = new PromptRequestBuilderService(
-    repositoryService
+    repositoryService,
   );
   const memoriesController = new MemoriesController(memoryRepository);
   const participantsController = new ParticipantsController(
-    participantRepository
+    participantRepository,
   );
   const locationsController = new LocationsController(locationRepository);
   const updateController = new UpdateController(updateService);
@@ -84,35 +88,37 @@ export function runApi({
     settingsService,
     directoryService,
     lastExceptionService,
-    versionService
+    versionService,
   );
   const patreonService = new PatreonService(settingsService);
   const patreonController = new PatreonController(patreonService);
   const animationsService = new AnimationsService(settingsService);
   const interactionRepository = new InteractionRepository(settingsService);
   const interactionDescriptionService = new InteractionService(
-    interactionRepository
+    interactionRepository,
   );
   const debugController = new DebugController(settingsService, logSendService);
   const aiService = new AIService(
     settingsService,
     promptBuilderService,
     animationsService,
-    interactionDescriptionService
+    interactionDescriptionService,
   );
   const interactionDescriptionController = new InteractionDescriptionController(
-    interactionDescriptionService
+    interactionDescriptionService,
   );
-  const aiController = new AIController(aiService);
+  const voiceController = new VoiceController();
+  const aiController = new AIController(aiService, dbService);
   const animationsController = new AnimationsController(animationsService);
   const assetsController = new AssetsController(getAssetPath);
+  const mappingController = new MappingController(new MappingService());
   const expressApp = express();
   expressApp.use(express.json({ limit: 52428800 }));
 
   expressApp.get('/debug/health', DebugController.appHealthCheck);
   expressApp.get(
     '/debug/test-ai',
-    debugController.healthCheckGenerationService
+    debugController.healthCheckGenerationService,
   );
   expressApp.post('/debug/send-logs', debugController.sendDebugLogs);
   expressApp.post('/debug/interaction', debugController.sendBugReport);
@@ -122,28 +128,34 @@ export function runApi({
   expressApp.post('/ai/v2/event/interaction', aiController.interactionEvent);
   expressApp.post(
     '/ai/v2/event/classification',
-    aiController.classificationEvent
+    aiController.classificationEvent,
   );
-  expressApp.post('/ai/v2/event/buff', aiController.buffEvent);
+  expressApp.post(
+    '/ai/v2/event/classification',
+    aiController.classificationEvent,
+  );
+  expressApp.post('/ai/v2/event/buff', aiController.buffDescription);
+  expressApp.post('/ai/v3/event/buff', aiController.buffEvent);
   expressApp.get('/ai/v2/models', aiController.getModels);
+  expressApp.get('/ai/v2/tts', aiController.tts);
 
   expressApp.get('/files/screenshots', fileController.listRecentScreenshots);
   expressApp.get('/files/screenshots/:filename', fileController.getScreenshot);
   expressApp.get('/files/last-exception', fileController.getLastExceptionFiles);
   expressApp.delete(
     '/files/last-exception',
-    fileController.deleteLastExceptionFiles
+    fileController.deleteLastExceptionFiles,
   );
   expressApp.get('/files/:filename', assetsController.getAssetsFile);
 
   expressApp.get('/settings/app/:appSetting', settingsController.getSetting);
   expressApp.post(
     '/settings/app/:appSetting',
-    settingsController.updateSetting
+    settingsController.updateSetting,
   );
   expressApp.get(
     '/settings/app/:appSetting/reset',
-    settingsController.resetSetting
+    settingsController.resetSetting,
   );
 
   expressApp.get('/versions/mod', versionController.getModVersion);
@@ -155,28 +167,28 @@ export function runApi({
   expressApp.get('/participants', participantsController.getAllParticipants);
   expressApp.get(
     '/participants/:participantId',
-    participantsController.getParticipant
+    participantsController.getParticipant,
   );
   expressApp.post(
     '/participants/:participantId',
-    participantsController.updateParticipant
+    participantsController.updateParticipant,
   );
   expressApp.delete(
     '/participants/:participantId',
-    participantsController.deleteParticipant
+    participantsController.deleteParticipant,
   );
 
   expressApp.get('/locations', locationsController.getAllLocations);
   expressApp.get('/locations/default', locationsController.getDefaultLocations);
   expressApp.get(
     '/locations/modified',
-    locationsController.getModifiedLocations
+    locationsController.getModifiedLocations,
   );
   expressApp.get('/locations/:locationId', locationsController.getLocation);
   expressApp.post('/locations', locationsController.updateLocation);
   expressApp.delete(
     '/locations/:locationId',
-    locationsController.deleteLocation
+    locationsController.deleteLocation,
   );
 
   expressApp.get('/memories/:memoryId', memoriesController.getMemory);
@@ -194,21 +206,32 @@ export function runApi({
   expressApp.post('/db/load', dbController.loadDatabase);
   expressApp.post('/db/save', dbController.saveDatabase);
   expressApp.get('/db/unload', dbController.unloadDatabase);
+  expressApp.get('/db/list', dbController.getSaveGames);
 
   expressApp.get('/animations', animationsController.getAnimations);
   expressApp.get(
     '/animations/nsfw-enabled',
-    animationsController.isNsfwEnabled
+    animationsController.isNsfwEnabled,
   );
   expressApp.post('/animations', animationsController.setAnimation);
 
   expressApp.get(
     '/interactions/ignored',
-    interactionDescriptionController.getIgnoredInteractions
+    interactionDescriptionController.getIgnoredInteractions,
   );
+  expressApp.get('/traits', mappingController.getTraits);
+  expressApp.get('/traits/unmapped', mappingController.getUnmappedTraits);
+  expressApp.post('/traits/export', mappingController.exportTraits);
+  expressApp.get('/moods', mappingController.getMoods);
+  expressApp.get('/moods/unmapped', mappingController.getUnmappedMoods);
   expressApp.post(
     '/interactions',
-    interactionDescriptionController.updateInteraction
+    interactionDescriptionController.updateInteraction,
+  );
+  expressApp.get('/voice/phonemize', voiceController.phonemize);
+  expressApp.get(
+    '/websocket/isconnected',
+    new WebsocketController().isConnected,
   );
 
   return expressApp.listen(port, () => {
@@ -218,7 +241,7 @@ export function runApi({
 
 export function runWebSocketServer(
   settingsService: SettingsService,
-  directoryService: DirectoryService
+  directoryService: DirectoryService,
 ) {
   const logsService = new LogsService(directoryService);
   return startWebSocketServer(logsService, settingsService);

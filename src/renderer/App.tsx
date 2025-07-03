@@ -8,6 +8,7 @@ import WidgetWithOverlay from './WidgetWithOverlay';
 import PopupNotificationModal from './PopupNotification';
 import { AnimationMappingComponent } from './components/AnimationMappingComponent';
 import { InteractionMappingComponent } from './components/InteractionMappingComponent';
+import { CaughtErrorPopupNotificationModal } from './CaughtErrorPopupNotificationModal';
 
 export default function App() {
   const [hideSideBar, setHideSideBar] = useState(false);
@@ -28,6 +29,7 @@ export default function App() {
         )}
       </Grid>
       <PopupNotificationModal />
+      <CaughtErrorPopupNotificationModal />
       <AnimationMappingComponent />
       <InteractionMappingComponent />
     </Container>

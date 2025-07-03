@@ -18,7 +18,7 @@ export function truncateMessages(
   truncateLength: number,
   breakStringTokens: number[],
   messagesTokens: number[],
-  messages: OpenAIMessage[]
+  messages: OpenAIMessage[],
 ): OpenAIMessage[] {
   if (truncateLength > messagesTokens.length) {
     return messages;
@@ -39,7 +39,7 @@ export function truncateMessages(
       if (
         arraysAreEqual(
           messagesTokens.slice(i, i + breakStringTokensLength),
-          breakStringTokens
+          breakStringTokens,
         )
       ) {
         if (systemPromptUsed && systemPromptLength === 0) {
@@ -52,7 +52,7 @@ export function truncateMessages(
             log.debug(
               `Eliminated tokens from prompt: ${messagesTokensLength} - ${eliminatedTokens} = ${
                 messagesTokensLength - eliminatedTokens
-              } < ${truncateLength}`
+              } < ${truncateLength}`,
             );
             break;
           }

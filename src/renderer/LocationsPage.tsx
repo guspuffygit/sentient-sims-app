@@ -21,6 +21,7 @@ import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
 import { useOnDatabaseLoaded } from './hooks/useOnDatabaseLoaded';
+import { useWebsocket } from './providers/WebsocketProvider';
 import { useAIVision } from './components/AIVisionModal';
 
 type SelectedLocation = {
@@ -45,6 +46,7 @@ export default function LocationsPage() {
   const [editedLocation, setEditedLocation] = useState<
     SelectedLocation | null | undefined
   >();
+  const { status } = useWebsocket();
   const [screenshots, setScreenshots] = useState<string[]>([]);
   const aiVision = useAIVision();
 
@@ -128,7 +130,7 @@ export default function LocationsPage() {
         });
       }
     },
-    [locations]
+    [locations],
   );
 
   async function handleSave() {
@@ -191,7 +193,7 @@ export default function LocationsPage() {
         },
       }));
     },
-    []
+    [],
   );
 
   const handleLotTypeEdit = useCallback(
@@ -206,7 +208,7 @@ export default function LocationsPage() {
         },
       }));
     },
-    []
+    [],
   );
 
   const handleDescriptionEdit = useCallback(
@@ -221,7 +223,7 @@ export default function LocationsPage() {
         },
       }));
     },
-    []
+    [],
   );
   if (locations.length > 0) {
     if (editedLocation) {

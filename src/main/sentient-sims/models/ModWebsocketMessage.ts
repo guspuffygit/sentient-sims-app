@@ -6,6 +6,8 @@ export enum ModWebsocketMessageType {
   MIGRATE_SINGLE_SLOT_SAVE = 'migrate_single_slot_save',
   MEMORY_DELETED = 'memory_deleted',
   MEMORY_EDITED = 'memory_edited',
+  MEMORY_CREATED = 'memory_created',
+  ADD_BUFF = 'add_buff',
 }
 
 export type ModWebsocketMessage = {
@@ -33,8 +35,15 @@ export type ModWebsocketNotificationMemoryEdited = ModWebsocketMessage & {
   memory: MemoryEntity;
 };
 
+export type ModAddBuff = ModWebsocketMessage & {
+  sim_id: string;
+  mood: string;
+  buff_description: string;
+};
+
 export type WebsocketNotification =
   | ModWebsocketMessage
   | ModWebsocketNotification
   | ModWebsocketNotificationMemoryEdited
-  | ModWebsocketNotificationMemoryDeleted;
+  | ModWebsocketNotificationMemoryDeleted
+  | ModAddBuff;

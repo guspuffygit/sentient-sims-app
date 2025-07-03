@@ -1,4 +1,5 @@
 import { DatabaseSession } from '../models/DatabaseSession';
+import { SaveGame } from '../models/SaveGame';
 import { ApiClient } from './ApiClient';
 
 export class DbClient extends ApiClient {
@@ -20,5 +21,10 @@ export class DbClient extends ApiClient {
 
   async unloadDatabase() {
     return fetch(`${this.apiUrl}/db/unload`);
+  }
+
+  async getSaveGames(): Promise<SaveGame[]> {
+    const response = await fetch(`${this.apiUrl}/db/list`);
+    return (await response.json()) as SaveGame[];
   }
 }

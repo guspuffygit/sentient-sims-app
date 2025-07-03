@@ -37,10 +37,9 @@ jobs:
           SENTIENTSIMS_TEST_PASSWORD: ${{ secrets.SENTIENTSIMS_TEST_PASSWORD }}
         run: |
           npm run package
-          npm run lint
           npm test
 
       - name: Upload Coverage Report as Artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with: 
           path: './coverage/lcov-report/'

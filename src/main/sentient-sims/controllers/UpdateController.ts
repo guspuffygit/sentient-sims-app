@@ -17,6 +17,10 @@ export class UpdateController {
   async updateMod(req: Request, res: Response) {
     try {
       log.info('Starting update.');
+      // expiration needs to be a Date object and not a string
+      req.body.credentials.expiration = new Date(
+        req.body.credentials.expiration,
+      );
       await this.updateService.updateMod(req.body);
       res.json({ done: 'done' });
     } catch (err: any) {
@@ -26,7 +30,7 @@ export class UpdateController {
           message: err?.message,
         },
       };
-      log.error(`Error updating: ${response}`);
+      log.error(`Error updating:`, err);
       sendPopUpNotification(err?.message);
       res.status(500).json(response);
     }

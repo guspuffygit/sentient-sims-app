@@ -8,7 +8,7 @@ import { ApiClient } from './ApiClient';
 
 export class AIClient extends ApiClient {
   async sentientSimsGenerate(
-    request: OpenAICompatibleRequest
+    request: OpenAICompatibleRequest,
   ): Promise<SimsGenerateResponse> {
     const response = await fetch(`${this.apiUrl}/ai/v2/generate`, {
       method: 'POST',
@@ -19,7 +19,7 @@ export class AIClient extends ApiClient {
   }
 
   async interactionEvent(
-    event: InteractionEvents
+    event: InteractionEvents,
   ): Promise<InteractionEventResult> {
     const response = await fetch(`${this.apiUrl}/ai/v2/event/interaction`, {
       method: 'POST',

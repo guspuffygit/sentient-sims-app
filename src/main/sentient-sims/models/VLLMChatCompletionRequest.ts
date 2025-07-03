@@ -1,9 +1,9 @@
 import {
+  ChatCompletionCreateParams,
   ChatCompletionMessageParam,
-  CompletionCreateParamsNonStreaming,
-} from 'openai/resources/chat/completions';
+} from 'openai/resources/index.js';
 
-export type VLLMChatCompletionRequest = CompletionCreateParamsNonStreaming & {
+export type VLLMChatCompletionRequest = ChatCompletionCreateParams & {
   chat_template?: string;
   chat_template_kwargs?: Map<String, any>;
   guided_choice?: string[];

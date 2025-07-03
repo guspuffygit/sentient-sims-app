@@ -12,10 +12,10 @@ export function randomString() {
 
 export function mockDirectoryService(
   mockPath?: string,
-  settingsService?: SettingsService
+  settingsService?: SettingsService,
 ): DirectoryService {
   const directoryService = new DirectoryService(
-    settingsService ?? new SettingsService()
+    settingsService ?? new SettingsService(),
   );
   const fakePath =
     mockPath ??
@@ -31,14 +31,14 @@ export function mockEnvironment() {
     os.tmpdir(),
     'sentient-sims-app-test',
     randomString(),
-    'electronConfig'
+    'electronConfig',
   );
 
   const mockModsPath = path.join(
     os.tmpdir(),
     'sentient-sims-app-test',
     randomString(),
-    'Mods'
+    'Mods',
   );
 
   const store = defaultStore(mockConfigPath);

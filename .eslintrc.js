@@ -36,4 +36,12 @@ module.exports = {
       '@typescript-eslint/parser': ['.ts', '.tsx'],
     },
   },
+  overrides: [
+    {
+      files: ['.eslintrc.js'],
+      parserOptions: {
+        project: null, // Ensures `.eslintrc.js` is not processed as a TypeScript file
+      },
+    },
+  ],
 };

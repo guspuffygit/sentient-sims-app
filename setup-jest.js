@@ -1,13 +1,6 @@
 import 'core-js/modules/web.immediate';
-// import { TextEncoder, TextDecoder } from 'util';
 import 'whatwg-fetch';
+import log from 'electron-log';
 
-// Object.defineProperty(window, 'TextDecoder', {
-//   writable: true,
-//   value: TextDecoder,
-// });
-
-// Object.defineProperty(window, 'TextEncoder', {
-//   writable: true,
-//   value: TextEncoder,
-// });
+log.transports.file.setAppName('sentient-sims-app');
+// log.initialize({ preload: true });

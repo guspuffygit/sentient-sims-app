@@ -26,6 +26,10 @@ import SimsPage from './SimsPage';
 import { SnackBarProvider } from './providers/SnackBarProvider';
 import { AISettingsProvider } from './providers/AISettingsProvider';
 import { VersionsProvider } from './providers/VersionsProvider';
+import TraitsPage from './TraitsPage';
+import { AudioContextProvider } from './providers/AudioContextProvider';
+import OfflineMemory from './OfflineMemory';
+import { WebsocketProvider } from './providers/WebsocketProvider';
 
 const updatedAwsConfig = {
   ...awsExports,
@@ -47,12 +51,20 @@ const router = createMemoryRouter([
         element: <HomePage />,
       },
       {
+        path: '/traits',
+        element: <TraitsPage />,
+      },
+      {
         path: '/settings',
         element: <SettingsPage />,
       },
       {
         path: '/chat',
         element: <ChatPage />,
+      },
+      {
+        path: '/offlinememory',
+        element: <OfflineMemory />,
       },
       {
         path: '/sims',
@@ -93,18 +105,22 @@ root.render(
       <Authenticator.Provider>
         <QueryClientProvider client={queryClient}>
           <SnackBarProvider>
-            <VersionsProvider>
-              <AISettingsProvider>
-                <ChatGenerationProvider>
-                  <DebugModeProvider>
-                    <RouterProvider router={router} />
-                  </DebugModeProvider>
-                </ChatGenerationProvider>
-              </AISettingsProvider>
-            </VersionsProvider>
+            <WebsocketProvider>
+              <VersionsProvider>
+                <AISettingsProvider>
+                  <AudioContextProvider>
+                    <ChatGenerationProvider>
+                      <DebugModeProvider>
+                        <RouterProvider router={router} />
+                      </DebugModeProvider>
+                    </ChatGenerationProvider>
+                  </AudioContextProvider>
+                </AISettingsProvider>
+              </VersionsProvider>
+            </WebsocketProvider>
           </SnackBarProvider>
         </QueryClientProvider>
       </Authenticator.Provider>
     </React.StrictMode>
-  </ThemeProvider>
+  </ThemeProvider>,
 );

@@ -3,19 +3,24 @@ import {
   formatAction,
   formatSentientSim,
   formatDateTime,
+  formatSeason,
 } from '../formatter/PromptFormatter';
-import { SSEvent } from '../models/InteractionEvents';
+import { SSEvent, SSRelationships } from '../models/InteractionEvents';
 import { RepositoryService } from './RepositoryService';
 import { getSystemPrompt } from '../systemPrompts';
 import { ApiType } from '../models/ApiType';
 import {
   FormattedMemoryMessage,
+  PreFormattedMemoryMessage,
   PromptRequest,
 } from '../models/OpenAIRequestBuilder';
 import { SentientSim } from '../models/SentientSim';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { ChatCompletionMessageRole } from '../models/ChatCompletionMessageRole';
 import { ModelSettings } from '../modelSettings';
+import { defaultRelationshipBitDescriptions } from '../descriptions/relationshipDescriptions';
+import { LocationEntity } from '../db/entities/LocationEntity';
+import { PromptHistoryMode } from '../models/PromptHistoryMode';
 
 export type GenerationOptions = {
   action?: string;
@@ -26,6 +31,7 @@ export type GenerationOptions = {
   sexCategoryType?: number;
   sexLocationType?: number;
   continue?: boolean;
+  promptHistoryMode?: PromptHistoryMode;
 };
 
 const maxGroupSizeLength = 1700;
@@ -42,7 +48,11 @@ export class PromptRequestBuilderService {
     this.repositoryService = repositoryService;
   }
 
-  async formatSims(sentientSims: SentientSim[]): Promise<string[]> {
+  async formatSims(
+    sentientSims: SentientSim[],
+    location: LocationEntity,
+    relationships?: SSRelationships,
+  ): Promise<string[]> {
     const participants =
       await this.repositoryService.participant.getParticipants(
         sentientSims.map((sentientSim) => {
@@ -53,12 +63,15 @@ export class PromptRequestBuilderService {
             log.error(JSON.stringify(sentientSim, null, 2));
             throw err;
           }
-        })
+        }),
       );
 
     const formattedParticipants: string[] = [];
+    const sims = new Map<string, SentientSim>();
 
     sentientSims.forEach((sentientSim) => {
+      sims.set(sentientSim.sim_id, sentientSim);
+
       participants.forEach((participant) => {
         if (participant.id === sentientSim.sim_id && participant.description) {
           sentientSim.description = participant.description;
@@ -68,12 +81,40 @@ export class PromptRequestBuilderService {
       formattedParticipants.push(formatSentientSim(sentientSim));
     });
 
+    const relationshipDescriptions: string[] = [];
+    // TODO: Fix relationship bits from interaction mapping
+    if (relationships && relationships.relationship_bits) {
+      relationships.relationship_bits.forEach((bit) => {
+        if (defaultRelationshipBitDescriptions.has(bit.name)) {
+          const bitDescription = defaultRelationshipBitDescriptions.get(
+            bit.name,
+          );
+          if (!bitDescription?.ignored && bitDescription?.description) {
+            relationshipDescriptions.push(
+              formatAction(
+                bitDescription.description,
+                [
+                  sims.get(bit.sim_one_id) as SentientSim,
+                  sims.get(bit.sim_two_id) as SentientSim,
+                ],
+                location,
+              ),
+            );
+          }
+        }
+      });
+    }
+
+    if (relationshipDescriptions.length > 0) {
+      formattedParticipants.push(relationshipDescriptions.join(' '));
+    }
+
     return formattedParticipants;
   }
 
   getMemories(sentientSims: SentientSim[]) {
     const participantIds = sentientSims.map(
-      (sentientSim) => sentientSim.sim_id
+      (sentientSim) => sentientSim.sim_id,
     );
 
     return this.repositoryService.memory.getParticipantsMemories({
@@ -83,12 +124,29 @@ export class PromptRequestBuilderService {
 
   // eslint-disable-next-line class-methods-use-this
   groupMemories(memories: MemoryEntity[]): FormattedMemoryMessage[] {
-    const messages: FormattedMemoryMessage[] = [];
+    const messages: PreFormattedMemoryMessage[] = [];
 
-    function addMessage(role: ChatCompletionMessageRole, text: string) {
+    const locations: Record<number, LocationEntity> = {};
+
+    const addMessage = (
+      role: ChatCompletionMessageRole,
+      text: string,
+      locationId: number,
+    ) => {
+      if (!locations[locationId]) {
+        locations[locationId] = this.repositoryService.location.getLocation({
+          id: locationId,
+        });
+      }
+
+      const location = locations[locationId];
+
       // Combine messages from the same role
       if (messages.length > 0 && messages[messages.length - 1].role === role) {
-        if (messages[messages.length - 1].content.length < maxGroupSizeLength) {
+        if (
+          messages[messages.length - 1].content.length < maxGroupSizeLength &&
+          location.id === messages[messages.length - 1].location
+        ) {
           messages[messages.length - 1].content += ` ${text.trim()}`;
           return;
         }
@@ -98,42 +156,57 @@ export class PromptRequestBuilderService {
           messages.push({
             content: 'Continue talking and interacting',
             role: 'user',
+            location: locationId,
           });
         }
       }
 
-      messages.push({
-        content: text,
-        role,
-      });
-    }
+      if (role === 'assistant') {
+        messages.push({
+          content: text,
+          role,
+          location: locationId,
+        });
+      } else {
+        messages.push({
+          content: `At ${location.name} (${location.lot_type}), ${text}`,
+          role,
+          location: locationId,
+        });
+      }
+    };
 
     memories.forEach((memory) => {
       if (memory.pre_action && memory.pre_action.trim()) {
-        addMessage('user', memory.pre_action);
+        addMessage('user', memory.pre_action, memory.location_id);
       }
 
       if (memory.observation && memory.observation.trim()) {
-        addMessage('user', memory.observation);
+        addMessage('user', memory.observation, memory.location_id);
       }
 
       if (memory.content && memory.content.trim()) {
-        addMessage('assistant', memory.content);
+        addMessage('assistant', memory.content, memory.location_id);
       }
     });
 
-    return messages;
+    const formattedMessages: FormattedMemoryMessage[] = [];
+    messages.forEach((message) =>
+      formattedMessages.push({ content: message.content, role: message.role }),
+    );
+    return formattedMessages;
   }
 
   async buildPromptRequest(
     event: SSEvent,
-    options: PromptRequestBuilderOptions
+    options: PromptRequestBuilderOptions,
   ): Promise<PromptRequest> {
     const location = this.repositoryService.location.getLocation({
       id: event.environment.location_id,
     });
 
     const dateTime = formatDateTime(event.environment);
+    const season = formatSeason(event.environment);
 
     let formattedAction;
     if (options.action) {
@@ -142,7 +215,7 @@ export class PromptRequestBuilderService {
         event.sentient_sims,
         location,
         options.sexCategoryType,
-        options.sexLocationType
+        options.sexLocationType,
       );
     }
 
@@ -153,7 +226,7 @@ export class PromptRequestBuilderService {
         event.sentient_sims,
         location,
         options.sexCategoryType,
-        options.sexLocationType
+        options.sexLocationType,
       );
     }
 
@@ -165,7 +238,7 @@ export class PromptRequestBuilderService {
         event.sentient_sims,
         location,
         options.sexCategoryType,
-        options.sexLocationType
+        options.sexLocationType,
       );
       log.debug(`formattedPrePreAction: ${formattedPrePreAction}`);
     }
@@ -178,8 +251,8 @@ export class PromptRequestBuilderService {
           event.sentient_sims,
           location,
           options.sexCategoryType,
-          options.sexLocationType
-        )
+          options.sexLocationType,
+        ),
       );
     });
 
@@ -191,7 +264,7 @@ export class PromptRequestBuilderService {
         event.sentient_sims,
         location,
         options.sexCategoryType,
-        options.sexLocationType
+        options.sexLocationType,
       );
       log.debug(`preAssistantPreResponse: ${formattedPreAssistantPreResponse}`);
     }
@@ -202,19 +275,31 @@ export class PromptRequestBuilderService {
       event.sentient_sims,
       location,
       options.sexCategoryType,
-      options.sexLocationType
+      options.sexLocationType,
     );
 
-    const simsPromise = this.formatSims(event.sentient_sims);
+    const simsPromise = this.formatSims(
+      event.sentient_sims,
+      location,
+      event.relationships,
+    );
     const memories = this.getMemories(event.sentient_sims);
     const groupedMemories = this.groupMemories(memories);
     const sims = await simsPromise;
+    const formattedLocation = formatAction(
+      'Location: {location} ({location_type}), {location_description}',
+      event.sentient_sims,
+      location,
+      options.sexCategoryType,
+      options.sexLocationType,
+    );
 
     return {
       systemPrompt: formattedSystemPrompt,
       participants: sims.join('\n'),
-      location: location.description,
+      location: formattedLocation,
       dateTime,
+      season,
       memories: groupedMemories,
       action: formattedAction,
       maxResponseTokens: 90,
@@ -224,6 +309,7 @@ export class PromptRequestBuilderService {
       preAssistantPreResponse: formattedPreAssistantPreResponse,
       stopTokens: formattedStopTokens,
       continue: options.continue,
+      promptHistoryMode: options.promptHistoryMode,
     };
   }
 }

@@ -1,12 +1,18 @@
 /* eslint-disable no-plusplus */
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { getCareerTrackLevel } from '../descriptions/careerDescriptions';
-import { traitDescriptions } from '../descriptions/traitDescriptions';
+import { moodDescriptions } from '../descriptions/moodDescriptions';
 import { getSexCategory, getSexLocation } from '../descriptions/wwDescriptions';
-import { SSEnvironment } from '../models/InteractionEvents';
+import {
+  SSEnvironment,
+  SSSeasonSegment,
+  SSSeasonType,
+} from '../models/InteractionEvents';
 import { SentientSim } from '../models/SentientSim';
 import { SimAge } from '../models/SimAge';
 import { removeEmojis } from '../util/filter';
+import { traitDescriptions } from '../descriptions/traitDescriptions';
+import { TraitType } from '../models/TraitType';
 
 export enum BodyState {
   OUTFIT = 1,
@@ -33,16 +39,15 @@ export function formatListToString(items: string[]): string {
   return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
 }
 
-function formatTraits(traits: string[]): string[] {
-  const formattedTraits: string[] = [];
-
-  traits.forEach((trait) => {
-    if (traitDescriptions.has(trait)) {
-      formattedTraits.push(traitDescriptions.get(trait) as string);
-    }
-  });
-
-  return formattedTraits;
+function formatMoods(moods: string[]): string[] {
+  return moods
+    .filter(
+      (mood) =>
+        mood in moodDescriptions &&
+        !moodDescriptions[mood]?.ignored &&
+        moodDescriptions[mood]?.description,
+    )
+    .map((mood) => moodDescriptions[mood].description as string);
 }
 
 function formatAge(age: SimAge): string {
@@ -77,7 +82,7 @@ function formatCareers(sentientSim: SentientSim): string[] {
       const description = careerDescription.sentient_sims_description;
       const formattedCareer = description.replaceAll(
         '{sim_name}',
-        sentientSim.name
+        sentientSim.name,
       );
       formattedCareers.push(formattedCareer);
     }
@@ -146,13 +151,13 @@ function formatProperties(sentientSim: SentientSim): string[] {
 
   if (sentientSim.on_fire) {
     formattedProperties.push(
-      'is currently burning on fire with flames on their clothing'
+      'is currently burning on fire with flames on their clothing',
     );
   }
 
   if (sentientSim.is_dying) {
     formattedProperties.push(
-      'is actively dying with the Grim Reaper present about to take their life'
+      'is actively dying with the Grim Reaper present about to take their life',
     );
   }
 
@@ -160,16 +165,43 @@ function formatProperties(sentientSim: SentientSim): string[] {
 }
 
 export function formatSentientSim(sentientSim: SentientSim): string {
-  const likes = formatTraits(sentientSim.likes);
-  const dislikes = formatTraits(sentientSim.dislikes);
-  const moods = formatTraits(sentientSim.moods);
-  const personalityTraits = formatTraits(sentientSim.personality_traits);
+  const likes: string[] = [];
+  const dislikes: string[] = [];
+  const attractions: string[] = [];
+  const turnOffs: string[] = [];
+  const fears: string[] = [];
+  const genericTraits: string[] = [];
+  sentientSim.traits
+    .filter((trait) => trait in traitDescriptions)
+    .map((trait) => traitDescriptions[trait])
+    .filter((trait) => !trait?.ignored && trait?.description)
+    .forEach((trait) => {
+      if (trait.trait_type === TraitType.LIKE) {
+        if (trait.class === 'AttractionPreference') {
+          attractions.push(trait.description as string);
+        } else {
+          likes.push(trait.description as string);
+        }
+      } else if (trait.trait_type === TraitType.DISLIKE) {
+        if (trait.class === 'AttractionPreference') {
+          turnOffs.push(trait.description as string);
+        } else {
+          dislikes.push(trait.description as string);
+        }
+      } else if (trait.trait_type === TraitType.FEAR) {
+        fears.push(trait.description as string);
+      } else {
+        genericTraits.push(trait.description as string);
+      }
+    });
+
+  const moods = formatMoods(sentientSim.moods);
   const careers = formatCareers(sentientSim);
   const properties = formatProperties(sentientSim);
 
   const prompt = [
     `${sentientSim.name} is a ${sentientSim.gender} ${formatAge(
-      sentientSim.age
+      sentientSim.age,
     )}.`,
   ];
 
@@ -181,10 +213,28 @@ export function formatSentientSim(sentientSim: SentientSim): string {
     prompt.push(`${sentientSim.name} hates ${formatListToString(dislikes)}.`);
   }
 
-  if (personalityTraits.length > 0) {
+  if (attractions.length > 0) {
     prompt.push(
-      `${sentientSim.name} ${formatListToString(personalityTraits)}.`
+      `${sentientSim.name} is attracted to a partner who ${formatListToString(
+        attractions,
+      )}.`,
     );
+  }
+
+  if (turnOffs.length > 0) {
+    prompt.push(
+      `${sentientSim.name} is turned off by a partner who ${formatListToString(
+        turnOffs,
+      )}.`,
+    );
+  }
+
+  if (fears.length > 0) {
+    prompt.push(`${sentientSim.name} fears ${formatListToString(fears)}.`);
+  }
+
+  if (genericTraits.length > 0) {
+    prompt.push(`${sentientSim.name} ${formatListToString(genericTraits)}.`);
   }
 
   if (moods.length > 0) {
@@ -224,7 +274,7 @@ export function formatAction(
   sentientSims: SentientSim[],
   location: LocationEntity,
   sexCategoryType?: number,
-  sexLocationType?: number
+  sexLocationType?: number,
 ) {
   let formattedAction = action;
 
@@ -238,7 +288,7 @@ export function formatAction(
     }
     formattedAction = formattedAction.replaceAll(
       '{non_initiator_participants}',
-      formatListToString(sentientSimNames)
+      formatListToString(sentientSimNames),
     );
   }
 
@@ -246,48 +296,112 @@ export function formatAction(
     const sentientSimNames = sentientSims.map((sim) => sim.name);
     formattedAction = formattedAction.replaceAll(
       '{participants}',
-      formatListToString(sentientSimNames)
+      formatListToString(sentientSimNames),
     );
   }
 
   formattedAction = formattedAction.replaceAll('{location}', location.name);
+  formattedAction = formattedAction.replaceAll(
+    '{location_type}',
+    location.lot_type,
+  );
+  formattedAction = formattedAction.replaceAll(
+    '{location_description}',
+    location.description,
+  );
 
   for (let i = 0; i < sentientSims.length; i++) {
     formattedAction = formattedAction.replaceAll(
       `{actor.${i}}`,
-      sentientSims[i].name
+      sentientSims[i].name,
     );
 
     if (sentientSims[i].gender === 'Male') {
       formattedAction = formattedAction.replaceAll(`{actor.${i}.he/she}`, 'he');
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.him/her}`,
-        'him'
+        'him',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.his/her}`,
-        'his'
+        'his',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.himself/herself}`,
-        'himself'
+        'himself',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.uncle/aunt}`,
+        'uncle',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.brother/sister}`,
+        'brother',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.husband/wife}`,
+        'husband',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.nephew/niece}`,
+        'nephew',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.son/daughter}`,
+        'son',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.dad/mom}`,
+        'dad',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.father/mother}`,
+        'father',
       );
     } else {
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.he/she}`,
-        'she'
+        'she',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.him/her}`,
-        'her'
+        'her',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.his/her}`,
-        'her'
+        'her',
       );
       formattedAction = formattedAction.replaceAll(
         `{actor.${i}.himself/herself}`,
-        'herself'
+        'herself',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.uncle/aunt}`,
+        'aunt',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.brother/sister}`,
+        'sister',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.husband/wife}`,
+        'wife',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.nephew/niece}`,
+        'niece',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.son/daughter}`,
+        'daughter',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.dad/mom}`,
+        'mom',
+      );
+      formattedAction = formattedAction.replaceAll(
+        `{actor.${i}.father/mother}`,
+        'mother',
       );
     }
 
@@ -296,7 +410,7 @@ export function formatAction(
       if (sexCategory) {
         formattedAction = formattedAction.replaceAll(
           `{sex_category}`,
-          sexCategory
+          sexCategory,
         );
       }
     }
@@ -306,7 +420,7 @@ export function formatAction(
       if (sexLocation) {
         formattedAction = formattedAction.replaceAll(
           `{sex_location}`,
-          sexLocation
+          sexLocation,
         );
       }
     }
@@ -316,7 +430,7 @@ export function formatAction(
 }
 
 export function getMappingStringReplacementPairs(
-  sentientSims?: SentientSim[]
+  sentientSims?: SentientSim[],
 ): ActorMapping[] {
   const mappings: ActorMapping[] = [];
 
@@ -388,7 +502,7 @@ export function getMappingStringErrorPairs(sentientSims?: SentientSim[]) {
       she: 'Replace she with she.Firstname Lastname',
       her: 'Replace her with her.Firstname Lastname',
       herself: 'Replace himself with herself.Firstname Lastname',
-    })
+    }),
   );
 
   if (!sentientSims) {
@@ -401,11 +515,11 @@ export function getMappingStringErrorPairs(sentientSims?: SentientSim[]) {
     if (spaceIndex !== -1) {
       errors.set(
         name.substring(0, spaceIndex),
-        'Use the full name of the sim when describing the animation'
+        'Use the full name of the sim when describing the animation',
       );
       errors.set(
         name.substring(spaceIndex + 1),
-        'Use the full name of the sim when describing the animation'
+        'Use the full name of the sim when describing the animation',
       );
     }
   });
@@ -427,7 +541,7 @@ export function trimIncompleteSentence(text: string): string {
   const lastPunctIndex = Math.max(
     text.lastIndexOf('.'),
     text.lastIndexOf('?'),
-    text.lastIndexOf('!')
+    text.lastIndexOf('!'),
   );
 
   if (lastPunctIndex >= 0) {
@@ -465,6 +579,9 @@ export function removeStopTokens(text: string, stopTokens?: string[]) {
 export function cleanupAIOutput(text: string, stopTokens?: string[]): string {
   let output: string = text.trim();
 
+  const index = output.indexOf(':');
+  output = index !== -1 ? output.substring(index + 1) : output;
+  output = output.replaceAll('*', '');
   output = removeStopTokens(output, stopTokens);
   output = removeLastParagraph(output);
   output = trimIncompleteSentence(output);
@@ -501,5 +618,42 @@ export function formatDateTime(environment: SSEnvironment): string {
   const amPm = environment.time.hour >= 12 ? 'PM' : 'AM';
   const hourIn12HourFormat = environment.time.hour % 12 || 12; // Convert 0 hour to 12 for 12 AM.
 
-  return `The day is ${dayName} at ${hourIn12HourFormat}:${minute} ${amPm}.`;
+  return `<DATE>The day is ${dayName} at ${hourIn12HourFormat}:${minute} ${amPm}.</DATE>`;
+}
+
+export function formatSeason(environment: SSEnvironment): string {
+  let segmentString = '';
+  switch (environment.season?.season_segment) {
+    case SSSeasonSegment.EARLY:
+      segmentString += 'Early';
+      break;
+    case SSSeasonSegment.MID:
+      segmentString += 'Mid';
+      break;
+    case SSSeasonSegment.LATE:
+      segmentString += 'Late';
+      break;
+    default:
+      segmentString += 'Eternal';
+      break;
+  }
+
+  let seasonString = '';
+  switch (environment.season?.season_type) {
+    case SSSeasonType.SPRING:
+      seasonString += 'Spring';
+      break;
+    case SSSeasonType.WINTER:
+      seasonString += 'Winter';
+      break;
+    case SSSeasonType.FALL:
+      seasonString += 'Fall';
+      break;
+    case SSSeasonType.SUMMER:
+    default:
+      seasonString += 'Summer';
+      break;
+  }
+
+  return `<SEASON>${segmentString} ${seasonString}</SEASON>`;
 }

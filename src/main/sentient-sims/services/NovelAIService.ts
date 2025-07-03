@@ -115,6 +115,11 @@ type NovelAISubscription = {
   };
 };
 
+type NovelAIError = {
+  status?: number;
+  message?: string;
+};
+
 type NovelAIGenerateResponse = {
   output?: string;
   error?: string;
@@ -130,13 +135,13 @@ export class NovelAIService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return 'https://api.novelai.net';
+    return this.settingsService.get(SettingsEnum.NOVELAI_ENDPOINT) as string;
   }
 
   getNovelAIKey(): string | undefined {
     // Check app settings
     const novelAIKeyFromSettings = this.settingsService.get(
-      SettingsEnum.NOVELAI_KEY
+      SettingsEnum.NOVELAI_KEY,
     );
     if (novelAIKeyFromSettings) {
       log.debug('Using novelai key from settings');
@@ -144,12 +149,14 @@ export class NovelAIService implements GenerationService {
     }
 
     throw new NovelAIKeyNotSetError(
-      'No NovelAI Key set, Edit NovelAI Key to set it'
+      'No NovelAI Key set, Edit NovelAI Key to set it',
     );
   }
 
   async healthCheck(apiKey?: string) {
     const key = apiKey ?? this.getNovelAIKey();
+
+    log.info(`${this.serviceUrl()}/user/subscription`);
 
     const response = await fetch(`${this.serviceUrl()}/user/subscription`, {
       headers: {
@@ -166,13 +173,24 @@ export class NovelAIService implements GenerationService {
       };
     }
 
+    try {
+      const novelAIError: NovelAIError = await response.json();
+      if (novelAIError.message) {
+        return {
+          status: `NovelAI Error: ${novelAIError.message}`,
+        };
+      }
+    } catch (err: any) {
+      // ignore
+    }
+
     return {
       status: 'Not working..',
     };
   }
 
   async sentientSimsGenerate(
-    request: OpenAICompatibleRequest
+    request: OpenAICompatibleRequest,
   ): Promise<SimsGenerateResponse> {
     const prompt = request.messages.map((m) => m.content).join('\n');
     log.debug(`prompt: ${JSON.stringify(prompt)}`);

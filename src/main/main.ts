@@ -18,6 +18,7 @@ import electron, {
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import { dialog } from 'electron/main';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import registerDebugToggleHotkey from './sentient-sims/registerDebugToggleHotkey';
@@ -33,14 +34,6 @@ import {
 } from './sentient-sims/util/debugLog';
 
 log.initialize({ preload: true });
-
-class AppUpdater {
-  constructor() {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
-  }
-}
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -64,10 +57,13 @@ const installExtensions = async () => {
   return installer
     .default(
       extensions.map((name) => installer[name]),
-      forceDownload
+      forceDownload,
     )
     .catch(console.log);
 };
+
+app.commandLine.appendSwitch('enable-unsafe-webgpu');
+app.commandLine.appendSwitch('enable-features', 'Vulkan');
 
 const createWindow = async () => {
   if (isDebug) {
@@ -145,9 +141,25 @@ const createWindow = async () => {
     directoryService,
   });
 
-  // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
-  new AppUpdater();
+  log.transports.file.level = 'info';
+  autoUpdater.logger = log;
+  try {
+    autoUpdater.checkForUpdatesAndNotify();
+    if (mainWindow) {
+      autoUpdater.on('update-downloaded', async (info) => {
+        await dialog.showMessageBox(mainWindow as BrowserWindow, {
+          type: 'question',
+          buttons: ['Install and Restart'],
+          defaultId: 0,
+          message: `Update ${info.version} has been downloaded and is ready to install, please restart to install the update.`,
+        });
+
+        autoUpdater.quitAndInstall();
+      });
+    }
+  } catch (err) {
+    log.error(`Unable to check for updates and notify`, err);
+  }
 };
 
 /**
@@ -200,7 +212,7 @@ app
           session.defaultSession.clearStorageData();
           mainWindow?.loadURL(resolveHtmlPath('index.html'));
         }
-      }
+      },
     );
   })
   .catch(console.log);

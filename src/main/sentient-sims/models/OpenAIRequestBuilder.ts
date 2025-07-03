@@ -5,15 +5,21 @@ import { OpenAICompatibleRequest } from './OpenAICompatibleRequest';
 import { ChatCompletionMessageRole } from './ChatCompletionMessageRole';
 import { OpenAIMessage } from './OpenAIMessage';
 import { filterNullAndUndefined } from '../util/filter';
+import { PromptHistoryMode } from './PromptHistoryMode';
 
 export type FormattedMemoryMessage = {
   content: string;
   role: ChatCompletionMessageRole;
 };
 
+export type PreFormattedMemoryMessage = FormattedMemoryMessage & {
+  location: number;
+};
+
 export type PromptRequest = {
   location: string;
   dateTime: string;
+  season: string;
   participants: string;
   systemPrompt: string;
   memories: FormattedMemoryMessage[];
@@ -25,6 +31,7 @@ export type PromptRequest = {
   prePreAction?: string;
   stopTokens?: string[];
   continue?: boolean;
+  promptHistoryMode?: PromptHistoryMode;
 };
 
 export type OneShotRequest = {
@@ -44,7 +51,14 @@ export type ClassificationRequest = {
   messages: string[];
 };
 
-export type BuffRequest = {
+export type BuffEventRequest = {
+  sim_id: string;
+  name: string;
+  classifiers: string[];
+  messages: string[];
+};
+
+export type BuffDescriptionRequest = {
   name: string;
   mood: string;
   messages: string[];
@@ -62,6 +76,7 @@ export class OpenAIRequestBuilder {
       promptRequest.systemPrompt,
       promptRequest.location,
       promptRequest.dateTime,
+      promptRequest.season,
       promptRequest.participants,
     ].join('\n\n');
     const systemMessage: OpenAIMessage = {
@@ -109,11 +124,24 @@ export class OpenAIRequestBuilder {
         break;
       }
 
+      if (memory.content.length <= 1) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
       const memoryMessage: OpenAIMessage = {
         role: memory.role,
-        content: memory.content,
+        content: memory.content.replaceAll('*', ''),
         tokens: newTokens,
       };
+
+      if (
+        memoryMessage.role === 'user' &&
+        promptRequest.promptHistoryMode === PromptHistoryMode.NO_USER_HISTORY
+      ) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
       memoriesToInsert.unshift(memoryMessage);
     }
@@ -130,7 +158,7 @@ export class OpenAIRequestBuilder {
   }
 
   buildOneShotOpenAIRequest(
-    oneShotRequest: OneShotRequest
+    oneShotRequest: OneShotRequest,
   ): OpenAICompatibleRequest {
     const systemMessage: OpenAIMessage = {
       role: 'system',
@@ -148,7 +176,7 @@ export class OpenAIRequestBuilder {
         role: 'assistant',
         content: oneShotRequest.assistantPreResponse,
         tokens: this.tokenCounter.countTokens(
-          oneShotRequest.assistantPreResponse
+          oneShotRequest.assistantPreResponse,
         ),
       };
       messages.push(assistantMessage);

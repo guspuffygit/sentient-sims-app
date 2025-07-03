@@ -8,12 +8,8 @@ export type SentientSim = {
   age: SimAge;
   sim_id: string;
   gender: string;
-  likes: string[];
-  dislikes: string[];
-  aspirations: string[];
+  traits: string[];
   moods: string[];
-  motives: string[];
-  personality_traits: string[];
   is_ghost: boolean;
   grubby: boolean;
   in_pool: boolean;

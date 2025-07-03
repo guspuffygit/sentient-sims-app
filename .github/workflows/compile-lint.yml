@@ -1,0 +1,35 @@
+name: Compile & Lint
+
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js and NPM
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install Dependencies
+        run: |
+          npm cache clean --force
+          npm install
+
+      - name: Compile
+        run: |
+          npm run compile
+      
+      - name: Lint
+        run: |
+          npm run lint

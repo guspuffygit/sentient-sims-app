@@ -1761,5 +1761,5 @@ export const defaultSimDescriptions: Map<String, string> = new Map(
     ]
       .join(' ')
       .trim(),
-  })
+  }),
 );

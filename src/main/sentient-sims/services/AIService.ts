@@ -21,6 +21,8 @@ import {
 import {
   notifyMapAnimation,
   notifyMapInteraction,
+  playTTS,
+  sendChatGeneration,
 } from '../util/notifyRenderer';
 import {
   GenerationOptions,
@@ -41,7 +43,8 @@ import {
   getTokenCounter,
 } from '../factories/generationServiceFactory';
 import {
-  BuffRequest,
+  BuffEventRequest,
+  BuffDescriptionRequest,
   ClassificationRequest,
   OneShotRequest,
   OpenAIRequestBuilder,
@@ -57,10 +60,15 @@ import { InteractionService } from './InteractionService';
 import { InputFormatter } from '../formatter/InputOutputFormatting';
 import { MythoMaxFormatter } from '../formatter/MythoMaxFormatter';
 import { NovelAIFormatter } from '../formatter/NovelAIFormatter';
-import { getBuffSystemPrompt } from '../systemPrompts';
 import { AIModel } from '../models/AIModel';
 import { DefaultFormatter } from '../formatter/DefaultFormatter';
 import { InteractionDescription } from '../descriptions/interactionDescriptions';
+import { PromptHistoryMode } from '../models/PromptHistoryMode';
+import { sendModNotification } from '../websocketServer';
+import {
+  ModAddBuff,
+  ModWebsocketMessageType,
+} from '../models/ModWebsocketMessage';
 import { GenerateLotDescriptionRequest } from '../models/GenerateLotDescriptionRequest';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
@@ -88,7 +96,7 @@ export class AIService {
     settingsService: SettingsService,
     promptRequestBuilderService: PromptRequestBuilderService,
     animationsService: AnimationsService,
-    interactionService: InteractionService
+    interactionService: InteractionService,
   ) {
     this.settingsService = settingsService;
     this.promptRequestBuilderService = promptRequestBuilderService;
@@ -102,7 +110,7 @@ export class AIService {
   }
 
   async interactionEvent(
-    event: InteractionEvents
+    event: InteractionEvents,
   ): Promise<InteractionEventResult> {
     switch (event.event_type) {
       case SSEventType.DO_SOMETHING:
@@ -134,7 +142,7 @@ export class AIService {
       };
     } else {
       description = await this.interactionService.getInteractionDescription(
-        event.interaction_name
+        event.interaction_name,
       );
     }
 
@@ -155,6 +163,7 @@ export class AIService {
       const action = getRandomItem(description.pre_actions);
       return this.runGeneration(event, {
         action,
+        prePreAction: 'At {location} ({location_type}), ',
       });
     }
 
@@ -162,7 +171,14 @@ export class AIService {
   }
 
   async handleContinue(event: ContinueInteractionEvent) {
-    return this.runGeneration(event, { continue: true });
+    let result = await this.runGeneration(event, { continue: true });
+    if (!result.text) {
+      result = await this.runGeneration(event, {
+        continue: true,
+        preAssistantPreResponse: ' ',
+      });
+    }
+    return result;
   }
 
   async handleWants(event: WantsInteractionEvent) {
@@ -174,6 +190,7 @@ export class AIService {
       action: defaultWantsPrompt,
       preAssistantPreResponse: `{actor.0}:`,
       assistantPreResponse: randomAction,
+      promptHistoryMode: PromptHistoryMode.NO_USER_HISTORY,
     });
   }
 
@@ -190,7 +207,7 @@ export class AIService {
 
     const animation = await this.animationsService.getAnimation(
       event.animation_author,
-      event.animation_identifier
+      event.animation_identifier,
     );
 
     if (event.ww_event_type === WWEventType.ASKING) {
@@ -224,6 +241,7 @@ export class AIService {
 
     return this.runGeneration(event, {
       action,
+      prePreAction: 'At {location} ({location_type}), ',
       sexCategoryType: event.sex_category,
       sexLocationType: event.sex_location,
     });
@@ -232,6 +250,7 @@ export class AIService {
   async handleDoSomething(doSomethingEvent: DoSomethingInteractionEvent) {
     return this.runGeneration(doSomethingEvent, {
       action: doSomethingEvent.action,
+      prePreAction: 'At {location} ({location_type}), ',
     });
   }
 
@@ -253,7 +272,7 @@ export class AIService {
 
   async runGeneration(
     event: InteractionEvents,
-    options: GenerationOptions = {}
+    options: GenerationOptions = {},
   ): Promise<InteractionEventResult> {
     const generationService = getGenerationService(this.settingsService);
     const tokenCounter = getTokenCounter(this.settingsService);
@@ -269,12 +288,13 @@ export class AIService {
       apiType: this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType,
       modelSettings: getModelSettings(this.settingsService),
       continue: options.continue,
+      promptHistoryMode: options.promptHistoryMode,
     };
 
     let promptRequest =
       await this.promptRequestBuilderService.buildPromptRequest(
         event,
-        promptOptions
+        promptOptions,
       );
 
     // save memory before any model specific formatting
@@ -293,9 +313,8 @@ export class AIService {
     const openAIRequest =
       openAIRequestBuilder.buildOpenAIRequest(promptRequest);
 
-    const response = await generationService.sentientSimsGenerate(
-      openAIRequest
-    );
+    const response =
+      await generationService.sentientSimsGenerate(openAIRequest);
 
     const stopTokens = [];
     // TODO: model specific OUTPUT formatting cleanup stop tokens
@@ -345,29 +364,41 @@ export class AIService {
       output = output.replace(lastMessage.content, '').trim();
     }
 
-    newMemory.content = output;
+    output = output.trim();
 
+    if (output.length > 1) {
+      newMemory.content = output;
+
+      this.playTts(output);
+
+      return {
+        status: InteractionEventStatus.GENERATED,
+        text: output,
+        request: response.request,
+        memory: newMemory,
+      };
+    }
+
+    log.error(`There wasn't any output from the AI`);
     return {
-      status: InteractionEventStatus.GENERATED,
-      text: output,
+      status: InteractionEventStatus.NOOP,
       request: response.request,
-      memory: newMemory,
     };
   }
 
   async runClassification(
-    classificationRequest: ClassificationRequest
+    classificationRequest: ClassificationRequest,
   ): Promise<InteractionEventResult> {
     const generationService = getGenerationService(this.settingsService);
     const tokenCounter = getTokenCounter(this.settingsService);
 
     const apiType: ApiType = this.settingsService.get(
-      SettingsEnum.AI_API_TYPE
+      SettingsEnum.AI_API_TYPE,
     ) as ApiType;
 
     const systemPrompt = defaultClassificationPrompt.replaceAll(
       '{classifiers}',
-      classificationRequest.classifiers.join(', ')
+      classificationRequest.classifiers.join(', '),
     );
 
     let oneShotRequest: OneShotRequest = {
@@ -387,9 +418,8 @@ export class AIService {
     const openAIRequest =
       openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
 
-    const response = await generationService.sentientSimsGenerate(
-      openAIRequest
-    );
+    const response =
+      await generationService.sentientSimsGenerate(openAIRequest);
 
     const output = cleanAIClassificationOutput(response.text);
 
@@ -406,21 +436,71 @@ export class AIService {
     };
   }
 
-  async runBuff(buffRequest: BuffRequest): Promise<InteractionEventResult> {
+  async runBuff(event: BuffEventRequest) {
+    const classificationResult = await this.runClassification({
+      name: event.name,
+      classifiers: event.classifiers,
+      messages: event.messages,
+    });
+
+    if (
+      classificationResult.status !== InteractionEventStatus.CLASSIFIED ||
+      !classificationResult.text
+    ) {
+      return;
+    }
+
+    sendChatGeneration(classificationResult);
+
+    const buffDescriptionResult = await this.runBuffDescription({
+      name: event.name,
+      mood: classificationResult.text,
+      messages: event.messages,
+    });
+
+    if (
+      buffDescriptionResult.status !== InteractionEventStatus.GENERATED ||
+      !buffDescriptionResult.text
+    ) {
+      return;
+    }
+
+    sendChatGeneration(buffDescriptionResult);
+
+    const modAddBuff: ModAddBuff = {
+      type: ModWebsocketMessageType.ADD_BUFF,
+      sim_id: event.sim_id,
+      mood: classificationResult.text,
+      buff_description: buffDescriptionResult.text,
+    };
+
+    sendModNotification(modAddBuff);
+  }
+
+  async runBuffDescription(
+    buffRequest: BuffDescriptionRequest,
+  ): Promise<InteractionEventResult> {
     const generationService = getGenerationService(this.settingsService);
     const tokenCounter = getTokenCounter(this.settingsService);
 
     const apiType: ApiType = this.settingsService.get(
-      SettingsEnum.AI_API_TYPE
+      SettingsEnum.AI_API_TYPE,
     ) as ApiType;
 
-    const systemPrompt = getBuffSystemPrompt(apiType)
-      .replaceAll('{mood}', buffRequest.mood)
-      .replaceAll('{name}', buffRequest.name);
+    const systemPrompt = `\
+You will write a game buff description that will be displayed about the character ${buffRequest.name}.
+${buffRequest.name} has just completed chatting and is feeling ${buffRequest.mood} from the conversation.
+Use the details of the conversation to craft the buff description to tell why ${buffRequest.name} is feeling ${buffRequest.mood}.
+Return only the description text itself without any commentary or formatting without breaking the 4th wall.
+Write me a buff description based on the conversation so that ${buffRequest.name} knows why they have received the "${buffRequest.mood}" buff based on this conversation:\n
+`;
 
     let oneShotRequest: OneShotRequest = {
-      systemPrompt,
+      systemPrompt:
+        'Response to the request without extra commentary or formatting, only return the answer to the request.',
       messages: buffRequest.messages,
+      userPreResponse: systemPrompt,
+      assistantPreResponse: `Buff Title: ${buffRequest.mood}\nBuff Description: ${buffRequest.name} is feeling ${buffRequest.mood} because`,
       maxResponseTokens: 90,
       maxTokens: 3900,
     };
@@ -434,11 +514,10 @@ export class AIService {
     const openAIRequest =
       openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
 
-    const response = await generationService.sentientSimsGenerate(
-      openAIRequest
-    );
+    const response =
+      await generationService.sentientSimsGenerate(openAIRequest);
 
-    const output = cleanupAIOutput(response.text);
+    const output = `${buffRequest.name} ${cleanupAIOutput(response.text)}`;
 
     return {
       status: InteractionEventStatus.GENERATED,
@@ -466,19 +545,24 @@ export class AIService {
 
     if (event.status === InteractionEventStatus.UNMAPPED_INTERACTION) {
       log.debug(
-        `Unmapped interaction will be mapped: ${event.interaction_name}`
+        `Unmapped interaction will be mapped: ${event.interaction_name}`,
       );
       if (event.sentient_sims.length <= 2) {
         notifyMapInteraction(event);
         return { status: InteractionEventStatus.MAPPING_INTERACTION };
       }
       log.debug(
-        `Interaction ${event.interaction_name} has more than 2 sims: ${event.sentient_sims.length}, mapping isnt supported yet for more than 2.`
+        `Interaction ${event.interaction_name} has more than 2 sims: ${event.sentient_sims.length}, mapping isnt supported yet for more than 2.`,
       );
     }
 
     log.debug(`NOOP interaction mapping: ${event.interaction_name}`);
     return { status: InteractionEventStatus.NOOP };
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  playTts(text: string) {
+    playTTS(text);
   }
 
   async generateLotDescription(request: GenerateLotDescriptionRequest) {}

@@ -12,7 +12,7 @@ export class RepositoryService {
   constructor(
     locationRepository: LocationRepository,
     memoryRepository: MemoryRepository,
-    participantRepository: ParticipantRepository
+    participantRepository: ParticipantRepository,
   ) {
     this.location = locationRepository;
     this.memory = memoryRepository;

@@ -30,7 +30,7 @@ export class MemoryRepository extends Repository {
   }
 
   getMemoryParticipants(
-    getMemoryParticipantsRequest: GetMemoryParticipantsRequest
+    getMemoryParticipantsRequest: GetMemoryParticipantsRequest,
   ): MemoryParticipantDTO[] {
     const memoryParticipants = this.dbService
       .getDb()
@@ -49,7 +49,7 @@ export class MemoryRepository extends Repository {
   }
 
   getParticipantsMemories(
-    getParticipantsMemoriesRequest: GetParticipantsMemoriesRequest
+    getParticipantsMemoriesRequest: GetParticipantsMemoriesRequest,
   ): MemoryEntity[] {
     const placeholders = getParticipantsMemoriesRequest.participant_ids
       .map(() => '?')
@@ -69,7 +69,7 @@ export class MemoryRepository extends Repository {
 
     const bigIntParticipantIds =
       getParticipantsMemoriesRequest.participant_ids.map(
-        (participantIdString) => BigInt(participantIdString)
+        (participantIdString) => BigInt(participantIdString),
       );
 
     return this.dbService
@@ -89,7 +89,7 @@ export class MemoryRepository extends Repository {
             LIMIT 100
           ) AS subquery
           ORDER BY subquery.timestamp ASC;
-        `
+        `,
       )
       .all() as MemoryEntity[];
   }
@@ -98,7 +98,7 @@ export class MemoryRepository extends Repository {
     const result = this.dbService
       .getDb()
       .prepare(
-        'UPDATE memory SET pre_action = ?, observation = ?, content = ?, timestamp = ?, location_id = ? WHERE id = ?'
+        'UPDATE memory SET pre_action = ?, observation = ?, content = ?, timestamp = ?, location_id = ? WHERE id = ?',
       )
       .run(
         memory.pre_action,
@@ -106,7 +106,7 @@ export class MemoryRepository extends Repository {
         memory.content,
         memory.timestamp,
         memory.location_id,
-        memory.id
+        memory.id,
       );
 
     notifyMemoryEdited(memory);
@@ -118,7 +118,7 @@ export class MemoryRepository extends Repository {
     return this.dbService
       .getDb()
       .prepare(
-        'INSERT OR REPLACE INTO memory_participants(id, participant_id, memory_id) VALUES(?, ?, ?)'
+        'INSERT OR REPLACE INTO memory_participants(id, participant_id, memory_id) VALUES(?, ?, ?)',
       )
       .safeIntegers()
       .run([
@@ -133,7 +133,7 @@ export class MemoryRepository extends Repository {
       const updateMemoryResult = this.dbService
         .getDb()
         .prepare(
-          'INSERT OR REPLACE INTO memory(id, pre_action, observation, content, location_id) VALUES(?, ?, ?, ?, ?)'
+          'INSERT OR REPLACE INTO memory(id, pre_action, observation, content, location_id) VALUES(?, ?, ?, ?, ?)',
         )
         .run([
           createMemoryRequest.memory.id,

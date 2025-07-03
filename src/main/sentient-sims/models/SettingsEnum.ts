@@ -14,8 +14,26 @@ export enum SettingsEnum {
   NSFW_ENABLED = 'nsfwEnabled',
   MAPPING_NOTIFICATION_ENABLED = 'mappingNotificationEnabled',
   OPENAI_ENDPOINT = 'openaiEndpoint',
+  VLLM_ENDPOINT = 'vllmEndpoint',
+  VLLM_APIKEY = 'vllmKey',
+  VLLM_MODEL = 'vllmModel',
   KOBOLDAI_ENDPOINT = 'koboldAIEndpoint',
   SENTIENTSIMSAI_ENDPOINT = 'sentientsimsAIEndpoint',
+  NOVELAI_ENDPOINT = 'novelAIEndpoint',
+  GEMINI_KEYS = 'geminiKeys', // Supports multiple keys separated by commas (e.g., "key1,key2,key3")
+  GEMINI_ENDPOINT = 'geminiEndpoint',
+  GEMINI_MODEL = 'geminiModel',
+  TRAIT_MAPPING_PATH = 'traitMappingPath',
+  TTS_ENABLED = 'ttsEnabled',
+  TTS_API_TYPE = 'ttsApiType',
+  TTS_VOLUME = 'ttsVolume',
+  OPENAI_TTS_SETTINGS = 'openaiTtsSettings',
+  SENTIENTSIMSAI_TTS_SETTINGS = 'sentientsimsaiTtsSettings',
+  KOKOROAI_ENDPOINT = 'kokoroaiEndpoint',
+  KOKOROAI_TTS_SETTINGS = 'kokoroaiTtsSettings',
+  ELEVENLABS_KEY = 'elevenlabsKey',
+  ELEVENLABS_ENDPOINT = 'elevenlabsEndpoint',
+  ELEVENLABS_TTS_SETTINGS = 'elevenlabsTtsSettings',
 }
 
 export enum DeprecatedSettingsEnum {

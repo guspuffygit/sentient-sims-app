@@ -13,6 +13,8 @@ import { InteractionBugReport } from '../models/InteractionBugReport';
 import { SSEventType, WWInteractionEvent } from '../models/InteractionEvents';
 import { sendPopUpNotification } from '../util/notifyRenderer';
 import { SendLogsRequest } from '../models/SendLogsRequest';
+import { GetPatreonDebugText } from '../util/patreonUtil';
+import { CaughtError } from '../models/CaughtError';
 
 export const webhookUrl = [
   'https://d',
@@ -41,7 +43,7 @@ export class LogSendService {
     settingsService: SettingsService,
     directoryService: DirectoryService,
     lastExceptionService: LastExceptionService,
-    versionService: VersionService
+    versionService: VersionService,
   ) {
     this.settingsService = settingsService;
     this.directoryService = directoryService;
@@ -51,7 +53,7 @@ export class LogSendService {
 
   static newLogId() {
     return Array.from({ length: 10 }, () =>
-      Math.random().toString(36).charAt(2)
+      Math.random().toString(36).charAt(2),
     ).join('');
   }
 
@@ -62,18 +64,46 @@ export class LogSendService {
     try {
       const logZip = new AdmZip();
 
+      const formData = new FormData();
+
+      const extraData = [
+        `Discord Username: ${sendLogsRequest.discordUsername}`,
+        `Error Description: ${sendLogsRequest.errorDescription}`,
+      ];
+
+      if (sendLogsRequest.amplifyUser) {
+        const patreonDebugTexts: string[] = GetPatreonDebugText(
+          sendLogsRequest.amplifyUser,
+        );
+        patreonDebugTexts.forEach((text) => extraData.push(text));
+      }
+
+      const endData: string[] = [];
+
+      if (sendLogsRequest.caughtError) {
+        try {
+          endData.push(
+            `CaughtError: ${JSON.stringify(sendLogsRequest.caughtError, null, 2)}`,
+          );
+        } catch (err) {
+          log.error(`Error attaching caughtError info to debug logs`, err);
+        }
+      }
+
+      const content = this.getContent(logId, extraData, endData);
+
+      this.appendInformationToFormData(formData, errors, content);
+      this.appendContentToZipFile(content, logZip, errors);
       this.appendFilesListToZipFile(logZip, errors);
       this.appendLogsFileToZipFile(logZip, errors);
+      this.appendErrorDatabaseToZipFile(
+        logZip,
+        errors,
+        sendLogsRequest?.caughtError,
+      );
       this.appendLastExceptionFilesToZipFile(logZip, errors);
       this.appendAppLogsToZipFile(logZip, errors);
       this.appendConfigFileToZipFile(logZip, errors);
-
-      const formData = new FormData();
-
-      this.appendInformationToFormData(formData, logId, errors, [
-        `Discord Username: ${sendLogsRequest.discordUsername}`,
-        `Error Description: ${sendLogsRequest.errorDescription}`,
-      ]);
       this.appendZipFileToFormData(logZip, formData, errors);
 
       const response = await this.sendFormData(formData, errors, url);
@@ -82,12 +112,12 @@ export class LogSendService {
 
       if (!response || !response.ok) {
         errors.push(
-          `Failed to post message: ${response?.status} ${response?.statusText}.`
+          `Failed to post message: ${response?.status} ${response?.statusText}.`,
         );
         if (response) {
           const responseJson = await response.json();
           log.error(
-            `Response JSON Error:\n${JSON.stringify(responseJson, null, 2)}`
+            `Response JSON Error:\n${JSON.stringify(responseJson, null, 2)}`,
           );
           errors.push(responseJson);
         }
@@ -108,9 +138,25 @@ export class LogSendService {
     };
   }
 
+  getContent(logId: string, extraData: string[] = [], endData: string[] = []) {
+    return [
+      ...extraData,
+      `Log id: ${logId}`,
+      `Platform: ${os.platform()}`,
+      `Architecture: ${os.arch()}`,
+      `OS Release: ${os.release()}`,
+      `Mods Folder: ${this.directoryService.getModsFolder()}`,
+      `Mod Version: ${this.versionService.getModVersion().version}`,
+      `App Version: ${app.getVersion()}`,
+      `Game Version: ${this.versionService.getGameVersion().version}`,
+      ...this.getSettings(),
+      ...endData,
+    ].join('\n');
+  }
+
   async sendBugReport(
     url: string,
-    { event, username, memory, bugDetails }: InteractionBugReport
+    { event, username, memory, bugDetails }: InteractionBugReport,
   ) {
     const logId = LogSendService.newLogId();
     const errors: any[] = [];
@@ -145,16 +191,12 @@ export class LogSendService {
             `WW Event Type: ${wwEvent.ww_event_type}`,
             `Sex Category: ${wwEvent.sex_category}`,
             `Sex Location: ${wwEvent.sex_location}`,
-          ].join('\n')
+          ].join('\n'),
         );
       }
 
-      this.appendInformationToFormData(
-        formData,
-        logId,
-        errors,
-        interactionBugInfo
-      );
+      const content = this.getContent(logId, interactionBugInfo);
+      this.appendInformationToFormData(formData, errors, content);
 
       const response = await this.sendFormData(formData, errors, url);
 
@@ -162,7 +204,7 @@ export class LogSendService {
 
       if (!response || !response.ok) {
         errors.push(
-          `Failed to post message: ${response?.status} ${response?.statusText}.`
+          `Failed to post message: ${response?.status} ${response?.statusText}.`,
         );
         if (response) {
           errors.push(await response.json());
@@ -185,7 +227,13 @@ export class LogSendService {
       // Dont send tokens or secrets in the logs
       if (!settingsEnum.includes('Key') && !settingsEnum.includes('Token')) {
         const settingsValue = this.settingsService.getSetting(settingsEnum);
-        settings.push(`${settingsEnum}: ${settingsValue}`);
+        if (
+          Object.prototype.toString.call(settingsValue) === '[object Object]'
+        ) {
+          settings.push(`${settingsEnum}: ${JSON.stringify(settingsValue)}`);
+        } else {
+          settings.push(`${settingsEnum}: ${settingsValue}`);
+        }
       }
     });
 
@@ -194,26 +242,11 @@ export class LogSendService {
 
   private appendInformationToFormData(
     formData: FormData,
-    logId: string,
     errors: any[],
-    extraInfo: string[] = []
+    content: string,
   ) {
     try {
-      formData.append(
-        'content',
-        [
-          ...extraInfo,
-          `Log id: ${logId}`,
-          `Platform: ${os.platform()}`,
-          `Architecture: ${os.arch()}`,
-          `OS Release: ${os.release()}`,
-          `Mods Folder: ${this.directoryService.getModsFolder()}`,
-          `Mod Version: ${this.versionService.getModVersion().version}`,
-          `App Version: ${app.getVersion()}`,
-          `Game Version: ${this.versionService.getGameVersion().version}`,
-          ...this.getSettings(),
-        ].join('\n')
-      );
+      formData.append('content', content.slice(0, 1900));
     } catch (err: any) {
       this.handleAppendError('Error attaching log information', err, errors);
     }
@@ -222,11 +255,11 @@ export class LogSendService {
   private appendFilesListToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
       const filesList = this.directoryService.listFilesRecursively(
-        this.directoryService.getModsFolder()
+        this.directoryService.getModsFolder(),
       );
       zipFile.addFile(
         'fileList.txt',
-        Buffer.from(filesList.join('\n'), 'utf-8')
+        Buffer.from(filesList.join('\n'), 'utf-8'),
       );
     } catch (err: any) {
       this.handleAppendError('Error adding file list', err, errors);
@@ -242,6 +275,35 @@ export class LogSendService {
     }
   }
 
+  private appendErrorDatabaseToZipFile(
+    zipFile: AdmZip,
+    errors: any[],
+    caughtError?: CaughtError,
+  ) {
+    try {
+      if (caughtError?.databaseSession) {
+        const errorDb = this.directoryService.getSentientSimsErrorDb(
+          caughtError.databaseSession,
+        );
+        zipFile.addLocalFile(errorDb);
+      }
+    } catch (err: any) {
+      this.handleAppendError('Error attaching error db file', err, errors);
+    }
+  }
+
+  private appendContentToZipFile(
+    content: string,
+    zipFile: AdmZip,
+    errors: any[],
+  ) {
+    try {
+      zipFile.addFile('systemconfig.txt', Buffer.from(content, 'utf-8'));
+    } catch (err: any) {
+      this.handleAppendError('Error attaching mod log file', err, errors);
+    }
+  }
+
   private appendLastExceptionFilesToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
       this.lastExceptionService
@@ -249,14 +311,15 @@ export class LogSendService {
         .forEach((lastExceptionFile) => {
           zipFile.addFile(
             lastExceptionFile.filename,
-            Buffer.from(lastExceptionFile.text, 'utf-8')
+            Buffer.from(lastExceptionFile.text, 'utf-8'),
+            `Created ${lastExceptionFile.created.toUTCString()}`,
           );
         });
     } catch (err: any) {
       this.handleAppendError(
         'Error attaching lastException files',
         err,
-        errors
+        errors,
       );
     }
   }
@@ -282,7 +345,7 @@ export class LogSendService {
   private appendZipFileToFormData(
     zipFile: AdmZip,
     formData: FormData,
-    errors: any[]
+    errors: any[],
   ) {
     try {
       const blob = new Blob([zipFile.toBuffer()], { type: 'application/zip' });

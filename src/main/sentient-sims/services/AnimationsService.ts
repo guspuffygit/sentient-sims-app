@@ -1,14 +1,13 @@
 /* eslint-disable class-methods-use-this */
 import { Animation } from 'main/sentient-sims/models/Animation';
-import log from 'electron-log';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
-import { fetchWithRetries } from '../util/fetchWithRetries';
 import { ApiType } from '../models/ApiType';
+import { axiosClient } from '../clients/AxiosClient';
 
 export function getAnimationKey(
   animationAuthor: string,
-  animationIdentifier: string
+  animationIdentifier: string,
 ) {
   return `${animationAuthor}:${animationIdentifier}`;
 }
@@ -23,37 +22,33 @@ export class AnimationsService {
   }
 
   async getAnimations() {
-    const url = `${this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_ENDPOINT
-    )}/animations`;
-    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
-    log.debug(`url: ${url}, auth: ${authHeader}`);
-    const response = await fetchWithRetries(url, {
+    const response = await axiosClient({
+      url: '/animations',
+      baseURL: `${this.settingsService.get(
+        SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
+      )}`,
       headers: {
-        'Content-Type': 'application/json',
-        Authentication: authHeader,
+        Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
     });
 
-    return response.json();
+    return response.data;
   }
 
   async setAnimation(animation: Animation) {
-    const url = `${this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_ENDPOINT
-    )}/animations`;
-    const authHeader = `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`;
-    log.debug(`url: ${url}, auth: ${authHeader}`);
-    const response = await fetchWithRetries(url, {
+    const response = await axiosClient({
+      url: '/animations',
       method: 'POST',
+      data: animation,
+      baseURL: `${this.settingsService.get(
+        SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
+      )}`,
       headers: {
-        'Content-Type': 'application/json',
-        Authentication: authHeader,
+        Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
-      body: JSON.stringify(animation),
     });
 
-    const result = await response.json();
+    const result = response.data;
 
     this.animations = new Map(Object.entries(result));
 
@@ -80,7 +75,7 @@ export class AnimationsService {
 
   isAnimationMappingEnabled(): boolean {
     return this.settingsService.get(
-      SettingsEnum.MAPPING_NOTIFICATION_ENABLED
+      SettingsEnum.MAPPING_NOTIFICATION_ENABLED,
     ) as boolean;
   }
 }

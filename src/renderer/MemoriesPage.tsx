@@ -14,6 +14,7 @@ import { appApiUrl } from 'main/sentient-sims/constants';
 import { DeleteMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
 import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
+import { useWebsocket } from './providers/WebsocketProvider';
 
 type SelectedMemory = {
   memory: MemoryEntity;
@@ -27,6 +28,7 @@ export default function MemoriesPage() {
   const [editedMemory, setEditedMemory] = useState<
     SelectedMemory | null | undefined
   >();
+  const { status } = useWebsocket();
 
   const addMemory = useCallback((memory: MemoryEntity) => {
     setMemories((previousMemories) => [...previousMemories, memory]);
@@ -36,11 +38,11 @@ export default function MemoriesPage() {
     (deleteMemoryRequest: DeleteMemoryRequest) => {
       setMemories((previousMemories) =>
         previousMemories.filter(
-          (memory) => memory.id !== deleteMemoryRequest.id
-        )
+          (memory) => memory.id !== deleteMemoryRequest.id,
+        ),
       );
     },
-    []
+    [],
   );
 
   const editMemory = useCallback((memory: MemoryEntity) => {
@@ -58,7 +60,7 @@ export default function MemoriesPage() {
     const removeListener = window.electron.onNewMemoryAdded(
       (_event: any, memory: MemoryEntity) => {
         addMemory(memory);
-      }
+      },
     );
 
     return () => {
@@ -123,7 +125,7 @@ export default function MemoriesPage() {
         });
       }
     },
-    [memories]
+    [memories],
   );
 
   useEffect(() => {
@@ -131,7 +133,7 @@ export default function MemoriesPage() {
       (_event: any, deleteMemoryRequest: DeleteMemoryRequest) => {
         deleteMemory(deleteMemoryRequest);
         handleSetSelectedMemory(-1);
-      }
+      },
     );
 
     return () => {
@@ -144,7 +146,7 @@ export default function MemoriesPage() {
       (_event: any, memory: MemoryEntity) => {
         editMemory(memory);
         handleSetSelectedMemory(-1);
-      }
+      },
     );
 
     return () => {
@@ -207,7 +209,7 @@ export default function MemoriesPage() {
         },
       }));
     },
-    []
+    [],
   );
 
   const handleContentEdit = useCallback(
@@ -224,7 +226,7 @@ export default function MemoriesPage() {
         },
       }));
     },
-    []
+    [],
   );
 
   const handlePreActionEdit = useCallback(
@@ -241,8 +243,17 @@ export default function MemoriesPage() {
         },
       }));
     },
-    []
+    [],
   );
+
+  if (!status.mod) {
+    return (
+      <AppCard>
+        Not connected to The Sims 4. Start a Sims 4 game to connect.
+      </AppCard>
+    );
+  }
+
   if (memories.length > 0) {
     const renderText: any[] = [];
 
@@ -254,7 +265,7 @@ export default function MemoriesPage() {
           className="hoverHighlightTypography"
         >
           {[memory.observation, memory.content].filter((m) => m).join(' ')}
-        </Typography>
+        </Typography>,
       );
       renderText.push(<Typography> </Typography>);
     });
@@ -344,5 +355,5 @@ export default function MemoriesPage() {
     );
   }
 
-  return <AppCard>No game loaded yet</AppCard>;
+  return <AppCard>Interactions between Sims in game will appear here.</AppCard>;
 }

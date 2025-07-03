@@ -48,7 +48,7 @@ export class KoboldAIService implements GenerationService {
   }
 
   async sentientSimsGenerate(
-    request: OpenAICompatibleRequest
+    request: OpenAICompatibleRequest,
   ): Promise<SimsGenerateResponse> {
     const prompt = request.messages.map((m) => m.content).join('\n');
     log.debug(`prompt: ${JSON.stringify(prompt)}`);

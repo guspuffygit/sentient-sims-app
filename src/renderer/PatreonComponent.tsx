@@ -2,7 +2,7 @@ import { useAuthenticator } from '@aws-amplify/ui-react';
 import { Box, Button, Typography } from '@mui/material';
 import { PropsWithChildren } from 'react';
 import { appApiUrl } from 'main/sentient-sims/constants';
-import PatreonUser from './wrappers/PatreonUser';
+import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import { useDebugMode } from './providers/DebugModeProvider';
 
 export const getPatreonOauthUrl = (): string => {
@@ -61,6 +61,7 @@ interface SubscribedPatreonProps {
 }
 
 function SubscribedPatreon({ patreonUser }: SubscribedPatreonProps) {
+  const { enableDebugMode } = useDebugMode();
   let text = `Thank you for being a ${patreonUser.getSubscriptionLevel()} Patreon subscriber!`;
   if (patreonUser.isDev()) {
     text = `Thank you for being a Dev!`;
@@ -68,16 +69,24 @@ function SubscribedPatreon({ patreonUser }: SubscribedPatreonProps) {
 
   return (
     <div>
-      <Typography variant="h5" align="center">
-        {text}
-      </Typography>
-      {/* <EditAvatarComponent /> */}
+      {text === 'Thank you for being a Dev!' ? (
+        <Button
+          onClick={() => {
+            enableDebugMode();
+          }}
+        >
+          {text}
+        </Button>
+      ) : (
+        <Typography variant="h5" align="center">
+          {text}
+        </Typography>
+      )}
     </div>
   );
 }
 
 export default function PatreonComponent() {
-  const debugMode = useDebugMode();
   const { user } = useAuthenticator((context) => [context.user]);
   if (!user) {
     return null;
@@ -92,24 +101,5 @@ export default function PatreonComponent() {
     }
   }
 
-  return (
-    <>
-      <Box>
-        {debugMode.isEnabled ? (
-          <div>
-            <Typography>User: {user?.attributes?.email}</Typography>
-            <Typography>
-              Patreon Linked? {`${patreonUser.isPatreonLinked()}`}
-            </Typography>
-            <Typography>Tier: {patreonUser.getSubscriptionLevel()}</Typography>
-            <Typography>
-              Founder Status: {patreonUser.getFounderStatus()}
-            </Typography>
-            <Typography>Patreon ID: {patreonUser.getPatreonId()}</Typography>
-          </div>
-        ) : null}
-      </Box>
-      <CenteredBox>{content}</CenteredBox>
-    </>
-  );
+  return <CenteredBox>{content}</CenteredBox>;
 }

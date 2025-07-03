@@ -19,11 +19,11 @@ describe('Version Service', () => {
     expect(versionService.getModVersion().version).toEqual('none');
 
     directoryService.createDirectoryIfNotExist(
-      path.dirname(directoryService.getModVersionFile())
+      path.dirname(directoryService.getModVersionFile()),
     );
     fs.writeFileSync(
       directoryService.getModVersionFile(),
-      JSON.stringify(version)
+      JSON.stringify(version),
     );
     expect(versionService.getModVersion().version).toEqual(version.version);
   });

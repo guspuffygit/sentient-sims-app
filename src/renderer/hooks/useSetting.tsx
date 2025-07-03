@@ -3,20 +3,20 @@ import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { appApiUrl } from 'main/sentient-sims/constants';
 
-export type SettingsHook = {
-  value: any;
+export type SettingsHook<T> = {
+  value: T;
   isLoading: boolean;
-  setSetting: (settingValue: any) => Promise<void>;
+  setSetting: (settingValue: T) => Promise<void>;
   resetSetting: () => Promise<void>;
 };
 
-export default function useSetting(
+export default function useSetting<T = any>(
   settingsEnum: SettingsEnum,
-  defaultValue: any = ''
-): SettingsHook {
+  defaultValue: any = '',
+): SettingsHook<T> {
   const settingName = settingsEnum.toString();
   const [isLoading, setIsLoading] = useState(false);
-  const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState<T>(defaultValue);
   const [bounceTimeout, setBounceTimeout] = useState<ReturnType<
     typeof setTimeout
   > | null>();
@@ -27,7 +27,7 @@ export default function useSetting(
     try {
       const response = await fetch(`${appApiUrl}/settings/app/${settingName}`);
       const result = await response.json();
-      setValue(result.value);
+      setValue((prev: any) => (prev !== result.value ? result.value : prev));
     } catch (err: any) {
       log.error(`Unable to get setting ${settingName}`, err);
     } finally {
@@ -45,7 +45,7 @@ export default function useSetting(
     // debounce so that we dont send a bunch of requests back and forth
     const timeout = setTimeout(() => {
       log.debug(
-        `Setting debounce running: ${settingsEnum.toString()}, value: ${settingValue}`
+        `Setting debounce running: ${settingsEnum.toString()}, value: ${settingValue}`,
       );
       window.electron.setSetting(settingsEnum, settingValue);
     }, 600);
@@ -66,14 +66,18 @@ export default function useSetting(
   }, [handleGetSetting]);
 
   useEffect(() => {
-    return window.electron.onSettingChange(
+    const unsubscribe = window.electron.onSettingChange(
       (_event: any, setting: SettingsEnum, newValue: any) => {
         if (setting === settingsEnum) {
           log.debug(`New value: ${newValue}`);
           setValue(newValue);
         }
-      }
+      },
     );
+
+    return () => {
+      unsubscribe();
+    };
   });
 
   return {

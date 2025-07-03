@@ -21,7 +21,7 @@ export class VersionService {
     if (fs.existsSync(path)) {
       log.log(`Version file exists at path: ${path}`);
       const parsedVersion = JSON.parse(
-        fs.readFileSync(path, { encoding: 'utf-8' })
+        fs.readFileSync(path, { encoding: 'utf-8' }),
       );
       log.log(parsedVersion);
       return parsedVersion;
@@ -44,7 +44,7 @@ export class VersionService {
     try {
       const versionText = fs.readFileSync(
         this.directoryService.getGameVersion(),
-        'utf-8'
+        'utf-8',
       );
 
       return { version: removeNonPrintableCharacters(versionText).trim() };

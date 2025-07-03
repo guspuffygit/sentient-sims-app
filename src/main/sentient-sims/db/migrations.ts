@@ -55,7 +55,7 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
                   SELECT 1 FROM memory
                   WHERE timestamp IS NULL
               ) AS has_null_timestamp;
-            `
+            `,
           )
           .get() as any;
 
@@ -72,11 +72,11 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
               SELECT id FROM memory
               WHERE timestamp IS NULL
               ORDER BY id DESC;
-            `
+            `,
           )
           .all() as MemoryEntity[];
         log.info(
-          `Creating timestamps for ${rows.length} rows in the memory table`
+          `Creating timestamps for ${rows.length} rows in the memory table`,
         );
 
         rows.forEach((memory) => {
@@ -90,7 +90,7 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
               UPDATE memory
               SET timestamp = ?
               WHERE id = ?;
-            `
+            `,
           ).run(newTimeStamp, memory.id);
 
           // Subtract one second for the next timestamp
@@ -102,7 +102,7 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
       ALTER TABLE participant
       ADD COLUMN name TEXT;
     `,
-  })
+  }),
 );
 
 const createDbMigrationsTable = (db: Database) => {
@@ -113,7 +113,7 @@ const createDbMigrationsTable = (db: Database) => {
       name TEXT NOT NULL,
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     );
-  `
+  `,
   ).run();
 };
 
@@ -132,7 +132,7 @@ const applyMigration = (db: Database, dbMigration: DbMigration) => {
       }
 
       db.prepare('INSERT INTO migrations (name) VALUES (?)').run(
-        dbMigration.name
+        dbMigration.name,
       );
     });
 

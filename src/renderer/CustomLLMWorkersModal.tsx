@@ -45,7 +45,7 @@ export default function CustomLLMWorkersModal({
   } catch (err: any) {
     log.error(
       `Exception thrown trying to render workers, typeof: ${typeof workers}`,
-      err
+      err,
     );
   }
   return (
