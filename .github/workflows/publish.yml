@@ -76,14 +76,19 @@ jobs:
           if [ "$BUILD_ARCHITECTURE" = "x64" ]; then
             npx tsx ci-prepare-mac-universal-artifacts.ts
             npx tsx build-mac-universal.ts
+            echo "$APPLE_P12_BASE64" | base64 --decode > certificate.p12
+            security create-keychain -p "" build.keychain
+            security default-keychain -s build.keychain
+            security unlock-keychain -p "" build.keychain
+            security import certificate.p12 -k build.keychain -P "$APPLE_P12_PASSWORD" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+            codesign --force --deep --sign "Developer ID Application: Sentient Simulations LLC (JKSSH5AMBR)" universal/SentientSims.app
             npm exec electron-builder -- --publish always --prepackaged universal/SentientSims.app --mac --universal -c.mac.target.arch='universal'
           fi
         env:
           # These values are used for auto updates signing
-          # APPLE_ID: ${{ secrets.APPLE_ID }}
-          # APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
-          # CSC_LINK: ${{ secrets.CSC_LINK }}
-          # CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_P12_BASE64: ${{ secrets.APPLE_P12_BASE64 }}
+          APPLE_P12_PASSWORD: ${{ secrets.APPLE_P12_PASSWORD }}
           # This is used for uploading release assets to github
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BUILD_ARCHITECTURE: ${{ matrix.platform.arch }}
