@@ -18,6 +18,7 @@ import electron, {
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import { dialog } from 'electron/main';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import registerDebugToggleHotkey from './sentient-sims/registerDebugToggleHotkey';
@@ -144,6 +145,18 @@ const createWindow = async () => {
   autoUpdater.logger = log;
   try {
     autoUpdater.checkForUpdatesAndNotify();
+    if (mainWindow) {
+      autoUpdater.on('update-downloaded', async (info) => {
+        await dialog.showMessageBox(mainWindow as BrowserWindow, {
+          type: 'question',
+          buttons: ['Install and Restart'],
+          defaultId: 0,
+          message: `Update ${info.version} has been downloaded and is ready to install, please restart to install the update.`,
+        });
+
+        autoUpdater.quitAndInstall();
+      });
+    }
   } catch (err) {
     log.error(`Unable to check for updates and notify`, err);
   }
