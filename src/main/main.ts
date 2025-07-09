@@ -62,9 +62,6 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
-app.commandLine.appendSwitch('enable-unsafe-webgpu');
-app.commandLine.appendSwitch('enable-features', 'Vulkan');
-
 const createWindow = async () => {
   if (isDebug) {
     await installExtensions();
