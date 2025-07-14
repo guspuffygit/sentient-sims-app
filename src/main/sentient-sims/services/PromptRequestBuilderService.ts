@@ -78,7 +78,9 @@ export class PromptRequestBuilderService {
         }
       });
 
-      formattedParticipants.push(formatSentientSim(sentientSim));
+      formattedParticipants.push(
+        `<CHARACTER_IN_INTERACTION>\n${formatSentientSim(sentientSim)}\n</CHARACTER_IN_INTERACTION>`,
+      );
     });
 
     const relationshipDescriptions: string[] = [];
@@ -106,7 +108,9 @@ export class PromptRequestBuilderService {
     }
 
     if (relationshipDescriptions.length > 0) {
-      formattedParticipants.push(relationshipDescriptions.join(' '));
+      formattedParticipants.push(
+        `<RELATIONSHIPS>\n${relationshipDescriptions.join(' ')}\n</RELATIONSHIPS>`,
+      );
     }
 
     return formattedParticipants;
