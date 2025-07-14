@@ -47,6 +47,12 @@ export const AllModelSettings: ModelSettingsType = {
     breakTokenString: '<|finetune_right_pad|>',
     breakStringTokens: [200018],
   },
+  'moonshotai/Kimi-K2-Instruct': {
+    temperature: 0.6,
+    max_tokens: 16000,
+    breakTokenString: '[UNK]',
+    breakStringTokens: [163838],
+  },
   'ArliAI/Mistral-Nemo-12B-ArliAI-RPMax-v1.1': {
     temperature: 0.8,
     top_p: 0.9,
@@ -82,7 +88,6 @@ export const AllModelSettings: ModelSettingsType = {
     repetition_penalty: 0.5,
     max_tokens: 16000,
   },
-
   'Llama-3.3-70B-ArliAI-RPMax-v1.4': {
     temperature: 0.8,
     top_p: 0.95,
