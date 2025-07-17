@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import log from 'electron-log';
 import { formatAction, formatSentientSim, formatDateTime, formatSeason } from '../formatter/PromptFormatter';
 import { SSEvent, SSRelationships } from '../models/InteractionEvents';
@@ -12,6 +13,14 @@ import { ModelSettings } from '../modelSettings';
 import { defaultRelationshipBitDescriptions } from '../descriptions/relationshipDescriptions';
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { PromptHistoryMode } from '../models/PromptHistoryMode';
+import {
+  postureDescriptions,
+  PostureType,
+} from '../descriptions/postureDescriptions';
+import {
+  ObjectDescription,
+  objectDescriptions,
+} from '../descriptions/objectDescriptions';
 
 export type GenerationOptions = {
   action?: string;
@@ -99,6 +108,61 @@ export class PromptRequestBuilderService {
     return formattedParticipants;
   }
 
+  formatSimPostures(sentientSims: SentientSim[]) {
+    const formattedPositions: string[] = [];
+    sentientSims.forEach((sentientSim) => {
+      const positionStrings: string[] = [`${sentientSim.name} is`];
+      if (
+        sentientSim.body_posture &&
+        sentientSim.body_posture in postureDescriptions
+      ) {
+        const bodyPosturePosition =
+          postureDescriptions[sentientSim.body_posture];
+        if (
+          bodyPosturePosition?.ignored !== true &&
+          bodyPosturePosition?.description
+        ) {
+          positionStrings.push(bodyPosturePosition.description);
+        }
+        if (sentientSim.posture_linked_sim) {
+          positionStrings.push(`with ${sentientSim.posture_linked_sim.name}`);
+        }
+
+        let objectDescription: ObjectDescription | undefined;
+        if (
+          sentientSim.target_part_owner_name &&
+          sentientSim.target_part_owner_name in objectDescriptions
+        ) {
+          objectDescription =
+            objectDescriptions[sentientSim.target_part_owner_name];
+        } else if (
+          sentientSim.target_name &&
+          sentientSim.target_name in objectDescriptions
+        ) {
+          objectDescription = objectDescriptions[sentientSim.target_name];
+        }
+        if (
+          objectDescription &&
+          objectDescription.ignored !== true &&
+          objectDescription.description &&
+          bodyPosturePosition.posture_type !== PostureType.FINAL
+        ) {
+          positionStrings.push(`at the ${objectDescription.description}`);
+        }
+      }
+
+      if (positionStrings.length > 1) {
+        formattedPositions.push(positionStrings.join(' '));
+      }
+    });
+
+    if (formattedPositions.length > 0) {
+      return formattedPositions.join(', ');
+    }
+
+    return undefined;
+  }
+
   getMemories(sentientSims: SentientSim[]) {
     const participantIds = sentientSims.map((sentientSim) => sentientSim.sim_id);
 
@@ -182,6 +246,7 @@ export class PromptRequestBuilderService {
 
     const dateTime = formatDateTime(event.environment);
     const season = formatSeason(event.environment);
+    const postures = this.formatSimPostures(event.sentient_sims);
 
     let formattedAction;
     if (options.action) {
@@ -191,6 +256,7 @@ export class PromptRequestBuilderService {
         location,
         options.sexCategoryType,
         options.sexLocationType,
+        postures,
       );
     }
 
@@ -202,6 +268,7 @@ export class PromptRequestBuilderService {
         location,
         options.sexCategoryType,
         options.sexLocationType,
+        postures,
       );
     }
 
@@ -214,6 +281,7 @@ export class PromptRequestBuilderService {
         location,
         options.sexCategoryType,
         options.sexLocationType,
+        postures,
       );
       log.debug(`formattedPrePreAction: ${formattedPrePreAction}`);
     }
@@ -221,7 +289,14 @@ export class PromptRequestBuilderService {
     const formattedStopTokens: string[] = [];
     options?.stopTokens?.forEach((stopToken) => {
       formattedStopTokens.push(
-        formatAction(stopToken, event.sentient_sims, location, options.sexCategoryType, options.sexLocationType),
+        formatAction(
+          stopToken,
+          event.sentient_sims,
+          location,
+          options.sexCategoryType,
+          options.sexLocationType,
+          postures,
+        ),
       );
     });
 
@@ -234,6 +309,7 @@ export class PromptRequestBuilderService {
         location,
         options.sexCategoryType,
         options.sexLocationType,
+        postures,
       );
       log.debug(`preAssistantPreResponse: ${formattedPreAssistantPreResponse}`);
     }
@@ -245,6 +321,7 @@ export class PromptRequestBuilderService {
       location,
       options.sexCategoryType,
       options.sexLocationType,
+      postures,
     );
 
     const simsPromise = this.formatSims(event.sentient_sims, location, event.relationships);
@@ -252,11 +329,12 @@ export class PromptRequestBuilderService {
     const groupedMemories = this.groupMemories(memories);
     const sims = await simsPromise;
     const formattedLocation = formatAction(
-      'Location: {location} ({location_type}), {location_description}',
+      '<LOCATION>\n{location} ({location_type}), {location_description}\n</LOCATION>',
       event.sentient_sims,
       location,
       options.sexCategoryType,
       options.sexLocationType,
+      postures,
     );
 
     return {
@@ -275,6 +353,7 @@ export class PromptRequestBuilderService {
       stopTokens: formattedStopTokens,
       continue: options.continue,
       promptHistoryMode: options.promptHistoryMode,
+      postures,
     };
   }
 }

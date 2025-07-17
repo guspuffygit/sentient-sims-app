@@ -129,7 +129,7 @@ export class VLLMAIService implements GenerationService {
       completionRequest.min_tokens = undefined;
     }
 
-    log.debug(`Request: ${JSON.stringify(completionRequest, null, 2)}`);
+    // log.debug(`Request: ${JSON.stringify(completionRequest, null, 2)}`);
 
     const response = await axiosClient({
       url: '/v1/chat/completions',

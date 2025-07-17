@@ -136,7 +136,7 @@ export class AIService {
       const action = getRandomItem(description.pre_actions);
       return this.runGeneration(event, {
         action,
-        prePreAction: 'At {location} ({location_type}), ',
+        prePreAction: 'At {location} ({location_type}), {postures},',
       });
     }
 
@@ -207,7 +207,7 @@ export class AIService {
 
     return this.runGeneration(event, {
       action,
-      prePreAction: 'At {location} ({location_type}), ',
+      prePreAction: 'At {location} ({location_type}), {postures},',
       sexCategoryType: event.sex_category,
       sexLocationType: event.sex_location,
     });
@@ -216,7 +216,7 @@ export class AIService {
   async handleDoSomething(doSomethingEvent: DoSomethingInteractionEvent) {
     return this.runGeneration(doSomethingEvent, {
       action: doSomethingEvent.action,
-      prePreAction: 'At {location} ({location_type}), ',
+      prePreAction: 'At {location} ({location_type}), {postures},',
     });
   }
 
