@@ -275,6 +275,7 @@ export function formatAction(
   location: LocationEntity,
   sexCategoryType?: number,
   sexLocationType?: number,
+  postures?: string,
 ) {
   let formattedAction = action;
 
@@ -424,6 +425,13 @@ export function formatAction(
         );
       }
     }
+  }
+
+  if (postures) {
+    formattedAction = formattedAction.replaceAll(`{postures}`, postures);
+  } else {
+    formattedAction = formattedAction.replaceAll(` {postures},`, '');
+    formattedAction = formattedAction.replaceAll(`{postures}`, '');
   }
 
   return formattedAction;
