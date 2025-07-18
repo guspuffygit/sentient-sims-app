@@ -137,4 +137,11 @@ export const AllModelSettings: ModelSettingsType = {
     repetition_penalty: 1.15,
     max_tokens: 14000,
   },
+  'TroyDoesAI/BlackSheep-24B': {
+    temperature: 0.7,
+    repetition_penalty: 1.05,
+    max_tokens: 30000,
+    breakTokenString: '<SPECIAL_54>',
+    breakStringTokens: [54],
+  },
 };
