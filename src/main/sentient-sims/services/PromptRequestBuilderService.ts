@@ -133,12 +133,21 @@ export class PromptRequestBuilderService {
           sentientSim.target_part_owner_name &&
           sentientSim.target_part_owner_name in objectDescriptions
         ) {
+          // This is an explicit description of a specific object
           objectDescription =
             objectDescriptions[sentientSim.target_part_owner_name];
+        } else if (
+          sentientSim.target_slot_type_set_name &&
+          sentientSim.target_slot_type_set_name in objectDescriptions
+        ) {
+          // This ia a more generic description of a slot_type
+          objectDescription =
+            objectDescriptions[sentientSim.target_slot_type_set_name];
         } else if (
           sentientSim.target_name &&
           sentientSim.target_name in objectDescriptions
         ) {
+          // This is fallback to target_name
           objectDescription = objectDescriptions[sentientSim.target_name];
         }
         if (

@@ -36,6 +36,7 @@ export type SentientSimProperties = {
   right_posture_target?: string;
   target_name?: string;
   target_part_owner_name?: string;
+  target_slot_type_set_name?: string;
 };
 
 export type SentientSim = SentientSimProperties & {
