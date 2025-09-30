@@ -203,12 +203,47 @@ export class OpenAIService implements GenerationService {
   async getModels(): Promise<AIModel[]> {
     const models = await this.getOpenAIClient().models.list();
 
+    // These models are the only ones that work with json_schema
+    const jsonSchemaModels: Record<string, AIModel> = {
+      'gpt-4o-2024-08-06': {
+        name: 'gpt-4o-2024-08-06',
+        displayName: 'gpt-4o 2024-08-06',
+      },
+      'gpt-4o-2024-11-20': {
+        name: 'gpt-4o-2024-11-20',
+        displayName: 'gpt-4o 2024-11-20',
+      },
+      'gpt-4o-mini-2024-07-18': {
+        name: 'gpt-4o-mini-2024-07-18',
+        displayName: 'gpt-4o-mini 2024-07-18',
+      },
+      'gpt-4.1-2025-04-14': {
+        name: 'gpt-4.1-2025-04-14',
+        displayName: 'gpt-4.1 2025-04-14',
+      },
+      'gpt-4.1-mini-2025-04-14': {
+        name: 'gpt-4.1-mini-2025-04-14',
+        displayName: 'gpt-4.1-mini 2025-04-14',
+      },
+      'gpt-4.1-nano-2025-04-14': {
+        name: 'gpt-4.1-nano-2025-04-14',
+        displayName: 'gpt-4.1-nano 2025-04-14',
+      },
+    }
+
     const aiModels: AIModel[] = [];
     models.data.forEach((model) => {
-      aiModels.push({
-        name: model.id,
-        displayName: model.id,
-      });
+      if (this.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) !== openaiDefaultEndpoint) {
+        aiModels.push({
+          name: model.id,
+          displayName: model.id,
+        });
+      } else if (model.id in jsonSchemaModels) {
+        aiModels.push({
+          name: model.id,
+          displayName: jsonSchemaModels[model.id].displayName,
+        });
+      }
     });
 
     return aiModels;
