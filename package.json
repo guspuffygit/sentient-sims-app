@@ -135,6 +135,7 @@
     "css-loader": "^6.7.3",
     "css-minimizer-webpack-plugin": "^4.2.2",
     "detect-port": "^2.1.0",
+    "dmg-license": "^1.0.11",
     "electron": "^38.2.1",
     "electron-builder": "26.0.12",
     "electron-chromedriver": "^23.3.13",
