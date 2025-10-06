@@ -34,10 +34,9 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install Node and NPM
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: npm
       - name: Diagnose Environment
         run: |
           echo "Node.js version: $(node -v)"
@@ -57,7 +56,7 @@ jobs:
       - name: Install and build
         run: |
           npm cache clean --force
-          npm ci
+          npm install
           npm run postinstall
           npm run build
 

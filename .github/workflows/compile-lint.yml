@@ -13,18 +13,17 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Install Node.js and NPM
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
+          node-version-file: .nvmrc
 
       - name: Install Dependencies
         run: |
           npm cache clean --force
-          npm ci
+          npm install
 
       - name: Compile
         run: |
