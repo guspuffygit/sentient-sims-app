@@ -75,15 +75,10 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
             `,
           )
           .all() as MemoryEntity[];
-        log.info(
-          `Creating timestamps for ${rows.length} rows in the memory table`,
-        );
+        log.info(`Creating timestamps for ${rows.length} rows in the memory table`);
 
         rows.forEach((memory) => {
-          const newTimeStamp = currentTime
-            .toISOString()
-            .replace('T', ' ')
-            .slice(0, -5);
+          const newTimeStamp = currentTime.toISOString().replace('T', ' ').slice(0, -5);
 
           db.prepare(
             `
@@ -131,9 +126,7 @@ const applyMigration = (db: Database, dbMigration: DbMigration) => {
         db.prepare(dbMigration.sql).run();
       }
 
-      db.prepare('INSERT INTO migrations (name) VALUES (?)').run(
-        dbMigration.name,
-      );
+      db.prepare('INSERT INTO migrations (name) VALUES (?)').run(dbMigration.name);
     });
 
     migrationTransaction();
@@ -157,7 +150,6 @@ export const migrate = (db: Database) => {
   });
   migrationsToApply.sort();
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const migrationName of migrationsToApply) {
     const migration: DbMigration = {
       name: migrationName,

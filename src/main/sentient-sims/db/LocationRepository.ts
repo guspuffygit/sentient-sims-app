@@ -1,8 +1,4 @@
-/* eslint-disable class-methods-use-this */
-import {
-  defaultLocationDescriptions,
-  defaultLotDescription,
-} from '../descriptions/locationDescriptions';
+import { defaultLocationDescriptions, defaultLotDescription } from '../descriptions/locationDescriptions';
 import { DeleteLocationRequest } from '../models/DeleteLocationRequest';
 import { GetLocationRequest } from '../models/GetLocationRequest';
 import { Repository } from './Repository';
@@ -24,9 +20,7 @@ export class LocationRepository extends Repository {
       return results[0];
     }
 
-    const locationEntity = defaultLocationDescriptions.get(
-      locationRequest.id.toString(),
-    );
+    const locationEntity = defaultLocationDescriptions.get(locationRequest.id.toString());
     const defaultLocation = {
       id: locationRequest.id,
       name: 'the home',
@@ -56,22 +50,12 @@ export class LocationRepository extends Repository {
   updateLocation(location: LocationEntity) {
     return this.dbService
       .getDb()
-      .prepare(
-        'INSERT OR REPLACE INTO location(id, name, lot_type, description) VALUES(?, ?, ?, ?)',
-      )
-      .run([
-        location.id,
-        location.name,
-        location.lot_type,
-        location.description,
-      ]);
+      .prepare('INSERT OR REPLACE INTO location(id, name, lot_type, description) VALUES(?, ?, ?, ?)')
+      .run([location.id, location.name, location.lot_type, location.description]);
   }
 
   deleteLocation(location: DeleteLocationRequest) {
-    return this.dbService
-      .getDb()
-      .prepare('DELETE FROM location WHERE id = ?')
-      .run([location.id]);
+    return this.dbService.getDb().prepare('DELETE FROM location WHERE id = ?').run([location.id]);
   }
 
   getAllLocations(): LocationEntity[] {
@@ -86,10 +70,7 @@ export class LocationRepository extends Repository {
   }
 
   getModifiedLocations(): LocationEntity[] {
-    return this.dbService
-      .getDb()
-      .prepare('SELECT * FROM location')
-      .all() as LocationEntity[];
+    return this.dbService.getDb().prepare('SELECT * FROM location').all() as LocationEntity[];
   }
 
   getDefaultLocations(): LocationEntity[] {

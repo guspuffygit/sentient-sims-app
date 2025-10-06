@@ -4,14 +4,8 @@ import HelpButton from 'renderer/components/HelpButton';
 import useSetting from '../hooks/useSetting';
 
 export default function LocalizationSettingsComponent() {
-  const localizationEnabled = useSetting(
-    SettingsEnum.LOCALIZATION_ENABLED,
-    false,
-  );
-  const localizationLanguage = useSetting(
-    SettingsEnum.LOCALIZATION_LANGUAGE,
-    '',
-  );
+  const localizationEnabled = useSetting(SettingsEnum.LOCALIZATION_ENABLED, false);
+  const localizationLanguage = useSetting(SettingsEnum.LOCALIZATION_LANGUAGE, '');
 
   return (
     <>
@@ -21,9 +15,7 @@ export default function LocalizationSettingsComponent() {
           control={
             <Checkbox
               checked={localizationEnabled.value}
-              onChange={(change) =>
-                localizationEnabled.setSetting(change.target.checked)
-              }
+              onChange={(change) => localizationEnabled.setSetting(change.target.checked)}
             />
           }
         />
@@ -39,9 +31,7 @@ export default function LocalizationSettingsComponent() {
             value={localizationLanguage.value}
             size="small"
             fullWidth
-            onChange={(change) =>
-              localizationLanguage.setSetting(change.target.value)
-            }
+            onChange={(change) => localizationLanguage.setSetting(change.target.value)}
             sx={{ marginRight: 2 }}
           />
         </Box>

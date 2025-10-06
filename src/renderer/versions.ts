@@ -1,16 +1,15 @@
-/* eslint import/prefer-default-export: off */
 import { HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { Auth } from 'aws-amplify';
+import { fetchAuthSession } from 'aws-amplify/auth';
 import log from 'electron-log';
 
-export async function isNewVersionAvailable(
-  currentVersionId: string,
-  type = 'main',
-): Promise<boolean> {
+export async function isNewVersionAvailable(currentVersionId: string, type = 'main'): Promise<boolean> {
   log.debug(`current version: ${currentVersionId}`);
   try {
-    const credentials = await Auth.currentCredentials();
-    const client = new S3Client({ region: 'us-east-1', credentials });
+    const authSession = await fetchAuthSession();
+    const client = new S3Client({
+      region: 'us-east-1',
+      credentials: authSession.credentials,
+    });
 
     // Get the latest version ID of the object
     const headObjectCommand = new HeadObjectCommand({
@@ -27,9 +26,7 @@ export async function isNewVersionAvailable(
 
     if (latestVersionId !== yourVersionId) {
       // A new version is available
-      log.info(
-        `New version available. Current: ${yourVersionId} Latest: ${latestVersionId}`,
-      );
+      log.info(`New version available. Current: ${yourVersionId} Latest: ${latestVersionId}`);
       return true;
     }
 

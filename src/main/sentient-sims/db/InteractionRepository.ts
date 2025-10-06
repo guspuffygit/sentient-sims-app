@@ -1,9 +1,5 @@
-/* eslint-disable class-methods-use-this */
 import log from 'electron-log';
-import {
-  InteractionDescription,
-  interactionDescriptions,
-} from '../descriptions/interactionDescriptions';
+import { InteractionDescription, interactionDescriptions } from '../descriptions/interactionDescriptions';
 import { IgnoredInteractionsResponse } from '../models/IgnoredInteractionsResponse';
 import { SettingsService } from '../services/SettingsService';
 import { BasicInteraction } from './dto/InteractionDTO';
@@ -22,9 +18,7 @@ export class InteractionRepository {
   async fetchInteractions(): Promise<Map<string, BasicInteraction>> {
     const response = await axiosClient({
       url: '/interactions',
-      baseURL: `${this.settingsService.get(
-        SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
-      )}`,
+      baseURL: `${this.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
       headers: {
         Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
@@ -36,9 +30,7 @@ export class InteractionRepository {
   async getInteractions(): Promise<Map<string, BasicInteraction>> {
     if (!this.interactions) {
       try {
-        this.interactions = new Map(
-          Object.entries(await this.fetchInteractions()),
-        );
+        this.interactions = new Map(Object.entries(await this.fetchInteractions()));
       } catch (err) {
         log.error(`Unable to fetch interactions from Sentient Sims API`, err);
       }
@@ -52,9 +44,7 @@ export class InteractionRepository {
       url: '/interactions',
       method: 'POST',
       data: interaction,
-      baseURL: `${this.settingsService.get(
-        SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
-      )}`,
+      baseURL: `${this.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
       headers: {
         Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
@@ -67,9 +57,7 @@ export class InteractionRepository {
     return result;
   }
 
-  async getInteraction(
-    interactionName: string,
-  ): Promise<InteractionDescription | undefined> {
+  async getInteraction(interactionName: string): Promise<InteractionDescription | undefined> {
     if (!this.interactions) {
       this.interactions = new Map(Object.entries(await this.getInteractions()));
     }

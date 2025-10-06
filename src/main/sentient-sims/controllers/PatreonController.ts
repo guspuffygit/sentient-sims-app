@@ -1,13 +1,18 @@
 import { Request, Response } from 'express';
 import electron from 'electron';
+import log from 'electron-log';
 import { NotLoggedInError, PatreonService } from '../services/PatreonService';
 import { resolveHtmlPath } from '../../util';
+import { notifyRefreshUserAttributes } from '../util/notifyRenderer';
 
 export class PatreonController {
   private patreonService: PatreonService;
 
-  constructor(patreonService: PatreonService) {
+  private readonly getAssetPath: (...paths: string[]) => string;
+
+  constructor(patreonService: PatreonService, getAssetPath: (...paths: string[]) => string) {
     this.patreonService = patreonService;
+    this.getAssetPath = getAssetPath;
 
     this.handleRedirect = this.handleRedirect.bind(this);
   }
@@ -15,14 +20,13 @@ export class PatreonController {
   async handleRedirect(req: Request, res: Response) {
     const { code } = req.query;
 
+    res.sendFile(this.getAssetPath('redirect-complete.html'));
+
     try {
+      log.debug('Handling patreon redirect');
       await this.patreonService.handlePatreonRedirect(code as string);
-      res.redirect('https://www.patreon.com/SentientSims');
-      electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-        if (wnd.webContents?.isDestroyed() === false) {
-          wnd.webContents.loadURL(resolveHtmlPath('index.html'));
-        }
-      });
+
+      notifyRefreshUserAttributes();
     } catch (exception: any) {
       if (exception instanceof NotLoggedInError) {
         electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
@@ -30,10 +34,7 @@ export class PatreonController {
             wnd.webContents.loadURL(resolveHtmlPath('index.html#/login'));
           }
         });
-        return;
       }
-
-      res.send(exception.message);
     }
   }
 }

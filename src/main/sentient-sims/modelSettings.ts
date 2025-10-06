@@ -15,7 +15,7 @@ export type ModelSettingsType = {
 };
 
 export const AllModelSettings: ModelSettingsType = {
-  default: {
+  'default': {
     temperature: 0.8,
     top_p: 0.9,
     top_k: 40,
@@ -143,5 +143,41 @@ export const AllModelSettings: ModelSettingsType = {
     max_tokens: 30000,
     breakTokenString: '<SPECIAL_54>',
     breakStringTokens: [54],
+  },
+  'zai-org/GLM-4.6-FP8': {
+    temperature: 1.0,
+    top_p: 0.95,
+    top_k: 40,
+    repetition_penalty: 1.05,
+    max_tokens: 16000,
+    breakTokenString: '[MASK]',
+    breakStringTokens: [151330],
+  },
+  'zai-org/GLM-4.6': {
+    temperature: 1.0,
+    top_p: 0.95,
+    top_k: 40,
+    repetition_penalty: 1.05,
+    max_tokens: 16000,
+    breakTokenString: '[MASK]',
+    breakStringTokens: [151330],
+  },
+  'gpt-4o-2024-08-06': {
+    max_tokens: 32000,
+  },
+  'gpt-4o-2024-11-20': {
+    max_tokens: 32000,
+  },
+  'gpt-4o-mini-2024-07-18': {
+    max_tokens: 32000,
+  },
+  'gpt-4.1-2025-04-14': {
+    max_tokens: 32000,
+  },
+  'gpt-4.1-mini-2025-04-14': {
+    max_tokens: 32000,
+  },
+  'gpt-4.1-nano-2025-04-14': {
+    max_tokens: 32000,
   },
 };

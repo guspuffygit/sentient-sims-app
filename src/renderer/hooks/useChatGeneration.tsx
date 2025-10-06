@@ -1,15 +1,5 @@
-/* eslint-disable no-plusplus */
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
-import {
-  defaultMythoMaxSystemPrompt,
-  defaultSystemPrompt,
-} from 'main/sentient-sims/constants';
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
+import { defaultMythoMaxSystemPrompt, defaultSystemPrompt } from 'main/sentient-sims/constants';
 import { ChatCompletionMessageRole } from 'main/sentient-sims/models/ChatCompletionMessageRole';
 import { generateUUID } from '@widgetbot/react-embed/dist/util';
 import log from 'electron-log';
@@ -63,12 +53,8 @@ export interface ChatGeneration {
 export default function useChatGeneration(): ChatGeneration {
   const apiType = useSetting(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
   const [loading, setLoading] = useState(false);
-  const [generationLoadedCallback, setGenerationLoadedCallback] = useState<
-    () => void
-  >(() => {});
-  const [messages, setMessages] = useState<MessageInputProps[]>(
-    defaultMessages(defaultSystemPrompt),
-  );
+  const [generationLoadedCallback, setGenerationLoadedCallback] = useState<() => void>(() => {});
+  const [messages, setMessages] = useState<MessageInputProps[]>(defaultMessages(defaultSystemPrompt));
   const [input, setInput] = useState<string | undefined | null>();
   const maxResponseTokensState = useState(90);
 
@@ -85,49 +71,43 @@ export default function useChatGeneration(): ChatGeneration {
   }, [resetMessages]);
 
   useEffect(() => {
-    const removeListener = window.electron.onChatGeneration(
-      (_event: any, result: InteractionEventResult) => {
-        const updatedMessages: MessageInputProps[] = [];
+    const removeListener = window.electron.onChatGeneration((_event: any, result: InteractionEventResult) => {
+      const updatedMessages: MessageInputProps[] = [];
 
-        if (result.request?.messages) {
-          result.request.messages.forEach((message) => {
+      if (result.request?.messages) {
+        result.request.messages.forEach((message) => {
+          updatedMessages.push({
+            id: generateUUID(),
+            message,
+          });
+        });
+
+        if (result.text) {
+          if (updatedMessages[updatedMessages.length - 1].message.role === 'assistant') {
+            updatedMessages[updatedMessages.length - 1].message.content += ` ${result.text}`;
+          } else {
             updatedMessages.push({
               id: generateUUID(),
-              message,
+              message: {
+                role: 'assistant',
+                content: result.text,
+                tokens: 0,
+              },
             });
-          });
-
-          if (result.text) {
-            if (
-              updatedMessages[updatedMessages.length - 1].message.role ===
-              'assistant'
-            ) {
-              updatedMessages[updatedMessages.length - 1].message.content +=
-                ` ${result.text}`;
-            } else {
-              updatedMessages.push({
-                id: generateUUID(),
-                message: {
-                  role: 'assistant',
-                  content: result.text,
-                  tokens: 0,
-                },
-              });
-            }
           }
-
-          setMessages(updatedMessages);
-          if (result.input) {
-            try {
-              setInput(JSON.stringify(result.input, null, 2));
-            } catch (e: any) {
-              log.error(`Unable to stringify input`, e);
-            }
-          }
-          generationLoadedCallback();
         }
-      },
-    );
+
+        setMessages(updatedMessages);
+        if (result.input) {
+          try {
+            setInput(JSON.stringify(result.input, null, 2));
+          } catch (e: any) {
+            log.error(`Unable to stringify input`, e);
+          }
+        }
+        generationLoadedCallback();
+      }
+    });
     return () => {
       removeListener();
     };

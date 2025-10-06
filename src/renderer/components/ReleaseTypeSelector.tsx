@@ -1,22 +1,17 @@
-import { useAuthenticator } from '@aws-amplify/ui-react';
 import { MenuItem, Select, SelectChangeEvent, Tooltip } from '@mui/material';
 import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { getNightlyAccess } from 'main/sentient-sims/util/nightlyAccess';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import useSetting, { SettingsHook } from 'renderer/hooks/useSetting';
+import { useAuth } from 'renderer/providers/AuthProvider';
 
 export function ReleaseTypeSelector() {
-  const { user } = useAuthenticator((context) => [context.user]);
-  const patreonUser = new PatreonUser(user);
-  const releaseType: SettingsHook<string> = useSetting<string>(
-    SettingsEnum.MOD_RELEASE,
-    'main',
-  );
+  const { userAttributes } = useAuth();
+  const patreonUser = new PatreonUser(userAttributes);
+  const releaseType: SettingsHook<string> = useSetting<string>(SettingsEnum.MOD_RELEASE, 'main');
 
-  const handleChangeReleaseType = async (
-    event: SelectChangeEvent,
-  ): Promise<void> => {
+  const handleChangeReleaseType = async (event: SelectChangeEvent): Promise<void> => {
     const newType = event.target.value;
     log.debug(`Changed release type to: ${newType}`);
     await releaseType.setSetting(newType);
@@ -25,10 +20,7 @@ export function ReleaseTypeSelector() {
   const { disableNightly, nightlyText } = getNightlyAccess(patreonUser);
 
   return (
-    <Tooltip
-      title="Select the mod release channel. Patreon members get early access to nightly builds"
-      placement="top"
-    >
+    <Tooltip title="Select the mod release channel. Patreon members get early access to nightly builds" placement="top">
       <Select
         size="small"
         labelId="release-type-select-label"

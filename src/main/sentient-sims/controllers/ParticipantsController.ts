@@ -1,5 +1,3 @@
-/* eslint-disable promise/always-return */
-/* eslint-disable import/prefer-default-export */
 import { Request, Response } from 'express';
 import log from 'electron-log';
 import { ParticipantRepository } from '../db/ParticipantRepository';

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Set!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Basic Reset */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        /* Main Styles */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7f6; /* A soft, off-white/light gray */
+            color: #333;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2.5rem 3rem;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            transform: translateY(-20px); /* A slight lift for the animation */
+            animation: fadeIn 0.5s ease-out forwards;
+            opacity: 0; /* Start invisible for the animation */
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(0px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(-20px);
+            }
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 500;
+            margin: 1rem 0 0 0;
+            color: #2c3e50; /* A darker, professional blue-gray */
+        }
+        
+        /* Checkmark Icon using CSS */
+        .checkmark {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: inline-block;
+            background-color: #2ecc71; /* A friendly green */
+            position: relative;
+            animation: scaleUp 0.3s ease-in-out 0.2s backwards;
+        }
+        
+        @keyframes scaleUp {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+        
+        .checkmark::after {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 15px;
+            width: 15px;
+            height: 30px;
+            border: solid white;
+            border-width: 0 6px 6px 0;
+            transform: rotate(45deg);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="checkmark"></div>
+        <h1>Success, this window will now close.</h1>
+    </div>
+    <script>
+        const closeWindowAfterDelay = (delayInMilliseconds) => {
+            setTimeout(() => {
+                window.close();
+            }, delayInMilliseconds);
+        };
+
+        closeWindowAfterDelay(1000);
+    </script>
+</body>
+</html>

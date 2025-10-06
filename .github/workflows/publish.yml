@@ -48,7 +48,7 @@ jobs:
       - name: Setup mac build
         if: matrix.platform.cmd == '--mac'
         run: |
-          node setupMacBuildArch.js ${{ matrix.platform.arch }}
+          npx tsx setupMacBuildArch.ts ${{ matrix.platform.arch }}
       - name: Install and build
         run: |
           npm cache clean --force

@@ -1,12 +1,4 @@
-import {
-  Box,
-  FormHelperText,
-  IconButton,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Tooltip,
-} from '@mui/material';
+import { Box, FormHelperText, IconButton, MenuItem, Select, SelectChangeEvent, Tooltip } from '@mui/material';
 import UndoIcon from '@mui/icons-material/Undo';
 import SyncIcon from '@mui/icons-material/Sync';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
@@ -62,14 +54,8 @@ export default function AIModelSelection({
   endpointSetting,
 }: AIModelSelectionProps) {
   const aiModels = useAIModels(apiType);
-  const aiModel: SettingsHook<string> = useSetting<string>(
-    modelSetting,
-    defaultModel,
-  );
-  const aiEndpoint: SettingsHook<string> = useSetting<string>(
-    endpointSetting,
-    defaultEndpoint,
-  );
+  const aiModel: SettingsHook<string> = useSetting<string>(modelSetting, defaultModel);
+  const aiEndpoint: SettingsHook<string> = useSetting<string>(endpointSetting, defaultEndpoint);
 
   const handleChange = (event: SelectChangeEvent) => {
     const model = event.target.value;
@@ -91,9 +77,7 @@ export default function AIModelSelection({
       .sort(compareAIModels)
       .forEach((model) => models.push(model));
 
-    const currentSelectedModelAvailable = models.some(
-      (model) => model.name === aiModel.value,
-    );
+    const currentSelectedModelAvailable = models.some((model) => model.name === aiModel.value);
 
     models.forEach((model) =>
       menuItems.push(
@@ -134,10 +118,7 @@ export default function AIModelSelection({
       )}
       {aiEndpoint.value === defaultEndpoint ? (
         <Tooltip title="Reset to Default">
-          <IconButton
-            sx={{ marginLeft: 1 }}
-            onClick={() => aiModel.resetSetting()}
-          >
+          <IconButton sx={{ marginLeft: 1 }} onClick={() => aiModel.resetSetting()}>
             <UndoIcon />
           </IconButton>
         </Tooltip>

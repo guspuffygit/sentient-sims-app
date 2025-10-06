@@ -1,13 +1,4 @@
-import {
-  Box,
-  Button,
-  Chip,
-  Divider,
-  Modal,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Chip, Divider, Modal, TextField, Tooltip, Typography } from '@mui/material';
 import { Animation } from 'main/sentient-sims/models/Animation';
 import { IpcRendererEvent } from 'electron';
 import { getSexLocation } from 'main/sentient-sims/descriptions/wwDescriptions';
@@ -17,18 +8,9 @@ import {
   getMappingStringErrorPairs,
   getMappingStringReplacementPairs,
 } from 'main/sentient-sims/formatter/PromptFormatter';
-import {
-  WWEventType,
-  WWInteractionEvent,
-} from 'main/sentient-sims/models/InteractionEvents';
+import { WWEventType, WWInteractionEvent } from 'main/sentient-sims/models/InteractionEvents';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
-import {
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useEffect,
-  useState,
-} from 'react';
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
 import { JSX } from 'react/jsx-runtime';
 import { InteractionEventResult } from 'main/sentient-sims/models/InteractionEventResult';
 import log from 'electron-log';
@@ -49,17 +31,11 @@ type ReplacementOutput = {
   actionString: string;
 };
 
-export function replaceActorStringWithSimNames(
-  targetString: string,
-  replacements: ActorMapping[],
-): string {
+export function replaceActorStringWithSimNames(targetString: string, replacements: ActorMapping[]): string {
   let actionString: string = targetString;
 
   replacements.forEach((replacement) => {
-    actionString = actionString.replaceAll(
-      replacement.actor,
-      replacement.mapping,
-    );
+    actionString = actionString.replaceAll(replacement.actor, replacement.mapping);
   });
 
   return actionString;
@@ -85,7 +61,6 @@ export function replaceKeyValuePairs(
       return node.split(regex).reduce((acc, value, index, array) => {
         acc.push(value);
         if (index < array.length - 1) {
-          // eslint-disable-next-line react/no-array-index-key
           acc.push(
             <Tooltip title={replacement.actor} placement="top">
               <Chip label={replacement.mapping} variant="filled" />
@@ -126,7 +101,6 @@ export function replaceKeyValuePairs(
       return node.split(regex).reduce((acc, value, index, array) => {
         acc.push(value);
         if (index < array.length - 1) {
-          // eslint-disable-next-line react/no-array-index-key
           acc.push(
             <Tooltip title={errorMessage} placement="top">
               <Chip label={error} color="error" />
@@ -145,10 +119,7 @@ export function replaceKeyValuePairs(
   };
 }
 
-export function SimMappingRow({
-  sentientSim,
-  setInput,
-}: SimMappingRowProperties) {
+export function SimMappingRow({ sentientSim, setInput }: SimMappingRowProperties) {
   function add(piece: string) {
     // TODO: Input at cursor location instead of the end if the cursor is within the text box
     setInput((previousInput) => `${previousInput}${piece} `);
@@ -156,25 +127,19 @@ export function SimMappingRow({
 
   return (
     <Box>
-      <Button onClick={() => add(`${sentientSim.name}`)}>
-        {sentientSim.name}
-      </Button>
+      <Button onClick={() => add(`${sentientSim.name}`)}>{sentientSim.name}</Button>
       {sentientSim.gender === 'Male' ? (
         <>
           <Button onClick={() => add(`he.${sentientSim.name}`)}>he</Button>
           <Button onClick={() => add(`him.${sentientSim.name}`)}>him</Button>
           <Button onClick={() => add(`his.${sentientSim.name}`)}>his</Button>
-          <Button onClick={() => add(`himself.${sentientSim.name}`)}>
-            himself
-          </Button>
+          <Button onClick={() => add(`himself.${sentientSim.name}`)}>himself</Button>
         </>
       ) : (
         <>
           <Button onClick={() => add(`she.${sentientSim.name}`)}>she</Button>
           <Button onClick={() => add(`her.${sentientSim.name}`)}>her</Button>
-          <Button onClick={() => add(`herself.${sentientSim.name}`)}>
-            herself
-          </Button>
+          <Button onClick={() => add(`herself.${sentientSim.name}`)}>herself</Button>
         </>
       )}
     </Box>
@@ -209,9 +174,7 @@ export function AnimationMappingComponent() {
           );
           setInput(formattedInput);
         } else {
-          const simNames = interactionEvent.sentient_sims.map(
-            (sim) => sim.name,
-          );
+          const simNames = interactionEvent.sentient_sims.map((sim) => sim.name);
           const simNamesList = formatListToString(simNames);
           setInput(`${simNamesList} are `);
         }
@@ -226,9 +189,7 @@ export function AnimationMappingComponent() {
   const rows: JSX.Element[] = [];
   if (event?.sentient_sims) {
     event.sentient_sims.forEach((sentientSim) => {
-      rows.push(
-        <SimMappingRow sentientSim={sentientSim} setInput={setInput} />,
-      );
+      rows.push(<SimMappingRow sentientSim={sentientSim} setInput={setInput} />);
     });
   }
 
@@ -327,10 +288,7 @@ export function AnimationMappingComponent() {
   if (event) {
     const sexLocation = getSexLocation(event.sex_location);
     postFix = (
-      <Tooltip
-        title="This is always appended to the end of the prompt"
-        placement="top"
-      >
+      <Tooltip title="This is always appended to the end of the prompt" placement="top">
         <Chip label={sexLocation} variant="outlined" />
       </Tooltip>
     );
@@ -340,9 +298,7 @@ export function AnimationMappingComponent() {
   if (testResults.length > 0) {
     testOutcome = [];
     testResults.forEach((result, index) => {
-      testOutcome.push(
-        <Typography sx={{ marginBottom: 1 }}>Test {index + 1}:</Typography>,
-      );
+      testOutcome.push(<Typography sx={{ marginBottom: 1 }}>Test {index + 1}:</Typography>);
       testOutcome.push(
         <Typography variant="body2" sx={{ marginBottom: 1 }}>
           {result.text}
@@ -394,8 +350,7 @@ export function AnimationMappingComponent() {
         }}
       >
         <Typography>
-          {event?.animation_author}: {event?.animation_name} -{' '}
-          {event?.animation_identifier}
+          {event?.animation_author}: {event?.animation_name} - {event?.animation_identifier}
         </Typography>
         <Divider sx={{ marginTop: 1, marginBottom: 1 }} />
         {testOutcome}
@@ -452,11 +407,7 @@ export function AnimationMappingComponent() {
               )}
             </div>
             <div>
-              <LoadingButton
-                color="secondary"
-                variant="outlined"
-                onClick={() => onClose()}
-              >
+              <LoadingButton color="secondary" variant="outlined" onClick={() => onClose()}>
                 Cancel
               </LoadingButton>
             </div>

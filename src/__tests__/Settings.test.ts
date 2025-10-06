@@ -1,8 +1,5 @@
 import '@testing-library/jest-dom';
-import {
-  getGenerationService,
-  getTokenCounter,
-} from 'main/sentient-sims/factories/generationServiceFactory';
+import { getGenerationService, getTokenCounter } from 'main/sentient-sims/factories/generationServiceFactory';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { NovelAIService } from 'main/sentient-sims/services/NovelAIService';

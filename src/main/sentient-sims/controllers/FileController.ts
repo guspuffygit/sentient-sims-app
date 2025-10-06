@@ -1,5 +1,3 @@
-/* eslint-disable class-methods-use-this */
-/* eslint-disable import/prefer-default-export */
 import { Request, Response } from 'express';
 import { LastExceptionService } from '../services/LastExceptionService';
 

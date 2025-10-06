@@ -1,14 +1,6 @@
-/* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-import {
-  useEffect,
-  useState,
-  ChangeEvent,
-  useMemo,
-  useCallback,
-  JSX,
-} from 'react';
+import { useEffect, useState, ChangeEvent, useMemo, useCallback, JSX } from 'react';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import {
   Box,
@@ -92,17 +84,9 @@ export default function TraitsPage() {
   if (filteredTraits[selectedIndex]?.trait_type) {
     const traitType = filteredTraits[selectedIndex]?.trait_type;
     const traitClass = filteredTraits[selectedIndex]?.class;
-    if (
-      traitType === 'DISLIKE' &&
-      traitClass &&
-      traitClass === 'AttractionPreference'
-    ) {
+    if (traitType === 'DISLIKE' && traitClass && traitClass === 'AttractionPreference') {
       prefix = 'John Doe is turned off by a partner who';
-    } else if (
-      traitType === 'LIKE' &&
-      traitClass &&
-      traitClass === 'AttractionPreference'
-    ) {
+    } else if (traitType === 'LIKE' && traitClass && traitClass === 'AttractionPreference') {
       prefix = 'John Doe is attracted to a partner who';
     } else if (traitType === 'FEAR') {
       prefix = 'John Doe fears';
@@ -117,10 +101,7 @@ export default function TraitsPage() {
 
   const selectMenuItems: JSX.Element[] = [];
   Object.keys(traitCounts).forEach((traitTypeKey) => {
-    if (
-      traitCounts[traitTypeKey].mapped ===
-      traitCounts[traitTypeKey].mapped - traitCounts[traitTypeKey].unmapped
-    ) {
+    if (traitCounts[traitTypeKey].mapped === traitCounts[traitTypeKey].mapped - traitCounts[traitTypeKey].unmapped) {
       selectMenuItems.push(
         <MenuItem value={traitTypeKey}>
           {traitTypeKey}: {traitCounts[traitTypeKey].mapped}
@@ -129,10 +110,8 @@ export default function TraitsPage() {
     } else {
       selectMenuItems.push(
         <MenuItem value={traitTypeKey}>
-          {traitTypeKey}:{' '}
-          {traitCounts[traitTypeKey].mapped -
-            traitCounts[traitTypeKey].unmapped}
-          /{traitCounts[traitTypeKey].mapped}
+          {traitTypeKey}: {traitCounts[traitTypeKey].mapped - traitCounts[traitTypeKey].unmapped}/
+          {traitCounts[traitTypeKey].mapped}
         </MenuItem>,
       );
     }
@@ -226,12 +205,9 @@ export default function TraitsPage() {
 
   const handleSkip = () => {
     updateDescription();
-    // eslint-disable-next-line no-plusplus
+
     for (let i = selectedIndex + 1; i < filteredTraits.length; i++) {
-      if (
-        !filteredTraits[i]?.description &&
-        filteredTraits[i]?.ignored === undefined
-      ) {
+      if (!filteredTraits[i]?.description && filteredTraits[i]?.ignored === undefined) {
         setSelectedIndex(i);
         setInputField(filteredTraits[i]?.description || '');
         break;
@@ -288,9 +264,7 @@ export default function TraitsPage() {
     }).finally(() => setLoadingExport(false));
   };
 
-  const xml: string | string[] = getFormattedXml(
-    filteredTraits[selectedIndex]?.xml,
-  );
+  const xml: string | string[] = getFormattedXml(filteredTraits[selectedIndex]?.xml);
 
   let ignored = 0;
   if (filteredTraits[selectedIndex]?.ignored === true) {
@@ -313,41 +287,24 @@ export default function TraitsPage() {
           {/* Trait Information */}
           <Grid item xs={12} sm={4}>
             <Typography variant="subtitle1" fontWeight="bold">
-              Trait Details - {selectedIndex + 1} / {filteredTraits.length} -
-              Unmapped: {unmapped}
+              Trait Details - {selectedIndex + 1} / {filteredTraits.length} - Unmapped: {unmapped}
             </Typography>
-            <FormHelperText>
-              Name: {filteredTraits[selectedIndex]?.name}
-            </FormHelperText>
-            <FormHelperText>
-              Class: {filteredTraits[selectedIndex]?.class}
-            </FormHelperText>
-            <FormHelperText>
-              Trait Type: {filteredTraits[selectedIndex]?.trait_type}
-            </FormHelperText>
+            <FormHelperText>Name: {filteredTraits[selectedIndex]?.name}</FormHelperText>
+            <FormHelperText>Class: {filteredTraits[selectedIndex]?.class}</FormHelperText>
+            <FormHelperText>Trait Type: {filteredTraits[selectedIndex]?.trait_type}</FormHelperText>
           </Grid>
 
           {/* Select Menus */}
           <Grid item xs={12} sm={4} container spacing={2}>
             <Grid item xs={6}>
-              <Select
-                value={ignored}
-                onChange={handleChangeIgnored}
-                fullWidth
-                displayEmpty
-              >
+              <Select value={ignored} onChange={handleChangeIgnored} fullWidth displayEmpty>
                 <MenuItem value={0}>Ignored?</MenuItem>
                 <MenuItem value={1}>Ignored = True</MenuItem>
                 <MenuItem value={2}>Ignored = False</MenuItem>
               </Select>
             </Grid>
             <Grid item xs={6}>
-              <Select
-                value={filterTraitType}
-                onChange={handleChangeTraitType}
-                fullWidth
-                displayEmpty
-              >
+              <Select value={filterTraitType} onChange={handleChangeTraitType} fullWidth displayEmpty>
                 <MenuItem value="">No Filter</MenuItem>
                 {selectMenuItems}
               </Select>
@@ -380,20 +337,9 @@ export default function TraitsPage() {
           </Grid>
 
           {/* Action Buttons */}
-          <Grid
-            item
-            xs={12}
-            sm={5}
-            container
-            spacing={2}
-            justifyContent="center"
-          >
+          <Grid item xs={12} sm={5} container spacing={2} justifyContent="center">
             <Grid item>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleBack}
-              >
+              <Button variant="contained" color="secondary" onClick={handleBack}>
                 Back
               </Button>
             </Grid>
@@ -410,11 +356,7 @@ export default function TraitsPage() {
               </Button>
             </Grid>
             <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleForward}
-              >
+              <Button variant="contained" color="primary" onClick={handleForward}>
                 Next
               </Button>
             </Grid>
@@ -424,20 +366,12 @@ export default function TraitsPage() {
               </Button>
             </Grid>
             <Grid item>
-              <LoadingButton
-                variant="contained"
-                loading={loadingExport}
-                onClick={exportResults}
-              >
+              <LoadingButton variant="contained" loading={loadingExport} onClick={exportResults}>
                 Export
               </LoadingButton>
             </Grid>
             <Grid item>
-              <LoadingButton
-                variant="contained"
-                loading={loadingTraits}
-                onClick={loadItems}
-              >
+              <LoadingButton variant="contained" loading={loadingTraits} onClick={loadItems}>
                 Load
               </LoadingButton>
             </Grid>

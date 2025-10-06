@@ -1,4 +1,3 @@
-/* eslint-disable class-methods-use-this */
 import { OneShotRequest, PromptRequest } from '../models/OpenAIRequestBuilder';
 import { filterNullAndUndefined } from '../util/filter';
 import { InputFormatter } from './InputOutputFormatting';

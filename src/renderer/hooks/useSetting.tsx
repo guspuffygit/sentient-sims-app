@@ -10,16 +10,11 @@ export type SettingsHook<T> = {
   resetSetting: () => Promise<void>;
 };
 
-export default function useSetting<T = any>(
-  settingsEnum: SettingsEnum,
-  defaultValue: any = '',
-): SettingsHook<T> {
+export default function useSetting<T = any>(settingsEnum: SettingsEnum, defaultValue: any = ''): SettingsHook<T> {
   const settingName = settingsEnum.toString();
   const [isLoading, setIsLoading] = useState(false);
   const [value, setValue] = useState<T>(defaultValue);
-  const [bounceTimeout, setBounceTimeout] = useState<ReturnType<
-    typeof setTimeout
-  > | null>();
+  const [bounceTimeout, setBounceTimeout] = useState<ReturnType<typeof setTimeout> | null>();
 
   const handleGetSetting = useCallback(async () => {
     setIsLoading(true);
@@ -44,9 +39,7 @@ export default function useSetting<T = any>(
 
     // debounce so that we dont send a bunch of requests back and forth
     const timeout = setTimeout(() => {
-      log.debug(
-        `Setting debounce running: ${settingsEnum.toString()}, value: ${settingValue}`,
-      );
+      log.debug(`Setting debounce running: ${settingsEnum.toString()}, value: ${settingValue}`);
       window.electron.setSetting(settingsEnum, settingValue);
     }, 600);
 
@@ -66,14 +59,12 @@ export default function useSetting<T = any>(
   }, [handleGetSetting]);
 
   useEffect(() => {
-    const unsubscribe = window.electron.onSettingChange(
-      (_event: any, setting: SettingsEnum, newValue: any) => {
-        if (setting === settingsEnum) {
-          log.debug(`New value: ${newValue}`);
-          setValue(newValue);
-        }
-      },
-    );
+    const unsubscribe = window.electron.onSettingChange((_event: any, setting: SettingsEnum, newValue: any) => {
+      if (setting === settingsEnum) {
+        log.debug(`New value: ${newValue}`);
+        setValue(newValue);
+      }
+    });
 
     return () => {
       unsubscribe();

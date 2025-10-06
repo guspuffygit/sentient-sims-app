@@ -1,13 +1,5 @@
-/* eslint-disable no-plusplus */
-/* eslint-disable promise/catch-or-return */
 /* eslint-disable promise/always-return */
-import {
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Typography,
-} from '@mui/material';
+import { Button, Card, CardActions, CardContent, Typography } from '@mui/material';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import log from 'electron-log';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
@@ -148,26 +140,19 @@ export default function SimsPage() {
     getSims();
   }, [editedSim, handleSetSelectedSim]);
 
-  const handleDescriptionEdit = useCallback(
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setEditedSim((previousSim) => ({
-        index: Number(previousSim?.index),
-        sim: {
-          id: previousSim?.sim?.id || '',
-          name: previousSim?.sim?.name || '',
-          description: event.target.value,
-        },
-      }));
-    },
-    [],
-  );
+  const handleDescriptionEdit = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEditedSim((previousSim) => ({
+      index: Number(previousSim?.index),
+      sim: {
+        id: previousSim?.sim?.id || '',
+        name: previousSim?.sim?.name || '',
+        description: event.target.value,
+      },
+    }));
+  }, []);
 
   if (!status.mod) {
-    return (
-      <AppCard>
-        Not connected to The Sims 4. Start a Sims 4 game to connect.
-      </AppCard>
-    );
+    return <AppCard>Not connected to The Sims 4. Start a Sims 4 game to connect.</AppCard>;
   }
 
   if (sims.length > 0) {
@@ -186,37 +171,22 @@ export default function SimsPage() {
               }}
             >
               <div>
-                <Button
-                  sx={{ marginRight: 1 }}
-                  color="secondary"
-                  variant="outlined"
-                  onClick={() => handleSave()}
-                >
+                <Button sx={{ marginRight: 1 }} color="secondary" variant="outlined" onClick={() => handleSave()}>
                   Save
                 </Button>
-                <Button
-                  color="secondary"
-                  variant="outlined"
-                  onClick={() => handleSetSelectedSim(-1)}
-                >
+                <Button color="secondary" variant="outlined" onClick={() => handleSetSelectedSim(-1)}>
                   Cancel
                 </Button>
               </div>
               <div>
-                <Button
-                  color="error"
-                  variant="outlined"
-                  onClick={() => handleDelete()}
-                >
+                <Button color="error" variant="outlined" onClick={() => handleDelete()}>
                   Delete
                 </Button>
               </div>
             </CardActions>
           }
         >
-          <Typography sx={{ marginBottom: 2 }}>
-            Name: {editedSim.sim.name}
-          </Typography>
+          <Typography sx={{ marginBottom: 2 }}>Name: {editedSim.sim.name}</Typography>
           <MemoryEditInput
             label="Description"
             handleEdit={handleDescriptionEdit}
@@ -271,7 +241,5 @@ export default function SimsPage() {
     );
   }
 
-  return (
-    <AppCard>Edit a Sim&apos;s description in game to see them here.</AppCard>
-  );
+  return <AppCard>Edit a Sim&apos;s description in game to see them here.</AppCard>;
 }

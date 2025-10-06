@@ -7,8 +7,9 @@ import path from 'path';
 import { merge } from 'webpack-merge';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
-import { dependencies } from '../../package.json';
+import packageJson from '../../package.json' with { type: 'json' };
 import checkNodeEnv from '../scripts/check-node-env';
+import rendererWebpack from './webpack.config.renderer.dev';
 
 checkNodeEnv('development');
 
@@ -28,10 +29,10 @@ const configuration: webpack.Configuration = {
   /**
    * Use `module` from `webpack.config.renderer.dev.js`
    */
-  module: require('./webpack.config.renderer.dev').default.module,
+  module: rendererWebpack.module,
 
   entry: {
-    renderer: Object.keys(dependencies || {}),
+    renderer: Object.keys(packageJson.dependencies || {}),
   },
 
   output: {

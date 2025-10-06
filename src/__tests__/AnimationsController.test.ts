@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import '@testing-library/jest-dom';
 import { AnimationsService } from 'main/sentient-sims/services/AnimationsService';
 import { SettingsService } from 'main/sentient-sims/services/SettingsService';

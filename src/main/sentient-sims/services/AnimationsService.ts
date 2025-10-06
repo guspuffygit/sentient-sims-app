@@ -1,14 +1,10 @@
-/* eslint-disable class-methods-use-this */
 import { Animation } from 'main/sentient-sims/models/Animation';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { ApiType } from '../models/ApiType';
 import { axiosClient } from '../clients/AxiosClient';
 
-export function getAnimationKey(
-  animationAuthor: string,
-  animationIdentifier: string,
-) {
+export function getAnimationKey(animationAuthor: string, animationIdentifier: string) {
   return `${animationAuthor}:${animationIdentifier}`;
 }
 
@@ -24,9 +20,7 @@ export class AnimationsService {
   async getAnimations() {
     const response = await axiosClient({
       url: '/animations',
-      baseURL: `${this.settingsService.get(
-        SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
-      )}`,
+      baseURL: `${this.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
       headers: {
         Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
@@ -40,9 +34,7 @@ export class AnimationsService {
       url: '/animations',
       method: 'POST',
       data: animation,
-      baseURL: `${this.settingsService.get(
-        SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
-      )}`,
+      baseURL: `${this.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
       headers: {
         Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
@@ -74,8 +66,6 @@ export class AnimationsService {
   }
 
   isAnimationMappingEnabled(): boolean {
-    return this.settingsService.get(
-      SettingsEnum.MAPPING_NOTIFICATION_ENABLED,
-    ) as boolean;
+    return this.settingsService.get(SettingsEnum.MAPPING_NOTIFICATION_ENABLED) as boolean;
   }
 }

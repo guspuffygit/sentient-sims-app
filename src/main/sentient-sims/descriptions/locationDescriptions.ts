@@ -10,7 +10,7 @@ export const defaultLotDescription: string = [
 ].join(' ');
 
 // Default zone descriptions for certain areas, can be overridden
-export const defaultLocationDescriptions: Map<String, LocationEntity> = new Map(
+export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
   Object.entries({
     '90369424': {
       id: 90369424,

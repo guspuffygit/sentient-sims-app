@@ -16,13 +16,10 @@ const electronHandler = {
   onPopupNotification: (callback: any) => {
     return ipcRenderer.on('popup-notification', callback);
   },
-  onCaughtErrorPopupNotification: (
-    callback: (_event: IpcRendererEvent, caughtError: CaughtError) => any,
-  ) => {
+  onCaughtErrorPopupNotification: (callback: (_event: IpcRendererEvent, caughtError: CaughtError) => any) => {
     ipcRenderer.on('caught-error-popup-notification', callback);
 
-    return () =>
-      ipcRenderer.removeListener('caught-error-popup-notification', callback);
+    return () => ipcRenderer.removeListener('caught-error-popup-notification', callback);
   },
   selectDirectory: () => {
     return ipcRenderer.invoke('dialog:selectDirectory');
@@ -37,6 +34,21 @@ const electronHandler = {
     ipcRenderer.on('on-auth', callback);
 
     return () => ipcRenderer.removeListener('on-auth', callback);
+  },
+  refreshAuth: (callback: any) => {
+    ipcRenderer.on('refresh-auth', callback);
+
+    return () => ipcRenderer.removeListener('refresh-auth', callback);
+  },
+  refreshUserAttributes: (callback: any) => {
+    ipcRenderer.on('refresh-user-attributes', callback);
+
+    return () => ipcRenderer.removeListener('refresh-user-attributes', callback);
+  },
+  onLinkingPatreon: (callback: any) => {
+    ipcRenderer.on('on-linking-patreon', callback);
+
+    return () => ipcRenderer.removeListener('on-linking-patreon', callback);
   },
   onSuccessfulAuth: () => {
     ipcRenderer.send('on-successful-auth');
@@ -77,8 +89,7 @@ const electronHandler = {
   onInteractionsChanged: (callback: any) => {
     ipcRenderer.on('on-interactions-changed', callback);
 
-    return () =>
-      ipcRenderer.removeListener('on-interactions-changed', callback);
+    return () => ipcRenderer.removeListener('on-interactions-changed', callback);
   },
   onDatabaseLoaded: (callback: any) => {
     ipcRenderer.on('on-database-loaded', callback);
@@ -101,13 +112,17 @@ const electronHandler = {
   onApiKeyPasteFromClipboard: (callback: any) => {
     ipcRenderer.on('on-api-key-paste-from-clipboard', callback);
 
-    return () =>
-      ipcRenderer.removeListener('on-api-key-paste-from-clipboard', callback);
+    return () => ipcRenderer.removeListener('on-api-key-paste-from-clipboard', callback);
   },
   onMapInteraction: (callback: any) => {
     ipcRenderer.on('on-map-interaction', callback);
 
     return () => ipcRenderer.removeListener('on-map-interaction', callback);
+  },
+  onGoogleAuthComplete: (callback: any) => {
+    ipcRenderer.on('google-auth-complete', callback);
+
+    return () => ipcRenderer.removeListener('google-auth-complete', callback);
   },
   onVoice: (callback: any) => {
     ipcRenderer.on('on-voice', callback);
@@ -117,8 +132,19 @@ const electronHandler = {
   onWebsocketStatusChange: (callback: any) => {
     ipcRenderer.on('websocket-status-change', callback);
 
-    return () =>
-      ipcRenderer.removeListener('websocket-status-change', callback);
+    return () => ipcRenderer.removeListener('websocket-status-change', callback);
+  },
+  setAmplify: async (key: string, value: string) => {
+    return ipcRenderer.invoke('set-amplify', key, value);
+  },
+  getAmplify: async (key: string): Promise<string | null> => {
+    return ipcRenderer.invoke('get-amplify', key);
+  },
+  removeAmplify: async (key: string) => {
+    return ipcRenderer.invoke('remove-amplify', key);
+  },
+  clearAmplify: async () => {
+    return ipcRenderer.invoke('reset-amplify');
   },
 };
 

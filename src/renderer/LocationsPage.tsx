@@ -1,5 +1,3 @@
-/* eslint-disable no-plusplus */
-/* eslint-disable promise/catch-or-return */
 /* eslint-disable promise/always-return */
 import { Button, Card, CardActions, CardContent } from '@mui/material';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
@@ -32,9 +30,7 @@ const columns: GridColDef[] = [
 
 export default function LocationsPage() {
   const [locations, setLocations] = useState<LocationEntity[]>([]);
-  const [editedLocation, setEditedLocation] = useState<
-    SelectedLocation | null | undefined
-  >();
+  const [editedLocation, setEditedLocation] = useState<SelectedLocation | null | undefined>();
   const { status } = useWebsocket();
 
   function getLocations() {
@@ -152,57 +148,44 @@ export default function LocationsPage() {
     getLocations();
   }, [editedLocation, handleSetSelectedLocation]);
 
-  const handleNameEdit = useCallback(
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setEditedLocation((previousLocation) => ({
-        index: Number(previousLocation?.index),
-        location: {
-          id: Number(previousLocation?.location?.id),
-          name: event.target.value,
-          lot_type: previousLocation?.location?.lot_type || '',
-          description: previousLocation?.location?.description || '',
-        },
-      }));
-    },
-    [],
-  );
+  const handleNameEdit = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEditedLocation((previousLocation) => ({
+      index: Number(previousLocation?.index),
+      location: {
+        id: Number(previousLocation?.location?.id),
+        name: event.target.value,
+        lot_type: previousLocation?.location?.lot_type || '',
+        description: previousLocation?.location?.description || '',
+      },
+    }));
+  }, []);
 
-  const handleLotTypeEdit = useCallback(
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setEditedLocation((previousLocation) => ({
-        index: Number(previousLocation?.index),
-        location: {
-          id: Number(previousLocation?.location?.id),
-          name: previousLocation?.location?.name || '',
-          lot_type: event.target.value,
-          description: previousLocation?.location?.description || '',
-        },
-      }));
-    },
-    [],
-  );
+  const handleLotTypeEdit = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEditedLocation((previousLocation) => ({
+      index: Number(previousLocation?.index),
+      location: {
+        id: Number(previousLocation?.location?.id),
+        name: previousLocation?.location?.name || '',
+        lot_type: event.target.value,
+        description: previousLocation?.location?.description || '',
+      },
+    }));
+  }, []);
 
-  const handleDescriptionEdit = useCallback(
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setEditedLocation((previousLocation) => ({
-        index: Number(previousLocation?.index),
-        location: {
-          id: Number(previousLocation?.location?.id),
-          name: previousLocation?.location?.name || '',
-          lot_type: previousLocation?.location?.lot_type || '',
-          description: event.target.value,
-        },
-      }));
-    },
-    [],
-  );
+  const handleDescriptionEdit = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEditedLocation((previousLocation) => ({
+      index: Number(previousLocation?.index),
+      location: {
+        id: Number(previousLocation?.location?.id),
+        name: previousLocation?.location?.name || '',
+        lot_type: previousLocation?.location?.lot_type || '',
+        description: event.target.value,
+      },
+    }));
+  }, []);
 
   if (!status.mod || locations.length === 0) {
-    return (
-      <AppCard>
-        Not connected to The Sims 4. Start a Sims 4 game to connect.
-      </AppCard>
-    );
+    return <AppCard>Not connected to The Sims 4. Start a Sims 4 game to connect.</AppCard>;
   }
 
   let editLocationBox;
@@ -220,28 +203,15 @@ export default function LocationsPage() {
             }}
           >
             <div>
-              <Button
-                sx={{ marginRight: 1 }}
-                color="secondary"
-                variant="outlined"
-                onClick={() => handleSave()}
-              >
+              <Button sx={{ marginRight: 1 }} color="secondary" variant="outlined" onClick={() => handleSave()}>
                 Save
               </Button>
-              <Button
-                color="secondary"
-                variant="outlined"
-                onClick={() => handleSetSelectedLocation(-1)}
-              >
+              <Button color="secondary" variant="outlined" onClick={() => handleSetSelectedLocation(-1)}>
                 Cancel
               </Button>
             </div>
             <div>
-              <Button
-                color="error"
-                variant="outlined"
-                onClick={() => handleDelete()}
-              >
+              <Button color="error" variant="outlined" onClick={() => handleDelete()}>
                 Delete
               </Button>
             </div>

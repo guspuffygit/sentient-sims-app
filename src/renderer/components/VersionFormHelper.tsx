@@ -22,7 +22,7 @@ export function VersionFormHelper({ text, version }: VersionFormHelperProps) {
         elements.push(<FormHelperText error>{errors[i]}</FormHelperText>);
       }
     }
-    // eslint-disable-next-line react/jsx-no-useless-fragment
+
     return <>{elements}</>;
   }
 

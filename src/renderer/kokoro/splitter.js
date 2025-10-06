@@ -1,10 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-multi-assign */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-continue */
-/* eslint-disable no-plusplus */
-/* eslint-disable no-underscore-dangle */
 /**
  * Returns true if the character is considered a sentence terminator.
  * This includes ASCII (".", "!", "?") and common Unicode terminators.
@@ -298,10 +291,7 @@ export class TextSplitterStream {
         // --- URL/email protection ---
         // If the token appears to be a URL or email (contains "://" or "@")
         // and does not already end with a terminator, skip splitting.
-        if (
-          (/https?[,:]\/\//.test(token) || token.includes('@')) &&
-          !isSentenceTerminator(token.at(-1))
-        ) {
+        if ((/https?[,:]\/\//.test(token) || token.includes('@')) && !isSentenceTerminator(token.at(-1))) {
           i = tokenStart + token.length;
           continue;
         }
@@ -315,11 +305,7 @@ export class TextSplitterStream {
         // --- Middle initials heuristic ---
         // If the token is a series of single-letter initials (each ending in a period)
         // and is followed by a capitalized word, assume it's part of a name.
-        if (
-          /^([A-Za-z]\.)+$/.test(token) &&
-          nextNonSpace < len &&
-          /[A-Z]/.test(buffer[nextNonSpace])
-        ) {
+        if (/^([A-Za-z]\.)+$/.test(token) && nextNonSpace < len && /[A-Z]/.test(buffer[nextNonSpace])) {
           ++i;
           continue;
         }
@@ -327,19 +313,13 @@ export class TextSplitterStream {
         // --- Lookahead heuristic ---
         // If the terminator is a period and the next non–whitespace character is lowercase,
         // assume it is not the end of a sentence.
-        if (
-          c === '.' &&
-          nextNonSpace < len &&
-          /[a-z]/.test(buffer[nextNonSpace])
-        ) {
+        if (c === '.' && nextNonSpace < len && /[a-z]/.test(buffer[nextNonSpace])) {
           ++i;
           continue;
         }
 
         // Special case: ellipsis that stands alone should be merged with the following sentence.
-        const sentence = buffer
-          .substring(sentenceStart, boundaryEnd + 1)
-          .trim();
+        const sentence = buffer.substring(sentenceStart, boundaryEnd + 1).trim();
         if (sentence === '...' || sentence === '…') {
           ++i;
           continue;

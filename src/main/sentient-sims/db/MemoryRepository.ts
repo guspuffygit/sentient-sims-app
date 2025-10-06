@@ -9,11 +9,7 @@ import {
 import { Repository } from './Repository';
 import { MemoryEntity } from './entities/MemoryEntity';
 import { MemoryParticipantEntity } from './entities/MemoryParticipantEntity';
-import {
-  notifyMemoryDeleted,
-  notifyMemoryEdited,
-  notifyNewMemoryAdded,
-} from '../util/notifyRenderer';
+import { notifyMemoryDeleted, notifyMemoryEdited, notifyNewMemoryAdded } from '../util/notifyRenderer';
 import { MemoryParticipantDTO } from './dto/MemoryParticipantDTO';
 
 export class MemoryRepository extends Repository {
@@ -29,15 +25,11 @@ export class MemoryRepository extends Repository {
     throw Error(`Memory with id ${getMemoryRequest.id} not found.`);
   }
 
-  getMemoryParticipants(
-    getMemoryParticipantsRequest: GetMemoryParticipantsRequest,
-  ): MemoryParticipantDTO[] {
+  getMemoryParticipants(getMemoryParticipantsRequest: GetMemoryParticipantsRequest): MemoryParticipantDTO[] {
     const memoryParticipants = this.dbService
       .getDb()
       .prepare('SELECT * FROM memory_participants WHERE memory_id = ?')
-      .all([
-        getMemoryParticipantsRequest.memory_id,
-      ]) as MemoryParticipantEntity[];
+      .all([getMemoryParticipantsRequest.memory_id]) as MemoryParticipantEntity[];
 
     return memoryParticipants.map((memoryParticipant) => {
       return {
@@ -48,12 +40,8 @@ export class MemoryRepository extends Repository {
     });
   }
 
-  getParticipantsMemories(
-    getParticipantsMemoriesRequest: GetParticipantsMemoriesRequest,
-  ): MemoryEntity[] {
-    const placeholders = getParticipantsMemoriesRequest.participant_ids
-      .map(() => '?')
-      .join(', ');
+  getParticipantsMemories(getParticipantsMemoriesRequest: GetParticipantsMemoriesRequest): MemoryEntity[] {
+    const placeholders = getParticipantsMemoriesRequest.participant_ids.map(() => '?').join(', ');
 
     const query = `
       SELECT * FROM (
@@ -67,15 +55,11 @@ export class MemoryRepository extends Repository {
       ORDER BY subquery.timestamp ASC;
     `;
 
-    const bigIntParticipantIds =
-      getParticipantsMemoriesRequest.participant_ids.map(
-        (participantIdString) => BigInt(participantIdString),
-      );
+    const bigIntParticipantIds = getParticipantsMemoriesRequest.participant_ids.map((participantIdString) =>
+      BigInt(participantIdString),
+    );
 
-    return this.dbService
-      .getDb()
-      .prepare(query)
-      .all(bigIntParticipantIds) as MemoryEntity[];
+    return this.dbService.getDb().prepare(query).all(bigIntParticipantIds) as MemoryEntity[];
   }
 
   getMemories(): MemoryEntity[] {
@@ -100,14 +84,7 @@ export class MemoryRepository extends Repository {
       .prepare(
         'UPDATE memory SET pre_action = ?, observation = ?, content = ?, timestamp = ?, location_id = ? WHERE id = ?',
       )
-      .run(
-        memory.pre_action,
-        memory.observation,
-        memory.content,
-        memory.timestamp,
-        memory.location_id,
-        memory.id,
-      );
+      .run(memory.pre_action, memory.observation, memory.content, memory.timestamp, memory.location_id, memory.id);
 
     notifyMemoryEdited(memory);
 
@@ -117,15 +94,9 @@ export class MemoryRepository extends Repository {
   updateMemoryParticipant(memoryParticipant: MemoryParticipantDTO) {
     return this.dbService
       .getDb()
-      .prepare(
-        'INSERT OR REPLACE INTO memory_participants(id, participant_id, memory_id) VALUES(?, ?, ?)',
-      )
+      .prepare('INSERT OR REPLACE INTO memory_participants(id, participant_id, memory_id) VALUES(?, ?, ?)')
       .safeIntegers()
-      .run([
-        memoryParticipant.id,
-        BigInt(memoryParticipant.participant_id),
-        memoryParticipant.memory_id,
-      ]);
+      .run([memoryParticipant.id, BigInt(memoryParticipant.participant_id), memoryParticipant.memory_id]);
   }
 
   createMemory(createMemoryRequest: CreateMemoryRequest) {
@@ -165,10 +136,7 @@ export class MemoryRepository extends Repository {
   }
 
   deleteMemory(deleteMemoryRequest: DeleteMemoryRequest) {
-    const result = this.dbService
-      .getDb()
-      .prepare('DELETE FROM memory WHERE id = ?')
-      .run([deleteMemoryRequest.id]);
+    const result = this.dbService.getDb().prepare('DELETE FROM memory WHERE id = ?').run([deleteMemoryRequest.id]);
 
     notifyMemoryDeleted(deleteMemoryRequest);
 

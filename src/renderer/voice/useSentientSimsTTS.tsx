@@ -1,5 +1,3 @@
-/* eslint-disable no-continue */
-/* eslint-disable no-await-in-loop */
 import { useState, useCallback, useRef, useEffect } from 'react';
 import log from 'electron-log';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
@@ -17,14 +15,8 @@ import { TTSHook } from './TTSHook';
 
 export function useSentientSimsTTS(): TTSHook {
   const aiSettings = useAISettings();
-  const sentientSimsAIEndpointSetting = useSetting<string>(
-    SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
-    sentientSimsAIHost,
-  );
-  const sentientSimsAITokenSetting = useSetting<string>(
-    SettingsEnum.ACCESS_TOKEN,
-    '',
-  );
+  const sentientSimsAIEndpointSetting = useSetting<string>(SettingsEnum.SENTIENTSIMSAI_ENDPOINT, sentientSimsAIHost);
+  const sentientSimsAITokenSetting = useSetting<string>(SettingsEnum.ACCESS_TOKEN, '');
   const sentientSimsAITTSSettings = useSetting<SentientSimsAITTSSettings>(
     SettingsEnum.SENTIENTSIMSAI_TTS_SETTINGS,
     defaultSentientSimsAITTSSettings,
@@ -61,9 +53,7 @@ export function useSentientSimsTTS(): TTSHook {
         input: text,
         voice: sentientSimsAITTSSettings.value.voice.join('+'),
         response_format: sentientSimsAITTSSettings.value.response_format,
-        speed:
-          sentientSimsAITTSSettings.value.speed ??
-          defaultSentientSimsAITTSSettings.speed,
+        speed: sentientSimsAITTSSettings.value.speed ?? defaultSentientSimsAITTSSettings.speed,
       };
 
       const url = `${sentientSimsAIEndpointSetting.value}/v2/audio/speech`;
@@ -73,7 +63,7 @@ export function useSentientSimsTTS(): TTSHook {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authentication: sentientSimsAITokenSetting.value,
+            'Authentication': sentientSimsAITokenSetting.value,
             'sentient-sims-model': requestBody.model,
           },
           body: JSON.stringify(requestBody),
@@ -86,6 +76,7 @@ export function useSentientSimsTTS(): TTSHook {
             const bodyResponse = await response.text();
             log.error(bodyResponse);
             setError(bodyResponse);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (err: any) {
             setError(errorMessage);
           }
@@ -106,11 +97,7 @@ export function useSentientSimsTTS(): TTSHook {
 
     fetcherRunningRef.current = false;
     log.debug('Fetcher loop finished.');
-  }, [
-    sentientSimsAITTSSettings.value,
-    sentientSimsAIEndpointSetting.value,
-    sentientSimsAITokenSetting.value,
-  ]);
+  }, [sentientSimsAITTSSettings.value, sentientSimsAIEndpointSetting.value, sentientSimsAITokenSetting.value]);
 
   // The Consumer: Plays audio from the audioUrlQueueRef as it becomes available
   const playerLoop = useCallback(async () => {
@@ -175,12 +162,8 @@ export function useSentientSimsTTS(): TTSHook {
         const { sentences } = response.data;
 
         if (sentences?.length > 0) {
-          sentences.forEach((sentence) =>
-            sentenceQueueRef.current.push(sentence),
-          );
-          log.debug(
-            `Queued ${sentences.length} sentences. Starting fetcher and player.`,
-          );
+          sentences.forEach((sentence) => sentenceQueueRef.current.push(sentence));
+          log.debug(`Queued ${sentences.length} sentences. Starting fetcher and player.`);
           fetcherLoop();
           playerLoop();
         } else {
@@ -192,12 +175,7 @@ export function useSentientSimsTTS(): TTSHook {
         setError(errorMessage);
       }
     },
-    [
-      sentientSimsAIEndpointSetting.value,
-      sentientSimsAITokenSetting.value,
-      fetcherLoop,
-      playerLoop,
-    ],
+    [sentientSimsAIEndpointSetting.value, sentientSimsAITokenSetting.value, fetcherLoop, playerLoop],
   );
 
   const stopTTS = useCallback(() => {

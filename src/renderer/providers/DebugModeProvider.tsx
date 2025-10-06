@@ -1,12 +1,4 @@
-/* eslint-disable import/prefer-default-export */
-import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 
 // Define the context for the debug mode
 interface DebugModeContextType {
@@ -14,9 +6,7 @@ interface DebugModeContextType {
   enableDebugMode: () => void;
 }
 
-const DebugModeContext = createContext<DebugModeContextType | undefined>(
-  undefined,
-);
+const DebugModeContext = createContext<DebugModeContextType | undefined>(undefined);
 
 // Provider component
 interface DebugModeProviderProps {
@@ -49,9 +39,5 @@ export function DebugModeProvider({ children }: DebugModeProviderProps) {
     return { isEnabled: debugModeEnabled, enableDebugMode };
   }, [debugModeEnabled]);
 
-  return (
-    <DebugModeContext.Provider value={contextValue}>
-      {children}
-    </DebugModeContext.Provider>
-  );
+  return <DebugModeContext.Provider value={contextValue}>{children}</DebugModeContext.Provider>;
 }

@@ -47,9 +47,7 @@ export class KoboldAIService implements GenerationService {
     return result.results[0].text;
   }
 
-  async sentientSimsGenerate(
-    request: OpenAICompatibleRequest,
-  ): Promise<SimsGenerateResponse> {
+  async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
     const prompt = request.messages.map((m) => m.content).join('\n');
     log.debug(`prompt: ${JSON.stringify(prompt)}`);
 
@@ -67,14 +65,12 @@ export class KoboldAIService implements GenerationService {
 
       if (currentModel.includes('read only')) {
         return {
-          status:
-            'Error: No AI loaded in Kobold AI yet, please load Mythomax into Kobold AI',
+          status: 'Error: No AI loaded in Kobold AI yet, please load Mythomax into Kobold AI',
         };
       }
       if (!currentModel.includes('mythomax')) {
         return {
-          status:
-            'Kobold AI OK. Warning, using a model other than Mythomax will not work with Sentient Sims',
+          status: 'Kobold AI OK. Warning, using a model other than Mythomax will not work with Sentient Sims',
         };
       }
       return {

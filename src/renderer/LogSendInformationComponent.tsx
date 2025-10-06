@@ -11,8 +11,7 @@ export default function LogSendInformationComponent() {
       </Typography>
       <p />
       <Typography variant="body1" gutterBottom>
-        The Open AI API key will be removed from the data when it is sent to the
-        developer.
+        The Open AI API key will be removed from the data when it is sent to the developer.
       </Typography>
 
       <Typography variant="body1" gutterBottom>
@@ -26,8 +25,7 @@ export default function LogSendInformationComponent() {
       <ul>
         <li>
           <Typography variant="body1" gutterBottom>
-            - lastException.txt and lastCrash.txt files from the The Sims 4
-            folder
+            - lastException.txt and lastCrash.txt files from the The Sims 4 folder
           </Typography>
         </li>
         <li>

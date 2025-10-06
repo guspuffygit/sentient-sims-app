@@ -1,14 +1,4 @@
-/* eslint-disable no-plusplus */
-import {
-  Box,
-  Button,
-  Chip,
-  Divider,
-  Modal,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Chip, Divider, Modal, TextField, Tooltip, Typography } from '@mui/material';
 import { IpcRendererEvent } from 'electron';
 import {
   ActorMapping,
@@ -16,19 +6,9 @@ import {
   getMappingStringErrorPairs,
   getMappingStringReplacementPairs,
 } from 'main/sentient-sims/formatter/PromptFormatter';
-import {
-  InteractionEvent,
-  InteractionMappingEvent,
-  SSEventType,
-} from 'main/sentient-sims/models/InteractionEvents';
+import { InteractionEvent, InteractionMappingEvent, SSEventType } from 'main/sentient-sims/models/InteractionEvents';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
-import {
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useEffect,
-  useState,
-} from 'react';
+import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
 import { JSX } from 'react/jsx-runtime';
 import { InteractionEventResult } from 'main/sentient-sims/models/InteractionEventResult';
 import log from 'electron-log';
@@ -50,17 +30,11 @@ type ReplacementOutput = {
   actionString: string;
 };
 
-export function replaceActorStringWithSimNames(
-  targetString: string,
-  replacements: ActorMapping[],
-): string {
+export function replaceActorStringWithSimNames(targetString: string, replacements: ActorMapping[]): string {
   let actionString: string = targetString;
 
   replacements.forEach((replacement) => {
-    actionString = actionString.replaceAll(
-      replacement.actor,
-      replacement.mapping,
-    );
+    actionString = actionString.replaceAll(replacement.actor, replacement.mapping);
   });
 
   return actionString;
@@ -86,7 +60,6 @@ export function replaceKeyValuePairs(
       return node.split(regex).reduce((acc, value, index, array) => {
         acc.push(value);
         if (index < array.length - 1) {
-          // eslint-disable-next-line react/no-array-index-key
           acc.push(
             <Tooltip title={replacement.actor} placement="top">
               <Chip label={replacement.mapping} variant="filled" />
@@ -127,7 +100,6 @@ export function replaceKeyValuePairs(
       return node.split(regex).reduce((acc, value, index, array) => {
         acc.push(value);
         if (index < array.length - 1) {
-          // eslint-disable-next-line react/no-array-index-key
           acc.push(
             <Tooltip title={errorMessage} placement="top">
               <Chip label={error} color="error" />
@@ -146,10 +118,7 @@ export function replaceKeyValuePairs(
   };
 }
 
-export function SimMappingRow({
-  sentientSim,
-  setInput,
-}: SimMappingRowProperties) {
+export function SimMappingRow({ sentientSim, setInput }: SimMappingRowProperties) {
   function add(piece: string) {
     // TODO: Input at cursor location instead of the end if the cursor is within the text box
     setInput((previousInput) => `${previousInput}${piece} `);
@@ -157,25 +126,19 @@ export function SimMappingRow({
 
   return (
     <Box>
-      <Button onClick={() => add(`${sentientSim.name}`)}>
-        {sentientSim.name}
-      </Button>
+      <Button onClick={() => add(`${sentientSim.name}`)}>{sentientSim.name}</Button>
       {sentientSim.gender === 'Male' ? (
         <>
           <Button onClick={() => add(`he.${sentientSim.name}`)}>he</Button>
           <Button onClick={() => add(`him.${sentientSim.name}`)}>him</Button>
           <Button onClick={() => add(`his.${sentientSim.name}`)}>his</Button>
-          <Button onClick={() => add(`himself.${sentientSim.name}`)}>
-            himself
-          </Button>
+          <Button onClick={() => add(`himself.${sentientSim.name}`)}>himself</Button>
         </>
       ) : (
         <>
           <Button onClick={() => add(`she.${sentientSim.name}`)}>she</Button>
           <Button onClick={() => add(`her.${sentientSim.name}`)}>her</Button>
-          <Button onClick={() => add(`herself.${sentientSim.name}`)}>
-            herself
-          </Button>
+          <Button onClick={() => add(`herself.${sentientSim.name}`)}>herself</Button>
         </>
       )}
     </Box>
@@ -185,9 +148,7 @@ export function SimMappingRow({
 const aiClient = new AIClient();
 
 export function InteractionMappingComponent() {
-  const [event, setEvent] = useState<
-    InteractionMappingEvent | undefined | null
-  >();
+  const [event, setEvent] = useState<InteractionMappingEvent | undefined | null>();
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [testResults, setTestResults] = useState<InteractionEventResult[]>([]);
@@ -212,9 +173,7 @@ export function InteractionMappingComponent() {
           );
           setInput(formattedInput);
         } else {
-          const simNames = interactionEvent.sentient_sims.map(
-            (sim) => sim.name,
-          );
+          const simNames = interactionEvent.sentient_sims.map((sim) => sim.name);
           const simNamesList = formatListToString(simNames);
           setInput(`${simNamesList} are `);
         }
@@ -234,9 +193,7 @@ export function InteractionMappingComponent() {
   const rows: JSX.Element[] = [];
   if (event?.sentient_sims) {
     event.sentient_sims.forEach((sentientSim) => {
-      rows.push(
-        <SimMappingRow sentientSim={sentientSim} setInput={setInput} />,
-      );
+      rows.push(<SimMappingRow sentientSim={sentientSim} setInput={setInput} />);
     });
 
     if (event.sentient_sims.length > 2) {
@@ -246,9 +203,7 @@ export function InteractionMappingComponent() {
       }
       rows.push(
         <Box>
-          <Button onClick={() => add(nonInitiatorParticipants.join(', '))}>
-            non_initiator_participants
-          </Button>
+          <Button onClick={() => add(nonInitiatorParticipants.join(', '))}>non_initiator_participants</Button>
         </Box>,
       );
       // {non_initiator_participants}
@@ -261,7 +216,6 @@ export function InteractionMappingComponent() {
     getMappingStringErrorPairs(event?.sentient_sims),
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function handleSave(saveToMemory: boolean) {
     if (!event) {
       return;
@@ -362,9 +316,7 @@ export function InteractionMappingComponent() {
   if (testResults.length > 0) {
     testOutcome = [];
     testResults.forEach((result, index) => {
-      testOutcome.push(
-        <Typography sx={{ marginBottom: 1 }}>Test {index + 1}:</Typography>,
-      );
+      testOutcome.push(<Typography sx={{ marginBottom: 1 }}>Test {index + 1}:</Typography>);
       testOutcome.push(
         <Typography variant="body2" sx={{ marginBottom: 1 }}>
           {result.text}
@@ -471,11 +423,7 @@ export function InteractionMappingComponent() {
               )}
             </div>
             <div>
-              <LoadingButton
-                color="secondary"
-                variant="outlined"
-                onClick={() => onClose()}
-              >
+              <LoadingButton color="secondary" variant="outlined" onClick={() => onClose()}>
                 Cancel
               </LoadingButton>
             </div>

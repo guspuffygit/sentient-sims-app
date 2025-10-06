@@ -1,14 +1,4 @@
-import {
-  Box,
-  Chip,
-  FormHelperText,
-  Grid,
-  MenuItem,
-  Select,
-  Slider,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, Chip, FormHelperText, Grid, MenuItem, Select, Slider, Stack, Typography } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting from 'renderer/hooks/useSetting';
 import { JSX, useMemo } from 'react';
@@ -25,16 +15,16 @@ import {
 import { VOICES } from 'renderer/kokoro/voices';
 import { TestVoiceButton } from 'renderer/components/VoiceTestButton';
 import { useTTS } from 'renderer/providers/AudioContextProvider';
-import { useAuthenticator } from '@aws-amplify/ui-react';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import SpeedIcon from '@mui/icons-material/Speed';
+import { useAuth } from '../../providers/AuthProvider';
 
 export function SentientSimsAIVoiceSettingsComponent() {
-  const { user } = useAuthenticator((context) => [context.user]);
+  const { userAttributes } = useAuth();
 
-  const patreonUser = new PatreonUser(user);
+  const patreonUser = new PatreonUser(userAttributes);
 
-  const showLogInError = !user;
+  const showLogInError = !userAttributes;
   const showMemberError = !patreonUser.isMember();
 
   const errors: JSX.Element[] = [];
@@ -64,9 +54,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
   );
 
   const voiceMenuItems: any[] = [];
-  if (
-    sentientsimsaiTtsSettings.value.model === SentientSimsAISpeechModel.KOKORO
-  ) {
+  if (sentientsimsaiTtsSettings.value.model === SentientSimsAISpeechModel.KOKORO) {
     Object.entries(SentientSimsAISpeechKokoroVoice).forEach((key) => {
       // this voice doesn't work for some reason
       if (key[1] !== SentientSimsAISpeechKokoroVoice.Isabella) {
@@ -86,9 +74,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
   function handleModelChange(model: string) {
     const speechModel = toSpeechModel(model);
 
-    let voice: SentientSimsAISpeechVoice[] = [
-      SentientSimsAISpeechKokoroVoice.Heart,
-    ];
+    let voice: SentientSimsAISpeechVoice[] = [SentientSimsAISpeechKokoroVoice.Heart];
     if (speechModel === SentientSimsAISpeechModel.ORPHEUS) {
       voice = [SentientSimsAISpeechOrpheusVoice.Tara];
     }
@@ -152,11 +138,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
       <Box>
         <Box>{errors}</Box>
         <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            sx={{ alignItems: 'center', mb: 1, width: '100%' }}
-          >
+          <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
             <Typography>Speech Model:</Typography>
             <Select
               size="small"
@@ -171,21 +153,14 @@ export function SentientSimsAIVoiceSettingsComponent() {
           </Stack>
         </Box>
         <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            sx={{ alignItems: 'center', mb: 1, width: '100%' }}
-          >
+          <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
             <Typography>Speech Voice:</Typography>
             <Select
               size="small"
               labelId="voice"
               id="voice"
               label="Voice"
-              multiple={
-                sentientsimsaiTtsSettings.value.model ===
-                SentientSimsAISpeechModel.KOKORO
-              }
+              multiple={sentientsimsaiTtsSettings.value.model === SentientSimsAISpeechModel.KOKORO}
               value={sentientsimsaiTtsSettings.value.voice}
               onChange={(change) => handleVoiceChange(change.target.value)}
               renderValue={(selected) => (
@@ -201,28 +176,16 @@ export function SentientSimsAIVoiceSettingsComponent() {
           </Stack>
         </Box>
         <Box>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            sx={{ alignItems: 'center', mb: 1, width: '100%' }}
-          >
-            {sentientsimsaiTtsSettings.value.model ===
-              SentientSimsAISpeechModel.KOKORO && (
-              <FormHelperText>
-                You can select multiple voices to create a custom voice
-              </FormHelperText>
+          <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
+            {sentientsimsaiTtsSettings.value.model === SentientSimsAISpeechModel.KOKORO && (
+              <FormHelperText>You can select multiple voices to create a custom voice</FormHelperText>
             )}
             <TestVoiceButton disabled={showLogInError || showMemberError} />
           </Stack>
         </Box>
-        {sentientsimsaiTtsSettings.value.model ===
-          SentientSimsAISpeechModel.KOKORO && (
+        {sentientsimsaiTtsSettings.value.model === SentientSimsAISpeechModel.KOKORO && (
           <Box sx={{ width: 300 }}>
-            <Stack
-              spacing={2}
-              direction="row"
-              sx={{ alignItems: 'center', mb: 1 }}
-            >
+            <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
               <Typography>Speed:</Typography>
               <Slider
                 aria-label="Speed"
@@ -242,11 +205,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
           </Box>
         )}
         {tts?.error && (
-          <Box
-            display="flex"
-            alignItems="center"
-            sx={{ marginBottom: 2, marginTop: 2 }}
-          >
+          <Box display="flex" alignItems="center" sx={{ marginBottom: 2, marginTop: 2 }}>
             <FormHelperText error>Error: {tts?.error}</FormHelperText>
           </Box>
         )}

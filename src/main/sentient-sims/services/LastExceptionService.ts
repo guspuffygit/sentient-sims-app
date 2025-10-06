@@ -19,10 +19,7 @@ export class LastExceptionService {
 
   getLastExceptionFiles() {
     const files = ['lastException', 'lastCleanException', 'lastUIException'];
-    return this.directoryService.findFilesWithKeywords(
-      this.directoryService.getSims4Folder(),
-      files,
-    );
+    return this.directoryService.findFilesWithKeywords(this.directoryService.getSims4Folder(), files);
   }
 
   getParsedLastExceptionFiles() {
@@ -60,9 +57,7 @@ export class LastExceptionService {
 
     const files = this.getLastExceptionFiles();
     files.forEach((lastExceptionFile) => {
-      log.info(
-        `Removing last exception file: ${path.basename(lastExceptionFile)}`,
-      );
+      log.info(`Removing last exception file: ${path.basename(lastExceptionFile)}`);
       fs.rmSync(lastExceptionFile);
     });
 

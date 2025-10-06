@@ -1,9 +1,6 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
-import {
-  ExportTraitsRequest,
-  MappingService,
-} from '../services/MappingService';
+import { ExportTraitsRequest, MappingService } from '../services/MappingService';
 
 export class MappingController {
   private readonly mappingService: MappingService;
@@ -20,9 +17,7 @@ export class MappingController {
 
   async getTraits(req: Request, res: Response) {
     log.debug(`params: ${req.query}`);
-    const searchClass: string | undefined = req.query.searchClass as
-      | string
-      | undefined;
+    const searchClass: string | undefined = req.query.searchClass as string | undefined;
     const extractedPath: string = req.query.extractedPath as string;
 
     res.json(
@@ -34,9 +29,7 @@ export class MappingController {
   }
 
   async getUnmappedTraits(req: Request, res: Response) {
-    const searchClass: string | undefined = req.query.searchClass as
-      | string
-      | undefined;
+    const searchClass: string | undefined = req.query.searchClass as string | undefined;
     const extractedPath: string = req.query.extractedPath as string;
     res.json(
       await this.mappingService.getUnmappedTraits({
@@ -57,9 +50,7 @@ export class MappingController {
   async exportTraits(req: Request, res: Response) {
     const exportTraitsRequest: ExportTraitsRequest = req.body;
     log.debug(`ExtractedPath: ${exportTraitsRequest.extractedPath}`);
-    log.debug(
-      `Length of Traits: ${Object.keys(exportTraitsRequest.traits).length}`,
-    );
+    log.debug(`Length of Traits: ${Object.keys(exportTraitsRequest.traits).length}`);
     res.json(await this.mappingService.exportTraits(req.body));
   }
 }

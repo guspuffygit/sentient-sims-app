@@ -8,1204 +8,1203 @@ export type TraitMapping = TraitDescription & {
 };
 
 export const simsTraitDescriptions: Record<string, TraitMapping> = {
-  ageTraits_Fox_Adult: {
+  'ageTraits_Fox_Adult': {
     name: 'ageTraits_Fox_Adult',
     description: 'is an adult fox',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  ageTraits_Fox_Elder: {
+  'ageTraits_Fox_Elder': {
     name: 'ageTraits_Fox_Elder',
     description: 'is an elder fox',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  archaeologySkill_GiveAuthenticationMail_Prohibit: {
+  'archaeologySkill_GiveAuthenticationMail_Prohibit': {
     name: 'archaeologySkill_GiveAuthenticationMail_Prohibit',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  challenge_Kindness_Ambassador: {
+  'challenge_Kindness_Ambassador': {
     name: 'challenge_Kindness_Ambassador',
     description: 'has stronger friendships and fewer negative emotions',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  EP18_Trait_Hidden_NPC: {
+  'EP18_Trait_Hidden_NPC': {
     name: 'EP18_Trait_Hidden_NPC',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  eP18_Trait_Hidden_NPC_BrunoHoffman: {
+  'eP18_Trait_Hidden_NPC_BrunoHoffman': {
     name: 'eP18_Trait_Hidden_NPC_BrunoHoffman',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  EP18_Trait_Hidden_NPC_CannonBallColeman: {
+  'EP18_Trait_Hidden_NPC_CannonBallColeman': {
     name: 'EP18_Trait_Hidden_NPC_CannonBallColeman',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  EP18_Trait_Hidden_NPC_CoreyNyhrus: {
+  'EP18_Trait_Hidden_NPC_CoreyNyhrus': {
     name: 'EP18_Trait_Hidden_NPC_CoreyNyhrus',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  EP18_Trait_Hidden_NPC_CrispinBlack: {
+  'EP18_Trait_Hidden_NPC_CrispinBlack': {
     name: 'EP18_Trait_Hidden_NPC_CrispinBlack',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  eP18_Trait_Hidden_NPC_FelixHoffman: {
+  'eP18_Trait_Hidden_NPC_FelixHoffman': {
     name: 'eP18_Trait_Hidden_NPC_FelixHoffman',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  eP18_Trait_Hidden_NPC_FreyaLoden: {
+  'eP18_Trait_Hidden_NPC_FreyaLoden': {
     name: 'eP18_Trait_Hidden_NPC_FreyaLoden',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  EP18_Trait_Hidden_NPC_GrammaHattie: {
+  'EP18_Trait_Hidden_NPC_GrammaHattie': {
     name: 'EP18_Trait_Hidden_NPC_GrammaHattie',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  EP18_Trait_Hidden_NPC_Hoffman: {
+  'EP18_Trait_Hidden_NPC_Hoffman': {
     name: 'EP18_Trait_Hidden_NPC_Hoffman',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  EP18_Trait_Hidden_NPC_Loden: {
+  'EP18_Trait_Hidden_NPC_Loden': {
     name: 'EP18_Trait_Hidden_NPC_Loden',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  eP18_Trait_Hidden_NPC_NoraLoden: {
+  'eP18_Trait_Hidden_NPC_NoraLoden': {
     name: 'eP18_Trait_Hidden_NPC_NoraLoden',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  eP18_Trait_Hidden_NPC_OllieMark: {
+  'eP18_Trait_Hidden_NPC_OllieMark': {
     name: 'eP18_Trait_Hidden_NPC_OllieMark',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  eP18_Trait_Hidden_NPC_ZainKaba: {
+  'eP18_Trait_Hidden_NPC_ZainKaba': {
     name: 'eP18_Trait_Hidden_NPC_ZainKaba',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  fameTrait_Level1: {
+  'fameTrait_Level1': {
     name: 'fameTrait_Level1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  fameTrait_Level2: {
+  'fameTrait_Level2': {
     name: 'fameTrait_Level2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  fameTrait_Level3: {
+  'fameTrait_Level3': {
     name: 'fameTrait_Level3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  fameTrait_Level4: {
+  'fameTrait_Level4': {
     name: 'fameTrait_Level4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  fameTrait_Level5: {
+  'fameTrait_Level5': {
     name: 'fameTrait_Level5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  fameTraits_CelebrityWalk_On: {
+  'fameTraits_CelebrityWalk_On': {
     name: 'fameTraits_CelebrityWalk_On',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  fameTraits_Shine_Off: {
+  'fameTraits_Shine_Off': {
     name: 'fameTraits_Shine_Off',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  fameTraits_Shine_On_Rank4: {
+  'fameTraits_Shine_On_Rank4': {
     name: 'fameTraits_Shine_On_Rank4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  fameTraits_Shine_On_Rank5: {
+  'fameTraits_Shine_On_Rank5': {
     name: 'fameTraits_Shine_On_Rank5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  foodPreferences_Infants_Applesauce: {
+  'foodPreferences_Infants_Applesauce': {
     name: 'foodPreferences_Infants_Applesauce',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_bananaSlices: {
+  'foodPreferences_Infants_bananaSlices': {
     name: 'foodPreferences_Infants_bananaSlices',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_crushedCarrots: {
+  'foodPreferences_Infants_crushedCarrots': {
     name: 'foodPreferences_Infants_crushedCarrots',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_homemadeHummus: {
+  'foodPreferences_Infants_homemadeHummus': {
     name: 'foodPreferences_Infants_homemadeHummus',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_iceCream: {
+  'foodPreferences_Infants_iceCream': {
     name: 'foodPreferences_Infants_iceCream',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_mashedMango: {
+  'foodPreferences_Infants_mashedMango': {
     name: 'foodPreferences_Infants_mashedMango',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_mashedPeas: {
+  'foodPreferences_Infants_mashedPeas': {
     name: 'foodPreferences_Infants_mashedPeas',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_oatmealCereal: {
+  'foodPreferences_Infants_oatmealCereal': {
     name: 'foodPreferences_Infants_oatmealCereal',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_OatyOs: {
+  'foodPreferences_Infants_OatyOs': {
     name: 'foodPreferences_Infants_OatyOs',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_papayaPaste: {
+  'foodPreferences_Infants_papayaPaste': {
     name: 'foodPreferences_Infants_papayaPaste',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_peanutButterPuffs: {
+  'foodPreferences_Infants_peanutButterPuffs': {
     name: 'foodPreferences_Infants_peanutButterPuffs',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_pumpkinPuree: {
+  'foodPreferences_Infants_pumpkinPuree': {
     name: 'foodPreferences_Infants_pumpkinPuree',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_ricePorridge: {
+  'foodPreferences_Infants_ricePorridge': {
     name: 'foodPreferences_Infants_ricePorridge',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_smashedAvocado: {
+  'foodPreferences_Infants_smashedAvocado': {
     name: 'foodPreferences_Infants_smashedAvocado',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_smashedLemon: {
+  'foodPreferences_Infants_smashedLemon': {
     name: 'foodPreferences_Infants_smashedLemon',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_sweetPotatoPuree: {
+  'foodPreferences_Infants_sweetPotatoPuree': {
     name: 'foodPreferences_Infants_sweetPotatoPuree',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_yogurt: {
+  'foodPreferences_Infants_yogurt': {
     name: 'foodPreferences_Infants_yogurt',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  foodPreferences_Infants_yogurtMelts: {
+  'foodPreferences_Infants_yogurtMelts': {
     name: 'foodPreferences_Infants_yogurtMelts',
     ignored: true,
     class: 'GameplayObjectPreference',
     trait_type: TraitType.NONE,
   },
-  love_Explorer: {
+  'love_Explorer': {
     name: 'love_Explorer',
     description: 'is quick at growing romantic relationships',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  love_Poly: {
+  'love_Poly': {
     name: 'love_Poly',
     description: 'is good at keeping multiple romantic relationships',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_active: {
+  'trait_active': {
     name: 'trait_active',
     description: 'is active',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_ActorCareer_Hidden_Checkpoints_NewToActorCareer: {
+  'trait_ActorCareer_Hidden_Checkpoints_NewToActorCareer': {
     name: 'trait_ActorCareer_Hidden_Checkpoints_NewToActorCareer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_adult: {
+  'trait_adult': {
     name: 'trait_adult',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Adventurous: {
+  'trait_Adventurous': {
     name: 'trait_Adventurous',
     description: 'is adventurous',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Alluring: {
+  'trait_Alluring': {
     name: 'trait_Alluring',
     ignored: false,
     description: 'is alluring',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_AlwaysWelcome: {
+  'trait_AlwaysWelcome': {
     name: 'trait_AlwaysWelcome',
     ignored: false,
     description: "is always welcome in other people's homes",
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Ambitious: {
+  'trait_Ambitious': {
     name: 'trait_Ambitious',
     description: 'is ambitious',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_AnglersTranquility: {
+  'trait_AnglersTranquility': {
     name: 'trait_AnglersTranquility',
     ignored: false,
     description: 'is calmed when fishing',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Animal_Attraction: {
+  'trait_Animal_Attraction': {
     name: 'trait_Animal_Attraction',
     ignored: false,
     description: 'is affectionate to animals',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_Animal_Whisperer: {
+  'trait_Animal_Whisperer': {
     name: 'trait_Animal_Whisperer',
     ignored: false,
-    description:
-      'is good at training pets and has good relationships with pets',
+    description: 'is good at training pets and has good relationships with pets',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  Trait_AnimalEnthusiast: {
+  'Trait_AnimalEnthusiast': {
     name: 'Trait_AnimalEnthusiast',
     description: 'is an animal enthusiast',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Antiseptic: {
+  'trait_Antiseptic': {
     name: 'trait_Antiseptic',
     ignored: false,
     description: 'is naturally hygienic without effort',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Appraiser: {
+  'trait_Appraiser': {
     name: 'trait_Appraiser',
     ignored: false,
     description: 'is an appraiser of metals, crystals and fossils',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_ArchaeologyScholar_MuseumPatron: {
+  'trait_ArchaeologyScholar_MuseumPatron': {
     name: 'trait_ArchaeologyScholar_MuseumPatron',
     ignored: false,
     description: 'is an Archaeology Scholar and Museum Patron',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_ArtLover: {
+  'trait_ArtLover': {
     name: 'trait_ArtLover',
     description: 'loves art',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_AtDaycare: {
+  'trait_AtDaycare': {
     name: 'trait_AtDaycare',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Attraction_Activities_Broke_TurnOff: {
+  'trait_Attraction_Activities_Broke_TurnOff': {
     name: 'trait_Attraction_Activities_Broke_TurnOff',
     description: 'is broke',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Activities_Broke_TurnOn: {
+  'trait_Attraction_Activities_Broke_TurnOn': {
     name: 'trait_Attraction_Activities_Broke_TurnOn',
     description: 'is broke',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Activities_CareerMinded_TurnOff: {
+  'trait_Attraction_Activities_CareerMinded_TurnOff': {
     name: 'trait_Attraction_Activities_CareerMinded_TurnOff',
     description: 'is career focused',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Activities_CareerMinded_TurnOn: {
+  'trait_Attraction_Activities_CareerMinded_TurnOn': {
     name: 'trait_Attraction_Activities_CareerMinded_TurnOn',
     description: 'is career focused',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Activities_HighlySkilled_TurnOff: {
+  'trait_Attraction_Activities_HighlySkilled_TurnOff': {
     name: 'trait_Attraction_Activities_HighlySkilled_TurnOff',
     description: 'is highly skilled',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Activities_HighlySkilled_TurnOn: {
+  'trait_Attraction_Activities_HighlySkilled_TurnOn': {
     name: 'trait_Attraction_Activities_HighlySkilled_TurnOn',
     description: 'is highly skilled',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Activities_SelfEmployed_TurnOff: {
+  'trait_Attraction_Activities_SelfEmployed_TurnOff': {
     name: 'trait_Attraction_Activities_SelfEmployed_TurnOff',
     description: 'is self employed',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Activities_SelfEmployed_TurnOn: {
+  'trait_Attraction_Activities_SelfEmployed_TurnOn': {
     name: 'trait_Attraction_Activities_SelfEmployed_TurnOn',
     description: 'is self employed',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Activities_Slacker_TurnOff: {
+  'trait_Attraction_Activities_Slacker_TurnOff': {
     name: 'trait_Attraction_Activities_Slacker_TurnOff',
     description: 'is a slacker',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Activities_Slacker_TurnOn: {
+  'trait_Attraction_Activities_Slacker_TurnOn': {
     name: 'trait_Attraction_Activities_Slacker_TurnOn',
     description: 'is a slacker',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Activities_Taken_TurnOff: {
+  'trait_Attraction_Activities_Taken_TurnOff': {
     name: 'trait_Attraction_Activities_Taken_TurnOff',
     description: 'is in a relationship and taken',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Activities_Taken_TurnOn: {
+  'trait_Attraction_Activities_Taken_TurnOn': {
     name: 'trait_Attraction_Activities_Taken_TurnOn',
     description: 'is in a relationship and taken',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Activities_Wealthy_TurnOff: {
+  'trait_Attraction_Activities_Wealthy_TurnOff': {
     name: 'trait_Attraction_Activities_Wealthy_TurnOff',
     description: 'is wealthy',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Activities_Wealthy_TurnOn: {
+  'trait_Attraction_Activities_Wealthy_TurnOn': {
     name: 'trait_Attraction_Activities_Wealthy_TurnOn',
     description: 'is wealthy',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_ChangeAttractionSettings_TurnOff: {
+  'trait_Attraction_ChangeAttractionSettings_TurnOff': {
     name: 'trait_Attraction_ChangeAttractionSettings_TurnOff',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Attraction_Characteristics_Ambitionless_TurnOff: {
+  'trait_Attraction_Characteristics_Ambitionless_TurnOff': {
     name: 'trait_Attraction_Characteristics_Ambitionless_TurnOff',
     description: 'is ambitionless',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Ambitionless_TurnOn: {
+  'trait_Attraction_Characteristics_Ambitionless_TurnOn': {
     name: 'trait_Attraction_Characteristics_Ambitionless_TurnOn',
     description: 'is ambitionless',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_Ambitious_TurnOff: {
+  'trait_Attraction_Characteristics_Ambitious_TurnOff': {
     name: 'trait_Attraction_Characteristics_Ambitious_TurnOff',
     description: 'is ambitious',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Ambitious_TurnOn: {
+  'trait_Attraction_Characteristics_Ambitious_TurnOn': {
     name: 'trait_Attraction_Characteristics_Ambitious_TurnOn',
     description: 'is ambitious',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_Argumentative_TurnOff: {
+  'trait_Attraction_Characteristics_Argumentative_TurnOff': {
     name: 'trait_Attraction_Characteristics_Argumentative_TurnOff',
     description: 'is argumentative',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Argumentative_TurnOn: {
+  'trait_Attraction_Characteristics_Argumentative_TurnOn': {
     name: 'trait_Attraction_Characteristics_Argumentative_TurnOn',
     description: 'is argumentative',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_Cerebral_TurnOff: {
+  'trait_Attraction_Characteristics_Cerebral_TurnOff': {
     name: 'trait_Attraction_Characteristics_Cerebral_TurnOff',
     description: 'is smart and nerdy',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Cerebral_TurnOn: {
+  'trait_Attraction_Characteristics_Cerebral_TurnOn': {
     name: 'trait_Attraction_Characteristics_Cerebral_TurnOn',
     description: 'is smart and nerdy',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_Clean_TurnOff: {
+  'trait_Attraction_Characteristics_Clean_TurnOff': {
     name: 'trait_Attraction_Characteristics_Clean_TurnOff',
     description: 'is clean',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Clean_TurnOn: {
+  'trait_Attraction_Characteristics_Clean_TurnOn': {
     name: 'trait_Attraction_Characteristics_Clean_TurnOn',
     description: 'is clean',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_Egotistical_TurnOff: {
+  'trait_Attraction_Characteristics_Egotistical_TurnOff': {
     name: 'trait_Attraction_Characteristics_Egotistical_TurnOff',
     description: 'is egotistical',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Egotistical_TurnOn: {
+  'trait_Attraction_Characteristics_Egotistical_TurnOn': {
     name: 'trait_Attraction_Characteristics_Egotistical_TurnOn',
     description: 'is egotistical',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_EmotionalDecisionMakers_TurnOff: {
+  'trait_Attraction_Characteristics_EmotionalDecisionMakers_TurnOff': {
     name: 'trait_Attraction_Characteristics_EmotionalDecisionMakers_TurnOff',
     description: 'is an emotional decision maker',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_EmotionalDecisionMakers_TurnOn: {
+  'trait_Attraction_Characteristics_EmotionalDecisionMakers_TurnOn': {
     name: 'trait_Attraction_Characteristics_EmotionalDecisionMakers_TurnOn',
     description: 'is an emotional decision maker',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_FamilyMotivated_TurnOff: {
+  'trait_Attraction_Characteristics_FamilyMotivated_TurnOff': {
     name: 'trait_Attraction_Characteristics_FamilyMotivated_TurnOff',
     description: 'is family motivated',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_FamilyMotivated_TurnOn: {
+  'trait_Attraction_Characteristics_FamilyMotivated_TurnOn': {
     name: 'trait_Attraction_Characteristics_FamilyMotivated_TurnOn',
     description: 'is family motivated',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_Funny_TurnOff: {
+  'trait_Attraction_Characteristics_Funny_TurnOff': {
     name: 'trait_Attraction_Characteristics_Funny_TurnOff',
     description: 'is funny',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Funny_TurnOn: {
+  'trait_Attraction_Characteristics_Funny_TurnOn': {
     name: 'trait_Attraction_Characteristics_Funny_TurnOn',
     description: 'is funny',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_Hardworking_TurnOff: {
+  'trait_Attraction_Characteristics_Hardworking_TurnOff': {
     name: 'trait_Attraction_Characteristics_Hardworking_TurnOff',
     description: 'is hardworking',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Hardworking_TurnOn: {
+  'trait_Attraction_Characteristics_Hardworking_TurnOn': {
     name: 'trait_Attraction_Characteristics_Hardworking_TurnOn',
     description: 'is hardworking',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_HighEnergy_TurnOff: {
+  'trait_Attraction_Characteristics_HighEnergy_TurnOff': {
     name: 'trait_Attraction_Characteristics_HighEnergy_TurnOff',
     description: 'is high energy',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_HighEnergy_TurnOn: {
+  'trait_Attraction_Characteristics_HighEnergy_TurnOn': {
     name: 'trait_Attraction_Characteristics_HighEnergy_TurnOn',
     description: 'is high energy',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_Homebody_TurnOff: {
+  'trait_Attraction_Characteristics_Homebody_TurnOff': {
     name: 'trait_Attraction_Characteristics_Homebody_TurnOff',
     description: 'is a homebody',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Homebody_TurnOn: {
+  'trait_Attraction_Characteristics_Homebody_TurnOn': {
     name: 'trait_Attraction_Characteristics_Homebody_TurnOn',
     description: 'is a homebody',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_Idealist_TurnOff: {
+  'trait_Attraction_Characteristics_Idealist_TurnOff': {
     name: 'trait_Attraction_Characteristics_Idealist_TurnOff',
     description: 'is an idealist',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Idealist_TurnOn: {
+  'trait_Attraction_Characteristics_Idealist_TurnOn': {
     name: 'trait_Attraction_Characteristics_Idealist_TurnOn',
     description: 'is an idealist',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_Messy_TurnOff: {
+  'trait_Attraction_Characteristics_Messy_TurnOff': {
     name: 'trait_Attraction_Characteristics_Messy_TurnOff',
     description: 'is messy',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Messy_TurnOn: {
+  'trait_Attraction_Characteristics_Messy_TurnOn': {
     name: 'trait_Attraction_Characteristics_Messy_TurnOn',
     description: 'is messy',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_NatureEnthusiast_TurnOff: {
+  'trait_Attraction_Characteristics_NatureEnthusiast_TurnOff': {
     name: 'trait_Attraction_Characteristics_NatureEnthusiast_TurnOff',
     description: 'is a nature enthusiast',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_NatureEnthusiast_TurnOn: {
+  'trait_Attraction_Characteristics_NatureEnthusiast_TurnOn': {
     name: 'trait_Attraction_Characteristics_NatureEnthusiast_TurnOn',
     description: 'is a nature enthusiast',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_Optimistic_TurnOff: {
+  'trait_Attraction_Characteristics_Optimistic_TurnOff': {
     name: 'trait_Attraction_Characteristics_Optimistic_TurnOff',
     description: 'is optimistic',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Optimistic_TurnOn: {
+  'trait_Attraction_Characteristics_Optimistic_TurnOn': {
     name: 'trait_Attraction_Characteristics_Optimistic_TurnOn',
     description: 'is optimistic',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_Pessimistic_TurnOff: {
+  'trait_Attraction_Characteristics_Pessimistic_TurnOff': {
     name: 'trait_Attraction_Characteristics_Pessimistic_TurnOff',
     description: 'is pessimistic',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Pessimistic_TurnOn: {
+  'trait_Attraction_Characteristics_Pessimistic_TurnOn': {
     name: 'trait_Attraction_Characteristics_Pessimistic_TurnOn',
     description: 'is pessimistic',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_PetEnthusiast_TurnOff: {
+  'trait_Attraction_Characteristics_PetEnthusiast_TurnOff': {
     name: 'trait_Attraction_Characteristics_PetEnthusiast_TurnOff',
     description: 'likes pets',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_PetEnthusiast_TurnOn: {
+  'trait_Attraction_Characteristics_PetEnthusiast_TurnOn': {
     name: 'trait_Attraction_Characteristics_PetEnthusiast_TurnOn',
     description: 'likes pets',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_RomanceEnthusiast_TurnOff: {
+  'trait_Attraction_Characteristics_RomanceEnthusiast_TurnOff': {
     name: 'trait_Attraction_Characteristics_RomanceEnthusiast_TurnOff',
     description: 'is very romantic',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_RomanceEnthusiast_TurnOn: {
+  'trait_Attraction_Characteristics_RomanceEnthusiast_TurnOn': {
     name: 'trait_Attraction_Characteristics_RomanceEnthusiast_TurnOn',
     description: 'is very romantic',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Characteristics_Spirited_TurnOff: {
+  'trait_Attraction_Characteristics_Spirited_TurnOff': {
     name: 'trait_Attraction_Characteristics_Spirited_TurnOff',
     description: 'is spirited',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Characteristics_Spirited_TurnOn: {
+  'trait_Attraction_Characteristics_Spirited_TurnOn': {
     name: 'trait_Attraction_Characteristics_Spirited_TurnOn',
     description: 'is spirited',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Fashion_Basics_TurnOff: {
+  'trait_Attraction_Fashion_Basics_TurnOff': {
     name: 'trait_Attraction_Fashion_Basics_TurnOff',
     description: 'has basic fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Fashion_Basics_TurnOn: {
+  'trait_Attraction_Fashion_Basics_TurnOn': {
     name: 'trait_Attraction_Fashion_Basics_TurnOn',
     description: 'has basic fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Fashion_Boho_TurnOff: {
+  'trait_Attraction_Fashion_Boho_TurnOff': {
     name: 'trait_Attraction_Fashion_Boho_TurnOff',
     description: 'has boho fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Fashion_Boho_TurnOn: {
+  'trait_Attraction_Fashion_Boho_TurnOn': {
     name: 'trait_Attraction_Fashion_Boho_TurnOn',
     description: 'has boho fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Fashion_Costumes_TurnOff: {
+  'trait_Attraction_Fashion_Costumes_TurnOff': {
     name: 'trait_Attraction_Fashion_Costumes_TurnOff',
     description: 'wears costumes',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Fashion_Costumes_TurnOn: {
+  'trait_Attraction_Fashion_Costumes_TurnOn': {
     name: 'trait_Attraction_Fashion_Costumes_TurnOn',
     description: 'wears costumes',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Fashion_Country_TurnOff: {
+  'trait_Attraction_Fashion_Country_TurnOff': {
     name: 'trait_Attraction_Fashion_Country_TurnOff',
     description: 'has country fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Fashion_Country_TurnOn: {
+  'trait_Attraction_Fashion_Country_TurnOn': {
     name: 'trait_Attraction_Fashion_Country_TurnOn',
     description: 'has country fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Fashion_Hipster_TurnOff: {
+  'trait_Attraction_Fashion_Hipster_TurnOff': {
     name: 'trait_Attraction_Fashion_Hipster_TurnOff',
     description: 'wears hipster fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Fashion_Hipster_TurnOn: {
+  'trait_Attraction_Fashion_Hipster_TurnOn': {
     name: 'trait_Attraction_Fashion_Hipster_TurnOn',
     description: 'wears hipster fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Fashion_Outdoorsy_TurnOff: {
+  'trait_Attraction_Fashion_Outdoorsy_TurnOff': {
     name: 'trait_Attraction_Fashion_Outdoorsy_TurnOff',
     description: 'has outdoorsy fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Fashion_Outdoorsy_TurnOn: {
+  'trait_Attraction_Fashion_Outdoorsy_TurnOn': {
     name: 'trait_Attraction_Fashion_Outdoorsy_TurnOn',
     description: 'has outdoorsy fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Fashion_Polished_TurnOff: {
+  'trait_Attraction_Fashion_Polished_TurnOff': {
     name: 'trait_Attraction_Fashion_Polished_TurnOff',
     description: 'has polished fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Fashion_Polished_TurnOn: {
+  'trait_Attraction_Fashion_Polished_TurnOn': {
     name: 'trait_Attraction_Fashion_Polished_TurnOn',
     description: 'has polished fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Fashion_Preppy_TurnOff: {
+  'trait_Attraction_Fashion_Preppy_TurnOff': {
     name: 'trait_Attraction_Fashion_Preppy_TurnOff',
     description: 'has preppy fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Fashion_Preppy_TurnOn: {
+  'trait_Attraction_Fashion_Preppy_TurnOn': {
     name: 'trait_Attraction_Fashion_Preppy_TurnOn',
     description: 'has preppy fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Fashion_Rocker_TurnOff: {
+  'trait_Attraction_Fashion_Rocker_TurnOff': {
     name: 'trait_Attraction_Fashion_Rocker_TurnOff',
     description: 'has rocker fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Fashion_Rocker_TurnOn: {
+  'trait_Attraction_Fashion_Rocker_TurnOn': {
     name: 'trait_Attraction_Fashion_Rocker_TurnOn',
     description: 'has rocker fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_Fashion_Streetwear_TurnOff: {
+  'trait_Attraction_Fashion_Streetwear_TurnOff': {
     name: 'trait_Attraction_Fashion_Streetwear_TurnOff',
     description: 'has streetwear fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_Fashion_Streetwear_TurnOn: {
+  'trait_Attraction_Fashion_Streetwear_TurnOn': {
     name: 'trait_Attraction_Fashion_Streetwear_TurnOn',
     description: 'has streetwear fashion',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_Auburn_TurnOff: {
+  'trait_Attraction_HairColor_Auburn_TurnOff': {
     name: 'trait_Attraction_HairColor_Auburn_TurnOff',
     description: 'has auburn hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_Auburn_TurnOn: {
+  'trait_Attraction_HairColor_Auburn_TurnOn': {
     name: 'trait_Attraction_HairColor_Auburn_TurnOn',
     description: 'has auburn hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_Black_TurnOff: {
+  'trait_Attraction_HairColor_Black_TurnOff': {
     name: 'trait_Attraction_HairColor_Black_TurnOff',
     description: 'has black hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_Black_TurnOn: {
+  'trait_Attraction_HairColor_Black_TurnOn': {
     name: 'trait_Attraction_HairColor_Black_TurnOn',
     description: 'has black hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_Blonde_TurnOff: {
+  'trait_Attraction_HairColor_Blonde_TurnOff': {
     name: 'trait_Attraction_HairColor_Blonde_TurnOff',
     description: 'has blonde hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_Blonde_TurnOn: {
+  'trait_Attraction_HairColor_Blonde_TurnOn': {
     name: 'trait_Attraction_HairColor_Blonde_TurnOn',
     description: 'has blonde hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_Brown_TurnOff: {
+  'trait_Attraction_HairColor_Brown_TurnOff': {
     name: 'trait_Attraction_HairColor_Brown_TurnOff',
     description: 'has brown hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_Brown_TurnOn: {
+  'trait_Attraction_HairColor_Brown_TurnOn': {
     name: 'trait_Attraction_HairColor_Brown_TurnOn',
     description: 'has brown hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_DarkBlue_TurnOff: {
+  'trait_Attraction_HairColor_DarkBlue_TurnOff': {
     name: 'trait_Attraction_HairColor_DarkBlue_TurnOff',
     description: 'has dark blue hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_DarkBlue_TurnOn: {
+  'trait_Attraction_HairColor_DarkBlue_TurnOn': {
     name: 'trait_Attraction_HairColor_DarkBlue_TurnOn',
     description: 'has dark blue hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_Gray_TurnOff: {
+  'trait_Attraction_HairColor_Gray_TurnOff': {
     name: 'trait_Attraction_HairColor_Gray_TurnOff',
     description: 'has gray hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_Gray_TurnOn: {
+  'trait_Attraction_HairColor_Gray_TurnOn': {
     name: 'trait_Attraction_HairColor_Gray_TurnOn',
     description: 'has gray hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_Green_TurnOff: {
+  'trait_Attraction_HairColor_Green_TurnOff': {
     name: 'trait_Attraction_HairColor_Green_TurnOff',
     description: 'has green hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_Green_TurnOn: {
+  'trait_Attraction_HairColor_Green_TurnOn': {
     name: 'trait_Attraction_HairColor_Green_TurnOn',
     description: 'has green hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_HotPink_TurnOff: {
+  'trait_Attraction_HairColor_HotPink_TurnOff': {
     name: 'trait_Attraction_HairColor_HotPink_TurnOff',
     description: 'has hot pink hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_HotPink_TurnOn: {
+  'trait_Attraction_HairColor_HotPink_TurnOn': {
     name: 'trait_Attraction_HairColor_HotPink_TurnOn',
     description: 'has hot pink hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_Orange_TurnOff: {
+  'trait_Attraction_HairColor_Orange_TurnOff': {
     name: 'trait_Attraction_HairColor_Orange_TurnOff',
     description: 'has orange hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_Orange_TurnOn: {
+  'trait_Attraction_HairColor_Orange_TurnOn': {
     name: 'trait_Attraction_HairColor_Orange_TurnOn',
     description: 'has orange hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_Platinum_TurnOff: {
+  'trait_Attraction_HairColor_Platinum_TurnOff': {
     name: 'trait_Attraction_HairColor_Platinum_TurnOff',
     description: 'has platinum blonde hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_Platinum_TurnOn: {
+  'trait_Attraction_HairColor_Platinum_TurnOn': {
     name: 'trait_Attraction_HairColor_Platinum_TurnOn',
     description: 'has platinum blonde hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_PurplePastel_TurnOff: {
+  'trait_Attraction_HairColor_PurplePastel_TurnOff': {
     name: 'trait_Attraction_HairColor_PurplePastel_TurnOff',
     description: 'has purple pastel hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_PurplePastel_TurnOn: {
+  'trait_Attraction_HairColor_PurplePastel_TurnOn': {
     name: 'trait_Attraction_HairColor_PurplePastel_TurnOn',
     description: 'has purple pastel hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_Red_TurnOff: {
+  'trait_Attraction_HairColor_Red_TurnOff': {
     name: 'trait_Attraction_HairColor_Red_TurnOff',
     description: 'has red hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_Red_TurnOn: {
+  'trait_Attraction_HairColor_Red_TurnOn': {
     name: 'trait_Attraction_HairColor_Red_TurnOn',
     description: 'has red hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_Turquoise_TurnOff: {
+  'trait_Attraction_HairColor_Turquoise_TurnOff': {
     name: 'trait_Attraction_HairColor_Turquoise_TurnOff',
     description: 'has turquoise hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_Turquoise_TurnOn: {
+  'trait_Attraction_HairColor_Turquoise_TurnOn': {
     name: 'trait_Attraction_HairColor_Turquoise_TurnOn',
     description: 'has turquoise hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_HairColor_White_TurnOff: {
+  'trait_Attraction_HairColor_White_TurnOff': {
     name: 'trait_Attraction_HairColor_White_TurnOff',
     description: 'has white hair',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_HairColor_White_TurnOn: {
+  'trait_Attraction_HairColor_White_TurnOn': {
     name: 'trait_Attraction_HairColor_White_TurnOn',
     description: 'has white hair',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_OutfitColor_Black_TurnOff: {
+  'trait_Attraction_OutfitColor_Black_TurnOff': {
     name: 'trait_Attraction_OutfitColor_Black_TurnOff',
     description: 'wears black outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_OutfitColor_Black_TurnOn: {
+  'trait_Attraction_OutfitColor_Black_TurnOn': {
     name: 'trait_Attraction_OutfitColor_Black_TurnOn',
     description: 'wears black outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_OutfitColor_Blue_TurnOff: {
+  'trait_Attraction_OutfitColor_Blue_TurnOff': {
     name: 'trait_Attraction_OutfitColor_Blue_TurnOff',
     description: 'wears blue outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_OutfitColor_Blue_TurnOn: {
+  'trait_Attraction_OutfitColor_Blue_TurnOn': {
     name: 'trait_Attraction_OutfitColor_Blue_TurnOn',
     description: 'wears blue outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_OutfitColor_Brown_TurnOff: {
+  'trait_Attraction_OutfitColor_Brown_TurnOff': {
     name: 'trait_Attraction_OutfitColor_Brown_TurnOff',
     description: 'wears brown outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_OutfitColor_Brown_TurnOn: {
+  'trait_Attraction_OutfitColor_Brown_TurnOn': {
     name: 'trait_Attraction_OutfitColor_Brown_TurnOn',
     description: 'wears brown outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_OutfitColor_Gray_TurnOff: {
+  'trait_Attraction_OutfitColor_Gray_TurnOff': {
     name: 'trait_Attraction_OutfitColor_Gray_TurnOff',
     description: 'wears gray outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_OutfitColor_Gray_TurnOn: {
+  'trait_Attraction_OutfitColor_Gray_TurnOn': {
     name: 'trait_Attraction_OutfitColor_Gray_TurnOn',
     description: 'wears gray outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_OutfitColor_Green_TurnOff: {
+  'trait_Attraction_OutfitColor_Green_TurnOff': {
     name: 'trait_Attraction_OutfitColor_Green_TurnOff',
     description: 'wears green outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_OutfitColor_Green_TurnOn: {
+  'trait_Attraction_OutfitColor_Green_TurnOn': {
     name: 'trait_Attraction_OutfitColor_Green_TurnOn',
     description: 'wears green outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_OutfitColor_Orange_TurnOff: {
+  'trait_Attraction_OutfitColor_Orange_TurnOff': {
     name: 'trait_Attraction_OutfitColor_Orange_TurnOff',
     description: 'wears orange outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_OutfitColor_Orange_TurnOn: {
+  'trait_Attraction_OutfitColor_Orange_TurnOn': {
     name: 'trait_Attraction_OutfitColor_Orange_TurnOn',
     description: 'wears orange outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_OutfitColor_Pink_TurnOff: {
+  'trait_Attraction_OutfitColor_Pink_TurnOff': {
     name: 'trait_Attraction_OutfitColor_Pink_TurnOff',
     description: 'wears pink outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_OutfitColor_Pink_TurnOn: {
+  'trait_Attraction_OutfitColor_Pink_TurnOn': {
     name: 'trait_Attraction_OutfitColor_Pink_TurnOn',
     description: 'wears pink outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_OutfitColor_Purple_TurnOff: {
+  'trait_Attraction_OutfitColor_Purple_TurnOff': {
     name: 'trait_Attraction_OutfitColor_Purple_TurnOff',
     description: 'wears purple outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_OutfitColor_Purple_TurnOn: {
+  'trait_Attraction_OutfitColor_Purple_TurnOn': {
     name: 'trait_Attraction_OutfitColor_Purple_TurnOn',
     description: 'wears purple outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_OutfitColor_Red_TurnOff: {
+  'trait_Attraction_OutfitColor_Red_TurnOff': {
     name: 'trait_Attraction_OutfitColor_Red_TurnOff',
     description: 'wears red outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_OutfitColor_Red_TurnOn: {
+  'trait_Attraction_OutfitColor_Red_TurnOn': {
     name: 'trait_Attraction_OutfitColor_Red_TurnOn',
     description: 'wears red outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_OutfitColor_White_TurnOff: {
+  'trait_Attraction_OutfitColor_White_TurnOff': {
     name: 'trait_Attraction_OutfitColor_White_TurnOff',
     description: 'wears white outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_OutfitColor_White_TurnOn: {
+  'trait_Attraction_OutfitColor_White_TurnOn': {
     name: 'trait_Attraction_OutfitColor_White_TurnOn',
     description: 'wears white outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_OutfitColor_Yellow_TurnOff: {
+  'trait_Attraction_OutfitColor_Yellow_TurnOff': {
     name: 'trait_Attraction_OutfitColor_Yellow_TurnOff',
     description: 'wears yellow outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_OutfitColor_Yellow_TurnOn: {
+  'trait_Attraction_OutfitColor_Yellow_TurnOn': {
     name: 'trait_Attraction_OutfitColor_Yellow_TurnOn',
     description: 'wears yellow outfits',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_RomanceStyles_Affection_TurnOff: {
+  'trait_Attraction_RomanceStyles_Affection_TurnOff': {
     name: 'trait_Attraction_RomanceStyles_Affection_TurnOff',
     description: 'is romantically affectionate',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_RomanceStyles_Affection_TurnOn: {
+  'trait_Attraction_RomanceStyles_Affection_TurnOn': {
     name: 'trait_Attraction_RomanceStyles_Affection_TurnOn',
     description: 'is romantically affectionate',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_RomanceStyles_Flirting_TurnOff: {
+  'trait_Attraction_RomanceStyles_Flirting_TurnOff': {
     name: 'trait_Attraction_RomanceStyles_Flirting_TurnOff',
     description: 'is romantically flirty',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_RomanceStyles_Flirting_TurnOn: {
+  'trait_Attraction_RomanceStyles_Flirting_TurnOn': {
     name: 'trait_Attraction_RomanceStyles_Flirting_TurnOn',
     description: 'is romantically flirty',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_RomanceStyles_GiftGiving_TurnOff: {
+  'trait_Attraction_RomanceStyles_GiftGiving_TurnOff': {
     name: 'trait_Attraction_RomanceStyles_GiftGiving_TurnOff',
     description: 'romantically gives gifts',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_RomanceStyles_GiftGiving_TurnOn: {
+  'trait_Attraction_RomanceStyles_GiftGiving_TurnOn': {
     name: 'trait_Attraction_RomanceStyles_GiftGiving_TurnOn',
     description: 'romantically gives gifts',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_RomanceStyles_PhysicalIntimacy_TurnOff: {
+  'trait_Attraction_RomanceStyles_PhysicalIntimacy_TurnOff': {
     name: 'trait_Attraction_RomanceStyles_PhysicalIntimacy_TurnOff',
     description: 'is romantically physically intimate',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_RomanceStyles_PhysicalIntimacy_TurnOn: {
+  'trait_Attraction_RomanceStyles_PhysicalIntimacy_TurnOn': {
     name: 'trait_Attraction_RomanceStyles_PhysicalIntimacy_TurnOn',
     description: 'is romantically physically intimate',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_RomanceStyles_Woohoo_TurnOff: {
+  'trait_Attraction_RomanceStyles_Woohoo_TurnOff': {
     name: 'trait_Attraction_RomanceStyles_Woohoo_TurnOff',
     description: 'is romantically sexual',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_RomanceStyles_Woohoo_TurnOn: {
+  'trait_Attraction_RomanceStyles_Woohoo_TurnOn': {
     name: 'trait_Attraction_RomanceStyles_Woohoo_TurnOn',
     description: 'is romantically sexual',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_SkillArchetypes_Academic_TurnOff: {
+  'trait_Attraction_SkillArchetypes_Academic_TurnOff': {
     name: 'trait_Attraction_SkillArchetypes_Academic_TurnOff',
     description: 'is academic',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_SkillArchetypes_Academic_TurnOn: {
+  'trait_Attraction_SkillArchetypes_Academic_TurnOn': {
     name: 'trait_Attraction_SkillArchetypes_Academic_TurnOn',
     description: 'is academic',
     class: 'AttractionPreference',
@@ -1223,37 +1222,37 @@ export const simsTraitDescriptions: Record<string, TraitMapping> = {
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_SkillArchetypes_Cooking_TurnOff: {
+  'trait_Attraction_SkillArchetypes_Cooking_TurnOff': {
     name: 'trait_Attraction_SkillArchetypes_Cooking_TurnOff',
     description: 'likes cooking',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_SkillArchetypes_Cooking_TurnOn: {
+  'trait_Attraction_SkillArchetypes_Cooking_TurnOn': {
     name: 'trait_Attraction_SkillArchetypes_Cooking_TurnOn',
     description: 'likes cooking',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_SkillArchetypes_DrinkMaking_TurnOff: {
+  'trait_Attraction_SkillArchetypes_DrinkMaking_TurnOff': {
     name: 'trait_Attraction_SkillArchetypes_DrinkMaking_TurnOff',
     description: 'likes drink making',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_SkillArchetypes_DrinkMaking_TurnOn: {
+  'trait_Attraction_SkillArchetypes_DrinkMaking_TurnOn': {
     name: 'trait_Attraction_SkillArchetypes_DrinkMaking_TurnOn',
     description: 'likes drink making',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_SkillArchetypes_Engineering_TurnOff: {
+  'trait_Attraction_SkillArchetypes_Engineering_TurnOff': {
     name: 'trait_Attraction_SkillArchetypes_Engineering_TurnOff',
     description: 'likes engineering',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_SkillArchetypes_Engineering_TurnOn: {
+  'trait_Attraction_SkillArchetypes_Engineering_TurnOn': {
     name: 'trait_Attraction_SkillArchetypes_Engineering_TurnOn',
     description: 'likes engineering',
     class: 'AttractionPreference',
@@ -1271,13 +1270,13 @@ export const simsTraitDescriptions: Record<string, TraitMapping> = {
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_SkillArchetypes_Interpersonal_TurnOff: {
+  'trait_Attraction_SkillArchetypes_Interpersonal_TurnOff': {
     name: 'trait_Attraction_SkillArchetypes_Interpersonal_TurnOff',
     description: 'is interpersonal',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_SkillArchetypes_Interpersonal_TurnOn: {
+  'trait_Attraction_SkillArchetypes_Interpersonal_TurnOn': {
     name: 'trait_Attraction_SkillArchetypes_Interpersonal_TurnOn',
     description: 'is interpersonal',
     class: 'AttractionPreference',
@@ -1295,4534 +1294,4522 @@ export const simsTraitDescriptions: Record<string, TraitMapping> = {
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_SkillArchetypes_Nature_TurnOff: {
+  'trait_Attraction_SkillArchetypes_Nature_TurnOff': {
     name: 'trait_Attraction_SkillArchetypes_Nature_TurnOff',
     description: 'likes nature',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_SkillArchetypes_Nature_TurnOn: {
+  'trait_Attraction_SkillArchetypes_Nature_TurnOn': {
     name: 'trait_Attraction_SkillArchetypes_Nature_TurnOn',
     description: 'likes nature',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_SkillArchetypes_Performer_TurnOff: {
+  'trait_Attraction_SkillArchetypes_Performer_TurnOff': {
     name: 'trait_Attraction_SkillArchetypes_Performer_TurnOff',
     description: 'is a performer',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_SkillArchetypes_Performer_TurnOn: {
+  'trait_Attraction_SkillArchetypes_Performer_TurnOn': {
     name: 'trait_Attraction_SkillArchetypes_Performer_TurnOn',
     description: 'is a performer',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attraction_SkillArchetypes_SenseOfHumor_TurnOff: {
+  'trait_Attraction_SkillArchetypes_SenseOfHumor_TurnOff': {
     name: 'trait_Attraction_SkillArchetypes_SenseOfHumor_TurnOff',
     description: 'has a sense of humor',
     class: 'AttractionPreference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_Attraction_SkillArchetypes_SenseOfHumor_TurnOn: {
+  'trait_Attraction_SkillArchetypes_SenseOfHumor_TurnOn': {
     name: 'trait_Attraction_SkillArchetypes_SenseOfHumor_TurnOn',
     description: 'has a sense of humor',
     class: 'AttractionPreference',
     trait_type: TraitType.LIKE,
   },
-  trait_Attuned: {
+  'trait_Attuned': {
     name: 'trait_Attuned',
     description: 'has insights into the mysteries of crystals',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_baby: {
+  'trait_baby': {
     name: 'trait_baby',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_BabyDiaper_Preference_Cloth: {
+  'trait_BabyDiaper_Preference_Cloth': {
     name: 'trait_BabyDiaper_Preference_Cloth',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_BabyFeed_Preference_Body: {
+  'trait_BabyFeed_Preference_Body': {
     name: 'trait_BabyFeed_Preference_Body',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_BabyFeed_Preference_Bottle: {
+  'trait_BabyFeed_Preference_Bottle': {
     name: 'trait_BabyFeed_Preference_Bottle',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Bane: {
+  'trait_Bane': {
     name: 'trait_Bane',
     description: 'is a bane',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_BatchCook: {
+  'trait_BatchCook': {
     name: 'trait_BatchCook',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Batuu_Alien_Abednedo: {
+  'trait_Batuu_Alien_Abednedo': {
     name: 'trait_Batuu_Alien_Abednedo',
     description: 'is an Abednedo alien',
     class: 'Trait',
     trait_type: TraitType.BATUU_ALIEN,
   },
-  trait_Batuu_Alien_Bith: {
+  'trait_Batuu_Alien_Bith': {
     name: 'trait_Batuu_Alien_Bith',
     description: 'is a Bith alien',
     class: 'Trait',
     trait_type: TraitType.BATUU_ALIEN,
   },
-  trait_Batuu_Alien_Identifier: {
+  'trait_Batuu_Alien_Identifier': {
     name: 'trait_Batuu_Alien_Identifier',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.BATUU_ALIEN,
   },
-  trait_Batuu_Alien_Mirialan: {
+  'trait_Batuu_Alien_Mirialan': {
     name: 'trait_Batuu_Alien_Mirialan',
     description: 'is an Mirialan alien',
     class: 'Trait',
     trait_type: TraitType.BATUU_ALIEN,
   },
-  trait_Batuu_Alien_Twilek: {
+  'trait_Batuu_Alien_Twilek': {
     name: 'trait_Batuu_Alien_Twilek',
     description: "is a Twi'lek alien",
     class: 'Trait',
     trait_type: TraitType.BATUU_ALIEN,
   },
-  trait_Batuu_Alien_Weequay: {
+  'trait_Batuu_Alien_Weequay': {
     name: 'trait_Batuu_Alien_Weequay',
     description: 'is a Weequay alien',
     class: 'Trait',
     trait_type: TraitType.BATUU_ALIEN,
   },
-  trait_Batuu_Alien_Zabrak: {
+  'trait_Batuu_Alien_Zabrak': {
     name: 'trait_Batuu_Alien_Zabrak',
     description: 'is a Zabrak alien',
     class: 'Trait',
     trait_type: TraitType.BATUU_ALIEN,
   },
-  trait_Batuu_FirstOrder_Identifier: {
+  'trait_Batuu_FirstOrder_Identifier': {
     name: 'trait_Batuu_FirstOrder_Identifier',
     description: 'is in the First Order',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_FirstOrder_Identifier_Officer: {
+  'trait_Batuu_FirstOrder_Identifier_Officer': {
     name: 'trait_Batuu_FirstOrder_Identifier_Officer',
     description: 'is a First Order Officer',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_FirstOrder_Identifier_Officer_ResistanceSpy: {
+  'trait_Batuu_FirstOrder_Identifier_Officer_ResistanceSpy': {
     name: 'trait_Batuu_FirstOrder_Identifier_Officer_ResistanceSpy',
     description: 'is a First Order Officer Resistance Spy',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_FirstOrder_Identifier_Stormtrooper: {
+  'trait_Batuu_FirstOrder_Identifier_Stormtrooper': {
     name: 'trait_Batuu_FirstOrder_Identifier_Stormtrooper',
     description: 'is a First Order Stormtrooper',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_FirstOrder_SNPC_Agnon_Identifier: {
+  'trait_Batuu_FirstOrder_SNPC_Agnon_Identifier': {
     name: 'trait_Batuu_FirstOrder_SNPC_Agnon_Identifier',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_FirstOrder_SNPC_Kylo_Identifier: {
+  'trait_Batuu_FirstOrder_SNPC_Kylo_Identifier': {
     name: 'trait_Batuu_FirstOrder_SNPC_Kylo_Identifier',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Known: {
+  'trait_Batuu_Known': {
     name: 'trait_Batuu_Known',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Lightsaber_Blue_Identifier: {
+  'trait_Batuu_Lightsaber_Blue_Identifier': {
     name: 'trait_Batuu_Lightsaber_Blue_Identifier',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Lightsaber_Green_Identifier: {
+  'trait_Batuu_Lightsaber_Green_Identifier': {
     name: 'trait_Batuu_Lightsaber_Green_Identifier',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Lightsaber_Identifier: {
+  'trait_Batuu_Lightsaber_Identifier': {
     name: 'trait_Batuu_Lightsaber_Identifier',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Lightsaber_Red_Identifier: {
+  'trait_Batuu_Lightsaber_Red_Identifier': {
     name: 'trait_Batuu_Lightsaber_Red_Identifier',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Ask_About_Resistance: {
+  'trait_Batuu_Mission_Ask_About_Resistance': {
     name: 'trait_Batuu_Mission_Ask_About_Resistance',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Sabacc_Tournament_1st_Opponent_Trait: {
+  'trait_Batuu_Mission_Sabacc_Tournament_1st_Opponent_Trait': {
     name: 'trait_Batuu_Mission_Sabacc_Tournament_1st_Opponent_Trait',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Sabacc_Tournament_2nd_Opponent_Trait: {
+  'trait_Batuu_Mission_Sabacc_Tournament_2nd_Opponent_Trait': {
     name: 'trait_Batuu_Mission_Sabacc_Tournament_2nd_Opponent_Trait',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Sabacc_Tournament_Final_Opponent_Trait: {
+  'trait_Batuu_Mission_Sabacc_Tournament_Final_Opponent_Trait': {
     name: 'trait_Batuu_Mission_Sabacc_Tournament_Final_Opponent_Trait',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Sabacc_Tournament_Played_All_Opponents: {
+  'trait_Batuu_Mission_Sabacc_Tournament_Played_All_Opponents': {
     name: 'trait_Batuu_Mission_Sabacc_Tournament_Played_All_Opponents',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Bribe_Credits: {
+  'trait_Batuu_Mission_Traits_Bribe_Credits': {
     name: 'trait_Batuu_Mission_Traits_Bribe_Credits',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Bribe_Droid_Parts: {
+  'trait_Batuu_Mission_Traits_Bribe_Droid_Parts': {
     name: 'trait_Batuu_Mission_Traits_Bribe_Droid_Parts',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Bribe_Food: {
+  'trait_Batuu_Mission_Traits_Bribe_Food': {
     name: 'trait_Batuu_Mission_Traits_Bribe_Food',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Bribe_Has_Been_Bribed: {
+  'trait_Batuu_Mission_Traits_Bribe_Has_Been_Bribed': {
     name: 'trait_Batuu_Mission_Traits_Bribe_Has_Been_Bribed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Bribe_Kyber: {
+  'trait_Batuu_Mission_Traits_Bribe_Kyber': {
     name: 'trait_Batuu_Mission_Traits_Bribe_Kyber',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Bribe_Porg: {
+  'trait_Batuu_Mission_Traits_Bribe_Porg': {
     name: 'trait_Batuu_Mission_Traits_Bribe_Porg',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Can_Retrieve_Data_RR15: {
+  'trait_Batuu_Mission_Traits_Can_Retrieve_Data_RR15': {
     name: 'trait_Batuu_Mission_Traits_Can_Retrieve_Data_RR15',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Convinced_Scientist_Join_FO: {
+  'trait_Batuu_Mission_Traits_Convinced_Scientist_Join_FO': {
     name: 'trait_Batuu_Mission_Traits_Convinced_Scientist_Join_FO',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Defector: {
+  'trait_Batuu_Mission_Traits_Defector': {
     name: 'trait_Batuu_Mission_Traits_Defector',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_DestroyJammingEquipment_RS9: {
+  'trait_Batuu_Mission_Traits_DestroyJammingEquipment_RS9': {
     name: 'trait_Batuu_Mission_Traits_DestroyJammingEquipment_RS9',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_FO_FR1: {
+  'trait_Batuu_Mission_Traits_FO_FR1': {
     name: 'trait_Batuu_Mission_Traits_FO_FR1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_FO_FR13: {
+  'trait_Batuu_Mission_Traits_FO_FR13': {
     name: 'trait_Batuu_Mission_Traits_FO_FR13',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_FO_FR2: {
+  'trait_Batuu_Mission_Traits_FO_FR2': {
     name: 'trait_Batuu_Mission_Traits_FO_FR2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_FO_FR3: {
+  'trait_Batuu_Mission_Traits_FO_FR3': {
     name: 'trait_Batuu_Mission_Traits_FO_FR3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_FO_FS4: {
+  'trait_Batuu_Mission_Traits_FO_FS4': {
     name: 'trait_Batuu_Mission_Traits_FO_FS4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_FreeDrinks_At_OgasCantina: {
+  'trait_Batuu_Mission_Traits_FreeDrinks_At_OgasCantina': {
     name: 'trait_Batuu_Mission_Traits_FreeDrinks_At_OgasCantina',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_FS4_Criminal: {
+  'trait_Batuu_Mission_Traits_FS4_Criminal': {
     name: 'trait_Batuu_Mission_Traits_FS4_Criminal',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_FS4_Criminal_Helper: {
+  'trait_Batuu_Mission_Traits_FS4_Criminal_Helper': {
     name: 'trait_Batuu_Mission_Traits_FS4_Criminal_Helper',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Given_Info: {
+  'trait_Batuu_Mission_Traits_Given_Info': {
     name: 'trait_Batuu_Mission_Traits_Given_Info',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Is_Informant: {
+  'trait_Batuu_Mission_Traits_Is_Informant': {
     name: 'trait_Batuu_Mission_Traits_Is_Informant',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Is_Resistance_Sympathizer: {
+  'trait_Batuu_Mission_Traits_Is_Resistance_Sympathizer': {
     name: 'trait_Batuu_Mission_Traits_Is_Resistance_Sympathizer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Obtained_Criminal_Info: {
+  'trait_Batuu_Mission_Traits_Obtained_Criminal_Info': {
     name: 'trait_Batuu_Mission_Traits_Obtained_Criminal_Info',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Obtained_First_Order_Access_Code: {
+  'trait_Batuu_Mission_Traits_Obtained_First_Order_Access_Code': {
     name: 'trait_Batuu_Mission_Traits_Obtained_First_Order_Access_Code',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Recruited_Heist_SS7: {
+  'trait_Batuu_Mission_Traits_Recruited_Heist_SS7': {
     name: 'trait_Batuu_Mission_Traits_Recruited_Heist_SS7',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Resistance_RR1_Part1: {
+  'trait_Batuu_Mission_Traits_Resistance_RR1_Part1': {
     name: 'trait_Batuu_Mission_Traits_Resistance_RR1_Part1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Resistance_RR1_Part2: {
+  'trait_Batuu_Mission_Traits_Resistance_RR1_Part2': {
     name: 'trait_Batuu_Mission_Traits_Resistance_RR1_Part2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Resistance_RR2: {
+  'trait_Batuu_Mission_Traits_Resistance_RR2': {
     name: 'trait_Batuu_Mission_Traits_Resistance_RR2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Scientist_DoWork: {
+  'trait_Batuu_Mission_Traits_Scientist_DoWork': {
     name: 'trait_Batuu_Mission_Traits_Scientist_DoWork',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Scientist_Joined_FO_FS6: {
+  'trait_Batuu_Mission_Traits_Scientist_Joined_FO_FS6': {
     name: 'trait_Batuu_Mission_Traits_Scientist_Joined_FO_FS6',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Mission_Traits_Stormtrooper_CheckID: {
+  'trait_Batuu_Mission_Traits_Stormtrooper_CheckID': {
     name: 'trait_Batuu_Mission_Traits_Stormtrooper_CheckID',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Missions_Ask_About_First_Order: {
+  'trait_Batuu_Missions_Ask_About_First_Order': {
     name: 'trait_Batuu_Missions_Ask_About_First_Order',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Missions_Resistance_Contact: {
+  'trait_Batuu_Missions_Resistance_Contact': {
     name: 'trait_Batuu_Missions_Resistance_Contact',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Missions_Resistance_RS3_Repaired: {
+  'trait_Batuu_Missions_Resistance_RS3_Repaired': {
     name: 'trait_Batuu_Missions_Resistance_RS3_Repaired',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Missions_Resistance_RS3_Scrambled: {
+  'trait_Batuu_Missions_Resistance_RS3_Scrambled': {
     name: 'trait_Batuu_Missions_Resistance_RS3_Scrambled',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Missions_Scoundrel_Contact: {
+  'trait_Batuu_Missions_Scoundrel_Contact': {
     name: 'trait_Batuu_Missions_Scoundrel_Contact',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Missions_Shared_Fake_Info_All_FS_7: {
+  'trait_Batuu_Missions_Shared_Fake_Info_All_FS_7': {
     name: 'trait_Batuu_Missions_Shared_Fake_Info_All_FS_7',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_NPC_Citizen_Identifier: {
+  'trait_Batuu_NPC_Citizen_Identifier': {
     name: 'trait_Batuu_NPC_Citizen_Identifier',
     description: 'is a Batuu citizen',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_NPC_Identifier: {
+  'trait_Batuu_NPC_Identifier': {
     name: 'trait_Batuu_NPC_Identifier',
     description: 'is from Batuu',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeFOModifier_Level1: {
+  'trait_Batuu_Reputation_NegativeFOModifier_Level1': {
     name: 'trait_Batuu_Reputation_NegativeFOModifier_Level1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeFOModifier_Level2: {
+  'trait_Batuu_Reputation_NegativeFOModifier_Level2': {
     name: 'trait_Batuu_Reputation_NegativeFOModifier_Level2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeFOModifier_Level3: {
+  'trait_Batuu_Reputation_NegativeFOModifier_Level3': {
     name: 'trait_Batuu_Reputation_NegativeFOModifier_Level3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeFOModifier_Level4: {
+  'trait_Batuu_Reputation_NegativeFOModifier_Level4': {
     name: 'trait_Batuu_Reputation_NegativeFOModifier_Level4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeFOModifier_Level5: {
+  'trait_Batuu_Reputation_NegativeFOModifier_Level5': {
     name: 'trait_Batuu_Reputation_NegativeFOModifier_Level5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeRESModifier_Level1: {
+  'trait_Batuu_Reputation_NegativeRESModifier_Level1': {
     name: 'trait_Batuu_Reputation_NegativeRESModifier_Level1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeRESModifier_Level2: {
+  'trait_Batuu_Reputation_NegativeRESModifier_Level2': {
     name: 'trait_Batuu_Reputation_NegativeRESModifier_Level2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeRESModifier_Level3: {
+  'trait_Batuu_Reputation_NegativeRESModifier_Level3': {
     name: 'trait_Batuu_Reputation_NegativeRESModifier_Level3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeRESModifier_Level4: {
+  'trait_Batuu_Reputation_NegativeRESModifier_Level4': {
     name: 'trait_Batuu_Reputation_NegativeRESModifier_Level4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeRESModifier_Level5: {
+  'trait_Batuu_Reputation_NegativeRESModifier_Level5': {
     name: 'trait_Batuu_Reputation_NegativeRESModifier_Level5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeSMGModifier_Level1: {
+  'trait_Batuu_Reputation_NegativeSMGModifier_Level1': {
     name: 'trait_Batuu_Reputation_NegativeSMGModifier_Level1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeSMGModifier_Level2: {
+  'trait_Batuu_Reputation_NegativeSMGModifier_Level2': {
     name: 'trait_Batuu_Reputation_NegativeSMGModifier_Level2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeSMGModifier_Level3: {
+  'trait_Batuu_Reputation_NegativeSMGModifier_Level3': {
     name: 'trait_Batuu_Reputation_NegativeSMGModifier_Level3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeSMGModifier_Level4: {
+  'trait_Batuu_Reputation_NegativeSMGModifier_Level4': {
     name: 'trait_Batuu_Reputation_NegativeSMGModifier_Level4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Reputation_NegativeSMGModifier_Level5: {
+  'trait_Batuu_Reputation_NegativeSMGModifier_Level5': {
     name: 'trait_Batuu_Reputation_NegativeSMGModifier_Level5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Resistance_Identifier: {
+  'trait_Batuu_Resistance_Identifier': {
     name: 'trait_Batuu_Resistance_Identifier',
     description: 'is part of the Batuu Resistance',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Resistance_SNPC_Rey_Identifier: {
+  'trait_Batuu_Resistance_SNPC_Rey_Identifier': {
     name: 'trait_Batuu_Resistance_SNPC_Rey_Identifier',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Resistance_SNPC_Vi_Identifier: {
+  'trait_Batuu_Resistance_SNPC_Vi_Identifier': {
     name: 'trait_Batuu_Resistance_SNPC_Vi_Identifier',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Rich_Scoundrel: {
+  'trait_Batuu_Rich_Scoundrel': {
     name: 'trait_Batuu_Rich_Scoundrel',
     description: 'is a Batuu Rich Scoundrel',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Scoundrel_Identifier: {
+  'trait_Batuu_Scoundrel_Identifier': {
     name: 'trait_Batuu_Scoundrel_Identifier',
     description: 'is a Batuu scoundrel',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Batuu_Scoundrel_SNPC_Hondo_Identifier: {
+  'trait_Batuu_Scoundrel_SNPC_Hondo_Identifier': {
     name: 'trait_Batuu_Scoundrel_SNPC_Hondo_Identifier',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_BeachBum_LaidBack: {
+  'trait_BeachBum_LaidBack': {
     name: 'trait_BeachBum_LaidBack',
     ignored: false,
     description: 'is laid back and never becomes tense',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Beguiling: {
+  'trait_Beguiling': {
     name: 'trait_Beguiling',
     ignored: false,
     description: 'is beguiling',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_BelovedBrand: {
+  'trait_BelovedBrand': {
     name: 'trait_BelovedBrand',
     description: 'is a good brand builder',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Bonehilda: {
+  'trait_Bonehilda': {
     name: 'trait_Bonehilda',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Bookworm: {
+  'trait_Bookworm': {
     name: 'trait_Bookworm',
     description: 'is a bookworm',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_BoothBoss: {
+  'trait_BoothBoss': {
     name: 'trait_BoothBoss',
     description: 'is good at selling from food stands and sales tables',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Brave: {
+  'trait_Brave': {
     name: 'trait_Brave',
     ignored: false,
     description: 'is brave',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Breasts_ForceOff: {
+  'trait_Breasts_ForceOff': {
     name: 'trait_Breasts_ForceOff',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Breasts_ForceOn: {
+  'trait_Breasts_ForceOn': {
     name: 'trait_Breasts_ForceOn',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Bro: {
+  'trait_Bro': {
     name: 'trait_Bro',
     description: 'is a bro',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Business_Savvy: {
+  'trait_Business_Savvy': {
     name: 'trait_Business_Savvy',
     ignored: false,
     description: 'is business savvy',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_canAccuseBurglar: {
+  'trait_canAccuseBurglar': {
     name: 'trait_canAccuseBurglar',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CareerScientist_Event_Inventing: {
+  'trait_CareerScientist_Event_Inventing': {
     name: 'trait_CareerScientist_Event_Inventing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Carefree: {
+  'trait_Carefree': {
     name: 'trait_Carefree',
     ignored: false,
     description: 'is carefree',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_CarryableInfant_PreferredCarrier_BlackYellow: {
+  'trait_CarryableInfant_PreferredCarrier_BlackYellow': {
     name: 'trait_CarryableInfant_PreferredCarrier_BlackYellow',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.INFANT_CARRIER,
   },
-  trait_CarryableInfant_PreferredCarrier_Grey: {
+  'trait_CarryableInfant_PreferredCarrier_Grey': {
     name: 'trait_CarryableInfant_PreferredCarrier_Grey',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.INFANT_CARRIER,
   },
-  trait_CarryableInfant_PreferredCarrier_Pink: {
+  'trait_CarryableInfant_PreferredCarrier_Pink': {
     name: 'trait_CarryableInfant_PreferredCarrier_Pink',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.INFANT_CARRIER,
   },
-  trait_CarryableInfant_PreferredCarrier_Sturdy_Blue: {
+  'trait_CarryableInfant_PreferredCarrier_Sturdy_Blue': {
     name: 'trait_CarryableInfant_PreferredCarrier_Sturdy_Blue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.INFANT_CARRIER,
   },
-  trait_CarryableInfant_PreferredCarrier_Sturdy_Gray: {
+  'trait_CarryableInfant_PreferredCarrier_Sturdy_Gray': {
     name: 'trait_CarryableInfant_PreferredCarrier_Sturdy_Gray',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.INFANT_CARRIER,
   },
-  trait_CarryableInfant_PreferredCarrier_Sturdy_Green: {
+  'trait_CarryableInfant_PreferredCarrier_Sturdy_Green': {
     name: 'trait_CarryableInfant_PreferredCarrier_Sturdy_Green',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.INFANT_CARRIER,
   },
-  trait_CarryableInfant_PreferredCarrier_Sturdy_Orange: {
+  'trait_CarryableInfant_PreferredCarrier_Sturdy_Orange': {
     name: 'trait_CarryableInfant_PreferredCarrier_Sturdy_Orange',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.INFANT_CARRIER,
   },
-  trait_CarryableInfant_PreferredCarrier_Sturdy_Red: {
+  'trait_CarryableInfant_PreferredCarrier_Sturdy_Red': {
     name: 'trait_CarryableInfant_PreferredCarrier_Sturdy_Red',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.INFANT_CARRIER,
   },
-  trait_CarryableInfant_PreferredCarrier_White: {
+  'trait_CarryableInfant_PreferredCarrier_White': {
     name: 'trait_CarryableInfant_PreferredCarrier_White',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.INFANT_CARRIER,
   },
-  Trait_CAS_Story_Career_Activist: {
+  'Trait_CAS_Story_Career_Activist': {
     name: 'Trait_CAS_Story_Career_Activist',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Activist_Level_2: {
+  'trait_CAS_Story_Career_Activist_Level_2': {
     name: 'trait_CAS_Story_Career_Activist_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Activist_Level_3: {
+  'trait_CAS_Story_Career_Activist_Level_3': {
     name: 'trait_CAS_Story_Career_Activist_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Career_Actor: {
+  'Trait_CAS_Story_Career_Actor': {
     name: 'Trait_CAS_Story_Career_Actor',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Actor_Level_2: {
+  'trait_CAS_Story_Career_Actor_Level_2': {
     name: 'trait_CAS_Story_Career_Actor_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Actor_Level_3: {
+  'trait_CAS_Story_Career_Actor_Level_3': {
     name: 'trait_CAS_Story_Career_Actor_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Astronaut: {
+  'trait_CAS_Story_Career_Astronaut': {
     name: 'trait_CAS_Story_Career_Astronaut',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Astronaut_Level_2: {
+  'trait_CAS_Story_Career_Astronaut_Level_2': {
     name: 'trait_CAS_Story_Career_Astronaut_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Astronaut_Level_3: {
+  'trait_CAS_Story_Career_Astronaut_Level_3': {
     name: 'trait_CAS_Story_Career_Astronaut_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Athletic: {
+  'trait_CAS_Story_Career_Athletic': {
     name: 'trait_CAS_Story_Career_Athletic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Athletic_2: {
+  'trait_CAS_Story_Career_Athletic_2': {
     name: 'trait_CAS_Story_Career_Athletic_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Athletic_3: {
+  'trait_CAS_Story_Career_Athletic_3': {
     name: 'trait_CAS_Story_Career_Athletic_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Business: {
+  'trait_CAS_Story_Career_Business': {
     name: 'trait_CAS_Story_Career_Business',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Business_Level_2: {
+  'trait_CAS_Story_Career_Business_Level_2': {
     name: 'trait_CAS_Story_Career_Business_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Business_Level_3: {
+  'trait_CAS_Story_Career_Business_Level_3': {
     name: 'trait_CAS_Story_Career_Business_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_CivilDesigner: {
+  'trait_CAS_Story_Career_CivilDesigner': {
     name: 'trait_CAS_Story_Career_CivilDesigner',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_CivilDesigner_Level_2: {
+  'trait_CAS_Story_Career_CivilDesigner_Level_2': {
     name: 'trait_CAS_Story_Career_CivilDesigner_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_CivilDesigner_Level_3: {
+  'trait_CAS_Story_Career_CivilDesigner_Level_3': {
     name: 'trait_CAS_Story_Career_CivilDesigner_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Career_Conservationist: {
+  'Trait_CAS_Story_Career_Conservationist': {
     name: 'Trait_CAS_Story_Career_Conservationist',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Conservationist_Level_2: {
+  'trait_CAS_Story_Career_Conservationist_Level_2': {
     name: 'trait_CAS_Story_Career_Conservationist_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Conservationist_Level_3: {
+  'trait_CAS_Story_Career_Conservationist_Level_3': {
     name: 'trait_CAS_Story_Career_Conservationist_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Corporate_0: {
+  'trait_CAS_Story_Career_Corporate_0': {
     name: 'trait_CAS_Story_Career_Corporate_0',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Corporate_Level_2: {
+  'trait_CAS_Story_Career_Corporate_Level_2': {
     name: 'trait_CAS_Story_Career_Corporate_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Corporate_Level_3: {
+  'trait_CAS_Story_Career_Corporate_Level_3': {
     name: 'trait_CAS_Story_Career_Corporate_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Criminal: {
+  'trait_CAS_Story_Career_Criminal': {
     name: 'trait_CAS_Story_Career_Criminal',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Criminal_Level_2: {
+  'trait_CAS_Story_Career_Criminal_Level_2': {
     name: 'trait_CAS_Story_Career_Criminal_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Criminal_Level_3: {
+  'trait_CAS_Story_Career_Criminal_Level_3': {
     name: 'trait_CAS_Story_Career_Criminal_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Career_Critic: {
+  'Trait_CAS_Story_Career_Critic': {
     name: 'Trait_CAS_Story_Career_Critic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Critic_Level_2: {
+  'trait_CAS_Story_Career_Critic_Level_2': {
     name: 'trait_CAS_Story_Career_Critic_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Critic_Level_3: {
+  'trait_CAS_Story_Career_Critic_Level_3': {
     name: 'trait_CAS_Story_Career_Critic_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Culinary: {
+  'trait_CAS_Story_Career_Culinary': {
     name: 'trait_CAS_Story_Career_Culinary',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Culinary_Level_2: {
+  'trait_CAS_Story_Career_Culinary_Level_2': {
     name: 'trait_CAS_Story_Career_Culinary_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Culinary_Level_3: {
+  'trait_CAS_Story_Career_Culinary_Level_3': {
     name: 'trait_CAS_Story_Career_Culinary_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Career_Detective: {
+  'Trait_CAS_Story_Career_Detective': {
     name: 'Trait_CAS_Story_Career_Detective',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Detective_Level_2: {
+  'trait_CAS_Story_Career_Detective_Level_2': {
     name: 'trait_CAS_Story_Career_Detective_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Detective_Level_3: {
+  'trait_CAS_Story_Career_Detective_Level_3': {
     name: 'trait_CAS_Story_Career_Detective_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Career_Diver: {
+  'Trait_CAS_Story_Career_Diver': {
     name: 'Trait_CAS_Story_Career_Diver',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Diver_Level_2: {
+  'trait_CAS_Story_Career_Diver_Level_2': {
     name: 'trait_CAS_Story_Career_Diver_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Diver_Level_3: {
+  'trait_CAS_Story_Career_Diver_Level_3': {
     name: 'trait_CAS_Story_Career_Diver_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Career_Doctor: {
+  'Trait_CAS_Story_Career_Doctor': {
     name: 'Trait_CAS_Story_Career_Doctor',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Doctor_Level_2: {
+  'trait_CAS_Story_Career_Doctor_Level_2': {
     name: 'trait_CAS_Story_Career_Doctor_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Doctor_Level_3: {
+  'trait_CAS_Story_Career_Doctor_Level_3': {
     name: 'trait_CAS_Story_Career_Doctor_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Education: {
+  'trait_CAS_Story_Career_Education': {
     name: 'trait_CAS_Story_Career_Education',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Education_Level_2: {
+  'trait_CAS_Story_Career_Education_Level_2': {
     name: 'trait_CAS_Story_Career_Education_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Education_Level_3: {
+  'trait_CAS_Story_Career_Education_Level_3': {
     name: 'trait_CAS_Story_Career_Education_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Engineer: {
+  'trait_CAS_Story_Career_Engineer': {
     name: 'trait_CAS_Story_Career_Engineer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Engineer_Level_2: {
+  'trait_CAS_Story_Career_Engineer_Level_2': {
     name: 'trait_CAS_Story_Career_Engineer_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Engineer_Level_3: {
+  'trait_CAS_Story_Career_Engineer_Level_3': {
     name: 'trait_CAS_Story_Career_Engineer_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Entertainer: {
+  'trait_CAS_Story_Career_Entertainer': {
     name: 'trait_CAS_Story_Career_Entertainer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Entertainer_Level_2: {
+  'trait_CAS_Story_Career_Entertainer_Level_2': {
     name: 'trait_CAS_Story_Career_Entertainer_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Entertainer_Level_3: {
+  'trait_CAS_Story_Career_Entertainer_Level_3': {
     name: 'trait_CAS_Story_Career_Entertainer_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Fisherman: {
+  'trait_CAS_Story_Career_Fisherman': {
     name: 'trait_CAS_Story_Career_Fisherman',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Fisherman_Level_2: {
+  'trait_CAS_Story_Career_Fisherman_Level_2': {
     name: 'trait_CAS_Story_Career_Fisherman_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Fisherman_Level_3: {
+  'trait_CAS_Story_Career_Fisherman_Level_3': {
     name: 'trait_CAS_Story_Career_Fisherman_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Freelancer: {
+  'trait_CAS_Story_Career_Freelancer': {
     name: 'trait_CAS_Story_Career_Freelancer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Career_Gardener: {
+  'Trait_CAS_Story_Career_Gardener': {
     name: 'Trait_CAS_Story_Career_Gardener',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Gardener_Level_2: {
+  'trait_CAS_Story_Career_Gardener_Level_2': {
     name: 'trait_CAS_Story_Career_Gardener_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Gardener_Level_3: {
+  'trait_CAS_Story_Career_Gardener_Level_3': {
     name: 'trait_CAS_Story_Career_Gardener_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Grim: {
+  'trait_CAS_Story_Career_Grim': {
     name: 'trait_CAS_Story_Career_Grim',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Grim_Level_2: {
+  'trait_CAS_Story_Career_Grim_Level_2': {
     name: 'trait_CAS_Story_Career_Grim_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Grim_Level_3: {
+  'trait_CAS_Story_Career_Grim_Level_3': {
     name: 'trait_CAS_Story_Career_Grim_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Law: {
+  'trait_CAS_Story_Career_Law': {
     name: 'trait_CAS_Story_Career_Law',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Law_Level_2: {
+  'trait_CAS_Story_Career_Law_Level_2': {
     name: 'trait_CAS_Story_Career_Law_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Law_Level_3: {
+  'trait_CAS_Story_Career_Law_Level_3': {
     name: 'trait_CAS_Story_Career_Law_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Lifeguard: {
+  'trait_CAS_Story_Career_Lifeguard': {
     name: 'trait_CAS_Story_Career_Lifeguard',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Lifeguard_Level_2: {
+  'trait_CAS_Story_Career_Lifeguard_Level_2': {
     name: 'trait_CAS_Story_Career_Lifeguard_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Lifeguard_Level_3: {
+  'trait_CAS_Story_Career_Lifeguard_Level_3': {
     name: 'trait_CAS_Story_Career_Lifeguard_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Career_Military: {
+  'Trait_CAS_Story_Career_Military': {
     name: 'Trait_CAS_Story_Career_Military',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Military_level_2: {
+  'trait_CAS_Story_Career_Military_level_2': {
     name: 'trait_CAS_Story_Career_Military_level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Military_Level_3: {
+  'trait_CAS_Story_Career_Military_Level_3': {
     name: 'trait_CAS_Story_Career_Military_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Mortician: {
+  'trait_CAS_Story_Career_Mortician': {
     name: 'trait_CAS_Story_Career_Mortician',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Mortician_Level_2: {
+  'trait_CAS_Story_Career_Mortician_Level_2': {
     name: 'trait_CAS_Story_Career_Mortician_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Mortician_Level_3: {
+  'trait_CAS_Story_Career_Mortician_Level_3': {
     name: 'trait_CAS_Story_Career_Mortician_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Painter: {
+  'trait_CAS_Story_Career_Painter': {
     name: 'trait_CAS_Story_Career_Painter',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Painter_Level_2: {
+  'trait_CAS_Story_Career_Painter_Level_2': {
     name: 'trait_CAS_Story_Career_Painter_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Painter_Level_3: {
+  'trait_CAS_Story_Career_Painter_Level_3': {
     name: 'trait_CAS_Story_Career_Painter_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_RomanceConsultant_Level1: {
+  'trait_CAS_Story_Career_RomanceConsultant_Level1': {
     name: 'trait_CAS_Story_Career_RomanceConsultant_Level1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_RomanceConsultant_Level2: {
+  'trait_CAS_Story_Career_RomanceConsultant_Level2': {
     name: 'trait_CAS_Story_Career_RomanceConsultant_Level2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_RomanceConsultant_Level3: {
+  'trait_CAS_Story_Career_RomanceConsultant_Level3': {
     name: 'trait_CAS_Story_Career_RomanceConsultant_Level3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Career_Scientist: {
+  'Trait_CAS_Story_Career_Scientist': {
     name: 'Trait_CAS_Story_Career_Scientist',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Scientist_Level_2: {
+  'trait_CAS_Story_Career_Scientist_Level_2': {
     name: 'trait_CAS_Story_Career_Scientist_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Scientist_Level_3: {
+  'trait_CAS_Story_Career_Scientist_Level_3': {
     name: 'trait_CAS_Story_Career_Scientist_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Secret_Agent: {
+  'trait_CAS_Story_Career_Secret_Agent': {
     name: 'trait_CAS_Story_Career_Secret_Agent',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Secret_Agent_Level_2: {
+  'trait_CAS_Story_Career_Secret_Agent_Level_2': {
     name: 'trait_CAS_Story_Career_Secret_Agent_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Secret_Agent_Level_3: {
+  'trait_CAS_Story_Career_Secret_Agent_Level_3': {
     name: 'trait_CAS_Story_Career_Secret_Agent_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Career_Social_Media: {
+  'Trait_CAS_Story_Career_Social_Media': {
     name: 'Trait_CAS_Story_Career_Social_Media',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Social_Media_Level_2: {
+  'trait_CAS_Story_Career_Social_Media_Level_2': {
     name: 'trait_CAS_Story_Career_Social_Media_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Social_Media_Level_3: {
+  'trait_CAS_Story_Career_Social_Media_Level_3': {
     name: 'trait_CAS_Story_Career_Social_Media_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Style_Influencer: {
+  'trait_CAS_Story_Career_Style_Influencer': {
     name: 'trait_CAS_Story_Career_Style_Influencer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Style_Influencer_Level_2: {
+  'trait_CAS_Story_Career_Style_Influencer_Level_2': {
     name: 'trait_CAS_Story_Career_Style_Influencer_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Style_Influencer_Level_3: {
+  'trait_CAS_Story_Career_Style_Influencer_Level_3': {
     name: 'trait_CAS_Story_Career_Style_Influencer_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Tech_Guru: {
+  'trait_CAS_Story_Career_Tech_Guru': {
     name: 'trait_CAS_Story_Career_Tech_Guru',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Tech_Guru_Level_2: {
+  'trait_CAS_Story_Career_Tech_Guru_Level_2': {
     name: 'trait_CAS_Story_Career_Tech_Guru_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Tech_Guru_Level_3: {
+  'trait_CAS_Story_Career_Tech_Guru_Level_3': {
     name: 'trait_CAS_Story_Career_Tech_Guru_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Unemployed: {
+  'trait_CAS_Story_Career_Unemployed': {
     name: 'trait_CAS_Story_Career_Unemployed',
     ignored: false,
     description: 'is currently unemployed',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Writer: {
+  'trait_CAS_Story_Career_Writer': {
     name: 'trait_CAS_Story_Career_Writer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Writer_Level_2: {
+  'trait_CAS_Story_Career_Writer_Level_2': {
     name: 'trait_CAS_Story_Career_Writer_Level_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Career_Writer_Level_3: {
+  'trait_CAS_Story_Career_Writer_Level_3': {
     name: 'trait_CAS_Story_Career_Writer_Level_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Household_Funds_High: {
+  'trait_CAS_Story_Household_Funds_High': {
     name: 'trait_CAS_Story_Household_Funds_High',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Household_Funds_Low: {
+  'trait_CAS_Story_Household_Funds_Low': {
     name: 'trait_CAS_Story_Household_Funds_Low',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Household_Funds_Med: {
+  'trait_CAS_Story_Household_Funds_Med': {
     name: 'trait_CAS_Story_Household_Funds_Med',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Occult_Ghost: {
+  'trait_CAS_Story_Occult_Ghost': {
     name: 'trait_CAS_Story_Occult_Ghost',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Occult_Vampire: {
+  'Trait_CAS_Story_Occult_Vampire': {
     name: 'Trait_CAS_Story_Occult_Vampire',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Skill_Acting: {
+  'Trait_CAS_Story_Skill_Acting': {
     name: 'Trait_CAS_Story_Skill_Acting',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Acting_3: {
+  'trait_CAS_Story_Skill_Acting_3': {
     name: 'trait_CAS_Story_Skill_Acting_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Skill_Archaeology: {
+  'Trait_CAS_Story_Skill_Archaeology': {
     name: 'Trait_CAS_Story_Skill_Archaeology',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Archaeology_3: {
+  'trait_CAS_Story_Skill_Archaeology_3': {
     name: 'trait_CAS_Story_Skill_Archaeology_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Skill_Baking: {
+  'Trait_CAS_Story_Skill_Baking': {
     name: 'Trait_CAS_Story_Skill_Baking',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Baking_3: {
+  'trait_CAS_Story_Skill_Baking_3': {
     name: 'trait_CAS_Story_Skill_Baking_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Skill_Bowling: {
+  'Trait_CAS_Story_Skill_Bowling': {
     name: 'Trait_CAS_Story_Skill_Bowling',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Bowling_3: {
+  'trait_CAS_Story_Skill_Bowling_3': {
     name: 'trait_CAS_Story_Skill_Bowling_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Charisma: {
+  'trait_CAS_Story_Skill_Charisma': {
     name: 'trait_CAS_Story_Skill_Charisma',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Charisma_3: {
+  'trait_CAS_Story_Skill_Charisma_3': {
     name: 'trait_CAS_Story_Skill_Charisma_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Comedy: {
+  'trait_CAS_Story_Skill_Comedy': {
     name: 'trait_CAS_Story_Skill_Comedy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Comedy_3: {
+  'trait_CAS_Story_Skill_Comedy_3': {
     name: 'trait_CAS_Story_Skill_Comedy_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Cooking: {
+  'trait_CAS_Story_Skill_Cooking': {
     name: 'trait_CAS_Story_Skill_Cooking',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Cooking_3: {
+  'trait_CAS_Story_Skill_Cooking_3': {
     name: 'trait_CAS_Story_Skill_Cooking_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_CrossStitch: {
+  'trait_CAS_Story_Skill_CrossStitch': {
     name: 'trait_CAS_Story_Skill_CrossStitch',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_CrossStitch_3: {
+  'trait_CAS_Story_Skill_CrossStitch_3': {
     name: 'trait_CAS_Story_Skill_CrossStitch_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Dancing: {
+  'trait_CAS_Story_Skill_Dancing': {
     name: 'trait_CAS_Story_Skill_Dancing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Dancing_3: {
+  'trait_CAS_Story_Skill_Dancing_3': {
     name: 'trait_CAS_Story_Skill_Dancing_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Skill_DJ_Mixing: {
+  'Trait_CAS_Story_Skill_DJ_Mixing': {
     name: 'Trait_CAS_Story_Skill_DJ_Mixing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_DJ_Mixing_3: {
+  'trait_CAS_Story_Skill_DJ_Mixing_3': {
     name: 'trait_CAS_Story_Skill_DJ_Mixing_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Entrepreneur: {
+  'trait_CAS_Story_Skill_Entrepreneur': {
     name: 'trait_CAS_Story_Skill_Entrepreneur',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Entrepreneur_3: {
+  'trait_CAS_Story_Skill_Entrepreneur_3': {
     name: 'trait_CAS_Story_Skill_Entrepreneur_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_EquestrianSkill: {
+  'trait_CAS_Story_Skill_EquestrianSkill': {
     name: 'trait_CAS_Story_Skill_EquestrianSkill',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_EquestrianSkill_3: {
+  'trait_CAS_Story_Skill_EquestrianSkill_3': {
     name: 'trait_CAS_Story_Skill_EquestrianSkill_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Fabrication: {
+  'trait_CAS_Story_Skill_Fabrication': {
     name: 'trait_CAS_Story_Skill_Fabrication',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Fabrication_3: {
+  'trait_CAS_Story_Skill_Fabrication_3': {
     name: 'trait_CAS_Story_Skill_Fabrication_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Fishing: {
+  'trait_CAS_Story_Skill_Fishing': {
     name: 'trait_CAS_Story_Skill_Fishing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Fishing_3: {
+  'trait_CAS_Story_Skill_Fishing_3': {
     name: 'trait_CAS_Story_Skill_Fishing_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Fitness: {
+  'trait_CAS_Story_Skill_Fitness': {
     name: 'trait_CAS_Story_Skill_Fitness',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Fitness_3: {
+  'trait_CAS_Story_Skill_Fitness_3': {
     name: 'trait_CAS_Story_Skill_Fitness_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Skill_Flower_Arranging: {
+  'Trait_CAS_Story_Skill_Flower_Arranging': {
     name: 'Trait_CAS_Story_Skill_Flower_Arranging',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Flower_Arranging_3: {
+  'trait_CAS_Story_Skill_Flower_Arranging_3': {
     name: 'trait_CAS_Story_Skill_Flower_Arranging_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Gardening: {
+  'trait_CAS_Story_Skill_Gardening': {
     name: 'trait_CAS_Story_Skill_Gardening',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Gardening_3: {
+  'trait_CAS_Story_Skill_Gardening_3': {
     name: 'trait_CAS_Story_Skill_Gardening_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Gourmet_Cooking: {
+  'trait_CAS_Story_Skill_Gourmet_Cooking': {
     name: 'trait_CAS_Story_Skill_Gourmet_Cooking',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Gourmet_Cooking_3: {
+  'trait_CAS_Story_Skill_Gourmet_Cooking_3': {
     name: 'trait_CAS_Story_Skill_Gourmet_Cooking_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Guitar: {
+  'trait_CAS_Story_Skill_Guitar': {
     name: 'trait_CAS_Story_Skill_Guitar',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Guitar_3: {
+  'trait_CAS_Story_Skill_Guitar_3': {
     name: 'trait_CAS_Story_Skill_Guitar_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Handiness: {
+  'trait_CAS_Story_Skill_Handiness': {
     name: 'trait_CAS_Story_Skill_Handiness',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Handiness_3: {
+  'trait_CAS_Story_Skill_Handiness_3': {
     name: 'trait_CAS_Story_Skill_Handiness_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Skill_Herbalism: {
+  'Trait_CAS_Story_Skill_Herbalism': {
     name: 'Trait_CAS_Story_Skill_Herbalism',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Herbalism_3: {
+  'trait_CAS_Story_Skill_Herbalism_3': {
     name: 'trait_CAS_Story_Skill_Herbalism_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_JuiceFizzing: {
+  'trait_CAS_Story_Skill_JuiceFizzing': {
     name: 'trait_CAS_Story_Skill_JuiceFizzing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_JuiceFizzing_3: {
+  'trait_CAS_Story_Skill_JuiceFizzing_3': {
     name: 'trait_CAS_Story_Skill_JuiceFizzing_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Local_Culture: {
+  'trait_CAS_Story_Skill_Local_Culture': {
     name: 'trait_CAS_Story_Skill_Local_Culture',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Local_Culture_3: {
+  'trait_CAS_Story_Skill_Local_Culture_3': {
     name: 'trait_CAS_Story_Skill_Local_Culture_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Logic: {
+  'trait_CAS_Story_Skill_Logic': {
     name: 'trait_CAS_Story_Skill_Logic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Logic_3: {
+  'trait_CAS_Story_Skill_Logic_3': {
     name: 'trait_CAS_Story_Skill_Logic_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Mischief: {
+  'trait_CAS_Story_Skill_Mischief': {
     name: 'trait_CAS_Story_Skill_Mischief',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Mischief_3: {
+  'trait_CAS_Story_Skill_Mischief_3': {
     name: 'trait_CAS_Story_Skill_Mischief_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Mixology: {
+  'trait_CAS_Story_Skill_Mixology': {
     name: 'trait_CAS_Story_Skill_Mixology',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Mixology_3: {
+  'trait_CAS_Story_Skill_Mixology_3': {
     name: 'trait_CAS_Story_Skill_Mixology_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Nectar: {
+  'trait_CAS_Story_Skill_Nectar': {
     name: 'trait_CAS_Story_Skill_Nectar',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Nectar_3: {
+  'trait_CAS_Story_Skill_Nectar_3': {
     name: 'trait_CAS_Story_Skill_Nectar_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Painting: {
+  'trait_CAS_Story_Skill_Painting': {
     name: 'trait_CAS_Story_Skill_Painting',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Painting_3: {
+  'trait_CAS_Story_Skill_Painting_3': {
     name: 'trait_CAS_Story_Skill_Painting_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Skill_Parenting: {
+  'Trait_CAS_Story_Skill_Parenting': {
     name: 'Trait_CAS_Story_Skill_Parenting',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Parenting_3: {
+  'trait_CAS_Story_Skill_Parenting_3': {
     name: 'trait_CAS_Story_Skill_Parenting_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Pet_Training: {
+  'trait_CAS_Story_Skill_Pet_Training': {
     name: 'trait_CAS_Story_Skill_Pet_Training',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Pet_Training_3: {
+  'trait_CAS_Story_Skill_Pet_Training_3': {
     name: 'trait_CAS_Story_Skill_Pet_Training_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Photography: {
+  'trait_CAS_Story_Skill_Photography': {
     name: 'trait_CAS_Story_Skill_Photography',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Photography_3: {
+  'trait_CAS_Story_Skill_Photography_3': {
     name: 'trait_CAS_Story_Skill_Photography_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Piano: {
+  'trait_CAS_Story_Skill_Piano': {
     name: 'trait_CAS_Story_Skill_Piano',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Piano_3: {
+  'trait_CAS_Story_Skill_Piano_3': {
     name: 'trait_CAS_Story_Skill_Piano_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Skill_PipeOrgan: {
+  'Trait_CAS_Story_Skill_PipeOrgan': {
     name: 'Trait_CAS_Story_Skill_PipeOrgan',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_PipeOrgan_3: {
+  'trait_CAS_Story_Skill_PipeOrgan_3': {
     name: 'trait_CAS_Story_Skill_PipeOrgan_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Programming: {
+  'trait_CAS_Story_Skill_Programming': {
     name: 'trait_CAS_Story_Skill_Programming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Programming_3: {
+  'trait_CAS_Story_Skill_Programming_3': {
     name: 'trait_CAS_Story_Skill_Programming_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_ResearchDebate: {
+  'trait_CAS_Story_Skill_ResearchDebate': {
     name: 'trait_CAS_Story_Skill_ResearchDebate',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_ResearchDebate_3: {
+  'trait_CAS_Story_Skill_ResearchDebate_3': {
     name: 'trait_CAS_Story_Skill_ResearchDebate_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Robotics: {
+  'trait_CAS_Story_Skill_Robotics': {
     name: 'trait_CAS_Story_Skill_Robotics',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Robotics_3: {
+  'trait_CAS_Story_Skill_Robotics_3': {
     name: 'trait_CAS_Story_Skill_Robotics_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_RockClimbing: {
+  'trait_CAS_Story_Skill_RockClimbing': {
     name: 'trait_CAS_Story_Skill_RockClimbing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_RockClimbing_3: {
+  'trait_CAS_Story_Skill_RockClimbing_3': {
     name: 'trait_CAS_Story_Skill_RockClimbing_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Rocket_Science: {
+  'trait_CAS_Story_Skill_Rocket_Science': {
     name: 'trait_CAS_Story_Skill_Rocket_Science',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Rocket_Science_3: {
+  'trait_CAS_Story_Skill_Rocket_Science_3': {
     name: 'trait_CAS_Story_Skill_Rocket_Science_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Romance: {
+  'trait_CAS_Story_Skill_Romance': {
     name: 'trait_CAS_Story_Skill_Romance',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Skill_Singing: {
+  'Trait_CAS_Story_Skill_Singing': {
     name: 'Trait_CAS_Story_Skill_Singing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Singing_3: {
+  'trait_CAS_Story_Skill_Singing_3': {
     name: 'trait_CAS_Story_Skill_Singing_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Skiing: {
+  'trait_CAS_Story_Skill_Skiing': {
     name: 'trait_CAS_Story_Skill_Skiing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Skiing_3: {
+  'trait_CAS_Story_Skill_Skiing_3': {
     name: 'trait_CAS_Story_Skill_Skiing_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Snowboarding: {
+  'trait_CAS_Story_Skill_Snowboarding': {
     name: 'trait_CAS_Story_Skill_Snowboarding',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Snowboarding_3: {
+  'trait_CAS_Story_Skill_Snowboarding_3': {
     name: 'trait_CAS_Story_Skill_Snowboarding_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Thanatology: {
+  'trait_CAS_Story_Skill_Thanatology': {
     name: 'trait_CAS_Story_Skill_Thanatology',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Thanatology_3: {
+  'trait_CAS_Story_Skill_Thanatology_3': {
     name: 'trait_CAS_Story_Skill_Thanatology_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Vampire_Lore: {
+  'trait_CAS_Story_Skill_Vampire_Lore': {
     name: 'trait_CAS_Story_Skill_Vampire_Lore',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Vampire_Lore_3: {
+  'trait_CAS_Story_Skill_Vampire_Lore_3': {
     name: 'trait_CAS_Story_Skill_Vampire_Lore_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Skill_Veterinarian: {
+  'Trait_CAS_Story_Skill_Veterinarian': {
     name: 'Trait_CAS_Story_Skill_Veterinarian',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Veterinarian_3: {
+  'trait_CAS_Story_Skill_Veterinarian_3': {
     name: 'trait_CAS_Story_Skill_Veterinarian_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Video_Gaming: {
+  'trait_CAS_Story_Skill_Video_Gaming': {
     name: 'trait_CAS_Story_Skill_Video_Gaming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Video_Gaming_3: {
+  'trait_CAS_Story_Skill_Video_Gaming_3': {
     name: 'trait_CAS_Story_Skill_Video_Gaming_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Violin: {
+  'trait_CAS_Story_Skill_Violin': {
     name: 'trait_CAS_Story_Skill_Violin',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Violin_3: {
+  'trait_CAS_Story_Skill_Violin_3': {
     name: 'trait_CAS_Story_Skill_Violin_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_CAS_Story_Skill_Wellness: {
+  'Trait_CAS_Story_Skill_Wellness': {
     name: 'Trait_CAS_Story_Skill_Wellness',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Wellness_3: {
+  'trait_CAS_Story_Skill_Wellness_3': {
     name: 'trait_CAS_Story_Skill_Wellness_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Writing: {
+  'trait_CAS_Story_Skill_Writing': {
     name: 'trait_CAS_Story_Skill_Writing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CAS_Story_Skill_Writing_3: {
+  'trait_CAS_Story_Skill_Writing_3': {
     name: 'trait_CAS_Story_Skill_Writing_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CatLover: {
+  'trait_CatLover': {
     name: 'trait_CatLover',
     description: 'loves cats',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_CatQuirk_SleepStyle_Back: {
+  'trait_CatQuirk_SleepStyle_Back': {
     name: 'trait_CatQuirk_SleepStyle_Back',
     description: 'likes to sleep on back',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_CatQuirk_SleepStyle_Curl: {
+  'trait_CatQuirk_SleepStyle_Curl': {
     name: 'trait_CatQuirk_SleepStyle_Curl',
     description: 'likes to curl up to sleep',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_CatQuirk_StandWatch_False: {
+  'trait_CatQuirk_StandWatch_False': {
     name: 'trait_CatQuirk_StandWatch_False',
     description: "doesn't like to stand watch",
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_CatQuirk_StandWatch_True: {
+  'trait_CatQuirk_StandWatch_True': {
     name: 'trait_CatQuirk_StandWatch_True',
     description: 'likes to stand watch',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Cauldron_Potion_Immortality: {
+  'trait_Cauldron_Potion_Immortality': {
     name: 'trait_Cauldron_Potion_Immortality',
     description: 'is immortal',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Cauldron_Potion_Luck_Clumsy: {
+  'trait_Cauldron_Potion_Luck_Clumsy': {
     name: 'trait_Cauldron_Potion_Luck_Clumsy',
     description: 'is clumsy',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CelebrityFans_Nervous: {
+  'trait_CelebrityFans_Nervous': {
     name: 'trait_CelebrityFans_Nervous',
     description: 'is nervous being around a celebrity',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CelebrityFans_Social: {
+  'trait_CelebrityFans_Social': {
     name: 'trait_CelebrityFans_Social',
     description: 'is very talkative with celebrities',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CelebrityFans_Touchy: {
+  'trait_CelebrityFans_Touchy': {
     name: 'trait_CelebrityFans_Touchy',
     description: 'is very touchy with celebrities',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ChampionOfThePeople: {
+  'trait_ChampionOfThePeople': {
     name: 'trait_ChampionOfThePeople',
     description: 'is a true Champion of the People',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_ChasedByDeath: {
+  'trait_ChasedByDeath': {
     name: 'trait_ChasedByDeath',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Cheerful: {
+  'trait_Cheerful': {
     name: 'trait_Cheerful',
     description: 'is cheerful',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_child: {
+  'trait_child': {
     name: 'trait_child',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ChildConfidence_High: {
+  'trait_ChildConfidence_High': {
     name: 'trait_ChildConfidence_High',
     description: 'has high confidence',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_ChildConfidence_Low: {
+  'trait_ChildConfidence_Low': {
     name: 'trait_ChildConfidence_Low',
     ignored: false,
     description: 'has low confidence',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_ChildConfidence_Neutral: {
+  'trait_ChildConfidence_Neutral': {
     name: 'trait_ChildConfidence_Neutral',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_ChildhoodPhase_Bear: {
+  'trait_ChildhoodPhase_Bear': {
     name: 'trait_ChildhoodPhase_Bear',
-    description:
-      "is wearing a bear costume and won't take it off no matter what",
+    description: "is wearing a bear costume and won't take it off no matter what",
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_ChildhoodPhase_Clingy: {
+  'trait_ChildhoodPhase_Clingy': {
     name: 'trait_ChildhoodPhase_Clingy',
     description: 'is going through a clingy phase',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_ChildhoodPhase_Distant: {
+  'trait_ChildhoodPhase_Distant': {
     name: 'trait_ChildhoodPhase_Distant',
     description: 'is going through a distant phase',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_ChildhoodPhase_Loud: {
+  'trait_ChildhoodPhase_Loud': {
     name: 'trait_ChildhoodPhase_Loud',
     description: 'is going through a loud phase',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_ChildhoodPhase_MeanStreak: {
+  'trait_ChildhoodPhase_MeanStreak': {
     name: 'trait_ChildhoodPhase_MeanStreak',
     description: 'is on a mean streak',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_ChildhoodPhase_PickyEater_A: {
+  'trait_ChildhoodPhase_PickyEater_A': {
     name: 'trait_ChildhoodPhase_PickyEater_A',
     description: 'is a picky eater',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_ChildhoodPhase_PickyEater_B: {
+  'trait_ChildhoodPhase_PickyEater_B': {
     name: 'trait_ChildhoodPhase_PickyEater_B',
     description: 'is a picky eater',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_ChildhoodPhase_PickyEater_C: {
+  'trait_ChildhoodPhase_PickyEater_C': {
     name: 'trait_ChildhoodPhase_PickyEater_C',
     description: 'is a picky eater',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_ChildhoodPhase_PickyEater_D: {
+  'trait_ChildhoodPhase_PickyEater_D': {
     name: 'trait_ChildhoodPhase_PickyEater_D',
     description: 'is a picky eater',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_ChildhoodPhase_PickyEater_DisgustedByFood: {
+  'trait_ChildhoodPhase_PickyEater_DisgustedByFood': {
     name: 'trait_ChildhoodPhase_PickyEater_DisgustedByFood',
-    description:
-      'is going through a phase where they are disgusted by all food',
+    description: 'is going through a phase where they are disgusted by all food',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ChildhoodPhase_PickyEater_E: {
+  'trait_ChildhoodPhase_PickyEater_E': {
     name: 'trait_ChildhoodPhase_PickyEater_E',
     description: 'is a picky eater',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_ChildhoodPhase_Rebellious: {
+  'trait_ChildhoodPhase_Rebellious': {
     name: 'trait_ChildhoodPhase_Rebellious',
     description: 'is going through a rebellious phase',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
-  trait_Childish: {
+  'trait_Childish': {
     name: 'trait_Childish',
     description: 'is childish',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_ChildoftheOcean: {
+  'trait_ChildoftheOcean': {
     name: 'trait_ChildoftheOcean',
     description: 'is a child of the ocean',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_ChildoftheSEA: {
+  'trait_ChildoftheSEA': {
     name: 'trait_ChildoftheSEA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_ChildSkillReward_Headstrong: {
+  'trait_ChildSkillReward_Headstrong': {
     name: 'trait_ChildSkillReward_Headstrong',
     description: 'is headstrong',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_ChildSkillReward_IdeaPerson: {
+  'trait_ChildSkillReward_IdeaPerson': {
     name: 'trait_ChildSkillReward_IdeaPerson',
     description: 'is creative',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_ChildSkillReward_PackAnimal: {
+  'trait_ChildSkillReward_PackAnimal': {
     name: 'trait_ChildSkillReward_PackAnimal',
     description: 'like improving themselves',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_ChildSkillReward_PraticedHost: {
+  'trait_ChildSkillReward_PraticedHost': {
     name: 'trait_ChildSkillReward_PraticedHost',
     description: 'is good at hosting events',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_ChopstickSavvy: {
+  'trait_ChopstickSavvy': {
     name: 'trait_ChopstickSavvy',
     ignored: false,
     description: 'is chopstick savvy',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Chronicler: {
+  'trait_Chronicler': {
     name: 'trait_Chronicler',
     ignored: false,
     description: 'is a chronicler',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_CivicPolicy_CommunalOwnership: {
+  'trait_CivicPolicy_CommunalOwnership': {
     name: 'trait_CivicPolicy_CommunalOwnership',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_EcoFriendlyAppliances: {
+  'trait_CivicPolicy_EcoFriendlyAppliances': {
     name: 'trait_CivicPolicy_EcoFriendlyAppliances',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_GreenGardening: {
+  'trait_CivicPolicy_GreenGardening': {
     name: 'trait_CivicPolicy_GreenGardening',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_ModernPolicy: {
+  'trait_CivicPolicy_ModernPolicy': {
     name: 'trait_CivicPolicy_ModernPolicy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_RepealStarted: {
+  'trait_CivicPolicy_RepealStarted': {
     name: 'trait_CivicPolicy_RepealStarted',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_SkillBased_Aggression: {
+  'trait_CivicPolicy_SkillBased_Aggression': {
     name: 'trait_CivicPolicy_SkillBased_Aggression',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_SkillBased_CreativeArts: {
+  'trait_CivicPolicy_SkillBased_CreativeArts': {
     name: 'trait_CivicPolicy_SkillBased_CreativeArts',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_SkillBased_FreeLove: {
+  'trait_CivicPolicy_SkillBased_FreeLove': {
     name: 'trait_CivicPolicy_SkillBased_FreeLove',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_SkillBased_FunCommunity: {
+  'trait_CivicPolicy_SkillBased_FunCommunity': {
     name: 'trait_CivicPolicy_SkillBased_FunCommunity',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_SkillBased_HomeCooking: {
+  'trait_CivicPolicy_SkillBased_HomeCooking': {
     name: 'trait_CivicPolicy_SkillBased_HomeCooking',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_SkillBased_JuicedCommunity: {
+  'trait_CivicPolicy_SkillBased_JuicedCommunity': {
     name: 'trait_CivicPolicy_SkillBased_JuicedCommunity',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_SkillBased_MusicArts: {
+  'trait_CivicPolicy_SkillBased_MusicArts': {
     name: 'trait_CivicPolicy_SkillBased_MusicArts',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_SkillBased_OldDays: {
+  'trait_CivicPolicy_SkillBased_OldDays': {
     name: 'trait_CivicPolicy_SkillBased_OldDays',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_SkillBased_SelfCare: {
+  'trait_CivicPolicy_SkillBased_SelfCare': {
     name: 'trait_CivicPolicy_SkillBased_SelfCare',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_SkillBased_SelfSufficient: {
+  'trait_CivicPolicy_SkillBased_SelfSufficient': {
     name: 'trait_CivicPolicy_SkillBased_SelfSufficient',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_SkillBased_TechnologicalProgress: {
+  'trait_CivicPolicy_SkillBased_TechnologicalProgress': {
     name: 'trait_CivicPolicy_SkillBased_TechnologicalProgress',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_UpcyclingInitiative: {
+  'trait_CivicPolicy_UpcyclingInitiative': {
     name: 'trait_CivicPolicy_UpcyclingInitiative',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CivicPolicy_UtilityProduction: {
+  'trait_CivicPolicy_UtilityProduction': {
     name: 'trait_CivicPolicy_UtilityProduction',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ClubPresident: {
+  'trait_ClubPresident': {
     name: 'trait_ClubPresident',
-    description:
-      'is a natural leader and will overthrow other leaders with ease',
+    description: 'is a natural leader and will overthrow other leaders with ease',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Clumsy: {
+  'trait_Clumsy': {
     name: 'trait_Clumsy',
     description: 'is clumsy',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_ColdHearted: {
+  'trait_ColdHearted': {
     name: 'trait_ColdHearted',
     ignored: false,
     description: 'is cold-hearted',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Collector: {
+  'trait_Collector': {
     name: 'trait_Collector',
     ignored: false,
     description: 'is a Collector',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_CollegeOrganization_SecretSociety_Member: {
+  'trait_CollegeOrganization_SecretSociety_Member': {
     name: 'trait_CollegeOrganization_SecretSociety_Member',
     description: 'is a secret society member',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CommitmentIssues: {
+  'trait_CommitmentIssues': {
     name: 'trait_CommitmentIssues',
     description: 'has commitment issues',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_CommunityBoard_AskedAboutCommunity: {
+  'trait_CommunityBoard_AskedAboutCommunity': {
     name: 'trait_CommunityBoard_AskedAboutCommunity',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ComputerGlasses_Wearing: {
+  'trait_ComputerGlasses_Wearing': {
     name: 'trait_ComputerGlasses_Wearing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ComputerGlasses_Wearing_Blue: {
+  'trait_ComputerGlasses_Wearing_Blue': {
     name: 'trait_ComputerGlasses_Wearing_Blue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ComputerGlasses_Wearing_Green: {
+  'trait_ComputerGlasses_Wearing_Green': {
     name: 'trait_ComputerGlasses_Wearing_Green',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ComputerGlasses_Wearing_Orange: {
+  'trait_ComputerGlasses_Wearing_Orange': {
     name: 'trait_ComputerGlasses_Wearing_Orange',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ComputerGlasses_Wearing_Pink: {
+  'trait_ComputerGlasses_Wearing_Pink': {
     name: 'trait_ComputerGlasses_Wearing_Pink',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ComputerGlasses_Wearing_Red: {
+  'trait_ComputerGlasses_Wearing_Red': {
     name: 'trait_ComputerGlasses_Wearing_Red',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ComputerGlasses_Wearing_Yellow: {
+  'trait_ComputerGlasses_Wearing_Yellow': {
     name: 'trait_ComputerGlasses_Wearing_Yellow',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Connections: {
+  'trait_Connections': {
     name: 'trait_Connections',
     description: 'has good career social connections',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_CorporateWorker_CharismaticCrooner: {
+  'trait_CorporateWorker_CharismaticCrooner': {
     name: 'trait_CorporateWorker_CharismaticCrooner',
     description: 'is a charismatic crooner',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_CorporateWorker_LegendaryStamina: {
+  'trait_CorporateWorker_LegendaryStamina': {
     name: 'trait_CorporateWorker_LegendaryStamina',
     description: 'always has energy',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Creative: {
+  'trait_Creative': {
     name: 'trait_Creative',
     description: 'is creative',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_CreativelyGifted: {
+  'trait_CreativelyGifted': {
     name: 'trait_CreativelyGifted',
     ignored: false,
     description: 'is creatively gifted',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_CreativeVisionary: {
+  'trait_CreativeVisionary': {
     name: 'trait_CreativeVisionary',
     ignored: false,
     description: 'is a creative visionary',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Cringe: {
+  'trait_Cringe': {
     name: 'trait_Cringe',
     description: 'is cringy',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_CrystalHelmet_Alabaster: {
+  'trait_CrystalHelmet_Alabaster': {
     name: 'trait_CrystalHelmet_Alabaster',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Alexandrite_EP: {
+  'trait_CrystalHelmet_Alexandrite_EP': {
     name: 'trait_CrystalHelmet_Alexandrite_EP',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Amazonite_EP: {
+  'trait_CrystalHelmet_Amazonite_EP': {
     name: 'trait_CrystalHelmet_Amazonite_EP',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Amethyst: {
+  'trait_CrystalHelmet_Amethyst': {
     name: 'trait_CrystalHelmet_Amethyst',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Citrine: {
+  'trait_CrystalHelmet_Citrine': {
     name: 'trait_CrystalHelmet_Citrine',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Crandestine_EP: {
+  'trait_CrystalHelmet_Crandestine_EP': {
     name: 'trait_CrystalHelmet_Crandestine_EP',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Diamond: {
+  'trait_CrystalHelmet_Diamond': {
     name: 'trait_CrystalHelmet_Diamond',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Emerald: {
+  'trait_CrystalHelmet_Emerald': {
     name: 'trait_CrystalHelmet_Emerald',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_FireOpal: {
+  'trait_CrystalHelmet_FireOpal': {
     name: 'trait_CrystalHelmet_FireOpal',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Hematite: {
+  'trait_CrystalHelmet_Hematite': {
     name: 'trait_CrystalHelmet_Hematite',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Jet: {
+  'trait_CrystalHelmet_Jet': {
     name: 'trait_CrystalHelmet_Jet',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Jonquilyst: {
+  'trait_CrystalHelmet_Jonquilyst': {
     name: 'trait_CrystalHelmet_Jonquilyst',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Nitelite_EP: {
+  'trait_CrystalHelmet_Nitelite_EP': {
     name: 'trait_CrystalHelmet_Nitelite_EP',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_OrangeTopaz: {
+  'trait_CrystalHelmet_OrangeTopaz': {
     name: 'trait_CrystalHelmet_OrangeTopaz',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Peach: {
+  'trait_CrystalHelmet_Peach': {
     name: 'trait_CrystalHelmet_Peach',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Plumbite: {
+  'trait_CrystalHelmet_Plumbite': {
     name: 'trait_CrystalHelmet_Plumbite',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Quartz: {
+  'trait_CrystalHelmet_Quartz': {
     name: 'trait_CrystalHelmet_Quartz',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Rainborz: {
+  'trait_CrystalHelmet_Rainborz': {
     name: 'trait_CrystalHelmet_Rainborz',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Rose: {
+  'trait_CrystalHelmet_Rose': {
     name: 'trait_CrystalHelmet_Rose',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Ruby: {
+  'trait_CrystalHelmet_Ruby': {
     name: 'trait_CrystalHelmet_Ruby',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Sapphire: {
+  'trait_CrystalHelmet_Sapphire': {
     name: 'trait_CrystalHelmet_Sapphire',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Shinalite: {
+  'trait_CrystalHelmet_Shinalite': {
     name: 'trait_CrystalHelmet_Shinalite',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Simanite: {
+  'trait_CrystalHelmet_Simanite': {
     name: 'trait_CrystalHelmet_Simanite',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_CrystalHelmet_Turquoise: {
+  'trait_CrystalHelmet_Turquoise': {
     name: 'trait_CrystalHelmet_Turquoise',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Curses_FountainOfMagic: {
+  'trait_Curses_FountainOfMagic': {
     name: 'trait_Curses_FountainOfMagic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.CURSE,
   },
-  trait_Curses_HexOfDuelist: {
+  'trait_Curses_HexOfDuelist': {
     name: 'trait_Curses_HexOfDuelist',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.CURSE,
   },
-  trait_Curses_InfectiousLaughter: {
+  'trait_Curses_InfectiousLaughter': {
     name: 'trait_Curses_InfectiousLaughter',
     ignored: false,
     description: 'is cursed with infectious laughter',
     class: 'Trait',
     trait_type: TraitType.CURSE,
   },
-  trait_Curses_NightStalker: {
+  'trait_Curses_NightStalker': {
     name: 'trait_Curses_NightStalker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.CURSE,
   },
-  trait_Curses_PunchableFace: {
+  'trait_Curses_PunchableFace': {
     name: 'trait_Curses_PunchableFace',
     ignored: false,
     description: 'is cursed with a punchable face',
     class: 'Trait',
     trait_type: TraitType.CURSE,
   },
-  trait_Curses_Repulsiveness: {
+  'trait_Curses_Repulsiveness': {
     name: 'trait_Curses_Repulsiveness',
     ignored: false,
     description: 'is cursed with a repulsive face',
     class: 'Trait',
     trait_type: TraitType.CURSE,
   },
-  trait_Curses_SweatyStench: {
+  'trait_Curses_SweatyStench': {
     name: 'trait_Curses_SweatyStench',
     ignored: false,
     description: 'is cursed to always have a sweaty stench',
     class: 'Trait',
     trait_type: TraitType.CURSE,
   },
-  trait_Curses_TouchyFeely: {
+  'trait_Curses_TouchyFeely': {
     name: 'trait_Curses_TouchyFeely',
     description: 'is cursed to be touchy-feely towards others',
     class: 'Trait',
     trait_type: TraitType.CURSE,
   },
-  trait_Curses_WildMagic: {
+  'trait_Curses_WildMagic': {
     name: 'trait_Curses_WildMagic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.CURSE,
   },
-  trait_DanceMachine: {
+  'trait_DanceMachine': {
     name: 'trait_DanceMachine',
     description: 'is a dance machine',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Dastardly: {
+  'trait_Dastardly': {
     name: 'trait_Dastardly',
     ignored: false,
     description: 'is dastardly',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_Dauntless: {
+  'trait_Dauntless': {
     name: 'trait_Dauntless',
     ignored: false,
     description: 'is dauntless',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_DetectiveCareer_Criminal: {
+  'trait_DetectiveCareer_Criminal': {
     name: 'trait_DetectiveCareer_Criminal',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DetectiveCareer_PoliceStationCriminalNPC: {
+  'trait_DetectiveCareer_PoliceStationCriminalNPC': {
     name: 'trait_DetectiveCareer_PoliceStationCriminalNPC',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Discipline_Pet_PottyTraining: {
+  'trait_Discipline_Pet_PottyTraining': {
     name: 'trait_Discipline_Pet_PottyTraining',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Cat_JumpOnCounters: {
+  'trait_DisciplinedOut_Cat_JumpOnCounters': {
     name: 'trait_DisciplinedOut_Cat_JumpOnCounters',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Cat_Scratching: {
+  'trait_DisciplinedOut_Cat_Scratching': {
     name: 'trait_DisciplinedOut_Cat_Scratching',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Dog_Bark: {
+  'trait_DisciplinedOut_Dog_Bark': {
     name: 'trait_DisciplinedOut_Dog_Bark',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Dog_EatPoop: {
+  'trait_DisciplinedOut_Dog_EatPoop': {
     name: 'trait_DisciplinedOut_Dog_EatPoop',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Dog_JumpOnCounters: {
+  'trait_DisciplinedOut_Dog_JumpOnCounters': {
     name: 'trait_DisciplinedOut_Dog_JumpOnCounters',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Dog_PuddlesPlay: {
+  'trait_DisciplinedOut_Dog_PuddlesPlay': {
     name: 'trait_DisciplinedOut_Dog_PuddlesPlay',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Dog_Toilet: {
+  'trait_DisciplinedOut_Dog_Toilet': {
     name: 'trait_DisciplinedOut_Dog_Toilet',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Pet_Attack: {
+  'trait_DisciplinedOut_Pet_Attack': {
     name: 'trait_DisciplinedOut_Pet_Attack',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Pet_BegEating: {
+  'trait_DisciplinedOut_Pet_BegEating': {
     name: 'trait_DisciplinedOut_Pet_BegEating',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Pet_BreakPottery: {
+  'trait_DisciplinedOut_Pet_BreakPottery': {
     name: 'trait_DisciplinedOut_Pet_BreakPottery',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Pet_EatPeopleFood: {
+  'trait_DisciplinedOut_Pet_EatPeopleFood': {
     name: 'trait_DisciplinedOut_Pet_EatPeopleFood',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Pet_PottyTraining: {
+  'trait_DisciplinedOut_Pet_PottyTraining': {
     name: 'trait_DisciplinedOut_Pet_PottyTraining',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Pet_PuddlesDrink: {
+  'trait_DisciplinedOut_Pet_PuddlesDrink': {
     name: 'trait_DisciplinedOut_Pet_PuddlesDrink',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Pet_TrashEat: {
+  'trait_DisciplinedOut_Pet_TrashEat': {
     name: 'trait_DisciplinedOut_Pet_TrashEat',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Pet_TrashPlay: {
+  'trait_DisciplinedOut_Pet_TrashPlay': {
     name: 'trait_DisciplinedOut_Pet_TrashPlay',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisciplinedOut_Pet_WakeUpSims: {
+  'trait_DisciplinedOut_Pet_WakeUpSims': {
     name: 'trait_DisciplinedOut_Pet_WakeUpSims',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_DisgustedByFood: {
+  'trait_DisgustedByFood': {
     name: 'trait_DisgustedByFood',
     description: 'is disgusted by food',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Doctor_SicknessResistant: {
+  'trait_Doctor_SicknessResistant': {
     name: 'trait_Doctor_SicknessResistant',
     description: 'is immune to sickness',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_DogLover: {
+  'trait_DogLover': {
     name: 'trait_DogLover',
     description: 'loves dogs',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_DogQuirk_BarkerLoud: {
+  'trait_DogQuirk_BarkerLoud': {
     name: 'trait_DogQuirk_BarkerLoud',
     description: 'is a loud barker',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_DogQuirk_BarkerNeutral: {
+  'trait_DogQuirk_BarkerNeutral': {
     name: 'trait_DogQuirk_BarkerNeutral',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_DogQuirk_BarkerQuiet: {
+  'trait_DogQuirk_BarkerQuiet': {
     name: 'trait_DogQuirk_BarkerQuiet',
     description: 'has a quiet bark',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_eco_master: {
+  'trait_eco_master': {
     name: 'trait_eco_master',
     ignored: false,
     description: 'is an eco master and loves being eco-concious',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_EcoEngineer: {
+  'trait_EcoEngineer': {
     name: 'trait_EcoEngineer',
     ignored: false,
     description: 'is an Eco-Engineer',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_elder: {
+  'trait_elder': {
     name: 'trait_elder',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_entrepreneur: {
+  'trait_entrepreneur': {
     name: 'trait_entrepreneur',
     ignored: false,
     description: 'is an entrepreneur',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_Entrepreneur_TheKnowledge: {
+  'trait_Entrepreneur_TheKnowledge': {
     name: 'trait_Entrepreneur_TheKnowledge',
     ignored: false,
     description: 'is an Entrepreneur',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Entrepreneurial: {
+  'trait_Entrepreneurial': {
     name: 'trait_Entrepreneurial',
     ignored: false,
     description: 'is entrepreneurial',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_EP12Death_Ghost_UrbanMyth_Fear: {
+  'trait_EP12Death_Ghost_UrbanMyth_Fear': {
     name: 'trait_EP12Death_Ghost_UrbanMyth_Fear',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_EP17Festival_TreeSpree_TemporaryGhost_FeelingLucky: {
+  'trait_EP17Festival_TreeSpree_TemporaryGhost_FeelingLucky': {
     name: 'trait_EP17Festival_TreeSpree_TemporaryGhost_FeelingLucky',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_EP17World_AliceTree_QuestComplete: {
+  'trait_EP17World_AliceTree_QuestComplete': {
     name: 'trait_EP17World_AliceTree_QuestComplete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_EP17World_AliceTree_QuestComplete_AliceOnly: {
+  'trait_EP17World_AliceTree_QuestComplete_AliceOnly': {
     name: 'trait_EP17World_AliceTree_QuestComplete_AliceOnly',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_EP17World_RiverStyx_TemporaryGhost: {
+  'trait_EP17World_RiverStyx_TemporaryGhost': {
     name: 'trait_EP17World_RiverStyx_TemporaryGhost',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_EP17World_WellOfSouls_Courage: {
+  'trait_EP17World_WellOfSouls_Courage': {
     name: 'trait_EP17World_WellOfSouls_Courage',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_EpicPoet: {
+  'trait_EpicPoet': {
     name: 'trait_EpicPoet',
     ignored: false,
     description: 'is an Epic Poet',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_EssenceOfFlavor: {
+  'trait_EssenceOfFlavor': {
     name: 'trait_EssenceOfFlavor',
     description: 'is good at cooking and making drinks',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_EternalBond: {
+  'trait_EternalBond': {
     name: 'trait_EternalBond',
     ignored: false,
     description: 'has an Eternal Bond with their spouse',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Evil: {
+  'trait_Evil': {
     name: 'trait_Evil',
     description: 'is evil',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Evil_BegoniaScent: {
+  'trait_Evil_BegoniaScent': {
     name: 'trait_Evil_BegoniaScent',
     description: 'loves when others are unhappy',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Excursion_Mountaineer_Rank1: {
+  'trait_Excursion_Mountaineer_Rank1': {
     name: 'trait_Excursion_Mountaineer_Rank1',
     ignored: false,
     description: 'is a mountaineer',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Excursion_Mountaineer_Rank2: {
+  'trait_Excursion_Mountaineer_Rank2': {
     name: 'trait_Excursion_Mountaineer_Rank2',
     ignored: false,
     description: 'is a mountaineer',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Excursion_Mountaineer_Rank3: {
+  'trait_Excursion_Mountaineer_Rank3': {
     name: 'trait_Excursion_Mountaineer_Rank3',
     ignored: false,
     description: 'is a mountaineer',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Expressionistic: {
+  'trait_Expressionistic': {
     name: 'trait_Expressionistic',
     ignored: false,
     description: 'is expressionistic',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_FakeGenius: {
+  'trait_FakeGenius': {
     name: 'trait_FakeGenius',
     description: 'has drank a potion to become temporarily a genius',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_FamilyOriented: {
+  'trait_FamilyOriented': {
     name: 'trait_FamilyOriented',
     description: 'is family oriented',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_FamilySim: {
+  'trait_FamilySim': {
     name: 'trait_FamilySim',
     ignored: false,
     description: 'is family-oriented',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_FastFastidious: {
+  'trait_FastFastidious': {
     name: 'trait_FastFastidious',
     ignored: false,
     description: 'is fastidious',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Fear_BeingAlone: {
+  'trait_Fear_BeingAlone': {
     name: 'trait_Fear_BeingAlone',
     description: 'being alone without a relationship',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_BeingBurgled: {
+  'trait_Fear_BeingBurgled': {
     name: 'trait_Fear_BeingBurgled',
     description: 'being burgled by a burglar',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_BeingCanceled: {
+  'trait_Fear_BeingCanceled': {
     name: 'trait_Fear_BeingCanceled',
     description: 'being cancelled online because of their actions or words',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_BeingCheatedOn: {
+  'trait_Fear_BeingCheatedOn': {
     name: 'trait_Fear_BeingCheatedOn',
     ignored: false,
     description: 'being cheated on',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_BeingJudged: {
+  'trait_Fear_BeingJudged': {
     name: 'trait_Fear_BeingJudged',
     ignored: false,
     description: 'being judged',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_Cowplant: {
+  'trait_Fear_Cowplant': {
     name: 'trait_Fear_Cowplant',
     ignored: false,
     description: 'Cowplants',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_CrowdedPlaces: {
+  'trait_Fear_CrowdedPlaces': {
     name: 'trait_Fear_CrowdedPlaces',
     ignored: false,
     description: 'crowded places',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_Dark: {
+  'trait_Fear_Dark': {
     name: 'trait_Fear_Dark',
     ignored: false,
     description: 'the dark',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_DeadEndJob: {
+  'trait_Fear_DeadEndJob': {
     name: 'trait_Fear_DeadEndJob',
     ignored: false,
     description: 'their dead-end job',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_Death: {
+  'trait_Fear_Death': {
     name: 'trait_Fear_Death',
     ignored: false,
     description: 'death',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  Trait_Fear_DisappointingParents: {
+  'Trait_Fear_DisappointingParents': {
     name: 'Trait_Fear_DisappointingParents',
     ignored: false,
     description: 'disappointing their parents',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_DisappointingParents_ParentDeceasedFlag: {
+  'trait_Fear_DisappointingParents_ParentDeceasedFlag': {
     name: 'trait_Fear_DisappointingParents_ParentDeceasedFlag',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fear_Eviction: {
+  'trait_Fear_Eviction': {
     name: 'trait_Fear_Eviction',
     description: 'that they are about to get evicted from their home',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  Trait_Fear_Failing_AfterSchoolActivities: {
+  'Trait_Fear_Failing_AfterSchoolActivities': {
     name: 'Trait_Fear_Failing_AfterSchoolActivities',
     ignored: false,
-    description:
-      'when they occasionally relive a moment of failure from their past',
+    description: 'when they occasionally relive a moment of failure from their past',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  Trait_Fear_Failing_Class: {
+  'Trait_Fear_Failing_Class': {
     name: 'Trait_Fear_Failing_Class',
     ignored: false,
     description: 'potentially failing their classes',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  Trait_Fear_Failing_Tests: {
+  'Trait_Fear_Failing_Tests': {
     name: 'Trait_Fear_Failing_Tests',
     ignored: false,
     description: 'potentially failing tests in school',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_Failure: {
+  'trait_Fear_Failure': {
     name: 'trait_Fear_Failure',
     ignored: false,
     description: 'failure',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_Fire: {
+  'trait_Fear_Fire': {
     name: 'trait_Fear_Fire',
     ignored: false,
     description: 'fire',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_Ghosts: {
+  'trait_Fear_Ghosts': {
     name: 'trait_Fear_Ghosts',
     ignored: false,
     description: 'ghosts',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  Trait_Fear_Homework: {
+  'Trait_Fear_Homework': {
     name: 'Trait_Fear_Homework',
     description: 'anxiety when doing homework',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_Horses: {
+  'trait_Fear_Horses': {
     name: 'trait_Fear_Horses',
     description: 'horses',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_Horses_Progress: {
+  'trait_Fear_Horses_Progress': {
     name: 'trait_Fear_Horses_Progress',
     description: 'horses',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_Inferior: {
+  'trait_Fear_Inferior': {
     name: 'trait_Fear_Inferior',
     ignored: false,
     description: 'failing to be confident',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_Intimacy: {
+  'trait_Fear_Intimacy': {
     name: 'trait_Fear_Intimacy',
     description: 'physical and emotional connections',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_Swimming: {
+  'trait_Fear_Swimming': {
     name: 'trait_Fear_Swimming',
     ignored: false,
     description: 'swimming',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fear_Unfulfilled: {
+  'trait_Fear_Unfulfilled': {
     name: 'trait_Fear_Unfulfilled',
     ignored: false,
     description: 'is fearful that they are living an unfulfilling life',
     class: 'Trait',
     trait_type: TraitType.FEAR,
   },
-  trait_Fertile: {
+  'trait_Fertile': {
     name: 'trait_Fertile',
     ignored: false,
     description: 'is very fertile',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_FilthDweller: {
+  'trait_FilthDweller': {
     name: 'trait_FilthDweller',
     ignored: false,
     description: 'loathes cleaning and loves living in filth',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Fizzyhead: {
+  'trait_Fizzyhead': {
     name: 'trait_Fizzyhead',
     ignored: false,
     description: 'likes kombucha and juice fizzy drinks',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_FlowerBunny: {
+  'trait_FlowerBunny': {
     name: 'trait_FlowerBunny',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Foodie: {
+  'trait_Foodie': {
     name: 'trait_Foodie',
     description: 'is a foodie',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_ForestGhost: {
+  'trait_ForestGhost': {
     name: 'trait_ForestGhost',
     description: 'is a forest ghost',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ForestGhost_Gloomy: {
+  'trait_ForestGhost_Gloomy': {
     name: 'trait_ForestGhost_Gloomy',
     description: 'is a gloomy forest ghost',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ForestGhost_Goofy: {
+  'trait_ForestGhost_Goofy': {
     name: 'trait_ForestGhost_Goofy',
     description: 'is a goofy forest ghost',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ForestGhost_Mean: {
+  'trait_ForestGhost_Mean': {
     name: 'trait_ForestGhost_Mean',
     description: 'is a mean forest ghost',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ForeverFresh: {
+  'trait_ForeverFresh': {
     name: 'trait_ForeverFresh',
     ignored: false,
     description: 'never needs to shower or bathe to stay fresh',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_ForeverFull: {
+  'trait_ForeverFull': {
     name: 'trait_ForeverFull',
     ignored: false,
     description: "is Forever Full and doesn't require food to live",
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Fox_AnimalClothing_Grandma1: {
+  'trait_Fox_AnimalClothing_Grandma1': {
     name: 'trait_Fox_AnimalClothing_Grandma1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Grandma2: {
+  'trait_Fox_AnimalClothing_Grandma2': {
     name: 'trait_Fox_AnimalClothing_Grandma2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Grandma3: {
+  'trait_Fox_AnimalClothing_Grandma3': {
     name: 'trait_Fox_AnimalClothing_Grandma3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Grandma4: {
+  'trait_Fox_AnimalClothing_Grandma4': {
     name: 'trait_Fox_AnimalClothing_Grandma4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Grandma5: {
+  'trait_Fox_AnimalClothing_Grandma5': {
     name: 'trait_Fox_AnimalClothing_Grandma5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Grandma6: {
+  'trait_Fox_AnimalClothing_Grandma6': {
     name: 'trait_Fox_AnimalClothing_Grandma6',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Robber1: {
+  'trait_Fox_AnimalClothing_Robber1': {
     name: 'trait_Fox_AnimalClothing_Robber1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Robber2: {
+  'trait_Fox_AnimalClothing_Robber2': {
     name: 'trait_Fox_AnimalClothing_Robber2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Robber3: {
+  'trait_Fox_AnimalClothing_Robber3': {
     name: 'trait_Fox_AnimalClothing_Robber3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Robber4: {
+  'trait_Fox_AnimalClothing_Robber4': {
     name: 'trait_Fox_AnimalClothing_Robber4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Robber5: {
+  'trait_Fox_AnimalClothing_Robber5': {
     name: 'trait_Fox_AnimalClothing_Robber5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Robber6: {
+  'trait_Fox_AnimalClothing_Robber6': {
     name: 'trait_Fox_AnimalClothing_Robber6',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Robber7: {
+  'trait_Fox_AnimalClothing_Robber7': {
     name: 'trait_Fox_AnimalClothing_Robber7',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Robinhood1: {
+  'trait_Fox_AnimalClothing_Robinhood1': {
     name: 'trait_Fox_AnimalClothing_Robinhood1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Robinhood2: {
+  'trait_Fox_AnimalClothing_Robinhood2': {
     name: 'trait_Fox_AnimalClothing_Robinhood2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Robinhood3: {
+  'trait_Fox_AnimalClothing_Robinhood3': {
     name: 'trait_Fox_AnimalClothing_Robinhood3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Robinhood4: {
+  'trait_Fox_AnimalClothing_Robinhood4': {
     name: 'trait_Fox_AnimalClothing_Robinhood4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Robinhood5: {
+  'trait_Fox_AnimalClothing_Robinhood5': {
     name: 'trait_Fox_AnimalClothing_Robinhood5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_AnimalClothing_Robinhood6: {
+  'trait_Fox_AnimalClothing_Robinhood6': {
     name: 'trait_Fox_AnimalClothing_Robinhood6',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Fox_Default: {
+  'trait_Fox_Default': {
     name: 'trait_Fox_Default',
     ignored: true,
     description: 'is a fox',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Fox_Walkstyle: {
+  'trait_Fox_Walkstyle': {
     name: 'trait_Fox_Walkstyle',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.WALKSTYLE,
   },
-  trait_Freegan: {
+  'trait_Freegan': {
     name: 'trait_Freegan',
     description: 'is freegan and anti-consumer',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Freelancer_Career_Completed_Meet_With_Client: {
+  'trait_Freelancer_Career_Completed_Meet_With_Client': {
     name: 'trait_Freelancer_Career_Completed_Meet_With_Client',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Freelancer_Career_Fashion_Photographer_Unlocked_MagazineCover_Submission:
-    {
-      name: 'trait_Freelancer_Career_Fashion_Photographer_Unlocked_MagazineCover_Submission',
-      ignored: true,
-      class: 'Trait',
-      trait_type: TraitType.HIDDEN,
-    },
-  trait_Freelancer_Career_Fashion_Photographer_Unlocked_PhotoEditor: {
+  'trait_Freelancer_Career_Fashion_Photographer_Unlocked_MagazineCover_Submission': {
+    name: 'trait_Freelancer_Career_Fashion_Photographer_Unlocked_MagazineCover_Submission',
+    ignored: true,
+    class: 'Trait',
+    trait_type: TraitType.HIDDEN,
+  },
+  'trait_Freelancer_Career_Fashion_Photographer_Unlocked_PhotoEditor': {
     name: 'trait_Freelancer_Career_Fashion_Photographer_Unlocked_PhotoEditor',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Freelancer_Career_Fashion_Photographer_Waiting_For_Magazine: {
+  'trait_Freelancer_Career_Fashion_Photographer_Waiting_For_Magazine': {
     name: 'trait_Freelancer_Career_Fashion_Photographer_Waiting_For_Magazine',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Freelancer_Career_Hidden_Agencies_Fashion_Photographer: {
+  'trait_Freelancer_Career_Hidden_Agencies_Fashion_Photographer': {
     name: 'trait_Freelancer_Career_Hidden_Agencies_Fashion_Photographer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.AGENT,
   },
-  trait_Freelancer_Career_Hidden_Agencies_InteriorDecorator: {
+  'trait_Freelancer_Career_Hidden_Agencies_InteriorDecorator': {
     name: 'trait_Freelancer_Career_Hidden_Agencies_InteriorDecorator',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.AGENT,
   },
-  trait_Freelancer_Career_Hidden_Agencies_Maker: {
+  'trait_Freelancer_Career_Hidden_Agencies_Maker': {
     name: 'trait_Freelancer_Career_Hidden_Agencies_Maker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.AGENT,
   },
-  trait_Freelancer_Career_Hidden_Agencies_Painting: {
+  'trait_Freelancer_Career_Hidden_Agencies_Painting': {
     name: 'trait_Freelancer_Career_Hidden_Agencies_Painting',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.AGENT,
   },
-  trait_Freelancer_Career_Hidden_Agencies_ParanormalInvestigator: {
+  'trait_Freelancer_Career_Hidden_Agencies_ParanormalInvestigator': {
     name: 'trait_Freelancer_Career_Hidden_Agencies_ParanormalInvestigator',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.AGENT,
   },
-  trait_Freelancer_Career_Hidden_Agencies_Programming: {
+  'trait_Freelancer_Career_Hidden_Agencies_Programming': {
     name: 'trait_Freelancer_Career_Hidden_Agencies_Programming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.AGENT,
   },
-  trait_Freelancer_Career_Hidden_Agencies_Writing: {
+  'trait_Freelancer_Career_Hidden_Agencies_Writing': {
     name: 'trait_Freelancer_Career_Hidden_Agencies_Writing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.AGENT,
   },
-  trait_Freelancer_Career_Hidden_Bonus_Gig_Payout: {
+  'trait_Freelancer_Career_Hidden_Bonus_Gig_Payout': {
     name: 'trait_Freelancer_Career_Hidden_Bonus_Gig_Payout',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Freelancer_Career_Hidden_Unlocked_Meet: {
+  'trait_Freelancer_Career_Hidden_Unlocked_Meet': {
     name: 'trait_Freelancer_Career_Hidden_Unlocked_Meet',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Freelancer_Career_Hidden_Unlocked_Overclock: {
+  'trait_Freelancer_Career_Hidden_Unlocked_Overclock': {
     name: 'trait_Freelancer_Career_Hidden_Unlocked_Overclock',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Freelancer_Career_ParanormalInvestigator_License: {
+  'trait_Freelancer_Career_ParanormalInvestigator_License': {
     name: 'trait_Freelancer_Career_ParanormalInvestigator_License',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_FreeServices: {
+  'trait_FreeServices': {
     name: 'trait_FreeServices',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_FreshChef: {
+  'trait_FreshChef': {
     name: 'trait_FreshChef',
     ignored: false,
     description: 'is a high quality chef that can make food that never spoils',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_FriendOfTheSea: {
+  'trait_FriendOfTheSea': {
     name: 'trait_FriendOfTheSea',
     ignored: false,
     description: 'is friends with dolphins and mermaids',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Frugal: {
+  'trait_Frugal': {
     name: 'trait_Frugal',
     ignored: false,
     description: 'is frugal',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_FTUE_CareerMinded_initial: {
+  'trait_FTUE_CareerMinded_initial': {
     name: 'trait_FTUE_CareerMinded_initial',
     ignored: false,
     description: 'is career-minded',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_Gameplay_Mounted_Buffs: {
+  'trait_Gameplay_Mounted_Buffs': {
     name: 'trait_Gameplay_Mounted_Buffs',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Geek: {
+  'trait_Geek': {
     name: 'trait_Geek',
     description: 'is a geek',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_GenderFemale: {
+  'trait_GenderFemale': {
     name: 'trait_GenderFemale',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_GenderMale: {
+  'trait_GenderMale': {
     name: 'trait_GenderMale',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_GenderOptions_AttractedTo_Female: {
+  'trait_GenderOptions_AttractedTo_Female': {
     name: 'trait_GenderOptions_AttractedTo_Female',
     description: 'is attracted to females',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_AttractedTo_Male: {
+  'trait_GenderOptions_AttractedTo_Male': {
     name: 'trait_GenderOptions_AttractedTo_Male',
     description: 'is attracted to males',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_AttractedTo_NotFemale: {
+  'trait_GenderOptions_AttractedTo_NotFemale': {
     name: 'trait_GenderOptions_AttractedTo_NotFemale',
     description: 'is unattracted to females',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_AttractedTo_NotMale: {
+  'trait_GenderOptions_AttractedTo_NotMale': {
     name: 'trait_GenderOptions_AttractedTo_NotMale',
     description: 'is unattracted to males',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Clothing_MensWear: {
+  'trait_GenderOptions_Clothing_MensWear': {
     name: 'trait_GenderOptions_Clothing_MensWear',
     description: 'wears mens clothing',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Clothing_WomensWear: {
+  'trait_GenderOptions_Clothing_WomensWear': {
     name: 'trait_GenderOptions_Clothing_WomensWear',
     description: 'wears womens clothing',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Frame_Feminine: {
+  'trait_GenderOptions_Frame_Feminine': {
     name: 'trait_GenderOptions_Frame_Feminine',
     description: 'has a feminine body type',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Frame_Masculine: {
+  'trait_GenderOptions_Frame_Masculine': {
     name: 'trait_GenderOptions_Frame_Masculine',
     description: 'has a masculine body type',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Lactate_Can: {
+  'trait_GenderOptions_Lactate_Can': {
     name: 'trait_GenderOptions_Lactate_Can',
     description: 'can lactate and produce milk',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Lactate_CanNot: {
+  'trait_GenderOptions_Lactate_CanNot': {
     name: 'trait_GenderOptions_Lactate_CanNot',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Pregnancy_CanBeImpregnated: {
+  'trait_GenderOptions_Pregnancy_CanBeImpregnated': {
     name: 'trait_GenderOptions_Pregnancy_CanBeImpregnated',
     description: 'can be impregnated and become pregnant',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Pregnancy_CanImpregnate: {
+  'trait_GenderOptions_Pregnancy_CanImpregnate': {
     name: 'trait_GenderOptions_Pregnancy_CanImpregnate',
     description: 'is able to impregnate others and make them pregnant',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Pregnancy_CanNot_BeImpregnated: {
+  'trait_GenderOptions_Pregnancy_CanNot_BeImpregnated': {
     name: 'trait_GenderOptions_Pregnancy_CanNot_BeImpregnated',
     description: 'is not able to become pregnant or be impregnated',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Pregnancy_CanNotImpregnate: {
+  'trait_GenderOptions_Pregnancy_CanNotImpregnate': {
     name: 'trait_GenderOptions_Pregnancy_CanNotImpregnate',
     description: 'is unable to impregnate others and make them pregnant',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Sexuality_Exploring: {
+  'trait_GenderOptions_Sexuality_Exploring': {
     name: 'trait_GenderOptions_Sexuality_Exploring',
     description: 'is exploring their sexuality',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Sexuality_NotExploring: {
+  'trait_GenderOptions_Sexuality_NotExploring': {
     name: 'trait_GenderOptions_Sexuality_NotExploring',
     description: 'is very firm in their sexuality',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Toilet_Sitting: {
+  'trait_GenderOptions_Toilet_Sitting': {
     name: 'trait_GenderOptions_Toilet_Sitting',
     description: 'uses the toilet sitting down',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_GenderOptions_Toilet_Standing: {
+  'trait_GenderOptions_Toilet_Standing': {
     name: 'trait_GenderOptions_Toilet_Standing',
     description: 'uses the toilet standing up',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_Generous: {
+  'trait_Generous': {
     name: 'trait_Generous',
     description: 'is generous',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Genius: {
+  'trait_Genius': {
     name: 'trait_Genius',
     description: 'is genius',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_ghost_Anger: {
+  'trait_ghost_Anger': {
     name: 'trait_ghost_Anger',
     description: 'is a ghost who died from anger',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_AnimalObjects_KillerChicken: {
+  'trait_Ghost_AnimalObjects_KillerChicken': {
     name: 'trait_Ghost_AnimalObjects_KillerChicken',
     description: 'is a ghost who died from a killer chicken attack',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_AnimalObjects_KillerRabbit: {
+  'trait_Ghost_AnimalObjects_KillerRabbit': {
     name: 'trait_Ghost_AnimalObjects_KillerRabbit',
     description: 'is a ghost who died from a killer rabbit attack',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_Beetle: {
+  'trait_Ghost_Beetle': {
     name: 'trait_Ghost_Beetle',
     description: 'is a ghost who died from a mixed drink containing beetle ',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_BrokenHeart: {
+  'trait_Ghost_BrokenHeart': {
     name: 'trait_Ghost_BrokenHeart',
     description: 'is a ghost who died from a broken heart',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_Cauldron_Potion_Immortality_Failure: {
+  'trait_Ghost_Cauldron_Potion_Immortality_Failure': {
     name: 'trait_Ghost_Cauldron_Potion_Immortality_Failure',
-    description:
-      'is a ghost who died from trying to drink an immortality potion and is only a ghost temporarily',
+    description: 'is a ghost who died from trying to drink an immortality potion and is only a ghost temporarily',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_ClimbingRoute: {
+  'trait_Ghost_ClimbingRoute': {
     name: 'trait_Ghost_ClimbingRoute',
     description: 'is a ghost who died from falling while hiking',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_ghost_Cowplant: {
+  'trait_ghost_Cowplant': {
     name: 'trait_ghost_Cowplant',
     description: 'is a ghost who died from being eaten by a cowplant',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_Curses_NightStalker_Stalker: {
+  'trait_Ghost_Curses_NightStalker_Stalker': {
     name: 'trait_Ghost_Curses_NightStalker_Stalker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_DeathFlower: {
+  'trait_Ghost_DeathFlower': {
     name: 'trait_Ghost_DeathFlower',
     description:
       'is a ghost who who died from smelling an arrangement of flowers that were poisoned with a death flower',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_ghost_Drown: {
+  'trait_ghost_Drown': {
     name: 'trait_ghost_Drown',
     description: 'is a ghost who died from drowning',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_ghost_ElderExhaustion: {
+  'trait_ghost_ElderExhaustion': {
     name: 'trait_ghost_ElderExhaustion',
     description: 'is a ghost who died because they were old and overdid it',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_ghost_Electrocution: {
+  'trait_ghost_Electrocution': {
     name: 'trait_ghost_Electrocution',
     description: 'is a ghost who died by electrocution',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_ghost_Embarrassment: {
+  'trait_ghost_Embarrassment': {
     name: 'trait_ghost_Embarrassment',
     description: 'is a ghost who died from embarrassment',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_ghost_Fire: {
+  'trait_ghost_Fire': {
     name: 'trait_ghost_Fire',
     description: 'is a ghost who died in a fire',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_Flies: {
+  'trait_Ghost_Flies': {
     name: 'trait_Ghost_Flies',
-    description:
-      'is a ghost who died from being killed by a swarm of angry flies',
+    description: 'is a ghost who died from being killed by a swarm of angry flies',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_ghost_Frozen: {
+  'trait_ghost_Frozen': {
     name: 'trait_ghost_Frozen',
     description: 'is a ghost who died from freezing to death',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_ghost_Hunger: {
+  'trait_ghost_Hunger': {
     name: 'trait_ghost_Hunger',
     description: 'is a ghost who died from hunger',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_ghost_Laugher: {
+  'trait_ghost_Laugher': {
     name: 'trait_ghost_Laugher',
     description: 'is a ghost who died from laughter',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_Lightning: {
+  'trait_Ghost_Lightning': {
     name: 'trait_Ghost_Lightning',
     description: 'is a ghost who died from lightning',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_Meteorite: {
+  'trait_Ghost_Meteorite': {
     name: 'trait_Ghost_Meteorite',
     description: 'is a ghost who died from being struck by a meteorite',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_MoldSystem: {
+  'trait_Ghost_MoldSystem': {
     name: 'trait_Ghost_MoldSystem',
     description: 'is a ghost who died from toxic mold',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_MotherPlant: {
+  'trait_Ghost_MotherPlant': {
     name: 'trait_Ghost_MotherPlant',
-    description:
-      'is a ghost who died by being eaten by the carnivorous "Mother" plant',
+    description: 'is a ghost who died by being eaten by the carnivorous "Mother" plant',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_MurphyBed: {
+  'trait_Ghost_MurphyBed': {
     name: 'trait_Ghost_MurphyBed',
     description: 'is a ghost who died when a murphy bed malfunctioned',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_ghost_OldAge: {
+  'trait_ghost_OldAge': {
     name: 'trait_ghost_OldAge',
     description: 'is a ghost who died from old age',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_ghost_Overheat: {
+  'trait_ghost_Overheat': {
     name: 'trait_ghost_Overheat',
     description: 'is a ghost who died from heat exhaustion',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_PetCrow: {
+  'trait_Ghost_PetCrow': {
     name: 'trait_Ghost_PetCrow',
     description: 'is a ghost who died from being pecked to death by a crow',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_Poison: {
+  'trait_Ghost_Poison': {
     name: 'trait_Ghost_Poison',
     description: 'is a ghost who died from poison',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_Pufferfish: {
+  'trait_Ghost_Pufferfish': {
     name: 'trait_Ghost_Pufferfish',
     description: 'is a ghost who died from a eating a pufferfish',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_R3Event: {
+  'trait_Ghost_R3Event': {
     name: 'trait_Ghost_R3Event',
     description: 'is temporarily a ghost',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_Rodent_Disease: {
+  'trait_Ghost_Rodent_Disease': {
     name: 'trait_Ghost_Rodent_Disease',
     description: 'is a ghost who died from a rodent disease',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_SeanceTable: {
+  'trait_Ghost_SeanceTable': {
     name: 'trait_Ghost_SeanceTable',
     description: 'is temporarily a ghost',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_ghost_Steam: {
+  'trait_ghost_Steam': {
     name: 'trait_ghost_Steam',
     description: 'is a ghost who died from steam exposure',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_StinkBomb: {
+  'trait_Ghost_StinkBomb': {
     name: 'trait_Ghost_StinkBomb',
     description: 'is a ghost who died from a stink bomb',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_UrbanMyth: {
+  'trait_Ghost_UrbanMyth': {
     name: 'trait_Ghost_UrbanMyth',
     description: 'is a ghost who died from summoning an urban myth legend',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_UrbanMyth_EP12Death: {
+  'trait_Ghost_UrbanMyth_EP12Death': {
     name: 'trait_Ghost_UrbanMyth_EP12Death',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_ghost_Vampire_Sun: {
+  'trait_ghost_Vampire_Sun': {
     name: 'trait_ghost_Vampire_Sun',
-    description:
-      'is a ghost because they are a vampire and went out in the sun',
+    description: 'is a ghost because they are a vampire and went out in the sun',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_VendingMachine: {
+  'trait_Ghost_VendingMachine': {
     name: 'trait_Ghost_VendingMachine',
-    description:
-      'is a ghost because they died when a vending machine fell on them',
+    description: 'is a ghost because they died when a vending machine fell on them',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Ghost_WitchOverload: {
+  'trait_Ghost_WitchOverload': {
     name: 'trait_Ghost_WitchOverload',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_GhostHasRebirthedIntoNewSim: {
+  'trait_GhostHasRebirthedIntoNewSim': {
     name: 'trait_GhostHasRebirthedIntoNewSim',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_GhostPowers_Manifested: {
+  'trait_GhostPowers_Manifested': {
     name: 'trait_GhostPowers_Manifested',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_GhostRisen: {
+  'trait_GhostRisen': {
     name: 'trait_GhostRisen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_GhostWhisperer: {
+  'trait_GhostWhisperer': {
     name: 'trait_GhostWhisperer',
     description: 'is a ghost whisperer and friends with ghosts',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_GhostWoohoo_TempGhost: {
+  'trait_GhostWoohoo_TempGhost': {
     name: 'trait_GhostWoohoo_TempGhost',
-    description:
-      'just had a transcendent sexual experience with a ghost and is temporarily a ghost',
+    description: 'just had a transcendent sexual experience with a ghost and is temporarily a ghost',
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_Gloomy: {
+  'trait_Gloomy': {
     name: 'trait_Gloomy',
     description: 'is gloomy',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Glutton: {
+  'trait_Glutton': {
     name: 'trait_Glutton',
     description: 'is a glutton',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Good: {
+  'trait_Good': {
     name: 'trait_Good',
     description: 'is good',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Goofball: {
+  'trait_Goofball': {
     name: 'trait_Goofball',
     description: 'is a goofball',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_GradeSchool_A: {
+  'trait_GradeSchool_A': {
     name: 'trait_GradeSchool_A',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_GradeSchool_B: {
+  'trait_GradeSchool_B': {
     name: 'trait_GradeSchool_B',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_GradeSchool_C: {
+  'trait_GradeSchool_C': {
     name: 'trait_GradeSchool_C',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_GradeSchool_D: {
+  'trait_GradeSchool_D': {
     name: 'trait_GradeSchool_D',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_GradeSchool_F: {
+  'trait_GradeSchool_F': {
     name: 'trait_GradeSchool_F',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_GreatKisser: {
+  'trait_GreatKisser': {
     name: 'trait_GreatKisser',
     ignored: false,
     description: 'is a great kisser',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_GreatStoryteller: {
+  'trait_GreatStoryteller': {
     name: 'trait_GreatStoryteller',
     ignored: false,
     description: 'is a great storyteller',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_GreenFiend: {
+  'trait_GreenFiend': {
     name: 'trait_GreenFiend',
     description: 'is eco concious',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Gregarious: {
+  'trait_Gregarious': {
     name: 'trait_Gregarious',
     ignored: false,
     description: 'is gregarious',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_Grief_Anger: {
+  'trait_Grief_Anger': {
     name: 'trait_Grief_Anger',
     description: 'has anger and grief',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Grief_Conquered: {
+  'trait_Grief_Conquered': {
     name: 'trait_Grief_Conquered',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Grief_Denial: {
+  'trait_Grief_Denial': {
     name: 'trait_Grief_Denial',
-    description:
-      'is in grief with denial and is struggling to process their emotions',
+    description: 'is in grief with denial and is struggling to process their emotions',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Grief_Depression: {
+  'trait_Grief_Depression': {
     name: 'trait_Grief_Depression',
     description: 'is in grief with depression',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Grief_HoldTogether: {
+  'trait_Grief_HoldTogether': {
     name: 'trait_Grief_HoldTogether',
     description: 'is in grief but managing a positive outlook on life',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_GrimRework_GrimBorn: {
+  'trait_GrimRework_GrimBorn': {
     name: 'trait_GrimRework_GrimBorn',
     description: 'is an offspring of the Grim Reaper',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_GrimRework_GrimDescendant: {
+  'trait_GrimRework_GrimDescendant': {
     name: 'trait_GrimRework_GrimDescendant',
     description: 'is a descendant of the Grim Reaper',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Grouch: {
+  'trait_Grouch': {
     name: 'trait_Grouch',
     description: 'is a grouch',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Guidry: {
+  'trait_Guidry': {
     name: 'trait_Guidry',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_GymRat: {
+  'trait_GymRat': {
     name: 'trait_GymRat',
     ignored: false,
     description: 'is a Gym Rat',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Handedness_Left: {
+  'trait_Handedness_Left': {
     name: 'trait_Handedness_Left',
     description: 'is left handed',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Handedness_Right: {
+  'trait_Handedness_Right': {
     name: 'trait_Handedness_Right',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Handyperson_GoldenWrench: {
+  'trait_Handyperson_GoldenWrench': {
     name: 'trait_Handyperson_GoldenWrench',
     description: 'is good at repairing things',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Happy_Toddler: {
+  'trait_Happy_Toddler': {
     name: 'trait_Happy_Toddler',
     ignored: false,
     description: 'is a Happy Toddler',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Happy_Toddler_Hidden: {
+  'trait_Happy_Toddler_Hidden': {
     name: 'trait_Happy_Toddler_Hidden',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HardlyHungry: {
+  'trait_HardlyHungry': {
     name: 'trait_HardlyHungry',
     ignored: false,
     description: 'is rarely hungry',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_HasMetNanny: {
+  'trait_HasMetNanny': {
     name: 'trait_HasMetNanny',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HasMetRanchHand: {
+  'trait_HasMetRanchHand': {
     name: 'trait_HasMetRanchHand',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HasVisitedDeepWoods: {
+  'trait_HasVisitedDeepWoods': {
     name: 'trait_HasVisitedDeepWoods',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HasVisitedForgottenGrotto: {
+  'trait_HasVisitedForgottenGrotto': {
     name: 'trait_HasVisitedForgottenGrotto',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HasVisitedSylvanGlade: {
+  'trait_HasVisitedSylvanGlade': {
     name: 'trait_HasVisitedSylvanGlade',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HatesChildren: {
+  'trait_HatesChildren': {
     name: 'trait_HatesChildren',
     description: 'hates children',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_HauntedHouse_Temperance: {
+  'trait_HauntedHouse_Temperance': {
     name: 'trait_HauntedHouse_Temperance',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_HeartToHeart: {
+  'trait_HeartToHeart': {
     name: 'trait_HeartToHeart',
     description: 'loves being around happy couples',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_HeroicPresence: {
+  'trait_HeroicPresence': {
     name: 'trait_HeroicPresence',
     ignored: false,
     description: 'is a heroic presence',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_HeroOfStrangerville: {
+  'trait_HeroOfStrangerville': {
     name: 'trait_HeroOfStrangerville',
     ignored: false,
     description: 'is the Hero of StrangerVille',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Hidden_AcceptedToUniversity: {
+  'trait_Hidden_AcceptedToUniversity': {
     name: 'trait_Hidden_AcceptedToUniversity',
     description: 'has been accepted to university',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ActorCareer_Agency_AIStaffing: {
+  'trait_Hidden_ActorCareer_Agency_AIStaffing': {
     name: 'trait_Hidden_ActorCareer_Agency_AIStaffing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.AGENT,
   },
-  trait_Hidden_ActorCareer_Agency_EverydayExtras: {
+  'trait_Hidden_ActorCareer_Agency_EverydayExtras': {
     name: 'trait_Hidden_ActorCareer_Agency_EverydayExtras',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.AGENT,
   },
-  trait_Hidden_ActorCareer_Agency_GRAN: {
+  'trait_Hidden_ActorCareer_Agency_GRAN': {
     name: 'trait_Hidden_ActorCareer_Agency_GRAN',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.AGENT,
   },
-  trait_Hidden_ActorCareer_Agency_WellSuited: {
+  'trait_Hidden_ActorCareer_Agency_WellSuited': {
     name: 'trait_Hidden_ActorCareer_Agency_WellSuited',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.AGENT,
   },
-  trait_Hidden_AdoptTiger: {
+  'trait_Hidden_AdoptTiger': {
     name: 'trait_Hidden_AdoptTiger',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_AdoptTiger_Commodity: {
+  'trait_Hidden_AdoptTiger_Commodity': {
     name: 'trait_Hidden_AdoptTiger_Commodity',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Basketball_DreamBig: {
+  'trait_Hidden_Basketball_DreamBig': {
     name: 'trait_Hidden_Basketball_DreamBig',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Batuu_Missions_Scoundrel_Contraband_Location_BS: {
+  'trait_Hidden_Batuu_Missions_Scoundrel_Contraband_Location_BS': {
     name: 'trait_Hidden_Batuu_Missions_Scoundrel_Contraband_Location_BS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Batuu_Missions_Scoundrel_Contraband_Location_FO: {
+  'trait_Hidden_Batuu_Missions_Scoundrel_Contraband_Location_FO': {
     name: 'trait_Hidden_Batuu_Missions_Scoundrel_Contraband_Location_FO',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_AdharaMichaelson: {
+  'trait_Hidden_BayArea_NPC_AdharaMichaelson': {
     name: 'trait_Hidden_BayArea_NPC_AdharaMichaelson',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_AurelioRobles: {
+  'trait_Hidden_BayArea_NPC_AurelioRobles': {
     name: 'trait_Hidden_BayArea_NPC_AurelioRobles',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_BerniceRobles: {
+  'trait_Hidden_BayArea_NPC_BerniceRobles': {
     name: 'trait_Hidden_BayArea_NPC_BerniceRobles',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_ChristopherMichaelson: {
+  'trait_Hidden_BayArea_NPC_ChristopherMichaelson': {
     name: 'trait_Hidden_BayArea_NPC_ChristopherMichaelson',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_DoliRuano: {
+  'trait_Hidden_BayArea_NPC_DoliRuano': {
     name: 'trait_Hidden_BayArea_NPC_DoliRuano',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_EleanorSullivan: {
+  'trait_Hidden_BayArea_NPC_EleanorSullivan': {
     name: 'trait_Hidden_BayArea_NPC_EleanorSullivan',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_IanRobles: {
+  'trait_Hidden_BayArea_NPC_IanRobles': {
     name: 'trait_Hidden_BayArea_NPC_IanRobles',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_IgnacioRobles: {
+  'trait_Hidden_BayArea_NPC_IgnacioRobles': {
     name: 'trait_Hidden_BayArea_NPC_IgnacioRobles',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_JayRobles: {
+  'trait_Hidden_BayArea_NPC_JayRobles': {
     name: 'trait_Hidden_BayArea_NPC_JayRobles',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_KarmineLuna: {
+  'trait_Hidden_BayArea_NPC_KarmineLuna': {
     name: 'trait_Hidden_BayArea_NPC_KarmineLuna',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_KyleKyleson: {
+  'trait_Hidden_BayArea_NPC_KyleKyleson': {
     name: 'trait_Hidden_BayArea_NPC_KyleKyleson',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_OrionMichaelson: {
+  'trait_Hidden_BayArea_NPC_OrionMichaelson': {
     name: 'trait_Hidden_BayArea_NPC_OrionMichaelson',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_PenelopeMichaelson: {
+  'trait_Hidden_BayArea_NPC_PenelopeMichaelson': {
     name: 'trait_Hidden_BayArea_NPC_PenelopeMichaelson',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_TalaRuano: {
+  'trait_Hidden_BayArea_NPC_TalaRuano': {
     name: 'trait_Hidden_BayArea_NPC_TalaRuano',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BayArea_NPC_XochitilLuna: {
+  'trait_Hidden_BayArea_NPC_XochitilLuna': {
     name: 'trait_Hidden_BayArea_NPC_XochitilLuna',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_BeenKissed: {
+  'trait_Hidden_BeenKissed': {
     name: 'trait_Hidden_BeenKissed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Bowled_Perfect_Llama: {
+  'trait_Hidden_Bowled_Perfect_Llama': {
     name: 'trait_Hidden_Bowled_Perfect_Llama',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Camping: {
+  'trait_Hidden_Camping': {
     name: 'trait_Hidden_Camping',
     description: 'is camping',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_Activist_Cause_Economy: {
+  'trait_Hidden_Career_Activist_Cause_Economy': {
     name: 'trait_Hidden_Career_Activist_Cause_Economy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_Activist_Cause_Environment: {
+  'trait_Hidden_Career_Activist_Cause_Environment': {
     name: 'trait_Hidden_Career_Activist_Cause_Environment',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_Activist_Cause_Justice: {
+  'trait_Hidden_Career_Activist_Cause_Justice': {
     name: 'trait_Hidden_Career_Activist_Cause_Justice',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_Activist_Cause_Peace: {
+  'trait_Hidden_Career_Activist_Cause_Peace': {
     name: 'trait_Hidden_Career_Activist_Cause_Peace',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_Activist_Cause_Tax: {
+  'trait_Hidden_Career_Activist_Cause_Tax': {
     name: 'trait_Hidden_Career_Activist_Cause_Tax',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_Activist_HasCause: {
+  'trait_Hidden_Career_Activist_HasCause': {
     name: 'trait_Hidden_Career_Activist_HasCause',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_Activist_PoliticalPosition_Left: {
+  'trait_Hidden_Career_Activist_PoliticalPosition_Left': {
     name: 'trait_Hidden_Career_Activist_PoliticalPosition_Left',
     description: 'is a left leaning politician',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_Activist_PoliticalPosition_Right: {
+  'trait_Hidden_Career_Activist_PoliticalPosition_Right': {
     name: 'trait_Hidden_Career_Activist_PoliticalPosition_Right',
     ignored: true,
     description: 'is a right leaning politician',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_Hidden_Career_Critic_Thrifty: {
+  'Trait_Hidden_Career_Critic_Thrifty': {
     name: 'Trait_Hidden_Career_Critic_Thrifty',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Hidden_Career_Custom: {
+  'trait_Hidden_Career_Custom': {
     name: 'trait_Hidden_Career_Custom',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_Lifeguard_Rewards_Level2: {
+  'trait_Hidden_Career_Lifeguard_Rewards_Level2': {
     name: 'trait_Hidden_Career_Lifeguard_Rewards_Level2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_Lifeguard_Rewards_Level3: {
+  'trait_Hidden_Career_Lifeguard_Rewards_Level3': {
     name: 'trait_Hidden_Career_Lifeguard_Rewards_Level3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_Mortician_Cert1: {
+  'trait_Hidden_Career_Mortician_Cert1': {
     name: 'trait_Hidden_Career_Mortician_Cert1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_Mortician_FullCert: {
+  'trait_Hidden_Career_Mortician_FullCert': {
     name: 'trait_Hidden_Career_Mortician_FullCert',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_SimsfluencerSideHustle_CanReview: {
+  'trait_Hidden_Career_SimsfluencerSideHustle_CanReview': {
     name: 'trait_Hidden_Career_SimsfluencerSideHustle_CanReview',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Career_SimsfluencerSideHustle_GiftDelivery: {
+  'trait_Hidden_Career_SimsfluencerSideHustle_GiftDelivery': {
     name: 'trait_Hidden_Career_SimsfluencerSideHustle_GiftDelivery',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_careerIncomeBoost_A: {
+  'trait_Hidden_careerIncomeBoost_A': {
     name: 'trait_Hidden_careerIncomeBoost_A',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_careerIncomeBoost_B: {
+  'trait_Hidden_careerIncomeBoost_B': {
     name: 'trait_Hidden_careerIncomeBoost_B',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CareerPayBoosts_2x: {
+  'trait_Hidden_CareerPayBoosts_2x': {
     name: 'trait_Hidden_CareerPayBoosts_2x',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CareerPayBoosts_Law_Clients_1: {
+  'trait_Hidden_CareerPayBoosts_Law_Clients_1': {
     name: 'trait_Hidden_CareerPayBoosts_Law_Clients_1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CareerPayBoosts_Law_Clients_10: {
+  'trait_Hidden_CareerPayBoosts_Law_Clients_10': {
     name: 'trait_Hidden_CareerPayBoosts_Law_Clients_10',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CareerPayBoosts_Law_Clients_2: {
+  'trait_Hidden_CareerPayBoosts_Law_Clients_2': {
     name: 'trait_Hidden_CareerPayBoosts_Law_Clients_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CareerPayBoosts_Law_Clients_3: {
+  'trait_Hidden_CareerPayBoosts_Law_Clients_3': {
     name: 'trait_Hidden_CareerPayBoosts_Law_Clients_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CareerPayBoosts_Law_Clients_4: {
+  'trait_Hidden_CareerPayBoosts_Law_Clients_4': {
     name: 'trait_Hidden_CareerPayBoosts_Law_Clients_4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CareerPayBoosts_Law_Clients_5: {
+  'trait_Hidden_CareerPayBoosts_Law_Clients_5': {
     name: 'trait_Hidden_CareerPayBoosts_Law_Clients_5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CareerPayBoosts_Law_Clients_6: {
+  'trait_Hidden_CareerPayBoosts_Law_Clients_6': {
     name: 'trait_Hidden_CareerPayBoosts_Law_Clients_6',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CareerPayBoosts_Law_Clients_7: {
+  'trait_Hidden_CareerPayBoosts_Law_Clients_7': {
     name: 'trait_Hidden_CareerPayBoosts_Law_Clients_7',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CareerPayBoosts_Law_Clients_8: {
+  'trait_Hidden_CareerPayBoosts_Law_Clients_8': {
     name: 'trait_Hidden_CareerPayBoosts_Law_Clients_8',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CareerPayBoosts_Law_Clients_9: {
+  'trait_Hidden_CareerPayBoosts_Law_Clients_9': {
     name: 'trait_Hidden_CareerPayBoosts_Law_Clients_9',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Challenge_Positivity_Collected_Reward_1: {
+  'trait_Hidden_Challenge_Positivity_Collected_Reward_1': {
     name: 'trait_Hidden_Challenge_Positivity_Collected_Reward_1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Challenge_Positivity_Collected_Reward_2: {
+  'trait_Hidden_Challenge_Positivity_Collected_Reward_2': {
     name: 'trait_Hidden_Challenge_Positivity_Collected_Reward_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Challenge_Positivity_Collected_Reward_3: {
+  'trait_Hidden_Challenge_Positivity_Collected_Reward_3': {
     name: 'trait_Hidden_Challenge_Positivity_Collected_Reward_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Challenge_Positivity_Collected_Reward_4: {
+  'trait_Hidden_Challenge_Positivity_Collected_Reward_4': {
     name: 'trait_Hidden_Challenge_Positivity_Collected_Reward_4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Child_RomanticSage: {
+  'trait_Hidden_Child_RomanticSage': {
     name: 'trait_Hidden_Child_RomanticSage',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ChildCannotAgeUp_DoesNotPersist: {
+  'trait_Hidden_ChildCannotAgeUp_DoesNotPersist': {
     name: 'trait_Hidden_ChildCannotAgeUp_DoesNotPersist',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ChildoftheOcean_DisgustedByFish: {
+  'trait_Hidden_ChildoftheOcean_DisgustedByFish': {
     name: 'trait_Hidden_ChildoftheOcean_DisgustedByFish',
     description: 'is disgusted by fish',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ClimateChangeWoke: {
+  'trait_Hidden_ClimateChangeWoke': {
     name: 'trait_Hidden_ClimateChangeWoke',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CottageWorld_NPC_AgathaCrumplebottom: {
+  'trait_Hidden_CottageWorld_NPC_AgathaCrumplebottom': {
     name: 'trait_Hidden_CottageWorld_NPC_AgathaCrumplebottom',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CottageWorld_NPC_AgnesCrumplebottom: {
+  'trait_Hidden_CottageWorld_NPC_AgnesCrumplebottom': {
     name: 'trait_Hidden_CottageWorld_NPC_AgnesCrumplebottom',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CottageWorld_NPC_CritterTender: {
+  'trait_Hidden_CottageWorld_NPC_CritterTender': {
     name: 'trait_Hidden_CottageWorld_NPC_CritterTender',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CottageWorld_NPC_GroceryDelivery: {
+  'trait_Hidden_CottageWorld_NPC_GroceryDelivery': {
     name: 'trait_Hidden_CottageWorld_NPC_GroceryDelivery',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CottageWorld_NPC_GroceryOwner: {
+  'trait_Hidden_CottageWorld_NPC_GroceryOwner': {
     name: 'trait_Hidden_CottageWorld_NPC_GroceryOwner',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CottageWorld_NPC_Mayor: {
+  'trait_Hidden_CottageWorld_NPC_Mayor': {
     name: 'trait_Hidden_CottageWorld_NPC_Mayor',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_CottageWorld_NPC_PubOwner: {
+  'trait_Hidden_CottageWorld_NPC_PubOwner': {
     name: 'trait_Hidden_CottageWorld_NPC_PubOwner',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_DisgustedByFoodAnimation: {
+  'trait_Hidden_DisgustedByFoodAnimation': {
     name: 'trait_Hidden_DisgustedByFoodAnimation',
     description: 'is disgusted by food',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_DramaClub: {
+  'trait_Hidden_DramaClub': {
     name: 'trait_Hidden_DramaClub',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_DramaClub_CryOnDemand: {
+  'trait_Hidden_DramaClub_CryOnDemand': {
     name: 'trait_Hidden_DramaClub_CryOnDemand',
     ignored: true,
     class: 'Trait',
@@ -5852,11755 +5839,11723 @@ export const simsTraitDescriptions: Record<string, TraitMapping> = {
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EarBuds_MusicLover_HasBeen_Given: {
+  'trait_Hidden_EarBuds_MusicLover_HasBeen_Given': {
     name: 'trait_Hidden_EarBuds_MusicLover_HasBeen_Given',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Education_Teach_10: {
+  'trait_Hidden_Education_Teach_10': {
     name: 'trait_Hidden_Education_Teach_10',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Education_Teach_7: {
+  'trait_Hidden_Education_Teach_7': {
     name: 'trait_Hidden_Education_Teach_7',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Education_Teach_8: {
+  'trait_Hidden_Education_Teach_8': {
     name: 'trait_Hidden_Education_Teach_8',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Education_Teach_9: {
+  'trait_Hidden_Education_Teach_9': {
     name: 'trait_Hidden_Education_Teach_9',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Employee_Quit: {
+  'trait_Hidden_Employee_Quit': {
     name: 'trait_Hidden_Employee_Quit',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP14_World_NPC_HorseTrainer_goodbye: {
+  'trait_Hidden_EP14_World_NPC_HorseTrainer_goodbye': {
     name: 'trait_Hidden_EP14_World_NPC_HorseTrainer_goodbye',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP14_World_NPC_HorseTrainer_hello: {
+  'trait_Hidden_EP14_World_NPC_HorseTrainer_hello': {
     name: 'trait_Hidden_EP14_World_NPC_HorseTrainer_hello',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP14World_HasWonHorseCompetition: {
+  'trait_Hidden_EP14World_HasWonHorseCompetition': {
     name: 'trait_Hidden_EP14World_HasWonHorseCompetition',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP14World_NPC_HasAskedAbout_LifeNectar: {
+  'trait_Hidden_EP14World_NPC_HasAskedAbout_LifeNectar': {
     name: 'trait_Hidden_EP14World_NPC_HasAskedAbout_LifeNectar',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP14World_NPC_HorseTrainer: {
+  'trait_Hidden_EP14World_NPC_HorseTrainer': {
     name: 'trait_Hidden_EP14World_NPC_HorseTrainer',
     description: 'is a horse trainer',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP14World_NPC_MysteriousRancher: {
+  'trait_Hidden_EP14World_NPC_MysteriousRancher': {
     name: 'trait_Hidden_EP14World_NPC_MysteriousRancher',
     description: 'is a mysterious rancher',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP14WorldLocal: {
+  'trait_Hidden_EP14WorldLocal': {
     name: 'trait_Hidden_EP14WorldLocal',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP15_Local: {
+  'trait_Hidden_EP15_Local': {
     name: 'trait_Hidden_EP15_Local',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP15_NPC_AlonSadya: {
+  'trait_Hidden_EP15_NPC_AlonSadya': {
     name: 'trait_Hidden_EP15_NPC_AlonSadya',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP15_NPC_ArturoLinh: {
+  'trait_Hidden_EP15_NPC_ArturoLinh': {
     name: 'trait_Hidden_EP15_NPC_ArturoLinh',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP15_NPC_BuaBunMa: {
+  'trait_Hidden_EP15_NPC_BuaBunMa': {
     name: 'trait_Hidden_EP15_NPC_BuaBunMa',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP15_NPC_ChanhLinh: {
+  'trait_Hidden_EP15_NPC_ChanhLinh': {
     name: 'trait_Hidden_EP15_NPC_ChanhLinh',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP15_NPC_KasemBunMa: {
+  'trait_Hidden_EP15_NPC_KasemBunMa': {
     name: 'trait_Hidden_EP15_NPC_KasemBunMa',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP15_NPC_LienSadya: {
+  'trait_Hidden_EP15_NPC_LienSadya': {
     name: 'trait_Hidden_EP15_NPC_LienSadya',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP15_NPC_NinBunMa: {
+  'trait_Hidden_EP15_NPC_NinBunMa': {
     name: 'trait_Hidden_EP15_NPC_NinBunMa',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP15_NPC_ThiLinh: {
+  'trait_Hidden_EP15_NPC_ThiLinh': {
     name: 'trait_Hidden_EP15_NPC_ThiLinh',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP15_NPC_VaneshaCahyaputri: {
+  'trait_Hidden_EP15_NPC_VaneshaCahyaputri': {
     name: 'trait_Hidden_EP15_NPC_VaneshaCahyaputri',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP15_NPC_ZhafiraCahyaputri: {
+  'trait_Hidden_EP15_NPC_ZhafiraCahyaputri': {
     name: 'trait_Hidden_EP15_NPC_ZhafiraCahyaputri',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP16World_WallOfLove_WroteOnWall: {
+  'trait_Hidden_EP16World_WallOfLove_WroteOnWall': {
     name: 'trait_Hidden_EP16World_WallOfLove_WroteOnWall',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_02_Freddy_ObjectiveTracker: {
+  'trait_Hidden_EP17World_02_Freddy_ObjectiveTracker': {
     name: 'trait_Hidden_EP17World_02_Freddy_ObjectiveTracker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_04_Edith_ObjectiveTracker: {
+  'trait_Hidden_EP17World_04_Edith_ObjectiveTracker': {
     name: 'trait_Hidden_EP17World_04_Edith_ObjectiveTracker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_AliceBasu: {
+  'trait_Hidden_EP17World_NPC_AliceBasu': {
     name: 'trait_Hidden_EP17World_NPC_AliceBasu',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_EdithBasu: {
+  'trait_Hidden_EP17World_NPC_EdithBasu': {
     name: 'trait_Hidden_EP17World_NPC_EdithBasu',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_EkadeAether: {
+  'trait_Hidden_EP17World_NPC_EkadeAether': {
     name: 'trait_Hidden_EP17World_NPC_EkadeAether',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_EstherGomes: {
+  'trait_Hidden_EP17World_NPC_EstherGomes': {
     name: 'trait_Hidden_EP17World_NPC_EstherGomes',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_isEP17NPC: {
+  'trait_Hidden_EP17World_NPC_isEP17NPC': {
     name: 'trait_Hidden_EP17World_NPC_isEP17NPC',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_KaiAether: {
+  'trait_Hidden_EP17World_NPC_KaiAether': {
     name: 'trait_Hidden_EP17World_NPC_KaiAether',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_LayneCoffin: {
+  'trait_Hidden_EP17World_NPC_LayneCoffin': {
     name: 'trait_Hidden_EP17World_NPC_LayneCoffin',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_LayneTraits_KnowsAboutOlive: {
+  'trait_Hidden_EP17World_NPC_LayneTraits_KnowsAboutOlive': {
     name: 'trait_Hidden_EP17World_NPC_LayneTraits_KnowsAboutOlive',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_LayneTraits_LayneCall: {
+  'trait_Hidden_EP17World_NPC_LayneTraits_LayneCall': {
     name: 'trait_Hidden_EP17World_NPC_LayneTraits_LayneCall',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_LayneTraits_LayneEvil: {
+  'trait_Hidden_EP17World_NPC_LayneTraits_LayneEvil': {
     name: 'trait_Hidden_EP17World_NPC_LayneTraits_LayneEvil',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_LayneTraits_LayneReady: {
+  'trait_Hidden_EP17World_NPC_LayneTraits_LayneReady': {
     name: 'trait_Hidden_EP17World_NPC_LayneTraits_LayneReady',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_LayneTraits_NoOlive: {
+  'trait_Hidden_EP17World_NPC_LayneTraits_NoOlive': {
     name: 'trait_Hidden_EP17World_NPC_LayneTraits_NoOlive',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_NyonSpecter: {
+  'trait_Hidden_EP17World_NPC_NyonSpecter': {
     name: 'trait_Hidden_EP17World_NPC_NyonSpecter',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_OliveSpecter: {
+  'trait_Hidden_EP17World_NPC_OliveSpecter': {
     name: 'trait_Hidden_EP17World_NPC_OliveSpecter',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_RadwanGomes: {
+  'trait_Hidden_EP17World_NPC_RadwanGomes': {
     name: 'trait_Hidden_EP17World_NPC_RadwanGomes',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_RavendancerGoth: {
+  'trait_Hidden_EP17World_NPC_RavendancerGoth': {
     name: 'trait_Hidden_EP17World_NPC_RavendancerGoth',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_TakamaAether: {
+  'trait_Hidden_EP17World_NPC_TakamaAether': {
     name: 'trait_Hidden_EP17World_NPC_TakamaAether',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_TziporahGomes: {
+  'trait_Hidden_EP17World_NPC_TziporahGomes': {
     name: 'trait_Hidden_EP17World_NPC_TziporahGomes',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_WaylonWarez: {
+  'trait_Hidden_EP17World_NPC_WaylonWarez': {
     name: 'trait_Hidden_EP17World_NPC_WaylonWarez',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_WelcomeWagon_WelcomingNeighbor: {
+  'trait_Hidden_EP17World_NPC_WelcomeWagon_WelcomingNeighbor': {
     name: 'trait_Hidden_EP17World_NPC_WelcomeWagon_WelcomingNeighbor',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_ZelmiraGomes: {
+  'trait_Hidden_EP17World_NPC_ZelmiraGomes': {
     name: 'trait_Hidden_EP17World_NPC_ZelmiraGomes',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EP17World_NPC_ZuleikaIzadi: {
+  'trait_Hidden_EP17World_NPC_ZuleikaIzadi': {
     name: 'trait_Hidden_EP17World_NPC_ZuleikaIzadi',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Event_FallChallenge_DoTD_RecievedSkullDisplay: {
+  'trait_Hidden_Event_FallChallenge_DoTD_RecievedSkullDisplay': {
     name: 'trait_Hidden_Event_FallChallenge_DoTD_RecievedSkullDisplay',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_EvictionSystem_UsedFreeChance: {
+  'trait_Hidden_EvictionSystem_UsedFreeChance': {
     name: 'trait_Hidden_EvictionSystem_UsedFreeChance',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Fame_CelebrityTileAchieved: {
+  'trait_Hidden_Fame_CelebrityTileAchieved': {
     name: 'trait_Hidden_Fame_CelebrityTileAchieved',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Fame_Quirk_StarTreatment: {
+  'trait_Hidden_Fame_Quirk_StarTreatment': {
     name: 'trait_Hidden_Fame_Quirk_StarTreatment',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FashionMarketplace_SoldHypeOutfit: {
+  'trait_Hidden_FashionMarketplace_SoldHypeOutfit': {
     name: 'trait_Hidden_FashionMarketplace_SoldHypeOutfit',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FashionMarketplace_WearingOutfit: {
+  'trait_Hidden_FashionMarketplace_WearingOutfit': {
     name: 'trait_Hidden_FashionMarketplace_WearingOutfit',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FavoriteMovie_Action: {
+  'trait_Hidden_FavoriteMovie_Action': {
     name: 'trait_Hidden_FavoriteMovie_Action',
     description: 'loves action movies',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FavoriteMovie_Comedy: {
+  'trait_Hidden_FavoriteMovie_Comedy': {
     name: 'trait_Hidden_FavoriteMovie_Comedy',
     description: 'loves comedy movies',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FavoriteMovie_Family: {
+  'trait_Hidden_FavoriteMovie_Family': {
     name: 'trait_Hidden_FavoriteMovie_Family',
     description: 'loves family movies',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FavoriteMovie_Horror: {
+  'trait_Hidden_FavoriteMovie_Horror': {
     name: 'trait_Hidden_FavoriteMovie_Horror',
     description: 'loves horror movies',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FavoriteMovie_Romance: {
+  'trait_Hidden_FavoriteMovie_Romance': {
     name: 'trait_Hidden_FavoriteMovie_Romance',
     description: 'loves romance movies',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FirstSnow: {
+  'trait_Hidden_FirstSnow': {
     name: 'trait_Hidden_FirstSnow',
     description: 'this is the first time they have experienced snow',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FoodFestival_CurryContest_Winner: {
+  'trait_Hidden_FoodFestival_CurryContest_Winner': {
     name: 'trait_Hidden_FoodFestival_CurryContest_Winner',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FriendshipBracelet_1: {
+  'trait_Hidden_FriendshipBracelet_1': {
     name: 'trait_Hidden_FriendshipBracelet_1',
     description: 'is wearing a friendship bracelet',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FriendshipBracelet_2: {
+  'trait_Hidden_FriendshipBracelet_2': {
     name: 'trait_Hidden_FriendshipBracelet_2',
     description: 'is wearing a friendship bracelet',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FriendshipBracelet_3: {
+  'trait_Hidden_FriendshipBracelet_3': {
     name: 'trait_Hidden_FriendshipBracelet_3',
     description: 'is wearing a friendship bracelet',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FriendshipBracelet_4: {
+  'trait_Hidden_FriendshipBracelet_4': {
     name: 'trait_Hidden_FriendshipBracelet_4',
     description: 'is wearing a friendship bracelet',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FriendshipBracelet_5: {
+  'trait_Hidden_FriendshipBracelet_5': {
     name: 'trait_Hidden_FriendshipBracelet_5',
     description: 'is wearing a friendship bracelet',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_FriendshipBracelet_NeedsCleanup: {
+  'trait_Hidden_FriendshipBracelet_NeedsCleanup': {
     name: 'trait_Hidden_FriendshipBracelet_NeedsCleanup',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_GhostPower_CAS_EvilTattoo: {
+  'trait_Hidden_GhostPower_CAS_EvilTattoo': {
     name: 'trait_Hidden_GhostPower_CAS_EvilTattoo',
     ignored: true,
     description: 'has a mark of evil tattoo',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_GhostPower_CAS_GoodTattoo: {
+  'trait_Hidden_GhostPower_CAS_GoodTattoo': {
     name: 'trait_Hidden_GhostPower_CAS_GoodTattoo',
     description: 'has a mark of good tattoo',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_GhostPowers_BurntOut: {
+  'trait_Hidden_GhostPowers_BurntOut': {
     name: 'trait_Hidden_GhostPowers_BurntOut',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_GhostPowers_GhostNap: {
+  'trait_Hidden_GhostPowers_GhostNap': {
     name: 'trait_Hidden_GhostPowers_GhostNap',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_GhostPowers_MermaidAndSuppressNeeds2: {
+  'trait_Hidden_GhostPowers_MermaidAndSuppressNeeds2': {
     name: 'trait_Hidden_GhostPowers_MermaidAndSuppressNeeds2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_GhostPowers_ObjectManipulation_SinisterPossess: {
+  'trait_Hidden_GhostPowers_ObjectManipulation_SinisterPossess': {
     name: 'trait_Hidden_GhostPowers_ObjectManipulation_SinisterPossess',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_GhostPowers_SuppressNeeds_lvl1: {
+  'trait_Hidden_GhostPowers_SuppressNeeds_lvl1': {
     name: 'trait_Hidden_GhostPowers_SuppressNeeds_lvl1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_GhostPowers_SuppressNeeds_lvl2: {
+  'trait_Hidden_GhostPowers_SuppressNeeds_lvl2': {
     name: 'trait_Hidden_GhostPowers_SuppressNeeds_lvl2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_GhostUpdates_PositiveReflection: {
+  'trait_Hidden_GhostUpdates_PositiveReflection': {
     name: 'trait_Hidden_GhostUpdates_PositiveReflection',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HadFight: {
+  'trait_Hidden_HadFight': {
     name: 'trait_Hidden_HadFight',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HadWooHoo: {
+  'trait_Hidden_HadWooHoo': {
     name: 'trait_Hidden_HadWooHoo',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Has_Researched_Rodent_Disease: {
+  'trait_Hidden_Has_Researched_Rodent_Disease': {
     name: 'trait_Hidden_Has_Researched_Rodent_Disease',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HasBeenScientist: {
+  'trait_Hidden_HasBeenScientist': {
     name: 'trait_Hidden_HasBeenScientist',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HasMonsterFriend: {
+  'trait_Hidden_HasMonsterFriend': {
     name: 'trait_Hidden_HasMonsterFriend',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HasTastedExperimentalFood: {
+  'trait_Hidden_HasTastedExperimentalFood': {
     name: 'trait_Hidden_HasTastedExperimentalFood',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HasUltimateSnowpal: {
+  'trait_Hidden_HasUltimateSnowpal': {
     name: 'trait_Hidden_HasUltimateSnowpal',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Hates_Fruitcake: {
+  'trait_Hidden_Hates_Fruitcake': {
     name: 'trait_Hidden_Hates_Fruitcake',
     description: 'hates fruitcake',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Hates_FruitCake_Controller: {
+  'trait_Hidden_Hates_FruitCake_Controller': {
     name: 'trait_Hidden_Hates_FruitCake_Controller',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Hates_Mayo: {
+  'trait_Hidden_Hates_Mayo': {
     name: 'trait_Hidden_Hates_Mayo',
     description: 'hates mayo',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HighSchool_NPC_AshHarjo: {
+  'trait_Hidden_HighSchool_NPC_AshHarjo': {
     name: 'trait_Hidden_HighSchool_NPC_AshHarjo',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HighSchool_NPC_CafWorker: {
+  'trait_Hidden_HighSchool_NPC_CafWorker': {
     name: 'trait_Hidden_HighSchool_NPC_CafWorker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HighSchool_NPC_Janitor: {
+  'trait_Hidden_HighSchool_NPC_Janitor': {
     name: 'trait_Hidden_HighSchool_NPC_Janitor',
     description: 'is a janitor',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HighSchool_NPC_Principle: {
+  'trait_Hidden_HighSchool_NPC_Principle': {
     name: 'trait_Hidden_HighSchool_NPC_Principle',
     description: 'is the principle',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HighSchool_NPC_Teacher1: {
+  'trait_Hidden_HighSchool_NPC_Teacher1': {
     name: 'trait_Hidden_HighSchool_NPC_Teacher1',
     description: 'is a teacher',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HighSchool_NPC_Teacher2: {
+  'trait_Hidden_HighSchool_NPC_Teacher2': {
     name: 'trait_Hidden_HighSchool_NPC_Teacher2',
     description: 'is a teacher',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HighSchool_NPC_ThriftStoreOwner: {
+  'trait_Hidden_HighSchool_NPC_ThriftStoreOwner': {
     name: 'trait_Hidden_HighSchool_NPC_ThriftStoreOwner',
     description: 'is a thrift store owner',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HobbyMeetup_EnableTNS_Books: {
+  'trait_Hidden_HobbyMeetup_EnableTNS_Books': {
     name: 'trait_Hidden_HobbyMeetup_EnableTNS_Books',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HobbyMeetup_EnableTNS_Creative: {
+  'trait_Hidden_HobbyMeetup_EnableTNS_Creative': {
     name: 'trait_Hidden_HobbyMeetup_EnableTNS_Creative',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HobbyMeetup_EnableTNS_Fitness: {
+  'trait_Hidden_HobbyMeetup_EnableTNS_Fitness': {
     name: 'trait_Hidden_HobbyMeetup_EnableTNS_Fitness',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HobbyMeetup_EnableTNS_FoodDrink: {
+  'trait_Hidden_HobbyMeetup_EnableTNS_FoodDrink': {
     name: 'trait_Hidden_HobbyMeetup_EnableTNS_FoodDrink',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HobbyMeetup_EnableTNS_Logic: {
+  'trait_Hidden_HobbyMeetup_EnableTNS_Logic': {
     name: 'trait_Hidden_HobbyMeetup_EnableTNS_Logic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HobbyMeetup_EnableTNS_Performer: {
+  'trait_Hidden_HobbyMeetup_EnableTNS_Performer': {
     name: 'trait_Hidden_HobbyMeetup_EnableTNS_Performer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HobbyMeetup_EnableTNS_Pottery: {
+  'trait_Hidden_HobbyMeetup_EnableTNS_Pottery': {
     name: 'trait_Hidden_HobbyMeetup_EnableTNS_Pottery',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_BarrelRacing_Beginner_Complete: {
+  'trait_Hidden_HorseCompetition_BarrelRacing_Beginner_Complete': {
     name: 'trait_Hidden_HorseCompetition_BarrelRacing_Beginner_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_BarrelRacing_Expert_Complete: {
+  'trait_Hidden_HorseCompetition_BarrelRacing_Expert_Complete': {
     name: 'trait_Hidden_HorseCompetition_BarrelRacing_Expert_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_BarrelRacing_Intermediate_Complete: {
+  'trait_Hidden_HorseCompetition_BarrelRacing_Intermediate_Complete': {
     name: 'trait_Hidden_HorseCompetition_BarrelRacing_Intermediate_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_BarrelRacing_Master_Complete: {
+  'trait_Hidden_HorseCompetition_BarrelRacing_Master_Complete': {
     name: 'trait_Hidden_HorseCompetition_BarrelRacing_Master_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_EnduraceRacing_Beginner_Complete: {
+  'trait_Hidden_HorseCompetition_EnduraceRacing_Beginner_Complete': {
     name: 'trait_Hidden_HorseCompetition_EnduraceRacing_Beginner_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_EnduraceRacing_Expert_Complete: {
+  'trait_Hidden_HorseCompetition_EnduraceRacing_Expert_Complete': {
     name: 'trait_Hidden_HorseCompetition_EnduraceRacing_Expert_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_EnduraceRacing_Intermediate_Complete: {
+  'trait_Hidden_HorseCompetition_EnduraceRacing_Intermediate_Complete': {
     name: 'trait_Hidden_HorseCompetition_EnduraceRacing_Intermediate_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_EnduraceRacing_Master_Complete: {
+  'trait_Hidden_HorseCompetition_EnduraceRacing_Master_Complete': {
     name: 'trait_Hidden_HorseCompetition_EnduraceRacing_Master_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_ShowJumping_Beginner_Complete: {
+  'trait_Hidden_HorseCompetition_ShowJumping_Beginner_Complete': {
     name: 'trait_Hidden_HorseCompetition_ShowJumping_Beginner_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_ShowJumping_Expert_Complete: {
+  'trait_Hidden_HorseCompetition_ShowJumping_Expert_Complete': {
     name: 'trait_Hidden_HorseCompetition_ShowJumping_Expert_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_ShowJumping_Intermediate_Complete: {
+  'trait_Hidden_HorseCompetition_ShowJumping_Intermediate_Complete': {
     name: 'trait_Hidden_HorseCompetition_ShowJumping_Intermediate_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_ShowJumping_Master_Complete: {
+  'trait_Hidden_HorseCompetition_ShowJumping_Master_Complete': {
     name: 'trait_Hidden_HorseCompetition_ShowJumping_Master_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_WesternPleasure_Beginner_Complete: {
+  'trait_Hidden_HorseCompetition_WesternPleasure_Beginner_Complete': {
     name: 'trait_Hidden_HorseCompetition_WesternPleasure_Beginner_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_WesternPleasure_Expert_Complete: {
+  'trait_Hidden_HorseCompetition_WesternPleasure_Expert_Complete': {
     name: 'trait_Hidden_HorseCompetition_WesternPleasure_Expert_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_WesternPleasure_Intermediate_Complete: {
+  'trait_Hidden_HorseCompetition_WesternPleasure_Intermediate_Complete': {
     name: 'trait_Hidden_HorseCompetition_WesternPleasure_Intermediate_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_HorseCompetition_WesternPleasure_Master_Complete: {
+  'trait_Hidden_HorseCompetition_WesternPleasure_Master_Complete': {
     name: 'trait_Hidden_HorseCompetition_WesternPleasure_Master_Complete',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_FrequentlyHiccups: {
+  'trait_Hidden_Infant_Element_FrequentlyHiccups': {
     name: 'trait_Hidden_Infant_Element_FrequentlyHiccups',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_FrequentlySneezes: {
+  'trait_Hidden_Infant_Element_FrequentlySneezes': {
     name: 'trait_Hidden_Infant_Element_FrequentlySneezes',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_Gassy: {
+  'trait_Hidden_Infant_Element_Gassy': {
     name: 'trait_Hidden_Infant_Element_Gassy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_GoodAppetite: {
+  'trait_Hidden_Infant_Element_GoodAppetite': {
     name: 'trait_Hidden_Infant_Element_GoodAppetite',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_HappySpitter: {
+  'trait_Hidden_Infant_Element_HappySpitter': {
     name: 'trait_Hidden_Infant_Element_HappySpitter',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_HatesBeingHeld: {
+  'trait_Hidden_Infant_Element_HatesBeingHeld': {
     name: 'trait_Hidden_Infant_Element_HatesBeingHeld',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_HatesWakingUp: {
+  'trait_Hidden_Infant_Element_HatesWakingUp': {
     name: 'trait_Hidden_Infant_Element_HatesWakingUp',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_LovesBeingHeld: {
+  'trait_Hidden_Infant_Element_LovesBeingHeld': {
     name: 'trait_Hidden_Infant_Element_LovesBeingHeld',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_LovesWakingUp: {
+  'trait_Hidden_Infant_Element_LovesWakingUp': {
     name: 'trait_Hidden_Infant_Element_LovesWakingUp',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_MessyEater: {
+  'trait_Hidden_Infant_Element_MessyEater': {
     name: 'trait_Hidden_Infant_Element_MessyEater',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_ObsessedWithSound: {
+  'trait_Hidden_Infant_Element_ObsessedWithSound': {
     name: 'trait_Hidden_Infant_Element_ObsessedWithSound',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_OnlySleepsWhenHeld: {
+  'trait_Hidden_Infant_Element_OnlySleepsWhenHeld': {
     name: 'trait_Hidden_Infant_Element_OnlySleepsWhenHeld',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_PeesDuringChanges: {
+  'trait_Hidden_Infant_Element_PeesDuringChanges': {
     name: 'trait_Hidden_Infant_Element_PeesDuringChanges',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_PeesDuringFeeding: {
+  'trait_Hidden_Infant_Element_PeesDuringFeeding': {
     name: 'trait_Hidden_Infant_Element_PeesDuringFeeding',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_PickyEater: {
+  'trait_Hidden_Infant_Element_PickyEater': {
     name: 'trait_Hidden_Infant_Element_PickyEater',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_RisesWithTheSun: {
+  'trait_Hidden_Infant_Element_RisesWithTheSun': {
     name: 'trait_Hidden_Infant_Element_RisesWithTheSun',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_SelfSoother: {
+  'trait_Hidden_Infant_Element_SelfSoother': {
     name: 'trait_Hidden_Infant_Element_SelfSoother',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Infant_Element_Talker: {
+  'trait_Hidden_Infant_Element_Talker': {
     name: 'trait_Hidden_Infant_Element_Talker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestone_CanCrawl: {
+  'trait_Hidden_InfantMilestone_CanCrawl': {
     name: 'trait_Hidden_InfantMilestone_CanCrawl',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestone_SitUp: {
+  'trait_Hidden_InfantMilestone_SitUp': {
     name: 'trait_Hidden_InfantMilestone_SitUp',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_BGUnlock_Core: {
+  'trait_Hidden_InfantMilestones_BGUnlock_Core': {
     name: 'trait_Hidden_InfantMilestones_BGUnlock_Core',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_BGUnlock_FirstBath: {
+  'trait_Hidden_InfantMilestones_BGUnlock_FirstBath': {
     name: 'trait_Hidden_InfantMilestones_BGUnlock_FirstBath',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_BGUnlock_FirstBlowout: {
+  'trait_Hidden_InfantMilestones_BGUnlock_FirstBlowout': {
     name: 'trait_Hidden_InfantMilestones_BGUnlock_FirstBlowout',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_BGUnlock_FirstBubbleBath: {
+  'trait_Hidden_InfantMilestones_BGUnlock_FirstBubbleBath': {
     name: 'trait_Hidden_InfantMilestones_BGUnlock_FirstBubbleBath',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_BGUnlock_FirstFood: {
+  'trait_Hidden_InfantMilestones_BGUnlock_FirstFood': {
     name: 'trait_Hidden_InfantMilestones_BGUnlock_FirstFood',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_BGUnlock_FirstTripToPark: {
+  'trait_Hidden_InfantMilestones_BGUnlock_FirstTripToPark': {
     name: 'trait_Hidden_InfantMilestones_BGUnlock_FirstTripToPark',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_BGUnlock_FirstVacation: {
+  'trait_Hidden_InfantMilestones_BGUnlock_FirstVacation': {
     name: 'trait_Hidden_InfantMilestones_BGUnlock_FirstVacation',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_BGUnlock_FirstVisitors: {
+  'trait_Hidden_InfantMilestones_BGUnlock_FirstVisitors': {
     name: 'trait_Hidden_InfantMilestones_BGUnlock_FirstVisitors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_BGUnlock_FirstVisitToFamily: {
+  'trait_Hidden_InfantMilestones_BGUnlock_FirstVisitToFamily': {
     name: 'trait_Hidden_InfantMilestones_BGUnlock_FirstVisitToFamily',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_BGUnlock_PeesOnParent: {
+  'trait_Hidden_InfantMilestones_BGUnlock_PeesOnParent': {
     name: 'trait_Hidden_InfantMilestones_BGUnlock_PeesOnParent',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_Clap: {
+  'trait_Hidden_InfantMilestones_Clap': {
     name: 'trait_Hidden_InfantMilestones_Clap',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_Coo: {
+  'trait_Hidden_InfantMilestones_Coo': {
     name: 'trait_Hidden_InfantMilestones_Coo',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_Hidden_InfantMilestones_Immobile: {
+  'Trait_Hidden_InfantMilestones_Immobile': {
     name: 'Trait_Hidden_InfantMilestones_Immobile',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_Laugh: {
+  'trait_Hidden_InfantMilestones_Laugh': {
     name: 'trait_Hidden_InfantMilestones_Laugh',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_InfantMilestones_SleptThroughNight: {
+  'trait_Hidden_InfantMilestones_SleptThroughNight': {
     name: 'trait_Hidden_InfantMilestones_SleptThroughNight',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_isAdoptionOfficer: {
+  'trait_Hidden_isAdoptionOfficer': {
     name: 'trait_Hidden_isAdoptionOfficer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_isDisguised: {
+  'trait_Hidden_isDisguised': {
     name: 'trait_Hidden_isDisguised',
-    description:
-      "is wearing a disguise so that people don't notice they are a celebrity",
+    description: "is wearing a disguise so that people don't notice they are a celebrity",
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_IsEventNPC_Challenge: {
+  'trait_Hidden_IsEventNPC_Challenge': {
     name: 'trait_Hidden_IsEventNPC_Challenge',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_IsEventNPC_Challenge_MBB: {
+  'trait_Hidden_IsEventNPC_Challenge_MBB': {
     name: 'trait_Hidden_IsEventNPC_Challenge_MBB',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_isFirefighter: {
+  'trait_Hidden_isFirefighter': {
     name: 'trait_Hidden_isFirefighter',
     description: 'is a firefighter',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_IslandAncestor_Elemental: {
+  'trait_Hidden_IslandAncestor_Elemental': {
     name: 'trait_Hidden_IslandAncestor_Elemental',
     ignored: false,
     description: 'is imbued with elemental energy due to their heritage',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Hidden_IsNative: {
+  'trait_Hidden_IsNative': {
     name: 'trait_Hidden_IsNative',
     ignored: true,
     description: 'is native',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_isNativeStray: {
+  'trait_Hidden_isNativeStray': {
     name: 'trait_Hidden_isNativeStray',
     description: 'is a native stray',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_isNotDisguised: {
+  'trait_Hidden_isNotDisguised': {
     name: 'trait_Hidden_isNotDisguised',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_Hidden_JoinedFiftyMileHighClub: {
+  'Trait_Hidden_JoinedFiftyMileHighClub': {
     name: 'Trait_Hidden_JoinedFiftyMileHighClub',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_Hidden_JoinedFiftyMileHighClub_Teen: {
+  'Trait_Hidden_JoinedFiftyMileHighClub_Teen': {
     name: 'Trait_Hidden_JoinedFiftyMileHighClub_Teen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Jungle_WelcomePackage_Received: {
+  'trait_Hidden_Jungle_WelcomePackage_Received': {
     name: 'trait_Hidden_Jungle_WelcomePackage_Received',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_KeepsakeBox_Designated: {
+  'trait_Hidden_KeepsakeBox_Designated': {
     name: 'trait_Hidden_KeepsakeBox_Designated',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_KidsBike_CanRide: {
+  'trait_Hidden_KidsBike_CanRide': {
     name: 'trait_Hidden_KidsBike_CanRide',
     description: 'can ride a bike',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_KidsBike_CantRide: {
+  'trait_Hidden_KidsBike_CantRide': {
     name: 'trait_Hidden_KidsBike_CantRide',
     description: "can't ride a bike",
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Knitting_GiftedGrim: {
+  'trait_Hidden_Knitting_GiftedGrim': {
     name: 'trait_Hidden_Knitting_GiftedGrim',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Landlord: {
+  'trait_Hidden_Landlord': {
     name: 'trait_Hidden_Landlord',
     description: 'is a landlord',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_LighthouseConception: {
+  'trait_Hidden_LighthouseConception': {
     name: 'trait_Hidden_LighthouseConception',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Likes_Fruitcake: {
+  'trait_Hidden_Likes_Fruitcake': {
     name: 'trait_Hidden_Likes_Fruitcake',
     description: 'likes fruitcake',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Likes_Mayo: {
+  'trait_Hidden_Likes_Mayo': {
     name: 'trait_Hidden_Likes_Mayo',
     description: 'likes mayo',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_LotTrait_SimpleLiving_Cookbook: {
+  'trait_Hidden_LotTrait_SimpleLiving_Cookbook': {
     name: 'trait_Hidden_LotTrait_SimpleLiving_Cookbook',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_MakePregnant: {
+  'trait_Hidden_MakePregnant': {
     name: 'trait_Hidden_MakePregnant',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Matchmaking_Disabled: {
+  'trait_Hidden_Matchmaking_Disabled': {
     name: 'trait_Hidden_Matchmaking_Disabled',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_MediumSwimming: {
+  'trait_Hidden_MediumSwimming': {
     name: 'trait_Hidden_MediumSwimming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_MidlifeCrisis_HadACrisis: {
+  'trait_Hidden_MidlifeCrisis_HadACrisis': {
     name: 'trait_Hidden_MidlifeCrisis_HadACrisis',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Mortician_Ghouls: {
+  'trait_Hidden_Mortician_Ghouls': {
     name: 'trait_Hidden_Mortician_Ghouls',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Mortician_Grave: {
+  'trait_Hidden_Mortician_Grave': {
     name: 'trait_Hidden_Mortician_Grave',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Mortician_Grave2: {
+  'trait_Hidden_Mortician_Grave2': {
     name: 'trait_Hidden_Mortician_Grave2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_muEvent_TenantRevolt_GenericCause: {
+  'trait_Hidden_muEvent_TenantRevolt_GenericCause': {
     name: 'trait_Hidden_muEvent_TenantRevolt_GenericCause',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_NPC_isDJ: {
+  'trait_Hidden_NPC_isDJ': {
     name: 'trait_Hidden_NPC_isDJ',
     description: 'is a DJ',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_NPC_TenantApplicant: {
+  'trait_Hidden_NPC_TenantApplicant': {
     name: 'trait_Hidden_NPC_TenantApplicant',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_OnTrashUpdateLot: {
+  'trait_Hidden_OnTrashUpdateLot': {
     name: 'trait_Hidden_OnTrashUpdateLot',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_PaintingMaster: {
+  'trait_Hidden_PaintingMaster': {
     name: 'trait_Hidden_PaintingMaster',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ParanormalInvestigator_AskedGrim: {
+  'trait_Hidden_ParanormalInvestigator_AskedGrim': {
     name: 'trait_Hidden_ParanormalInvestigator_AskedGrim',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ParanormalInvestigator_Medium: {
+  'trait_Hidden_ParanormalInvestigator_Medium': {
     name: 'trait_Hidden_ParanormalInvestigator_Medium',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Pet_Minor_Cage_RodentDisease_Immune: {
+  'trait_Hidden_Pet_Minor_Cage_RodentDisease_Immune': {
     name: 'trait_Hidden_Pet_Minor_Cage_RodentDisease_Immune',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Pet_Minor_Cage_RodentDisease_Removed_Costume: {
+  'trait_Hidden_Pet_Minor_Cage_RodentDisease_Removed_Costume': {
     name: 'trait_Hidden_Pet_Minor_Cage_RodentDisease_Removed_Costume',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_Hidden_ProfessorNPC_Course_Arts_A: {
+  'Trait_Hidden_ProfessorNPC_Course_Arts_A': {
     name: 'Trait_Hidden_ProfessorNPC_Course_Arts_A',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PROFESSOR,
   },
-  trait_Hidden_ProfessorNPC_Course_Arts_B: {
+  'trait_Hidden_ProfessorNPC_Course_Arts_B': {
     name: 'trait_Hidden_ProfessorNPC_Course_Arts_B',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PROFESSOR,
   },
-  trait_Hidden_ProfessorNPC_Course_Arts_C: {
+  'trait_Hidden_ProfessorNPC_Course_Arts_C': {
     name: 'trait_Hidden_ProfessorNPC_Course_Arts_C',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PROFESSOR,
   },
-  trait_Hidden_ProfessorNPC_Course_Arts_D: {
+  'trait_Hidden_ProfessorNPC_Course_Arts_D': {
     name: 'trait_Hidden_ProfessorNPC_Course_Arts_D',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PROFESSOR,
   },
-  trait_Hidden_ProfessorNPC_Course_Science_A: {
+  'trait_Hidden_ProfessorNPC_Course_Science_A': {
     name: 'trait_Hidden_ProfessorNPC_Course_Science_A',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PROFESSOR,
   },
-  trait_Hidden_ProfessorNPC_Course_Science_B: {
+  'trait_Hidden_ProfessorNPC_Course_Science_B': {
     name: 'trait_Hidden_ProfessorNPC_Course_Science_B',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PROFESSOR,
   },
-  trait_Hidden_ProfessorNPC_Course_Science_C: {
+  'trait_Hidden_ProfessorNPC_Course_Science_C': {
     name: 'trait_Hidden_ProfessorNPC_Course_Science_C',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PROFESSOR,
   },
-  trait_Hidden_ProfessorNPC_Course_Science_D: {
+  'trait_Hidden_ProfessorNPC_Course_Science_D': {
     name: 'trait_Hidden_ProfessorNPC_Course_Science_D',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PROFESSOR,
   },
-  trait_Hidden_ProfessorNPC_isArtsProfessorNPC: {
+  'trait_Hidden_ProfessorNPC_isArtsProfessorNPC': {
     name: 'trait_Hidden_ProfessorNPC_isArtsProfessorNPC',
     description: 'is arts professor',
     class: 'Trait',
     trait_type: TraitType.PROFESSOR,
   },
-  trait_Hidden_ProfessorNPC_isScienceProfessorNPC: {
+  'trait_Hidden_ProfessorNPC_isScienceProfessorNPC': {
     name: 'trait_Hidden_ProfessorNPC_isScienceProfessorNPC',
     description: 'is science professor',
     class: 'Trait',
     trait_type: TraitType.PROFESSOR,
   },
-  trait_Hidden_PubertyChanges_ExperiencedFirstTime: {
+  'trait_Hidden_PubertyChanges_ExperiencedFirstTime': {
     name: 'trait_Hidden_PubertyChanges_ExperiencedFirstTime',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_R3Event_ThrillSeeker: {
+  'trait_Hidden_R3Event_ThrillSeeker': {
     name: 'trait_Hidden_R3Event_ThrillSeeker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ReaperCareer_DeadSim: {
+  'trait_Hidden_ReaperCareer_DeadSim': {
     name: 'trait_Hidden_ReaperCareer_DeadSim',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ReaperCareer_DeadSim_Find: {
+  'trait_Hidden_ReaperCareer_DeadSim_Find': {
     name: 'trait_Hidden_ReaperCareer_DeadSim_Find',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ReceivedExperimentalFoodTNS: {
+  'trait_Hidden_ReceivedExperimentalFoodTNS': {
     name: 'trait_Hidden_ReceivedExperimentalFoodTNS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Acting: {
+  'trait_Hidden_ResearchMachine_Acting': {
     name: 'trait_Hidden_ResearchMachine_Acting',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Charisma: {
+  'trait_Hidden_ResearchMachine_Charisma': {
     name: 'trait_Hidden_ResearchMachine_Charisma',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Comedy: {
+  'trait_Hidden_ResearchMachine_Comedy': {
     name: 'trait_Hidden_ResearchMachine_Comedy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Cooking: {
+  'trait_Hidden_ResearchMachine_Cooking': {
     name: 'trait_Hidden_ResearchMachine_Cooking',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Fitness: {
+  'trait_Hidden_ResearchMachine_Fitness': {
     name: 'trait_Hidden_ResearchMachine_Fitness',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Gardening: {
+  'trait_Hidden_ResearchMachine_Gardening': {
     name: 'trait_Hidden_ResearchMachine_Gardening',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Handiness: {
+  'trait_Hidden_ResearchMachine_Handiness': {
     name: 'trait_Hidden_ResearchMachine_Handiness',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Logic: {
+  'trait_Hidden_ResearchMachine_Logic': {
     name: 'trait_Hidden_ResearchMachine_Logic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Painting: {
+  'trait_Hidden_ResearchMachine_Painting': {
     name: 'trait_Hidden_ResearchMachine_Painting',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Photography: {
+  'trait_Hidden_ResearchMachine_Photography': {
     name: 'trait_Hidden_ResearchMachine_Photography',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Programming: {
+  'trait_Hidden_ResearchMachine_Programming': {
     name: 'trait_Hidden_ResearchMachine_Programming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Research: {
+  'trait_Hidden_ResearchMachine_Research': {
     name: 'trait_Hidden_ResearchMachine_Research',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Robotics: {
+  'trait_Hidden_ResearchMachine_Robotics': {
     name: 'trait_Hidden_ResearchMachine_Robotics',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_RocketScience: {
+  'trait_Hidden_ResearchMachine_RocketScience': {
     name: 'trait_Hidden_ResearchMachine_RocketScience',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Thanatology: {
+  'trait_Hidden_ResearchMachine_Thanatology': {
     name: 'trait_Hidden_ResearchMachine_Thanatology',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_VideoGaming: {
+  'trait_Hidden_ResearchMachine_VideoGaming': {
     name: 'trait_Hidden_ResearchMachine_VideoGaming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ResearchMachine_Writing: {
+  'trait_Hidden_ResearchMachine_Writing': {
     name: 'trait_Hidden_ResearchMachine_Writing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_RestaurantAtWork: {
+  'trait_Hidden_RestaurantAtWork': {
     name: 'trait_Hidden_RestaurantAtWork',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_RockClimbingGear_HasGear: {
+  'trait_Hidden_RockClimbingGear_HasGear': {
     name: 'trait_Hidden_RockClimbingGear_HasGear',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_RockClimbingGear_WearingGear: {
+  'trait_Hidden_RockClimbingGear_WearingGear': {
     name: 'trait_Hidden_RockClimbingGear_WearingGear',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Rocketship_HasWatchedAlien: {
+  'trait_Hidden_Rocketship_HasWatchedAlien': {
     name: 'trait_Hidden_Rocketship_HasWatchedAlien',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_RoleState_VetEmployee_Clean: {
+  'trait_Hidden_RoleState_VetEmployee_Clean': {
     name: 'trait_Hidden_RoleState_VetEmployee_Clean',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_RoleState_VetEmployee_DontClean: {
+  'trait_Hidden_RoleState_VetEmployee_DontClean': {
     name: 'trait_Hidden_RoleState_VetEmployee_DontClean',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_RoleState_VetEmployee_DontTreat: {
+  'trait_Hidden_RoleState_VetEmployee_DontTreat': {
     name: 'trait_Hidden_RoleState_VetEmployee_DontTreat',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_RoleState_VetEmployee_Treat: {
+  'trait_Hidden_RoleState_VetEmployee_Treat': {
     name: 'trait_Hidden_RoleState_VetEmployee_Treat',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Scenario_Premades_NotRival: {
+  'trait_Hidden_Scenario_Premades_NotRival': {
     name: 'trait_Hidden_Scenario_Premades_NotRival',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Scenario_Premades_Rival: {
+  'trait_Hidden_Scenario_Premades_Rival': {
     name: 'trait_Hidden_Scenario_Premades_Rival',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_SelfDiscoveryMax: {
+  'trait_Hidden_SelfDiscoveryMax': {
     name: 'trait_Hidden_SelfDiscoveryMax',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ShadyNPC_TattooRecognized: {
+  'trait_Hidden_ShadyNPC_TattooRecognized': {
     name: 'trait_Hidden_ShadyNPC_TattooRecognized',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_SimPreference_ActiveDislike: {
+  'trait_Hidden_SimPreference_ActiveDislike': {
     name: 'trait_Hidden_SimPreference_ActiveDislike',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Skeleton: {
+  'trait_Hidden_Skeleton': {
     name: 'trait_Hidden_Skeleton',
     description: 'is a skeleton',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Skeleton_ServiceSkeleton: {
+  'trait_Hidden_Skeleton_ServiceSkeleton': {
     name: 'trait_Hidden_Skeleton_ServiceSkeleton',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Skeleton_TempleSkeleton: {
+  'trait_Hidden_Skeleton_TempleSkeleton': {
     name: 'trait_Hidden_Skeleton_TempleSkeleton',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Snowboarding_Goofy: {
+  'trait_Hidden_Snowboarding_Goofy': {
     name: 'trait_Hidden_Snowboarding_Goofy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_SoccerTeam_ProSports: {
+  'trait_Hidden_SoccerTeam_ProSports': {
     name: 'trait_Hidden_SoccerTeam_ProSports',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Social_Media_Application_Disable: {
+  'trait_Hidden_Social_Media_Application_Disable': {
     name: 'trait_Hidden_Social_Media_Application_Disable',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Social_Media_TNS_Disable: {
+  'trait_Hidden_Social_Media_TNS_Disable': {
     name: 'trait_Hidden_Social_Media_TNS_Disable',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_SpellcasterPremade: {
+  'trait_Hidden_SpellcasterPremade': {
     name: 'trait_Hidden_SpellcasterPremade',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_SpringChallenge_2016_Gave_Pristine_GrowFruit: {
+  'trait_Hidden_SpringChallenge_2016_Gave_Pristine_GrowFruit': {
     name: 'trait_Hidden_SpringChallenge_2016_Gave_Pristine_GrowFruit',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_SpringChallenge_2016_Gave_X_GrowFruit_Completed: {
+  'trait_Hidden_SpringChallenge_2016_Gave_X_GrowFruit_Completed': {
     name: 'trait_Hidden_SpringChallenge_2016_Gave_X_GrowFruit_Completed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_SpringChallenge2016_GotGrowfruitStarter: {
+  'trait_Hidden_SpringChallenge2016_GotGrowfruitStarter': {
     name: 'trait_Hidden_SpringChallenge2016_GotGrowfruitStarter',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_hidden_staretNeeds_tracker: {
+  'trait_hidden_staretNeeds_tracker': {
     name: 'trait_hidden_staretNeeds_tracker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_startingSimoleons: {
+  'trait_Hidden_startingSimoleons': {
     name: 'trait_Hidden_startingSimoleons',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_StickyFingers: {
+  'trait_Hidden_StickyFingers': {
     name: 'trait_Hidden_StickyFingers',
     description: 'is good at stealing',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Strangerville_HasOpenedDoor: {
+  'trait_Hidden_Strangerville_HasOpenedDoor': {
     name: 'trait_Hidden_Strangerville_HasOpenedDoor',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Strangerville_VeteranHermit: {
+  'trait_Hidden_Strangerville_VeteranHermit': {
     name: 'trait_Hidden_Strangerville_VeteranHermit',
     description: 'is a veteran hermit',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Strangetown_Agent: {
+  'trait_Hidden_Strangetown_Agent': {
     name: 'trait_Hidden_Strangetown_Agent',
     description: 'is an agent',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Strangetown_Conspiracist: {
+  'trait_Hidden_Strangetown_Conspiracist': {
     name: 'trait_Hidden_Strangetown_Conspiracist',
     description: 'is a conspiracist',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Strangetown_CurioShop: {
+  'trait_Hidden_Strangetown_CurioShop': {
     name: 'trait_Hidden_Strangetown_CurioShop',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Strangetown_Military: {
+  'trait_Hidden_Strangetown_Military': {
     name: 'trait_Hidden_Strangetown_Military',
     description: 'is military',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Strangetown_NPC_PremadeSim: {
+  'trait_Hidden_Strangetown_NPC_PremadeSim': {
     name: 'trait_Hidden_Strangetown_NPC_PremadeSim',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Strangetown_Scientist: {
+  'trait_Hidden_Strangetown_Scientist': {
     name: 'trait_Hidden_Strangetown_Scientist',
     description: 'is a scientist',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_SummitLocal: {
+  'trait_Hidden_SummitLocal': {
     name: 'trait_Hidden_SummitLocal',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_SuperFertizier_Unlock: {
+  'trait_Hidden_SuperFertizier_Unlock': {
     name: 'trait_Hidden_SuperFertizier_Unlock',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Tarot_Collector: {
+  'trait_Hidden_Tarot_Collector': {
     name: 'trait_Hidden_Tarot_Collector',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Tarot_DeckPurchase: {
+  'trait_Hidden_Tarot_DeckPurchase': {
     name: 'trait_Hidden_Tarot_DeckPurchase',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Tarot_Quest: {
+  'trait_Hidden_Tarot_Quest': {
     name: 'trait_Hidden_Tarot_Quest',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Tarot_Quest_PossiblyLost: {
+  'trait_Hidden_Tarot_Quest_PossiblyLost': {
     name: 'trait_Hidden_Tarot_Quest_PossiblyLost',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_LostCardsRetrieved: {
+  'trait_Hidden_TarotCollectible_LostCardsRetrieved': {
     name: 'trait_Hidden_TarotCollectible_LostCardsRetrieved',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_Ekade01: {
+  'trait_Hidden_TarotCollectible_OnQuest_Ekade01': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_Ekade01',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_Ekade02: {
+  'trait_Hidden_TarotCollectible_OnQuest_Ekade02': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_Ekade02',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_Ekade04: {
+  'trait_Hidden_TarotCollectible_OnQuest_Ekade04': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_Ekade04',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_Ekade05: {
+  'trait_Hidden_TarotCollectible_OnQuest_Ekade05': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_Ekade05',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_EkadeDeadEnd01: {
+  'trait_Hidden_TarotCollectible_OnQuest_EkadeDeadEnd01': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_EkadeDeadEnd01',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_EkadeDeadEnd02: {
+  'trait_Hidden_TarotCollectible_OnQuest_EkadeDeadEnd02': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_EkadeDeadEnd02',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_Esther01: {
+  'trait_Hidden_TarotCollectible_OnQuest_Esther01': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_Esther01',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_Esther02: {
+  'trait_Hidden_TarotCollectible_OnQuest_Esther02': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_Esther02',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_EstherCake01: {
+  'trait_Hidden_TarotCollectible_OnQuest_EstherCake01': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_EstherCake01',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_EstherCake02: {
+  'trait_Hidden_TarotCollectible_OnQuest_EstherCake02': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_EstherCake02',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_EstherCake03: {
+  'trait_Hidden_TarotCollectible_OnQuest_EstherCake03': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_EstherCake03',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_EstherHaunt01: {
+  'trait_Hidden_TarotCollectible_OnQuest_EstherHaunt01': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_EstherHaunt01',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_EstherHaunt02: {
+  'trait_Hidden_TarotCollectible_OnQuest_EstherHaunt02': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_EstherHaunt02',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_Nyon01: {
+  'trait_Hidden_TarotCollectible_OnQuest_Nyon01': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_Nyon01',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_Nyon02: {
+  'trait_Hidden_TarotCollectible_OnQuest_Nyon02': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_Nyon02',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_Nyon03: {
+  'trait_Hidden_TarotCollectible_OnQuest_Nyon03': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_Nyon03',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_Nyon04: {
+  'trait_Hidden_TarotCollectible_OnQuest_Nyon04': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_Nyon04',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_NyonGrim01: {
+  'trait_Hidden_TarotCollectible_OnQuest_NyonGrim01': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_NyonGrim01',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_NyonGrim02: {
+  'trait_Hidden_TarotCollectible_OnQuest_NyonGrim02': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_NyonGrim02',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_Zelmira01: {
+  'trait_Hidden_TarotCollectible_OnQuest_Zelmira01': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_Zelmira01',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_Zelmira02: {
+  'trait_Hidden_TarotCollectible_OnQuest_Zelmira02': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_Zelmira02',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_ZelmiraAltar01: {
+  'trait_Hidden_TarotCollectible_OnQuest_ZelmiraAltar01': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_ZelmiraAltar01',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_ZelmiraAltar02: {
+  'trait_Hidden_TarotCollectible_OnQuest_ZelmiraAltar02': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_ZelmiraAltar02',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_ZelmiraAltar03: {
+  'trait_Hidden_TarotCollectible_OnQuest_ZelmiraAltar03': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_ZelmiraAltar03',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_ZelmiraLife01: {
+  'trait_Hidden_TarotCollectible_OnQuest_ZelmiraLife01': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_ZelmiraLife01',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotCollectible_OnQuest_ZelmiraLife02: {
+  'trait_Hidden_TarotCollectible_OnQuest_ZelmiraLife02': {
     name: 'trait_Hidden_TarotCollectible_OnQuest_ZelmiraLife02',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotNPC_EkadeQuests: {
+  'trait_Hidden_TarotNPC_EkadeQuests': {
     name: 'trait_Hidden_TarotNPC_EkadeQuests',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotNPC_EstherQuests: {
+  'trait_Hidden_TarotNPC_EstherQuests': {
     name: 'trait_Hidden_TarotNPC_EstherQuests',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotNPC_NyonQuests: {
+  'trait_Hidden_TarotNPC_NyonQuests': {
     name: 'trait_Hidden_TarotNPC_NyonQuests',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TarotNPC_ZelmiraQuests: {
+  'trait_Hidden_TarotNPC_ZelmiraQuests': {
     name: 'trait_Hidden_TarotNPC_ZelmiraQuests',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Temperature_Preference_Cool: {
+  'trait_Hidden_Temperature_Preference_Cool': {
     name: 'trait_Hidden_Temperature_Preference_Cool',
     description: 'likes cool climates and temperatures',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Temperature_Preference_Warm: {
+  'trait_Hidden_Temperature_Preference_Warm': {
     name: 'trait_Hidden_Temperature_Preference_Warm',
     description: 'likes warm climates and temperatures',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TemporaryStay_Guest: {
+  'trait_Hidden_TemporaryStay_Guest': {
     name: 'trait_Hidden_TemporaryStay_Guest',
     description: 'is a guest',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TemporaryStay_HadInfantIntro: {
+  'trait_Hidden_TemporaryStay_HadInfantIntro': {
     name: 'trait_Hidden_TemporaryStay_HadInfantIntro',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TemporaryStay_RecentlyArrived: {
+  'trait_Hidden_TemporaryStay_RecentlyArrived': {
     name: 'trait_Hidden_TemporaryStay_RecentlyArrived',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_Aggressive: {
+  'trait_Hidden_ToddlerPersonalityUpdate_Aggressive': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_Aggressive',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_AudioLover: {
+  'trait_Hidden_ToddlerPersonalityUpdate_AudioLover': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_AudioLover',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_BookLover: {
+  'trait_Hidden_ToddlerPersonalityUpdate_BookLover': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_BookLover',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_Destructive: {
+  'trait_Hidden_ToddlerPersonalityUpdate_Destructive': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_Destructive',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_EarlyRiser: {
+  'trait_Hidden_ToddlerPersonalityUpdate_EarlyRiser': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_EarlyRiser',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_GoodAppetite: {
+  'trait_Hidden_ToddlerPersonalityUpdate_GoodAppetite': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_GoodAppetite',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_HatesBedtime: {
+  'trait_Hidden_ToddlerPersonalityUpdate_HatesBedtime': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_HatesBedtime',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_HatesCarry: {
+  'trait_Hidden_ToddlerPersonalityUpdate_HatesCarry': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_HatesCarry',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_HatesWakeup: {
+  'trait_Hidden_ToddlerPersonalityUpdate_HatesWakeup': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_HatesWakeup',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_HeavySleeper: {
+  'trait_Hidden_ToddlerPersonalityUpdate_HeavySleeper': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_HeavySleeper',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_LightSleeper: {
+  'trait_Hidden_ToddlerPersonalityUpdate_LightSleeper': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_LightSleeper',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_LovesCarry: {
+  'trait_Hidden_ToddlerPersonalityUpdate_LovesCarry': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_LovesCarry',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_LovesWakeup: {
+  'trait_Hidden_ToddlerPersonalityUpdate_LovesWakeup': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_LovesWakeup',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_MessyEater: {
+  'trait_Hidden_ToddlerPersonalityUpdate_MessyEater': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_MessyEater',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_PickyEater: {
+  'trait_Hidden_ToddlerPersonalityUpdate_PickyEater': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_PickyEater',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_RunsAway: {
+  'trait_Hidden_ToddlerPersonalityUpdate_RunsAway': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_RunsAway',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_Singer: {
+  'trait_Hidden_ToddlerPersonalityUpdate_Singer': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_Singer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_ToddlerPersonalityUpdate_WaterLover: {
+  'trait_Hidden_ToddlerPersonalityUpdate_WaterLover': {
     name: 'trait_Hidden_ToddlerPersonalityUpdate_WaterLover',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TopRider_HasWonUltimateChampionship: {
+  'trait_Hidden_TopRider_HasWonUltimateChampionship': {
     name: 'trait_Hidden_TopRider_HasWonUltimateChampionship',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_1: {
+  'trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_1': {
     name: 'trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_2: {
+  'trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_2': {
     name: 'trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_3: {
+  'trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_3': {
     name: 'trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_4: {
+  'trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_4': {
     name: 'trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_5: {
+  'trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_5': {
     name: 'trait_Hidden_TreadMill_ClimbingWall_Challenge_Complete_5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_UniversityEnrollment_HasSeenEnrollmentInfo: {
+  'trait_Hidden_UniversityEnrollment_HasSeenEnrollmentInfo': {
     name: 'trait_Hidden_UniversityEnrollment_HasSeenEnrollmentInfo',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_UniversityStudent: {
+  'trait_Hidden_UniversityStudent': {
     name: 'trait_Hidden_UniversityStudent',
     description: 'is a university student',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_UnlockCampingSculpture: {
+  'trait_Hidden_UnlockCampingSculpture': {
     name: 'trait_Hidden_UnlockCampingSculpture',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Unlocked_PositivityChallenge_Aspiration: {
+  'trait_Hidden_Unlocked_PositivityChallenge_Aspiration': {
     name: 'trait_Hidden_Unlocked_PositivityChallenge_Aspiration',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_UnlockedGrilledCheese_Aspiration: {
+  'trait_Hidden_UnlockedGrilledCheese_Aspiration': {
     name: 'trait_Hidden_UnlockedGrilledCheese_Aspiration',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Vampire_SpiritPowers_BatEnabled: {
+  'trait_Hidden_Vampire_SpiritPowers_BatEnabled': {
     name: 'trait_Hidden_Vampire_SpiritPowers_BatEnabled',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Vampire_SpiritPowers_MistEnabled: {
+  'trait_Hidden_Vampire_SpiritPowers_MistEnabled': {
     name: 'trait_Hidden_Vampire_SpiritPowers_MistEnabled',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Vampire_SpiritPowers_VampireRunEnabled: {
+  'trait_Hidden_Vampire_SpiritPowers_VampireRunEnabled': {
     name: 'trait_Hidden_Vampire_SpiritPowers_VampireRunEnabled',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VampirePowerSusceptibility: {
+  'trait_Hidden_VampirePowerSusceptibility': {
     name: 'trait_Hidden_VampirePowerSusceptibility',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VfxMask_Cursed: {
+  'trait_Hidden_VfxMask_Cursed': {
     name: 'trait_Hidden_VfxMask_Cursed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_CritterTender_GotMashOnce: {
+  'trait_Hidden_VillagerHelp_CritterTender_GotMashOnce': {
     name: 'trait_Hidden_VillagerHelp_CritterTender_GotMashOnce',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_AgathaCrumplebottom: {
+  'trait_Hidden_VillagerHelp_OnQuest_AgathaCrumplebottom': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_AgathaCrumplebottom',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_AgathaCrumplebottom_2: {
+  'trait_Hidden_VillagerHelp_OnQuest_AgathaCrumplebottom_2': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_AgathaCrumplebottom_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_AgnesCrumplebottom: {
+  'trait_Hidden_VillagerHelp_OnQuest_AgnesCrumplebottom': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_AgnesCrumplebottom',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_AgnesCrumplebottom_2: {
+  'trait_Hidden_VillagerHelp_OnQuest_AgnesCrumplebottom_2': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_AgnesCrumplebottom_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_CritterTender: {
+  'trait_Hidden_VillagerHelp_OnQuest_CritterTender': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_CritterTender',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_FoodShort: {
+  'trait_Hidden_VillagerHelp_OnQuest_FoodShort': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_FoodShort',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_GardenShort: {
+  'trait_Hidden_VillagerHelp_OnQuest_GardenShort': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_GardenShort',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_GroceryDelivery: {
+  'trait_Hidden_VillagerHelp_OnQuest_GroceryDelivery': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_GroceryDelivery',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_GroceryOwner: {
+  'trait_Hidden_VillagerHelp_OnQuest_GroceryOwner': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_GroceryOwner',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_LivestockLong: {
+  'trait_Hidden_VillagerHelp_OnQuest_LivestockLong': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_LivestockLong',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_LivestockShort: {
+  'trait_Hidden_VillagerHelp_OnQuest_LivestockShort': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_LivestockShort',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_Mayor: {
+  'trait_Hidden_VillagerHelp_OnQuest_Mayor': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_Mayor',
     description: 'is a mayor',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_PubOwner: {
+  'trait_Hidden_VillagerHelp_OnQuest_PubOwner': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_PubOwner',
     description: 'is a pub owner',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_SocialMedium: {
+  'trait_Hidden_VillagerHelp_OnQuest_SocialMedium': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_SocialMedium',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_SocialShort: {
+  'trait_Hidden_VillagerHelp_OnQuest_SocialShort': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_SocialShort',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_WildAnimalFoodLong: {
+  'trait_Hidden_VillagerHelp_OnQuest_WildAnimalFoodLong': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_WildAnimalFoodLong',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_VillagerHelp_OnQuest_WildAnimalShort: {
+  'trait_Hidden_VillagerHelp_OnQuest_WildAnimalShort': {
     name: 'trait_Hidden_VillagerHelp_OnQuest_WildAnimalShort',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Weather_Rain_Hate: {
+  'trait_Hidden_Weather_Rain_Hate': {
     name: 'trait_Hidden_Weather_Rain_Hate',
     description: 'hates rainy weather',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Weather_Rain_Love: {
+  'trait_Hidden_Weather_Rain_Love': {
     name: 'trait_Hidden_Weather_Rain_Love',
     description: 'loves rainy weather',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Weather_Snow_Hate: {
+  'trait_Hidden_Weather_Snow_Hate': {
     name: 'trait_Hidden_Weather_Snow_Hate',
     description: 'hates snow',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Weather_Snow_Love: {
+  'trait_Hidden_Weather_Snow_Love': {
     name: 'trait_Hidden_Weather_Snow_Love',
     description: 'loves snow',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Weather_Sun_Hate: {
+  'trait_Hidden_Weather_Sun_Hate': {
     name: 'trait_Hidden_Weather_Sun_Hate',
     description: 'hates the sun',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Weather_Sun_Love: {
+  'trait_Hidden_Weather_Sun_Love': {
     name: 'trait_Hidden_Weather_Sun_Love',
     description: 'loves the sun',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Weather_Wind_Hate: {
+  'trait_Hidden_Weather_Wind_Hate': {
     name: 'trait_Hidden_Weather_Wind_Hate',
     description: 'hates the wind',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Weather_Wind_Love: {
+  'trait_Hidden_Weather_Wind_Love': {
     name: 'trait_Hidden_Weather_Wind_Love',
     description: 'loves the wind',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WeddingWorld_NPC_ArnessaThebe: {
+  'trait_Hidden_WeddingWorld_NPC_ArnessaThebe': {
     name: 'trait_Hidden_WeddingWorld_NPC_ArnessaThebe',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WeddingWorld_NPC_CamilleSoto: {
+  'trait_Hidden_WeddingWorld_NPC_CamilleSoto': {
     name: 'trait_Hidden_WeddingWorld_NPC_CamilleSoto',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WeddingWorld_NPC_DominiqueSoto: {
+  'trait_Hidden_WeddingWorld_NPC_DominiqueSoto': {
     name: 'trait_Hidden_WeddingWorld_NPC_DominiqueSoto',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WeddingWorld_NPC_GretaLaurent: {
+  'trait_Hidden_WeddingWorld_NPC_GretaLaurent': {
     name: 'trait_Hidden_WeddingWorld_NPC_GretaLaurent',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WeddingWorld_NPC_HectorLaurent: {
+  'trait_Hidden_WeddingWorld_NPC_HectorLaurent': {
     name: 'trait_Hidden_WeddingWorld_NPC_HectorLaurent',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WeddingWorld_NPC_HilaryLaurent: {
+  'trait_Hidden_WeddingWorld_NPC_HilaryLaurent': {
     name: 'trait_Hidden_WeddingWorld_NPC_HilaryLaurent',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WeddingWorld_NPC_JaceLaurent: {
+  'trait_Hidden_WeddingWorld_NPC_JaceLaurent': {
     name: 'trait_Hidden_WeddingWorld_NPC_JaceLaurent',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WeddingWorld_NPC_JaleelFaiz: {
+  'trait_Hidden_WeddingWorld_NPC_JaleelFaiz': {
     name: 'trait_Hidden_WeddingWorld_NPC_JaleelFaiz',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WeddingWorld_NPC_LuciaMarkovic: {
+  'trait_Hidden_WeddingWorld_NPC_LuciaMarkovic': {
     name: 'trait_Hidden_WeddingWorld_NPC_LuciaMarkovic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WeddingWorld_NPC_MateoMarkovic: {
+  'trait_Hidden_WeddingWorld_NPC_MateoMarkovic': {
     name: 'trait_Hidden_WeddingWorld_NPC_MateoMarkovic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WeddingWorld_NPC_TomiMarkovic: {
+  'trait_Hidden_WeddingWorld_NPC_TomiMarkovic': {
     name: 'trait_Hidden_WeddingWorld_NPC_TomiMarkovic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_Witch_Teleport: {
+  'trait_Hidden_Witch_Teleport': {
     name: 'trait_Hidden_Witch_Teleport',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WolfTown_Adventure_KnowsSculptureSecret: {
+  'trait_Hidden_WolfTown_Adventure_KnowsSculptureSecret': {
     name: 'trait_Hidden_WolfTown_Adventure_KnowsSculptureSecret',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WolfTown_PortalUnlock_MinePorta: {
+  'trait_Hidden_WolfTown_PortalUnlock_MinePorta': {
     name: 'trait_Hidden_WolfTown_PortalUnlock_MinePorta',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WolfTown_PortalUnlock_PortaSewer: {
+  'trait_Hidden_WolfTown_PortalUnlock_PortaSewer': {
     name: 'trait_Hidden_WolfTown_PortalUnlock_PortaSewer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WolfTown_PortalUnlock_SewerMine: {
+  'trait_Hidden_WolfTown_PortalUnlock_SewerMine': {
     name: 'trait_Hidden_WolfTown_PortalUnlock_SewerMine',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WolfTown_Premade_CeleneLopez: {
+  'trait_Hidden_WolfTown_Premade_CeleneLopez': {
     name: 'trait_Hidden_WolfTown_Premade_CeleneLopez',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WolfTown_Premade_JacobVolkov: {
+  'trait_Hidden_WolfTown_Premade_JacobVolkov': {
     name: 'trait_Hidden_WolfTown_Premade_JacobVolkov',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WolfTown_Premade_KristopherVolkov: {
+  'trait_Hidden_WolfTown_Premade_KristopherVolkov': {
     name: 'trait_Hidden_WolfTown_Premade_KristopherVolkov',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WolfTown_Premade_LilyZhu: {
+  'trait_Hidden_WolfTown_Premade_LilyZhu': {
     name: 'trait_Hidden_WolfTown_Premade_LilyZhu',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WolfTown_Premade_LouHowell: {
+  'trait_Hidden_WolfTown_Premade_LouHowell': {
     name: 'trait_Hidden_WolfTown_Premade_LouHowell',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WolfTown_Premade_RoryOaklow: {
+  'trait_Hidden_WolfTown_Premade_RoryOaklow': {
     name: 'trait_Hidden_WolfTown_Premade_RoryOaklow',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hidden_WolfTown_Premade_WolfgangWilder: {
+  'trait_Hidden_WolfTown_Premade_WolfgangWilder': {
     name: 'trait_Hidden_WolfTown_Premade_WolfgangWilder',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_High_Metabolism: {
+  'trait_High_Metabolism': {
     name: 'trait_High_Metabolism',
     description: 'has a high metabolism',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_Highflier: {
+  'trait_Highflier': {
     name: 'trait_Highflier',
     description: 'is a highflier',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_HighFlyer: {
+  'trait_HighFlyer': {
     name: 'trait_HighFlyer',
     ignored: false,
     description: 'is a highflier',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_HighMaintenance: {
+  'trait_HighMaintenance': {
     name: 'trait_HighMaintenance',
     description: 'is high maintenance',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_HighSchool_A: {
+  'trait_HighSchool_A': {
     name: 'trait_HighSchool_A',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HighSchool_Active_Class1Student: {
+  'trait_HighSchool_Active_Class1Student': {
     name: 'trait_HighSchool_Active_Class1Student',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HighSchool_Active_HadOrientation: {
+  'trait_HighSchool_Active_HadOrientation': {
     name: 'trait_HighSchool_Active_HadOrientation',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HighSchool_Active_LearnedTPoseChallenge: {
+  'trait_HighSchool_Active_LearnedTPoseChallenge': {
     name: 'trait_HighSchool_Active_LearnedTPoseChallenge',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HighSchool_B: {
+  'trait_HighSchool_B': {
     name: 'trait_HighSchool_B',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HighSchool_C: {
+  'trait_HighSchool_C': {
     name: 'trait_HighSchool_C',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HighSchool_D: {
+  'trait_HighSchool_D': {
     name: 'trait_HighSchool_D',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HighSchool_F: {
+  'trait_HighSchool_F': {
     name: 'trait_HighSchool_F',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Hilarious: {
+  'trait_Hilarious': {
     name: 'trait_Hilarious',
     ignored: false,
     description: 'is hilarious',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_HolidayTradition_FatherWinter: {
+  'trait_HolidayTradition_FatherWinter': {
     name: 'trait_HolidayTradition_FatherWinter',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_HolidayTradition_FatherWinterBaby: {
+  'trait_HolidayTradition_FatherWinterBaby': {
     name: 'trait_HolidayTradition_FatherWinterBaby',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_HomeTurf: {
+  'trait_HomeTurf': {
     name: 'trait_HomeTurf',
     ignored: false,
     description: 'feels connected and content when in their home neighborhood',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_Horse_Age_Adult: {
+  'trait_Horse_Age_Adult': {
     name: 'trait_Horse_Age_Adult',
     description: 'is an adult horse',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Horse_Age_Child: {
+  'trait_Horse_Age_Child': {
     name: 'trait_Horse_Age_Child',
     description: 'is a child horse',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Horse_Age_Elder: {
+  'trait_Horse_Age_Elder': {
     name: 'trait_Horse_Age_Elder',
     description: 'is an elder horse',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Horse_Gameplay_Curious: {
+  'trait_Horse_Gameplay_Curious': {
     name: 'trait_Horse_Gameplay_Curious',
     ignored: false,
     description: 'is curious',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Horse_Gameplay_EquestrianCenter_ChampionHorse: {
+  'trait_Horse_Gameplay_EquestrianCenter_ChampionHorse': {
     name: 'trait_Horse_Gameplay_EquestrianCenter_ChampionHorse',
     description: 'is a champion horse',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Horse_Gameplay_HorseBreeding_ChampionGenes: {
+  'trait_Horse_Gameplay_HorseBreeding_ChampionGenes': {
     name: 'trait_Horse_Gameplay_HorseBreeding_ChampionGenes',
     description: 'has champion horse genes',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Horse_Gameplay_Mounted_Buffs_Reins_Modifier: {
+  'trait_Horse_Gameplay_Mounted_Buffs_Reins_Modifier': {
     name: 'trait_Horse_Gameplay_Mounted_Buffs_Reins_Modifier',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Horse_Gameplay_Playful: {
+  'trait_Horse_Gameplay_Playful': {
     name: 'trait_Horse_Gameplay_Playful',
     ignored: false,
     description: 'is playful',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Horse_Gameplay_Resilient: {
+  'trait_Horse_Gameplay_Resilient': {
     name: 'trait_Horse_Gameplay_Resilient',
     ignored: false,
     description: 'is resilient',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Horse_Gameplay_RewardTrait_TopNotchFoal: {
+  'trait_Horse_Gameplay_RewardTrait_TopNotchFoal': {
     name: 'trait_Horse_Gameplay_RewardTrait_TopNotchFoal',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Horse_HorseCompetition_BarrelRacing_Beginner_1st: {
+  'trait_Horse_HorseCompetition_BarrelRacing_Beginner_1st': {
     name: 'trait_Horse_HorseCompetition_BarrelRacing_Beginner_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_BarrelRacing_Beginner_2nd: {
+  'trait_Horse_HorseCompetition_BarrelRacing_Beginner_2nd': {
     name: 'trait_Horse_HorseCompetition_BarrelRacing_Beginner_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_BarrelRacing_Beginner_3rd: {
+  'trait_Horse_HorseCompetition_BarrelRacing_Beginner_3rd': {
     name: 'trait_Horse_HorseCompetition_BarrelRacing_Beginner_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_BarrelRacing_Expert_1st: {
+  'trait_Horse_HorseCompetition_BarrelRacing_Expert_1st': {
     name: 'trait_Horse_HorseCompetition_BarrelRacing_Expert_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_BarrelRacing_Expert_2nd: {
+  'trait_Horse_HorseCompetition_BarrelRacing_Expert_2nd': {
     name: 'trait_Horse_HorseCompetition_BarrelRacing_Expert_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_BarrelRacing_Expert_3rd: {
+  'trait_Horse_HorseCompetition_BarrelRacing_Expert_3rd': {
     name: 'trait_Horse_HorseCompetition_BarrelRacing_Expert_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_BarrelRacing_Intermediate_1st: {
+  'trait_Horse_HorseCompetition_BarrelRacing_Intermediate_1st': {
     name: 'trait_Horse_HorseCompetition_BarrelRacing_Intermediate_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_BarrelRacing_Intermediate_2nd: {
+  'trait_Horse_HorseCompetition_BarrelRacing_Intermediate_2nd': {
     name: 'trait_Horse_HorseCompetition_BarrelRacing_Intermediate_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_BarrelRacing_Intermediate_3rd: {
+  'trait_Horse_HorseCompetition_BarrelRacing_Intermediate_3rd': {
     name: 'trait_Horse_HorseCompetition_BarrelRacing_Intermediate_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_BarrelRacing_Master_1st: {
+  'trait_Horse_HorseCompetition_BarrelRacing_Master_1st': {
     name: 'trait_Horse_HorseCompetition_BarrelRacing_Master_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_BarrelRacing_Master_2nd: {
+  'trait_Horse_HorseCompetition_BarrelRacing_Master_2nd': {
     name: 'trait_Horse_HorseCompetition_BarrelRacing_Master_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_BarrelRacing_Master_3rd: {
+  'trait_Horse_HorseCompetition_BarrelRacing_Master_3rd': {
     name: 'trait_Horse_HorseCompetition_BarrelRacing_Master_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_EnduranceRacing_Beginner_1st: {
+  'trait_Horse_HorseCompetition_EnduranceRacing_Beginner_1st': {
     name: 'trait_Horse_HorseCompetition_EnduranceRacing_Beginner_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_EnduranceRacing_Beginner_2nd: {
+  'trait_Horse_HorseCompetition_EnduranceRacing_Beginner_2nd': {
     name: 'trait_Horse_HorseCompetition_EnduranceRacing_Beginner_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_EnduranceRacing_Beginner_3rd: {
+  'trait_Horse_HorseCompetition_EnduranceRacing_Beginner_3rd': {
     name: 'trait_Horse_HorseCompetition_EnduranceRacing_Beginner_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_EnduranceRacing_Expert_1st: {
+  'trait_Horse_HorseCompetition_EnduranceRacing_Expert_1st': {
     name: 'trait_Horse_HorseCompetition_EnduranceRacing_Expert_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_EnduranceRacing_Expert_2nd: {
+  'trait_Horse_HorseCompetition_EnduranceRacing_Expert_2nd': {
     name: 'trait_Horse_HorseCompetition_EnduranceRacing_Expert_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_EnduranceRacing_Expert_3rd: {
+  'trait_Horse_HorseCompetition_EnduranceRacing_Expert_3rd': {
     name: 'trait_Horse_HorseCompetition_EnduranceRacing_Expert_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_EnduranceRacing_Intermediate_1st: {
+  'trait_Horse_HorseCompetition_EnduranceRacing_Intermediate_1st': {
     name: 'trait_Horse_HorseCompetition_EnduranceRacing_Intermediate_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_EnduranceRacing_Intermediate_2nd: {
+  'trait_Horse_HorseCompetition_EnduranceRacing_Intermediate_2nd': {
     name: 'trait_Horse_HorseCompetition_EnduranceRacing_Intermediate_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_EnduranceRacing_Intermediate_3rd: {
+  'trait_Horse_HorseCompetition_EnduranceRacing_Intermediate_3rd': {
     name: 'trait_Horse_HorseCompetition_EnduranceRacing_Intermediate_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_EnduranceRacing_Master_1st: {
+  'trait_Horse_HorseCompetition_EnduranceRacing_Master_1st': {
     name: 'trait_Horse_HorseCompetition_EnduranceRacing_Master_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_EnduranceRacing_Master_2nd: {
+  'trait_Horse_HorseCompetition_EnduranceRacing_Master_2nd': {
     name: 'trait_Horse_HorseCompetition_EnduranceRacing_Master_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_EnduranceRacing_Master_3rd: {
+  'trait_Horse_HorseCompetition_EnduranceRacing_Master_3rd': {
     name: 'trait_Horse_HorseCompetition_EnduranceRacing_Master_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_NoCompetitionsWon: {
+  'trait_Horse_HorseCompetition_NoCompetitionsWon': {
     name: 'trait_Horse_HorseCompetition_NoCompetitionsWon',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_ShowJumping_Beginner_1st: {
+  'trait_Horse_HorseCompetition_ShowJumping_Beginner_1st': {
     name: 'trait_Horse_HorseCompetition_ShowJumping_Beginner_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_ShowJumping_Beginner_2nd: {
+  'trait_Horse_HorseCompetition_ShowJumping_Beginner_2nd': {
     name: 'trait_Horse_HorseCompetition_ShowJumping_Beginner_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_ShowJumping_Beginner_3rd: {
+  'trait_Horse_HorseCompetition_ShowJumping_Beginner_3rd': {
     name: 'trait_Horse_HorseCompetition_ShowJumping_Beginner_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_ShowJumping_Expert_1st: {
+  'trait_Horse_HorseCompetition_ShowJumping_Expert_1st': {
     name: 'trait_Horse_HorseCompetition_ShowJumping_Expert_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_ShowJumping_Expert_2nd: {
+  'trait_Horse_HorseCompetition_ShowJumping_Expert_2nd': {
     name: 'trait_Horse_HorseCompetition_ShowJumping_Expert_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_ShowJumping_Expert_3rd: {
+  'trait_Horse_HorseCompetition_ShowJumping_Expert_3rd': {
     name: 'trait_Horse_HorseCompetition_ShowJumping_Expert_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_ShowJumping_Intermediate_1st: {
+  'trait_Horse_HorseCompetition_ShowJumping_Intermediate_1st': {
     name: 'trait_Horse_HorseCompetition_ShowJumping_Intermediate_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_ShowJumping_Intermediate_2nd: {
+  'trait_Horse_HorseCompetition_ShowJumping_Intermediate_2nd': {
     name: 'trait_Horse_HorseCompetition_ShowJumping_Intermediate_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_ShowJumping_Intermediate_3rd: {
+  'trait_Horse_HorseCompetition_ShowJumping_Intermediate_3rd': {
     name: 'trait_Horse_HorseCompetition_ShowJumping_Intermediate_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_ShowJumping_Master_1st: {
+  'trait_Horse_HorseCompetition_ShowJumping_Master_1st': {
     name: 'trait_Horse_HorseCompetition_ShowJumping_Master_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_ShowJumping_Master_2nd: {
+  'trait_Horse_HorseCompetition_ShowJumping_Master_2nd': {
     name: 'trait_Horse_HorseCompetition_ShowJumping_Master_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_ShowJumping_Master_3rd: {
+  'trait_Horse_HorseCompetition_ShowJumping_Master_3rd': {
     name: 'trait_Horse_HorseCompetition_ShowJumping_Master_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_UltimateChampionship_1st: {
+  'trait_Horse_HorseCompetition_UltimateChampionship_1st': {
     name: 'trait_Horse_HorseCompetition_UltimateChampionship_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_UltimateChampionship_2nd: {
+  'trait_Horse_HorseCompetition_UltimateChampionship_2nd': {
     name: 'trait_Horse_HorseCompetition_UltimateChampionship_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_UltimateChampionship_3rd: {
+  'trait_Horse_HorseCompetition_UltimateChampionship_3rd': {
     name: 'trait_Horse_HorseCompetition_UltimateChampionship_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_WesternPleasure_Beginner_1st: {
+  'trait_Horse_HorseCompetition_WesternPleasure_Beginner_1st': {
     name: 'trait_Horse_HorseCompetition_WesternPleasure_Beginner_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_WesternPleasure_Beginner_2nd: {
+  'trait_Horse_HorseCompetition_WesternPleasure_Beginner_2nd': {
     name: 'trait_Horse_HorseCompetition_WesternPleasure_Beginner_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_WesternPleasure_Beginner_3rd: {
+  'trait_Horse_HorseCompetition_WesternPleasure_Beginner_3rd': {
     name: 'trait_Horse_HorseCompetition_WesternPleasure_Beginner_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_WesternPleasure_Expert_1st: {
+  'trait_Horse_HorseCompetition_WesternPleasure_Expert_1st': {
     name: 'trait_Horse_HorseCompetition_WesternPleasure_Expert_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_WesternPleasure_Expert_2nd: {
+  'trait_Horse_HorseCompetition_WesternPleasure_Expert_2nd': {
     name: 'trait_Horse_HorseCompetition_WesternPleasure_Expert_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_WesternPleasure_Expert_3rd: {
+  'trait_Horse_HorseCompetition_WesternPleasure_Expert_3rd': {
     name: 'trait_Horse_HorseCompetition_WesternPleasure_Expert_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_WesternPleasure_Intermediate_1st: {
+  'trait_Horse_HorseCompetition_WesternPleasure_Intermediate_1st': {
     name: 'trait_Horse_HorseCompetition_WesternPleasure_Intermediate_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_WesternPleasure_Intermediate_2nd: {
+  'trait_Horse_HorseCompetition_WesternPleasure_Intermediate_2nd': {
     name: 'trait_Horse_HorseCompetition_WesternPleasure_Intermediate_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_WesternPleasure_Intermediate_3rd: {
+  'trait_Horse_HorseCompetition_WesternPleasure_Intermediate_3rd': {
     name: 'trait_Horse_HorseCompetition_WesternPleasure_Intermediate_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_WesternPleasure_Master_1st: {
+  'trait_Horse_HorseCompetition_WesternPleasure_Master_1st': {
     name: 'trait_Horse_HorseCompetition_WesternPleasure_Master_1st',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_WesternPleasure_Master_2nd: {
+  'trait_Horse_HorseCompetition_WesternPleasure_Master_2nd': {
     name: 'trait_Horse_HorseCompetition_WesternPleasure_Master_2nd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseCompetition_WesternPleasure_Master_3rd: {
+  'trait_Horse_HorseCompetition_WesternPleasure_Master_3rd': {
     name: 'trait_Horse_HorseCompetition_WesternPleasure_Master_3rd',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HORSE_ACCOLADE,
   },
-  trait_Horse_HorseTransaction_Hidden_Rescue: {
+  'trait_Horse_HorseTransaction_Hidden_Rescue': {
     name: 'trait_Horse_HorseTransaction_Hidden_Rescue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Horse_Personality_Aggressive: {
+  'trait_Horse_Personality_Aggressive': {
     name: 'trait_Horse_Personality_Aggressive',
     description: 'is aggressive',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Horse_Personality_Brave: {
+  'trait_Horse_Personality_Brave': {
     name: 'trait_Horse_Personality_Brave',
     description: 'is brave',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Horse_Personality_Defiant: {
+  'trait_Horse_Personality_Defiant': {
     name: 'trait_Horse_Personality_Defiant',
     description: 'is defiant',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Horse_Personality_Energetic: {
+  'trait_Horse_Personality_Energetic': {
     name: 'trait_Horse_Personality_Energetic',
     description: 'is energetic',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Horse_Personality_Fearful: {
+  'trait_Horse_Personality_Fearful': {
     name: 'trait_Horse_Personality_Fearful',
     description: 'is fearful',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Horse_Personality_FreeSpirit: {
+  'trait_Horse_Personality_FreeSpirit': {
     name: 'trait_Horse_Personality_FreeSpirit',
     description: 'is a free spirit',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Horse_Personality_Friendly: {
+  'trait_Horse_Personality_Friendly': {
     name: 'trait_Horse_Personality_Friendly',
     description: 'is friendly',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Horse_Personality_Independent: {
+  'trait_Horse_Personality_Independent': {
     name: 'trait_Horse_Personality_Independent',
     description: 'is independent',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Horse_Personality_Intelligent: {
+  'trait_Horse_Personality_Intelligent': {
     name: 'trait_Horse_Personality_Intelligent',
     description: 'is intelligent',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Horse_Personality_Mellow: {
+  'trait_Horse_Personality_Mellow': {
     name: 'trait_Horse_Personality_Mellow',
     description: 'is mellow',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Horse_Personality_Needy: {
+  'trait_Horse_Personality_Needy': {
     name: 'trait_Horse_Personality_Needy',
     description: 'is needy',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_HorseLover: {
+  'trait_HorseLover': {
     name: 'trait_HorseLover',
     description: 'loves horses',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_HotHeaded: {
+  'trait_HotHeaded': {
     name: 'trait_HotHeaded',
     description: 'is hot headed',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_HSExit_Dropout: {
+  'trait_HSExit_Dropout': {
     name: 'trait_HSExit_Dropout',
     ignored: false,
     description: 'is a high school dropout',
     class: 'Trait',
     trait_type: TraitType.HIGH_SCHOOL,
   },
-  trait_HSExit_EarnedGED: {
+  'trait_HSExit_EarnedGED': {
     name: 'trait_HSExit_EarnedGED',
     ignored: false,
     description: 'is graduated with a GED',
     class: 'Trait',
     trait_type: TraitType.HIGH_SCHOOL,
   },
-  trait_HSExit_Expelled: {
+  'trait_HSExit_Expelled': {
     name: 'trait_HSExit_Expelled',
     ignored: false,
     description: 'is expelled from High School',
     class: 'Trait',
     trait_type: TraitType.HIGH_SCHOOL,
   },
-  trait_HSExit_Graduate_Early: {
+  'trait_HSExit_Graduate_Early': {
     name: 'trait_HSExit_Graduate_Early',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIGH_SCHOOL,
   },
-  trait_HSExit_Graduate_Honors: {
+  'trait_HSExit_Graduate_Honors': {
     name: 'trait_HSExit_Graduate_Honors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIGH_SCHOOL,
   },
-  trait_HSExit_Graduate_Valedictorian: {
+  'trait_HSExit_Graduate_Valedictorian': {
     name: 'trait_HSExit_Graduate_Valedictorian',
     ignored: false,
     description: 'is a High School Valedictorian graduate',
     class: 'Trait',
     trait_type: TraitType.HIGH_SCHOOL,
   },
-  trait_Human_Infant_Element_FrequentlyHiccups: {
+  'trait_Human_Infant_Element_FrequentlyHiccups': {
     name: 'trait_Human_Infant_Element_FrequentlyHiccups',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_FrequentlySneezes: {
+  'trait_Human_Infant_Element_FrequentlySneezes': {
     name: 'trait_Human_Infant_Element_FrequentlySneezes',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_Gassy: {
+  'trait_Human_Infant_Element_Gassy': {
     name: 'trait_Human_Infant_Element_Gassy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_GoodAppetite: {
+  'trait_Human_Infant_Element_GoodAppetite': {
     name: 'trait_Human_Infant_Element_GoodAppetite',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_HappySpitter: {
+  'trait_Human_Infant_Element_HappySpitter': {
     name: 'trait_Human_Infant_Element_HappySpitter',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_HatesBeingHeld: {
+  'trait_Human_Infant_Element_HatesBeingHeld': {
     name: 'trait_Human_Infant_Element_HatesBeingHeld',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_HatesWakingUp: {
+  'trait_Human_Infant_Element_HatesWakingUp': {
     name: 'trait_Human_Infant_Element_HatesWakingUp',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_LovesBeingHeld: {
+  'trait_Human_Infant_Element_LovesBeingHeld': {
     name: 'trait_Human_Infant_Element_LovesBeingHeld',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_LovesWakingUp: {
+  'trait_Human_Infant_Element_LovesWakingUp': {
     name: 'trait_Human_Infant_Element_LovesWakingUp',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_MessyEater: {
+  'trait_Human_Infant_Element_MessyEater': {
     name: 'trait_Human_Infant_Element_MessyEater',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_ObsessedWithSound: {
+  'trait_Human_Infant_Element_ObsessedWithSound': {
     name: 'trait_Human_Infant_Element_ObsessedWithSound',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_OnlySleepsWhenHeld: {
+  'trait_Human_Infant_Element_OnlySleepsWhenHeld': {
     name: 'trait_Human_Infant_Element_OnlySleepsWhenHeld',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_PeesDuringChanges: {
+  'trait_Human_Infant_Element_PeesDuringChanges': {
     name: 'trait_Human_Infant_Element_PeesDuringChanges',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_PeesDuringFeeding: {
+  'trait_Human_Infant_Element_PeesDuringFeeding': {
     name: 'trait_Human_Infant_Element_PeesDuringFeeding',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_PickyEater: {
+  'trait_Human_Infant_Element_PickyEater': {
     name: 'trait_Human_Infant_Element_PickyEater',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_RisesWithTheSun: {
+  'trait_Human_Infant_Element_RisesWithTheSun': {
     name: 'trait_Human_Infant_Element_RisesWithTheSun',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_SelfSoother: {
+  'trait_Human_Infant_Element_SelfSoother': {
     name: 'trait_Human_Infant_Element_SelfSoother',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_Infant_Element_Talker: {
+  'trait_Human_Infant_Element_Talker': {
     name: 'trait_Human_Infant_Element_Talker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_Aggressive: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_Aggressive': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_Aggressive',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_AudioLover: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_AudioLover': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_AudioLover',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_BookLover: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_BookLover': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_BookLover',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_Destructive: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_Destructive': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_Destructive',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_EarlyRiser: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_EarlyRiser': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_EarlyRiser',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_GoodAppetite: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_GoodAppetite': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_GoodAppetite',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_HatesBedtime: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_HatesBedtime': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_HatesBedtime',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_HatesCarry: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_HatesCarry': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_HatesCarry',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_HatesWakeup: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_HatesWakeup': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_HatesWakeup',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_HeavySleeper: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_HeavySleeper': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_HeavySleeper',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_LightSleeper: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_LightSleeper': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_LightSleeper',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_LovesCarry: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_LovesCarry': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_LovesCarry',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_LovesWakeup: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_LovesWakeup': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_LovesWakeup',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_MessyEater: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_MessyEater': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_MessyEater',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_PickyEater: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_PickyEater': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_PickyEater',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_RunsAway: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_RunsAway': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_RunsAway',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_Singer: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_Singer': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_Singer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  trait_Human_ToddlerPersonalityUpdate_Visible_WaterLover: {
+  'trait_Human_ToddlerPersonalityUpdate_Visible_WaterLover': {
     name: 'trait_Human_ToddlerPersonalityUpdate_Visible_WaterLover',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY_GENERIC,
   },
-  Trait_Humanoid_Robot_Died: {
+  'Trait_Humanoid_Robot_Died': {
     name: 'Trait_Humanoid_Robot_Died',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robot_Hover: {
+  'trait_Humanoid_Robot_Hover': {
     name: 'trait_Humanoid_Robot_Hover',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robot_Outfit_BeigeWhite: {
+  'trait_Humanoid_Robot_Outfit_BeigeWhite': {
     name: 'trait_Humanoid_Robot_Outfit_BeigeWhite',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robot_Outfit_BlackBlue: {
+  'trait_Humanoid_Robot_Outfit_BlackBlue': {
     name: 'trait_Humanoid_Robot_Outfit_BlackBlue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robot_Outfit_BlueRed: {
+  'trait_Humanoid_Robot_Outfit_BlueRed': {
     name: 'trait_Humanoid_Robot_Outfit_BlueRed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robot_Outfit_GrayBrown: {
+  'trait_Humanoid_Robot_Outfit_GrayBrown': {
     name: 'trait_Humanoid_Robot_Outfit_GrayBrown',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robot_Outfit_GreenBrown: {
+  'trait_Humanoid_Robot_Outfit_GreenBrown': {
     name: 'trait_Humanoid_Robot_Outfit_GreenBrown',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robot_Outfit_RedGreen: {
+  'trait_Humanoid_Robot_Outfit_RedGreen': {
     name: 'trait_Humanoid_Robot_Outfit_RedGreen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robot_Outfit_WhiteCopper: {
+  'trait_Humanoid_Robot_Outfit_WhiteCopper': {
     name: 'trait_Humanoid_Robot_Outfit_WhiteCopper',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_BehaviorModules_Childcare_Active: {
+  'trait_Humanoid_Robots_BehaviorModules_Childcare_Active': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Childcare_Active',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROBOT_MODULE,
   },
-  trait_Humanoid_Robots_BehaviorModules_ChildCare_Learned: {
+  'trait_Humanoid_Robots_BehaviorModules_ChildCare_Learned': {
     name: 'trait_Humanoid_Robots_BehaviorModules_ChildCare_Learned',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_BehaviorModules_Childcare_NotLearned: {
+  'trait_Humanoid_Robots_BehaviorModules_Childcare_NotLearned': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Childcare_NotLearned',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_BehaviorModules_ChildCare_TriggerUnlock: {
+  'trait_Humanoid_Robots_BehaviorModules_ChildCare_TriggerUnlock': {
     name: 'trait_Humanoid_Robots_BehaviorModules_ChildCare_TriggerUnlock',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROBOT_MODULE_LOCKED,
   },
-  trait_Humanoid_Robots_BehaviorModules_Cleaning_Active: {
+  'trait_Humanoid_Robots_BehaviorModules_Cleaning_Active': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Cleaning_Active',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROBOT_MODULE,
   },
-  trait_Humanoid_Robots_BehaviorModules_Cleaning_Learned: {
+  'trait_Humanoid_Robots_BehaviorModules_Cleaning_Learned': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Cleaning_Learned',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_BehaviorModules_Cleaning_NotLearned: {
+  'trait_Humanoid_Robots_BehaviorModules_Cleaning_NotLearned': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Cleaning_NotLearned',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_BehaviorModules_Cleaning_TriggerUnlock: {
+  'trait_Humanoid_Robots_BehaviorModules_Cleaning_TriggerUnlock': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Cleaning_TriggerUnlock',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROBOT_MODULE_LOCKED,
   },
-  trait_Humanoid_Robots_BehaviorModules_Gardening_Active: {
+  'trait_Humanoid_Robots_BehaviorModules_Gardening_Active': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Gardening_Active',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROBOT_MODULE,
   },
-  trait_Humanoid_Robots_BehaviorModules_Gardening_Learned: {
+  'trait_Humanoid_Robots_BehaviorModules_Gardening_Learned': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Gardening_Learned',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_BehaviorModules_Gardening_NotLearned: {
+  'trait_Humanoid_Robots_BehaviorModules_Gardening_NotLearned': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Gardening_NotLearned',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_BehaviorModules_Gardening_TriggerUnlock: {
+  'trait_Humanoid_Robots_BehaviorModules_Gardening_TriggerUnlock': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Gardening_TriggerUnlock',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROBOT_MODULE_LOCKED,
   },
-  trait_Humanoid_Robots_BehaviorModules_Party_Active: {
+  'trait_Humanoid_Robots_BehaviorModules_Party_Active': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Party_Active',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROBOT_MODULE,
   },
-  trait_Humanoid_Robots_BehaviorModules_Party_Learned: {
+  'trait_Humanoid_Robots_BehaviorModules_Party_Learned': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Party_Learned',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_BehaviorModules_Party_NotLearned: {
+  'trait_Humanoid_Robots_BehaviorModules_Party_NotLearned': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Party_NotLearned',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_BehaviorModules_Party_TriggerUnlock: {
+  'trait_Humanoid_Robots_BehaviorModules_Party_TriggerUnlock': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Party_TriggerUnlock',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROBOT_MODULE_LOCKED,
   },
-  trait_Humanoid_Robots_BehaviorModules_Repair_Active: {
+  'trait_Humanoid_Robots_BehaviorModules_Repair_Active': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Repair_Active',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROBOT_MODULE,
   },
-  trait_Humanoid_Robots_BehaviorModules_Repair_Learned: {
+  'trait_Humanoid_Robots_BehaviorModules_Repair_Learned': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Repair_Learned',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_BehaviorModules_Repair_NotLearned: {
+  'trait_Humanoid_Robots_BehaviorModules_Repair_NotLearned': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Repair_NotLearned',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_BehaviorModules_Repair_TriggerUnlock: {
+  'trait_Humanoid_Robots_BehaviorModules_Repair_TriggerUnlock': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Repair_TriggerUnlock',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROBOT_MODULE_LOCKED,
   },
-  trait_Humanoid_Robots_BehaviorModules_Security_Active: {
+  'trait_Humanoid_Robots_BehaviorModules_Security_Active': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Security_Active',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROBOT_MODULE,
   },
-  trait_Humanoid_Robots_BehaviorModules_Security_Learned: {
+  'trait_Humanoid_Robots_BehaviorModules_Security_Learned': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Security_Learned',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_BehaviorModules_Security_NotLearned: {
+  'trait_Humanoid_Robots_BehaviorModules_Security_NotLearned': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Security_NotLearned',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_BehaviorModules_Security_TriggerUnlock: {
+  'trait_Humanoid_Robots_BehaviorModules_Security_TriggerUnlock': {
     name: 'trait_Humanoid_Robots_BehaviorModules_Security_TriggerUnlock',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROBOT_MODULE_LOCKED,
   },
-  trait_Humanoid_Robots_EnhancementLevel_1: {
+  'trait_Humanoid_Robots_EnhancementLevel_1': {
     name: 'trait_Humanoid_Robots_EnhancementLevel_1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_EnhancementLevel_10: {
+  'trait_Humanoid_Robots_EnhancementLevel_10': {
     name: 'trait_Humanoid_Robots_EnhancementLevel_10',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_EnhancementLevel_2: {
+  'trait_Humanoid_Robots_EnhancementLevel_2': {
     name: 'trait_Humanoid_Robots_EnhancementLevel_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_EnhancementLevel_3: {
+  'trait_Humanoid_Robots_EnhancementLevel_3': {
     name: 'trait_Humanoid_Robots_EnhancementLevel_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_EnhancementLevel_4: {
+  'trait_Humanoid_Robots_EnhancementLevel_4': {
     name: 'trait_Humanoid_Robots_EnhancementLevel_4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_EnhancementLevel_5: {
+  'trait_Humanoid_Robots_EnhancementLevel_5': {
     name: 'trait_Humanoid_Robots_EnhancementLevel_5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_EnhancementLevel_6: {
+  'trait_Humanoid_Robots_EnhancementLevel_6': {
     name: 'trait_Humanoid_Robots_EnhancementLevel_6',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_EnhancementLevel_7: {
+  'trait_Humanoid_Robots_EnhancementLevel_7': {
     name: 'trait_Humanoid_Robots_EnhancementLevel_7',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_EnhancementLevel_8: {
+  'trait_Humanoid_Robots_EnhancementLevel_8': {
     name: 'trait_Humanoid_Robots_EnhancementLevel_8',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_EnhancementLevel_9: {
+  'trait_Humanoid_Robots_EnhancementLevel_9': {
     name: 'trait_Humanoid_Robots_EnhancementLevel_9',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Humanoid_Robots_MainTrait: {
+  'trait_Humanoid_Robots_MainTrait': {
     name: 'trait_Humanoid_Robots_MainTrait',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROBOT,
   },
-  trait_Iconic: {
+  'trait_Iconic': {
     name: 'trait_Iconic',
     ignored: false,
     description: 'is iconic',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Idealist: {
+  'trait_Idealist': {
     name: 'trait_Idealist',
     description: 'is an idealist',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Identified_Chamomile: {
+  'trait_Identified_Chamomile': {
     name: 'trait_Identified_Chamomile',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Identified_Chamomile_Toxic: {
+  'trait_Identified_Chamomile_Toxic': {
     name: 'trait_Identified_Chamomile_Toxic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Identified_Elderberry: {
+  'trait_Identified_Elderberry': {
     name: 'trait_Identified_Elderberry',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Identified_Elderberry_Toxic: {
+  'trait_Identified_Elderberry_Toxic': {
     name: 'trait_Identified_Elderberry_Toxic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Identified_Fireleaf: {
+  'trait_Identified_Fireleaf': {
     name: 'trait_Identified_Fireleaf',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Identified_Fireleaf_Toxic: {
+  'trait_Identified_Fireleaf_Toxic': {
     name: 'trait_Identified_Fireleaf_Toxic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Identified_Huckleberry: {
+  'trait_Identified_Huckleberry': {
     name: 'trait_Identified_Huckleberry',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Identified_Huckleberry_Toxic: {
+  'trait_Identified_Huckleberry_Toxic': {
     name: 'trait_Identified_Huckleberry_Toxic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Identified_Morel: {
+  'trait_Identified_Morel': {
     name: 'trait_Identified_Morel',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Identified_Morel_Toxic: {
+  'trait_Identified_Morel_Toxic': {
     name: 'trait_Identified_Morel_Toxic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_InCollegeOrganization: {
+  'Trait_InCollegeOrganization': {
     name: 'Trait_InCollegeOrganization',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_IncrediblyFriendly: {
+  'trait_IncrediblyFriendly': {
     name: 'trait_IncrediblyFriendly',
     ignored: false,
     description: 'is incredibly friendly',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Independent: {
+  'trait_Independent': {
     name: 'trait_Independent',
     ignored: false,
     description: 'is independent',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_infant: {
+  'trait_infant': {
     name: 'trait_infant',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Infant_Calm: {
+  'trait_Infant_Calm': {
     name: 'trait_Infant_Calm',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Infant_Cautious: {
+  'trait_Infant_Cautious': {
     name: 'trait_Infant_Cautious',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Infant_Intense: {
+  'trait_Infant_Intense': {
     name: 'trait_Infant_Intense',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Infant_Sensitive: {
+  'trait_Infant_Sensitive': {
     name: 'trait_Infant_Sensitive',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Infant_Sunny: {
+  'trait_Infant_Sunny': {
     name: 'trait_Infant_Sunny',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Infant_Wiggly: {
+  'trait_Infant_Wiggly': {
     name: 'trait_Infant_Wiggly',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Insane: {
+  'trait_Insane': {
     name: 'trait_Insane',
     description: 'is insane',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Insider: {
+  'trait_Insider': {
     name: 'trait_Insider',
     description: 'is an insider',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_InteriorDecorator_Client_Cooldown: {
+  'trait_InteriorDecorator_Client_Cooldown': {
     name: 'trait_InteriorDecorator_Client_Cooldown',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_InteriorDecorator_Client_Followup_Gig_Negative: {
+  'trait_InteriorDecorator_Client_Followup_Gig_Negative': {
     name: 'trait_InteriorDecorator_Client_Followup_Gig_Negative',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_InteriorDecorator_Client_Followup_Gig_Positive: {
+  'trait_InteriorDecorator_Client_Followup_Gig_Positive': {
     name: 'trait_InteriorDecorator_Client_Followup_Gig_Positive',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_InteriorDecorator_Client_Followup_Gig_Referred: {
+  'trait_InteriorDecorator_Client_Followup_Gig_Referred': {
     name: 'trait_InteriorDecorator_Client_Followup_Gig_Referred',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_InteriorDecorator_HideClients: {
+  'trait_InteriorDecorator_HideClients': {
     name: 'trait_InteriorDecorator_HideClients',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_InTheKnow: {
+  'trait_InTheKnow': {
     name: 'trait_InTheKnow',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_IntroToVampire_Caller: {
+  'trait_IntroToVampire_Caller': {
     name: 'trait_IntroToVampire_Caller',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Invested: {
+  'trait_Invested': {
     name: 'trait_Invested',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_isAlienPollinator: {
+  'trait_isAlienPollinator': {
     name: 'trait_isAlienPollinator',
     description: 'is an alien pollinator',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isBear: {
+  'trait_isBear': {
     name: 'trait_isBear',
     description: 'is wearing a full size bear costume',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isBornFromAlienAbduction: {
+  'trait_isBornFromAlienAbduction': {
     name: 'trait_isBornFromAlienAbduction',
     description: 'was born from an alien abduction and impregnation',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isBurglar: {
+  'trait_isBurglar': {
     name: 'trait_isBurglar',
     description: 'is a burglar in the act of robbing',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isButler: {
+  'trait_isButler': {
     name: 'trait_isButler',
     description: 'is a butler',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isChaletGardensGhost: {
+  'trait_isChaletGardensGhost': {
     name: 'trait_isChaletGardensGhost',
     description: 'is a ghost in the chalet gardens',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isCityRepair: {
+  'trait_isCityRepair': {
     name: 'trait_isCityRepair',
     description: 'is a city maintenance worker',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isCustomGender: {
+  'trait_isCustomGender': {
     name: 'trait_isCustomGender',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_isEmit: {
+  'trait_isEmit': {
     name: 'trait_isEmit',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isForestRanger: {
+  'trait_isForestRanger': {
     name: 'trait_isForestRanger',
     description: 'is a forest ranger',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isGardener: {
+  'trait_isGardener': {
     name: 'trait_isGardener',
     description: 'is a gardener',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isGardener_Service: {
+  'trait_isGardener_Service': {
     name: 'trait_isGardener_Service',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_IsGhost: {
+  'trait_IsGhost': {
     name: 'trait_IsGhost',
     description: 'is a ghost',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isGrimReaper: {
+  'trait_isGrimReaper': {
     name: 'trait_isGrimReaper',
     description: 'is the grim reaper',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_IslandAncestors: {
+  'trait_IslandAncestors': {
     name: 'trait_IslandAncestors',
     description: 'has island ancestors',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_IslanderCulture_Islander: {
+  'trait_IslanderCulture_Islander': {
     name: 'trait_IslanderCulture_Islander',
     description: 'is an islander',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isMaid: {
+  'trait_isMaid': {
     name: 'trait_isMaid',
     description: 'is a maid',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isMailman: {
+  'trait_isMailman': {
     name: 'trait_isMailman',
     description: 'is the mailmain',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isMassageTherapist: {
+  'trait_isMassageTherapist': {
     name: 'trait_isMassageTherapist',
     description: 'is a massage therapist',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isMasterFisherman: {
+  'trait_isMasterFisherman': {
     name: 'trait_isMasterFisherman',
     description: 'is a master fisherman',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isMasterGardener: {
+  'trait_isMasterGardener': {
     name: 'trait_isMasterGardener',
     description: 'is a master gardener',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isMasterHerbalist: {
+  'trait_isMasterHerbalist': {
     name: 'trait_isMasterHerbalist',
     description: 'is a master herbalist',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isNanny: {
+  'trait_isNanny': {
     name: 'trait_isNanny',
     description: 'is a nanny',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isPizzaDelivery: {
+  'trait_isPizzaDelivery': {
     name: 'trait_isPizzaDelivery',
     description: 'is the pizza delivery person',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isPlantSimNPC: {
+  'trait_isPlantSimNPC': {
     name: 'trait_isPlantSimNPC',
     description: 'is a plant',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isPregnant: {
+  'trait_isPregnant': {
     name: 'trait_isPregnant',
     description: 'is actively pregnant',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isPregnant_Alien_Abduction: {
+  'trait_isPregnant_Alien_Abduction': {
     name: 'trait_isPregnant_Alien_Abduction',
     description: 'is pregnant from an alien abduction',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isPremadePO: {
+  'trait_isPremadePO': {
     name: 'trait_isPremadePO',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isRanchHand: {
+  'trait_isRanchHand': {
     name: 'trait_isRanchHand',
     description: 'is a ranch hand',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isRepair: {
+  'trait_isRepair': {
     name: 'trait_isRepair',
     description: 'is repairman',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isRestaurantCritic: {
+  'trait_isRestaurantCritic': {
     name: 'trait_isRestaurantCritic',
     description: 'is a restaurant critic',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isSchoolGhost: {
+  'trait_isSchoolGhost': {
     name: 'trait_isSchoolGhost',
     description: 'is a school ghost',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isStatueBusker: {
+  'trait_isStatueBusker': {
     name: 'trait_isStatueBusker',
     description: 'is a statue busker',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isTragicClown: {
+  'trait_isTragicClown': {
     name: 'trait_isTragicClown',
     description: 'is the tragic clown',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_isWeirdo: {
+  'trait_isWeirdo': {
     name: 'trait_isWeirdo',
     description: 'is a weirdo',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Jealous: {
+  'trait_Jealous': {
     name: 'trait_Jealous',
     description: 'is jealous',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_JobLoss_InLayoffPeriod: {
+  'trait_JobLoss_InLayoffPeriod': {
     name: 'trait_JobLoss_InLayoffPeriod',
     description: 'was laid off from their job',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_JungleExplorer_TreasureHunter: {
+  'trait_JungleExplorer_TreasureHunter': {
     name: 'trait_JungleExplorer_TreasureHunter',
     ignored: false,
     description: 'is a skilled treasure hunter',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_JungleExplorer_TreasureHunter_BG: {
+  'trait_JungleExplorer_TreasureHunter_BG': {
     name: 'trait_JungleExplorer_TreasureHunter_BG',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Kleptomaniac: {
+  'trait_Kleptomaniac': {
     name: 'trait_Kleptomaniac',
     description: 'is a kleptomaniac',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Kleptomaniac_Enhanced: {
+  'trait_Kleptomaniac_Enhanced': {
     name: 'trait_Kleptomaniac_Enhanced',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Knowledge_SlingerOfSpells: {
+  'trait_Knowledge_SlingerOfSpells': {
     name: 'trait_Knowledge_SlingerOfSpells',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_LactoseIntolerant: {
+  'trait_LactoseIntolerant': {
     name: 'trait_LactoseIntolerant',
     description: 'is lactose intolerant',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Lazy: {
+  'trait_Lazy': {
     name: 'trait_Lazy',
     description: 'is lazy',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Legendary: {
+  'trait_Legendary': {
     name: 'trait_Legendary',
     ignored: false,
     description: 'is legendary',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_LifeSkills_Argumentative: {
+  'trait_LifeSkills_Argumentative': {
     name: 'trait_LifeSkills_Argumentative',
     ignored: false,
     description: 'is argumentative',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_LifeSkills_BadManners: {
+  'trait_LifeSkills_BadManners': {
     name: 'trait_LifeSkills_BadManners',
     ignored: false,
     description: 'has bad manners',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_LifeSkills_Compassionate: {
+  'trait_LifeSkills_Compassionate': {
     name: 'trait_LifeSkills_Compassionate',
     ignored: false,
     description: 'is compassionate',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_LifeSkills_EmotionalControl: {
+  'trait_LifeSkills_EmotionalControl': {
     name: 'trait_LifeSkills_EmotionalControl',
     ignored: false,
     description: 'has great emotional control',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_LifeSkills_GoodManners: {
+  'trait_LifeSkills_GoodManners': {
     name: 'trait_LifeSkills_GoodManners',
     ignored: false,
     description: 'has good manners',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_LifeSkills_Irresponsible: {
+  'trait_LifeSkills_Irresponsible': {
     name: 'trait_LifeSkills_Irresponsible',
     ignored: false,
     description: 'is irresponsible',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_LifeSkills_Mediator: {
+  'trait_LifeSkills_Mediator': {
     name: 'trait_LifeSkills_Mediator',
     ignored: false,
     description: 'is a skilled mediator',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_LifeSkills_Responsible: {
+  'trait_LifeSkills_Responsible': {
     name: 'trait_LifeSkills_Responsible',
     ignored: false,
     description: 'is responsible',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_LifeSkills_UncontrolledEmotion: {
+  'trait_LifeSkills_UncontrolledEmotion': {
     name: 'trait_LifeSkills_UncontrolledEmotion',
     ignored: false,
     description: 'has uncontrolled emotions',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_LifeSkills_Unfeeling: {
+  'trait_LifeSkills_Unfeeling': {
     name: 'trait_LifeSkills_Unfeeling',
     ignored: false,
     description: 'is unfeeling and insensitive',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Lifestyles_AdrenalineSeeker: {
+  'trait_Lifestyles_AdrenalineSeeker': {
     name: 'trait_Lifestyles_AdrenalineSeeker',
     ignored: false,
     description: 'is an adrenaline junkie',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_CloseKnit: {
+  'trait_Lifestyles_CloseKnit': {
     name: 'trait_Lifestyles_CloseKnit',
     ignored: false,
-    description:
-      'is good at forming deep connections with a small circle of friends',
+    description: 'is good at forming deep connections with a small circle of friends',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_CoffeeFanatic: {
+  'trait_Lifestyles_CoffeeFanatic': {
     name: 'trait_Lifestyles_CoffeeFanatic',
     ignored: false,
     description: 'is a Coffee Fanatic',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_Energetic: {
+  'trait_Lifestyles_Energetic': {
     name: 'trait_Lifestyles_Energetic',
     ignored: false,
     description: 'has an energetic lifestyle',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_FrequentTraveler: {
+  'trait_Lifestyles_FrequentTraveler': {
     name: 'trait_Lifestyles_FrequentTraveler',
     ignored: false,
     description: 'is a frequent traveler',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_HealthFoodNut: {
+  'trait_Lifestyles_HealthFoodNut': {
     name: 'trait_Lifestyles_HealthFoodNut',
     ignored: false,
     description: 'follows a Health Food Nut Lifestyle',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_HungryForLove: {
+  'trait_Lifestyles_HungryForLove': {
     name: 'trait_Lifestyles_HungryForLove',
     ignored: false,
-    description:
-      'strongly desires to be in a relationship and struggles without one',
+    description: 'strongly desires to be in a relationship and struggles without one',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_Indoorsy: {
+  'trait_Lifestyles_Indoorsy': {
     name: 'trait_Lifestyles_Indoorsy',
     ignored: false,
     description: 'is a homebody',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_JunkFoodDevourer: {
+  'trait_Lifestyles_JunkFoodDevourer': {
     name: 'trait_Lifestyles_JunkFoodDevourer',
     ignored: false,
     description: 'loves junk food',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_Networker: {
+  'trait_Lifestyles_Networker': {
     name: 'trait_Lifestyles_Networker',
     ignored: false,
     description: 'is good at social networking',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_NoNeedForRomance: {
+  'trait_Lifestyles_NoNeedForRomance': {
     name: 'trait_Lifestyles_NoNeedForRomance',
     ignored: false,
     description: 'doesnt need romance',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_Outdoorsy: {
+  'trait_Lifestyles_Outdoorsy': {
     name: 'trait_Lifestyles_Outdoorsy',
     ignored: false,
     description: 'is outdoorsy',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_Sedentary: {
+  'trait_Lifestyles_Sedentary': {
     name: 'trait_Lifestyles_Sedentary',
     ignored: false,
     description: 'is sedentary',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_Techie: {
+  'trait_Lifestyles_Techie': {
     name: 'trait_Lifestyles_Techie',
     ignored: false,
     description: 'is a Techie',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_Technophobe: {
+  'trait_Lifestyles_Technophobe': {
     name: 'trait_Lifestyles_Technophobe',
     ignored: false,
     description: 'is a technophobe',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_Lifestyles_Workaholic: {
+  'trait_Lifestyles_Workaholic': {
     name: 'trait_Lifestyles_Workaholic',
     ignored: false,
     description: 'is the Workaholic',
     class: 'Trait',
     trait_type: TraitType.LIFESTYLE,
   },
-  trait_LivingVicariously: {
+  'trait_LivingVicariously': {
     name: 'trait_LivingVicariously',
     ignored: false,
     description: 'is living vicariously',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Loner: {
+  'trait_Loner': {
     name: 'trait_Loner',
     description: 'is a loner',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Longevity: {
+  'trait_Longevity': {
     name: 'trait_Longevity',
     ignored: false,
     description: 'lives with longevity',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_LoveGuru: {
+  'trait_LoveGuru': {
     name: 'trait_LoveGuru',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_LovesOutdoors: {
+  'trait_LovesOutdoors': {
     name: 'trait_LovesOutdoors',
     description: 'loves the outdoors',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_LoveStruck: {
+  'trait_LoveStruck': {
     name: 'trait_LoveStruck',
     description: 'falls in love easily and quickly',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Loyal: {
+  'trait_Loyal': {
     name: 'trait_Loyal',
     description: 'is loyal',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Macabre: {
+  'trait_Macabre': {
     name: 'trait_Macabre',
     description: 'is macabre',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Magic_Fixups_DarrelCharm: {
+  'trait_Magic_Fixups_DarrelCharm': {
     name: 'trait_Magic_Fixups_DarrelCharm',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_Fixups_EmiliaErnest: {
+  'trait_Magic_Fixups_EmiliaErnest': {
     name: 'trait_Magic_Fixups_EmiliaErnest',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_Fixups_GemmaCharm: {
+  'trait_Magic_Fixups_GemmaCharm': {
     name: 'trait_Magic_Fixups_GemmaCharm',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_Fixups_GraceAnansi: {
+  'trait_Magic_Fixups_GraceAnansi': {
     name: 'trait_Magic_Fixups_GraceAnansi',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_Fixups_MinervaCharm: {
+  'trait_Magic_Fixups_MinervaCharm': {
     name: 'trait_Magic_Fixups_MinervaCharm',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_FIxups_Perks_MagicVenueNPC: {
+  'trait_Magic_FIxups_Perks_MagicVenueNPC': {
     name: 'trait_Magic_FIxups_Perks_MagicVenueNPC',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_FIxups_Potions_Intermediate: {
+  'trait_Magic_FIxups_Potions_Intermediate': {
     name: 'trait_Magic_FIxups_Potions_Intermediate',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_FIxups_Potions_Novice: {
+  'trait_Magic_FIxups_Potions_Novice': {
     name: 'trait_Magic_FIxups_Potions_Novice',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_FIxups_Potions_Sage: {
+  'trait_Magic_FIxups_Potions_Sage': {
     name: 'trait_Magic_FIxups_Potions_Sage',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_FIxups_Spells_MagicSage_Mischief: {
+  'trait_Magic_FIxups_Spells_MagicSage_Mischief': {
     name: 'trait_Magic_FIxups_Spells_MagicSage_Mischief',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_FIxups_Spells_MagicSage_Practical: {
+  'trait_Magic_FIxups_Spells_MagicSage_Practical': {
     name: 'trait_Magic_FIxups_Spells_MagicSage_Practical',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_FIxups_Spells_MagicSage_Untamed: {
+  'trait_Magic_FIxups_Spells_MagicSage_Untamed': {
     name: 'trait_Magic_FIxups_Spells_MagicSage_Untamed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_FIxups_Spells_MagicVenueNPC_Intermediate: {
+  'trait_Magic_FIxups_Spells_MagicVenueNPC_Intermediate': {
     name: 'trait_Magic_FIxups_Spells_MagicVenueNPC_Intermediate',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_FIxups_Spells_MagicVenueNPC_Novice: {
+  'trait_Magic_FIxups_Spells_MagicVenueNPC_Novice': {
     name: 'trait_Magic_FIxups_Spells_MagicVenueNPC_Novice',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_Fixups_TomaxCollette: {
+  'trait_Magic_Fixups_TomaxCollette': {
     name: 'trait_Magic_Fixups_TomaxCollette',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Magic_Marketstall_SpectralLook: {
+  'trait_Magic_Marketstall_SpectralLook': {
     name: 'trait_Magic_Marketstall_SpectralLook',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GHOST,
   },
-  trait_MagicSage_Mischief: {
+  'trait_MagicSage_Mischief': {
     name: 'trait_MagicSage_Mischief',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MagicSage_Practical: {
+  'trait_MagicSage_Practical': {
     name: 'trait_MagicSage_Practical',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MagicSage_Untamed: {
+  'trait_MagicSage_Untamed': {
     name: 'trait_MagicSage_Untamed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Maker: {
+  'trait_Maker': {
     name: 'trait_Maker',
     description: 'is a maker',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_makerNPC: {
+  'trait_makerNPC': {
     name: 'trait_makerNPC',
     ignored: false,
     description: 'is a maker',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_Marketable: {
+  'trait_Marketable': {
     name: 'trait_Marketable',
     ignored: false,
     description: 'is good at marketing',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MasterMaker: {
+  'trait_MasterMaker': {
     name: 'trait_MasterMaker',
     ignored: false,
     description: 'is a master maker',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Mastermind: {
+  'trait_Mastermind': {
     name: 'trait_Mastermind',
     ignored: false,
     description: 'is a mastermind',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MasterTrainer: {
+  'trait_MasterTrainer': {
     name: 'trait_MasterTrainer',
     ignored: false,
     description: 'is a master horse trainer',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MasteryPerk_AspirationalCreator: {
+  'trait_MasteryPerk_AspirationalCreator': {
     name: 'trait_MasteryPerk_AspirationalCreator',
     description: 'is a masterful creator',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_AspirationalThinker: {
+  'trait_MasteryPerk_AspirationalThinker': {
     name: 'trait_MasteryPerk_AspirationalThinker',
     description: 'is a masterful thinker',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_AuraActive: {
+  'trait_MasteryPerk_AuraActive': {
     name: 'trait_MasteryPerk_AuraActive',
     description: 'is a masterful coach and mentor',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_AuraCreative: {
+  'trait_MasteryPerk_AuraCreative': {
     name: 'trait_MasteryPerk_AuraCreative',
     description: 'is a masterful creative mentor and coach',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_AuraMental: {
+  'trait_MasteryPerk_AuraMental': {
     name: 'trait_MasteryPerk_AuraMental',
     description: 'is a masterful mental coach and mentor',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_DisableAuraVFX: {
+  'trait_MasteryPerk_DisableAuraVFX': {
     name: 'trait_MasteryPerk_DisableAuraVFX',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MasteryPerk_DisablePerformance: {
+  'trait_MasteryPerk_DisablePerformance': {
     name: 'trait_MasteryPerk_DisablePerformance',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MasteryPerk_EmptyPerk: {
+  'trait_MasteryPerk_EmptyPerk': {
     name: 'trait_MasteryPerk_EmptyPerk',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MasteryPerk_FinalTouch: {
+  'trait_MasteryPerk_FinalTouch': {
     name: 'trait_MasteryPerk_FinalTouch',
     description: 'is masterful and crafting quality items',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_InTheZone: {
+  'trait_MasteryPerk_InTheZone': {
     name: 'trait_MasteryPerk_InTheZone',
     description: 'is masterful at becoming seriously focused',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_MentalExercise: {
+  'trait_MasteryPerk_MentalExercise': {
     name: 'trait_MasteryPerk_MentalExercise',
     description: 'is masterful at building muscle with brain power',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_PigeonholedActive: {
+  'trait_MasteryPerk_PigeonholedActive': {
     name: 'trait_MasteryPerk_PigeonholedActive',
-    description:
-      'is masterful at improving active skills but has a harder time with other skills',
+    description: 'is masterful at improving active skills but has a harder time with other skills',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_PigeonholedCreative: {
+  'trait_MasteryPerk_PigeonholedCreative': {
     name: 'trait_MasteryPerk_PigeonholedCreative',
-    description:
-      'is masterful at improving creative skills but has a harder time with other skills',
+    description: 'is masterful at improving creative skills but has a harder time with other skills',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_PigeonholedMental: {
+  'trait_MasteryPerk_PigeonholedMental': {
     name: 'trait_MasteryPerk_PigeonholedMental',
-    description:
-      'is masterful at improving mental skills but has a harder time with other skills',
+    description: 'is masterful at improving mental skills but has a harder time with other skills',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_PigeonholedSocial: {
+  'trait_MasteryPerk_PigeonholedSocial': {
     name: 'trait_MasteryPerk_PigeonholedSocial',
-    description:
-      'is masterful at improving social skills but has a harder time with other skills',
+    description: 'is masterful at improving social skills but has a harder time with other skills',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_PowerfulPerformer: {
+  'trait_MasteryPerk_PowerfulPerformer': {
     name: 'trait_MasteryPerk_PowerfulPerformer',
     description: 'is a talented performer at any skill',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_SecondWind: {
+  'trait_MasteryPerk_SecondWind': {
     name: 'trait_MasteryPerk_SecondWind',
     description: 'is good at getting a second wind when exercising',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_SecretSpice: {
+  'trait_MasteryPerk_SecretSpice': {
     name: 'trait_MasteryPerk_SecretSpice',
     description: 'is a masterful chef',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_SkillfulSleep: {
+  'trait_MasteryPerk_SkillfulSleep': {
     name: 'trait_MasteryPerk_SkillfulSleep',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_SkillfulSleep_Clone: {
+  'trait_MasteryPerk_SkillfulSleep_Clone': {
     name: 'trait_MasteryPerk_SkillfulSleep_Clone',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MasteryPerk_Spacebender: {
+  'trait_MasteryPerk_Spacebender': {
     name: 'trait_MasteryPerk_Spacebender',
-    description:
-      'is able to bend the fabric of space and time, is able to teleport',
+    description: 'is able to bend the fabric of space and time, is able to teleport',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_MasteryPerk_StrongerWithAge: {
+  'trait_MasteryPerk_StrongerWithAge': {
     name: 'trait_MasteryPerk_StrongerWithAge',
     description: 'has improved stamina',
     class: 'Trait',
     trait_type: TraitType.MASTERY_PERK,
   },
-  trait_Materialistic: {
+  'trait_Materialistic': {
     name: 'trait_Materialistic',
     description: 'is materialistic',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Mean: {
+  'trait_Mean': {
     name: 'trait_Mean',
     description: 'is mean',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_MechanicalSuit_HoverEngaged: {
+  'trait_MechanicalSuit_HoverEngaged': {
     name: 'trait_MechanicalSuit_HoverEngaged',
     description: 'is hovering in a hover suit',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Body_BeigeWhite: {
+  'trait_MechanicalSuit_Wearing_Body_BeigeWhite': {
     name: 'trait_MechanicalSuit_Wearing_Body_BeigeWhite',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Body_BlackBlue: {
+  'trait_MechanicalSuit_Wearing_Body_BlackBlue': {
     name: 'trait_MechanicalSuit_Wearing_Body_BlackBlue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Body_BlueRed: {
+  'trait_MechanicalSuit_Wearing_Body_BlueRed': {
     name: 'trait_MechanicalSuit_Wearing_Body_BlueRed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Body_GrayBrown: {
+  'trait_MechanicalSuit_Wearing_Body_GrayBrown': {
     name: 'trait_MechanicalSuit_Wearing_Body_GrayBrown',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Body_GreenBrown: {
+  'trait_MechanicalSuit_Wearing_Body_GreenBrown': {
     name: 'trait_MechanicalSuit_Wearing_Body_GreenBrown',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Body_RedGreen: {
+  'trait_MechanicalSuit_Wearing_Body_RedGreen': {
     name: 'trait_MechanicalSuit_Wearing_Body_RedGreen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Body_WhiteCopper: {
+  'trait_MechanicalSuit_Wearing_Body_WhiteCopper': {
     name: 'trait_MechanicalSuit_Wearing_Body_WhiteCopper',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Helmet_BlackBlue: {
+  'trait_MechanicalSuit_Wearing_Helmet_BlackBlue': {
     name: 'trait_MechanicalSuit_Wearing_Helmet_BlackBlue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Helmet_BlackCopper: {
+  'trait_MechanicalSuit_Wearing_Helmet_BlackCopper': {
     name: 'trait_MechanicalSuit_Wearing_Helmet_BlackCopper',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Helmet_BlackGold: {
+  'trait_MechanicalSuit_Wearing_Helmet_BlackGold': {
     name: 'trait_MechanicalSuit_Wearing_Helmet_BlackGold',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Helmet_BlackGray: {
+  'trait_MechanicalSuit_Wearing_Helmet_BlackGray': {
     name: 'trait_MechanicalSuit_Wearing_Helmet_BlackGray',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Helmet_BlueGray: {
+  'trait_MechanicalSuit_Wearing_Helmet_BlueGray': {
     name: 'trait_MechanicalSuit_Wearing_Helmet_BlueGray',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Helmet_GrayBlack: {
+  'trait_MechanicalSuit_Wearing_Helmet_GrayBlack': {
     name: 'trait_MechanicalSuit_Wearing_Helmet_GrayBlack',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MechanicalSuit_Wearing_Helmet_GreenBlack: {
+  'trait_MechanicalSuit_Wearing_Helmet_GreenBlack': {
     name: 'trait_MechanicalSuit_Wearing_Helmet_GreenBlack',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MeltMaster: {
+  'trait_MeltMaster': {
     name: 'trait_MeltMaster',
     description: 'is grilled cheese maker melt master',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Memorable: {
+  'trait_Memorable': {
     name: 'trait_Memorable',
     description: 'is memorable',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MentallyGifted: {
+  'trait_MentallyGifted': {
     name: 'trait_MentallyGifted',
     ignored: false,
     description: 'is mentally gifted',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Mentor: {
+  'trait_Mentor': {
     name: 'trait_Mentor',
     ignored: false,
     description: 'is a mentor',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Misbehavior_Cat_JumpOnCounters: {
+  'trait_Misbehavior_Cat_JumpOnCounters': {
     name: 'trait_Misbehavior_Cat_JumpOnCounters',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehavior_Cat_Scratching: {
+  'trait_Misbehavior_Cat_Scratching': {
     name: 'trait_Misbehavior_Cat_Scratching',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehavior_Dog_Bark: {
+  'trait_Misbehavior_Dog_Bark': {
     name: 'trait_Misbehavior_Dog_Bark',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehavior_Dog_EatPoop: {
+  'trait_Misbehavior_Dog_EatPoop': {
     name: 'trait_Misbehavior_Dog_EatPoop',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehavior_Dog_JumpOnCounters: {
+  'trait_Misbehavior_Dog_JumpOnCounters': {
     name: 'trait_Misbehavior_Dog_JumpOnCounters',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehavior_Dog_PuddlesPlay: {
+  'trait_Misbehavior_Dog_PuddlesPlay': {
     name: 'trait_Misbehavior_Dog_PuddlesPlay',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehavior_Dog_Toilet: {
+  'trait_Misbehavior_Dog_Toilet': {
     name: 'trait_Misbehavior_Dog_Toilet',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehavior_Pet_Attack: {
+  'trait_Misbehavior_Pet_Attack': {
     name: 'trait_Misbehavior_Pet_Attack',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehavior_Pet_BegEating: {
+  'trait_Misbehavior_Pet_BegEating': {
     name: 'trait_Misbehavior_Pet_BegEating',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehavior_Pet_PuddlesDrink: {
+  'trait_Misbehavior_Pet_PuddlesDrink': {
     name: 'trait_Misbehavior_Pet_PuddlesDrink',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehavior_Pet_TrashEat: {
+  'trait_Misbehavior_Pet_TrashEat': {
     name: 'trait_Misbehavior_Pet_TrashEat',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehavior_Pet_TrashPlay: {
+  'trait_Misbehavior_Pet_TrashPlay': {
     name: 'trait_Misbehavior_Pet_TrashPlay',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehaviors_Pet_Debug: {
+  'trait_Misbehaviors_Pet_Debug': {
     name: 'trait_Misbehaviors_Pet_Debug',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehaviors_Pet_EatPeopleFood: {
+  'trait_Misbehaviors_Pet_EatPeopleFood': {
     name: 'trait_Misbehaviors_Pet_EatPeopleFood',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Misbehaviors_Pet_WakeUpSims: {
+  'trait_Misbehaviors_Pet_WakeUpSims': {
     name: 'trait_Misbehaviors_Pet_WakeUpSims',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MorningPerson: {
+  'trait_MorningPerson': {
     name: 'trait_MorningPerson',
     ignored: false,
     description: 'is a Morning Person',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MotivatingSpeaker: {
+  'trait_MotivatingSpeaker': {
     name: 'trait_MotivatingSpeaker',
     description: 'is a motivational speaker',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MovingOn_BurningSoul: {
+  'trait_MovingOn_BurningSoul': {
     name: 'trait_MovingOn_BurningSoul',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MovingOn_BurningSoul_Reincarnated: {
+  'trait_MovingOn_BurningSoul_Reincarnated': {
     name: 'trait_MovingOn_BurningSoul_Reincarnated',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MovingOn_Hidden_DreamsFulfilled: {
+  'trait_MovingOn_Hidden_DreamsFulfilled': {
     name: 'trait_MovingOn_Hidden_DreamsFulfilled',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MovingOn_Hidden_FindingPurpose: {
+  'trait_MovingOn_Hidden_FindingPurpose': {
     name: 'trait_MovingOn_Hidden_FindingPurpose',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MovingOn_Hidden_InfantHasReincarnated: {
+  'trait_MovingOn_Hidden_InfantHasReincarnated': {
     name: 'trait_MovingOn_Hidden_InfantHasReincarnated',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MovingOn_Hidden_MakingHeadway: {
+  'trait_MovingOn_Hidden_MakingHeadway': {
     name: 'trait_MovingOn_Hidden_MakingHeadway',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MovingOn_Hidden_NewfoundPurpose: {
+  'trait_MovingOn_Hidden_NewfoundPurpose': {
     name: 'trait_MovingOn_Hidden_NewfoundPurpose',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MovingOn_Hidden_NoRegrets: {
+  'trait_MovingOn_Hidden_NoRegrets': {
     name: 'trait_MovingOn_Hidden_NoRegrets',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MovingOn_Hidden_PastLifeRecalled: {
+  'trait_MovingOn_Hidden_PastLifeRecalled': {
     name: 'trait_MovingOn_Hidden_PastLifeRecalled',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MovingOn_Hidden_QuiteAJourney: {
+  'trait_MovingOn_Hidden_QuiteAJourney': {
     name: 'trait_MovingOn_Hidden_QuiteAJourney',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MovingOn_Hidden_TheRoadAhead: {
+  'trait_MovingOn_Hidden_TheRoadAhead': {
     name: 'trait_MovingOn_Hidden_TheRoadAhead',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MovingOn_PerspectivesOnDeath: {
+  'trait_MovingOn_PerspectivesOnDeath': {
     name: 'trait_MovingOn_PerspectivesOnDeath',
-    description:
-      'is strengthened by loss and has a new perspective on death and life',
+    description: 'is strengthened by loss and has a new perspective on death and life',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MovingOn_Reincarnated: {
+  'trait_MovingOn_Reincarnated': {
     name: 'trait_MovingOn_Reincarnated',
     description: 'is reincarnated',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MultiUnit_Aspiration_DiscerningDweller: {
+  'trait_MultiUnit_Aspiration_DiscerningDweller': {
     name: 'trait_MultiUnit_Aspiration_DiscerningDweller',
     description: 'is a good neighbor',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MultiUnit_Aspiration_FountainOfLocalKnowledge: {
+  'trait_MultiUnit_Aspiration_FountainOfLocalKnowledge': {
     name: 'trait_MultiUnit_Aspiration_FountainOfLocalKnowledge',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MultiUnit_Aspiration_LegendaryLandlord: {
+  'trait_MultiUnit_Aspiration_LegendaryLandlord': {
     name: 'trait_MultiUnit_Aspiration_LegendaryLandlord',
     description: 'is a good landlord',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MultiUnit_Aspiration_SeekerOfSecrets: {
+  'trait_MultiUnit_Aspiration_SeekerOfSecrets': {
     name: 'trait_MultiUnit_Aspiration_SeekerOfSecrets',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_MultiUnitGuide_KnowledgeableLeaser: {
+  'trait_MultiUnitGuide_KnowledgeableLeaser': {
     name: 'trait_MultiUnitGuide_KnowledgeableLeaser',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Muser: {
+  'trait_Muser': {
     name: 'trait_Muser',
     ignored: false,
     description: 'is a muser',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_MusicFestival_Identifier_BebeRexha: {
+  'trait_MusicFestival_Identifier_BebeRexha': {
     name: 'trait_MusicFestival_Identifier_BebeRexha',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MusicFestival_Identifier_DaveBayley: {
+  'trait_MusicFestival_Identifier_DaveBayley': {
     name: 'trait_MusicFestival_Identifier_DaveBayley',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MusicFestival_Identifier_JoyOladokun: {
+  'trait_MusicFestival_Identifier_JoyOladokun': {
     name: 'trait_MusicFestival_Identifier_JoyOladokun',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_MusicLover: {
+  'trait_MusicLover': {
     name: 'trait_MusicLover',
     description: 'loves music',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_NaturalSpeaker: {
+  'trait_NaturalSpeaker': {
     name: 'trait_NaturalSpeaker',
     ignored: false,
     description: 'is a natural speaker',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Nature_CountryCaretaker_NatureConversationalist: {
+  'trait_Nature_CountryCaretaker_NatureConversationalist': {
     name: 'trait_Nature_CountryCaretaker_NatureConversationalist',
     ignored: false,
-    description:
-      'is a Nature Conversationalist, has good relationship with animals',
+    description: 'is a Nature Conversationalist, has good relationship with animals',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Nature_InfluentialIndividual: {
+  'trait_Nature_InfluentialIndividual': {
     name: 'trait_Nature_InfluentialIndividual',
     ignored: true,
     description: 'is Nature Influential',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Nature_MasterMixer: {
+  'trait_Nature_MasterMixer': {
     name: 'trait_Nature_MasterMixer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Neat: {
+  'trait_Neat': {
     name: 'trait_Neat',
     description: 'is neat',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_NectarKnowItAll: {
+  'trait_NectarKnowItAll': {
     name: 'trait_NectarKnowItAll',
     ignored: false,
     description: 'knows all about wine and nectar creation',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_NeedsNoOne: {
+  'trait_NeedsNoOne': {
     name: 'trait_NeedsNoOne',
     ignored: false,
     description: "needs no one and doesn't need to socialize",
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_NeverWeary: {
+  'trait_NeverWeary': {
     name: 'trait_NeverWeary',
     ignored: false,
     description: 'never needs sleep',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_NewInTown_InspiredExplorer: {
+  'trait_NewInTown_InspiredExplorer': {
     name: 'trait_NewInTown_InspiredExplorer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_NightOwl: {
+  'trait_NightOwl': {
     name: 'trait_NightOwl',
     ignored: false,
     description: 'is a Night Owl',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_NightOwl_CrystalHelmet: {
+  'trait_NightOwl_CrystalHelmet': {
     name: 'trait_NightOwl_CrystalHelmet',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Nosy: {
+  'trait_Nosy': {
     name: 'trait_Nosy',
     description: 'is nosy',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_NosyNeighbor: {
+  'trait_NosyNeighbor': {
     name: 'trait_NosyNeighbor',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Observant: {
+  'trait_Observant': {
     name: 'trait_Observant',
     ignored: false,
     description: 'is observant',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Occult_NoOccult: {
+  'trait_Occult_NoOccult': {
     name: 'trait_Occult_NoOccult',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Occult_WitchOccult: {
+  'trait_Occult_WitchOccult': {
     name: 'trait_Occult_WitchOccult',
     description: 'is a witch',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Occult_WitchOccult_BloodlineAncient: {
+  'trait_Occult_WitchOccult_BloodlineAncient': {
     name: 'trait_Occult_WitchOccult_BloodlineAncient',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Occult_WitchOccult_BloodlineStrong: {
+  'trait_Occult_WitchOccult_BloodlineStrong': {
     name: 'trait_Occult_WitchOccult_BloodlineStrong',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Occult_WitchOccult_BloodlineWeak: {
+  'trait_Occult_WitchOccult_BloodlineWeak': {
     name: 'trait_Occult_WitchOccult_BloodlineWeak',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Occult_WitchOccult_Manifested: {
+  'trait_Occult_WitchOccult_Manifested': {
     name: 'trait_Occult_WitchOccult_Manifested',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultAlien: {
+  'trait_OccultAlien': {
     name: 'trait_OccultAlien',
     description: 'is an alien in human form',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultAlien_and_Ghost: {
+  'trait_OccultAlien_and_Ghost': {
     name: 'trait_OccultAlien_and_Ghost',
     description: 'is an alien and a ghost',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultAlien_Current: {
+  'trait_OccultAlien_Current': {
     name: 'trait_OccultAlien_Current',
     description: 'is an alien',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultAlien_FakeAlien: {
+  'trait_OccultAlien_FakeAlien': {
     name: 'trait_OccultAlien_FakeAlien',
     description: 'is a fake alien',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultAlienPart: {
+  'trait_OccultAlienPart': {
     name: 'trait_OccultAlienPart',
     description: 'is part alien',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultMermaid: {
+  'trait_OccultMermaid': {
     name: 'trait_OccultMermaid',
     description: 'is a mermaid',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultMermaid_Discovered: {
+  'trait_OccultMermaid_Discovered': {
     name: 'trait_OccultMermaid_Discovered',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultMermaid_MerfolkWoke: {
+  'trait_OccultMermaid_MerfolkWoke': {
     name: 'trait_OccultMermaid_MerfolkWoke',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultMermaid_MermaidForm: {
+  'trait_OccultMermaid_MermaidForm': {
     name: 'trait_OccultMermaid_MermaidForm',
     description: 'is in mermaid form',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultMermaid_TemporaryDiscovered: {
+  'trait_OccultMermaid_TemporaryDiscovered': {
     name: 'trait_OccultMermaid_TemporaryDiscovered',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultMermaid_TYAE: {
+  'trait_OccultMermaid_TYAE': {
     name: 'trait_OccultMermaid_TYAE',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultMermaidAndGhost: {
+  'trait_OccultMermaidAndGhost': {
     name: 'trait_OccultMermaidAndGhost',
     description: 'is a mermaid and a ghost',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultVampire: {
+  'trait_OccultVampire': {
     name: 'trait_OccultVampire',
     description: 'is a vampire',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultVampire_BatBaby: {
+  'trait_OccultVampire_BatBaby': {
     name: 'trait_OccultVampire_BatBaby',
     description: 'is a vampire bat baby',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultVampire_Cured: {
+  'trait_OccultVampire_Cured': {
     name: 'trait_OccultVampire_Cured',
     description: 'is cured from being a vampire',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultVampire_DarkForm: {
+  'trait_OccultVampire_DarkForm': {
     name: 'trait_OccultVampire_DarkForm',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultVampire_DarkLeyLine: {
+  'trait_OccultVampire_DarkLeyLine': {
     name: 'trait_OccultVampire_DarkLeyLine',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultVampire_Manifested: {
+  'trait_OccultVampire_Manifested': {
     name: 'trait_OccultVampire_Manifested',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultVampire_ManualDarkForm: {
+  'trait_OccultVampire_ManualDarkForm': {
     name: 'trait_OccultVampire_ManualDarkForm',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf: {
+  'trait_OccultWerewolf': {
     name: 'trait_OccultWerewolf',
     description: 'is a werewolf',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf_Abilities_TransformationMastery: {
+  'trait_OccultWerewolf_Abilities_TransformationMastery': {
     name: 'trait_OccultWerewolf_Abilities_TransformationMastery',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf_AspirationTraits_BetterFuryControl: {
+  'trait_OccultWerewolf_AspirationTraits_BetterFuryControl': {
     name: 'trait_OccultWerewolf_AspirationTraits_BetterFuryControl',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_OccultWerewolf_AspirationTraits_BetterTurning: {
+  'trait_OccultWerewolf_AspirationTraits_BetterTurning': {
     name: 'trait_OccultWerewolf_AspirationTraits_BetterTurning',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_OccultWerewolf_AspirationTraits_FormerLycan: {
+  'trait_OccultWerewolf_AspirationTraits_FormerLycan': {
     name: 'trait_OccultWerewolf_AspirationTraits_FormerLycan',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_OccultWerewolf_AspirationTraits_FriendlyWolf: {
+  'trait_OccultWerewolf_AspirationTraits_FriendlyWolf': {
     name: 'trait_OccultWerewolf_AspirationTraits_FriendlyWolf',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_OccultWerewolf_AspirationTraits_MoreFear: {
+  'trait_OccultWerewolf_AspirationTraits_MoreFear': {
     name: 'trait_OccultWerewolf_AspirationTraits_MoreFear',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_OccultWerewolf_DormantWolf: {
+  'trait_OccultWerewolf_DormantWolf': {
     name: 'trait_OccultWerewolf_DormantWolf',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_OccultWerewolf_GreaterWolfBlood: {
+  'trait_OccultWerewolf_GreaterWolfBlood': {
     name: 'trait_OccultWerewolf_GreaterWolfBlood',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_OccultWerewolf_HadFirstFullMoon: {
+  'trait_OccultWerewolf_HadFirstFullMoon': {
     name: 'trait_OccultWerewolf_HadFirstFullMoon',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf_HadFirstTransformation: {
+  'trait_OccultWerewolf_HadFirstTransformation': {
     name: 'trait_OccultWerewolf_HadFirstTransformation',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf_HasFatedMate: {
+  'trait_OccultWerewolf_HasFatedMate': {
     name: 'trait_OccultWerewolf_HasFatedMate',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf_ImmortalWolf: {
+  'trait_OccultWerewolf_ImmortalWolf': {
     name: 'trait_OccultWerewolf_ImmortalWolf',
     description: 'is an immortal werewolf',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf_InitiationBonusTrait: {
+  'trait_OccultWerewolf_InitiationBonusTrait': {
     name: 'trait_OccultWerewolf_InitiationBonusTrait',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_OccultWerewolf_Manifested: {
+  'trait_OccultWerewolf_Manifested': {
     name: 'trait_OccultWerewolf_Manifested',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf_NaturalHealing: {
+  'trait_OccultWerewolf_NaturalHealing': {
     name: 'trait_OccultWerewolf_NaturalHealing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf_NoFuryGlow: {
+  'trait_OccultWerewolf_NoFuryGlow': {
     name: 'trait_OccultWerewolf_NoFuryGlow',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf_PrimalInstinct: {
+  'trait_OccultWerewolf_PrimalInstinct': {
     name: 'trait_OccultWerewolf_PrimalInstinct',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf_SuperSpeed: {
+  'trait_OccultWerewolf_SuperSpeed': {
     name: 'trait_OccultWerewolf_SuperSpeed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf_TeachToHowl: {
+  'trait_OccultWerewolf_TeachToHowl': {
     name: 'trait_OccultWerewolf_TeachToHowl',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf_Temperaments_AntiCapitalistCanine: {
+  'trait_OccultWerewolf_Temperaments_AntiCapitalistCanine': {
     name: 'trait_OccultWerewolf_Temperaments_AntiCapitalistCanine',
     description: 'is an anti capitalist werewolf',
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_BigBadWolf: {
+  'trait_OccultWerewolf_Temperaments_BigBadWolf': {
     name: 'trait_OccultWerewolf_Temperaments_BigBadWolf',
     description: 'is a big bad werewolf',
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_Carnivore: {
+  'trait_OccultWerewolf_Temperaments_Carnivore': {
     name: 'trait_OccultWerewolf_Temperaments_Carnivore',
     description: 'is a carnivore werewolf',
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_EasyExcitable: {
+  'trait_OccultWerewolf_Temperaments_EasyExcitable': {
     name: 'trait_OccultWerewolf_Temperaments_EasyExcitable',
     description: 'is an easily excitable werewolf',
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_FeelsOutcasted: {
+  'trait_OccultWerewolf_Temperaments_FeelsOutcasted': {
     name: 'trait_OccultWerewolf_Temperaments_FeelsOutcasted',
     description: 'feels outcasted as a werewolf',
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_Frisky: {
+  'trait_OccultWerewolf_Temperaments_Frisky': {
     name: 'trait_OccultWerewolf_Temperaments_Frisky',
     description: 'is a frisky werewolf',
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_GrumpyWolf: {
+  'trait_OccultWerewolf_Temperaments_GrumpyWolf': {
     name: 'trait_OccultWerewolf_Temperaments_GrumpyWolf',
     description: 'is a grumpy werewolf',
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_HatesBeingWet: {
+  'trait_OccultWerewolf_Temperaments_HatesBeingWet': {
     name: 'trait_OccultWerewolf_Temperaments_HatesBeingWet',
     description: 'hates being wet as a werewolf',
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_HungryLikeTheWolf: {
+  'trait_OccultWerewolf_Temperaments_HungryLikeTheWolf': {
     name: 'trait_OccultWerewolf_Temperaments_HungryLikeTheWolf',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_Lunar_ForestMark: {
+  'trait_OccultWerewolf_Temperaments_Lunar_ForestMark': {
     name: 'trait_OccultWerewolf_Temperaments_Lunar_ForestMark',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_Lunar_HuntMark: {
+  'trait_OccultWerewolf_Temperaments_Lunar_HuntMark': {
     name: 'trait_OccultWerewolf_Temperaments_Lunar_HuntMark',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_Lunar_NightMark: {
+  'trait_OccultWerewolf_Temperaments_Lunar_NightMark': {
     name: 'trait_OccultWerewolf_Temperaments_Lunar_NightMark',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_Lunar_WolfMark: {
+  'trait_OccultWerewolf_Temperaments_Lunar_WolfMark': {
     name: 'trait_OccultWerewolf_Temperaments_Lunar_WolfMark',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_MustBeClean: {
+  'trait_OccultWerewolf_Temperaments_MustBeClean': {
     name: 'trait_OccultWerewolf_Temperaments_MustBeClean',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_NightWolf: {
+  'trait_OccultWerewolf_Temperaments_NightWolf': {
     name: 'trait_OccultWerewolf_Temperaments_NightWolf',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_Prideful: {
+  'trait_OccultWerewolf_Temperaments_Prideful': {
     name: 'trait_OccultWerewolf_Temperaments_Prideful',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_RestlessAnimal: {
+  'trait_OccultWerewolf_Temperaments_RestlessAnimal': {
     name: 'trait_OccultWerewolf_Temperaments_RestlessAnimal',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_SensitiveHearing: {
+  'trait_OccultWerewolf_Temperaments_SensitiveHearing': {
     name: 'trait_OccultWerewolf_Temperaments_SensitiveHearing',
     description: 'has sensitive hearing as a werewolf',
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_SurvivalInstincts: {
+  'trait_OccultWerewolf_Temperaments_SurvivalInstincts': {
     name: 'trait_OccultWerewolf_Temperaments_SurvivalInstincts',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_Territorial: {
+  'trait_OccultWerewolf_Temperaments_Territorial': {
     name: 'trait_OccultWerewolf_Temperaments_Territorial',
     description: 'is territorial as a werewolf',
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_WolfBrain: {
+  'trait_OccultWerewolf_Temperaments_WolfBrain': {
     name: 'trait_OccultWerewolf_Temperaments_WolfBrain',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_Temperaments_WrackedWithGuilt: {
+  'trait_OccultWerewolf_Temperaments_WrackedWithGuilt': {
     name: 'trait_OccultWerewolf_Temperaments_WrackedWithGuilt',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TEMPERAMENT,
   },
-  trait_OccultWerewolf_WereForm: {
+  'trait_OccultWerewolf_WereForm': {
     name: 'trait_OccultWerewolf_WereForm',
     description: 'is in werewolf form',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_OccultWerewolf_WerewolfAlly: {
+  'trait_OccultWerewolf_WerewolfAlly': {
     name: 'trait_OccultWerewolf_WerewolfAlly',
     ignored: true,
     description: 'is an ally to the werewolves',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_OneWithNature: {
+  'trait_OneWithNature': {
     name: 'trait_OneWithNature',
     ignored: false,
     description: 'is One With Nature',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Organizations_ArtSociety_Rank1: {
+  'trait_Organizations_ArtSociety_Rank1': {
     name: 'trait_Organizations_ArtSociety_Rank1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_ArtSociety_Rank2: {
+  'trait_Organizations_ArtSociety_Rank2': {
     name: 'trait_Organizations_ArtSociety_Rank2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_ArtSociety_Rank3: {
+  'trait_Organizations_ArtSociety_Rank3': {
     name: 'trait_Organizations_ArtSociety_Rank3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_Debate_Rank1: {
+  'trait_Organizations_Debate_Rank1': {
     name: 'trait_Organizations_Debate_Rank1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_Debate_Rank2: {
+  'trait_Organizations_Debate_Rank2': {
     name: 'trait_Organizations_Debate_Rank2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_Debate_Rank3: {
+  'trait_Organizations_Debate_Rank3': {
     name: 'trait_Organizations_Debate_Rank3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_HonorSociety_Rank1: {
+  'trait_Organizations_HonorSociety_Rank1': {
     name: 'trait_Organizations_HonorSociety_Rank1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_HonorSociety_Rank2: {
+  'trait_Organizations_HonorSociety_Rank2': {
     name: 'trait_Organizations_HonorSociety_Rank2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_HonorSociety_Rank3: {
+  'trait_Organizations_HonorSociety_Rank3': {
     name: 'trait_Organizations_HonorSociety_Rank3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Organizations_Robotics_Rank1: {
+  'trait_Organizations_Robotics_Rank1': {
     name: 'trait_Organizations_Robotics_Rank1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_Robotics_Rank2: {
+  'trait_Organizations_Robotics_Rank2': {
     name: 'trait_Organizations_Robotics_Rank2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_Robotics_Rank3: {
+  'trait_Organizations_Robotics_Rank3': {
     name: 'trait_Organizations_Robotics_Rank3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_SchoolSpirit_Party_Rank1: {
+  'trait_Organizations_SchoolSpirit_Party_Rank1': {
     name: 'trait_Organizations_SchoolSpirit_Party_Rank1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_SchoolSpirit_Party_Rank2: {
+  'trait_Organizations_SchoolSpirit_Party_Rank2': {
     name: 'trait_Organizations_SchoolSpirit_Party_Rank2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_SchoolSpirit_Party_Rank3: {
+  'trait_Organizations_SchoolSpirit_Party_Rank3': {
     name: 'trait_Organizations_SchoolSpirit_Party_Rank3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_SchoolSpirit_Prank_Rank1: {
+  'trait_Organizations_SchoolSpirit_Prank_Rank1': {
     name: 'trait_Organizations_SchoolSpirit_Prank_Rank1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_SchoolSpirit_Prank_Rank2: {
+  'trait_Organizations_SchoolSpirit_Prank_Rank2': {
     name: 'trait_Organizations_SchoolSpirit_Prank_Rank2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_SchoolSpirit_Prank_Rank3: {
+  'trait_Organizations_SchoolSpirit_Prank_Rank3': {
     name: 'trait_Organizations_SchoolSpirit_Prank_Rank3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_SecretSociety_Favor_High: {
+  'trait_Organizations_SecretSociety_Favor_High': {
     name: 'trait_Organizations_SecretSociety_Favor_High',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_SecretSociety_Favor_Low: {
+  'trait_Organizations_SecretSociety_Favor_Low': {
     name: 'trait_Organizations_SecretSociety_Favor_Low',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_SecretSociety_Favor_Med: {
+  'trait_Organizations_SecretSociety_Favor_Med': {
     name: 'trait_Organizations_SecretSociety_Favor_Med',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Organizations_SecretSociety_JoinVisit_Marked: {
+  'trait_Organizations_SecretSociety_JoinVisit_Marked': {
     name: 'trait_Organizations_SecretSociety_JoinVisit_Marked',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Outgoing: {
+  'trait_Outgoing': {
     name: 'trait_Outgoing',
     description: 'is outgoing',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Overachiever: {
+  'trait_Overachiever': {
     name: 'trait_Overachiever',
     description: 'is an overachiever',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_PaMatriarch: {
+  'trait_PaMatriarch': {
     name: 'trait_PaMatriarch',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Paparazzi: {
+  'trait_Paparazzi': {
     name: 'trait_Paparazzi',
     description: 'is a paparazzi',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Paranoid: {
+  'trait_Paranoid': {
     name: 'trait_Paranoid',
     description: 'is paranoid',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_ParentingSkill_UnderstandBaby: {
+  'trait_ParentingSkill_UnderstandBaby': {
     name: 'trait_ParentingSkill_UnderstandBaby',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PartyAnimal: {
+  'trait_PartyAnimal': {
     name: 'trait_PartyAnimal',
     description: 'is a party animal',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_PerfectHost: {
+  'trait_PerfectHost': {
     name: 'trait_PerfectHost',
     ignored: false,
     description: 'is great at hosting events',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Perfectionist: {
+  'trait_Perfectionist': {
     name: 'trait_Perfectionist',
     description: 'is a perfectionist',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Perk_FeudTarget: {
+  'trait_Perk_FeudTarget': {
     name: 'trait_Perk_FeudTarget',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pet_Active_Cat: {
+  'trait_Pet_Active_Cat': {
     name: 'trait_Pet_Active_Cat',
     description: 'is active',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Active_Dog: {
+  'trait_Pet_Active_Dog': {
     name: 'trait_Pet_Active_Dog',
     description: 'is active',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_age_Adult: {
+  'trait_Pet_age_Adult': {
     name: 'trait_Pet_age_Adult',
     description: 'is an adult pet',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pet_age_Child: {
+  'trait_Pet_age_Child': {
     name: 'trait_Pet_age_Child',
     description: 'is a child pet',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pet_age_Elder: {
+  'trait_Pet_age_Elder': {
     name: 'trait_Pet_age_Elder',
     description: 'is an elder pet',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pet_Aggressive_Cat: {
+  'trait_Pet_Aggressive_Cat': {
     name: 'trait_Pet_Aggressive_Cat',
     description: 'is aggressive',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Aggressive_Dog: {
+  'trait_Pet_Aggressive_Dog': {
     name: 'trait_Pet_Aggressive_Dog',
     description: 'is aggressive',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Curious_Cat: {
+  'trait_Pet_Curious_Cat': {
     name: 'trait_Pet_Curious_Cat',
     description: 'is curious',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Curious_Dog: {
+  'trait_Pet_Curious_Dog': {
     name: 'trait_Pet_Curious_Dog',
     description: 'is curious',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Friendly_Cat: {
+  'trait_Pet_Friendly_Cat': {
     name: 'trait_Pet_Friendly_Cat',
     description: 'is friendly',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Friendly_Dog: {
+  'trait_Pet_Friendly_Dog': {
     name: 'trait_Pet_Friendly_Dog',
     description: 'is friendly',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Glutton_Cat: {
+  'trait_Pet_Glutton_Cat': {
     name: 'trait_Pet_Glutton_Cat',
     description: 'is a glutton',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Glutton_Dog: {
+  'trait_Pet_Glutton_Dog': {
     name: 'trait_Pet_Glutton_Dog',
     description: 'is a glutton',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Hairy_Cat: {
+  'trait_Pet_Hairy_Cat': {
     name: 'trait_Pet_Hairy_Cat',
     description: 'is hairy',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Hairy_Dog: {
+  'trait_Pet_Hairy_Dog': {
     name: 'trait_Pet_Hairy_Dog',
     description: 'is hairy',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Hunter_Cat: {
+  'trait_Pet_Hunter_Cat': {
     name: 'trait_Pet_Hunter_Cat',
     description: 'is a hunter',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Hunter_Dog: {
+  'trait_Pet_Hunter_Dog': {
     name: 'trait_Pet_Hunter_Dog',
     description: 'is a hunter',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Independent_Cat: {
+  'trait_Pet_Independent_Cat': {
     name: 'trait_Pet_Independent_Cat',
     description: 'is independent',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Independent_Dog: {
+  'trait_Pet_Independent_Dog': {
     name: 'trait_Pet_Independent_Dog',
     description: 'is independent',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_InsideOnly: {
+  'trait_Pet_InsideOnly': {
     name: 'trait_Pet_InsideOnly',
     description: 'likes to be inside only',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pet_Lazy_Cat: {
+  'trait_Pet_Lazy_Cat': {
     name: 'trait_Pet_Lazy_Cat',
     description: 'is lazy',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Lazy_Dog: {
+  'trait_Pet_Lazy_Dog': {
     name: 'trait_Pet_Lazy_Dog',
     description: 'is lazy',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Loyal_Cat: {
+  'trait_Pet_Loyal_Cat': {
     name: 'trait_Pet_Loyal_Cat',
     description: 'is loyal',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Loyal_Dog: {
+  'trait_Pet_Loyal_Dog': {
     name: 'trait_Pet_Loyal_Dog',
     description: 'is loyal',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Missing_Pet: {
+  'trait_Pet_Missing_Pet': {
     name: 'trait_Pet_Missing_Pet',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pet_Naughty_Cat: {
+  'trait_Pet_Naughty_Cat': {
     name: 'trait_Pet_Naughty_Cat',
     description: 'is naughty',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Naughty_Dog: {
+  'trait_Pet_Naughty_Dog': {
     name: 'trait_Pet_Naughty_Dog',
     description: 'is naughty',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_OutsideOnly: {
+  'trait_Pet_OutsideOnly': {
     name: 'trait_Pet_OutsideOnly',
     description: 'is an outside only pet',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pet_Playful_Cat: {
+  'trait_Pet_Playful_Cat': {
     name: 'trait_Pet_Playful_Cat',
     description: 'is playful',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Playful_Dog: {
+  'trait_Pet_Playful_Dog': {
     name: 'trait_Pet_Playful_Dog',
     description: 'is playful',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Skittish_Cat: {
+  'trait_Pet_Skittish_Cat': {
     name: 'trait_Pet_Skittish_Cat',
     description: 'is skittish',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Skittish_Dog: {
+  'trait_Pet_Skittish_Dog': {
     name: 'trait_Pet_Skittish_Dog',
     description: 'is skittish',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Smart_Cat: {
+  'trait_Pet_Smart_Cat': {
     name: 'trait_Pet_Smart_Cat',
     description: 'is smart',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Smart_Dog: {
+  'trait_Pet_Smart_Dog': {
     name: 'trait_Pet_Smart_Dog',
     description: 'is smart',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Stubborn_Cat: {
+  'trait_Pet_Stubborn_Cat': {
     name: 'trait_Pet_Stubborn_Cat',
     description: 'is stubborn',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Stubborn_Dog: {
+  'trait_Pet_Stubborn_Dog': {
     name: 'trait_Pet_Stubborn_Dog',
     description: 'is stubborn',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Vocal_Cat: {
+  'trait_Pet_Vocal_Cat': {
     name: 'trait_Pet_Vocal_Cat',
     description: 'is vocal',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Vocal_Dog: {
+  'trait_Pet_Vocal_Dog': {
     name: 'trait_Pet_Vocal_Dog',
     description: 'is vocal',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Wanderlust_Cat: {
+  'trait_Pet_Wanderlust_Cat': {
     name: 'trait_Pet_Wanderlust_Cat',
     description: 'is wanderlust',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_Pet_Wanderlust_Dog: {
+  'trait_Pet_Wanderlust_Dog': {
     name: 'trait_Pet_Wanderlust_Dog',
     description: 'is wanderlust',
     class: 'Trait',
     trait_type: TraitType.NONE,
   },
-  trait_PetParent_Adventure: {
+  'trait_PetParent_Adventure': {
     name: 'trait_PetParent_Adventure',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PetQuirk_Fear_CoffeeMaker: {
+  'trait_PetQuirk_Fear_CoffeeMaker': {
     name: 'trait_PetQuirk_Fear_CoffeeMaker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_Computer: {
+  'trait_PetQuirk_Fear_Computer': {
     name: 'trait_PetQuirk_Fear_Computer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_Dishwasher: {
+  'trait_PetQuirk_Fear_Dishwasher': {
     name: 'trait_PetQuirk_Fear_Dishwasher',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_DoorBell: {
+  'trait_PetQuirk_Fear_DoorBell': {
     name: 'trait_PetQuirk_Fear_DoorBell',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_Fire: {
+  'trait_PetQuirk_Fear_Fire': {
     name: 'trait_PetQuirk_Fear_Fire',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_FitnessEquipment: {
+  'trait_PetQuirk_Fear_FitnessEquipment': {
     name: 'trait_PetQuirk_Fear_FitnessEquipment',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_Gaming: {
+  'trait_PetQuirk_Fear_Gaming': {
     name: 'trait_PetQuirk_Fear_Gaming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_Instrument: {
+  'trait_PetQuirk_Fear_Instrument': {
     name: 'trait_PetQuirk_Fear_Instrument',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_Microwave: {
+  'trait_PetQuirk_Fear_Microwave': {
     name: 'trait_PetQuirk_Fear_Microwave',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_RobotVacuum: {
+  'trait_PetQuirk_Fear_RobotVacuum': {
     name: 'trait_PetQuirk_Fear_RobotVacuum',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_Shower: {
+  'trait_PetQuirk_Fear_Shower': {
     name: 'trait_PetQuirk_Fear_Shower',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_Stereo: {
+  'trait_PetQuirk_Fear_Stereo': {
     name: 'trait_PetQuirk_Fear_Stereo',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_Stove: {
+  'trait_PetQuirk_Fear_Stove': {
     name: 'trait_PetQuirk_Fear_Stove',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_Swiming: {
+  'trait_PetQuirk_Fear_Swiming': {
     name: 'trait_PetQuirk_Fear_Swiming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_Toilet: {
+  'trait_PetQuirk_Fear_Toilet': {
     name: 'trait_PetQuirk_Fear_Toilet',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_TV: {
+  'trait_PetQuirk_Fear_TV': {
     name: 'trait_PetQuirk_Fear_TV',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Fear_Vacuum: {
+  'trait_PetQuirk_Fear_Vacuum': {
     name: 'trait_PetQuirk_Fear_Vacuum',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_CoffeeMaker: {
+  'trait_PetQuirk_Obsessed_CoffeeMaker': {
     name: 'trait_PetQuirk_Obsessed_CoffeeMaker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Computer: {
+  'trait_PetQuirk_Obsessed_Computer': {
     name: 'trait_PetQuirk_Obsessed_Computer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Cooking: {
+  'trait_PetQuirk_Obsessed_Cooking': {
     name: 'trait_PetQuirk_Obsessed_Cooking',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Dishwasher: {
+  'trait_PetQuirk_Obsessed_Dishwasher': {
     name: 'trait_PetQuirk_Obsessed_Dishwasher',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_DoorBell: {
+  'trait_PetQuirk_Obsessed_DoorBell': {
     name: 'trait_PetQuirk_Obsessed_DoorBell',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Fire: {
+  'trait_PetQuirk_Obsessed_Fire': {
     name: 'trait_PetQuirk_Obsessed_Fire',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_FishTanks: {
+  'trait_PetQuirk_Obsessed_FishTanks': {
     name: 'trait_PetQuirk_Obsessed_FishTanks',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_FitnessEquipment: {
+  'trait_PetQuirk_Obsessed_FitnessEquipment': {
     name: 'trait_PetQuirk_Obsessed_FitnessEquipment',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Fridge: {
+  'trait_PetQuirk_Obsessed_Fridge': {
     name: 'trait_PetQuirk_Obsessed_Fridge',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Gaming: {
+  'trait_PetQuirk_Obsessed_Gaming': {
     name: 'trait_PetQuirk_Obsessed_Gaming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Instrument: {
+  'trait_PetQuirk_Obsessed_Instrument': {
     name: 'trait_PetQuirk_Obsessed_Instrument',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Microwave: {
+  'trait_PetQuirk_Obsessed_Microwave': {
     name: 'trait_PetQuirk_Obsessed_Microwave',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Pet_Minor_Cage: {
+  'trait_PetQuirk_Obsessed_Pet_Minor_Cage': {
     name: 'trait_PetQuirk_Obsessed_Pet_Minor_Cage',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_RobotVacuum: {
+  'trait_PetQuirk_Obsessed_RobotVacuum': {
     name: 'trait_PetQuirk_Obsessed_RobotVacuum',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Shower: {
+  'trait_PetQuirk_Obsessed_Shower': {
     name: 'trait_PetQuirk_Obsessed_Shower',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Stereo: {
+  'trait_PetQuirk_Obsessed_Stereo': {
     name: 'trait_PetQuirk_Obsessed_Stereo',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Swimming: {
+  'trait_PetQuirk_Obsessed_Swimming': {
     name: 'trait_PetQuirk_Obsessed_Swimming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Toilet: {
+  'trait_PetQuirk_Obsessed_Toilet': {
     name: 'trait_PetQuirk_Obsessed_Toilet',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_TV: {
+  'trait_PetQuirk_Obsessed_TV': {
     name: 'trait_PetQuirk_Obsessed_TV',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_Obsessed_Vacuum: {
+  'trait_PetQuirk_Obsessed_Vacuum': {
     name: 'trait_PetQuirk_Obsessed_Vacuum',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_PetBedSpin: {
+  'trait_PetQuirk_PetBedSpin': {
     name: 'trait_PetQuirk_PetBedSpin',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_PregnancyVomiting_No: {
+  'trait_PetQuirk_PregnancyVomiting_No': {
     name: 'trait_PetQuirk_PregnancyVomiting_No',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PetQuirk_PregnancyVomiting_Yes: {
+  'trait_PetQuirk_PregnancyVomiting_Yes': {
     name: 'trait_PetQuirk_PregnancyVomiting_Yes',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_Adventure_A: {
+  'trait_Pets_Adventure_A': {
     name: 'trait_Pets_Adventure_A',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_Adventure_AA_Unseen: {
+  'trait_Pets_Adventure_AA_Unseen': {
     name: 'trait_Pets_Adventure_AA_Unseen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_Adventure_AB_Unseen: {
+  'trait_Pets_Adventure_AB_Unseen': {
     name: 'trait_Pets_Adventure_AB_Unseen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_Adventure_AC_Unseen: {
+  'trait_Pets_Adventure_AC_Unseen': {
     name: 'trait_Pets_Adventure_AC_Unseen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_Adventure_B: {
+  'trait_Pets_Adventure_B': {
     name: 'trait_Pets_Adventure_B',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_Adventure_C: {
+  'trait_Pets_Adventure_C': {
     name: 'trait_Pets_Adventure_C',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_Adventure_CA: {
+  'trait_Pets_Adventure_CA': {
     name: 'trait_Pets_Adventure_CA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_Adventure_CB: {
+  'trait_Pets_Adventure_CB': {
     name: 'trait_Pets_Adventure_CB',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_Adventure_CC: {
+  'trait_Pets_Adventure_CC': {
     name: 'trait_Pets_Adventure_CC',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_Adventure_LighthouseDog: {
+  'trait_Pets_Adventure_LighthouseDog': {
     name: 'trait_Pets_Adventure_LighthouseDog',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_Adventure_XA: {
+  'trait_Pets_Adventure_XA': {
     name: 'trait_Pets_Adventure_XA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_Adventure_XB: {
+  'trait_Pets_Adventure_XB': {
     name: 'trait_Pets_Adventure_XB',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_Adventure_XC: {
+  'trait_Pets_Adventure_XC': {
     name: 'trait_Pets_Adventure_XC',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Pets_TrainingCommand_Fetch: {
+  'trait_Pets_TrainingCommand_Fetch': {
     name: 'trait_Pets_TrainingCommand_Fetch',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pets_TrainingCommand_Heel: {
+  'trait_Pets_TrainingCommand_Heel': {
     name: 'trait_Pets_TrainingCommand_Heel',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pets_TrainingCommand_LieDown: {
+  'trait_Pets_TrainingCommand_LieDown': {
     name: 'trait_Pets_TrainingCommand_LieDown',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pets_TrainingCommand_PlayDead: {
+  'trait_Pets_TrainingCommand_PlayDead': {
     name: 'trait_Pets_TrainingCommand_PlayDead',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pets_TrainingCommand_RollOver: {
+  'trait_Pets_TrainingCommand_RollOver': {
     name: 'trait_Pets_TrainingCommand_RollOver',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pets_TrainingCommand_Shake: {
+  'trait_Pets_TrainingCommand_Shake': {
     name: 'trait_Pets_TrainingCommand_Shake',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pets_TrainingCommand_Sit: {
+  'trait_Pets_TrainingCommand_Sit': {
     name: 'trait_Pets_TrainingCommand_Sit',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Pets_TrainingCommand_Speak: {
+  'trait_Pets_TrainingCommand_Speak': {
     name: 'trait_Pets_TrainingCommand_Speak',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Phone_Black: {
+  'trait_Phone_Black': {
     name: 'trait_Phone_Black',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_BlackStripes: {
+  'trait_Phone_BlackStripes': {
     name: 'trait_Phone_BlackStripes',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_BluePolka: {
+  'trait_Phone_BluePolka': {
     name: 'trait_Phone_BluePolka',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Brown: {
+  'trait_Phone_Brown': {
     name: 'trait_Phone_Brown',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_astroBlack: {
+  'trait_Phone_Color_astroBlack': {
     name: 'trait_Phone_Color_astroBlack',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_astroGray: {
+  'trait_Phone_Color_astroGray': {
     name: 'trait_Phone_Color_astroGray',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_astroMaroon: {
+  'trait_Phone_Color_astroMaroon': {
     name: 'trait_Phone_Color_astroMaroon',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_astroPeach: {
+  'trait_Phone_Color_astroPeach': {
     name: 'trait_Phone_Color_astroPeach',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_astroPink: {
+  'trait_Phone_Color_astroPink': {
     name: 'trait_Phone_Color_astroPink',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_astroPurple: {
+  'trait_Phone_Color_astroPurple': {
     name: 'trait_Phone_Color_astroPurple',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_cassetteBlack: {
+  'trait_Phone_Color_cassetteBlack': {
     name: 'trait_Phone_Color_cassetteBlack',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_cassetteBlue: {
+  'trait_Phone_Color_cassetteBlue': {
     name: 'trait_Phone_Color_cassetteBlue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_cassetteGreen: {
+  'trait_Phone_Color_cassetteGreen': {
     name: 'trait_Phone_Color_cassetteGreen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_cassetteOrange: {
+  'trait_Phone_Color_cassetteOrange': {
     name: 'trait_Phone_Color_cassetteOrange',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_cassettePink: {
+  'trait_Phone_Color_cassettePink': {
     name: 'trait_Phone_Color_cassettePink',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_cassetteRed: {
+  'trait_Phone_Color_cassetteRed': {
     name: 'trait_Phone_Color_cassetteRed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_duoBabyBlue: {
+  'trait_Phone_Color_duoBabyBlue': {
     name: 'trait_Phone_Color_duoBabyBlue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_duoBlack: {
+  'trait_Phone_Color_duoBlack': {
     name: 'trait_Phone_Color_duoBlack',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_duoGreen: {
+  'trait_Phone_Color_duoGreen': {
     name: 'trait_Phone_Color_duoGreen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_duoLavender: {
+  'trait_Phone_Color_duoLavender': {
     name: 'trait_Phone_Color_duoLavender',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_duoSlate: {
+  'trait_Phone_Color_duoSlate': {
     name: 'trait_Phone_Color_duoSlate',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_duoUmber: {
+  'trait_Phone_Color_duoUmber': {
     name: 'trait_Phone_Color_duoUmber',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_floralGreenBlue: {
+  'trait_Phone_Color_floralGreenBlue': {
     name: 'trait_Phone_Color_floralGreenBlue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_floralMauve: {
+  'trait_Phone_Color_floralMauve': {
     name: 'trait_Phone_Color_floralMauve',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_floralPeach: {
+  'trait_Phone_Color_floralPeach': {
     name: 'trait_Phone_Color_floralPeach',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_floralPink: {
+  'trait_Phone_Color_floralPink': {
     name: 'trait_Phone_Color_floralPink',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_floralSlate: {
+  'trait_Phone_Color_floralSlate': {
     name: 'trait_Phone_Color_floralSlate',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_floralYellow: {
+  'trait_Phone_Color_floralYellow': {
     name: 'trait_Phone_Color_floralYellow',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_geoBlue: {
+  'trait_Phone_Color_geoBlue': {
     name: 'trait_Phone_Color_geoBlue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_geoBrown: {
+  'trait_Phone_Color_geoBrown': {
     name: 'trait_Phone_Color_geoBrown',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_geoGold: {
+  'trait_Phone_Color_geoGold': {
     name: 'trait_Phone_Color_geoGold',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_geoGreen: {
+  'trait_Phone_Color_geoGreen': {
     name: 'trait_Phone_Color_geoGreen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_geoRed: {
+  'trait_Phone_Color_geoRed': {
     name: 'trait_Phone_Color_geoRed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_geoSilver: {
+  'trait_Phone_Color_geoSilver': {
     name: 'trait_Phone_Color_geoSilver',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_paintBlack: {
+  'trait_Phone_Color_paintBlack': {
     name: 'trait_Phone_Color_paintBlack',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_paintBlue: {
+  'trait_Phone_Color_paintBlue': {
     name: 'trait_Phone_Color_paintBlue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_paintCanary: {
+  'trait_Phone_Color_paintCanary': {
     name: 'trait_Phone_Color_paintCanary',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_paintGreen: {
+  'trait_Phone_Color_paintGreen': {
     name: 'trait_Phone_Color_paintGreen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_paintTeal: {
+  'trait_Phone_Color_paintTeal': {
     name: 'trait_Phone_Color_paintTeal',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_paintWhite: {
+  'trait_Phone_Color_paintWhite': {
     name: 'trait_Phone_Color_paintWhite',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_roseBlack: {
+  'trait_Phone_Color_roseBlack': {
     name: 'trait_Phone_Color_roseBlack',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_roseBlue: {
+  'trait_Phone_Color_roseBlue': {
     name: 'trait_Phone_Color_roseBlue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_roseGreen: {
+  'trait_Phone_Color_roseGreen': {
     name: 'trait_Phone_Color_roseGreen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_roseLavender: {
+  'trait_Phone_Color_roseLavender': {
     name: 'trait_Phone_Color_roseLavender',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_roseMetalGold: {
+  'trait_Phone_Color_roseMetalGold': {
     name: 'trait_Phone_Color_roseMetalGold',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_roseWhite: {
+  'trait_Phone_Color_roseWhite': {
     name: 'trait_Phone_Color_roseWhite',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_swirlBlue: {
+  'trait_Phone_Color_swirlBlue': {
     name: 'trait_Phone_Color_swirlBlue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_swirlGray: {
+  'trait_Phone_Color_swirlGray': {
     name: 'trait_Phone_Color_swirlGray',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_swirlGreen: {
+  'trait_Phone_Color_swirlGreen': {
     name: 'trait_Phone_Color_swirlGreen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_swirlOrange: {
+  'trait_Phone_Color_swirlOrange': {
     name: 'trait_Phone_Color_swirlOrange',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_swirlPink: {
+  'trait_Phone_Color_swirlPink': {
     name: 'trait_Phone_Color_swirlPink',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Color_swirlPurple: {
+  'trait_Phone_Color_swirlPurple': {
     name: 'trait_Phone_Color_swirlPurple',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_DarkBlue: {
+  'trait_Phone_DarkBlue': {
     name: 'trait_Phone_DarkBlue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_DarkGreen: {
+  'trait_Phone_DarkGreen': {
     name: 'trait_Phone_DarkGreen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Gold: {
+  'trait_Phone_Gold': {
     name: 'trait_Phone_Gold',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_HotPinkPolka: {
+  'trait_Phone_HotPinkPolka': {
     name: 'trait_Phone_HotPinkPolka',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_LightPink: {
+  'trait_Phone_LightPink': {
     name: 'trait_Phone_LightPink',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Lime: {
+  'trait_Phone_Lime': {
     name: 'trait_Phone_Lime',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_MintGreenStripes: {
+  'trait_Phone_MintGreenStripes': {
     name: 'trait_Phone_MintGreenStripes',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_OrangePolka: {
+  'trait_Phone_OrangePolka': {
     name: 'trait_Phone_OrangePolka',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Purple: {
+  'trait_Phone_Purple': {
     name: 'trait_Phone_Purple',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Red: {
+  'trait_Phone_Red': {
     name: 'trait_Phone_Red',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_RoseGold: {
+  'trait_Phone_RoseGold': {
     name: 'trait_Phone_RoseGold',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_Silver: {
+  'trait_Phone_Silver': {
     name: 'trait_Phone_Silver',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_TurquoiseStripes: {
+  'trait_Phone_TurquoiseStripes': {
     name: 'trait_Phone_TurquoiseStripes',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_Phone_White: {
+  'trait_Phone_White': {
     name: 'trait_Phone_White',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.SIM_PHONE,
   },
-  trait_PhysicallyGifted: {
+  'trait_PhysicallyGifted': {
     name: 'trait_PhysicallyGifted',
     description: 'is physically gifted',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Piper: {
+  'trait_Piper': {
     name: 'trait_Piper',
     ignored: false,
     description: 'is a masterful Piper',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PlantSim: {
+  'trait_PlantSim': {
     name: 'trait_PlantSim',
     description: 'is a plant',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PlantSimChallenge_RecievedStump: {
+  'trait_PlantSimChallenge_RecievedStump': {
     name: 'trait_PlantSimChallenge_RecievedStump',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Player: {
+  'trait_Player': {
     name: 'trait_Player',
     ignored: false,
     description: 'is a romantic player',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PotionMaster: {
+  'trait_PotionMaster': {
     name: 'trait_PotionMaster',
     ignored: false,
     description: 'is a Potion Master',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_PracticeMakesPerfect: {
+  'trait_PracticeMakesPerfect': {
     name: 'trait_PracticeMakesPerfect',
     description: 'is a quick learner',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Creative_Tier0: {
+  'trait_PracticeMakesPerfect_BuffTrait_Creative_Tier0': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Creative_Tier0',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Creative_Tier1: {
+  'trait_PracticeMakesPerfect_BuffTrait_Creative_Tier1': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Creative_Tier1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Creative_Tier2: {
+  'trait_PracticeMakesPerfect_BuffTrait_Creative_Tier2': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Creative_Tier2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Creative_Tier3: {
+  'trait_PracticeMakesPerfect_BuffTrait_Creative_Tier3': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Creative_Tier3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Creative_Tier4: {
+  'trait_PracticeMakesPerfect_BuffTrait_Creative_Tier4': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Creative_Tier4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Mental_Tier0: {
+  'trait_PracticeMakesPerfect_BuffTrait_Mental_Tier0': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Mental_Tier0',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Mental_Tier1: {
+  'trait_PracticeMakesPerfect_BuffTrait_Mental_Tier1': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Mental_Tier1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Mental_Tier2: {
+  'trait_PracticeMakesPerfect_BuffTrait_Mental_Tier2': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Mental_Tier2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Mental_Tier3: {
+  'trait_PracticeMakesPerfect_BuffTrait_Mental_Tier3': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Mental_Tier3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Mental_Tier4: {
+  'trait_PracticeMakesPerfect_BuffTrait_Mental_Tier4': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Mental_Tier4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Physical_Tier0: {
+  'trait_PracticeMakesPerfect_BuffTrait_Physical_Tier0': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Physical_Tier0',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Physical_Tier1: {
+  'trait_PracticeMakesPerfect_BuffTrait_Physical_Tier1': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Physical_Tier1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Physical_Tier2: {
+  'trait_PracticeMakesPerfect_BuffTrait_Physical_Tier2': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Physical_Tier2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Physical_Tier3: {
+  'trait_PracticeMakesPerfect_BuffTrait_Physical_Tier3': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Physical_Tier3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Physical_Tier4: {
+  'trait_PracticeMakesPerfect_BuffTrait_Physical_Tier4': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Physical_Tier4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Social_Tier0: {
+  'trait_PracticeMakesPerfect_BuffTrait_Social_Tier0': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Social_Tier0',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Social_Tier1: {
+  'trait_PracticeMakesPerfect_BuffTrait_Social_Tier1': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Social_Tier1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Social_Tier2: {
+  'trait_PracticeMakesPerfect_BuffTrait_Social_Tier2': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Social_Tier2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Social_Tier3: {
+  'trait_PracticeMakesPerfect_BuffTrait_Social_Tier3': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Social_Tier3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_BuffTrait_Social_Tier4: {
+  'trait_PracticeMakesPerfect_BuffTrait_Social_Tier4': {
     name: 'trait_PracticeMakesPerfect_BuffTrait_Social_Tier4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_Tracking_Creative: {
+  'trait_PracticeMakesPerfect_Tracking_Creative': {
     name: 'trait_PracticeMakesPerfect_Tracking_Creative',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_Tracking_Mental: {
+  'trait_PracticeMakesPerfect_Tracking_Mental': {
     name: 'trait_PracticeMakesPerfect_Tracking_Mental',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_Tracking_Physical: {
+  'trait_PracticeMakesPerfect_Tracking_Physical': {
     name: 'trait_PracticeMakesPerfect_Tracking_Physical',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PracticeMakesPerfect_Tracking_Social: {
+  'trait_PracticeMakesPerfect_Tracking_Social': {
     name: 'trait_PracticeMakesPerfect_Tracking_Social',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_PregnancyOptions_Pet_canNotReproduce: {
+  'trait_PregnancyOptions_Pet_canNotReproduce': {
     name: 'trait_PregnancyOptions_Pet_canNotReproduce',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_PregnancyOptions_Pet_CanReproduce: {
+  'trait_PregnancyOptions_Pet_CanReproduce': {
     name: 'trait_PregnancyOptions_Pet_CanReproduce',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_PreparedVoyager: {
+  'trait_PreparedVoyager': {
     name: 'trait_PreparedVoyager',
     ignored: true,
     description: 'is a Prepared Voyager',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_ProfessionalSlacker: {
+  'trait_ProfessionalSlacker': {
     name: 'trait_ProfessionalSlacker',
     ignored: false,
-    description:
-      'is a professional slacker and has no fear of being demoted or fired',
+    description: 'is a professional slacker and has no fear of being demoted or fired',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Proper: {
+  'trait_Proper': {
     name: 'trait_Proper',
     description: 'is proper',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Quick_Learner: {
+  'trait_Quick_Learner': {
     name: 'trait_Quick_Learner',
     ignored: false,
     description: 'is a quick learner',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_Rancher: {
+  'trait_Rancher': {
     name: 'trait_Rancher',
     description: 'is a rancher',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Reaper_dummy: {
+  'trait_Reaper_dummy': {
     name: 'trait_Reaper_dummy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ReaperCareer_DeathReward: {
+  'trait_ReaperCareer_DeathReward': {
     name: 'trait_ReaperCareer_DeathReward',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_RecycleDisciple: {
+  'trait_RecycleDisciple': {
     name: 'trait_RecycleDisciple',
     description: 'loves to recycle',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_RegainedHumanity: {
+  'trait_RegainedHumanity': {
     name: 'trait_RegainedHumanity',
     ignored: false,
     description: 'is no longer a vampire and is now a human',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Relatable: {
+  'trait_Relatable': {
     name: 'trait_Relatable',
     ignored: false,
     description: 'is relatable',
     class: 'Trait',
     trait_type: TraitType.ASPIRATION,
   },
-  trait_RelExpectations_EmotionalExclusivity_No: {
+  'trait_RelExpectations_EmotionalExclusivity_No': {
     name: 'trait_RelExpectations_EmotionalExclusivity_No',
-    description:
-      'will feel OK if their romantic partner engages in non-physical romance with others',
+    description: 'will feel OK if their romantic partner engages in non-physical romance with others',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_RelExpectations_EmotionalExclusivity_Yes: {
+  'trait_RelExpectations_EmotionalExclusivity_Yes': {
     name: 'trait_RelExpectations_EmotionalExclusivity_Yes',
-    description:
-      'will be jealous if their romantic partner engages in non-physical romance with others',
+    description: 'will be jealous if their romantic partner engages in non-physical romance with others',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_RelExpectations_OpenToChange_No: {
+  'trait_RelExpectations_OpenToChange_No': {
     name: 'trait_RelExpectations_OpenToChange_No',
-    description:
-      'is firm on their romantic boundaries and does not want to change them',
+    description: 'is firm on their romantic boundaries and does not want to change them',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_RelExpectations_OpenToChange_Yes: {
+  'trait_RelExpectations_OpenToChange_Yes': {
     name: 'trait_RelExpectations_OpenToChange_Yes',
     description: 'is open to changing their romantic boundaries',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_RelExpectations_PhysicalExclusivity_No: {
+  'trait_RelExpectations_PhysicalExclusivity_No': {
     name: 'trait_RelExpectations_PhysicalExclusivity_No',
-    description:
-      'will feel OK if their romantic partner engages in physical romance with others',
+    description: 'will feel OK if their romantic partner engages in physical romance with others',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_RelExpectations_PhysicalExclusivity_Yes: {
+  'trait_RelExpectations_PhysicalExclusivity_Yes': {
     name: 'trait_RelExpectations_PhysicalExclusivity_Yes',
-    description:
-      'will be jealous if their romantic partner engages in physical romance with others',
+    description: 'will be jealous if their romantic partner engages in physical romance with others',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_RelExpectations_WoohooExclusivity_No: {
+  'trait_RelExpectations_WoohooExclusivity_No': {
     name: 'trait_RelExpectations_WoohooExclusivity_No',
-    description:
-      'will feel OK if their romantic partner engages in sex with others',
+    description: 'will feel OK if their romantic partner engages in sex with others',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_RelExpectations_WoohooExclusivity_Yes: {
+  'trait_RelExpectations_WoohooExclusivity_Yes': {
     name: 'trait_RelExpectations_WoohooExclusivity_Yes',
-    description:
-      'will be jealous if their romantic partner engages in sex with others',
+    description: 'will be jealous if their romantic partner engages in sex with others',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_Reputation_HasBeen_Rank_1_Terrible: {
+  'trait_Reputation_HasBeen_Rank_1_Terrible': {
     name: 'trait_Reputation_HasBeen_Rank_1_Terrible',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Reputation_HasBeen_Rank_2_ReallyBad: {
+  'trait_Reputation_HasBeen_Rank_2_ReallyBad': {
     name: 'trait_Reputation_HasBeen_Rank_2_ReallyBad',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Reputation_HasBeen_Rank_3_Bad: {
+  'trait_Reputation_HasBeen_Rank_3_Bad': {
     name: 'trait_Reputation_HasBeen_Rank_3_Bad',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Reputation_HasBeen_Rank_4_Neutral: {
+  'trait_Reputation_HasBeen_Rank_4_Neutral': {
     name: 'trait_Reputation_HasBeen_Rank_4_Neutral',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Reputation_HasBeen_Rank_5_Good: {
+  'trait_Reputation_HasBeen_Rank_5_Good': {
     name: 'trait_Reputation_HasBeen_Rank_5_Good',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Reputation_HasBeen_Rank_6_ReallyGood: {
+  'trait_Reputation_HasBeen_Rank_6_ReallyGood': {
     name: 'trait_Reputation_HasBeen_Rank_6_ReallyGood',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Reputation_HasBeen_Rank_7_Pristine: {
+  'trait_Reputation_HasBeen_Rank_7_Pristine': {
     name: 'trait_Reputation_HasBeen_Rank_7_Pristine',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Reputation_Rank_1_Terrible: {
+  'trait_Reputation_Rank_1_Terrible': {
     name: 'trait_Reputation_Rank_1_Terrible',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Reputation_Rank_2_ReallyBad: {
+  'trait_Reputation_Rank_2_ReallyBad': {
     name: 'trait_Reputation_Rank_2_ReallyBad',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Reputation_Rank_3_Bad: {
+  'trait_Reputation_Rank_3_Bad': {
     name: 'trait_Reputation_Rank_3_Bad',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Reputation_Rank_4_Neutral: {
+  'trait_Reputation_Rank_4_Neutral': {
     name: 'trait_Reputation_Rank_4_Neutral',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Reputation_Rank_5_Good: {
+  'trait_Reputation_Rank_5_Good': {
     name: 'trait_Reputation_Rank_5_Good',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Reputation_Rank_6_ReallyGood: {
+  'trait_Reputation_Rank_6_ReallyGood': {
     name: 'trait_Reputation_Rank_6_ReallyGood',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Reputation_Rank_7_Pristine: {
+  'trait_Reputation_Rank_7_Pristine': {
     name: 'trait_Reputation_Rank_7_Pristine',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_reward_Child_Confidence_HighSelfEsteem: {
+  'trait_reward_Child_Confidence_HighSelfEsteem': {
     name: 'trait_reward_Child_Confidence_HighSelfEsteem',
     ignored: false,
     description: 'has high self-esteem',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_reward_Child_Confidence_LowSelfEsteem: {
+  'trait_reward_Child_Confidence_LowSelfEsteem': {
     name: 'trait_reward_Child_Confidence_LowSelfEsteem',
     ignored: false,
     description: 'has low self-esteem',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Reward_HSTeam_CheerTeam: {
+  'trait_Reward_HSTeam_CheerTeam': {
     name: 'trait_Reward_HSTeam_CheerTeam',
     ignored: false,
     description: 'is on the cheer team',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Reward_HSTeam_ChessTeam: {
+  'trait_Reward_HSTeam_ChessTeam': {
     name: 'trait_Reward_HSTeam_ChessTeam',
     ignored: false,
     description: 'is on the chess team',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Reward_HSTeam_ComputerTeam: {
+  'trait_Reward_HSTeam_ComputerTeam': {
     name: 'trait_Reward_HSTeam_ComputerTeam',
     ignored: false,
     description: 'is on the computer team',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Reward_HSTeam_FootballTeam: {
+  'trait_Reward_HSTeam_FootballTeam': {
     name: 'trait_Reward_HSTeam_FootballTeam',
     ignored: false,
     description: 'is on the football team',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Reward_Infant_Happy: {
+  'trait_Reward_Infant_Happy': {
     name: 'trait_Reward_Infant_Happy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Reward_Infant_TopNotch: {
+  'trait_Reward_Infant_TopNotch': {
     name: 'trait_Reward_Infant_TopNotch',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Reward_Infant_Unhappy: {
+  'trait_Reward_Infant_Unhappy': {
     name: 'trait_Reward_Infant_Unhappy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Rider_Gameplay_Mounted_ReinsDown: {
+  'trait_Rider_Gameplay_Mounted_ReinsDown': {
     name: 'trait_Rider_Gameplay_Mounted_ReinsDown',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_RoboticsArm_Wearing_BeigeWhite: {
+  'trait_RoboticsArm_Wearing_BeigeWhite': {
     name: 'trait_RoboticsArm_Wearing_BeigeWhite',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_RoboticsArm_Wearing_BlackBlue: {
+  'trait_RoboticsArm_Wearing_BlackBlue': {
     name: 'trait_RoboticsArm_Wearing_BlackBlue',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_RoboticsArm_Wearing_BlueRed: {
+  'trait_RoboticsArm_Wearing_BlueRed': {
     name: 'trait_RoboticsArm_Wearing_BlueRed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_RoboticsArm_Wearing_GrayBrown: {
+  'trait_RoboticsArm_Wearing_GrayBrown': {
     name: 'trait_RoboticsArm_Wearing_GrayBrown',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_RoboticsArm_Wearing_GreenBrown: {
+  'trait_RoboticsArm_Wearing_GreenBrown': {
     name: 'trait_RoboticsArm_Wearing_GreenBrown',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_RoboticsArm_Wearing_RedGreen: {
+  'trait_RoboticsArm_Wearing_RedGreen': {
     name: 'trait_RoboticsArm_Wearing_RedGreen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_RoboticsArm_Wearing_WhiteCopper: {
+  'trait_RoboticsArm_Wearing_WhiteCopper': {
     name: 'trait_RoboticsArm_Wearing_WhiteCopper',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_Romantic: {
+  'Trait_Romantic': {
     name: 'Trait_Romantic',
     description: 'is romantic',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_RomanticallyReserved: {
+  'trait_RomanticallyReserved': {
     name: 'trait_RomanticallyReserved',
     description: 'is romantically reserved',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_RomanticSage: {
+  'trait_RomanticSage': {
     name: 'trait_RomanticSage',
     description: 'are thoughtful and optimistic about romantic relationships',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_RoommateNPC_Archetype_Breaker: {
+  'trait_RoommateNPC_Archetype_Breaker': {
     name: 'trait_RoommateNPC_Archetype_Breaker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Archetype_Cheerleader: {
+  'trait_RoommateNPC_Archetype_Cheerleader': {
     name: 'trait_RoommateNPC_Archetype_Cheerleader',
     description: 'is a cheerleader',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Archetype_ClingySocialite: {
+  'trait_RoommateNPC_Archetype_ClingySocialite': {
     name: 'trait_RoommateNPC_Archetype_ClingySocialite',
     description: 'is a clingy socialite',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Archetype_CouchPotato: {
+  'trait_RoommateNPC_Archetype_CouchPotato': {
     name: 'trait_RoommateNPC_Archetype_CouchPotato',
     description: 'is a couch potato',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Archetype_EmoLoner: {
+  'trait_RoommateNPC_Archetype_EmoLoner': {
     name: 'trait_RoommateNPC_Archetype_EmoLoner',
     description: 'is an emo loner',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Archetype_Fixer: {
+  'trait_RoommateNPC_Archetype_Fixer': {
     name: 'trait_RoommateNPC_Archetype_Fixer',
     description: 'is a fixer',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Archetype_LoudMusic: {
+  'trait_RoommateNPC_Archetype_LoudMusic': {
     name: 'trait_RoommateNPC_Archetype_LoudMusic',
     description: 'likes to play loud music',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Archetype_Mealmaker: {
+  'trait_RoommateNPC_Archetype_Mealmaker': {
     name: 'trait_RoommateNPC_Archetype_Mealmaker',
     description: 'likes to make meals',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Archetype_PartyPlanner: {
+  'trait_RoommateNPC_Archetype_PartyPlanner': {
     name: 'trait_RoommateNPC_Archetype_PartyPlanner',
     description: 'is a party planner',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Archetype_SuperNeat: {
+  'trait_RoommateNPC_Archetype_SuperNeat': {
     name: 'trait_RoommateNPC_Archetype_SuperNeat',
     description: 'is super neat and clean',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Interest_Art: {
+  'trait_RoommateNPC_Interest_Art': {
     name: 'trait_RoommateNPC_Interest_Art',
     description: 'is interested in art',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Interest_Baking: {
+  'trait_RoommateNPC_Interest_Baking': {
     name: 'trait_RoommateNPC_Interest_Baking',
     description: 'is interested in baking',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Interest_Computers: {
+  'trait_RoommateNPC_Interest_Computers': {
     name: 'trait_RoommateNPC_Interest_Computers',
     description: 'is interested in computers',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Interest_Fitness: {
+  'trait_RoommateNPC_Interest_Fitness': {
     name: 'trait_RoommateNPC_Interest_Fitness',
     description: 'is interested in fitness',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Interest_Music: {
+  'trait_RoommateNPC_Interest_Music': {
     name: 'trait_RoommateNPC_Interest_Music',
     description: 'is interested in music',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Quirk_Absent: {
+  'trait_RoommateNPC_Quirk_Absent': {
     name: 'trait_RoommateNPC_Quirk_Absent',
     description: 'is always absent',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Quirk_BathroomHog: {
+  'trait_RoommateNPC_Quirk_BathroomHog': {
     name: 'trait_RoommateNPC_Quirk_BathroomHog',
     description: 'always hogs the bathroom',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Quirk_BigCloset: {
+  'trait_RoommateNPC_Quirk_BigCloset': {
     name: 'trait_RoommateNPC_Quirk_BigCloset',
     description: 'has a huge closet',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Quirk_LateOnRent: {
+  'trait_RoommateNPC_Quirk_LateOnRent': {
     name: 'trait_RoommateNPC_Quirk_LateOnRent',
     description: 'is always late on rent',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Quirk_Prankster: {
+  'trait_RoommateNPC_Quirk_Prankster': {
     name: 'trait_RoommateNPC_Quirk_Prankster',
     description: 'is a prankster',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Quirk_PublicAffectionDisplayer: {
+  'trait_RoommateNPC_Quirk_PublicAffectionDisplayer': {
     name: 'trait_RoommateNPC_Quirk_PublicAffectionDisplayer',
     description: 'always is making public displays of affection',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_RoommateNPC_Standard: {
+  'trait_RoommateNPC_Standard': {
     name: 'trait_RoommateNPC_Standard',
     description: 'is a roommate',
     class: 'Trait',
     trait_type: TraitType.ROOMMATE,
   },
-  trait_SacredKnittingKnowledge: {
+  'trait_SacredKnittingKnowledge': {
     name: 'trait_SacredKnittingKnowledge',
     ignored: false,
     description: 'possesses sacred knitting knowledge',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Savant: {
+  'trait_Savant': {
     name: 'trait_Savant',
     ignored: false,
     description: 'is a savant',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Scarecrow: {
+  'trait_Scarecrow': {
     name: 'trait_Scarecrow',
     description: 'is a scarecrow',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_AlienAdbuction_Adults: {
+  'trait_Scenario_AlienAdbuction_Adults': {
     name: 'trait_Scenario_AlienAdbuction_Adults',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_Cookout: {
+  'trait_Scenario_Cookout': {
     name: 'trait_Scenario_Cookout',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ExploreTheNight: {
+  'trait_Scenario_ExploreTheNight': {
     name: 'trait_Scenario_ExploreTheNight',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ExploreTheNight_StayedUp: {
+  'trait_Scenario_ExploreTheNight_StayedUp': {
     name: 'trait_Scenario_ExploreTheNight_StayedUp',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_Inheritance_Goal_GrandmotherGhost: {
+  'trait_Scenario_Inheritance_Goal_GrandmotherGhost': {
     name: 'trait_Scenario_Inheritance_Goal_GrandmotherGhost',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_Inheritance_Goal_MoneyDonated: {
+  'trait_Scenario_Inheritance_Goal_MoneyDonated': {
     name: 'trait_Scenario_Inheritance_Goal_MoneyDonated',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_Inheritance_Goal_ReadWill: {
+  'trait_Scenario_Inheritance_Goal_ReadWill': {
     name: 'trait_Scenario_Inheritance_Goal_ReadWill',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_Inheritance_Goal_SiblingsFriends: {
+  'trait_Scenario_Inheritance_Goal_SiblingsFriends': {
     name: 'trait_Scenario_Inheritance_Goal_SiblingsFriends',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_Inheritance_Grandmother: {
+  'trait_Scenario_Inheritance_Grandmother': {
     name: 'trait_Scenario_Inheritance_Grandmother',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_InTheMoodlet: {
+  'trait_Scenario_InTheMoodlet': {
     name: 'trait_Scenario_InTheMoodlet',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_NewInTown: {
+  'trait_Scenario_NewInTown': {
     name: 'trait_Scenario_NewInTown',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_NewInTown_Hidden_P1_7a_Intro: {
+  'trait_Scenario_NewInTown_Hidden_P1_7a_Intro': {
     name: 'trait_Scenario_NewInTown_Hidden_P1_7a_Intro',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_NewInTown_Hidden_P1_7b_Intro: {
+  'trait_Scenario_NewInTown_Hidden_P1_7b_Intro': {
     name: 'trait_Scenario_NewInTown_Hidden_P1_7b_Intro',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_NewInTown_Hidden_P1_7c_Intro: {
+  'trait_Scenario_NewInTown_Hidden_P1_7c_Intro': {
     name: 'trait_Scenario_NewInTown_Hidden_P1_7c_Intro',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_NewInTown_Hidden_P3a_Intro: {
+  'trait_Scenario_NewInTown_Hidden_P3a_Intro': {
     name: 'trait_Scenario_NewInTown_Hidden_P3a_Intro',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_NewInTown_Hidden_P3b_Intro: {
+  'trait_Scenario_NewInTown_Hidden_P3b_Intro': {
     name: 'trait_Scenario_NewInTown_Hidden_P3b_Intro',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_NewInTown_Hidden_P4_relgain: {
+  'trait_Scenario_NewInTown_Hidden_P4_relgain': {
     name: 'trait_Scenario_NewInTown_Hidden_P4_relgain',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_NewInTown_Hidden_Phase3a_NewAcquaintanceCaller_FriendGym: {
+  'trait_Scenario_NewInTown_Hidden_Phase3a_NewAcquaintanceCaller_FriendGym': {
     name: 'trait_Scenario_NewInTown_Hidden_Phase3a_NewAcquaintanceCaller_FriendGym',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_NewInTown_Hidden_Phase3b_NewAcquaintanceCaller_FriendBar: {
+  'trait_Scenario_NewInTown_Hidden_Phase3b_NewAcquaintanceCaller_FriendBar': {
     name: 'trait_Scenario_NewInTown_Hidden_Phase3b_NewAcquaintanceCaller_FriendBar',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_NewInTown_Hidden_Phase3b_NewAcquaintanceCaller_RomanceBar: {
+  'trait_Scenario_NewInTown_Hidden_Phase3b_NewAcquaintanceCaller_RomanceBar': {
     name: 'trait_Scenario_NewInTown_Hidden_Phase3b_NewAcquaintanceCaller_RomanceBar',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_NewInTown_Hidden_woohooed: {
+  'trait_Scenario_NewInTown_Hidden_woohooed': {
     name: 'trait_Scenario_NewInTown_Hidden_woohooed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_NoSkillsNoProblem: {
+  'trait_Scenario_NoSkillsNoProblem': {
     name: 'trait_Scenario_NoSkillsNoProblem',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ParentingPredicaments_Child: {
+  'trait_Scenario_ParentingPredicaments_Child': {
     name: 'trait_Scenario_ParentingPredicaments_Child',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ParentingPredicaments_FinalGrade_Leonardo_A: {
+  'trait_Scenario_ParentingPredicaments_FinalGrade_Leonardo_A': {
     name: 'trait_Scenario_ParentingPredicaments_FinalGrade_Leonardo_A',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ParentingPredicaments_FinalGrade_Leonardo_F: {
+  'trait_Scenario_ParentingPredicaments_FinalGrade_Leonardo_F': {
     name: 'trait_Scenario_ParentingPredicaments_FinalGrade_Leonardo_F',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ParentingPredicaments_FinalGrade_Sofia_A: {
+  'trait_Scenario_ParentingPredicaments_FinalGrade_Sofia_A': {
     name: 'trait_Scenario_ParentingPredicaments_FinalGrade_Sofia_A',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ParentingPredicaments_FinalGrade_Sofia_F: {
+  'trait_Scenario_ParentingPredicaments_FinalGrade_Sofia_F': {
     name: 'trait_Scenario_ParentingPredicaments_FinalGrade_Sofia_F',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ParentingPredicaments_Jennifer: {
+  'trait_Scenario_ParentingPredicaments_Jennifer': {
     name: 'trait_Scenario_ParentingPredicaments_Jennifer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ParentingPredicaments_Leonardo: {
+  'trait_Scenario_ParentingPredicaments_Leonardo': {
     name: 'trait_Scenario_ParentingPredicaments_Leonardo',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ParentingPredicaments_Pablo: {
+  'trait_Scenario_ParentingPredicaments_Pablo': {
     name: 'trait_Scenario_ParentingPredicaments_Pablo',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ParentingPredicaments_Parent: {
+  'trait_Scenario_ParentingPredicaments_Parent': {
     name: 'trait_Scenario_ParentingPredicaments_Parent',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ParentingPredicaments_Principal: {
+  'trait_Scenario_ParentingPredicaments_Principal': {
     name: 'trait_Scenario_ParentingPredicaments_Principal',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ParentingPredicaments_Sofia: {
+  'trait_Scenario_ParentingPredicaments_Sofia': {
     name: 'trait_Scenario_ParentingPredicaments_Sofia',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_ProudParent: {
+  'trait_Scenario_ProudParent': {
     name: 'trait_Scenario_ProudParent',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_Nova: {
+  'trait_Scenario_StuckInTheirShadow_Nova': {
     name: 'trait_Scenario_StuckInTheirShadow_Nova',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P1_CompletedMotives: {
+  'trait_Scenario_StuckInTheirShadow_P1_CompletedMotives': {
     name: 'trait_Scenario_StuckInTheirShadow_P1_CompletedMotives',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P1_CompletedProgramming: {
+  'trait_Scenario_StuckInTheirShadow_P1_CompletedProgramming': {
     name: 'trait_Scenario_StuckInTheirShadow_P1_CompletedProgramming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P2_RivalPurchases: {
+  'trait_Scenario_StuckInTheirShadow_P2_RivalPurchases': {
     name: 'trait_Scenario_StuckInTheirShadow_P2_RivalPurchases',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P3_CompletedImproveWorsen: {
+  'trait_Scenario_StuckInTheirShadow_P3_CompletedImproveWorsen': {
     name: 'trait_Scenario_StuckInTheirShadow_P3_CompletedImproveWorsen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P3_DecisionGoalActive: {
+  'trait_Scenario_StuckInTheirShadow_P3_DecisionGoalActive': {
     name: 'trait_Scenario_StuckInTheirShadow_P3_DecisionGoalActive',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P3_RivalArrived: {
+  'trait_Scenario_StuckInTheirShadow_P3_RivalArrived': {
     name: 'trait_Scenario_StuckInTheirShadow_P3_RivalArrived',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P3_RivalInvited: {
+  'trait_Scenario_StuckInTheirShadow_P3_RivalInvited': {
     name: 'trait_Scenario_StuckInTheirShadow_P3_RivalInvited',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P3_RivalKicked: {
+  'trait_Scenario_StuckInTheirShadow_P3_RivalKicked': {
     name: 'trait_Scenario_StuckInTheirShadow_P3_RivalKicked',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P3_RivalSleepover: {
+  'trait_Scenario_StuckInTheirShadow_P3_RivalSleepover': {
     name: 'trait_Scenario_StuckInTheirShadow_P3_RivalSleepover',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P3_Start: {
+  'trait_Scenario_StuckInTheirShadow_P3_Start': {
     name: 'trait_Scenario_StuckInTheirShadow_P3_Start',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P3_VoodooOwner: {
+  'trait_Scenario_StuckInTheirShadow_P3_VoodooOwner': {
     name: 'trait_Scenario_StuckInTheirShadow_P3_VoodooOwner',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P4A_AskedAboutCareer: {
+  'trait_Scenario_StuckInTheirShadow_P4A_AskedAboutCareer': {
     name: 'trait_Scenario_StuckInTheirShadow_P4A_AskedAboutCareer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P4A_AstronautNo: {
+  'trait_Scenario_StuckInTheirShadow_P4A_AstronautNo': {
     name: 'trait_Scenario_StuckInTheirShadow_P4A_AstronautNo',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P4A_AstronautYes: {
+  'trait_Scenario_StuckInTheirShadow_P4A_AstronautYes': {
     name: 'trait_Scenario_StuckInTheirShadow_P4A_AstronautYes',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P4B_CanQuit: {
+  'trait_Scenario_StuckInTheirShadow_P4B_CanQuit': {
     name: 'trait_Scenario_StuckInTheirShadow_P4B_CanQuit',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P4B_IndieAccepted: {
+  'trait_Scenario_StuckInTheirShadow_P4B_IndieAccepted': {
     name: 'trait_Scenario_StuckInTheirShadow_P4B_IndieAccepted',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P4B_IndieRejected: {
+  'trait_Scenario_StuckInTheirShadow_P4B_IndieRejected': {
     name: 'trait_Scenario_StuckInTheirShadow_P4B_IndieRejected',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_StuckInTheirShadow_P4B_Promoted: {
+  'trait_Scenario_StuckInTheirShadow_P4B_Promoted': {
     name: 'trait_Scenario_StuckInTheirShadow_P4B_Promoted',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scenario_UnluckyChef: {
+  'trait_Scenario_UnluckyChef': {
     name: 'trait_Scenario_UnluckyChef',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SchoolLocker_Claimed: {
+  'trait_SchoolLocker_Claimed': {
     name: 'trait_SchoolLocker_Claimed',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Scientist_ExpertRepair: {
+  'trait_Scientist_ExpertRepair': {
     name: 'trait_Scientist_ExpertRepair',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ScoutingAptitude: {
+  'trait_ScoutingAptitude': {
     name: 'trait_ScoutingAptitude',
     ignored: false,
     description: 'is a good scout',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_ScubaGear_DiveKnife: {
+  'trait_ScubaGear_DiveKnife': {
     name: 'trait_ScubaGear_DiveKnife',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ScubaGear_Rebreather: {
+  'trait_ScubaGear_Rebreather': {
     name: 'trait_ScubaGear_Rebreather',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ScubaGear_SpearfishingGun: {
+  'trait_ScubaGear_SpearfishingGun': {
     name: 'trait_ScubaGear_SpearfishingGun',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ScubaGear_TreasureTool: {
+  'trait_ScubaGear_TreasureTool': {
     name: 'trait_ScubaGear_TreasureTool',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_ScubaGear_UnderwaterCamera: {
+  'trait_ScubaGear_UnderwaterCamera': {
     name: 'trait_ScubaGear_UnderwaterCamera',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SeasonedGamer: {
+  'trait_SeasonedGamer': {
     name: 'trait_SeasonedGamer',
     ignored: false,
     description: 'is a seasoned video gamer',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_SeldomSleepy: {
+  'trait_SeldomSleepy': {
     name: 'trait_SeldomSleepy',
     ignored: false,
     description: 'is seldom sleepy and needs less sleep',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_SelfAbsorbed: {
+  'trait_SelfAbsorbed': {
     name: 'trait_SelfAbsorbed',
     description: 'is self absorbed',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_SelfAssured: {
+  'trait_SelfAssured': {
     name: 'trait_SelfAssured',
     description: 'is self assured',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_SexualOrientation_WooHooInterests_Female: {
+  'trait_SexualOrientation_WooHooInterests_Female': {
     name: 'trait_SexualOrientation_WooHooInterests_Female',
     description: 'is sexually attracted to females',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_SexualOrientation_WooHooInterests_Male: {
+  'trait_SexualOrientation_WooHooInterests_Male': {
     name: 'trait_SexualOrientation_WooHooInterests_Male',
     description: 'is sexually attracted to males',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_SexualOrientation_WooHooInterests_NotFemale: {
+  'trait_SexualOrientation_WooHooInterests_NotFemale': {
     name: 'trait_SexualOrientation_WooHooInterests_NotFemale',
     description: 'is not sexually attracted to females',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_SexualOrientation_WooHooInterests_NotMale: {
+  'trait_SexualOrientation_WooHooInterests_NotMale': {
     name: 'trait_SexualOrientation_WooHooInterests_NotMale',
     description: 'is not sexually attracted to males',
     class: 'Trait',
     trait_type: TraitType.GENDER_OPTIONS,
   },
-  trait_Shady: {
+  'trait_Shady': {
     name: 'trait_Shady',
     description: 'is shady',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_ShadyNPC: {
+  'trait_ShadyNPC': {
     name: 'trait_ShadyNPC',
     description: 'is shady',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Shameless: {
+  'trait_Shameless': {
     name: 'trait_Shameless',
     ignored: false,
     description: 'is shameless',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_SicknessImmunity: {
+  'trait_SicknessImmunity': {
     name: 'trait_SicknessImmunity',
     description: 'is immune to sickness',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Sim_Reputation_Host: {
+  'trait_Sim_Reputation_Host': {
     name: 'trait_Sim_Reputation_Host',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_Dislikes_Activities_Acting: {
+  'Trait_SimPreference_Dislikes_Activities_Acting': {
     name: 'Trait_SimPreference_Dislikes_Activities_Acting',
     description: 'acting',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_Baking: {
+  'Trait_SimPreference_Dislikes_Activities_Baking': {
     name: 'Trait_SimPreference_Dislikes_Activities_Baking',
     description: 'baking activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_Bowling: {
+  'Trait_SimPreference_Dislikes_Activities_Bowling': {
     name: 'Trait_SimPreference_Dislikes_Activities_Bowling',
     description: 'bowling activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Comedy: {
+  'trait_SimPreference_Dislikes_Activities_Comedy': {
     name: 'trait_SimPreference_Dislikes_Activities_Comedy',
     description: 'comedy activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Cooking: {
+  'trait_SimPreference_Dislikes_Activities_Cooking': {
     name: 'trait_SimPreference_Dislikes_Activities_Cooking',
     description: 'cooking activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_CrossStitch: {
+  'Trait_SimPreference_Dislikes_Activities_CrossStitch': {
     name: 'Trait_SimPreference_Dislikes_Activities_CrossStitch',
     description: 'cross-stitch activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_Dancing: {
+  'Trait_SimPreference_Dislikes_Activities_Dancing': {
     name: 'Trait_SimPreference_Dislikes_Activities_Dancing',
     description: 'dancing',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_Debating: {
+  'Trait_SimPreference_Dislikes_Activities_Debating': {
     name: 'Trait_SimPreference_Dislikes_Activities_Debating',
-    description:
-      'activities related to debating due to their preference for research and debate',
+    description: 'activities related to debating due to their preference for research and debate',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_DJMixing: {
+  'Trait_SimPreference_Dislikes_Activities_DJMixing': {
     name: 'Trait_SimPreference_Dislikes_Activities_DJMixing',
     description: 'DJ Mixing activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_EquestrianSkill: {
+  'trait_SimPreference_Dislikes_Activities_EquestrianSkill': {
     name: 'trait_SimPreference_Dislikes_Activities_EquestrianSkill',
-    description:
-      'activities related to the Equestrian Skill, such as horse riding',
+    description: 'activities related to the Equestrian Skill, such as horse riding',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Fishing: {
+  'trait_SimPreference_Dislikes_Activities_Fishing': {
     name: 'trait_SimPreference_Dislikes_Activities_Fishing',
     description: 'fishing',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Fitness: {
+  'trait_SimPreference_Dislikes_Activities_Fitness': {
     name: 'trait_SimPreference_Dislikes_Activities_Fitness',
     description: 'fitness activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Gardening: {
+  'trait_SimPreference_Dislikes_Activities_Gardening': {
     name: 'trait_SimPreference_Dislikes_Activities_Gardening',
     description: 'gardening activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_GemologySkill: {
+  'trait_SimPreference_Dislikes_Activities_GemologySkill': {
     name: 'trait_SimPreference_Dislikes_Activities_GemologySkill',
     description: 'gemology',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Guitar: {
+  'trait_SimPreference_Dislikes_Activities_Guitar': {
     name: 'trait_SimPreference_Dislikes_Activities_Guitar',
     description: 'playing the guitar',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Handiness: {
+  'trait_SimPreference_Dislikes_Activities_Handiness': {
     name: 'trait_SimPreference_Dislikes_Activities_Handiness',
     description: 'being handy',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Knitting: {
+  'trait_SimPreference_Dislikes_Activities_Knitting': {
     name: 'trait_SimPreference_Dislikes_Activities_Knitting',
     description: 'knitting activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_MediaProduction: {
+  'Trait_SimPreference_Dislikes_Activities_MediaProduction': {
     name: 'Trait_SimPreference_Dislikes_Activities_MediaProduction',
     description: 'media production activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Mischief: {
+  'trait_SimPreference_Dislikes_Activities_Mischief': {
     name: 'trait_SimPreference_Dislikes_Activities_Mischief',
     description: 'mischievous activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Mixology: {
+  'trait_SimPreference_Dislikes_Activities_Mixology': {
     name: 'trait_SimPreference_Dislikes_Activities_Mixology',
     description: 'Mixology activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_NectarMaking: {
+  'trait_SimPreference_Dislikes_Activities_NectarMaking': {
     name: 'trait_SimPreference_Dislikes_Activities_NectarMaking',
     description: 'activities related to nectar making',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Painting: {
+  'trait_SimPreference_Dislikes_Activities_Painting': {
     name: 'trait_SimPreference_Dislikes_Activities_Painting',
     description: 'painting activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_Photography: {
+  'Trait_SimPreference_Dislikes_Activities_Photography': {
     name: 'Trait_SimPreference_Dislikes_Activities_Photography',
     description: 'photography',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Piano: {
+  'trait_SimPreference_Dislikes_Activities_Piano': {
     name: 'trait_SimPreference_Dislikes_Activities_Piano',
     description: 'playing the piano',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_PipeOrgan: {
+  'Trait_SimPreference_Dislikes_Activities_PipeOrgan': {
     name: 'Trait_SimPreference_Dislikes_Activities_PipeOrgan',
     description: 'playing the pipe organ',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Pottery: {
+  'trait_SimPreference_Dislikes_Activities_Pottery': {
     name: 'trait_SimPreference_Dislikes_Activities_Pottery',
     description: 'making pottery',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Programming: {
+  'trait_SimPreference_Dislikes_Activities_Programming': {
     name: 'trait_SimPreference_Dislikes_Activities_Programming',
     description: 'programming activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_Robotics: {
+  'Trait_SimPreference_Dislikes_Activities_Robotics': {
     name: 'Trait_SimPreference_Dislikes_Activities_Robotics',
     description: 'activities related to robotics',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_RockClimbing: {
+  'Trait_SimPreference_Dislikes_Activities_RockClimbing': {
     name: 'Trait_SimPreference_Dislikes_Activities_RockClimbing',
     description: 'rock climbing activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_RocketScience: {
+  'trait_SimPreference_Dislikes_Activities_RocketScience': {
     name: 'trait_SimPreference_Dislikes_Activities_RocketScience',
     description: 'activities related to Rocket Science',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_RomanceSkill: {
+  'trait_SimPreference_Dislikes_Activities_RomanceSkill': {
     name: 'trait_SimPreference_Dislikes_Activities_RomanceSkill',
     description: 'romance',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_Singing: {
+  'Trait_SimPreference_Dislikes_Activities_Singing': {
     name: 'Trait_SimPreference_Dislikes_Activities_Singing',
     description: 'singing',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_Skiing: {
+  'Trait_SimPreference_Dislikes_Activities_Skiing': {
     name: 'Trait_SimPreference_Dislikes_Activities_Skiing',
     description: 'skiing',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_Snowboarding: {
+  'Trait_SimPreference_Dislikes_Activities_Snowboarding': {
     name: 'Trait_SimPreference_Dislikes_Activities_Snowboarding',
     description: 'snowboarding activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Tattooing: {
+  'trait_SimPreference_Dislikes_Activities_Tattooing': {
     name: 'trait_SimPreference_Dislikes_Activities_Tattooing',
     description: 'tattooing',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Thanatology: {
+  'trait_SimPreference_Dislikes_Activities_Thanatology': {
     name: 'trait_SimPreference_Dislikes_Activities_Thanatology',
     description: 'thanatology',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_VideoGaming: {
+  'trait_SimPreference_Dislikes_Activities_VideoGaming': {
     name: 'trait_SimPreference_Dislikes_Activities_VideoGaming',
     description: 'video gaming',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Violin: {
+  'trait_SimPreference_Dislikes_Activities_Violin': {
     name: 'trait_SimPreference_Dislikes_Activities_Violin',
     description: 'playing the violin',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Activities_Wellness: {
+  'Trait_SimPreference_Dislikes_Activities_Wellness': {
     name: 'Trait_SimPreference_Dislikes_Activities_Wellness',
     description: 'activities related to wellness',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Activities_Writing: {
+  'trait_SimPreference_Dislikes_Activities_Writing': {
     name: 'trait_SimPreference_Dislikes_Activities_Writing',
     description: 'writing activities',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_Ambitionless: {
+  'trait_SimPreference_Dislikes_Characteristic_Ambitionless': {
     name: 'trait_SimPreference_Dislikes_Characteristic_Ambitionless',
     description: 'is ambitionless',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_Argumentative: {
+  'trait_SimPreference_Dislikes_Characteristic_Argumentative': {
     name: 'trait_SimPreference_Dislikes_Characteristic_Argumentative',
     description: 'is argumentative',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_Cerebral: {
+  'trait_SimPreference_Dislikes_Characteristic_Cerebral': {
     name: 'trait_SimPreference_Dislikes_Characteristic_Cerebral',
     description: 'is cerebral',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_Egotistical: {
+  'trait_SimPreference_Dislikes_Characteristic_Egotistical': {
     name: 'trait_SimPreference_Dislikes_Characteristic_Egotistical',
     description: 'is egotistical',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_EmotionalDecisionMaker: {
+  'trait_SimPreference_Dislikes_Characteristic_EmotionalDecisionMaker': {
     name: 'trait_SimPreference_Dislikes_Characteristic_EmotionalDecisionMaker',
     description: 'is an emotional decision-maker',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_Funny: {
+  'trait_SimPreference_Dislikes_Characteristic_Funny': {
     name: 'trait_SimPreference_Dislikes_Characteristic_Funny',
     description: 'is funny',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_HardWorker: {
+  'trait_SimPreference_Dislikes_Characteristic_HardWorker': {
     name: 'trait_SimPreference_Dislikes_Characteristic_HardWorker',
     description: 'is a hard worker',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_HighEnergy: {
+  'trait_SimPreference_Dislikes_Characteristic_HighEnergy': {
     name: 'trait_SimPreference_Dislikes_Characteristic_HighEnergy',
     description: 'is high energy',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_Homebody: {
+  'trait_SimPreference_Dislikes_Characteristic_Homebody': {
     name: 'trait_SimPreference_Dislikes_Characteristic_Homebody',
     description: 'is a homebody',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_Idealist: {
+  'trait_SimPreference_Dislikes_Characteristic_Idealist': {
     name: 'trait_SimPreference_Dislikes_Characteristic_Idealist',
     description: 'is an idealist',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_KidEnthusiast: {
+  'trait_SimPreference_Dislikes_Characteristic_KidEnthusiast': {
     name: 'trait_SimPreference_Dislikes_Characteristic_KidEnthusiast',
     description: 'is a kid enthusiast',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_Mischievous: {
+  'trait_SimPreference_Dislikes_Characteristic_Mischievous': {
     name: 'trait_SimPreference_Dislikes_Characteristic_Mischievous',
     description: 'is mischievous',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_NatureEnthusiast: {
+  'trait_SimPreference_Dislikes_Characteristic_NatureEnthusiast': {
     name: 'trait_SimPreference_Dislikes_Characteristic_NatureEnthusiast',
     description: 'is a nature enthusiast',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_Optimist: {
+  'trait_SimPreference_Dislikes_Characteristic_Optimist': {
     name: 'trait_SimPreference_Dislikes_Characteristic_Optimist',
     description: 'is optimistic',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_Pessimist: {
+  'trait_SimPreference_Dislikes_Characteristic_Pessimist': {
     name: 'trait_SimPreference_Dislikes_Characteristic_Pessimist',
     description: 'is pessimistic',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_PetEnthusiast: {
+  'trait_SimPreference_Dislikes_Characteristic_PetEnthusiast': {
     name: 'trait_SimPreference_Dislikes_Characteristic_PetEnthusiast',
     description: 'is a pet enthusiast',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_RomanceEnthusiast: {
+  'trait_SimPreference_Dislikes_Characteristic_RomanceEnthusiast': {
     name: 'trait_SimPreference_Dislikes_Characteristic_RomanceEnthusiast',
     description: 'is a Romance Enthusiast',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Characteristic_Spirited: {
+  'trait_SimPreference_Dislikes_Characteristic_Spirited': {
     name: 'trait_SimPreference_Dislikes_Characteristic_Spirited',
     description: 'is spirited',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Color_Black: {
+  'trait_SimPreference_Dislikes_Color_Black': {
     name: 'trait_SimPreference_Dislikes_Color_Black',
     description: 'the color black',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Color_Blue: {
+  'trait_SimPreference_Dislikes_Color_Blue': {
     name: 'trait_SimPreference_Dislikes_Color_Blue',
     description: 'the color blue',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Color_Brown: {
+  'trait_SimPreference_Dislikes_Color_Brown': {
     name: 'trait_SimPreference_Dislikes_Color_Brown',
     description: 'the color brown',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Color_Gray: {
+  'trait_SimPreference_Dislikes_Color_Gray': {
     name: 'trait_SimPreference_Dislikes_Color_Gray',
     description: 'the color gray',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Color_Green: {
+  'trait_SimPreference_Dislikes_Color_Green': {
     name: 'trait_SimPreference_Dislikes_Color_Green',
     description: 'the color green',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Color_Orange: {
+  'trait_SimPreference_Dislikes_Color_Orange': {
     name: 'trait_SimPreference_Dislikes_Color_Orange',
     description: 'the color orange',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Color_Pink: {
+  'trait_SimPreference_Dislikes_Color_Pink': {
     name: 'trait_SimPreference_Dislikes_Color_Pink',
     description: 'the color pink',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Color_Purple: {
+  'trait_SimPreference_Dislikes_Color_Purple': {
     name: 'trait_SimPreference_Dislikes_Color_Purple',
     description: 'the color purple',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Color_Red: {
+  'trait_SimPreference_Dislikes_Color_Red': {
     name: 'trait_SimPreference_Dislikes_Color_Red',
     description: 'the color red',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Color_White: {
+  'trait_SimPreference_Dislikes_Color_White': {
     name: 'trait_SimPreference_Dislikes_Color_White',
     description: 'the color white',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Color_Yellow: {
+  'trait_SimPreference_Dislikes_Color_Yellow': {
     name: 'trait_SimPreference_Dislikes_Color_Yellow',
     description: 'the color yellow',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_Affection: {
+  'trait_SimPreference_Dislikes_Communication_Affection': {
     name: 'trait_SimPreference_Dislikes_Communication_Affection',
     description: 'communication and affection',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_Arguments: {
+  'trait_SimPreference_Dislikes_Communication_Arguments': {
     name: 'trait_SimPreference_Dislikes_Communication_Arguments',
-    description:
-      'engaging in arguments and finds communication through disagreements stimulating',
+    description: 'engaging in arguments and finds communication through disagreements stimulating',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_Complaints: {
+  'trait_SimPreference_Dislikes_Communication_Complaints': {
     name: 'trait_SimPreference_Dislikes_Communication_Complaints',
-    description:
-      'is a preference for communication and tends to express complaints more often',
+    description: 'is a preference for communication and tends to express complaints more often',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_Compliments: {
+  'trait_SimPreference_Dislikes_Communication_Compliments': {
     name: 'trait_SimPreference_Dislikes_Communication_Compliments',
     description: 'communication that involves giving compliments',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_Deception: {
+  'trait_SimPreference_Dislikes_Communication_Deception': {
     name: 'trait_SimPreference_Dislikes_Communication_Deception',
     description: 'and engaging in deceptive communication',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_DeepThoughts: {
+  'trait_SimPreference_Dislikes_Communication_DeepThoughts': {
     name: 'trait_SimPreference_Dislikes_Communication_DeepThoughts',
     description: 'is a preference for deep and meaningful conversations',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_Flirtation: {
+  'trait_SimPreference_Dislikes_Communication_Flirtation': {
     name: 'trait_SimPreference_Dislikes_Communication_Flirtation',
     description: 'to communicate through flirtation',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_Gossip: {
+  'trait_SimPreference_Dislikes_Communication_Gossip': {
     name: 'trait_SimPreference_Dislikes_Communication_Gossip',
     description: 'gossiping and discussing the latest news with other people',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_Hobbies: {
+  'trait_SimPreference_Dislikes_Communication_Hobbies': {
     name: 'trait_SimPreference_Dislikes_Communication_Hobbies',
     description: 'to discuss hobbies with others',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_Interests: {
+  'trait_SimPreference_Dislikes_Communication_Interests': {
     name: 'trait_SimPreference_Dislikes_Communication_Interests',
     description: 'discussing interests',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_Jokes: {
+  'trait_SimPreference_Dislikes_Communication_Jokes': {
     name: 'trait_SimPreference_Dislikes_Communication_Jokes',
     description: 'communication through jokes',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_Malicious: {
+  'trait_SimPreference_Dislikes_Communication_Malicious': {
     name: 'trait_SimPreference_Dislikes_Communication_Malicious',
     description: 'is a preference for malicious interactions',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_PhysicalIntimacy: {
+  'trait_SimPreference_Dislikes_Communication_PhysicalIntimacy': {
     name: 'trait_SimPreference_Dislikes_Communication_PhysicalIntimacy',
-    description:
-      'physical intimacy andis likely to seek out opportunities for affectionate interactions',
+    description: 'physical intimacy andis likely to seek out opportunities for affectionate interactions',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_PottyHumor: {
+  'trait_SimPreference_Dislikes_Communication_PottyHumor': {
     name: 'trait_SimPreference_Dislikes_Communication_PottyHumor',
     description: 'is a preference for potty humor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_Pranks: {
+  'trait_SimPreference_Dislikes_Communication_Pranks': {
     name: 'trait_SimPreference_Dislikes_Communication_Pranks',
     description: 'pulling pranks on others',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_SillyBehavior: {
+  'trait_SimPreference_Dislikes_Communication_SillyBehavior': {
     name: 'trait_SimPreference_Dislikes_Communication_SillyBehavior',
     description: 'engaging in silly behavior',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_SmallTalk: {
+  'trait_SimPreference_Dislikes_Communication_SmallTalk': {
     name: 'trait_SimPreference_Dislikes_Communication_SmallTalk',
     description: 'engaging in small talk with others',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Communication_Stories: {
+  'trait_SimPreference_Dislikes_Communication_Stories': {
     name: 'trait_SimPreference_Dislikes_Communication_Stories',
     description: 'engaging in conversations and storytelling',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_ArtDeco: {
+  'trait_SimPreference_Dislikes_Decor_ArtDeco': {
     name: 'trait_SimPreference_Dislikes_Decor_ArtDeco',
     description: 'Art Deco decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Basics: {
+  'trait_SimPreference_Dislikes_Decor_Basics': {
     name: 'trait_SimPreference_Dislikes_Decor_Basics',
     description: 'basic decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Boho: {
+  'trait_SimPreference_Dislikes_Decor_Boho': {
     name: 'trait_SimPreference_Dislikes_Decor_Boho',
     description: 'Boho decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Contemporary: {
+  'trait_SimPreference_Dislikes_Decor_Contemporary': {
     name: 'trait_SimPreference_Dislikes_Decor_Contemporary',
     description: 'contemporary decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Cosmolux: {
+  'trait_SimPreference_Dislikes_Decor_Cosmolux': {
     name: 'trait_SimPreference_Dislikes_Decor_Cosmolux',
     description: 'Cosmolux decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Cute: {
+  'trait_SimPreference_Dislikes_Decor_Cute': {
     name: 'trait_SimPreference_Dislikes_Decor_Cute',
     description: 'cute decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_FrenchCountry: {
+  'trait_SimPreference_Dislikes_Decor_FrenchCountry': {
     name: 'trait_SimPreference_Dislikes_Decor_FrenchCountry',
     description: 'French Country decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Garden: {
+  'trait_SimPreference_Dislikes_Decor_Garden': {
     name: 'trait_SimPreference_Dislikes_Decor_Garden',
     description: 'garden decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_GothicFarmhouse: {
+  'trait_SimPreference_Dislikes_Decor_GothicFarmhouse': {
     name: 'trait_SimPreference_Dislikes_Decor_GothicFarmhouse',
     description: 'Gothic Farmhouse decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Industrial: {
+  'trait_SimPreference_Dislikes_Decor_Industrial': {
     name: 'trait_SimPreference_Dislikes_Decor_Industrial',
     description: 'industrial decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Island: {
+  'trait_SimPreference_Dislikes_Decor_Island': {
     name: 'trait_SimPreference_Dislikes_Decor_Island',
     description: 'island decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Luxe: {
+  'trait_SimPreference_Dislikes_Decor_Luxe': {
     name: 'trait_SimPreference_Dislikes_Decor_Luxe',
     description: 'luxe decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Mission: {
+  'trait_SimPreference_Dislikes_Decor_Mission': {
     name: 'trait_SimPreference_Dislikes_Decor_Mission',
     description: 'Mission decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Modern: {
+  'trait_SimPreference_Dislikes_Decor_Modern': {
     name: 'trait_SimPreference_Dislikes_Decor_Modern',
     description: 'modern decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Patio: {
+  'trait_SimPreference_Dislikes_Decor_Patio': {
     name: 'trait_SimPreference_Dislikes_Decor_Patio',
     description: 'patio decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_QueenAnne: {
+  'trait_SimPreference_Dislikes_Decor_QueenAnne': {
     name: 'trait_SimPreference_Dislikes_Decor_QueenAnne',
     description: 'Queen Anne decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_ScandinavianContemporary: {
+  'trait_SimPreference_Dislikes_Decor_ScandinavianContemporary': {
     name: 'trait_SimPreference_Dislikes_Decor_ScandinavianContemporary',
     description: 'Scandinavian contemporary decor and mid-century style',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Shabby: {
+  'trait_SimPreference_Dislikes_Decor_Shabby': {
     name: 'trait_SimPreference_Dislikes_Decor_Shabby',
     description: 'shabby decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_SuburbanContempo: {
+  'trait_SimPreference_Dislikes_Decor_SuburbanContempo': {
     name: 'trait_SimPreference_Dislikes_Decor_SuburbanContempo',
     description: 'suburban contemporary decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Tudor: {
+  'trait_SimPreference_Dislikes_Decor_Tudor': {
     name: 'trait_SimPreference_Dislikes_Decor_Tudor',
     description: 'Tudor-style decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Decor_Vintage: {
+  'trait_SimPreference_Dislikes_Decor_Vintage': {
     name: 'trait_SimPreference_Dislikes_Decor_Vintage',
     description: 'vintage decor',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Fashion_Basics: {
+  'trait_SimPreference_Dislikes_Fashion_Basics': {
     name: 'trait_SimPreference_Dislikes_Fashion_Basics',
     description: 'basic fashion',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Fashion_Boho: {
+  'trait_SimPreference_Dislikes_Fashion_Boho': {
     name: 'trait_SimPreference_Dislikes_Fashion_Boho',
     description: 'Boho Fashion',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Fashion_Country: {
+  'trait_SimPreference_Dislikes_Fashion_Country': {
     name: 'trait_SimPreference_Dislikes_Fashion_Country',
     description: 'country fashion',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Fashion_Hipster: {
+  'trait_SimPreference_Dislikes_Fashion_Hipster': {
     name: 'trait_SimPreference_Dislikes_Fashion_Hipster',
     description: 'hipster fashion',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Fashion_Outdoorsy: {
+  'trait_SimPreference_Dislikes_Fashion_Outdoorsy': {
     name: 'trait_SimPreference_Dislikes_Fashion_Outdoorsy',
     description: 'outdoorsy fashion',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Fashion_Polished: {
+  'trait_SimPreference_Dislikes_Fashion_Polished': {
     name: 'trait_SimPreference_Dislikes_Fashion_Polished',
     description: 'polished fashion',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Fashion_Preppy: {
+  'trait_SimPreference_Dislikes_Fashion_Preppy': {
     name: 'trait_SimPreference_Dislikes_Fashion_Preppy',
     description: 'preppy fashion',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Fashion_Rocker: {
+  'trait_SimPreference_Dislikes_Fashion_Rocker': {
     name: 'trait_SimPreference_Dislikes_Fashion_Rocker',
     description: 'rocker fashion',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Fashion_Streetwear: {
+  'trait_SimPreference_Dislikes_Fashion_Streetwear': {
     name: 'trait_SimPreference_Dislikes_Fashion_Streetwear',
     description: 'streetwear fashion',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_Alternative: {
+  'trait_SimPreference_Dislikes_Music_Alternative': {
     name: 'trait_SimPreference_Dislikes_Music_Alternative',
     description: 'alternative music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_Americana: {
+  'Trait_SimPreference_Dislikes_Music_Americana': {
     name: 'Trait_SimPreference_Dislikes_Music_Americana',
     description: 'Americana music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_Backyard: {
+  'Trait_SimPreference_Dislikes_Music_Backyard': {
     name: 'Trait_SimPreference_Dislikes_Music_Backyard',
     description: 'music in the backyard',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_Baroque: {
+  'Trait_SimPreference_Dislikes_Music_Baroque': {
     name: 'Trait_SimPreference_Dislikes_Music_Baroque',
     description: 'Baroque music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_Batuu: {
+  'trait_SimPreference_Dislikes_Music_Batuu': {
     name: 'trait_SimPreference_Dislikes_Music_Batuu',
     description: 'Batuu music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_Blues: {
+  'trait_SimPreference_Dislikes_Music_Blues': {
     name: 'trait_SimPreference_Dislikes_Music_Blues',
     description: 'blues music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_Brazilian: {
+  'trait_SimPreference_Dislikes_Music_Brazilian': {
     name: 'trait_SimPreference_Dislikes_Music_Brazilian',
     description: 'Brazilian music, particularly Carnival beats',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_Classical: {
+  'trait_SimPreference_Dislikes_Music_Classical': {
     name: 'trait_SimPreference_Dislikes_Music_Classical',
     description: 'classical music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_CottageCore: {
+  'trait_SimPreference_Dislikes_Music_CottageCore': {
     name: 'trait_SimPreference_Dislikes_Music_CottageCore',
     description: 'Cottagecore music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_DJ: {
+  'Trait_SimPreference_Dislikes_Music_DJ': {
     name: 'Trait_SimPreference_Dislikes_Music_DJ',
     description: 'music from DJ booths',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_EasyListening: {
+  'Trait_SimPreference_Dislikes_Music_EasyListening': {
     name: 'Trait_SimPreference_Dislikes_Music_EasyListening',
     description: 'listening to easy listening music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_Electronica: {
+  'trait_SimPreference_Dislikes_Music_Electronica': {
     name: 'trait_SimPreference_Dislikes_Music_Electronica',
     description: 'electronica music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_Focus: {
+  'Trait_SimPreference_Dislikes_Music_Focus': {
     name: 'Trait_SimPreference_Dislikes_Music_Focus',
-    description:
-      'is a strong preference for music and tends to focus better when listening to it',
+    description: 'is a strong preference for music and tends to focus better when listening to it',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_HipHop: {
+  'trait_SimPreference_Dislikes_Music_HipHop': {
     name: 'trait_SimPreference_Dislikes_Music_HipHop',
     description: 'hip hop music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_Island: {
+  'Trait_SimPreference_Dislikes_Music_Island': {
     name: 'Trait_SimPreference_Dislikes_Music_Island',
     description: 'island music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_JapaneseFolk: {
+  'Trait_SimPreference_Dislikes_Music_JapaneseFolk': {
     name: 'Trait_SimPreference_Dislikes_Music_JapaneseFolk',
     description: 'listening to Japanese folk music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_Jazz: {
+  'Trait_SimPreference_Dislikes_Music_Jazz': {
     name: 'Trait_SimPreference_Dislikes_Music_Jazz',
     description: 'jazz music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_Kids: {
+  'trait_SimPreference_Dislikes_Music_Kids': {
     name: 'trait_SimPreference_Dislikes_Music_Kids',
     description: 'kids radio music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_Latin: {
+  'Trait_SimPreference_Dislikes_Music_Latin': {
     name: 'Trait_SimPreference_Dislikes_Music_Latin',
     description: 'Latin music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_LatinPop: {
+  'Trait_SimPreference_Dislikes_Music_LatinPop': {
     name: 'Trait_SimPreference_Dislikes_Music_LatinPop',
     description: 'listening to Latin pop music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_Lullabies: {
+  'trait_SimPreference_Dislikes_Music_Lullabies': {
     name: 'trait_SimPreference_Dislikes_Music_Lullabies',
     description: 'lullabies music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_Metal: {
+  'Trait_SimPreference_Dislikes_Music_Metal': {
     name: 'Trait_SimPreference_Dislikes_Music_Metal',
     description: 'metal music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_NewAge: {
+  'Trait_SimPreference_Dislikes_Music_NewAge': {
     name: 'Trait_SimPreference_Dislikes_Music_NewAge',
     description: 'listening to New Age music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_NuDisco: {
+  'Trait_SimPreference_Dislikes_Music_NuDisco': {
     name: 'Trait_SimPreference_Dislikes_Music_NuDisco',
     description: 'listening to NuDisco music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_Oldies: {
+  'trait_SimPreference_Dislikes_Music_Oldies': {
     name: 'trait_SimPreference_Dislikes_Music_Oldies',
     description: 'oldies music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_Pop: {
+  'trait_SimPreference_Dislikes_Music_Pop': {
     name: 'trait_SimPreference_Dislikes_Music_Pop',
     description: 'pop music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_Ranch: {
+  'Trait_SimPreference_Dislikes_Music_Ranch': {
     name: 'Trait_SimPreference_Dislikes_Music_Ranch',
     description: 'ranch music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_Retro: {
+  'trait_SimPreference_Dislikes_Music_Retro': {
     name: 'trait_SimPreference_Dislikes_Music_Retro',
     description: 'retro music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_RnB: {
+  'trait_SimPreference_Dislikes_Music_RnB': {
     name: 'trait_SimPreference_Dislikes_Music_RnB',
     description: 'R&B music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_Romance: {
+  'trait_SimPreference_Dislikes_Music_Romance': {
     name: 'trait_SimPreference_Dislikes_Music_Romance',
     description: 'music with a romantic theme',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_SingerSongwriter: {
+  'Trait_SimPreference_Dislikes_Music_SingerSongwriter': {
     name: 'Trait_SimPreference_Dislikes_Music_SingerSongwriter',
     description: 'loves singer-songwriter music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_Spooky: {
+  'trait_SimPreference_Dislikes_Music_Spooky': {
     name: 'trait_SimPreference_Dislikes_Music_Spooky',
     description: 'spooky music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_SPop: {
+  'trait_SimPreference_Dislikes_Music_SPop': {
     name: 'trait_SimPreference_Dislikes_Music_SPop',
     description: 'S-Pop music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_StrangeTunes: {
+  'Trait_SimPreference_Dislikes_Music_StrangeTunes': {
     name: 'Trait_SimPreference_Dislikes_Music_StrangeTunes',
     description: 'strange tunes',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_SummerStrut: {
+  'Trait_SimPreference_Dislikes_Music_SummerStrut': {
     name: 'Trait_SimPreference_Dislikes_Music_SummerStrut',
     description: 'listening to the Summer Strut music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_TweenPop: {
+  'Trait_SimPreference_Dislikes_Music_TweenPop': {
     name: 'Trait_SimPreference_Dislikes_Music_TweenPop',
     description: 'tween pop music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  trait_SimPreference_Dislikes_Music_WinterHoliday: {
+  'trait_SimPreference_Dislikes_Music_WinterHoliday': {
     name: 'trait_SimPreference_Dislikes_Music_WinterHoliday',
     description: 'Winter Holiday music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Dislikes_Music_World: {
+  'Trait_SimPreference_Dislikes_Music_World': {
     name: 'Trait_SimPreference_Dislikes_Music_World',
     description: 'world music',
     class: 'Preference',
     trait_type: TraitType.DISLIKE,
   },
-  Trait_SimPreference_Likes_Activities_Acting: {
+  'Trait_SimPreference_Likes_Activities_Acting': {
     name: 'Trait_SimPreference_Likes_Activities_Acting',
     description: 'activities related to acting',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_Baking: {
+  'Trait_SimPreference_Likes_Activities_Baking': {
     name: 'Trait_SimPreference_Likes_Activities_Baking',
     description: 'baking activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_Bowling: {
+  'Trait_SimPreference_Likes_Activities_Bowling': {
     name: 'Trait_SimPreference_Likes_Activities_Bowling',
     description: 'bowling activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Comedy: {
+  'trait_SimPreference_Likes_Activities_Comedy': {
     name: 'trait_SimPreference_Likes_Activities_Comedy',
     description: 'comedy activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Cooking: {
+  'trait_SimPreference_Likes_Activities_Cooking': {
     name: 'trait_SimPreference_Likes_Activities_Cooking',
     description: 'cooking activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_CrossStitch: {
+  'Trait_SimPreference_Likes_Activities_CrossStitch': {
     name: 'Trait_SimPreference_Likes_Activities_CrossStitch',
     description: 'cross-stitch activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_Dancing: {
+  'Trait_SimPreference_Likes_Activities_Dancing': {
     name: 'Trait_SimPreference_Likes_Activities_Dancing',
     description: 'dancing',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_Debating: {
+  'Trait_SimPreference_Likes_Activities_Debating': {
     name: 'Trait_SimPreference_Likes_Activities_Debating',
-    description:
-      'activities related to debating due to their preference for research and debate',
+    description: 'activities related to debating due to their preference for research and debate',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_DJMixing: {
+  'Trait_SimPreference_Likes_Activities_DJMixing': {
     name: 'Trait_SimPreference_Likes_Activities_DJMixing',
     description: 'DJ Mixing activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_EquestrianSkill: {
+  'trait_SimPreference_Likes_Activities_EquestrianSkill': {
     name: 'trait_SimPreference_Likes_Activities_EquestrianSkill',
-    description:
-      'activities related to the Equestrian Skill, such as horse riding',
+    description: 'activities related to the Equestrian Skill, such as horse riding',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Fishing: {
+  'trait_SimPreference_Likes_Activities_Fishing': {
     name: 'trait_SimPreference_Likes_Activities_Fishing',
     description: 'fishing',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Fitness: {
+  'trait_SimPreference_Likes_Activities_Fitness': {
     name: 'trait_SimPreference_Likes_Activities_Fitness',
     description: 'fitness activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Gardening: {
+  'trait_SimPreference_Likes_Activities_Gardening': {
     name: 'trait_SimPreference_Likes_Activities_Gardening',
     description: 'gardening activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_GemologySkill: {
+  'trait_SimPreference_Likes_Activities_GemologySkill': {
     name: 'trait_SimPreference_Likes_Activities_GemologySkill',
     description: 'gemology',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Guitar: {
+  'trait_SimPreference_Likes_Activities_Guitar': {
     name: 'trait_SimPreference_Likes_Activities_Guitar',
     description: 'playing the guitar',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Handiness: {
+  'trait_SimPreference_Likes_Activities_Handiness': {
     name: 'trait_SimPreference_Likes_Activities_Handiness',
     description: 'being handy',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Knitting: {
+  'trait_SimPreference_Likes_Activities_Knitting': {
     name: 'trait_SimPreference_Likes_Activities_Knitting',
     description: 'knitting activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_MediaProduction: {
+  'Trait_SimPreference_Likes_Activities_MediaProduction': {
     name: 'Trait_SimPreference_Likes_Activities_MediaProduction',
     description: 'media production activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Mischief: {
+  'trait_SimPreference_Likes_Activities_Mischief': {
     name: 'trait_SimPreference_Likes_Activities_Mischief',
     description: 'mischievous activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Mixology: {
+  'trait_SimPreference_Likes_Activities_Mixology': {
     name: 'trait_SimPreference_Likes_Activities_Mixology',
     description: 'Mixology activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_NectarMaking: {
+  'trait_SimPreference_Likes_Activities_NectarMaking': {
     name: 'trait_SimPreference_Likes_Activities_NectarMaking',
     description: 'activities related to nectar making',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Painting: {
+  'trait_SimPreference_Likes_Activities_Painting': {
     name: 'trait_SimPreference_Likes_Activities_Painting',
     description: 'painting activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_Photography: {
+  'Trait_SimPreference_Likes_Activities_Photography': {
     name: 'Trait_SimPreference_Likes_Activities_Photography',
     description: 'photography',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Piano: {
+  'trait_SimPreference_Likes_Activities_Piano': {
     name: 'trait_SimPreference_Likes_Activities_Piano',
     description: 'playing the piano',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_PipeOrgan: {
+  'Trait_SimPreference_Likes_Activities_PipeOrgan': {
     name: 'Trait_SimPreference_Likes_Activities_PipeOrgan',
     description: 'playing the pipe organ',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Pottery: {
+  'trait_SimPreference_Likes_Activities_Pottery': {
     name: 'trait_SimPreference_Likes_Activities_Pottery',
     description: 'making pottery',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Programming: {
+  'trait_SimPreference_Likes_Activities_Programming': {
     name: 'trait_SimPreference_Likes_Activities_Programming',
     description: 'programming activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_Robotics: {
+  'Trait_SimPreference_Likes_Activities_Robotics': {
     name: 'Trait_SimPreference_Likes_Activities_Robotics',
     description: 'activities related to robotics',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_RockClimbing: {
+  'Trait_SimPreference_Likes_Activities_RockClimbing': {
     name: 'Trait_SimPreference_Likes_Activities_RockClimbing',
     description: 'rock climbing activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_RocketScience: {
+  'trait_SimPreference_Likes_Activities_RocketScience': {
     name: 'trait_SimPreference_Likes_Activities_RocketScience',
     description: 'activities related to Rocket Science',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_RomanceSkill: {
+  'trait_SimPreference_Likes_Activities_RomanceSkill': {
     name: 'trait_SimPreference_Likes_Activities_RomanceSkill',
     description: 'romance',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_Singing: {
+  'Trait_SimPreference_Likes_Activities_Singing': {
     name: 'Trait_SimPreference_Likes_Activities_Singing',
     description: 'singing',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_Skiing: {
+  'Trait_SimPreference_Likes_Activities_Skiing': {
     name: 'Trait_SimPreference_Likes_Activities_Skiing',
     description: 'skiing',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_Snowboarding: {
+  'Trait_SimPreference_Likes_Activities_Snowboarding': {
     name: 'Trait_SimPreference_Likes_Activities_Snowboarding',
     description: 'snowboarding activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Tattooing: {
+  'trait_SimPreference_Likes_Activities_Tattooing': {
     name: 'trait_SimPreference_Likes_Activities_Tattooing',
     description: 'tattooing',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Thanatology: {
+  'trait_SimPreference_Likes_Activities_Thanatology': {
     name: 'trait_SimPreference_Likes_Activities_Thanatology',
     description: 'thanatology',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_VideoGaming: {
+  'trait_SimPreference_Likes_Activities_VideoGaming': {
     name: 'trait_SimPreference_Likes_Activities_VideoGaming',
     description: 'video gaming',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Violin: {
+  'trait_SimPreference_Likes_Activities_Violin': {
     name: 'trait_SimPreference_Likes_Activities_Violin',
     description: 'playing the violin',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Activities_Wellness: {
+  'Trait_SimPreference_Likes_Activities_Wellness': {
     name: 'Trait_SimPreference_Likes_Activities_Wellness',
     description: 'activities related to wellness',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Activities_Writing: {
+  'trait_SimPreference_Likes_Activities_Writing': {
     name: 'trait_SimPreference_Likes_Activities_Writing',
     description: 'writing activities',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_Ambitionless: {
+  'trait_SimPreference_Likes_Characteristic_Ambitionless': {
     name: 'trait_SimPreference_Likes_Characteristic_Ambitionless',
     description: 'is ambitionless',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_Argumentative: {
+  'trait_SimPreference_Likes_Characteristic_Argumentative': {
     name: 'trait_SimPreference_Likes_Characteristic_Argumentative',
     description: 'is argumentative',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_Cerebral: {
+  'trait_SimPreference_Likes_Characteristic_Cerebral': {
     name: 'trait_SimPreference_Likes_Characteristic_Cerebral',
     description: 'is cerebral',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_Egotistical: {
+  'trait_SimPreference_Likes_Characteristic_Egotistical': {
     name: 'trait_SimPreference_Likes_Characteristic_Egotistical',
     description: 'is egotistical',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_EmotionalDecisionMaker: {
+  'trait_SimPreference_Likes_Characteristic_EmotionalDecisionMaker': {
     name: 'trait_SimPreference_Likes_Characteristic_EmotionalDecisionMaker',
     description: 'is an emotional decision-maker',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_Funny: {
+  'trait_SimPreference_Likes_Characteristic_Funny': {
     name: 'trait_SimPreference_Likes_Characteristic_Funny',
     description: 'is funny',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_HardWorker: {
+  'trait_SimPreference_Likes_Characteristic_HardWorker': {
     name: 'trait_SimPreference_Likes_Characteristic_HardWorker',
     description: 'is a hard worker',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_HighEnergy: {
+  'trait_SimPreference_Likes_Characteristic_HighEnergy': {
     name: 'trait_SimPreference_Likes_Characteristic_HighEnergy',
     description: 'is high energy',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_Homebody: {
+  'trait_SimPreference_Likes_Characteristic_Homebody': {
     name: 'trait_SimPreference_Likes_Characteristic_Homebody',
     description: 'is a homebody',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_Idealist: {
+  'trait_SimPreference_Likes_Characteristic_Idealist': {
     name: 'trait_SimPreference_Likes_Characteristic_Idealist',
     description: 'is an idealist',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_KidEnthusiast: {
+  'trait_SimPreference_Likes_Characteristic_KidEnthusiast': {
     name: 'trait_SimPreference_Likes_Characteristic_KidEnthusiast',
     description: 'is a kid enthusiast',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_Mischievous: {
+  'trait_SimPreference_Likes_Characteristic_Mischievous': {
     name: 'trait_SimPreference_Likes_Characteristic_Mischievous',
     description: 'is mischievous',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_NatureEnthusiast: {
+  'trait_SimPreference_Likes_Characteristic_NatureEnthusiast': {
     name: 'trait_SimPreference_Likes_Characteristic_NatureEnthusiast',
     description: 'is a nature enthusiast',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_Optimist: {
+  'trait_SimPreference_Likes_Characteristic_Optimist': {
     name: 'trait_SimPreference_Likes_Characteristic_Optimist',
     description: 'is optimistic',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_Pessimist: {
+  'trait_SimPreference_Likes_Characteristic_Pessimist': {
     name: 'trait_SimPreference_Likes_Characteristic_Pessimist',
     description: 'is pessimistic',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_PetEnthusiast: {
+  'trait_SimPreference_Likes_Characteristic_PetEnthusiast': {
     name: 'trait_SimPreference_Likes_Characteristic_PetEnthusiast',
     description: 'is a pet enthusiast',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_RomanceEnthusiast: {
+  'trait_SimPreference_Likes_Characteristic_RomanceEnthusiast': {
     name: 'trait_SimPreference_Likes_Characteristic_RomanceEnthusiast',
     description: 'is a Romance Enthusiast',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Characteristic_Spirited: {
+  'trait_SimPreference_Likes_Characteristic_Spirited': {
     name: 'trait_SimPreference_Likes_Characteristic_Spirited',
     description: 'is spirited',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Color_Black: {
+  'trait_SimPreference_Likes_Color_Black': {
     name: 'trait_SimPreference_Likes_Color_Black',
     description: 'the color black',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Color_Blue: {
+  'trait_SimPreference_Likes_Color_Blue': {
     name: 'trait_SimPreference_Likes_Color_Blue',
     description: 'the color blue',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Color_Brown: {
+  'trait_SimPreference_Likes_Color_Brown': {
     name: 'trait_SimPreference_Likes_Color_Brown',
     description: 'the color brown',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Color_Gray: {
+  'trait_SimPreference_Likes_Color_Gray': {
     name: 'trait_SimPreference_Likes_Color_Gray',
     description: 'the color gray',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Color_Green: {
+  'trait_SimPreference_Likes_Color_Green': {
     name: 'trait_SimPreference_Likes_Color_Green',
     description: 'the color green',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Color_Orange: {
+  'trait_SimPreference_Likes_Color_Orange': {
     name: 'trait_SimPreference_Likes_Color_Orange',
     description: 'the color orange',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Color_Pink: {
+  'trait_SimPreference_Likes_Color_Pink': {
     name: 'trait_SimPreference_Likes_Color_Pink',
     description: 'the color pink',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Color_Purple: {
+  'trait_SimPreference_Likes_Color_Purple': {
     name: 'trait_SimPreference_Likes_Color_Purple',
     description: 'the color purple',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Color_Red: {
+  'trait_SimPreference_Likes_Color_Red': {
     name: 'trait_SimPreference_Likes_Color_Red',
     description: 'the color red',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Color_White: {
+  'trait_SimPreference_Likes_Color_White': {
     name: 'trait_SimPreference_Likes_Color_White',
     description: 'the color white',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Color_Yellow: {
+  'trait_SimPreference_Likes_Color_Yellow': {
     name: 'trait_SimPreference_Likes_Color_Yellow',
     description: 'the color yellow',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_Affection: {
+  'trait_SimPreference_Likes_Communication_Affection': {
     name: 'trait_SimPreference_Likes_Communication_Affection',
     description: 'communication and affection',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_Arguments: {
+  'trait_SimPreference_Likes_Communication_Arguments': {
     name: 'trait_SimPreference_Likes_Communication_Arguments',
-    description:
-      'engaging in arguments and finds communication through disagreements stimulating',
+    description: 'engaging in arguments and finds communication through disagreements stimulating',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_Complaints: {
+  'trait_SimPreference_Likes_Communication_Complaints': {
     name: 'trait_SimPreference_Likes_Communication_Complaints',
-    description:
-      'is a preference for communication and tends to express complaints more often',
+    description: 'is a preference for communication and tends to express complaints more often',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_Compliments: {
+  'trait_SimPreference_Likes_Communication_Compliments': {
     name: 'trait_SimPreference_Likes_Communication_Compliments',
     description: 'communication that involves giving compliments',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_Deception: {
+  'trait_SimPreference_Likes_Communication_Deception': {
     name: 'trait_SimPreference_Likes_Communication_Deception',
     description: 'and engaging in deceptive communication',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_DeepThoughts: {
+  'trait_SimPreference_Likes_Communication_DeepThoughts': {
     name: 'trait_SimPreference_Likes_Communication_DeepThoughts',
     description: 'is a preference for deep and meaningful conversations',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_Flirtation: {
+  'trait_SimPreference_Likes_Communication_Flirtation': {
     name: 'trait_SimPreference_Likes_Communication_Flirtation',
     description: 'to communicate through flirtation',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_Gossip: {
+  'trait_SimPreference_Likes_Communication_Gossip': {
     name: 'trait_SimPreference_Likes_Communication_Gossip',
     description: 'gossiping and discussing the latest news with other people',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_Hobbies: {
+  'trait_SimPreference_Likes_Communication_Hobbies': {
     name: 'trait_SimPreference_Likes_Communication_Hobbies',
     description: 'to discuss hobbies with others',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_Interests: {
+  'trait_SimPreference_Likes_Communication_Interests': {
     name: 'trait_SimPreference_Likes_Communication_Interests',
     description: 'discussing interests',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_Jokes: {
+  'trait_SimPreference_Likes_Communication_Jokes': {
     name: 'trait_SimPreference_Likes_Communication_Jokes',
     description: 'communication through jokes',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_Malicious: {
+  'trait_SimPreference_Likes_Communication_Malicious': {
     name: 'trait_SimPreference_Likes_Communication_Malicious',
     description: 'is a preference for malicious interactions',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_PhysicalIntimacy: {
+  'trait_SimPreference_Likes_Communication_PhysicalIntimacy': {
     name: 'trait_SimPreference_Likes_Communication_PhysicalIntimacy',
-    description:
-      'physical intimacy andis likely to seek out opportunities for affectionate interactions',
+    description: 'physical intimacy andis likely to seek out opportunities for affectionate interactions',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_PottyHumor: {
+  'trait_SimPreference_Likes_Communication_PottyHumor': {
     name: 'trait_SimPreference_Likes_Communication_PottyHumor',
     description: 'is a preference for potty humor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_Pranks: {
+  'trait_SimPreference_Likes_Communication_Pranks': {
     name: 'trait_SimPreference_Likes_Communication_Pranks',
     description: 'pulling pranks on others',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_SillyBehavior: {
+  'trait_SimPreference_Likes_Communication_SillyBehavior': {
     name: 'trait_SimPreference_Likes_Communication_SillyBehavior',
     description: 'engaging in silly behavior',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_SmallTalk: {
+  'trait_SimPreference_Likes_Communication_SmallTalk': {
     name: 'trait_SimPreference_Likes_Communication_SmallTalk',
     description: 'engaging in small talk with others',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Communication_Stories: {
+  'trait_SimPreference_Likes_Communication_Stories': {
     name: 'trait_SimPreference_Likes_Communication_Stories',
     description: 'engaging in conversations and storytelling',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_ArtDeco: {
+  'trait_SimPreference_Likes_Decor_ArtDeco': {
     name: 'trait_SimPreference_Likes_Decor_ArtDeco',
     description: 'Art Deco decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Basics: {
+  'trait_SimPreference_Likes_Decor_Basics': {
     name: 'trait_SimPreference_Likes_Decor_Basics',
     description: 'basic decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Boho: {
+  'trait_SimPreference_Likes_Decor_Boho': {
     name: 'trait_SimPreference_Likes_Decor_Boho',
     description: 'Boho decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Contemporary: {
+  'trait_SimPreference_Likes_Decor_Contemporary': {
     name: 'trait_SimPreference_Likes_Decor_Contemporary',
     description: 'contemporary decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Cosmolux: {
+  'trait_SimPreference_Likes_Decor_Cosmolux': {
     name: 'trait_SimPreference_Likes_Decor_Cosmolux',
     description: 'Cosmolux decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Cute: {
+  'trait_SimPreference_Likes_Decor_Cute': {
     name: 'trait_SimPreference_Likes_Decor_Cute',
     description: 'cute decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_FrenchCountry: {
+  'trait_SimPreference_Likes_Decor_FrenchCountry': {
     name: 'trait_SimPreference_Likes_Decor_FrenchCountry',
     description: 'French Country decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Garden: {
+  'trait_SimPreference_Likes_Decor_Garden': {
     name: 'trait_SimPreference_Likes_Decor_Garden',
     description: 'garden decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_GothicFarmhouse: {
+  'trait_SimPreference_Likes_Decor_GothicFarmhouse': {
     name: 'trait_SimPreference_Likes_Decor_GothicFarmhouse',
     description: 'Gothic Farmhouse decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Industrial: {
+  'trait_SimPreference_Likes_Decor_Industrial': {
     name: 'trait_SimPreference_Likes_Decor_Industrial',
     description: 'industrial decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Island: {
+  'trait_SimPreference_Likes_Decor_Island': {
     name: 'trait_SimPreference_Likes_Decor_Island',
     description: 'island decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Luxe: {
+  'trait_SimPreference_Likes_Decor_Luxe': {
     name: 'trait_SimPreference_Likes_Decor_Luxe',
     description: 'luxe decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Mission: {
+  'trait_SimPreference_Likes_Decor_Mission': {
     name: 'trait_SimPreference_Likes_Decor_Mission',
     description: 'Mission decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Modern: {
+  'trait_SimPreference_Likes_Decor_Modern': {
     name: 'trait_SimPreference_Likes_Decor_Modern',
     description: 'modern decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Patio: {
+  'trait_SimPreference_Likes_Decor_Patio': {
     name: 'trait_SimPreference_Likes_Decor_Patio',
     description: 'patio decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_QueenAnne: {
+  'trait_SimPreference_Likes_Decor_QueenAnne': {
     name: 'trait_SimPreference_Likes_Decor_QueenAnne',
     description: 'Queen Anne decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_ScandinavianContemporary: {
+  'trait_SimPreference_Likes_Decor_ScandinavianContemporary': {
     name: 'trait_SimPreference_Likes_Decor_ScandinavianContemporary',
     description: 'Scandinavian contemporary decor and mid-century style',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Shabby: {
+  'trait_SimPreference_Likes_Decor_Shabby': {
     name: 'trait_SimPreference_Likes_Decor_Shabby',
     description: 'shabby decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_SuburbanContempo: {
+  'trait_SimPreference_Likes_Decor_SuburbanContempo': {
     name: 'trait_SimPreference_Likes_Decor_SuburbanContempo',
     description: 'suburban contemporary decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Tudor: {
+  'trait_SimPreference_Likes_Decor_Tudor': {
     name: 'trait_SimPreference_Likes_Decor_Tudor',
     description: 'Tudor-style decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Decor_Vintage: {
+  'trait_SimPreference_Likes_Decor_Vintage': {
     name: 'trait_SimPreference_Likes_Decor_Vintage',
     description: 'vintage decor',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Fashion_Basics: {
+  'trait_SimPreference_Likes_Fashion_Basics': {
     name: 'trait_SimPreference_Likes_Fashion_Basics',
     description: 'basic fashion',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Fashion_Boho: {
+  'trait_SimPreference_Likes_Fashion_Boho': {
     name: 'trait_SimPreference_Likes_Fashion_Boho',
     description: 'Boho Fashion',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Fashion_Country: {
+  'trait_SimPreference_Likes_Fashion_Country': {
     name: 'trait_SimPreference_Likes_Fashion_Country',
     description: 'country fashion',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Fashion_Hipster: {
+  'trait_SimPreference_Likes_Fashion_Hipster': {
     name: 'trait_SimPreference_Likes_Fashion_Hipster',
     description: 'hipster fashion',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Fashion_Outdoorsy: {
+  'trait_SimPreference_Likes_Fashion_Outdoorsy': {
     name: 'trait_SimPreference_Likes_Fashion_Outdoorsy',
     description: 'outdoorsy fashion',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Fashion_Polished: {
+  'trait_SimPreference_Likes_Fashion_Polished': {
     name: 'trait_SimPreference_Likes_Fashion_Polished',
     description: 'polished fashion',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Fashion_Preppy: {
+  'trait_SimPreference_Likes_Fashion_Preppy': {
     name: 'trait_SimPreference_Likes_Fashion_Preppy',
     description: 'preppy fashion',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Fashion_Rocker: {
+  'trait_SimPreference_Likes_Fashion_Rocker': {
     name: 'trait_SimPreference_Likes_Fashion_Rocker',
     description: 'rocker fashion',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Fashion_Streetwear: {
+  'trait_SimPreference_Likes_Fashion_Streetwear': {
     name: 'trait_SimPreference_Likes_Fashion_Streetwear',
     description: 'streetwear fashion',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_Alternative: {
+  'trait_SimPreference_Likes_Music_Alternative': {
     name: 'trait_SimPreference_Likes_Music_Alternative',
     description: 'alternative music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_Americana: {
+  'Trait_SimPreference_Likes_Music_Americana': {
     name: 'Trait_SimPreference_Likes_Music_Americana',
     description: 'Americana music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_Backyard: {
+  'Trait_SimPreference_Likes_Music_Backyard': {
     name: 'Trait_SimPreference_Likes_Music_Backyard',
     description: 'music in the backyard',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_Baroque: {
+  'Trait_SimPreference_Likes_Music_Baroque': {
     name: 'Trait_SimPreference_Likes_Music_Baroque',
     description: 'Baroque music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_Batuu: {
+  'trait_SimPreference_Likes_Music_Batuu': {
     name: 'trait_SimPreference_Likes_Music_Batuu',
     description: 'Batuu music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_Blues: {
+  'trait_SimPreference_Likes_Music_Blues': {
     name: 'trait_SimPreference_Likes_Music_Blues',
     description: 'blues music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_Brazilian: {
+  'trait_SimPreference_Likes_Music_Brazilian': {
     name: 'trait_SimPreference_Likes_Music_Brazilian',
     description: 'Brazilian music, particularly Carnival beats',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_Classical: {
+  'trait_SimPreference_Likes_Music_Classical': {
     name: 'trait_SimPreference_Likes_Music_Classical',
     description: 'classical music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_CottageCore: {
+  'trait_SimPreference_Likes_Music_CottageCore': {
     name: 'trait_SimPreference_Likes_Music_CottageCore',
     description: 'Cottagecore music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_DJ: {
+  'Trait_SimPreference_Likes_Music_DJ': {
     name: 'Trait_SimPreference_Likes_Music_DJ',
     description: 'music from DJ booths',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_EasyListening: {
+  'Trait_SimPreference_Likes_Music_EasyListening': {
     name: 'Trait_SimPreference_Likes_Music_EasyListening',
     description: 'listening to easy listening music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_Electronica: {
+  'trait_SimPreference_Likes_Music_Electronica': {
     name: 'trait_SimPreference_Likes_Music_Electronica',
     description: 'electronica music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_Focus: {
+  'Trait_SimPreference_Likes_Music_Focus': {
     name: 'Trait_SimPreference_Likes_Music_Focus',
-    description:
-      'is a strong preference for music and tends to focus better when listening to it',
+    description: 'is a strong preference for music and tends to focus better when listening to it',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_HipHop: {
+  'trait_SimPreference_Likes_Music_HipHop': {
     name: 'trait_SimPreference_Likes_Music_HipHop',
     description: 'hip hop music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_Island: {
+  'Trait_SimPreference_Likes_Music_Island': {
     name: 'Trait_SimPreference_Likes_Music_Island',
     description: 'island music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_JapaneseFolk: {
+  'Trait_SimPreference_Likes_Music_JapaneseFolk': {
     name: 'Trait_SimPreference_Likes_Music_JapaneseFolk',
     description: 'listening to Japanese folk music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_Jazz: {
+  'Trait_SimPreference_Likes_Music_Jazz': {
     name: 'Trait_SimPreference_Likes_Music_Jazz',
     description: 'jazz music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_Kids: {
+  'trait_SimPreference_Likes_Music_Kids': {
     name: 'trait_SimPreference_Likes_Music_Kids',
     description: 'kids radio music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_Latin: {
+  'Trait_SimPreference_Likes_Music_Latin': {
     name: 'Trait_SimPreference_Likes_Music_Latin',
     description: 'Latin music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_LatinPop: {
+  'Trait_SimPreference_Likes_Music_LatinPop': {
     name: 'Trait_SimPreference_Likes_Music_LatinPop',
     description: 'listening to Latin pop music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_Lullabies: {
+  'trait_SimPreference_Likes_Music_Lullabies': {
     name: 'trait_SimPreference_Likes_Music_Lullabies',
     description: 'lullabies music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_Metal: {
+  'Trait_SimPreference_Likes_Music_Metal': {
     name: 'Trait_SimPreference_Likes_Music_Metal',
     description: 'metal music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_NewAge: {
+  'Trait_SimPreference_Likes_Music_NewAge': {
     name: 'Trait_SimPreference_Likes_Music_NewAge',
     description: 'listening to New Age music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_NuDisco: {
+  'Trait_SimPreference_Likes_Music_NuDisco': {
     name: 'Trait_SimPreference_Likes_Music_NuDisco',
     description: 'listening to NuDisco music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_Oldies: {
+  'trait_SimPreference_Likes_Music_Oldies': {
     name: 'trait_SimPreference_Likes_Music_Oldies',
     description: 'oldies music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_Pop: {
+  'trait_SimPreference_Likes_Music_Pop': {
     name: 'trait_SimPreference_Likes_Music_Pop',
     description: 'pop music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_Ranch: {
+  'Trait_SimPreference_Likes_Music_Ranch': {
     name: 'Trait_SimPreference_Likes_Music_Ranch',
     description: 'ranch music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_Retro: {
+  'trait_SimPreference_Likes_Music_Retro': {
     name: 'trait_SimPreference_Likes_Music_Retro',
     description: 'retro music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_RnB: {
+  'trait_SimPreference_Likes_Music_RnB': {
     name: 'trait_SimPreference_Likes_Music_RnB',
     description: 'R&B music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_Romance: {
+  'trait_SimPreference_Likes_Music_Romance': {
     name: 'trait_SimPreference_Likes_Music_Romance',
     description: 'music with a romantic theme',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_SingerSongwriter: {
+  'Trait_SimPreference_Likes_Music_SingerSongwriter': {
     name: 'Trait_SimPreference_Likes_Music_SingerSongwriter',
     description: 'loves singer-songwriter music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_Spooky: {
+  'trait_SimPreference_Likes_Music_Spooky': {
     name: 'trait_SimPreference_Likes_Music_Spooky',
     description: 'spooky music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_SPop: {
+  'trait_SimPreference_Likes_Music_SPop': {
     name: 'trait_SimPreference_Likes_Music_SPop',
     description: 'S-Pop music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_StrangeTunes: {
+  'Trait_SimPreference_Likes_Music_StrangeTunes': {
     name: 'Trait_SimPreference_Likes_Music_StrangeTunes',
     description: 'strange tunes',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_SummerStrut: {
+  'Trait_SimPreference_Likes_Music_SummerStrut': {
     name: 'Trait_SimPreference_Likes_Music_SummerStrut',
     description: 'listening to the Summer Strut music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_TweenPop: {
+  'Trait_SimPreference_Likes_Music_TweenPop': {
     name: 'Trait_SimPreference_Likes_Music_TweenPop',
     description: 'tween pop music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  trait_SimPreference_Likes_Music_WinterHoliday: {
+  'trait_SimPreference_Likes_Music_WinterHoliday': {
     name: 'trait_SimPreference_Likes_Music_WinterHoliday',
     description: 'Winter Holiday music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_Likes_Music_World: {
+  'Trait_SimPreference_Likes_Music_World': {
     name: 'Trait_SimPreference_Likes_Music_World',
     description: 'world music',
     class: 'Preference',
     trait_type: TraitType.LIKE,
   },
-  Trait_SimPreference_NoOpinion_Activities_Acting: {
+  'Trait_SimPreference_NoOpinion_Activities_Acting': {
     name: 'Trait_SimPreference_NoOpinion_Activities_Acting',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_Baking: {
+  'Trait_SimPreference_NoOpinion_Activities_Baking': {
     name: 'Trait_SimPreference_NoOpinion_Activities_Baking',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_Bowling: {
+  'Trait_SimPreference_NoOpinion_Activities_Bowling': {
     name: 'Trait_SimPreference_NoOpinion_Activities_Bowling',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Comedy: {
+  'trait_SimPreference_NoOpinion_Activities_Comedy': {
     name: 'trait_SimPreference_NoOpinion_Activities_Comedy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Cooking: {
+  'trait_SimPreference_NoOpinion_Activities_Cooking': {
     name: 'trait_SimPreference_NoOpinion_Activities_Cooking',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_CrossStitch: {
+  'Trait_SimPreference_NoOpinion_Activities_CrossStitch': {
     name: 'Trait_SimPreference_NoOpinion_Activities_CrossStitch',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_Dancing: {
+  'Trait_SimPreference_NoOpinion_Activities_Dancing': {
     name: 'Trait_SimPreference_NoOpinion_Activities_Dancing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_Debating: {
+  'Trait_SimPreference_NoOpinion_Activities_Debating': {
     name: 'Trait_SimPreference_NoOpinion_Activities_Debating',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_DJMixing: {
+  'Trait_SimPreference_NoOpinion_Activities_DJMixing': {
     name: 'Trait_SimPreference_NoOpinion_Activities_DJMixing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_EquestrianSkill: {
+  'trait_SimPreference_NoOpinion_Activities_EquestrianSkill': {
     name: 'trait_SimPreference_NoOpinion_Activities_EquestrianSkill',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Fishing: {
+  'trait_SimPreference_NoOpinion_Activities_Fishing': {
     name: 'trait_SimPreference_NoOpinion_Activities_Fishing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Fitness: {
+  'trait_SimPreference_NoOpinion_Activities_Fitness': {
     name: 'trait_SimPreference_NoOpinion_Activities_Fitness',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Gardening: {
+  'trait_SimPreference_NoOpinion_Activities_Gardening': {
     name: 'trait_SimPreference_NoOpinion_Activities_Gardening',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_GemologySkill: {
+  'trait_SimPreference_NoOpinion_Activities_GemologySkill': {
     name: 'trait_SimPreference_NoOpinion_Activities_GemologySkill',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Guitar: {
+  'trait_SimPreference_NoOpinion_Activities_Guitar': {
     name: 'trait_SimPreference_NoOpinion_Activities_Guitar',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Handiness: {
+  'trait_SimPreference_NoOpinion_Activities_Handiness': {
     name: 'trait_SimPreference_NoOpinion_Activities_Handiness',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Knitting: {
+  'trait_SimPreference_NoOpinion_Activities_Knitting': {
     name: 'trait_SimPreference_NoOpinion_Activities_Knitting',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_MediaProduction: {
+  'Trait_SimPreference_NoOpinion_Activities_MediaProduction': {
     name: 'Trait_SimPreference_NoOpinion_Activities_MediaProduction',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Mischief: {
+  'trait_SimPreference_NoOpinion_Activities_Mischief': {
     name: 'trait_SimPreference_NoOpinion_Activities_Mischief',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Mixology: {
+  'trait_SimPreference_NoOpinion_Activities_Mixology': {
     name: 'trait_SimPreference_NoOpinion_Activities_Mixology',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_NectarMaking: {
+  'trait_SimPreference_NoOpinion_Activities_NectarMaking': {
     name: 'trait_SimPreference_NoOpinion_Activities_NectarMaking',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Painting: {
+  'trait_SimPreference_NoOpinion_Activities_Painting': {
     name: 'trait_SimPreference_NoOpinion_Activities_Painting',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_Photography: {
+  'Trait_SimPreference_NoOpinion_Activities_Photography': {
     name: 'Trait_SimPreference_NoOpinion_Activities_Photography',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Piano: {
+  'trait_SimPreference_NoOpinion_Activities_Piano': {
     name: 'trait_SimPreference_NoOpinion_Activities_Piano',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_PipeOrgan: {
+  'Trait_SimPreference_NoOpinion_Activities_PipeOrgan': {
     name: 'Trait_SimPreference_NoOpinion_Activities_PipeOrgan',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Pottery: {
+  'trait_SimPreference_NoOpinion_Activities_Pottery': {
     name: 'trait_SimPreference_NoOpinion_Activities_Pottery',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Programming: {
+  'trait_SimPreference_NoOpinion_Activities_Programming': {
     name: 'trait_SimPreference_NoOpinion_Activities_Programming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_Robotics: {
+  'Trait_SimPreference_NoOpinion_Activities_Robotics': {
     name: 'Trait_SimPreference_NoOpinion_Activities_Robotics',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_RockClimbing: {
+  'Trait_SimPreference_NoOpinion_Activities_RockClimbing': {
     name: 'Trait_SimPreference_NoOpinion_Activities_RockClimbing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_RocketScience: {
+  'trait_SimPreference_NoOpinion_Activities_RocketScience': {
     name: 'trait_SimPreference_NoOpinion_Activities_RocketScience',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_Singing: {
+  'Trait_SimPreference_NoOpinion_Activities_Singing': {
     name: 'Trait_SimPreference_NoOpinion_Activities_Singing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_Skiing: {
+  'Trait_SimPreference_NoOpinion_Activities_Skiing': {
     name: 'Trait_SimPreference_NoOpinion_Activities_Skiing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_Activities_Snowboarding: {
+  'Trait_SimPreference_NoOpinion_Activities_Snowboarding': {
     name: 'Trait_SimPreference_NoOpinion_Activities_Snowboarding',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Tattooing: {
+  'trait_SimPreference_NoOpinion_Activities_Tattooing': {
     name: 'trait_SimPreference_NoOpinion_Activities_Tattooing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_VideoGaming: {
+  'trait_SimPreference_NoOpinion_Activities_VideoGaming': {
     name: 'trait_SimPreference_NoOpinion_Activities_VideoGaming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Violin: {
+  'trait_SimPreference_NoOpinion_Activities_Violin': {
     name: 'trait_SimPreference_NoOpinion_Activities_Violin',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Wellness: {
+  'trait_SimPreference_NoOpinion_Activities_Wellness': {
     name: 'trait_SimPreference_NoOpinion_Activities_Wellness',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Activities_Writing: {
+  'trait_SimPreference_NoOpinion_Activities_Writing': {
     name: 'trait_SimPreference_NoOpinion_Activities_Writing',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_Ambitionless: {
+  'trait_SimPreference_NoOpinion_Characteristic_Ambitionless': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_Ambitionless',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_Argumentative: {
+  'trait_SimPreference_NoOpinion_Characteristic_Argumentative': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_Argumentative',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_Cerebral: {
+  'trait_SimPreference_NoOpinion_Characteristic_Cerebral': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_Cerebral',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_Egotistical: {
+  'trait_SimPreference_NoOpinion_Characteristic_Egotistical': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_Egotistical',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_EmotionalDecisionMaker: {
+  'trait_SimPreference_NoOpinion_Characteristic_EmotionalDecisionMaker': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_EmotionalDecisionMaker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_Funny: {
+  'trait_SimPreference_NoOpinion_Characteristic_Funny': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_Funny',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_HardWorker: {
+  'trait_SimPreference_NoOpinion_Characteristic_HardWorker': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_HardWorker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_HighEnergy: {
+  'trait_SimPreference_NoOpinion_Characteristic_HighEnergy': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_HighEnergy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_Homebody: {
+  'trait_SimPreference_NoOpinion_Characteristic_Homebody': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_Homebody',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_Idealist: {
+  'trait_SimPreference_NoOpinion_Characteristic_Idealist': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_Idealist',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_KidEnthusiast: {
+  'trait_SimPreference_NoOpinion_Characteristic_KidEnthusiast': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_KidEnthusiast',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_Mischievous: {
+  'trait_SimPreference_NoOpinion_Characteristic_Mischievous': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_Mischievous',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_NatureEnthusiast: {
+  'trait_SimPreference_NoOpinion_Characteristic_NatureEnthusiast': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_NatureEnthusiast',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_Optimist: {
+  'trait_SimPreference_NoOpinion_Characteristic_Optimist': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_Optimist',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_Pessimist: {
+  'trait_SimPreference_NoOpinion_Characteristic_Pessimist': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_Pessimist',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_PetEnthusiast: {
+  'trait_SimPreference_NoOpinion_Characteristic_PetEnthusiast': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_PetEnthusiast',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_RomanceEnthusiast: {
+  'trait_SimPreference_NoOpinion_Characteristic_RomanceEnthusiast': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_RomanceEnthusiast',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Characteristic_Spirited: {
+  'trait_SimPreference_NoOpinion_Characteristic_Spirited': {
     name: 'trait_SimPreference_NoOpinion_Characteristic_Spirited',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_Affection: {
+  'trait_SimPreference_NoOpinion_Communication_Affection': {
     name: 'trait_SimPreference_NoOpinion_Communication_Affection',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_Arguments: {
+  'trait_SimPreference_NoOpinion_Communication_Arguments': {
     name: 'trait_SimPreference_NoOpinion_Communication_Arguments',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_Complaints: {
+  'trait_SimPreference_NoOpinion_Communication_Complaints': {
     name: 'trait_SimPreference_NoOpinion_Communication_Complaints',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_Compliments: {
+  'trait_SimPreference_NoOpinion_Communication_Compliments': {
     name: 'trait_SimPreference_NoOpinion_Communication_Compliments',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_Deception: {
+  'trait_SimPreference_NoOpinion_Communication_Deception': {
     name: 'trait_SimPreference_NoOpinion_Communication_Deception',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_DeepThoughts: {
+  'trait_SimPreference_NoOpinion_Communication_DeepThoughts': {
     name: 'trait_SimPreference_NoOpinion_Communication_DeepThoughts',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_Flirtation: {
+  'trait_SimPreference_NoOpinion_Communication_Flirtation': {
     name: 'trait_SimPreference_NoOpinion_Communication_Flirtation',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_Gossip: {
+  'trait_SimPreference_NoOpinion_Communication_Gossip': {
     name: 'trait_SimPreference_NoOpinion_Communication_Gossip',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_Hobbies: {
+  'trait_SimPreference_NoOpinion_Communication_Hobbies': {
     name: 'trait_SimPreference_NoOpinion_Communication_Hobbies',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_Interests: {
+  'trait_SimPreference_NoOpinion_Communication_Interests': {
     name: 'trait_SimPreference_NoOpinion_Communication_Interests',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_Jokes: {
+  'trait_SimPreference_NoOpinion_Communication_Jokes': {
     name: 'trait_SimPreference_NoOpinion_Communication_Jokes',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_Malicious: {
+  'trait_SimPreference_NoOpinion_Communication_Malicious': {
     name: 'trait_SimPreference_NoOpinion_Communication_Malicious',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_PhysicalIntimacy: {
+  'trait_SimPreference_NoOpinion_Communication_PhysicalIntimacy': {
     name: 'trait_SimPreference_NoOpinion_Communication_PhysicalIntimacy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_PottyHumor: {
+  'trait_SimPreference_NoOpinion_Communication_PottyHumor': {
     name: 'trait_SimPreference_NoOpinion_Communication_PottyHumor',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_Pranks: {
+  'trait_SimPreference_NoOpinion_Communication_Pranks': {
     name: 'trait_SimPreference_NoOpinion_Communication_Pranks',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_SillyBehavior: {
+  'trait_SimPreference_NoOpinion_Communication_SillyBehavior': {
     name: 'trait_SimPreference_NoOpinion_Communication_SillyBehavior',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_SmallTalk: {
+  'trait_SimPreference_NoOpinion_Communication_SmallTalk': {
     name: 'trait_SimPreference_NoOpinion_Communication_SmallTalk',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Communication_Stories: {
+  'trait_SimPreference_NoOpinion_Communication_Stories': {
     name: 'trait_SimPreference_NoOpinion_Communication_Stories',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Fashion_Basics: {
+  'trait_SimPreference_NoOpinion_Fashion_Basics': {
     name: 'trait_SimPreference_NoOpinion_Fashion_Basics',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Fashion_Boho: {
+  'trait_SimPreference_NoOpinion_Fashion_Boho': {
     name: 'trait_SimPreference_NoOpinion_Fashion_Boho',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Fashion_Country: {
+  'trait_SimPreference_NoOpinion_Fashion_Country': {
     name: 'trait_SimPreference_NoOpinion_Fashion_Country',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Fashion_Hipster: {
+  'trait_SimPreference_NoOpinion_Fashion_Hipster': {
     name: 'trait_SimPreference_NoOpinion_Fashion_Hipster',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Fashion_Outdoorsy: {
+  'trait_SimPreference_NoOpinion_Fashion_Outdoorsy': {
     name: 'trait_SimPreference_NoOpinion_Fashion_Outdoorsy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Fashion_Polished: {
+  'trait_SimPreference_NoOpinion_Fashion_Polished': {
     name: 'trait_SimPreference_NoOpinion_Fashion_Polished',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Fashion_Preppy: {
+  'trait_SimPreference_NoOpinion_Fashion_Preppy': {
     name: 'trait_SimPreference_NoOpinion_Fashion_Preppy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Fashion_Rocker: {
+  'trait_SimPreference_NoOpinion_Fashion_Rocker': {
     name: 'trait_SimPreference_NoOpinion_Fashion_Rocker',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Fashion_Streetwear: {
+  'trait_SimPreference_NoOpinion_Fashion_Streetwear': {
     name: 'trait_SimPreference_NoOpinion_Fashion_Streetwear',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SimPreference_NoOpinion_Music_All: {
+  'trait_SimPreference_NoOpinion_Music_All': {
     name: 'trait_SimPreference_NoOpinion_Music_All',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  Trait_SimPreference_NoOpinion_VideoGaming: {
+  'Trait_SimPreference_NoOpinion_VideoGaming': {
     name: 'Trait_SimPreference_NoOpinion_VideoGaming',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Sincere: {
+  'trait_Sincere': {
     name: 'trait_Sincere',
     ignored: false,
     description: 'is sincere',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Skeptical: {
+  'trait_Skeptical': {
     name: 'trait_Skeptical',
     description: 'is skeptical',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Skill_Fishing_HiSkill: {
+  'trait_Skill_Fishing_HiSkill': {
     name: 'trait_Skill_Fishing_HiSkill',
     description: 'is good at fishing',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Skill_Imagination_1: {
+  'trait_Skill_Imagination_1': {
     name: 'trait_Skill_Imagination_1',
     description: 'has a good imagination',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Skill_Imagination_2: {
+  'trait_Skill_Imagination_2': {
     name: 'trait_Skill_Imagination_2',
     description: 'has a good imagination',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Skill_Imagination_3: {
+  'trait_Skill_Imagination_3': {
     name: 'trait_Skill_Imagination_3',
     description: 'has a good imagination',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Skill_Imagination_4: {
+  'trait_Skill_Imagination_4': {
     name: 'trait_Skill_Imagination_4',
     description: 'has a good imagination',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Skill_Imagination_5: {
+  'trait_Skill_Imagination_5': {
     name: 'trait_Skill_Imagination_5',
     description: 'has a good imagination',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SleightofHand: {
+  'trait_SleightofHand': {
     name: 'trait_SleightofHand',
     ignored: false,
     description: 'can perform sleight of hand tricks',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Slob: {
+  'trait_Slob': {
     name: 'trait_Slob',
     description: 'is a slob',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_SmallBusiness_Perks_Arsonist: {
+  'trait_SmallBusiness_Perks_Arsonist': {
     name: 'trait_SmallBusiness_Perks_Arsonist',
     description: 'is an arsonist',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_Bartering: {
+  'trait_SmallBusiness_Perks_Bartering': {
     name: 'trait_SmallBusiness_Perks_Bartering',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_CustomerAppreciationDay: {
+  'trait_SmallBusiness_Perks_CustomerAppreciationDay': {
     name: 'trait_SmallBusiness_Perks_CustomerAppreciationDay',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_CustomerSway: {
+  'trait_SmallBusiness_Perks_CustomerSway': {
     name: 'trait_SmallBusiness_Perks_CustomerSway',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_EmployeeTip: {
+  'trait_SmallBusiness_Perks_EmployeeTip': {
     name: 'trait_SmallBusiness_Perks_EmployeeTip',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_FakeBillPayment: {
+  'trait_SmallBusiness_Perks_FakeBillPayment': {
     name: 'trait_SmallBusiness_Perks_FakeBillPayment',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_InspireWithBusinessStory: {
+  'trait_SmallBusiness_Perks_InspireWithBusinessStory': {
     name: 'trait_SmallBusiness_Perks_InspireWithBusinessStory',
     description: 'is good at inspiring with business stories',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_MuscleMemory: {
+  'trait_SmallBusiness_Perks_MuscleMemory': {
     name: 'trait_SmallBusiness_Perks_MuscleMemory',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_SimoCoin: {
+  'trait_SmallBusiness_Perks_SimoCoin': {
     name: 'trait_SmallBusiness_Perks_SimoCoin',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_StorePheromone: {
+  'trait_SmallBusiness_Perks_StorePheromone': {
     name: 'trait_SmallBusiness_Perks_StorePheromone',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_TipJar: {
+  'trait_SmallBusiness_Perks_TipJar': {
     name: 'trait_SmallBusiness_Perks_TipJar',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_UltrasonicWhistle: {
+  'trait_SmallBusiness_Perks_UltrasonicWhistle': {
     name: 'trait_SmallBusiness_Perks_UltrasonicWhistle',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_ViralSocialMedia: {
+  'trait_SmallBusiness_Perks_ViralSocialMedia': {
     name: 'trait_SmallBusiness_Perks_ViralSocialMedia',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_WhiteCollarRobbery: {
+  'trait_SmallBusiness_Perks_WhiteCollarRobbery': {
     name: 'trait_SmallBusiness_Perks_WhiteCollarRobbery',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Perks_WutantBoost: {
+  'trait_SmallBusiness_Perks_WutantBoost': {
     name: 'trait_SmallBusiness_Perks_WutantBoost',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Rank_0: {
+  'trait_SmallBusiness_Rank_0': {
     name: 'trait_SmallBusiness_Rank_0',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Rank_1: {
+  'trait_SmallBusiness_Rank_1': {
     name: 'trait_SmallBusiness_Rank_1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Rank_2: {
+  'trait_SmallBusiness_Rank_2': {
     name: 'trait_SmallBusiness_Rank_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Rank_3: {
+  'trait_SmallBusiness_Rank_3': {
     name: 'trait_SmallBusiness_Rank_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Rank_4: {
+  'trait_SmallBusiness_Rank_4': {
     name: 'trait_SmallBusiness_Rank_4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Rank_5: {
+  'trait_SmallBusiness_Rank_5': {
     name: 'trait_SmallBusiness_Rank_5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Rank_Transferred: {
+  'trait_SmallBusiness_Rank_Transferred': {
     name: 'trait_SmallBusiness_Rank_Transferred',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_1_Schemer: {
+  'trait_SmallBusiness_Reputation_1_Schemer': {
     name: 'trait_SmallBusiness_Reputation_1_Schemer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_2_Schemer: {
+  'trait_SmallBusiness_Reputation_2_Schemer': {
     name: 'trait_SmallBusiness_Reputation_2_Schemer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_3_Schemer: {
+  'trait_SmallBusiness_Reputation_3_Schemer': {
     name: 'trait_SmallBusiness_Reputation_3_Schemer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_4_Neutral: {
+  'trait_SmallBusiness_Reputation_4_Neutral': {
     name: 'trait_SmallBusiness_Reputation_4_Neutral',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_5_Dreamer: {
+  'trait_SmallBusiness_Reputation_5_Dreamer': {
     name: 'trait_SmallBusiness_Reputation_5_Dreamer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_6_Dreamer: {
+  'trait_SmallBusiness_Reputation_6_Dreamer': {
     name: 'trait_SmallBusiness_Reputation_6_Dreamer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_7_Dreamer: {
+  'trait_SmallBusiness_Reputation_7_Dreamer': {
     name: 'trait_SmallBusiness_Reputation_7_Dreamer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_Consequences_FearWhimCompleted_Hidden: {
+  'trait_SmallBusiness_Reputation_Consequences_FearWhimCompleted_Hidden': {
     name: 'trait_SmallBusiness_Reputation_Consequences_FearWhimCompleted_Hidden',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_Consequences_UltimateDreamer: {
+  'trait_SmallBusiness_Reputation_Consequences_UltimateDreamer': {
     name: 'trait_SmallBusiness_Reputation_Consequences_UltimateDreamer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_SmallBusiness_Reputation_Consequences_UltimateSchemer: {
+  'trait_SmallBusiness_Reputation_Consequences_UltimateSchemer': {
     name: 'trait_SmallBusiness_Reputation_Consequences_UltimateSchemer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_SmallBusiness_Reputation_Consequences_Ultimatum_FirstWarningGiven_Hidden:
-    {
-      name: 'trait_SmallBusiness_Reputation_Consequences_Ultimatum_FirstWarningGiven_Hidden',
-      ignored: true,
-      class: 'Trait',
-      trait_type: TraitType.HIDDEN,
-    },
-  trait_SmallBusiness_Reputation_Consequences_Ultimatum_Initiated_Hidden: {
+  'trait_SmallBusiness_Reputation_Consequences_Ultimatum_FirstWarningGiven_Hidden': {
+    name: 'trait_SmallBusiness_Reputation_Consequences_Ultimatum_FirstWarningGiven_Hidden',
+    ignored: true,
+    class: 'Trait',
+    trait_type: TraitType.HIDDEN,
+  },
+  'trait_SmallBusiness_Reputation_Consequences_Ultimatum_Initiated_Hidden': {
     name: 'trait_SmallBusiness_Reputation_Consequences_Ultimatum_Initiated_Hidden',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_Consequences_Ultimatum_LastWarningGiven_Hidden:
-    {
-      name: 'trait_SmallBusiness_Reputation_Consequences_Ultimatum_LastWarningGiven_Hidden',
-      ignored: true,
-      class: 'Trait',
-      trait_type: TraitType.HIDDEN,
-    },
-  trait_SmallBusiness_Reputation_Consequences_Ultimatum_Unaddressed_Hidden: {
+  'trait_SmallBusiness_Reputation_Consequences_Ultimatum_LastWarningGiven_Hidden': {
+    name: 'trait_SmallBusiness_Reputation_Consequences_Ultimatum_LastWarningGiven_Hidden',
+    ignored: true,
+    class: 'Trait',
+    trait_type: TraitType.HIDDEN,
+  },
+  'trait_SmallBusiness_Reputation_Consequences_Ultimatum_Unaddressed_Hidden': {
     name: 'trait_SmallBusiness_Reputation_Consequences_Ultimatum_Unaddressed_Hidden',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_HasBeenRank_1: {
+  'trait_SmallBusiness_Reputation_HasBeenRank_1': {
     name: 'trait_SmallBusiness_Reputation_HasBeenRank_1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_HasBeenRank_2: {
+  'trait_SmallBusiness_Reputation_HasBeenRank_2': {
     name: 'trait_SmallBusiness_Reputation_HasBeenRank_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_HasBeenRank_3: {
+  'trait_SmallBusiness_Reputation_HasBeenRank_3': {
     name: 'trait_SmallBusiness_Reputation_HasBeenRank_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_HasBeenRank_4: {
+  'trait_SmallBusiness_Reputation_HasBeenRank_4': {
     name: 'trait_SmallBusiness_Reputation_HasBeenRank_4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_HasBeenRank_5: {
+  'trait_SmallBusiness_Reputation_HasBeenRank_5': {
     name: 'trait_SmallBusiness_Reputation_HasBeenRank_5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_HasBeenRank_6: {
+  'trait_SmallBusiness_Reputation_HasBeenRank_6': {
     name: 'trait_SmallBusiness_Reputation_HasBeenRank_6',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SmallBusiness_Reputation_HasBeenRank_7: {
+  'trait_SmallBusiness_Reputation_HasBeenRank_7': {
     name: 'trait_SmallBusiness_Reputation_HasBeenRank_7',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Smart_Hub_WakeUp_Routine_Daily_Affirmation: {
+  'trait_Smart_Hub_WakeUp_Routine_Daily_Affirmation': {
     name: 'trait_Smart_Hub_WakeUp_Routine_Daily_Affirmation',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Smart_Hub_WakeUp_Routine_Daily_Joke: {
+  'trait_Smart_Hub_WakeUp_Routine_Daily_Joke': {
     name: 'trait_Smart_Hub_WakeUp_Routine_Daily_Joke',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Smart_Hub_WakeUp_Routine_Daily_News: {
+  'trait_Smart_Hub_WakeUp_Routine_Daily_News': {
     name: 'trait_Smart_Hub_WakeUp_Routine_Daily_News',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Snob: {
+  'trait_Snob': {
     name: 'trait_Snob',
     description: 'is a snob',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Snooping_Menace: {
+  'trait_Snooping_Menace': {
     name: 'trait_Snooping_Menace',
     description: 'is a snooping menace',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Snooping_SafeKeeper: {
+  'trait_Snooping_SafeKeeper': {
     name: 'trait_Snooping_SafeKeeper',
     description: 'is good at making friends and finding secrets',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_SnowSportsSlope_Intensity_High: {
+  'trait_SnowSportsSlope_Intensity_High': {
     name: 'trait_SnowSportsSlope_Intensity_High',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SnowSportsSlope_Intensity_Low: {
+  'trait_SnowSportsSlope_Intensity_Low': {
     name: 'trait_SnowSportsSlope_Intensity_Low',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SnowSportsSlope_Intensity_Med: {
+  'trait_SnowSportsSlope_Intensity_Med': {
     name: 'trait_SnowSportsSlope_Intensity_Med',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SnowSportsSlope_Sled_ArmsUp: {
+  'trait_SnowSportsSlope_Sled_ArmsUp': {
     name: 'trait_SnowSportsSlope_Sled_ArmsUp',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SnowSportsSlope_Snowboarding_RecordVideo: {
+  'trait_SnowSportsSlope_Snowboarding_RecordVideo': {
     name: 'trait_SnowSportsSlope_Snowboarding_RecordVideo',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SociallyAwkward: {
+  'trait_SociallyAwkward': {
     name: 'trait_SociallyAwkward',
     description: 'is socially awkward',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_SociallyGifted: {
+  'trait_SociallyGifted': {
     name: 'trait_SociallyGifted',
     ignored: false,
     description: 'is socially gifted',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_SpecialNPC_isFTUERoommate: {
+  'trait_SpecialNPC_isFTUERoommate': {
     name: 'trait_SpecialNPC_isFTUERoommate',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SpecialNPCs_BabyAriel: {
+  'trait_SpecialNPCs_BabyAriel': {
     name: 'trait_SpecialNPCs_BabyAriel',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SpecialNPCs_EP16SpecialNPC_SammyGarcia: {
+  'trait_SpecialNPCs_EP16SpecialNPC_SammyGarcia': {
     name: 'trait_SpecialNPCs_EP16SpecialNPC_SammyGarcia',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SpecialNPCs_EP16SpecialNPC_TheRingBear: {
+  'trait_SpecialNPCs_EP16SpecialNPC_TheRingBear': {
     name: 'trait_SpecialNPCs_EP16SpecialNPC_TheRingBear',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SpecialNPCs_GAMESCOM_LoveInterest: {
+  'trait_SpecialNPCs_GAMESCOM_LoveInterest': {
     name: 'trait_SpecialNPCs_GAMESCOM_LoveInterest',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Species_Cat: {
+  'trait_Species_Cat': {
     name: 'trait_Species_Cat',
     description: 'is a cat',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Species_Dog: {
+  'trait_Species_Dog': {
     name: 'trait_Species_Dog',
     description: 'is a dog',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Species_Horse: {
+  'trait_Species_Horse': {
     name: 'trait_Species_Horse',
     description: 'is a horse',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Species_Human: {
+  'trait_Species_Human': {
     name: 'trait_Species_Human',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SpeciesExtended_LargeDogs: {
+  'trait_SpeciesExtended_LargeDogs': {
     name: 'trait_SpeciesExtended_LargeDogs',
     description: 'is a large dog',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SpeciesExtended_SmallDogs: {
+  'trait_SpeciesExtended_SmallDogs': {
     name: 'trait_SpeciesExtended_SmallDogs',
     description: 'is a small dog',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SpeedCleaner: {
+  'trait_SpeedCleaner': {
     name: 'trait_SpeedCleaner',
     ignored: false,
     description: 'is a Speed Cleaner',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_SpeedReader: {
+  'trait_SpeedReader': {
     name: 'trait_SpeedReader',
     ignored: false,
     description: 'is a speed reader',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_SpiceHound: {
+  'trait_SpiceHound': {
     name: 'trait_SpiceHound',
     ignored: false,
     description: 'loves spicy food',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Squeamish: {
+  'trait_Squeamish': {
     name: 'trait_Squeamish',
     description: 'is squeamish',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_SteelBladder: {
+  'trait_SteelBladder': {
     name: 'trait_SteelBladder',
     ignored: false,
     description: 'has the ability to hold their pee for a long time',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Stormchaser: {
+  'trait_Stormchaser': {
     name: 'trait_Stormchaser',
     ignored: false,
     description: 'is a storm chaser',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_StovesAndGrillsMaster: {
+  'trait_StovesAndGrillsMaster': {
     name: 'trait_StovesAndGrillsMaster',
     ignored: false,
     description: 'is a Stove and Grill Master',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Strangerville_ActivelyPossessed_Overlay: {
+  'trait_Strangerville_ActivelyPossessed_Overlay': {
     name: 'trait_Strangerville_ActivelyPossessed_Overlay',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Strangerville_Hidden_ExaminedLabDoor: {
+  'trait_Strangerville_Hidden_ExaminedLabDoor': {
     name: 'trait_Strangerville_Hidden_ExaminedLabDoor',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Strangerville_Hidden_HasAskedAround: {
+  'trait_Strangerville_Hidden_HasAskedAround': {
     name: 'trait_Strangerville_Hidden_HasAskedAround',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Strangerville_Hidden_HasDefeatedMotherPlant: {
+  'trait_Strangerville_Hidden_HasDefeatedMotherPlant': {
     name: 'trait_Strangerville_Hidden_HasDefeatedMotherPlant',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Strangerville_Hidden_HasSeenMotherPlant: {
+  'trait_Strangerville_Hidden_HasSeenMotherPlant': {
     name: 'trait_Strangerville_Hidden_HasSeenMotherPlant',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Strangerville_Infected: {
+  'trait_Strangerville_Infected': {
     name: 'trait_Strangerville_Infected',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.INFECTION,
   },
-  trait_Strangerville_Vaccinated: {
+  'trait_Strangerville_Vaccinated': {
     name: 'trait_Strangerville_Vaccinated',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SuperGreenThumb: {
+  'trait_SuperGreenThumb': {
     name: 'trait_SuperGreenThumb',
     ignored: false,
     description: 'has a green thumb',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_SuperParent_RoleModel: {
+  'trait_SuperParent_RoleModel': {
     name: 'trait_SuperParent_RoleModel',
     ignored: false,
     description: 'is a Super Parent Role Model',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_SupremeAuthority: {
+  'trait_SupremeAuthority': {
     name: 'trait_SupremeAuthority',
     ignored: false,
     description: 'has supreme authority and good at fights',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_SurpriseHoliday_DiscountDay: {
+  'trait_SurpriseHoliday_DiscountDay': {
     name: 'trait_SurpriseHoliday_DiscountDay',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SurpriseHoliday_PirateDay: {
+  'trait_SurpriseHoliday_PirateDay': {
     name: 'trait_SurpriseHoliday_PirateDay',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_SurvivalInstinct: {
+  'trait_SurvivalInstinct': {
     name: 'trait_SurvivalInstinct',
     ignored: false,
     description: 'has a strong survival instinct',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Survivalist: {
+  'trait_Survivalist': {
     name: 'trait_Survivalist',
     ignored: false,
     description: 'is a survivalist',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_TailStyle_Down: {
+  'trait_TailStyle_Down': {
     name: 'trait_TailStyle_Down',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TAILSTYLE,
   },
-  trait_TailStyle_Up: {
+  'trait_TailStyle_Up': {
     name: 'trait_TailStyle_Up',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.TAILSTYLE,
   },
-  trait_teen: {
+  'trait_teen': {
     name: 'trait_teen',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_TeenPranks_Prankster: {
+  'trait_TeenPranks_Prankster': {
     name: 'trait_TeenPranks_Prankster',
     ignored: false,
     description: 'is a Prankster',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Temperature_BurningMan: {
+  'trait_Temperature_BurningMan': {
     name: 'trait_Temperature_BurningMan',
     ignored: false,
     description: 'is unaffected by hot temperatures',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Temperature_ColdAcclimation: {
+  'trait_Temperature_ColdAcclimation': {
     name: 'trait_Temperature_ColdAcclimation',
     ignored: false,
     description: 'is acclimated to cold weather',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Temperature_HeatAcclimation: {
+  'trait_Temperature_HeatAcclimation': {
     name: 'trait_Temperature_HeatAcclimation',
     ignored: false,
     description: 'is acclimated to hot weather',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Temperature_IceMan: {
+  'trait_Temperature_IceMan': {
     name: 'trait_Temperature_IceMan',
     ignored: false,
     description: 'is unaffected by cold temperatures',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_TheKnack: {
+  'trait_TheKnack': {
     name: 'trait_TheKnack',
     ignored: false,
     description: 'is handy at fixing things',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_TheMaster: {
+  'trait_TheMaster': {
     name: 'trait_TheMaster',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_toddler: {
+  'trait_toddler': {
     name: 'trait_toddler',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Toddler_Angelic: {
+  'trait_Toddler_Angelic': {
     name: 'trait_Toddler_Angelic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Toddler_Charmer: {
+  'trait_Toddler_Charmer': {
     name: 'trait_Toddler_Charmer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Toddler_Clingy: {
+  'trait_Toddler_Clingy': {
     name: 'trait_Toddler_Clingy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Toddler_Fussy: {
+  'trait_Toddler_Fussy': {
     name: 'trait_Toddler_Fussy',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Toddler_Independent: {
+  'trait_Toddler_Independent': {
     name: 'trait_Toddler_Independent',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Toddler_Inquisitive: {
+  'trait_Toddler_Inquisitive': {
     name: 'trait_Toddler_Inquisitive',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Toddler_Silly: {
+  'trait_Toddler_Silly': {
     name: 'trait_Toddler_Silly',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Toddler_Wild: {
+  'trait_Toddler_Wild': {
     name: 'trait_Toddler_Wild',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_Top_Notch_Toddler: {
+  'trait_Top_Notch_Toddler': {
     name: 'trait_Top_Notch_Toddler',
     ignored: false,
     description: 'is a quick learner',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Top_Notch_Toddler_Hidden: {
+  'trait_Top_Notch_Toddler_Hidden': {
     name: 'trait_Top_Notch_Toddler_Hidden',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_TownMascot: {
+  'trait_TownMascot': {
     name: 'trait_TownMascot',
     description: 'is the town mascot',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_TrueMaster: {
+  'trait_TrueMaster': {
     name: 'trait_TrueMaster',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Umbrella_Preference_Adult_1: {
+  'trait_Umbrella_Preference_Adult_1': {
     name: 'trait_Umbrella_Preference_Adult_1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Adult_10: {
+  'trait_Umbrella_Preference_Adult_10': {
     name: 'trait_Umbrella_Preference_Adult_10',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Adult_11: {
+  'trait_Umbrella_Preference_Adult_11': {
     name: 'trait_Umbrella_Preference_Adult_11',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Adult_12: {
+  'trait_Umbrella_Preference_Adult_12': {
     name: 'trait_Umbrella_Preference_Adult_12',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Adult_2: {
+  'trait_Umbrella_Preference_Adult_2': {
     name: 'trait_Umbrella_Preference_Adult_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Adult_3: {
+  'trait_Umbrella_Preference_Adult_3': {
     name: 'trait_Umbrella_Preference_Adult_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Adult_4: {
+  'trait_Umbrella_Preference_Adult_4': {
     name: 'trait_Umbrella_Preference_Adult_4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Adult_5: {
+  'trait_Umbrella_Preference_Adult_5': {
     name: 'trait_Umbrella_Preference_Adult_5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Adult_6: {
+  'trait_Umbrella_Preference_Adult_6': {
     name: 'trait_Umbrella_Preference_Adult_6',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Adult_7: {
+  'trait_Umbrella_Preference_Adult_7': {
     name: 'trait_Umbrella_Preference_Adult_7',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Adult_8: {
+  'trait_Umbrella_Preference_Adult_8': {
     name: 'trait_Umbrella_Preference_Adult_8',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Adult_9: {
+  'trait_Umbrella_Preference_Adult_9': {
     name: 'trait_Umbrella_Preference_Adult_9',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Child_1: {
+  'trait_Umbrella_Preference_Child_1': {
     name: 'trait_Umbrella_Preference_Child_1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Child_10: {
+  'trait_Umbrella_Preference_Child_10': {
     name: 'trait_Umbrella_Preference_Child_10',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Child_11: {
+  'trait_Umbrella_Preference_Child_11': {
     name: 'trait_Umbrella_Preference_Child_11',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Child_12: {
+  'trait_Umbrella_Preference_Child_12': {
     name: 'trait_Umbrella_Preference_Child_12',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Child_2: {
+  'trait_Umbrella_Preference_Child_2': {
     name: 'trait_Umbrella_Preference_Child_2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Child_3: {
+  'trait_Umbrella_Preference_Child_3': {
     name: 'trait_Umbrella_Preference_Child_3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Child_4: {
+  'trait_Umbrella_Preference_Child_4': {
     name: 'trait_Umbrella_Preference_Child_4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Child_5: {
+  'trait_Umbrella_Preference_Child_5': {
     name: 'trait_Umbrella_Preference_Child_5',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Child_6: {
+  'trait_Umbrella_Preference_Child_6': {
     name: 'trait_Umbrella_Preference_Child_6',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Child_7: {
+  'trait_Umbrella_Preference_Child_7': {
     name: 'trait_Umbrella_Preference_Child_7',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Child_8: {
+  'trait_Umbrella_Preference_Child_8': {
     name: 'trait_Umbrella_Preference_Child_8',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_Preference_Child_9: {
+  'trait_Umbrella_Preference_Child_9': {
     name: 'trait_Umbrella_Preference_Child_9',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Umbrella_User: {
+  'trait_Umbrella_User': {
     name: 'trait_Umbrella_User',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Unflirty: {
+  'trait_Unflirty': {
     name: 'trait_Unflirty',
     description: 'is unflirty',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_University_ArtHistoryDegreeBA: {
+  'trait_University_ArtHistoryDegreeBA': {
     name: 'trait_University_ArtHistoryDegreeBA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_ArtHistoryDegreeBAHonors: {
+  'trait_University_ArtHistoryDegreeBAHonors': {
     name: 'trait_University_ArtHistoryDegreeBAHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_ArtHistoryDegreeBS: {
+  'trait_University_ArtHistoryDegreeBS': {
     name: 'trait_University_ArtHistoryDegreeBS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_ArtHistoryDegreeBSHonors: {
+  'trait_University_ArtHistoryDegreeBSHonors': {
     name: 'trait_University_ArtHistoryDegreeBSHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_BartenderDegree: {
+  'trait_University_BartenderDegree': {
     name: 'trait_University_BartenderDegree',
     ignored: false,
     description: 'has a Bartender Degree',
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_BiologyDegreeBA: {
+  'trait_University_BiologyDegreeBA': {
     name: 'trait_University_BiologyDegreeBA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_BiologyDegreeBAHonors: {
+  'trait_University_BiologyDegreeBAHonors': {
     name: 'trait_University_BiologyDegreeBAHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_BiologyDegreeBS: {
+  'trait_University_BiologyDegreeBS': {
     name: 'trait_University_BiologyDegreeBS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_BiologyDegreeBSHonors: {
+  'trait_University_BiologyDegreeBSHonors': {
     name: 'trait_University_BiologyDegreeBSHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_CommunicationsDegreeBA: {
+  'trait_University_CommunicationsDegreeBA': {
     name: 'trait_University_CommunicationsDegreeBA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_CommunicationsDegreeBAHonors: {
+  'trait_University_CommunicationsDegreeBAHonors': {
     name: 'trait_University_CommunicationsDegreeBAHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_CommunicationsDegreeBS: {
+  'trait_University_CommunicationsDegreeBS': {
     name: 'trait_University_CommunicationsDegreeBS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_CommunicationsDegreeBSHonors: {
+  'trait_University_CommunicationsDegreeBSHonors': {
     name: 'trait_University_CommunicationsDegreeBSHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_ComputerScienceDegreeBA: {
+  'trait_University_ComputerScienceDegreeBA': {
     name: 'trait_University_ComputerScienceDegreeBA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_ComputerScienceDegreeBAHonors: {
+  'trait_University_ComputerScienceDegreeBAHonors': {
     name: 'trait_University_ComputerScienceDegreeBAHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_ComputerScienceDegreeBS: {
+  'trait_University_ComputerScienceDegreeBS': {
     name: 'trait_University_ComputerScienceDegreeBS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_ComputerScienceDegreeBSHonors: {
+  'trait_University_ComputerScienceDegreeBSHonors': {
     name: 'trait_University_ComputerScienceDegreeBSHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_CulinaryArtsDegreeBA: {
+  'trait_University_CulinaryArtsDegreeBA': {
     name: 'trait_University_CulinaryArtsDegreeBA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_CulinaryArtsDegreeBAHonors: {
+  'trait_University_CulinaryArtsDegreeBAHonors': {
     name: 'trait_University_CulinaryArtsDegreeBAHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_CulinaryArtsDegreeBS: {
+  'trait_University_CulinaryArtsDegreeBS': {
     name: 'trait_University_CulinaryArtsDegreeBS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_CulinaryArtsDegreeBSHonors: {
+  'trait_University_CulinaryArtsDegreeBSHonors': {
     name: 'trait_University_CulinaryArtsDegreeBSHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_DegreeTraits_ArtHistory: {
+  'trait_University_DegreeTraits_ArtHistory': {
     name: 'trait_University_DegreeTraits_ArtHistory',
     description: 'has a degree in art history',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_Biology: {
+  'trait_University_DegreeTraits_Biology': {
     name: 'trait_University_DegreeTraits_Biology',
     description: 'has a biology degree',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_Communications: {
+  'trait_University_DegreeTraits_Communications': {
     name: 'trait_University_DegreeTraits_Communications',
     description: 'has a communications degree',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_ComputerScience: {
+  'trait_University_DegreeTraits_ComputerScience': {
     name: 'trait_University_DegreeTraits_ComputerScience',
     description: 'has a computer science degree',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_CulinaryArts: {
+  'trait_University_DegreeTraits_CulinaryArts': {
     name: 'trait_University_DegreeTraits_CulinaryArts',
     description: 'has a culinary arts degree',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_Drama: {
+  'trait_University_DegreeTraits_Drama': {
     name: 'trait_University_DegreeTraits_Drama',
     description: 'has a degree in drama',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_Economics: {
+  'trait_University_DegreeTraits_Economics': {
     name: 'trait_University_DegreeTraits_Economics',
     description: 'has a degree in economics',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_FineArt: {
+  'trait_University_DegreeTraits_FineArt': {
     name: 'trait_University_DegreeTraits_FineArt',
     description: 'has a degree in fine arts',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_History: {
+  'trait_University_DegreeTraits_History': {
     name: 'trait_University_DegreeTraits_History',
     description: 'has a degree in history',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_LanguageAndLiterature: {
+  'trait_University_DegreeTraits_LanguageAndLiterature': {
     name: 'trait_University_DegreeTraits_LanguageAndLiterature',
     description: 'has a degree in language and literature',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_Physics: {
+  'trait_University_DegreeTraits_Physics': {
     name: 'trait_University_DegreeTraits_Physics',
     description: 'has a degree in physics',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_Psychology: {
+  'trait_University_DegreeTraits_Psychology': {
     name: 'trait_University_DegreeTraits_Psychology',
     description: 'has a degree in psychology',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_Type_ArtsDegree: {
+  'trait_University_DegreeTraits_Type_ArtsDegree': {
     name: 'trait_University_DegreeTraits_Type_ArtsDegree',
     description: 'has a degree in arts',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_Type_Honors: {
+  'trait_University_DegreeTraits_Type_Honors': {
     name: 'trait_University_DegreeTraits_Type_Honors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DegreeTraits_Villainy: {
+  'trait_University_DegreeTraits_Villainy': {
     name: 'trait_University_DegreeTraits_Villainy',
     description: 'has a degree in villainy',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_University_DramaDegreeBA: {
+  'trait_University_DramaDegreeBA': {
     name: 'trait_University_DramaDegreeBA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_DramaDegreeBAHonors: {
+  'trait_University_DramaDegreeBAHonors': {
     name: 'trait_University_DramaDegreeBAHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_DramaDegreeBS: {
+  'trait_University_DramaDegreeBS': {
     name: 'trait_University_DramaDegreeBS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_DramaDegreeBSHonors: {
+  'trait_University_DramaDegreeBSHonors': {
     name: 'trait_University_DramaDegreeBSHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_EconomicsDegreeBA: {
+  'trait_University_EconomicsDegreeBA': {
     name: 'trait_University_EconomicsDegreeBA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_EconomicsDegreeBAHonors: {
+  'trait_University_EconomicsDegreeBAHonors': {
     name: 'trait_University_EconomicsDegreeBAHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_EconomicsDegreeBS: {
+  'trait_University_EconomicsDegreeBS': {
     name: 'trait_University_EconomicsDegreeBS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_EconomicsDegreeBSHonors: {
+  'trait_University_EconomicsDegreeBSHonors': {
     name: 'trait_University_EconomicsDegreeBSHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_FineArtDegreeBA: {
+  'trait_University_FineArtDegreeBA': {
     name: 'trait_University_FineArtDegreeBA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_FineArtDegreeBAHonors: {
+  'trait_University_FineArtDegreeBAHonors': {
     name: 'trait_University_FineArtDegreeBAHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_FineArtDegreeBS: {
+  'trait_University_FineArtDegreeBS': {
     name: 'trait_University_FineArtDegreeBS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_FineArtDegreeBSHonors: {
+  'trait_University_FineArtDegreeBSHonors': {
     name: 'trait_University_FineArtDegreeBSHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_HigherEducation: {
+  'trait_University_HigherEducation': {
     name: 'trait_University_HigherEducation',
     ignored: false,
     description: 'is highly educated',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_University_HistoryDegreeBA: {
+  'trait_University_HistoryDegreeBA': {
     name: 'trait_University_HistoryDegreeBA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_HistoryDegreeBAHonors: {
+  'trait_University_HistoryDegreeBAHonors': {
     name: 'trait_University_HistoryDegreeBAHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_HistoryDegreeBS: {
+  'trait_University_HistoryDegreeBS': {
     name: 'trait_University_HistoryDegreeBS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_HistoryDegreeBSHonors: {
+  'trait_University_HistoryDegreeBSHonors': {
     name: 'trait_University_HistoryDegreeBSHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_LanguageAndLiteratureDegreeBA: {
+  'trait_University_LanguageAndLiteratureDegreeBA': {
     name: 'trait_University_LanguageAndLiteratureDegreeBA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_LanguageAndLiteratureDegreeBAHonors: {
+  'trait_University_LanguageAndLiteratureDegreeBAHonors': {
     name: 'trait_University_LanguageAndLiteratureDegreeBAHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_LanguageAndLiteratureDegreeBS: {
+  'trait_University_LanguageAndLiteratureDegreeBS': {
     name: 'trait_University_LanguageAndLiteratureDegreeBS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_LanguageAndLiteratureDegreeBSHonors: {
+  'trait_University_LanguageAndLiteratureDegreeBSHonors': {
     name: 'trait_University_LanguageAndLiteratureDegreeBSHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_PhysicsDegreeBA: {
+  'trait_University_PhysicsDegreeBA': {
     name: 'trait_University_PhysicsDegreeBA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_PhysicsDegreeBAHonors: {
+  'trait_University_PhysicsDegreeBAHonors': {
     name: 'trait_University_PhysicsDegreeBAHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_PhysicsDegreeBS: {
+  'trait_University_PhysicsDegreeBS': {
     name: 'trait_University_PhysicsDegreeBS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_PhysicsDegreeBSHonors: {
+  'trait_University_PhysicsDegreeBSHonors': {
     name: 'trait_University_PhysicsDegreeBSHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_PsychologyDegreeBA: {
+  'trait_University_PsychologyDegreeBA': {
     name: 'trait_University_PsychologyDegreeBA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_PsychologyDegreeBAHonors: {
+  'trait_University_PsychologyDegreeBAHonors': {
     name: 'trait_University_PsychologyDegreeBAHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_PsychologyDegreeBS: {
+  'trait_University_PsychologyDegreeBS': {
     name: 'trait_University_PsychologyDegreeBS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_PsychologyDegreeBSHonors: {
+  'trait_University_PsychologyDegreeBSHonors': {
     name: 'trait_University_PsychologyDegreeBSHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_VillainyDegreeBA: {
+  'trait_University_VillainyDegreeBA': {
     name: 'trait_University_VillainyDegreeBA',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_VillainyDegreeBAHonors: {
+  'trait_University_VillainyDegreeBAHonors': {
     name: 'trait_University_VillainyDegreeBAHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_VillainyDegreeBS: {
+  'trait_University_VillainyDegreeBS': {
     name: 'trait_University_VillainyDegreeBS',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_University_VillainyDegreeBSHonors: {
+  'trait_University_VillainyDegreeBSHonors': {
     name: 'trait_University_VillainyDegreeBSHonors',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.UNIVERSITY_DEGREE,
   },
-  trait_UnstoppableFame: {
+  'trait_UnstoppableFame': {
     name: 'trait_UnstoppableFame',
     ignored: false,
     description: 'is an immortalized celebrity',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Untroubled: {
+  'trait_Untroubled': {
     name: 'trait_Untroubled',
     ignored: false,
     description: 'is untroubled and carefree',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_ValuedCustomer: {
+  'trait_ValuedCustomer': {
     name: 'trait_ValuedCustomer',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_Vegetarian: {
+  'trait_Vegetarian': {
     name: 'trait_Vegetarian',
     description: 'is a vegetarian',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_WalkStyleCreepy: {
+  'trait_WalkStyleCreepy': {
     name: 'trait_WalkStyleCreepy',
     description: 'has a creepy walk style',
     class: 'Trait',
     trait_type: TraitType.WALKSTYLE,
   },
-  trait_WalkStyleDefault: {
+  'trait_WalkStyleDefault': {
     name: 'trait_WalkStyleDefault',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.WALKSTYLE,
   },
-  trait_WalkStyleEnergetic: {
+  'trait_WalkStyleEnergetic': {
     name: 'trait_WalkStyleEnergetic',
     description: 'has an energetic walk style',
     class: 'Trait',
     trait_type: TraitType.WALKSTYLE,
   },
-  trait_WalkStyleFeminine: {
+  'trait_WalkStyleFeminine': {
     name: 'trait_WalkStyleFeminine',
     description: 'has a feminine walk style',
     class: 'Trait',
     trait_type: TraitType.WALKSTYLE,
   },
-  trait_WalkStyleGoofy: {
+  'trait_WalkStyleGoofy': {
     name: 'trait_WalkStyleGoofy',
     description: 'has a goofy walk style',
     class: 'Trait',
     trait_type: TraitType.WALKSTYLE,
   },
-  trait_WalkStylePerky: {
+  'trait_WalkStylePerky': {
     name: 'trait_WalkStylePerky',
     description: 'has a perky walk style',
     class: 'Trait',
     trait_type: TraitType.WALKSTYLE,
   },
-  trait_WalkStyleSleepy: {
+  'trait_WalkStyleSleepy': {
     name: 'trait_WalkStyleSleepy',
     description: 'has a sleepy walk style',
     class: 'Trait',
     trait_type: TraitType.WALKSTYLE,
   },
-  trait_WalkStyleSnooty: {
+  'trait_WalkStyleSnooty': {
     name: 'trait_WalkStyleSnooty',
     description: 'has a snooty walk style',
     class: 'Trait',
     trait_type: TraitType.WALKSTYLE,
   },
-  trait_WalkStyleSwagger: {
+  'trait_WalkStyleSwagger': {
     name: 'trait_WalkStyleSwagger',
     description: 'has a swagger walk style',
     class: 'Trait',
     trait_type: TraitType.WALKSTYLE,
   },
-  trait_WalkStyleTough: {
+  'trait_WalkStyleTough': {
     name: 'trait_WalkStyleTough',
     description: 'has a tough guy walk style',
     class: 'Trait',
     trait_type: TraitType.WALKSTYLE,
   },
-  trait_Waterproof: {
+  'trait_Waterproof': {
     name: 'trait_Waterproof',
     ignored: false,
     description: "is waterproof and doesn't get wet",
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_WebMaster: {
+  'trait_WebMaster': {
     name: 'trait_WebMaster',
     description: 'is a computer whiz',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_WeddingTradition_BouquetToss: {
+  'trait_WeddingTradition_BouquetToss': {
     name: 'trait_WeddingTradition_BouquetToss',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WeddingTradition_CoupleCakeCut: {
+  'trait_WeddingTradition_CoupleCakeCut': {
     name: 'trait_WeddingTradition_CoupleCakeCut',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WeddingTradition_FirstDance: {
+  'trait_WeddingTradition_FirstDance': {
     name: 'trait_WeddingTradition_FirstDance',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WeddingTradition_GroupDance: {
+  'trait_WeddingTradition_GroupDance': {
     name: 'trait_WeddingTradition_GroupDance',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WeddingTradition_HadBouquet: {
+  'trait_WeddingTradition_HadBouquet': {
     name: 'trait_WeddingTradition_HadBouquet',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WeddingTradition_HadWeddingCake: {
+  'trait_WeddingTradition_HadWeddingCake': {
     name: 'trait_WeddingTradition_HadWeddingCake',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WeddingTradition_RingExchange: {
+  'trait_WeddingTradition_RingExchange': {
     name: 'trait_WeddingTradition_RingExchange',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WeddingTradition_SpousalKiss: {
+  'trait_WeddingTradition_SpousalKiss': {
     name: 'trait_WeddingTradition_SpousalKiss',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WeddingTradition_WalkedDownAisle: {
+  'trait_WeddingTradition_WalkedDownAisle': {
     name: 'trait_WeddingTradition_WalkedDownAisle',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfBookRead_PeterBarker1: {
+  'trait_WerewolfBookRead_PeterBarker1': {
     name: 'trait_WerewolfBookRead_PeterBarker1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfBookRead_PeterBarker2: {
+  'trait_WerewolfBookRead_PeterBarker2': {
     name: 'trait_WerewolfBookRead_PeterBarker2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfBookRead_PeterBarker3: {
+  'trait_WerewolfBookRead_PeterBarker3': {
     name: 'trait_WerewolfBookRead_PeterBarker3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfBookRead_PeterBarker4: {
+  'trait_WerewolfBookRead_PeterBarker4': {
     name: 'trait_WerewolfBookRead_PeterBarker4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfBookRead_Secret1: {
+  'trait_WerewolfBookRead_Secret1': {
     name: 'trait_WerewolfBookRead_Secret1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfBookRead_Secret2: {
+  'trait_WerewolfBookRead_Secret2': {
     name: 'trait_WerewolfBookRead_Secret2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfBookRead_Secret3: {
+  'trait_WerewolfBookRead_Secret3': {
     name: 'trait_WerewolfBookRead_Secret3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfBookRead_Secret4: {
+  'trait_WerewolfBookRead_Secret4': {
     name: 'trait_WerewolfBookRead_Secret4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfBookRead_Vulfgang1: {
+  'trait_WerewolfBookRead_Vulfgang1': {
     name: 'trait_WerewolfBookRead_Vulfgang1',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfBookRead_Vulfgang2: {
+  'trait_WerewolfBookRead_Vulfgang2': {
     name: 'trait_WerewolfBookRead_Vulfgang2',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfBookRead_Vulfgang3: {
+  'trait_WerewolfBookRead_Vulfgang3': {
     name: 'trait_WerewolfBookRead_Vulfgang3',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfBookRead_Vulfgang4: {
+  'trait_WerewolfBookRead_Vulfgang4': {
     name: 'trait_WerewolfBookRead_Vulfgang4',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfInterest_DontWant: {
+  'trait_WerewolfInterest_DontWant': {
     name: 'trait_WerewolfInterest_DontWant',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfInterest_Want: {
+  'trait_WerewolfInterest_Want': {
     name: 'trait_WerewolfInterest_Want',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPack_AllianceFeud_Alliance: {
+  'trait_WerewolfPack_AllianceFeud_Alliance': {
     name: 'trait_WerewolfPack_AllianceFeud_Alliance',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPack_AllianceFeud_Feud: {
+  'trait_WerewolfPack_AllianceFeud_Feud': {
     name: 'trait_WerewolfPack_AllianceFeud_Feud',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPack_AllianceFeud_Neutral: {
+  'trait_WerewolfPack_AllianceFeud_Neutral': {
     name: 'trait_WerewolfPack_AllianceFeud_Neutral',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPack_Discipline_Probation: {
+  'trait_WerewolfPack_Discipline_Probation': {
     name: 'trait_WerewolfPack_Discipline_Probation',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPack_Discipline_ReportToLeader: {
+  'trait_WerewolfPack_Discipline_ReportToLeader': {
     name: 'trait_WerewolfPack_Discipline_ReportToLeader',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPack_Discipline_Warning: {
+  'trait_WerewolfPack_Discipline_Warning': {
     name: 'trait_WerewolfPack_Discipline_Warning',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPack_FriendA: {
+  'trait_WerewolfPack_FriendA': {
     name: 'trait_WerewolfPack_FriendA',
     ignored: false,
     description: 'is a friend of the Moonwood Collective',
     class: 'Trait',
     trait_type: TraitType.PACK_FRIEND,
   },
-  trait_WerewolfPack_FriendA_ReportToLeader: {
+  'trait_WerewolfPack_FriendA_ReportToLeader': {
     name: 'trait_WerewolfPack_FriendA_ReportToLeader',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPack_FriendB: {
+  'trait_WerewolfPack_FriendB': {
     name: 'trait_WerewolfPack_FriendB',
     ignored: false,
     description: 'is a friend of The Wildfangs',
     class: 'Trait',
     trait_type: TraitType.PACK_FRIEND,
   },
-  trait_WerewolfPack_FriendB_ReportToLeader: {
+  'trait_WerewolfPack_FriendB_ReportToLeader': {
     name: 'trait_WerewolfPack_FriendB_ReportToLeader',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPack_LeaderHasNotRedecorated: {
+  'trait_WerewolfPack_LeaderHasNotRedecorated': {
     name: 'trait_WerewolfPack_LeaderHasNotRedecorated',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPack_ReportToLeader_Other: {
+  'trait_WerewolfPack_ReportToLeader_Other': {
     name: 'trait_WerewolfPack_ReportToLeader_Other',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPackA: {
+  'trait_WerewolfPackA': {
     name: 'trait_WerewolfPackA',
     description: 'is a member of The Moonwood Collective',
     class: 'Trait',
     trait_type: TraitType.PACK_MEMBER,
   },
-  trait_WerewolfPackA_Leader: {
+  'trait_WerewolfPackA_Leader': {
     name: 'trait_WerewolfPackA_Leader',
     ignored: true,
     description: 'is a leader of The Moonwood Collective',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPackA_Member: {
+  'trait_WerewolfPackA_Member': {
     name: 'trait_WerewolfPackA_Member',
     ignored: true,
     description: 'is a member of The Moonwood Collective',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPackB: {
+  'trait_WerewolfPackB': {
     name: 'trait_WerewolfPackB',
     description: 'is a member of The Wildfangs',
     class: 'Trait',
     trait_type: TraitType.PACK_MEMBER,
   },
-  trait_WerewolfPackB_Leader: {
+  'trait_WerewolfPackB_Leader': {
     name: 'trait_WerewolfPackB_Leader',
     description: 'is the leader of The Wildfangs',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WerewolfPackB_Member: {
+  'trait_WerewolfPackB_Member': {
     name: 'trait_WerewolfPackB_Member',
     description: 'is a member of The Wildfangs',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_Wise: {
+  'trait_Wise': {
     name: 'trait_Wise',
     description: 'is wise',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
-  trait_WitchOccult_AskedAboutMagic: {
+  'trait_WitchOccult_AskedAboutMagic': {
     name: 'trait_WitchOccult_AskedAboutMagic',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WitchOccult_Broom_Walkby: {
+  'trait_WitchOccult_Broom_Walkby': {
     name: 'trait_WitchOccult_Broom_Walkby',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WitchOccult_Brooms_UseBroomTeleports: {
+  'trait_WitchOccult_Brooms_UseBroomTeleports': {
     name: 'trait_WitchOccult_Brooms_UseBroomTeleports',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WitchOccult_FormerWitch: {
+  'trait_WitchOccult_FormerWitch': {
     name: 'trait_WitchOccult_FormerWitch',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WitchOccult_MoteSight: {
+  'trait_WitchOccult_MoteSight': {
     name: 'trait_WitchOccult_MoteSight',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WitchOccult_Perks_MoteHound: {
+  'trait_WitchOccult_Perks_MoteHound': {
     name: 'trait_WitchOccult_Perks_MoteHound',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WitchOccult_Wands_PreferWands: {
+  'trait_WitchOccult_Wands_PreferWands': {
     name: 'trait_WitchOccult_Wands_PreferWands',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WitchOccult_Wands_UseWand: {
+  'trait_WitchOccult_Wands_UseWand': {
     name: 'trait_WitchOccult_Wands_UseWand',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WithNanny: {
+  'trait_WithNanny': {
     name: 'trait_WithNanny',
     description: 'is with nanny',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WolfTown_Greg: {
+  'trait_WolfTown_Greg': {
     name: 'trait_WolfTown_Greg',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  trait_WorldlyKnowledge: {
+  'trait_WorldlyKnowledge': {
     name: 'trait_WorldlyKnowledge',
     ignored: false,
     description: 'is good at socializing at social events',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_WorldRenownedActor: {
+  'trait_WorldRenownedActor': {
     name: 'trait_WorldRenownedActor',
     ignored: false,
     description: 'is a world-renowned actor',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  trait_youngAdult: {
+  'trait_youngAdult': {
     name: 'trait_youngAdult',
     ignored: true,
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  wellness_CalmingAura: {
+  'wellness_CalmingAura': {
     name: 'wellness_CalmingAura',
     description: 'has a calming aura',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  wellness_ClearPerspective: {
+  'wellness_ClearPerspective': {
     name: 'wellness_ClearPerspective',
     description: 'has a clear perspective on life',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  wellness_MomentOfClarity: {
+  'wellness_MomentOfClarity': {
     name: 'wellness_MomentOfClarity',
     description: 'is having a moment of clarity',
     class: 'Trait',
     trait_type: TraitType.HIDDEN,
   },
-  wellness_SelfCareExpertise: {
+  'wellness_SelfCareExpertise': {
     name: 'wellness_SelfCareExpertise',
     description: 'is an expert at self-care',
     class: 'Trait',
     trait_type: TraitType.GAMEPLAY,
   },
-  wellness_SpaMembership: {
+  'wellness_SpaMembership': {
     name: 'wellness_SpaMembership',
     ignored: true,
     class: 'Trait',
@@ -17617,8 +17572,7 @@ export const simsTraitDescriptions: Record<string, TraitMapping> = {
 const chingyu1023basetraits: Record<string, TraitMapping> = {
   chingyu1023_AbsentMinded_AbsentMindedTrait: {
     name: 'chingyu1023_AbsentMinded_AbsentMindedTrait',
-    description:
-      'gets lost in their thoughts and occasionally forget what they are doing, or where they are going',
+    description: 'gets lost in their thoughts and occasionally forget what they are doing, or where they are going',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
@@ -17630,8 +17584,7 @@ const chingyu1023basetraits: Record<string, TraitMapping> = {
   },
   chingyu1023_AsocialTrait_AsocialTrait: {
     name: 'chingyu1023_AsocialTrait_AsocialTrait',
-    description:
-      'is asocial, not interested in forming social groups or connections',
+    description: 'is asocial, not interested in forming social groups or connections',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
@@ -17679,8 +17632,7 @@ const chingyu1023basetraits: Record<string, TraitMapping> = {
   },
   chingyu1023_DaredevilTrait_DaredevilTrait: {
     name: 'chingyu1023_DaredevilTrait_DaredevilTrait',
-    description:
-      'is reckless and daring, is confident and active and unaffected by stress',
+    description: 'is reckless and daring, is confident and active and unaffected by stress',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
@@ -17734,8 +17686,7 @@ const chingyu1023basetraits: Record<string, TraitMapping> = {
   },
   chingyu1023_EncouragingTrait_EncouragingTrait: {
     name: 'chingyu1023_EncouragingTrait_EncouragingTrait',
-    description:
-      'is very supporting of their friends and loved ones and family',
+    description: 'is very supporting of their friends and loved ones and family',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
@@ -17885,8 +17836,7 @@ const chingyu1023basetraits: Record<string, TraitMapping> = {
   },
   chingyu1023_NeuroticTrait_NeuroticTrait: {
     name: 'chingyu1023_NeuroticTrait_NeuroticTrait',
-    description:
-      'is neurotic, has higher sensitivity to sadness and anger and stress',
+    description: 'is neurotic, has higher sensitivity to sadness and anger and stress',
     class: 'Trait',
     trait_type: TraitType.PERSONALITY,
   },
@@ -18237,8 +18187,7 @@ const wickedWhimsTraitDescriptions: Record<string, TraitMapping> = {
   },
   'TURBODRIVER:WickedWhims_Trait_Peeping_PeepingEnthusiast': {
     name: 'TURBODRIVER:WickedWhims_Trait_Peeping_PeepingEnthusiast',
-    description:
-      'is a peeping enthusiast and will watch through peoples windows',
+    description: 'is a peeping enthusiast and will watch through peoples windows',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
@@ -18412,8 +18361,7 @@ const wickedWhimsTraitDescriptions: Record<string, TraitMapping> = {
   },
   'TURBODRIVER:WickedWhims_Trait_Relationships_Poly': {
     name: 'TURBODRIVER:WickedWhims_Trait_Relationships_Poly',
-    description:
-      'is polyamorous, is open to having multiple romantic and or sexual committed relationships',
+    description: 'is polyamorous, is open to having multiple romantic and or sexual committed relationships',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
@@ -18449,22 +18397,19 @@ const wickedWhimsTraitDescriptions: Record<string, TraitMapping> = {
   },
   'TURBODRIVER:WickedWhims_Trait_Sex_Attribute_GenerousLover': {
     name: 'TURBODRIVER:WickedWhims_Trait_Sex_Attribute_GenerousLover',
-    description:
-      "is a generous sexual partner and focuses on their partner's sexual experience",
+    description: "is a generous sexual partner and focuses on their partner's sexual experience",
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
   'TURBODRIVER:WickedWhims_Trait_Sex_Attribute_SelfishLover': {
     name: 'TURBODRIVER:WickedWhims_Trait_Sex_Attribute_SelfishLover',
-    description:
-      'is a selfish sexual partner and only focuses on their own sexual experience',
+    description: 'is a selfish sexual partner and only focuses on their own sexual experience',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },
   'TURBODRIVER:WickedWhims_Trait_Sex_Cuckold': {
     name: 'TURBODRIVER:WickedWhims_Trait_Sex_Cuckold',
-    description:
-      'is a cuckold and desires seeing their partner have sex with someone else',
+    description: 'is a cuckold and desires seeing their partner have sex with someone else',
     class: 'Trait',
     trait_type: TraitType.PHASE,
   },

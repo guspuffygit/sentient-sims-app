@@ -28,21 +28,12 @@ export function SendLogButton() {
           </div>
           <div>
             {debugMode.isEnabled ? (
-              <Button
-                color="secondary"
-                variant="outlined"
-                sx={{ marginRight: 1 }}
-                onClick={() => navigate('/logs')}
-              >
+              <Button color="secondary" variant="outlined" sx={{ marginRight: 1 }} onClick={() => navigate('/logs')}>
                 Logs
               </Button>
             ) : null}
             <Tooltip title="View Sims 4 Last Exceptions if they exist">
-              <Button
-                color="secondary"
-                variant="outlined"
-                onClick={() => navigate('/last-exception')}
-              >
+              <Button color="secondary" variant="outlined" onClick={() => navigate('/last-exception')}>
                 Last Exceptions
               </Button>
             </Tooltip>

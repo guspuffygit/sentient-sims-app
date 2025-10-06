@@ -1,4 +1,3 @@
-/* eslint-disable class-methods-use-this */
 import * as fs from 'fs';
 import { DirectoryService } from './DirectoryService';
 
@@ -45,19 +44,14 @@ export class LogsService {
     return new Promise((resolve, reject) => {
       const dataToAppend = `${lines.join('\n')}\n`;
 
-      fs.appendFile(
-        this.directoryService.getLogsFile(),
-        dataToAppend,
-        'utf-8',
-        (err) => {
-          if (err) {
-            reject(err);
-            return;
-          }
+      fs.appendFile(this.directoryService.getLogsFile(), dataToAppend, 'utf-8', (err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
 
-          resolve();
-        },
-      );
+        resolve();
+      });
     });
   }
 }

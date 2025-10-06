@@ -1,14 +1,7 @@
 import log from 'electron-log';
 import { VersionClient } from 'main/sentient-sims/clients/VersionClient';
 import { Version } from 'main/sentient-sims/services/VersionService';
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 
 interface VersionsContextType {
   app: Version;
@@ -18,9 +11,7 @@ interface VersionsContextType {
   refresh: () => Promise<void>;
 }
 
-const VersionsContext = createContext<VersionsContextType | undefined>(
-  undefined,
-);
+const VersionsContext = createContext<VersionsContextType | undefined>(undefined);
 
 interface VersionsProviderProps {
   children: ReactNode;
@@ -75,9 +66,5 @@ export function VersionsProvider({ children }: VersionsProviderProps) {
     };
   }, [app, game, loading, mod]);
 
-  return (
-    <VersionsContext.Provider value={contextValue}>
-      {children}
-    </VersionsContext.Provider>
-  );
+  return <VersionsContext.Provider value={contextValue}>{children}</VersionsContext.Provider>;
 }

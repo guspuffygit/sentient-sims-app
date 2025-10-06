@@ -1,5 +1,3 @@
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable react/destructuring-assignment */
 import { Box, IconButton, Tooltip, Typography } from '@mui/material';
 import CachedIcon from '@mui/icons-material/Cached';
 import AppCard from './AppCard';

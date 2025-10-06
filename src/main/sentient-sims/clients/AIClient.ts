@@ -7,9 +7,7 @@ import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { ApiClient } from './ApiClient';
 
 export class AIClient extends ApiClient {
-  async sentientSimsGenerate(
-    request: OpenAICompatibleRequest,
-  ): Promise<SimsGenerateResponse> {
+  async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
     const response = await fetch(`${this.apiUrl}/ai/v2/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -18,9 +16,7 @@ export class AIClient extends ApiClient {
     return response.json();
   }
 
-  async interactionEvent(
-    event: InteractionEvents,
-  ): Promise<InteractionEventResult> {
+  async interactionEvent(event: InteractionEvents): Promise<InteractionEventResult> {
     const response = await fetch(`${this.apiUrl}/ai/v2/event/interaction`, {
       method: 'POST',
       body: JSON.stringify(event),
@@ -35,8 +31,7 @@ export class AIClient extends ApiClient {
     if (!response.ok) {
       try {
         const errorResponse = await response.json();
-        const errorMessage =
-          errorResponse.error || 'Unknown JSON error occurred';
+        const errorMessage = errorResponse.error || 'Unknown JSON error occurred';
         throw new SentientSimsAIError(`Error getting models: ${errorMessage}`);
       } catch (e: any) {
         if (e instanceof SentientSimsAIError) {

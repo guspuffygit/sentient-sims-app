@@ -1,4 +1,3 @@
-/* eslint-disable */
 interface Vocabulary {
   [key: string]: number;
 }
@@ -99,12 +98,7 @@ export class Encoder {
 
   private cache: Map<string, number[]> = new Map<string, number[]>();
 
-  constructor(
-    vocab: Vocabulary,
-    merges: string[][],
-    specials: string[],
-    config: Config
-  ) {
+  constructor(vocab: Vocabulary, merges: string[][], specials: string[], config: Config) {
     this.vocab = vocab;
     this.merges = merges;
     this.specials = specials
@@ -152,9 +146,7 @@ export class Encoder {
     this.tokenMerges = tokenMerges;
 
     // Sort specials in descending order of length.
-    const specialsSorted = Object.entries(this.specials).sort(
-      (a, b) => b[0].length - a[0].length
-    );
+    const specialsSorted = Object.entries(this.specials).sort((a, b) => b[0].length - a[0].length);
 
     // Create a specials tree by going through the specials. Starting node is empty.
     const specialsTree: SpecialsTreeNode = {
@@ -249,9 +241,7 @@ export class Encoder {
         // If we were accumulating a special, and we had found a full special,
         // isolate the full special and move the index back.
         else if (lastFullSpecialNode.value) {
-          const extra = accumulatedSpecial.slice(
-            lastFullSpecialNode.value.length
-          );
+          const extra = accumulatedSpecial.slice(lastFullSpecialNode.value.length);
           accumulatedSpecial = lastFullSpecialNode.value;
           i -= extra.length;
           lastFullSpecialNode = undefined;
@@ -259,19 +249,14 @@ export class Encoder {
         }
       }
 
-      if (
-        currentSpecialNode.value &&
-        accumulatedSpecial === currentSpecialNode.value
-      ) {
+      if (currentSpecialNode.value && accumulatedSpecial === currentSpecialNode.value) {
         // We found a full special.
         lastFullSpecialNode = currentSpecialNode;
       }
     }
     if (accumulatedSpecial) {
       if (lastFullSpecialNode?.value) {
-        const extra = accumulatedSpecial.slice(
-          lastFullSpecialNode.value.length
-        );
+        const extra = accumulatedSpecial.slice(lastFullSpecialNode.value.length);
         accumulatedSpecial = lastFullSpecialNode.value;
         split();
         accumulated = extra;
@@ -301,9 +286,7 @@ export class Encoder {
       return data;
     }
     // Transform using byteToChar.
-    return [...this.encodeStr(data)]
-      .map((byte) => this.byteToChar[byte])
-      .join('');
+    return [...this.encodeStr(data)].map((byte) => this.byteToChar[byte]).join('');
   }
 
   private insertSortedNoDups(data: BGERank[], item: BGERank) {
@@ -378,11 +361,7 @@ export class Encoder {
         }
         newWord = [...newWord, ...word.slice(i, j)];
         i = j;
-        if (
-          word[i] === first &&
-          i < word.length - 1 &&
-          word[i + 1] === second
-        ) {
+        if (word[i] === first && i < word.length - 1 && word[i + 1] === second) {
           newWord.push(first + second);
           i += 2;
         } else {
@@ -458,7 +437,7 @@ export class Encoder {
         [...text].flatMap((x) => {
           const converted = this.charToByte[x] ?? this.encodeStr(x);
           return converted;
-        })
+        }),
       );
     }
 

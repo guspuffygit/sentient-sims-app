@@ -1,11 +1,6 @@
-/* eslint-disable max-classes-per-file,class-methods-use-this */
-/* eslint-disable promise/always-return */
 import log from 'electron-log';
 import OpenAI from 'openai';
-import {
-  ChatCompletion,
-  ResponseFormatJSONSchema,
-} from 'openai/resources/index.js';
+import { ChatCompletion, ResponseFormatJSONSchema } from 'openai/resources/index.js';
 import { ChatCompletionCreateParams } from 'openai/resources/chat/completions.js';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
@@ -41,9 +36,7 @@ export class OpenAIService implements GenerationService {
 
   getOpenAIKey(): string | undefined {
     // Check app settings
-    const openAIKeyFromSettings = this.settingsService.get(
-      SettingsEnum.OPENAI_KEY,
-    );
+    const openAIKeyFromSettings = this.settingsService.get(SettingsEnum.OPENAI_KEY);
     if (openAIKeyFromSettings) {
       log.debug('Using openai key from settings');
       return openAIKeyFromSettings as string;
@@ -56,9 +49,7 @@ export class OpenAIService implements GenerationService {
       return openAIKeyFromEnv;
     }
 
-    throw new OpenAIKeyNotSetError(
-      'No OpenAI Key set, Edit OpenAI Key to set it',
-    );
+    throw new OpenAIKeyNotSetError('No OpenAI Key set, Edit OpenAI Key to set it');
   }
 
   private getOpenAIClient(apiKey?: string): OpenAI {
@@ -102,9 +93,7 @@ export class OpenAIService implements GenerationService {
     }
   }
 
-  async sentientSimsGenerate(
-    request: OpenAICompatibleRequest,
-  ): Promise<SimsGenerateResponse> {
+  async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
     const completionRequest: ChatCompletionCreateParams = {
       model: this.getOpenAIModel(),
       max_tokens: request.maxResponseTokens,
@@ -116,11 +105,7 @@ export class OpenAIService implements GenerationService {
       }),
     };
 
-    if (
-      request.guidedChoice &&
-      this.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) ===
-        openaiDefaultEndpoint
-    ) {
+    if (request.guidedChoice && this.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) === openaiDefaultEndpoint) {
       const schema: ResponseFormatJSONSchema = {
         json_schema: {
           name: 'thechoice',
@@ -145,23 +130,15 @@ export class OpenAIService implements GenerationService {
 
     log.debug(`OpenAI Request:\n${JSON.stringify(completionRequest, null, 2)}`);
 
-    const result =
-      await this.getOpenAIClient().chat.completions.create(completionRequest);
+    const result = await this.getOpenAIClient().chat.completions.create(completionRequest);
     let text = this.getOutputFromGeneration(result);
 
-    if (
-      request.guidedChoice &&
-      this.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) ===
-        openaiDefaultEndpoint
-    ) {
+    if (request.guidedChoice && this.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) === openaiDefaultEndpoint) {
       text = JSON.parse(text).choice.trim();
     }
 
     if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED)) {
-      text = await this.translate(
-        text,
-        this.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE) as string,
-      );
+      text = await this.translate(text, this.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE) as string);
     }
 
     return {
@@ -195,8 +172,7 @@ export class OpenAIService implements GenerationService {
         },
       ],
     };
-    const result =
-      await this.getOpenAIClient().chat.completions.create(request);
+    const result = await this.getOpenAIClient().chat.completions.create(request);
     return this.getOutputFromGeneration(result);
   }
 
@@ -229,7 +205,7 @@ export class OpenAIService implements GenerationService {
         name: 'gpt-4.1-nano-2025-04-14',
         displayName: 'gpt-4.1-nano 2025-04-14',
       },
-    }
+    };
 
     const aiModels: AIModel[] = [];
     models.data.forEach((model) => {

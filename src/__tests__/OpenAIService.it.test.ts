@@ -1,13 +1,8 @@
-/* eslint-disable no-console */
 import '@testing-library/jest-dom';
 import { OpenAIService } from 'main/sentient-sims/services/OpenAIService';
 import { SettingsService } from 'main/sentient-sims/services/SettingsService';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import {
-  OneShotRequest,
-  OpenAIRequestBuilder,
-  PromptRequest,
-} from 'main/sentient-sims/models/OpenAIRequestBuilder';
+import { OneShotRequest, OpenAIRequestBuilder, PromptRequest } from 'main/sentient-sims/models/OpenAIRequestBuilder';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
 
 describe('OpenAIServiceIT', () => {
@@ -81,9 +76,7 @@ describe('OpenAIServiceIT', () => {
     const result = await openAIService.sentientSimsGenerate(request);
     console.log(`Translation: ${result.text}`);
     const possibleMatches = ['acuerdo?', 'bien?', 'acuerdo'];
-    const isMatch = possibleMatches.some((item) =>
-      result.text.toLocaleLowerCase().includes(item),
-    );
+    const isMatch = possibleMatches.some((item) => result.text.toLocaleLowerCase().includes(item));
     expect(isMatch).toBeTruthy();
   }, 20000);
 

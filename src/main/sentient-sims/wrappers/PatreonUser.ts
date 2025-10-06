@@ -1,37 +1,26 @@
-import { AmplifyUser } from '@aws-amplify/ui';
+import { AuthUserAttributes } from 'renderer/providers/AuthProvider';
 
 export class PatreonUser {
-  private readonly user?: AmplifyUser;
+  private readonly userAttributes?: AuthUserAttributes;
 
-  constructor(user?: AmplifyUser) {
-    this.user = user;
+  constructor(userAttributes?: AuthUserAttributes) {
+    this.userAttributes = userAttributes;
   }
 
   getPatreonId() {
-    if (this.user?.attributes?.preferred_username) {
-      const patreonId = this.user.attributes.preferred_username;
-      if (patreonId) {
-        return patreonId;
-      }
-    }
-
-    return null;
+    return this.userAttributes?.patreonId;
   }
 
   getSubscriptionLevel() {
-    if (this.user?.attributes?.['custom:subscription_level']) {
-      return this.user.attributes['custom:subscription_level'];
+    if (this.userAttributes?.subscriptionLevel) {
+      return this.userAttributes?.subscriptionLevel;
     }
 
     return 'free';
   }
 
   getFounderStatus() {
-    if (this.user?.attributes?.['custom:founderstatus']) {
-      return this.user.attributes['custom:founderstatus'];
-    }
-
-    return null;
+    return this.userAttributes?.founderStatus;
   }
 
   isPatreonLinked() {

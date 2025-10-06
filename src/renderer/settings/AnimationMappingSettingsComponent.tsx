@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-no-useless-fragment */
 import { Box, Checkbox, FormControlLabel } from '@mui/material';
 import { ChangeEvent } from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
@@ -10,17 +9,10 @@ type AnimationMappingSettingsComponentProps = {
   apiType: ApiType;
 };
 
-export function AnimationMappingSettingsComponent({
-  apiType,
-}: AnimationMappingSettingsComponentProps) {
-  const animationMappingEnabled = useSetting(
-    SettingsEnum.MAPPING_NOTIFICATION_ENABLED,
-    true,
-  );
+export function AnimationMappingSettingsComponent({ apiType }: AnimationMappingSettingsComponentProps) {
+  const animationMappingEnabled = useSetting(SettingsEnum.MAPPING_NOTIFICATION_ENABLED, true);
 
-  const onAnimationMappingEnabledChange = (
-    change: ChangeEvent<HTMLInputElement>,
-  ) => {
+  const onAnimationMappingEnabledChange = (change: ChangeEvent<HTMLInputElement>) => {
     animationMappingEnabled.setSetting(change.target.checked);
   };
 
@@ -32,12 +24,7 @@ export function AnimationMappingSettingsComponent({
     <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
       <FormControlLabel
         label="Enable Animation Mapping"
-        control={
-          <Checkbox
-            checked={animationMappingEnabled.value}
-            onChange={onAnimationMappingEnabledChange}
-          />
-        }
+        control={<Checkbox checked={animationMappingEnabled.value} onChange={onAnimationMappingEnabledChange} />}
       />
       <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/External-Mod-Support#mapping-animations" />
     </Box>

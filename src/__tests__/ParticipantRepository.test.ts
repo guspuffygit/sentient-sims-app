@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import '@testing-library/jest-dom';
 import { ParticipantRepository } from 'main/sentient-sims/db/ParticipantRepository';
 import { DbService } from 'main/sentient-sims/services/DbService';
@@ -59,13 +58,10 @@ describe('ParticipantRepository', () => {
 
     noDescription.description = randomString();
     participantRepository.updateParticipant(noDescription);
-    const descriptionChangedResult =
-      await participantRepository.getParticipants([
-        { id: noDescription.id, fullName: 'some name' },
-      ]);
-    expect(descriptionChangedResult[0].description).toEqual(
-      noDescription.description,
-    );
+    const descriptionChangedResult = await participantRepository.getParticipants([
+      { id: noDescription.id, fullName: 'some name' },
+    ]);
+    expect(descriptionChangedResult[0].description).toEqual(noDescription.description);
 
     const defaultSimDescription = await participantRepository.getParticipant({
       id: '187263',
@@ -80,11 +76,7 @@ describe('ParticipantRepository', () => {
     });
 
     const allParticipants = participantRepository.getAllParticipants();
-    expect(
-      allParticipants.some(
-        (item) => item.id === '187263' && item.name === 'Travis Scott',
-      ),
-    ).toBeTruthy();
+    expect(allParticipants.some((item) => item.id === '187263' && item.name === 'Travis Scott')).toBeTruthy();
 
     expect(noDefaultSimDescription.description).toBeUndefined();
   });

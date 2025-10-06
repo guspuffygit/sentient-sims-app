@@ -4,5 +4,3 @@ export interface InputFormatter {
   formatInput(promptRequest: PromptRequest): PromptRequest;
   formatOneShotRequest(oneShotRequest: OneShotRequest): OneShotRequest;
 }
-
-export interface OutputFormatter {}

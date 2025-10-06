@@ -31,14 +31,10 @@ export function AISelectionComponent() {
         id="release-type-select"
         value={aiApiType}
         sx={{ minWidth: 100, marginRight: 2 }}
-        onChange={(change) =>
-          aiApiTypeSetting.setSetting(ApiTypeFromValue(change.target.value))
-        }
+        onChange={(change) => aiApiTypeSetting.setSetting(ApiTypeFromValue(change.target.value))}
       >
         <MenuItem value={ApiType.OpenAI}>OpenAI</MenuItem>
-        <MenuItem value={ApiType.SentientSimsAI}>
-          Sentient Sims Uncensored AI (Founder/Patreon)
-        </MenuItem>
+        <MenuItem value={ApiType.SentientSimsAI}>Sentient Sims Uncensored AI (Founder/Patreon)</MenuItem>
         <MenuItem value={ApiType.NovelAI}>NovelAI</MenuItem>
         <MenuItem value={ApiType.KoboldAI}>Kobold AI</MenuItem>
         <MenuItem value={ApiType.Gemini}>Gemini</MenuItem>

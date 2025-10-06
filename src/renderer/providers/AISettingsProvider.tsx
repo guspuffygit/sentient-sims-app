@@ -1,27 +1,9 @@
 import log from 'electron-log';
-import {
-  appApiUrl,
-  defaultTTSEnabled,
-  defaultTTSVolume,
-} from 'main/sentient-sims/constants';
-import {
-  AIHealthCheckResponse,
-  AITestStatus,
-} from 'main/sentient-sims/models/AIHealthCheckResponse';
-import {
-  ApiType,
-  ApiTypeFromValue,
-  ApiTypeName,
-} from 'main/sentient-sims/models/ApiType';
+import { appApiUrl, defaultTTSEnabled, defaultTTSVolume } from 'main/sentient-sims/constants';
+import { AIHealthCheckResponse, AITestStatus } from 'main/sentient-sims/models/AIHealthCheckResponse';
+import { ApiType, ApiTypeFromValue, ApiTypeName } from 'main/sentient-sims/models/ApiType';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 import useSetting, { SettingsHook } from 'renderer/hooks/useSetting';
 
 interface AISettingsContextType {
@@ -38,9 +20,7 @@ interface AISettingsContextType {
   testAI: (openAIKey?: string) => Promise<void>;
 }
 
-const AISettingsContext = createContext<AISettingsContextType | undefined>(
-  undefined,
-);
+const AISettingsContext = createContext<AISettingsContextType | undefined>(undefined);
 
 interface AISettingsProviderProps {
   children: ReactNode;
@@ -100,25 +80,13 @@ export function AISettingsProvider({ children }: AISettingsProviderProps) {
     });
   };
 
-  const aiApiTypeSetting = useSetting<ApiType>(
-    SettingsEnum.AI_API_TYPE,
-    ApiType.SentientSimsAI,
-  );
+  const aiApiTypeSetting = useSetting<ApiType>(SettingsEnum.AI_API_TYPE, ApiType.SentientSimsAI);
 
-  const ttsApiTypeSetting = useSetting<ApiType>(
-    SettingsEnum.TTS_API_TYPE,
-    ApiType.SentientSimsAI,
-  );
+  const ttsApiTypeSetting = useSetting<ApiType>(SettingsEnum.TTS_API_TYPE, ApiType.SentientSimsAI);
 
-  const ttsEnabledSetting = useSetting<boolean>(
-    SettingsEnum.TTS_ENABLED,
-    defaultTTSEnabled,
-  );
+  const ttsEnabledSetting = useSetting<boolean>(SettingsEnum.TTS_ENABLED, defaultTTSEnabled);
 
-  const ttsVolumeSetting = useSetting<number>(
-    SettingsEnum.TTS_VOLUME,
-    defaultTTSVolume,
-  );
+  const ttsVolumeSetting = useSetting<number>(SettingsEnum.TTS_VOLUME, defaultTTSVolume);
 
   const aiApiType = ApiTypeFromValue(aiApiTypeSetting.value);
 
@@ -138,15 +106,7 @@ export function AISettingsProvider({ children }: AISettingsProviderProps) {
       aiApiName: ApiTypeName(aiApiType),
       testAI,
     };
-  }, [
-    aiApiType,
-    aiStatus,
-    ttsApiType,
-    ttsEnabledSetting,
-    ttsVolumeSetting,
-    aiApiTypeSetting,
-    ttsApiTypeSetting,
-  ]);
+  }, [aiApiType, aiStatus, ttsApiType, ttsEnabledSetting, ttsVolumeSetting, aiApiTypeSetting, ttsApiTypeSetting]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -156,9 +116,5 @@ export function AISettingsProvider({ children }: AISettingsProviderProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  return (
-    <AISettingsContext.Provider value={contextValue}>
-      {children}
-    </AISettingsContext.Provider>
-  );
+  return <AISettingsContext.Provider value={contextValue}>{children}</AISettingsContext.Provider>;
 }

@@ -1,9 +1,5 @@
-/* eslint-disable no-console */
 import '@testing-library/jest-dom';
-import {
-  InteractionEvent,
-  SSEventType,
-} from 'main/sentient-sims/models/InteractionEvents';
+import { InteractionEvent, SSEventType } from 'main/sentient-sims/models/InteractionEvents';
 import * as fs from 'fs';
 import { DbService } from 'main/sentient-sims/services/DbService';
 import { ParticipantRepository } from 'main/sentient-sims/db/ParticipantRepository';
@@ -21,10 +17,7 @@ import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { RepositoryService } from 'main/sentient-sims/services/RepositoryService';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
-import {
-  OpenAIRequestBuilder,
-  PromptRequest,
-} from 'main/sentient-sims/models/OpenAIRequestBuilder';
+import { OpenAIRequestBuilder, PromptRequest } from 'main/sentient-sims/models/OpenAIRequestBuilder';
 import { SimAge } from 'main/sentient-sims/models/SimAge';
 import { mockDirectoryService } from './util';
 
@@ -83,8 +76,7 @@ describe('Output', () => {
               {
                 name: 'careers_Adult_SocialMedia',
                 level: 9,
-                track_name:
-                  'careerTrack_SocialMedia_Track2_InternetPersonality',
+                track_name: 'careerTrack_SocialMedia_Track2_InternetPersonality',
               },
             ],
             name: 'Richy Richardson',
@@ -132,8 +124,7 @@ describe('Output', () => {
             week: 0,
           },
         },
-        interaction_name:
-          'mixer_social_ShareFishingTips_targeted_Friendly_alwaysOn_skills',
+        interaction_name: 'mixer_social_ShareFishingTips_targeted_Friendly_alwaysOn_skills',
       };
 
       const directoryService = mockDirectoryService();
@@ -150,25 +141,19 @@ describe('Output', () => {
         new MemoryRepository(dbService),
         new ParticipantRepository(dbService),
       );
-      const promptRequestBuilderService = new PromptRequestBuilderService(
-        repositoryService,
-      );
+      const promptRequestBuilderService = new PromptRequestBuilderService(repositoryService);
 
-      const result = await promptRequestBuilderService.buildPromptRequest(
-        event,
-        {
-          action:
-            '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
-          apiType: ApiType.SentientSimsAI,
-          modelSettings: {
-            temperature: undefined,
-            top_p: undefined,
-            top_k: undefined,
-            repetition_penalty: undefined,
-            max_tokens: 5000,
-          },
+      const result = await promptRequestBuilderService.buildPromptRequest(event, {
+        action: '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
+        apiType: ApiType.SentientSimsAI,
+        modelSettings: {
+          temperature: undefined,
+          top_p: undefined,
+          top_k: undefined,
+          repetition_penalty: undefined,
+          max_tokens: 5000,
         },
-      );
+      });
 
       console.log(JSON.stringify(result, null, 2));
 
@@ -196,9 +181,7 @@ describe('Output', () => {
     });
 
     it('three items', () => {
-      expect(formatListToString(['hello', 'hi', 'how'])).toEqual(
-        'hello, hi, and how',
-      );
+      expect(formatListToString(['hello', 'hi', 'how'])).toEqual('hello, hi, and how');
     });
   });
 
@@ -244,9 +227,7 @@ describe('Output', () => {
     it('completelyNaked', () => {
       sentientSim.upper_body = BodyState.NUDE;
       sentientSim.lower_body = BodyState.NUDE;
-      expect(formatWWProperties(sentientSim)).toEqual(
-        `${sentientSim.name} is completely naked.`,
-      );
+      expect(formatWWProperties(sentientSim)).toEqual(`${sentientSim.name} is completely naked.`);
     });
   });
 
@@ -291,9 +272,7 @@ describe('Output', () => {
       expect(result.messages[0].content).toContain('location');
       expect(result.messages[0].content).toContain('sim 1');
       expect(result.messages[0].content).toContain('system');
-      expect(result.messages[0].content).toContain(
-        'The day is Monday at 7:51 AM.',
-      );
+      expect(result.messages[0].content).toContain('The day is Monday at 7:51 AM.');
       expect(result.messages[0].role).toBe('system');
       expect(result.messages[0].tokens).toBeGreaterThan(5);
 
@@ -330,9 +309,7 @@ describe('Output', () => {
       expect(result.messages[0].content).toContain('system');
       expect(result.messages[0].role).toBe('system');
       expect(result.messages[0].tokens).toBeGreaterThan(5);
-      console.log(
-        `THIS IS IT SEARCH FOR THIS: ${JSON.stringify(result, null, 2)}`,
-      );
+      console.log(`THIS IS IT SEARCH FOR THIS: ${JSON.stringify(result, null, 2)}`);
       expect(result.messages[1].content).toBe('A');
       expect(result.messages[1].role).toBe('assistant');
 

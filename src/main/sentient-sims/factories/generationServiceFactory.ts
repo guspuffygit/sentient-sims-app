@@ -15,9 +15,7 @@ import { stringType } from '../util/typeChecks';
 import { GeminiService } from '../services/GeminiService';
 import { VLLMAIService } from '../services/VLLMAIService';
 
-export function getGenerationService(
-  settingsService: SettingsService,
-): GenerationService {
+export function getGenerationService(settingsService: SettingsService): GenerationService {
   const aiType = settingsService.get(SettingsEnum.AI_API_TYPE);
   if (aiType === ApiType.SentientSimsAI || aiType === ApiType.CustomAI) {
     return new SentientSimsAIService(settingsService);
@@ -42,9 +40,7 @@ export function getGenerationService(
   return new OpenAIService(settingsService);
 }
 
-export function getTokenCounter(
-  settingsService: SettingsService,
-): TokenCounter {
+export function getTokenCounter(settingsService: SettingsService): TokenCounter {
   const aiType = settingsService.get(SettingsEnum.AI_API_TYPE);
 
   if (aiType === ApiType.NovelAI) {
@@ -58,9 +54,7 @@ export function getTokenCounter(
   return new LLaMaTokenCounter();
 }
 
-export function getModelSettings(
-  settingsService: SettingsService,
-): ModelSettings {
+export function getModelSettings(settingsService: SettingsService): ModelSettings {
   const aiType = settingsService.get(SettingsEnum.AI_API_TYPE);
 
   let modelSettings = AllModelSettings.default;

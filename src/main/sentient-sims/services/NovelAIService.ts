@@ -1,5 +1,3 @@
-/* eslint-disable max-classes-per-file,class-methods-use-this */
-/* eslint-disable promise/always-return */
 import log from 'electron-log';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
@@ -42,12 +40,10 @@ const badWordsList = [
 // Used for phrase repetition penalty
 const repPenaltyAllowList = [
   [
-    49256, 49264, 49231, 49230, 49287, 85, 49255, 49399, 49262, 336, 333, 432,
-    363, 468, 492, 745, 401, 426, 623, 794, 1096, 2919, 2072, 7379, 1259, 2110,
-    620, 526, 487, 16562, 603, 805, 761, 2681, 942, 8917, 653, 3513, 506, 5301,
-    562, 5010, 614, 10942, 539, 2976, 462, 5189, 567, 2032, 123, 124, 125, 126,
-    127, 128, 129, 130, 131, 132, 588, 803, 1040, 49209, 4, 5, 6, 7, 8, 9, 10,
-    11, 12,
+    49256, 49264, 49231, 49230, 49287, 85, 49255, 49399, 49262, 336, 333, 432, 363, 468, 492, 745, 401, 426, 623, 794,
+    1096, 2919, 2072, 7379, 1259, 2110, 620, 526, 487, 16562, 603, 805, 761, 2681, 942, 8917, 653, 3513, 506, 5301, 562,
+    5010, 614, 10942, 539, 2976, 462, 5189, 567, 2032, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 588, 803, 1040,
+    49209, 4, 5, 6, 7, 8, 9, 10, 11, 12,
   ],
 ];
 
@@ -140,17 +136,13 @@ export class NovelAIService implements GenerationService {
 
   getNovelAIKey(): string | undefined {
     // Check app settings
-    const novelAIKeyFromSettings = this.settingsService.get(
-      SettingsEnum.NOVELAI_KEY,
-    );
+    const novelAIKeyFromSettings = this.settingsService.get(SettingsEnum.NOVELAI_KEY);
     if (novelAIKeyFromSettings) {
       log.debug('Using novelai key from settings');
       return novelAIKeyFromSettings as string;
     }
 
-    throw new NovelAIKeyNotSetError(
-      'No NovelAI Key set, Edit NovelAI Key to set it',
-    );
+    throw new NovelAIKeyNotSetError('No NovelAI Key set, Edit NovelAI Key to set it');
   }
 
   async healthCheck(apiKey?: string) {
@@ -161,7 +153,7 @@ export class NovelAIService implements GenerationService {
     const response = await fetch(`${this.serviceUrl()}/user/subscription`, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${key}`,
+        'Authorization': `Bearer ${key}`,
       },
     });
 
@@ -180,6 +172,7 @@ export class NovelAIService implements GenerationService {
           status: `NovelAI Error: ${novelAIError.message}`,
         };
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err: any) {
       // ignore
     }
@@ -189,9 +182,7 @@ export class NovelAIService implements GenerationService {
     };
   }
 
-  async sentientSimsGenerate(
-    request: OpenAICompatibleRequest,
-  ): Promise<SimsGenerateResponse> {
+  async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
     const prompt = request.messages.map((m) => m.content).join('\n');
     log.debug(`prompt: ${JSON.stringify(prompt)}`);
 
@@ -231,7 +222,7 @@ export class NovelAIService implements GenerationService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${authHeader}`,
+        'Authorization': `Bearer ${authHeader}`,
       },
       body: JSON.stringify(novelAIRequest),
     });

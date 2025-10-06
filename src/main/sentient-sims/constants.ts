@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/prefer-default-export
 export const defaultMythoMaxSystemPrompt = [
   'The user will prompt you with a description of an act that you will narrate in the third person,',
   'describing the characters present who are performing the act explicitly in vivid detail',
@@ -40,8 +39,7 @@ export const defaultClassificationPrompt = [
 
 export const sentientSimsAIHost = 'https://ai.sentientsimulations.com';
 
-export const defaultWantsSystemPrompt =
-  'You are the following character in the following location:';
+export const defaultWantsSystemPrompt = 'You are the following character in the following location:';
 export const defaultWantsPrompt =
   'If you were the character in the story, what are your wants right now? Respond in the first person';
 
@@ -58,8 +56,7 @@ export const sentientSimsAIDefaultModel = 'Gryphe/MythoMax-L2-13b';
 export const tokenizerBreakString = '<<BREAK>>';
 export const defaultWantsPrefixes = ['I want to', 'I would like', 'I feel'];
 export const defaultGeminiModel = 'gemini-2.0-flash-exp';
-export const geminiDefaultEndpoint =
-  'https://generativelanguage.googleapis.com/v1beta';
+export const geminiDefaultEndpoint = 'https://generativelanguage.googleapis.com/v1beta';
 export const defaultTTSEnabled = false;
 export const defaultTTSVolume = 0.75;
 export const defaultElevenLabsEndpoint = 'https://api.elevenlabs.io/v1';

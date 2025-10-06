@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-no-useless-fragment */
 import { Box, InputAdornment, TextField } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiType, ApiTypeName } from 'main/sentient-sims/models/ApiType';
@@ -12,16 +11,11 @@ type AIEndpointComponentProps = {
   type: ApiType;
   selectedApiType: ApiType;
   settingsEnum: SettingsEnum;
-  // eslint-disable-next-line react/require-default-props
+
   onChange?: (value: string) => void;
 };
 
-export function AIEndpointComponent({
-  type,
-  selectedApiType,
-  settingsEnum,
-  onChange,
-}: AIEndpointComponentProps) {
+export function AIEndpointComponent({ type, selectedApiType, settingsEnum, onChange }: AIEndpointComponentProps) {
   const aiEndpoint = useSetting(settingsEnum);
 
   const inputDebounce = useDebounceHook();

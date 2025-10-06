@@ -1,4 +1,3 @@
-/* eslint-disable class-methods-use-this */
 import { TokenCounter } from './TokenCounter';
 import { Encoder } from './novelai/novelai';
 import { NovelAITokenizer } from './novelai/tokenizer';

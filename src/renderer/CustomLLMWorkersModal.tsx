@@ -1,4 +1,3 @@
-import React from 'react';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
@@ -25,11 +24,7 @@ const columns: GridColDef[] = [
   },
 ];
 
-export default function CustomLLMWorkersModal({
-  open,
-  onClose,
-  workers,
-}: ModalProps) {
+export default function CustomLLMWorkersModal({ open, onClose, workers }: ModalProps) {
   const rows: any[] = [];
   try {
     if (workers) {
@@ -43,10 +38,7 @@ export default function CustomLLMWorkersModal({
       });
     }
   } catch (err: any) {
-    log.error(
-      `Exception thrown trying to render workers, typeof: ${typeof workers}`,
-      err,
-    );
+    log.error(`Exception thrown trying to render workers, typeof: ${typeof workers}`, err);
   }
   return (
     <Modal open={open} onClose={onClose}>

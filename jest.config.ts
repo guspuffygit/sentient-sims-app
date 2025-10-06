@@ -1,4 +1,6 @@
-module.exports = {
+import type { Config } from 'jest';
+
+const config: Config = {
   // Conditionally enable coverage based on an environment variable
   collectCoverage: process.env.JEST_DISABLE_COVERAGE !== 'true',
 
@@ -10,7 +12,7 @@ module.exports = {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
   },
   setupFiles: ['./.erb/scripts/check-build-exists.ts'],
-  setupFilesAfterEnv: ['<rootDir>/setup-jest.js'],
+  setupFilesAfterEnv: ['<rootDir>/setup-jest.ts'],
   testEnvironment: 'node',
   testEnvironmentOptions: {
     url: 'http://localhost:25198/',
@@ -25,14 +27,9 @@ module.exports = {
     '\\.(ts|tsx|js|jsx)$': 'ts-jest',
   },
   collectCoverageFrom: ['./src/**'],
-  coveragePathIgnorePatterns: [
-    'main.ts',
-    'menu.ts',
-    'preload.ts',
-    'util.ts',
-    'LLamaTokenizer.ts',
-    'vocab.ts',
-  ],
+  coveragePathIgnorePatterns: ['main.ts', 'menu.ts', 'preload.ts', 'util.ts', 'LLamaTokenizer.ts', 'vocab.ts'],
   coverageDirectory: 'coverage',
   verbose: true,
 };
+
+export default config;

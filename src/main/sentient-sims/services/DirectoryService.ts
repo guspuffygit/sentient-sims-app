@@ -1,5 +1,3 @@
-/* eslint-disable class-methods-use-this */
-/* eslint-disable import/prefer-default-export */
 import * as fs from 'fs';
 import path from 'path';
 import log from 'electron-log';
@@ -49,13 +47,7 @@ export class DirectoryService {
   }
 
   filesToDelete(): string[] {
-    return [
-      path.join(
-        this.getSentientSimsFolder(),
-        'sentient-sims-descriptions.ts4script',
-      ),
-      this.getZippedModFile(),
-    ];
+    return [path.join(this.getSentientSimsFolder(), 'sentient-sims-descriptions.ts4script'), this.getZippedModFile()];
   }
 
   createDirectoryIfNotExist(directoryPath: string) {
@@ -100,9 +92,7 @@ export class DirectoryService {
       // Check if the item is a file
       if (fs.statSync(fullPath).isFile()) {
         // Check if the filename contains any of the specified keywords
-        const hasKeywords = keywords.some((keyword) =>
-          new RegExp(keyword, 'i').test(item),
-        );
+        const hasKeywords = keywords.some((keyword) => new RegExp(keyword, 'i').test(item));
         if (hasKeywords) {
           files.push(fullPath);
         }
@@ -113,17 +103,11 @@ export class DirectoryService {
   }
 
   getSentientSimsDb(databaseSession: DatabaseSession) {
-    return path.join(
-      this.getSentientSimsFolder(),
-      `${databaseSession.saveId}-sentient-sims.db`,
-    );
+    return path.join(this.getSentientSimsFolder(), `${databaseSession.saveId}-sentient-sims.db`);
   }
 
   getSentientSimsErrorDb(databaseSession: DatabaseSession) {
-    return path.join(
-      this.getSentientSimsFolder(),
-      `${databaseSession.saveId}-sentient-sims-error.db`,
-    );
+    return path.join(this.getSentientSimsFolder(), `${databaseSession.saveId}-sentient-sims-error.db`);
   }
 
   getSingleSlotSentientSimsDB() {
@@ -131,25 +115,16 @@ export class DirectoryService {
   }
 
   getSentientSimsDbUnsaved(databaseSession: DatabaseSession) {
-    return path.join(
-      this.getSentientSimsFolder(),
-      `${databaseSession.sessionId}-sentient-sims-unsaved.db`,
-    );
+    return path.join(this.getSentientSimsFolder(), `${databaseSession.sessionId}-sentient-sims-unsaved.db`);
   }
 
   getSentientSimsSaveGame(saveGame: SaveGame): string {
     if (saveGame.type === SaveGameType.SAVED) {
-      return path.join(
-        this.getSentientSimsFolder(),
-        `${saveGame.name}-sentient-sims.db`,
-      );
+      return path.join(this.getSentientSimsFolder(), `${saveGame.name}-sentient-sims.db`);
     }
 
     if (saveGame.type === SaveGameType.UNSAVED) {
-      return path.join(
-        this.getSentientSimsFolder(),
-        `${saveGame.name}-sentient-sims-unsaved.db`,
-      );
+      return path.join(this.getSentientSimsFolder(), `${saveGame.name}-sentient-sims-unsaved.db`);
     }
 
     throw Error(`Unknown SaveGameType: ${saveGame.type}`);
@@ -172,9 +147,7 @@ export class DirectoryService {
     try {
       const folderPath = this.getSentientSimsFolder();
       const files = fs.readdirSync(folderPath);
-      return files
-        .filter((file) => file.includes('-sentient-sims.db'))
-        .map((file) => path.join(folderPath, file));
+      return files.filter((file) => file.includes('-sentient-sims.db')).map((file) => path.join(folderPath, file));
     } catch (error) {
       log.error('Error reading directory:', error);
       return [];
@@ -185,6 +158,7 @@ export class DirectoryService {
     try {
       fs.accessSync(filePath, fs.constants.F_OK);
       return true;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       return false;
     }

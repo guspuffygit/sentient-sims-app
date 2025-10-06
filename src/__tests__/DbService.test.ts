@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import '@testing-library/jest-dom';
 import { DbService } from 'main/sentient-sims/services/DbService';
 import * as fs from 'fs';

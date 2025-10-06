@@ -25,8 +25,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Freelance Programmer',
         description:
           "Why sit in an office filled with coworkers talking about their kids? {0.SimFirstName} just wants to focus up and get some coding done in the comfort of wherever {F0.she}{M0.he} desires. No boss is going to tell {0.SimPronounObjective} what to work on. From spreadsheets to videogames, it's all {F0.her}{M0.his} choice!",
-        sentient_sims_description:
-          '{sim_name} works as a freelance programmer.',
+        sentient_sims_description: '{sim_name} works as a freelance programmer.',
       },
     },
   },
@@ -36,34 +35,29 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Grade School F Student',
         description:
           "Let's not sugar coat things.  You're failing.  But you've still got time to turn it around!  Do some homework - any homework - and go to school.",
-        sentient_sims_description:
-          '{sim_name} is a student in grade school and currently failing classes.',
+        sentient_sims_description: '{sim_name} is a student in grade school and currently failing classes.',
       },
       2: {
         name: 'Grade School D Student',
         description:
           "When Ds are the norm, things aren't bleak quite yet, but the teacher has called home a few times and you're right on the edge of failing out of school.",
-        sentient_sims_description:
-          '{sim_name} is a student in grade school and currently failing classes.',
+        sentient_sims_description: '{sim_name} is a student in grade school and currently failing classes.',
       },
       3: {
         name: 'Grade School C Student',
         description:
           "The middle of the pack is the most popular place to be, as evidenced by the other C students that surround you.  It's like a club!  A non-exclusive mediocre club.",
-        sentient_sims_description:
-          '{sim_name} is a student in grade school and barely passing classes with Cs.',
+        sentient_sims_description: '{sim_name} is a student in grade school and barely passing classes with Cs.',
       },
       4: {
         name: 'Grade School B Student',
-        sentient_sims_description:
-          '{sim_name} is a student in grade school and are passing classes with Bs.',
+        sentient_sims_description: '{sim_name} is a student in grade school and are passing classes with Bs.',
       },
       5: {
         name: 'Grade School A Student',
         description:
           'It must be hard to be an A student.  All that time studying, feeling superior, and studying some more.',
-        sentient_sims_description:
-          '{sim_name} is a student in grade school and are exceeding in classes with As.',
+        sentient_sims_description: '{sim_name} is a student in grade school and are exceeding in classes with As.',
       },
     },
   },
@@ -86,8 +80,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Technician',
         description:
           "{0.SimFirstName} doesn't think of {M0.himself}{F0.herself} as just a glorified mechanic. The shuttle costs billions of Simoleons, and any screw-ups would cost lives. {M0.He's}{F0.She's} more like a glorified engineer.",
-        sentient_sims_description:
-          '{sim_name} works as an astronaut technician working on space shuttles.',
+        sentient_sims_description: '{sim_name} works as an astronaut technician working on space shuttles.',
       },
       4: {
         name: 'Command Center Lead',
@@ -107,8 +100,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Space Cadet',
         description:
           '{0.SimFirstName} was hoping that if {M0.he}{F0.she} "accidentally" derailed a shuttle-board "simulation" {M0.he}{F0.she} might be able to launch the shuttle and get to space\u00e2\u0080\u00a6but it turns out that actual spacecraft are pretty well-secured. That\'s good, because {0.SimFirstName} is still learning how to space brake and star park.',
-        sentient_sims_description:
-          '{sim_name} works as a space cadet, training to become a full blown astronaut.',
+        sentient_sims_description: '{sim_name} works as a space cadet, training to become a full blown astronaut.',
       },
       7: {
         name: 'Astronaut',
@@ -171,22 +163,19 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Shelf Stocker',
         description:
           '{0.SimFirstName} is ready to take {M0.his}{F0.her} part in the global economy. People need to buy things to make the economy happen, and that means that people need retailers to sell them things, and THAT means that someone needs to stock a bunch of shelves. Guess what {0.SimFirstName}\u00e2\u0080\u0099s part is?',
-        sentient_sims_description:
-          '{sim_name} works as a shelf stocker at a department store.',
+        sentient_sims_description: '{sim_name} works as a shelf stocker at a department store.',
       },
       2: {
         name: 'Sales Floor Clerk',
         description:
           '{0.SimFirstName} has been promoted to Sales Floor Clerk! Now {M0.he}{F0.she} can interact directly with the customers and brush up on vital salesmanship skills! And between customers {M0.he}{F0.she} can sweep floors, scrape off gum, heft boxes and restock store displays.',
-        sentient_sims_description:
-          '{sim_name} works as a sales floor clerk at a department store.',
+        sentient_sims_description: '{sim_name} works as a sales floor clerk at a department store.',
       },
       3: {
         name: 'Customer Support',
         description:
           '\u00e2\u0080\u009cHappy customers, healthy business!\u00e2\u0080\u009d At least, that\u00e2\u0080\u0099s what {0.SimFirstName}\u00e2\u0080\u0099s training manual says. {M0.He}{F0.She} might be earning a healthier wage, manning the support desk with a smile, but the only customers who get sent {M0.his}{F0.her} way are not happy, not at all.',
-        sentient_sims_description:
-          '{sim_name} works as a customer service representative at a department store.',
+        sentient_sims_description: '{sim_name} works as a customer service representative at a department store.',
       },
     },
   },
@@ -203,22 +192,19 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Art Book Collator',
         description:
           'Saving up for art school supplies means working at the art school library. Unfortunately, the books must be re-shelved by number, and no one sees the genius in {0.SimFirstName} re-shelving them by complementary color. Visionaries are often misunderstood.',
-        sentient_sims_description:
-          '{sim_name} works at an art gallery arranging and categorizing art books.',
+        sentient_sims_description: '{sim_name} works at an art gallery arranging and categorizing art books.',
       },
       3: {
         name: 'Hungry Artist',
         description:
           "Being a hungry artist isn't about literal hunger. It's about {0.SimFirstName}'s burning passion to create an artistic expression that can change people's lives! (It's also about literal hunger.)",
-        sentient_sims_description:
-          '{sim_name} works for little pay as a new artist.',
+        sentient_sims_description: '{sim_name} works for little pay as a new artist.',
       },
       4: {
         name: 'Watercolor Dabbler',
         description:
           '{0.SimFirstName} is now a working artist! At least {M0.he}{F0.she}\'s working a booth at a local art fair, where patrons are haggling down the price of {M0.his}{F0.her} watercolored landscapes. But the words "work" and "artist" are coming closer together. And that\'s a good sign!',
-        sentient_sims_description:
-          '{sim_name} works at an art gallery arranging and categorizing art books.',
+        sentient_sims_description: '{sim_name} works at an art gallery arranging and categorizing art books.',
       },
       5: {
         name: 'Canvas Creator',
@@ -312,8 +298,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Latte Artiste',
         description:
           'Bravo! {0.SimFirstName} has ascended the barista ranks and seized control of the frother. Now in charge of crafting sumptuous espresso drinks, adorned with a dollop of feather-light froth which {M0.he}{F0.she} arranges in cute patterns, {0.SimFirstName} knows {M0.he}{F0.she}\u00e2\u0080\u0099s a true artiste.',
-        sentient_sims_description:
-          '{sim_name} works at starbucks part-time as a barista.',
+        sentient_sims_description: '{sim_name} works at starbucks part-time as a barista.',
       },
     },
   },
@@ -323,8 +308,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Lawn Mower',
         description:
           'For once, being young and inexperienced will work in {0.SimFirstName}\u00e2\u0080\u0099s favor! After all, {M0.he}{F0.she} is strong, energetic, and less likely to sue for hearing loss. In fact, the adults in the neighborhood will almost feel like they are doing {0.SimFirstName} a favor by letting {M0.him}{F0.her} push heavy equipment!',
-        sentient_sims_description:
-          '{sim_name} works as a lawn mower, mowing peoples yards.',
+        sentient_sims_description: '{sim_name} works as a lawn mower, mowing peoples yards.',
       },
       2: {
         name: 'Landscaper',
@@ -336,8 +320,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Backhoe Operator',
         description:
           'Every kid goes through a digging phase, but no tiny scoop and plastic pail on the beach can ever compare to the sheer awesomeness of breaking into the earth with a backhoe! This is a big promotion to operate a big machine, and {0.SimFirstName} is hoping the big responsibility will translate into big Simoleons!',
-        sentient_sims_description:
-          '{sim_name} works as a backhoe operator in construction.',
+        sentient_sims_description: '{sim_name} works as a backhoe operator in construction.',
       },
     },
   },
@@ -368,36 +351,31 @@ export const careerDescriptions: CareerDescriptions = {
         name: "Writer's Assistant",
         description:
           '{0.SimFirstName} is about to learn what it means to pay {M0.his}{F0.her} dues as an assistant-assistant coffee-getter, assistant fact-looker-upper, and assistant paperwork-filer. After a while, {M0.he}{F0.she} may even get to do some writing, although {M0.his}{F0.her} boss will take the credit.',
-        sentient_sims_description:
-          '{sim_name} works as writer intern, getting coffee and helping fill paperwork.',
+        sentient_sims_description: '{sim_name} works as writer intern, getting coffee and helping fill paperwork.',
       },
       2: {
         name: 'Blogger',
         description:
           'It\u00e2\u0080\u0099s more important to write fast than to write well\u00e2\u0080\u00a6does {0.SimFirstName} have what it takes? Bloggers only get paid if they get clicks, so {M0.he\u00e2\u0080\u0099d}{F0.she\u00e2\u0080\u0099d} better study the things people like to click on. (Cat videos and numbered lists.) ',
-        sentient_sims_description:
-          '{sim_name} works as a blog writer, getting paid for clicks online.',
+        sentient_sims_description: '{sim_name} works as a blog writer, getting paid for clicks online.',
       },
       3: {
         name: 'Freelance Article Writer',
         description:
           'Now {0.SimFirstName}\u00e2\u0080\u0099s working for {M0.himself}{F0.herself}, writing what {M0.he}{F0.she} wants\u00e2\u0080\u00a6or at least what paying clients want. Unfortunately, paying clients want articles about \u00e2\u0080\u009c10 Creative Ways to Eat Mushrooms\u00e2\u0080\u009d or \u00e2\u0080\u009cHot Tips to Drive Your Dog Wild.\u00e2\u0080\u009d It\u00e2\u0080\u0099s not glamorous, but it\u00e2\u0080\u0099s a living!',
-        sentient_sims_description:
-          '{sim_name} works as a writer, writing articles for websites online.',
+        sentient_sims_description: '{sim_name} works as a writer, writing articles for websites online.',
       },
       4: {
         name: 'Advice Columnist',
         description:
           '{M0.He\u00e2\u0080\u0099s}{F0.She\u00e2\u0080\u0099s} always thought of {M0.himself}{F0.herself} as a know-it-all, but now {0.SimFirstName} is a professional know-it-all. The life of an advice columnist is full of deranged in-laws, mailmen without personal boundaries, and secret second families. But only if {M0.he}{F0.she}\u00e2\u0080\u0099s lucky.',
-        sentient_sims_description:
-          '{sim_name} works as a writer for the advice column in the paper.',
+        sentient_sims_description: '{sim_name} works as a writer for the advice column in the paper.',
       },
       5: {
         name: 'Regular Contributor',
         description:
           'It\u00e2\u0080\u0099s important to have a beat. {0.SimFirstName} didn\u00e2\u0080\u0099t actually have any knowledge of {M0.his}{F0.her} beat before {M0.he}{F0.she} started writing about it, but if you sound convincing, you are convincing. The readers will never catch on! The secret? Use lots of big words.',
-        sentient_sims_description:
-          '{sim_name} works as a writer for the the paper, writing articles.',
+        sentient_sims_description: '{sim_name} works as a writer for the the paper, writing articles.',
       },
     },
     Writer_Track2_Author: {
@@ -405,15 +383,13 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Short Story Writer',
         description:
           'It\u00e2\u0080\u0099s not like {0.SimFirstName} can\u00e2\u0080\u0099t write longer stories, it\u00e2\u0080\u0099s just that {M0.he}{F0.she} doesn\u00e2\u0080\u0099t want to! Long stories are overrated. Who has the attention span for all that? And novels just end up getting adapted into movies anyway, and {0.SimFirstName}\u00e2\u0080\u0099s pretty busy already, so....',
-        sentient_sims_description:
-          '{sim_name} works as a writer writing short stories.',
+        sentient_sims_description: '{sim_name} works as a writer writing short stories.',
       },
       7: {
         name: 'Novelist',
         description:
           'Most novelists don\u00e2\u0080\u0099t go crazy alone in deserted hotels in the winter. Most novelists don\u00e2\u0080\u0099t die penniless in the streets. Most novelists are happy, well-adjusted, and creatively satisfied people! {0.SimFirstName} keeps telling {M0.himself}{F0.herself} that....',
-        sentient_sims_description:
-          '{sim_name} works as a writer writing novels.',
+        sentient_sims_description: '{sim_name} works as a writer writing novels.',
       },
       8: {
         name: 'Fan Favorite',
@@ -442,8 +418,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Page Two Journalist',
         description:
           'Municipal rezoning? Dog-catcher elections? The local beat isn\u00e2\u0080\u0099t always glamorous, but at least {0.SimFirstName} can use the power of {M0.his}{F0.her} job to crush {M0.his}{F0.her} enemies. Now {M0.he}{F0.she} gets the best restaurant tables and the cleaners never shrink {M0.his}{F0.her} sweaters. ',
-        sentient_sims_description:
-          '{sim_name} works as a journalist writing articles on page 2 of the newspaper.',
+        sentient_sims_description: '{sim_name} works as a journalist writing articles on page 2 of the newspaper.',
       },
       7: {
         name: 'Front Page Writer',
@@ -461,8 +436,7 @@ export const careerDescriptions: CareerDescriptions = {
       },
       9: {
         name: 'Editor-in-Chief',
-        sentient_sims_description:
-          '{sim_name} works as the editor-in-chief for the newspaper.',
+        sentient_sims_description: '{sim_name} works as the editor-in-chief for the newspaper.',
       },
       10: {
         name: 'Scribe of History',
@@ -479,29 +453,25 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Waterperson',
         description:
           "Delivering liquid nourishment to the world's biggest sports stars. {0.SimFirstName} will have to be fast on {M0.his}{F0.her} feet to replenish their thirst. If {M0.he}{F0.she} fails, the team will fail.",
-        sentient_sims_description:
-          '{sim_name} works as a waterperson for athletes, on the sidelines at big games.',
+        sentient_sims_description: '{sim_name} works as a waterperson for athletes, on the sidelines at big games.',
       },
       2: {
         name: 'Locker Room Attendant',
         description:
           "This is not just about picking up jock-straps. {0.SimFirstName} will need a positive attitude and to execute on {M0.his}{F0.her} duties with competence. {M0.His}{F0.Her} responsibilities include keeping the locker room clean, supplying players with clean towels, and organizing the team's equipment.",
-        sentient_sims_description:
-          '{sim_name} works as a locker room attendant for athletes.',
+        sentient_sims_description: '{sim_name} works as a locker room attendant for athletes.',
       },
       3: {
         name: 'Team Mascot',
         description:
           'A Team Mascot knows how to keep a crowd excited. Through a variety of expressions and body movements, {0.SimFirstName} will bring the fans to their feet to cheer the team on.',
-        sentient_sims_description:
-          '{sim_name} works as a team mascot for the sports team.',
+        sentient_sims_description: '{sim_name} works as a team mascot for the sports team.',
       },
       4: {
         name: 'Dance Team Captain',
         description:
           'Through hard work and unparalleled leadership, {0.SimFirstName} will deliver remarkable choreographed dance routines. Fans will watch {M0.his}{F0.her} team with amazement.',
-        sentient_sims_description:
-          '{sim_name} works as the dance team captain for the sports team.',
+        sentient_sims_description: '{sim_name} works as the dance team captain for the sports team.',
       },
     },
     Athletic_Track2_ProfessionalAthlete: {
@@ -509,29 +479,25 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Minor Leaguer',
         description:
           "It is time for {0.SimFirstName} to show them what {M0.he}{F0.she}'s got! {0.SimFirstName} will learn from {M0.his}{F0.her} coaches, develop {M0.his}{F0.her} skills and perform because {M0.he}{F0.she} will need to impress the scouts to get to the next level.",
-        sentient_sims_description:
-          '{sim_name} works as a minor leaguer in sports.',
+        sentient_sims_description: '{sim_name} works as a minor leaguer in sports.',
       },
       6: {
         name: 'Rookie',
         description:
           '{0.SimFirstName} is finally playing in the big leagues! Now {M0.he}{F0.she} is going to need to work harder than ever to stay there. {M0.He}{F0.She} needs to keep up on {M0.his}{F0.her} fitness and study the game tape. {0.SimFirstName} will get {M0.his}{F0.her} shot to make an impact!',
-        sentient_sims_description:
-          '{sim_name} works as a professional athlete in sports as a backup.',
+        sentient_sims_description: '{sim_name} works as a professional athlete in sports as a backup.',
       },
       7: {
         name: 'Starter',
         description:
           'No longer a bench warmer, now {0.SimFirstName} is playing with the big boys and earning the big bucks. Fans know who {M0.he}{F0.she} is now and are recognizing {0.SimFirstName} on the street. Keep up the hard work!',
-        sentient_sims_description:
-          '{sim_name} works as a professional athlete in sports as a starter.',
+        sentient_sims_description: '{sim_name} works as a professional athlete in sports as a starter.',
       },
       8: {
         name: 'All-Star',
         description:
           "{0.SimFirstName} has been selected to the All Star team! People from everywhere are asking for {M0.his}{F0.her} autograph. {M0.He}{F0.She}'s elite on and off the field.",
-        sentient_sims_description:
-          '{sim_name} works as a professional athlete in sports as an all-start athlete.',
+        sentient_sims_description: '{sim_name} works as a professional athlete in sports as an all-start athlete.',
       },
       9: {
         name: 'MVP',
@@ -553,22 +519,19 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Personal Trainer',
         description:
           '{0.SimFirstName} will now help clients to achieve their personal fitness and weight goals. Using the tools of fitness, from different ways to exercise to better ways to eat, {M0.he}{F0.she} will pump them up! They will only go as far as {M0.he}{F0.she} pushes them!',
-        sentient_sims_description:
-          '{sim_name} works as a professional trainer at the gym.',
+        sentient_sims_description: '{sim_name} works as a professional trainer at the gym.',
       },
       6: {
         name: 'Professional Bodybuilder',
         description:
           "Say goodbye to that puny body! {0.SimFirstName} needs to work on {M0.his}{F0.her} fitness to reach the next level. Don't wimp out! Train, train, train. Only then will {0.SimFirstName} become the Sim {M0.he}{F0.she} wants to be!",
-        sentient_sims_description:
-          '{sim_name} works as a professional bodybuilder.',
+        sentient_sims_description: '{sim_name} works as a professional bodybuilder.',
       },
       7: {
         name: 'Champion Bodybuilder',
         description:
           '{0.SimFirstName} is starting to establish {M0.his}{F0.her} name in the body building circuit. {0.SimFirstName} has to continue to work out and eat right and before {M0.he}{F0.she} knows it, {M0.he}{F0.she} will reach {M0.his}{F0.her} ultimate goal! There is no stopping {0.SimPronounObjective} now.',
-        sentient_sims_description:
-          '{sim_name} works as a professional bodybuilder, and has won championships.',
+        sentient_sims_description: '{sim_name} works as a professional bodybuilder, and has won championships.',
       },
       8: {
         name: 'Trainer to the Stars',
@@ -606,50 +569,43 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Intelligence Researcher',
         description:
           "{M0.His}{F0.Her} security clearance is pretty low, but {0.SimFirstName}'s still learning some cool secrets. Since {0.SimFirstName}'s been analyzing intelligence, {0.SimFirstName}'s learned the real speed limit, a code word that allows {0.SimPronounObjective} to use any employees-only restroom, and the truth about the moon landing in the 30\u00e2\u0080\u0099s.",
-        sentient_sims_description:
-          '{sim_name} works as an intelligence researcher for a secret agency.',
+        sentient_sims_description: '{sim_name} works as an intelligence researcher for a secret agency.',
       },
       3: {
         name: 'Agent Handler',
         description:
           'Run. Duck. JUDO CHOP THAT BAD GUY RIGHT NOW. {0.SimFirstName} loves giving orders. {M0.His}{F0.Her} agents will feel safe in {M0.his}{F0.her} capable hands, and {M0.he}{F0.she} can feel fulfilled being able to live {M0.his}{F0.her} spy fantasies vicariously through their adventures.',
-        sentient_sims_description:
-          '{sim_name} works as an agent handler for a secret agency.',
+        sentient_sims_description: '{sim_name} works as an agent handler for a secret agency.',
       },
       4: {
         name: 'Field Agent',
         description:
           'According to movies, as a field agent {0.SimFirstName} should immediately expect to go undercover to infiltrate a religious cult, street racing ring, or beauty pageant. Until then {M0.he\u00e2\u0080\u0099ll}{F0.she\u00e2\u0080\u0099ll} be interviewing a lot of tinfoil hat-wearers about the radio transmitters implanted in their teeth. Allegedly.',
-        sentient_sims_description:
-          '{sim_name} works as a field agent for a secret agency.',
+        sentient_sims_description: '{sim_name} works as a field agent for a secret agency.',
       },
       5: {
         name: 'Lead Detective',
         description:
           'Running major cases is just like running any mid-size organization. It\u00e2\u0080\u0099s all about managing personnel, budgets, and the bottom line. The big difference is that if {0.SimFirstName} fails, the world blows up.  Other than that, it\u00e2\u0080\u0099s pretty much the same.',
-        sentient_sims_description:
-          '{sim_name} works as a lead detective for a secret agency.',
+        sentient_sims_description: '{sim_name} works as a lead detective for a secret agency.',
       },
       6: {
         name: 'Government Agent',
         description:
           '{0.SimFirstName} feels a deep sense of patriotism serving the greater good. {M0.He\u00e2\u0080\u0099s}{F0.She\u00e2\u0080\u0099s} protecting {M0.his}{F0.her} countrymen from harm, performing a vital public service. Once these feelings wear off, {M0.he}{F0.she} can head back into the private sector and actually make some money.',
-        sentient_sims_description:
-          '{sim_name} works as a government agent for a secret agency.',
+        sentient_sims_description: '{sim_name} works as a government agent for a secret agency.',
       },
       7: {
         name: 'Secret Agent',
         description:
           'In the world of a spy, every stranger is a potential assassin. Every situation is a potential ambush. Fueled with adrenaline, {0.SimFirstName} lives fast and lives dangerously. {M0.He}{F0.She} also wears a lot of cool disguises.',
-        sentient_sims_description:
-          '{sim_name} works as a secret agent for a secret agency.',
+        sentient_sims_description: '{sim_name} works as a secret agent for a secret agency.',
       },
     },
     SecretAgent_Track2_DiamondAgent: {
       8: {
         name: 'Spy Captain',
-        sentient_sims_description:
-          '{sim_name} works as a spy captain for a secret agency, one of the top spies.',
+        sentient_sims_description: '{sim_name} works as a spy captain for a secret agency, one of the top spies.',
       },
       9: {
         name: 'Shadow Agent',
@@ -685,8 +641,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Supreme Villain',
         description:
           'As a villain, {0.SimFirstName} is pretty super! You might even say {M0.he\u00e2\u0080\u0099s}{F0.she\u00e2\u0080\u0099s} a..."Supreme" Villain. But that doesn\u00e2\u0080\u0099t mean every day is just stroking hairless cats and coining catchphrases. There\u00e2\u0080\u0099s a surprising amount of paperwork involved! Paperwork and torture. Some days it\u00e2\u0080\u0099s more paperwork, some days it\u00e2\u0080\u0099s more torture. Just depends.',
-        sentient_sims_description:
-          '{sim_name} works as a supreme super villain, very evil.',
+        sentient_sims_description: '{sim_name} works as a supreme super villain, very evil.',
       },
       11: {
         name: 'Triple Agent',
@@ -703,15 +658,13 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Live Chat Support Agent',
         description:
           'Welcome to Babysitting 101! {0.SimFirstName} will be using {M0.his}{F0.her} above-average intelligence for hours of gentle guidance and virtual handholding, exploring brave new limits on just how thinly one can veil sarcasm.',
-        sentient_sims_description:
-          '{sim_name} works as a live chat support agent.',
+        sentient_sims_description: '{sim_name} works as a live chat support agent.',
       },
       2: {
         name: 'Quality Assurance',
         description:
           '{0.SimFirstName} has entered the exciting world of QA, the unsung heroes of software development. It\u00e2\u0080\u0099s the perfect job for people who feel like they break everything they touch! But hey, better they break it than the customer, right? Right??',
-        sentient_sims_description:
-          '{sim_name} works as a QA tested in software development.',
+        sentient_sims_description: '{sim_name} works as a QA tested in software development.',
       },
       3: {
         name: 'Code Monkey',
@@ -727,15 +680,13 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Project Manager',
         description:
           '{0.SimFirstName} has finally achieved the glory of middle management! {M0.He}{F0.She} gets to drive the schedule, squeeze hundreds of programming hours out of each week, work magic with budgets and play the {M0.jerk}{F0.ice queen} everyone else gets to whine about.',
-        sentient_sims_description:
-          '{sim_name} works as a project manager for software engineers.',
+        sentient_sims_description: '{sim_name} works as a project manager for software engineers.',
       },
       6: {
         name: 'Development Captain',
         description:
           '{0.SimFirstName}\u00e2\u0080\u0099s got real power now. {M0.He}{F0.She} doesn\u00e2\u0080\u0099t just manage measly one-off projects, {M0.he}{F0.she} is in charge of the development process for several groundbreaking products. Aye, aye, this is going to be fun!',
-        sentient_sims_description:
-          '{sim_name} works as a lead developer for software engineers.',
+        sentient_sims_description: '{sim_name} works as a lead developer for software engineers.',
       },
     },
     TechGuru_Track2_Gaming: {
@@ -755,8 +706,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'APM {F0.Queen}{M0.King}',
         description:
           'With practice comes speed, and {0.SimFirstName}\u00e2\u0080\u0099s real-time strategy skills are living proof. With APM climbing past the 400 mark, {0.SimFirstName} has been known to assemble an army, equip it, construct an impenetrable base and annihilate at least one other race in the time it takes most people to tie their shoes.',
-        sentient_sims_description:
-          '{sim_name} works as a world renowned pro gamer with an APM above 400.',
+        sentient_sims_description: '{sim_name} works as a world renowned pro gamer with an APM above 400.',
       },
       10: {
         name: 'Champion Gamer',
@@ -771,8 +721,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'The Next Big Thing?',
         description:
           'At last, {0.SimFirstName} has ditched big company bureaucracy to launch {M0.his}{F0.her} very own company, founded on {M0.his}{F0.her} very own ideals, to build {M0.his}{F0.her} very own innovative solution. The only hitch? {M0.His}{F0.Her} very own money is not quite enough to get this thing off the ground.',
-        sentient_sims_description:
-          '{sim_name} works as a startup that they founded themselves, barely scraping by.',
+        sentient_sims_description: '{sim_name} works as a startup that they founded themselves, barely scraping by.',
       },
       8: {
         name: 'Independent Consultant',
@@ -801,8 +750,7 @@ export const careerDescriptions: CareerDescriptions = {
     careerTrack_Deliveries_FoodDeliveryNPC: {
       1: {
         name: 'Zoomers Food DeliveryPerson',
-        sentient_sims_description:
-          '{sim_name} works as a food delivery person.',
+        sentient_sims_description: '{sim_name} works as a food delivery person.',
       },
     },
   },
@@ -812,8 +760,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Amateur Entertainer',
         description:
           'If a joke is told in a comedy club, and nobody\u00e2\u0080\u0099s there to hear it, does it make a sound? As an amateur entertainer, {0.SimFirstName} is about to find out. At least there are no hisses or projectiles!',
-        sentient_sims_description:
-          '{sim_name} writes jokes in their free time as an amateur entertainer.',
+        sentient_sims_description: '{sim_name} writes jokes in their free time as an amateur entertainer.',
       },
       2: {
         name: 'Open Mic Seeker',
@@ -825,8 +772,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'C-Lister',
         description:
           'C-List is better than no list at all! Why, {0.SimFirstName} is even starting to book a few gigs. At this point, {M0.his}{F0.her} ability to shamelessly promote {M0.himself}{F0.herself} may be a greater asset than any true talent!',
-        sentient_sims_description:
-          '{sim_name} works as a C-list standup artist, getting small gigs in clubs.',
+        sentient_sims_description: '{sim_name} works as a C-list standup artist, getting small gigs in clubs.',
       },
       4: {
         name: 'Opening Act',
@@ -848,8 +794,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Serious Musician',
         description:
           '{0.SimFirstName} has always known that {M0.he}{F0.she} is more than just a {M0.hunk of love}{F0.pretty face}. {M0.He\u00e2\u0080\u0099s}{F0.She\u00e2\u0080\u0099s} got TALENT. And the instant {M0.his}{F0.her} fingers touch the keys of a piano or the strings of a guitar, everyone in the room knows it. These days, {M0.he\u00e2\u0080\u0099s}{F0.she\u00e2\u0080\u0099s} even got gigs to prove it.',
-        sentient_sims_description:
-          '{sim_name} works as a serious musician, booking small gigs.',
+        sentient_sims_description: '{sim_name} works as a serious musician, booking small gigs.',
       },
       7: {
         name: 'Professional Pianist',
@@ -862,8 +807,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Symphonic String Player',
         description:
           'All the world\u00e2\u0080\u0099s a stage, and {0.SimFirstName} has earned {M0.his}{F0.her} place upon it. {M0.He}{F0.She} is still putting bread in {M0.his}{F0.her} jar playing weddings and private parties, but the guest list and grub is getting better every time, and {M0.he}{F0.she} occasionally lifts {M0.his}{F0.her} spirits with satisfying stints in lesser-known symphony orchestras.',
-        sentient_sims_description:
-          '{sim_name} works as a professional musician in less known symphony orchestras.',
+        sentient_sims_description: '{sim_name} works as a professional musician in less known symphony orchestras.',
       },
       9: {
         name: 'Instrumental Wonder',
@@ -885,22 +829,19 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Jokesmith',
         description:
           'The ideas are really flowing for {0.SimFirstName} now. On stage, off stage, at weddings, at funerals. Everything is a source for hilarious new material! And who doesn\u00e2\u0080\u0099t like a good joke?',
-        sentient_sims_description:
-          '{sim_name} works as a standup comedian and comedy writer of jokes.',
+        sentient_sims_description: '{sim_name} works as a standup comedian and comedy writer of jokes.',
       },
       6: {
         name: 'Solid Storyteller',
         description:
           'Wow, {0.SimFirstName} can really keep a crowd captive, no handcuffs required! {M0.He}{F0.She} is spending less time peddling business cards and more time practicing one-liners, \u00e2\u0080\u009csquirrel walks into a bar\u00e2\u0080\u009d jokes, and impressions that people actually recognize.',
-        sentient_sims_description:
-          '{sim_name} works as a standup comedian and is great at telling comedic stories.',
+        sentient_sims_description: '{sim_name} works as a standup comedian and is great at telling comedic stories.',
       },
       7: {
         name: 'Rising Comedian',
         description:
           '{0.SimFirstName} is doing a stand-up job with {M0.his}{F0.her} stand-up routine, and people are starting to stand up and take notice. Good thing {0.SimFirstName} can cut them back down with a few quick jokes! ({M0.His}{F0.Her} jokes are better than these.)',
-        sentient_sims_description:
-          '{sim_name} works as a standup comedian and is rising to fame.',
+        sentient_sims_description: '{sim_name} works as a standup comedian and is rising to fame.',
       },
       8: {
         name: 'Roast Master',
@@ -931,22 +872,19 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Table Cleaner',
         description:
           'Everyone has to start somewhere, and this won\u00e2\u0080\u0099t be so bad. I mean sure, {0.SimFirstName} will come home smelling like fried\u00e2\u0080\u00a6something\u00e2\u0080\u00a6and {M0.his}{F0.her} hands will reek of mildewed rags, but at least {M0.he\u00e2\u0080\u0099ll}{F0.she\u00e2\u0080\u0099ll}  get to see {M0.his}{F0.her} friends! Sort of. While {M0.he\u00e2\u0080\u0099s}{F0.she\u00e2\u0080\u0099s} wearing a paper hat.',
-        sentient_sims_description:
-          '{sim_name} works at a fast food chain cleaning tables.',
+        sentient_sims_description: '{sim_name} works at a fast food chain cleaning tables.',
       },
       2: {
         name: 'Fry Cook',
         description:
           'Congratulations, {0.SimFirstName} has moved up in the world and is earning a smidge more every hour! A whole smidge! Now, instead of just being treated like {M0.he}{F0.she} is invisible, {M0.he}{F0.she} really is out of sight of the customers, focusing {M0.his}{F0.her} attention solely on hot grease and triple orders.',
-        sentient_sims_description:
-          '{sim_name} works at a fast food chain as a fry cook.',
+        sentient_sims_description: '{sim_name} works at a fast food chain as a fry cook.',
       },
       3: {
         name: 'Food Service Cashier',
         description:
           'Sweet, sweet Simoleons! \u00c2\u00a7\u00c2\u00a7\u00c2\u00a7! {0.SimFirstName} has earned enough trust to handle the Simoleons and the people who spend them. "Service with a smile," {M0.his}{F0.her} manager always says, so {0.SimFirstName} takes orders, presses buttons, and grins until {M0.his}{F0.her} cheeks hurt.',
-        sentient_sims_description:
-          '{sim_name} works at a fast food chain as a cashier.',
+        sentient_sims_description: '{sim_name} works at a fast food chain as a cashier.',
       },
     },
   },
@@ -956,8 +894,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Mailroom Technician',
         description:
           "Far from the days when postal correspondence was the lifeblood of a thriving business, today's mailrooms have been made all but obsolete with the rise of email. Still, somebody's gotta distribute all the online shopping deliveries! {0.SimFirstName} will have to keep {M0.his}{F0.her} energy level up to get noticed... and elevated from the mailroom. {M0.He}{F0.She} can now Fill Out Reports on the computer and Gossip About Office Romances.",
-        sentient_sims_description:
-          '{sim_name} works as a mail room technician at a business.',
+        sentient_sims_description: '{sim_name} works as a mail room technician at a business.',
       },
       2: {
         name: 'Office Assistant',
@@ -969,43 +906,37 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Assistant to the Manager',
         description:
           "It's not quite management track, but it's the next best thing, isn't it? After all, the manager only has one assistant...",
-        sentient_sims_description:
-          '{sim_name} works as an assistant to the manager in a business.',
+        sentient_sims_description: '{sim_name} works as an assistant to the manager in a business.',
       },
       4: {
         name: 'Assistant Manager',
         description:
           "This is it... almost. Ok, so {0.SimFirstName}'s not a manager, yet. Surely {M0.he}{F0.she}'s next in line for the position. It's time to build those people skills for when {M0.he}{F0.she} has people to boss about, er... manage.",
-        sentient_sims_description:
-          '{sim_name} works as an assistant manager in a business.',
+        sentient_sims_description: '{sim_name} works as an assistant manager in a business.',
       },
       5: {
         name: 'Regional Manager',
         description:
           "{0.SimFirstName}'s the {M0.man}{F0.woman} now! ... Or at least the manager of a region of the company. That means {M0.he}{F0.she}'s got to keep working on {M0.his}{F0.her} people skills if {M0.he}{F0.she} wants an even bigger slice of the pie.",
-        sentient_sims_description:
-          '{sim_name} works as a regional manager in a business.',
+        sentient_sims_description: '{sim_name} works as a regional manager in a business.',
       },
       6: {
         name: 'Senior Manager',
         description:
           "{0.SimFirstName} has proved {M0.himself}{F0.herself} as a manager, but {M0.he}{F0.she}'s got {M0.his}{F0.her} sights set on the next level. Whether {M0.he}{F0.she} wants to be an executive or a financial whiz, it's time to put the effort in and make it happen.",
-        sentient_sims_description:
-          '{sim_name} works as a senior manager in a business, managing multiple regions',
+        sentient_sims_description: '{sim_name} works as a senior manager in a business, managing multiple regions',
       },
     },
     Business_Track2_Management: {
       7: {
         name: 'Vice-President',
-        sentient_sims_description:
-          '{sim_name} works as the vice-president in a business.',
+        sentient_sims_description: '{sim_name} works as the vice-president in a business.',
       },
       8: {
         name: 'President',
         description:
           "The corner office is {0.SimFirstName}'s. Everyone looks to {M0.him}{F0.her} for leadership. Too bad the CEO still calls the shots, but someday...",
-        sentient_sims_description:
-          '{sim_name} works as the president in a business.',
+        sentient_sims_description: '{sim_name} works as the president in a business.',
       },
       9: {
         name: 'CEO',
@@ -1017,8 +948,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Business Tycoon',
         description:
           "{0.SimFirstName} used to run a company, and now {0.SimFirstName} runs several. Fortunately, {M0.he}{F0.she}'s got smart folks in key positions, so {M0.he}{F0.she}'s got more free time to enjoy life... and the private jet.",
-        sentient_sims_description:
-          '{sim_name} works on the boards of multiple fortune 500 businesses.',
+        sentient_sims_description: '{sim_name} works on the boards of multiple fortune 500 businesses.',
       },
     },
     Business_Track3_Investor: {
@@ -1038,8 +968,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Corporate Raider',
         description:
           '{0.SimFirstName} is a big game hunter, and corporations are {M0.his}{F0.her} prey. Mergers and acquisitions are {M0.his}{F0.her} weapons, and good luck to any straggling executives or minority shareholders that wander into {M0.his}{F0.her} sights.',
-        sentient_sims_description:
-          '{sim_name} works as a corporate raider, making hostile takeover bids of companies.',
+        sentient_sims_description: '{sim_name} works as a corporate raider, making hostile takeover bids of companies.',
       },
       10: {
         name: 'Angel Investor',
@@ -1055,36 +984,31 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Assistant Dishwasher',
         description:
           "Time to do the work of a common household appliance! {0.SimFirstName} will be scrubbing plates, ensuring crystal glasses have no leftover lipstick residue, and striking up conversations with Sims who couldn't pay their tab!",
-        sentient_sims_description:
-          '{sim_name} works as an assistant dishwasher in a restaurant.',
+        sentient_sims_description: '{sim_name} works as an assistant dishwasher in a restaurant.',
       },
       2: {
         name: 'Head Dishwasher',
         description:
           'As the Head Dishwasher, {0.SimFirstName} can choose which dishes {M0.he}{F0.she} wants to wash. Hard to scrub pots and pans are no longer an issue, unless {0.SimFirstName} wants them to be. Only the most beautiful china are now placed in {0.SimFirstName}\u00e2\u0080\u0099s hands.',
-        sentient_sims_description:
-          '{sim_name} works as the head dishwasher in a restaurant.',
+        sentient_sims_description: '{sim_name} works as the head dishwasher in a restaurant.',
       },
       3: {
         name: 'Caterer',
         description:
           "Standing behind food stations unable to eat the food is never easy, but it's the new reality for {0.SimFirstName}. {M0.His}{F0.Her} days will now be filled with ridiculous dancing at weddings, failed team-building exercises, and really weird baby shower games.",
-        sentient_sims_description:
-          '{sim_name} works as a caterer server at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a caterer server at a restaurant.',
       },
       4: {
         name: 'Mixologist',
         description:
           "The secret to Mixology is proportion. How much sweet juice? How much sour juice? Does this troubled patron want {0.SimFirstName}'s advice, or just for someone to listen? Is this a real job, or just something people do for money until they find a real job?",
-        sentient_sims_description:
-          '{sim_name} works as a mixologist and bartender at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a mixologist and bartender at a restaurant.',
       },
       5: {
         name: 'Line Cook',
         description:
           "{0.SimFirstName} is now a Line Cook! {M0.His}{F0.Her} duties include station setup, prepping food, cleaning up and stocking. Basically everything the real cooks don't want to do!",
-        sentient_sims_description:
-          '{sim_name} works as a line cook at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a line cook at a restaurant.',
       },
     },
     Culinary_Track2_Chef: {
@@ -1105,22 +1029,19 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Sous Chef',
         description:
           "Second-in-command isn't bad at all! Now {0.SimFirstName} can do some REAL work without getting any of the credit. But hey, with a little time and a lot of effort {0.SimFirstName} will be the one running things around here!",
-        sentient_sims_description:
-          '{sim_name} works as a sous chef at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a sous chef at a restaurant.',
       },
       9: {
         name: 'Executive Chef',
         description:
           "Congratulations to {0.SimFirstName}! {M0.He}{F0.She} is now the master of the kitchen. Yelling at underlings, demanding things be re-cooked, screaming at underlings, reprimanding underlings -- it's all possible now!",
-        sentient_sims_description:
-          '{sim_name} works as an executive chef at a restaurant.',
+        sentient_sims_description: '{sim_name} works as an executive chef at a restaurant.',
       },
       10: {
         name: 'Celebrity Chef',
         description:
           'Some might say {0.SimFirstName} has sold out to gain mainstream status, but {0.SimFirstName} cannot hear them. {M0.He}{F0.She} is relaxing in {M0.his}{F0.her} private\u00c2\u00a0office, eating hors d\u00e2\u0080\u0099oeurves in front of the fireplace, and considering the latest contract for a new TV show, cook book, and servingware line.',
-        sentient_sims_description:
-          '{sim_name} works as a celebrity chef, opening restaurants and appearing on TV.',
+        sentient_sims_description: '{sim_name} works as a celebrity chef, opening restaurants and appearing on TV.',
       },
     },
     Culinary_Track3_Bartender: {
@@ -1128,8 +1049,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Head Mixologist',
         description:
           'A master of doling out advice and a master of mixing fruity drinks, {0.SimFirstName} is now the Head Mixologist! It might be time to start charging therapist rates...',
-        sentient_sims_description:
-          '{sim_name} works as the head bartender at a restaurant.',
+        sentient_sims_description: '{sim_name} works as the head bartender at a restaurant.',
       },
       7: {
         name: 'Juice Boss',
@@ -1241,22 +1161,19 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Dedicated Dresser',
         description:
           'A good day begins with the right clothes and a great night kicks off with serious duds. Pontificating seriously about each button and wily zipper is the dedicated pursuit of a Dedicated Dresser.',
-        sentient_sims_description:
-          '{sim_name} works as a dedicated dresser, helping dress and suggest fashion online.',
+        sentient_sims_description: '{sim_name} works as a dedicated dresser, helping dress and suggest fashion online.',
       },
       7: {
         name: 'Textile Tactician',
         description:
           "There are surface level considerations, but then there are also ones that go deeper. It's key to thread that needle and dip just beneath the surface to learn to mastery the ways of the textiles.",
-        sentient_sims_description:
-          '{sim_name} works as a textile tactician, helping dress and suggest fashion online.',
+        sentient_sims_description: '{sim_name} works as a textile tactician, helping dress and suggest fashion online.',
       },
       8: {
         name: 'Wardrobe Wiz',
         description:
           "True magic doesn't require a wand, but a coat hanger in either hand holding a carefully considered piece of attire. Bring a spell to every wardrobe!",
-        sentient_sims_description:
-          '{sim_name} works as a Wardrobe Wiz, helping dress and suggest fashion online.',
+        sentient_sims_description: '{sim_name} works as a Wardrobe Wiz, helping dress and suggest fashion online.',
       },
       9: {
         name: 'Make-Over Miracle Worker',
@@ -1280,22 +1197,19 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Coffee Stain Remover',
         description:
           'This is {0.SimFirstName}\u00e2\u0080\u0099s first step into the exciting world of caffeine distribution systems. But of course {M0.he}{F0.she} can\u00e2\u0080\u0099t be responsible for pouring coffee until {M0.he}{F0.she} proves {M0.he}{F0.she} can handle mopping floors, setting up chairs, scrubbing mugs and keeping those frothers and foamers shiny!',
-        sentient_sims_description:
-          '{sim_name} recently started work at starbucks and is responsible for cleaning.',
+        sentient_sims_description: '{sim_name} recently started work at starbucks and is responsible for cleaning.',
       },
       2: {
         name: 'Bean Blender',
         description:
           'At last, {0.SimFirstName} can drop the dishrags and become one with the art of fine coffee! Grinding together the finest organic beans from around the globe, {0.SimFirstName} is now a master bean blender, a true mixologist whose arresting combinations of aggressively bold aromas and subtly nutty undertones please every palate.',
-        sentient_sims_description:
-          '{sim_name} works at starbucks and is responsible for helping prep drinks.',
+        sentient_sims_description: '{sim_name} works at starbucks and is responsible for helping prep drinks.',
       },
       3: {
         name: 'Latte Artiste',
         description:
           'Bravo! {0.SimFirstName} has ascended the barista ranks and seized control of the frother. Now in charge of crafting sumptuous espresso drinks, adorned with a dollop of feather-light froth which {M0.he}{F0.she} arranges in cute patterns, {0.SimFirstName} knows {M0.he}{F0.she}\u00e2\u0080\u0099s a true artiste.',
-        sentient_sims_description:
-          '{sim_name} works at starbucks as a barista.',
+        sentient_sims_description: '{sim_name} works at starbucks as a barista.',
       },
     },
   },
@@ -1305,8 +1219,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Freelancer',
         description:
           "{0.SimFirstName} has made the decision to be a freelancer. As nice as that sounds, {M0.he}{F0.she} won't be able to find gigs or get paid until {M0.he}{F0.she} selects a trade, and an agency to represent {M0.him}{F0.her}.",
-        sentient_sims_description:
-          '{sim_name} works as a freelancer, picking up odd jobs here and there.',
+        sentient_sims_description: '{sim_name} works as a freelancer, picking up odd jobs here and there.',
       },
     },
   },
@@ -1316,8 +1229,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Babysitter',
         description:
           '{0.SimFirstName} can\u00e2\u0080\u0099t wait to finally earn some dough-and what could be more fun than getting paid to play with kids? Besides, the kids are asleep half the time, right? So it\u00e2\u0080\u0099s basically getting paid to couch-sit and text all {M0.his}{F0.her} friends. Cake!',
-        sentient_sims_description:
-          '{sim_name} works as a part-time baby sitter.',
+        sentient_sims_description: '{sim_name} works as a part-time baby sitter.',
       },
       2: {
         name: 'Nanny',
@@ -1340,15 +1252,13 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Shelf Stocker',
         description:
           '{0.SimFirstName} is ready to take {M0.his}{F0.her} part in the global economy. People need to buy things to make the economy happen, and that means that people need retailers to sell them things, and THAT means that someone needs to stock a bunch of shelves. Guess what {0.SimFirstName}\u00e2\u0080\u0099s part is?',
-        sentient_sims_description:
-          '{sim_name} works part-time as a shelf stocker at a department store.',
+        sentient_sims_description: '{sim_name} works part-time as a shelf stocker at a department store.',
       },
       2: {
         name: 'Sales Floor Clerk',
         description:
           '{0.SimFirstName} has been promoted to Sales Floor Clerk! Now {M0.he}{F0.she} can interact directly with the customers and brush up on vital salesmanship skills! And between customers {M0.he}{F0.she} can sweep floors, scrape off gum, heft boxes and restock store displays.',
-        sentient_sims_description:
-          '{sim_name} works part-time as a sales floor clerk at a department store.',
+        sentient_sims_description: '{sim_name} works part-time as a sales floor clerk at a department store.',
       },
       3: {
         name: 'Customer Support',
@@ -1377,8 +1287,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Daycare Assistant',
         description:
           '{0.SimFirstName} has earned back {M0.his}{F0.her} weekend nights by securing a job at Holding Hands Daycare. Working with a loving, experienced team of childcare professionals, {0.SimFirstName} will help provide a gentle, caring and stimulating environment that honors the genius in every child.',
-        sentient_sims_description:
-          '{sim_name} works as a daycare administrator at Holding Hands Daycare.',
+        sentient_sims_description: '{sim_name} works as a daycare administrator at Holding Hands Daycare.',
       },
     },
   },
@@ -1388,8 +1297,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Lawn Mower',
         description:
           '{0.SimFirstName} has always loved being under the sun! After all, {F0.she}{M0.he} is strong, energetic, and loves the smell of freshly cut grass. And grass is green, so simoleons must smell like grass! That, or lawnmower exhaust. Either way, mowing lawns is a great work out for {F0.her}{M0.him}!',
-        sentient_sims_description:
-          '{sim_name} works as a lawn mower, mowing peoples yards.',
+        sentient_sims_description: '{sim_name} works as a lawn mower, mowing peoples yards.',
       },
       2: {
         name: 'Landscaper',
@@ -1401,8 +1309,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Backhoe Operator',
         description:
           'Every kid goes through a digging phase, but no tiny scoop and plastic pail on the beach can ever compare to the sheer awesomeness of breaking into the earth with a backhoe! This is a big promotion to operate a big machine, and {0.SimFirstName} is hoping the big responsibility will translate into big Simoleons!',
-        sentient_sims_description:
-          '{sim_name} works as a backhoe operator in construction.',
+        sentient_sims_description: '{sim_name} works as a backhoe operator in construction.',
       },
     },
   },
@@ -1412,36 +1319,31 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Tough {M0.Guy}{F0.Gal}',
         description:
           'Every criminal mastermind needs an entry-level bodyguard with irrational anger issues. {0.SimFirstName} will beef up doorways and rumble through dark alleys, keeping rivals at bay with those three little words, "Whaddayou lookin\' at?"',
-        sentient_sims_description:
-          '{sim_name} works as an entry-level body guard for a local criminal.',
+        sentient_sims_description: '{sim_name} works as an entry-level body guard for a local criminal.',
       },
       2: {
         name: 'Petty Thief',
         description:
           'Are those candy bars in your pocket? Where did you get that lovely old-lady-style purse? {0.SimFirstName} is now in charge of outfitting the bosses with snacks for the interrogation room and birthday gifts for their mother-in-laws, using {M0.his}{F0.her} five finger discount.',
-        sentient_sims_description:
-          '{sim_name} works as a criminal as a petty thief.',
+        sentient_sims_description: '{sim_name} works as a criminal as a petty thief.',
       },
       3: {
         name: 'Ringleader',
         description:
           "Switching to management is never easy. Will your gang remember to rob the bank before it closes? Can the goon have a sick day when he's scheduled to work the riot? Fortunately, {0.SimFirstName} knows how to lead a ring of delinquents into trouble, like a total boss.",
-        sentient_sims_description:
-          '{sim_name} works as a ringleader for a local criminal gang.',
+        sentient_sims_description: '{sim_name} works as a ringleader for a local criminal gang.',
       },
       4: {
         name: 'Felonius Monk',
         description:
           "It's time for {0.SimFirstName} to give up the misdemeanors. What is {M0.he}{F0.she}, a baby? Time to put on the big {M0.boy}{F0.girl} pants and pull the big {M0.boy}{F0.girl} crimes: felonies. Maybe {M0.he'll}{F0.she'll} even plan a heist!",
-        sentient_sims_description:
-          '{sim_name} works as a ringleader for a local criminal gang.',
+        sentient_sims_description: '{sim_name} works as a ringleader for a local criminal gang.',
       },
       5: {
         name: 'Minor Crimelord',
         description:
           "Wanna make a deal in this 'hood? You gotta go through {0.SimFirstName}. {M0.He}{F0.She} worked {M0.his}{F0.her} way up to running the racket on this turf, from that botanical garden over there, all the way down to the new organic grocery store.",
-        sentient_sims_description:
-          '{sim_name} works as a minor crimelord in the local area.',
+        sentient_sims_description: '{sim_name} works as a minor crimelord in the local area.',
       },
     },
     Criminal_Track2_Boss: {
@@ -1456,8 +1358,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Getaway Driver',
         description:
           '{0.SimFirstName} has taken {M0.his}{F0.her} talents into the mean streets, rocking getaway cars up on two wheels, hugging corners, running from cops. This stuff would make a pretty exciting video game!',
-        sentient_sims_description:
-          '{sim_name} works as the getaway driver for the local crime gang.',
+        sentient_sims_description: '{sim_name} works as the getaway driver for the local crime gang.',
       },
       8: {
         name: 'Safe Cracker',
@@ -1477,8 +1378,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'The Boss',
         description:
           "What's even better than being The Brains of the organization? Being The Brains' boss! Now {0.SimFirstName}'s crew can do all the work, while {M0.he}{F0.she} takes a bath in \u00c2\u00a71000 bills. Who cares if it's dirty money when there's so much of it?",
-        sentient_sims_description:
-          '{sim_name} works as the boss of the local crime gang, the head running everything.',
+        sentient_sims_description: '{sim_name} works as the boss of the local crime gang, the head running everything.',
       },
     },
     Criminal_Track3_Oracle: {
@@ -1491,8 +1391,7 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Elite Hacker',
         description:
           '{0.SimFirstName} has managed to earn the respect of other hackers, a group not valued for an overabundance of respect! They look to {M0.him}{F0.her} for advice on how to work around the toughest security measures while covering their tracks.',
-        sentient_sims_description:
-          '{sim_name} works as an elite hacker, working for a crime group on the internet.',
+        sentient_sims_description: '{sim_name} works as an elite hacker, working for a crime group on the internet.',
       },
       8: {
         name: 'Anonymous Ghost',
@@ -1521,27 +1420,23 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'High School F Student',
         description:
           'Okay, so... Not every child is going to get school right away. Don\u00e2\u0080\u0099t worry! Every student starts somewhere, and with a little effort {0.SimFirstName} will bring those grades up in no time. Even writing {M0.his}{F0.her} name on the test is worth a few points!',
-        sentient_sims_description:
-          '{sim_name} is a highschool student failing their classes.',
+        sentient_sims_description: '{sim_name} is a highschool student failing their classes.',
       },
       2: {
         name: 'High School D Student',
         description:
           'It\u00e2\u0080\u0099s a proud moment in any kid\u00e2\u0080\u0099s life when they make the transition from \u00e2\u0080\u009cfailing student\u00e2\u0080\u009d to \u00e2\u0080\u009cbarely passing student.\u00e2\u0080\u009d With enough effort, {0.SimFirstName} will claw {M0.his}{F0.her} way up to \u00e2\u0080\u009caverage\u00e2\u0080\u009d in no time. And THAT\u00e2\u0080\u0099S when doors start to open...',
-        sentient_sims_description:
-          '{sim_name} is a highschool student failing their classes with Ds.',
+        sentient_sims_description: '{sim_name} is a highschool student failing their classes with Ds.',
       },
       3: {
         name: 'High School C Student',
         description:
           "{0.SimFirstName} can now earn passing grades in all of {M0.his}{F0.her} subjects easily. But {M0.he}{F0.she} doesn\u00e2\u0080\u0099t want to stop there! Now that {0.SimFirstName}'s discovered an aptitude for learning, it\u00e2\u0080\u0099s time to see how far {M0.he}{F0.she} can go!",
-        sentient_sims_description:
-          '{sim_name} is a highschool student barely passing their classes with Cs.',
+        sentient_sims_description: '{sim_name} is a highschool student barely passing their classes with Cs.',
       },
       4: {
         name: 'High School B Student',
-        sentient_sims_description:
-          '{sim_name} is a highschool student passing their classes with Bs.',
+        sentient_sims_description: '{sim_name} is a highschool student passing their classes with Bs.',
       },
       5: {
         name: 'High School A Student',
@@ -1558,22 +1453,19 @@ export const careerDescriptions: CareerDescriptions = {
         name: 'Table Cleaner',
         description:
           'Everyone has to start somewhere, and this won\u00e2\u0080\u0099t be so bad. I mean sure, {0.SimFirstName} will come home smelling like fried\u00e2\u0080\u00a6something\u00e2\u0080\u00a6and {M0.his}{F0.her} hands will reek of mildewed rags, but at least {M0.he\u00e2\u0080\u0099ll}{F0.she\u00e2\u0080\u0099ll}  get to see {M0.his}{F0.her} friends! Sort of. While {M0.he\u00e2\u0080\u0099s}{F0.she\u00e2\u0080\u0099s} wearing a paper hat.',
-        sentient_sims_description:
-          '{sim_name} works part-time at a fast food chain cleaning tables.',
+        sentient_sims_description: '{sim_name} works part-time at a fast food chain cleaning tables.',
       },
       2: {
         name: 'Fry Cook',
         description:
           'Congratulations, {0.SimFirstName} has moved up in the world and is earning a smidge more every hour! A whole smidge! Now, instead of just being treated like {M0.he}{F0.she} is invisible, {M0.he}{F0.she} really is out of sight of the customers, focusing {M0.his}{F0.her} attention solely on hot grease and triple orders.',
-        sentient_sims_description:
-          '{sim_name} works part-time at a fast food chain as a fry cook.',
+        sentient_sims_description: '{sim_name} works part-time at a fast food chain as a fry cook.',
       },
       3: {
         name: 'Food Service Cashier',
         description:
           'Sweet, sweet Simoleons! \u00c2\u00a7\u00c2\u00a7\u00c2\u00a7! {0.SimFirstName} has earned enough trust to handle the Simoleons and the people who spend them. "Service with a smile," {M0.his}{F0.her} manager always says, so {0.SimFirstName} takes orders, presses buttons, and grins until {M0.his}{F0.her} cheeks hurt.',
-        sentient_sims_description:
-          '{sim_name} works part-time at a fast food chain as a cashier.',
+        sentient_sims_description: '{sim_name} works part-time at a fast food chain as a cashier.',
       },
     },
   },
@@ -1621,8 +1513,7 @@ export const careerDescriptions: CareerDescriptions = {
     careerTrack_NPC_Bartender: {
       1: {
         name: 'Mixologist',
-        sentient_sims_description:
-          '{sim_name} works as a mixologist and bartender.',
+        sentient_sims_description: '{sim_name} works as a mixologist and bartender.',
       },
     },
   },
@@ -1654,8 +1545,7 @@ export const careerDescriptions: CareerDescriptions = {
     careerTrack_NPC_Gardener_Service: {
       1: {
         name: 'Professional Gardener',
-        sentient_sims_description:
-          '{sim_name} works as a professional landscaper and gardener.',
+        sentient_sims_description: '{sim_name} works as a professional landscaper and gardener.',
       },
     },
   },
@@ -1663,8 +1553,7 @@ export const careerDescriptions: CareerDescriptions = {
     careerTrack_NPC_PizzaDelivery: {
       1: {
         name: 'Pizza Delivery {M0.Guy}{F0.Girl}',
-        sentient_sims_description:
-          '{sim_name} works as a pizza delivery driver.',
+        sentient_sims_description: '{sim_name} works as a pizza delivery driver.',
       },
     },
   },
@@ -1672,8 +1561,7 @@ export const careerDescriptions: CareerDescriptions = {
     careerTrack_NPC_RestaurantCritic: {
       1: {
         name: 'Restaurant Critic',
-        sentient_sims_description:
-          '{sim_name} works as a professional restaurant critic.',
+        sentient_sims_description: '{sim_name} works as a professional restaurant critic.',
       },
     },
   },
@@ -1681,8 +1569,7 @@ export const careerDescriptions: CareerDescriptions = {
     careerTrack_NPC_GrimReaper: {
       1: {
         name: 'Soul Reaper',
-        sentient_sims_description:
-          '{sim_name} works as the Grim Reaper and reaps Souls.',
+        sentient_sims_description: '{sim_name} works as the Grim Reaper and reaps Souls.',
       },
     },
   },
@@ -1690,8 +1577,7 @@ export const careerDescriptions: CareerDescriptions = {
     careerTrack_NPC_Repair: {
       1: {
         name: 'Repair Technician',
-        sentient_sims_description:
-          '{sim_name} works as a repair technician for appliances.',
+        sentient_sims_description: '{sim_name} works as a repair technician for appliances.',
       },
     },
   },
@@ -1699,8 +1585,7 @@ export const careerDescriptions: CareerDescriptions = {
     careerTrack_NPC_Bartender: {
       1: {
         name: 'Mixologist',
-        sentient_sims_description:
-          '{sim_name} works as a mixologist and bartender.',
+        sentient_sims_description: '{sim_name} works as a mixologist and bartender.',
       },
     },
   },
@@ -1716,8 +1601,7 @@ export const careerDescriptions: CareerDescriptions = {
     careerTrack_NPC_StallVendor: {
       1: {
         name: 'Vendor',
-        sentient_sims_description:
-          '{sim_name} works as a stall vendor at the festival.',
+        sentient_sims_description: '{sim_name} works as a stall vendor at the festival.',
       },
     },
   },
@@ -1733,28 +1617,23 @@ export const careerDescriptions: CareerDescriptions = {
     careerTrack_NPC_OwnableRestaurant_Host: {
       1: {
         name: 'Restaurant Host',
-        sentient_sims_description:
-          '{sim_name} just started work as a host at a restaurant.',
+        sentient_sims_description: '{sim_name} just started work as a host at a restaurant.',
       },
       2: {
         name: 'Restaurant Host',
-        sentient_sims_description:
-          '{sim_name} works as a host at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a host at a restaurant.',
       },
       3: {
         name: 'Restaurant Host',
-        sentient_sims_description:
-          '{sim_name} works as a host at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a host at a restaurant.',
       },
       4: {
         name: 'Restaurant Host',
-        sentient_sims_description:
-          '{sim_name} works as a host at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a host at a restaurant.',
       },
       5: {
         name: 'Head Restaurant Host',
-        sentient_sims_description:
-          '{sim_name} works as the head host at a restaurant.',
+        sentient_sims_description: '{sim_name} works as the head host at a restaurant.',
       },
     },
   },
@@ -1762,28 +1641,23 @@ export const careerDescriptions: CareerDescriptions = {
     careerTrack_NPC_OwnableRestaurant_Waiter: {
       1: {
         name: 'Restaurant Waiter',
-        sentient_sims_description:
-          '{sim_name} just started work as a waiter at a restaurant.',
+        sentient_sims_description: '{sim_name} just started work as a waiter at a restaurant.',
       },
       2: {
         name: 'Restaurant Waiter',
-        sentient_sims_description:
-          '{sim_name} works as a waiter at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a waiter at a restaurant.',
       },
       3: {
         name: 'Restaurant Waiter',
-        sentient_sims_description:
-          '{sim_name} works as a waiter at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a waiter at a restaurant.',
       },
       4: {
         name: 'Restaurant Waiter',
-        sentient_sims_description:
-          '{sim_name} works as a waiter at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a waiter at a restaurant.',
       },
       5: {
         name: 'Head of Waitstaff',
-        sentient_sims_description:
-          '{sim_name} works as the head of waitstaff at a restaurant.',
+        sentient_sims_description: '{sim_name} works as the head of waitstaff at a restaurant.',
       },
     },
   },
@@ -1791,28 +1665,23 @@ export const careerDescriptions: CareerDescriptions = {
     careerTrack_NPC_OwnableRestaurant_Chef: {
       1: {
         name: 'Line Cook',
-        sentient_sims_description:
-          '{sim_name} works as a line cook at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a line cook at a restaurant.',
       },
       2: {
         name: 'Demi Chef De Partie',
-        sentient_sims_description:
-          '{sim_name} works as a demi chef de partie at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a demi chef de partie at a restaurant.',
       },
       3: {
         name: 'Demi Chef De Partie',
-        sentient_sims_description:
-          '{sim_name} works as a chef de partie at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a chef de partie at a restaurant.',
       },
       4: {
         name: 'Sous Chef',
-        sentient_sims_description:
-          '{sim_name} works as a sous chef at a restaurant.',
+        sentient_sims_description: '{sim_name} works as a sous chef at a restaurant.',
       },
       5: {
         name: 'Executive Chef',
-        sentient_sims_description:
-          '{sim_name} works as an executive chef at a restaurant.',
+        sentient_sims_description: '{sim_name} works as an executive chef at a restaurant.',
       },
     },
   },
@@ -1827,9 +1696,7 @@ export const careerDescriptions: CareerDescriptions = {
   // },
 };
 
-export function getCareerTrackLevel(
-  sentientSimCareer: SentientSimCareer,
-): CareerTrackLevel | undefined {
+export function getCareerTrackLevel(sentientSimCareer: SentientSimCareer): CareerTrackLevel | undefined {
   if (careerDescriptions[sentientSimCareer.name]) {
     const careerTrack = careerDescriptions[sentientSimCareer.name];
 

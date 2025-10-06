@@ -52,9 +52,7 @@ export const defaultKokoroAITTSSettings: KokoroAITTSSettings = {
 };
 
 export function toSpeechModel(model?: string): KokoroAISpeechModel {
-  if (
-    Object.values(KokoroAISpeechModel).includes(model as KokoroAISpeechModel)
-  ) {
+  if (Object.values(KokoroAISpeechModel).includes(model as KokoroAISpeechModel)) {
     return model as KokoroAISpeechModel;
   }
 
@@ -62,9 +60,7 @@ export function toSpeechModel(model?: string): KokoroAISpeechModel {
 }
 
 export function toSpeechVoice(voice?: string): KokoroAISpeechVoice {
-  if (
-    Object.values(KokoroAISpeechVoice).includes(voice as KokoroAISpeechVoice)
-  ) {
+  if (Object.values(KokoroAISpeechVoice).includes(voice as KokoroAISpeechVoice)) {
     return voice as KokoroAISpeechVoice;
   }
 

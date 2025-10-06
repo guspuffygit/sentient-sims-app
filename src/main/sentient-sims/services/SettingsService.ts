@@ -23,6 +23,7 @@ import { disableDebugLogging, enableDebugLogging } from '../util/debugLog';
 import { defaultSentientSimsAITTSSettings } from '../models/SentientSimsAITTSSettings';
 import { defaultKokoroAITTSSettings } from '../models/KokoroAITTSSettings';
 import { defaultElevenLabsTTSSettings } from '../models/ElevenLabsTTSSettings';
+import { WizardPage } from '../models/WizardPage';
 
 export function defaultStore(cwd?: string) {
   return new Store({
@@ -162,18 +163,20 @@ export function defaultStore(cwd?: string) {
         type: 'string',
         default: defaultVLLMEndpoint,
       },
+      [SettingsEnum.SETUP_WIZARD_PAGE.toString()]: {
+        type: 'string',
+        default: WizardPage.INIT,
+      },
+      [SettingsEnum.PATREON_LINKING.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
     },
     migrations: {
       '3.1.0': (store) => {
         if (store.get(DeprecatedSettingsEnum.CUSTOM_LLM_ENABLED)) {
-          if (
-            store.get(DeprecatedSettingsEnum.CUSTOM_LLM_ENABLED) ===
-            sentientSimsAIHost
-          ) {
-            store.set(
-              SettingsEnum.AI_API_TYPE,
-              ApiType.SentientSimsAI.toString(),
-            );
+          if (store.get(DeprecatedSettingsEnum.CUSTOM_LLM_ENABLED) === sentientSimsAIHost) {
+            store.set(SettingsEnum.AI_API_TYPE, ApiType.SentientSimsAI.toString());
           } else {
             store.set(SettingsEnum.AI_API_TYPE, ApiType.CustomAI.toString());
           }
@@ -188,7 +191,6 @@ export function defaultStore(cwd?: string) {
 export class SettingsService {
   private readonly store;
 
-  // eslint-disable-next-line @typescript-eslint/no-shadow
   constructor(store?: Store) {
     this.store = store ?? defaultStore();
   }

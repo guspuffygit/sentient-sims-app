@@ -1,13 +1,11 @@
-/* eslint-disable no-console */
-const fs = require('fs');
+import fs from 'fs';
+import packageJson from './package.json' with { type: 'json' };
 
 const architecture = process.argv[2];
 
 if (!('arm64'.includes(architecture) || 'x64'.includes(architecture))) {
   throw Error('Pass in architecture argument of arm64 or x64');
 }
-
-const packageJson = JSON.parse(fs.readFileSync('package.json'));
 
 packageJson.build.mac.target.arch = [architecture];
 

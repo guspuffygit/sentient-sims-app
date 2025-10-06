@@ -11,20 +11,13 @@ import {
 import useSetting from 'renderer/hooks/useSetting';
 
 export function OpenAIVoiceSettingsComponent() {
-  const openaiTtsSettings = useSetting<OpenAITTSSettings>(
-    SettingsEnum.OPENAI_TTS_SETTINGS,
-    defaultOpenAITTSSettings,
-  );
+  const openaiTtsSettings = useSetting<OpenAITTSSettings>(SettingsEnum.OPENAI_TTS_SETTINGS, defaultOpenAITTSSettings);
 
   const modelMenuItems: any[] = [];
-  Object.values(OpenAISpeechModel).forEach((model) =>
-    modelMenuItems.push(<MenuItem value={model}>{model}</MenuItem>),
-  );
+  Object.values(OpenAISpeechModel).forEach((model) => modelMenuItems.push(<MenuItem value={model}>{model}</MenuItem>));
 
   const voiceMenuItems: any[] = [];
-  Object.entries(OpenAISpeechVoice).forEach((key) =>
-    voiceMenuItems.push(<MenuItem value={key[1]}>{key[0]}</MenuItem>),
-  );
+  Object.entries(OpenAISpeechVoice).forEach((key) => voiceMenuItems.push(<MenuItem value={key[1]}>{key[0]}</MenuItem>));
 
   function handleModelChange(model: string) {
     openaiTtsSettings.setSetting({
@@ -45,11 +38,7 @@ export function OpenAIVoiceSettingsComponent() {
   return (
     <Box>
       <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          sx={{ alignItems: 'center', mb: 1, width: '100%' }}
-        >
+        <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
           <Typography>Speech Model:</Typography>
           <Select
             size="small"
@@ -64,11 +53,7 @@ export function OpenAIVoiceSettingsComponent() {
         </Stack>
       </Box>
       <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          sx={{ alignItems: 'center', mb: 1, width: '100%' }}
-        >
+        <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
           <Typography>Speech Voice:</Typography>
           <Select
             size="small"

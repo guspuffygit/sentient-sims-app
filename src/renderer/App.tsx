@@ -1,4 +1,3 @@
-/* eslint-disable promise/always-return */
 import './App.css';
 import { Container, Grid } from '@mui/material';
 import { Outlet } from 'react-router-dom';
@@ -9,6 +8,8 @@ import PopupNotificationModal from './PopupNotification';
 import { AnimationMappingComponent } from './components/AnimationMappingComponent';
 import { InteractionMappingComponent } from './components/InteractionMappingComponent';
 import { CaughtErrorPopupNotificationModal } from './CaughtErrorPopupNotificationModal';
+import { SetupWizardProvider } from './providers/SetupWizardProvider';
+import { PatreonLinkingModal } from './components/PatreonLinkingModal';
 
 export default function App() {
   const [hideSideBar, setHideSideBar] = useState(false);
@@ -16,22 +17,25 @@ export default function App() {
   const mainWindowWidth = hideSideBar ? 12 : 8.5;
 
   return (
-    <Container maxWidth={false} className="root">
-      <Grid container spacing={3}>
-        <Grid item xs={mainWindowWidth}>
-          <MenuBar hideSideBar={hideSideBar} setHideSideBar={setHideSideBar} />
-          <Outlet />
-        </Grid>
-        {hideSideBar ? null : (
-          <Grid item xs={3.5}>
-            <WidgetWithOverlay />
+    <SetupWizardProvider>
+      <Container maxWidth={false} className="root">
+        <Grid container spacing={3}>
+          <Grid item xs={mainWindowWidth}>
+            <MenuBar hideSideBar={hideSideBar} setHideSideBar={setHideSideBar} />
+            <Outlet />
           </Grid>
-        )}
-      </Grid>
-      <PopupNotificationModal />
-      <CaughtErrorPopupNotificationModal />
-      <AnimationMappingComponent />
-      <InteractionMappingComponent />
-    </Container>
+          {hideSideBar ? null : (
+            <Grid item xs={3.5}>
+              <WidgetWithOverlay />
+            </Grid>
+          )}
+        </Grid>
+        <PopupNotificationModal />
+        <CaughtErrorPopupNotificationModal />
+        <AnimationMappingComponent />
+        <InteractionMappingComponent />
+        <PatreonLinkingModal />
+      </Container>
+    </SetupWizardProvider>
   );
 }

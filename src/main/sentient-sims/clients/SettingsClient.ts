@@ -16,19 +16,13 @@ export class SettingsClient extends ApiClient {
     });
   }
 
-  async getSetting(
-    settingsEnum: SettingsEnum | string,
-  ): Promise<SettingsResponse> {
+  async getSetting(settingsEnum: SettingsEnum | string): Promise<SettingsResponse> {
     const response = await fetch(`${this.apiUrl}/settings/app/${settingsEnum}`);
     return response.json();
   }
 
-  async resetSetting(
-    settingsEnum: SettingsEnum | string,
-  ): Promise<SettingsResponse> {
-    const response = await fetch(
-      `${this.apiUrl}/settings/app/${settingsEnum}/reset`,
-    );
+  async resetSetting(settingsEnum: SettingsEnum | string): Promise<SettingsResponse> {
+    const response = await fetch(`${this.apiUrl}/settings/app/${settingsEnum}/reset`);
     return response.json();
   }
 }

@@ -1,12 +1,4 @@
-import {
-  Box,
-  Button,
-  CardActions,
-  Grid,
-  Modal,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, Button, CardActions, Grid, Modal, TextField, Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import SendIcon from '@mui/icons-material/Send';
@@ -81,34 +73,16 @@ export default function ChatPage() {
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <div>
-                <Button
-                  type="submit"
-                  onClick={generateChat}
-                  color="primary"
-                  endIcon={<SendIcon />}
-                >
+                <Button type="submit" onClick={generateChat} color="primary" endIcon={<SendIcon />}>
                   Send
                 </Button>
-                <Button
-                  type="submit"
-                  onClick={() => onGenerateMultiple()}
-                  color="primary"
-                  endIcon={<SendIcon />}
-                >
+                <Button type="submit" onClick={() => onGenerateMultiple()} color="primary" endIcon={<SendIcon />}>
                   Send 10
                 </Button>
-                <Button
-                  onClick={() => addNewMessage('user')}
-                  color="primary"
-                  endIcon={<AddCircleIcon />}
-                >
+                <Button onClick={() => addNewMessage('user')} color="primary" endIcon={<AddCircleIcon />}>
                   Add User
                 </Button>
-                <Button
-                  onClick={() => addNewMessage('assistant')}
-                  color="primary"
-                  endIcon={<AddCircleIcon />}
-                >
+                <Button onClick={() => addNewMessage('assistant')} color="primary" endIcon={<AddCircleIcon />}>
                   Add Assistant
                 </Button>
               </div>
@@ -116,10 +90,7 @@ export default function ChatPage() {
                 <Grid container alignItems="center">
                   <Grid item>
                     {input ? (
-                      <Button
-                        onClick={() => onOpenInputView()}
-                        color="secondary"
-                      >
+                      <Button onClick={() => onOpenInputView()} color="secondary">
                         Event JSON
                       </Button>
                     ) : null}
@@ -128,9 +99,7 @@ export default function ChatPage() {
                     </Button>
                   </Grid>
                   <Grid item>
-                    <Typography sx={{ marginRight: 2, marginLeft: 2 }}>
-                      Tokens: {0}
-                    </Typography>
+                    <Typography sx={{ marginRight: 2, marginLeft: 2 }}>Tokens: {0}</Typography>
                   </Grid>
                   <Grid item>
                     <Button onClick={resetMessages} color="primary">
@@ -151,9 +120,7 @@ export default function ChatPage() {
                 label="Max Output"
                 variant="outlined"
                 value={maxResponseTokensState[0]}
-                onChange={(change) =>
-                  maxResponseTokensState[1](Number(change.target.value))
-                }
+                onChange={(change) => maxResponseTokensState[1](Number(change.target.value))}
                 sx={{ width: '100px' }}
               />
             </div>

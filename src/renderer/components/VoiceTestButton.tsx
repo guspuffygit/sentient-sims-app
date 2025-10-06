@@ -3,7 +3,6 @@ import log from 'electron-log';
 import { useTTS } from 'renderer/providers/AudioContextProvider';
 
 export type TestVoiceButtonProperties = {
-  // eslint-disable-next-line react/require-default-props
   disabled?: boolean;
 };
 

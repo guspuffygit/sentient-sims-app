@@ -1,7 +1,4 @@
-import {
-  GetParticipantRequest,
-  GetParticipantsRequest,
-} from '../models/GetParticipantsRequest';
+import { GetParticipantRequest, GetParticipantsRequest } from '../models/GetParticipantsRequest';
 import { defaultSimDescriptions } from '../descriptions/simDescriptions';
 import { Repository } from './Repository';
 import { ParticipantEntity } from './entities/ParticipantEntity';
@@ -15,9 +12,7 @@ export class ParticipantRepository extends Repository {
    * database, it returns a new ParticipantDTO with a description from default
    * sim descriptions if one exists.
    */
-  async getParticipant(
-    participantRequest: GetParticipantRequest,
-  ): Promise<ParticipantDTO> {
+  async getParticipant(participantRequest: GetParticipantRequest): Promise<ParticipantDTO> {
     const result = this.dbService
       .getDb()
       .prepare('SELECT * FROM participant WHERE id = ?')
@@ -51,9 +46,7 @@ export class ParticipantRepository extends Repository {
     return participant;
   }
 
-  async getParticipants(
-    getParticipantsRequest: GetParticipantsRequest,
-  ): Promise<ParticipantDTO[]> {
+  async getParticipants(getParticipantsRequest: GetParticipantsRequest): Promise<ParticipantDTO[]> {
     const results: Promise<ParticipantDTO>[] = [];
     getParticipantsRequest.forEach((participantRequest) => {
       results.push(this.getParticipant(participantRequest));
@@ -80,9 +73,7 @@ export class ParticipantRepository extends Repository {
   updateParticipant(participant: ParticipantDTO) {
     const result = this.dbService
       .getDb()
-      .prepare(
-        'INSERT OR REPLACE INTO participant(id, description, name) VALUES(?, ?, ?)',
-      )
+      .prepare('INSERT OR REPLACE INTO participant(id, description, name) VALUES(?, ?, ?)')
       .safeIntegers()
       .run([BigInt(participant.id), participant.description, participant.name]);
     notifySimsChanged();

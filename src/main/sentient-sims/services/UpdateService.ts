@@ -67,24 +67,18 @@ export class UpdateService {
 
       const sentientSimsFolder = this.directoryService.getSentientSimsFolder();
       if (!fs.existsSync(sentientSimsFolder)) {
-        log.info(
-          `Sentient Sims folder did not exist, creating: ${sentientSimsFolder}`,
-        );
+        log.info(`Sentient Sims folder did not exist, creating: ${sentientSimsFolder}`);
         fs.mkdirSync(sentientSimsFolder);
       }
 
-      const scriptsFolderExists = fs.existsSync(
-        this.directoryService.getSentientSimsScriptsFolder(),
-      );
+      const scriptsFolderExists = fs.existsSync(this.directoryService.getSentientSimsScriptsFolder());
 
       const zip = new AdmZip(zippedModFile);
       zip
         .getEntries()
         .filter((zipEntry) => !zipEntry.isDirectory)
         .filter((zipEntry) => {
-          return !(
-            zipEntry.name === 'sentient-sims.ts4script' && scriptsFolderExists
-          );
+          return !(zipEntry.name === 'sentient-sims.ts4script' && scriptsFolderExists);
         })
         .forEach((zipEntry) => {
           log.log(zipEntry.name);

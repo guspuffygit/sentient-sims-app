@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-no-useless-fragment */
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { PropsWithChildren } from 'react';
 

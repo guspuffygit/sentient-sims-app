@@ -1,16 +1,9 @@
-/* eslint-disable class-methods-use-this */
 import log from 'electron-log';
 import { XMLParser } from 'fast-xml-parser';
 import fs from 'fs';
 import path from 'path';
-import {
-  moodDescriptions,
-  MoodMapping,
-} from '../descriptions/moodDescriptions';
-import {
-  traitDescriptions,
-  TraitMapping,
-} from '../descriptions/traitDescriptions';
+import { moodDescriptions, MoodMapping } from '../descriptions/moodDescriptions';
+import { traitDescriptions, TraitMapping } from '../descriptions/traitDescriptions';
 import { toTraitType, TraitType } from '../models/TraitType';
 
 export type Instance = {
@@ -24,7 +17,7 @@ export type Instance = {
 };
 type EAttribute = {
   '#text'?: string;
-  $a_n?: string;
+  '$a_n'?: string;
 };
 
 export type InstanceXML = {
@@ -114,9 +107,7 @@ export class MappingService {
     log.debug(`extracted path: ${extractedPath}`);
     const traitsPath = path.join(extractedPath, 'Trait');
     const stringsPath = path.join(extractedPath, 'strings.json');
-    const parsedStrings: any = JSON.parse(
-      fs.readFileSync(stringsPath, 'utf-8'),
-    );
+    const parsedStrings: any = JSON.parse(fs.readFileSync(stringsPath, 'utf-8'));
     const stringMap: Record<string, string> = {};
     if (parsedStrings?.Entries && Array.isArray(parsedStrings.Entries)) {
       parsedStrings.Entries.forEach((stringPair: any) => {
@@ -149,15 +140,8 @@ export class MappingService {
           if (Array.isArray(instanceXml?.T)) {
             const newT: any[] = [];
             instanceXml.T.forEach((tInstance) => {
-              if (
-                tInstance?.$a_n in textProperties &&
-                '#text' in tInstance &&
-                tInstance['#text'] in stringMap
-              ) {
-                xml = xml.replace(
-                  tInstance['#text'],
-                  stringMap[tInstance['#text']],
-                );
+              if (tInstance?.$a_n in textProperties && '#text' in tInstance && tInstance['#text'] in stringMap) {
+                xml = xml.replace(tInstance['#text'], stringMap[tInstance['#text']]);
                 if ('#text' in tInstance) {
                   tInstance['#text'] = stringMap[tInstance['#text']];
                 }
@@ -263,9 +247,7 @@ export class MappingService {
       traitsMap[instance.name] = traitMapping;
     });
 
-    log.debug(
-      `There are ${traits.length} moods:\n${JSON.stringify(traitsMap, null, 2)}`,
-    );
+    log.debug(`There are ${traits.length} moods:\n${JSON.stringify(traitsMap, null, 2)}`);
 
     return {
       data: traits,
@@ -283,10 +265,7 @@ export class MappingService {
     const exportedPath = path.join(extractedPath, 'extracted.json');
     let theOutput = JSON.stringify(traits, null, 2);
     Object.keys(TraitType).forEach((traitType) => {
-      theOutput = theOutput.replaceAll(
-        `"trait_type": "${traitType}"`,
-        `"trait_type": TraitType.${traitType}`,
-      );
+      theOutput = theOutput.replaceAll(`"trait_type": "${traitType}"`, `"trait_type": TraitType.${traitType}`);
     });
     fs.writeFileSync(exportedPath, theOutput, 'utf-8');
   }

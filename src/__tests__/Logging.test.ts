@@ -1,13 +1,11 @@
-import {
-  disableDebugLogging,
-  enableDebugLogging,
-} from 'main/sentient-sims/util/debugLog';
+import { disableDebugLogging, enableDebugLogging } from 'main/sentient-sims/util/debugLog';
+import { describe, test } from '@jest/globals';
 
 describe('Logging', () => {
-  it('disableDebugLogging', () => {
+  test('disableDebugLogging', () => {
     disableDebugLogging();
   });
-  it('enableDebugLogging', () => {
+  test('enableDebugLogging', () => {
     enableDebugLogging();
   });
 });

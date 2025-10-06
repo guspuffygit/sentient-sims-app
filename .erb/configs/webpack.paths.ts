@@ -1,8 +1,8 @@
 import path from 'path';
 
-const rootPath = path.join(__dirname, '../..');
+const rootPath = process.cwd();
 
-const dllPath = path.join(__dirname, '../dll');
+const dllPath = path.join(rootPath, '.erb/dll');
 
 const srcPath = path.join(rootPath, 'src');
 const srcMainPath = path.join(srcPath, 'main');

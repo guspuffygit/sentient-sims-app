@@ -1,29 +1,25 @@
-/* eslint-disable promise/always-return,react-hooks/exhaustive-deps */
-/* eslint-disable promise/catch-or-return */
+/* eslint-disable promise/always-return */
+
 import log from 'electron-log';
-import { Auth } from 'aws-amplify';
-import { CognitoUser } from '@aws-amplify/auth';
+import { fetchAuthSession } from '@aws-amplify/auth';
 import { useEffect } from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 
-function refreshAuth() {
+export function refreshAuth() {
   log.debug('Updating auth credentials');
-  Auth.currentAuthenticatedUser({ bypassCache: true })
-    .then(async (user: CognitoUser) => {
-      if (!user) {
+  fetchAuthSession({ forceRefresh: true })
+    .then((authSession) => {
+      if (!authSession.userSub) {
         log.debug('User not logged in?');
         return;
       }
-      const session = user.getSignInUserSession();
-      if (!session) {
+
+      if (!authSession.credentials) {
         return;
       }
 
-      log.debug('Updated auth token');
-      window.electron.setSetting(
-        SettingsEnum.ACCESS_TOKEN,
-        session.getIdToken().getJwtToken(),
-      );
+      log.debug('Updating auth token');
+      window.electron.setSetting(SettingsEnum.ACCESS_TOKEN, authSession.tokens?.idToken?.toString());
     })
     .catch((error: any) => {
       if (error === 'The user is not authenticated') {
@@ -49,21 +45,13 @@ export default function useAuthCredentials() {
     return () => clearInterval(intervalId);
   }, []);
 
-  async function onAuth(_event: any, url: string) {
-    log.debug('onAuth running');
-    log.debug(`onAuth: ${url}`);
-    // eslint-disable-next-line no-restricted-globals
-    Object.defineProperty(history, 'replaceState', {
-      configurable: true,
-      value: () => {},
-    });
-    // eslint-disable-next-line no-underscore-dangle
-    await (Auth as any)._handleAuthResponse(url);
-    window.electron.onSuccessfulAuth();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async function onRefreshAuth(_event: any) {
+    refreshAuth();
   }
 
   useEffect(() => {
-    const removeListener = window.electron.onAuth(onAuth);
+    const removeListener = window.electron.refreshAuth(onRefreshAuth);
 
     return () => {
       removeListener();

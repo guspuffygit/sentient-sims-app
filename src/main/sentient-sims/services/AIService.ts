@@ -14,16 +14,8 @@ import {
 } from '../models/InteractionEvents';
 import { AnimationsService } from './AnimationsService';
 import { getRandomItem } from '../util/getRandomItem';
-import {
-  InteractionEventResult,
-  InteractionEventStatus,
-} from '../models/InteractionEventResult';
-import {
-  notifyMapAnimation,
-  notifyMapInteraction,
-  playTTS,
-  sendChatGeneration,
-} from '../util/notifyRenderer';
+import { InteractionEventResult, InteractionEventStatus } from '../models/InteractionEventResult';
+import { notifyMapAnimation, notifyMapInteraction, playTTS, sendChatGeneration } from '../util/notifyRenderer';
 import {
   GenerationOptions,
   PromptRequestBuilderOptions,
@@ -31,17 +23,9 @@ import {
 } from './PromptRequestBuilderService';
 import { containsPlayerSim } from '../util/eventContainsPlayerSim';
 import { ApiType } from '../models/ApiType';
-import {
-  defaultClassificationPrompt,
-  defaultWantsPrefixes,
-  defaultWantsPrompt,
-} from '../constants';
+import { defaultClassificationPrompt, defaultWantsPrefixes, defaultWantsPrompt } from '../constants';
 import { SettingsService } from './SettingsService';
-import {
-  getGenerationService,
-  getModelSettings,
-  getTokenCounter,
-} from '../factories/generationServiceFactory';
+import { getGenerationService, getModelSettings, getTokenCounter } from '../factories/generationServiceFactory';
 import {
   BuffEventRequest,
   BuffDescriptionRequest,
@@ -51,10 +35,7 @@ import {
 } from '../models/OpenAIRequestBuilder';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
-import {
-  cleanAIClassificationOutput,
-  cleanupAIOutput,
-} from '../formatter/PromptFormatter';
+import { cleanAIClassificationOutput, cleanupAIOutput } from '../formatter/PromptFormatter';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { InteractionService } from './InteractionService';
 import { InputFormatter } from '../formatter/InputOutputFormatting';
@@ -65,10 +46,7 @@ import { DefaultFormatter } from '../formatter/DefaultFormatter';
 import { InteractionDescription } from '../descriptions/interactionDescriptions';
 import { PromptHistoryMode } from '../models/PromptHistoryMode';
 import { sendModNotification } from '../websocketServer';
-import {
-  ModAddBuff,
-  ModWebsocketMessageType,
-} from '../models/ModWebsocketMessage';
+import { ModAddBuff, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
@@ -108,9 +86,7 @@ export class AIService {
     return generationService.sentientSimsGenerate(promptRequest);
   }
 
-  async interactionEvent(
-    event: InteractionEvents,
-  ): Promise<InteractionEventResult> {
+  async interactionEvent(event: InteractionEvents): Promise<InteractionEventResult> {
     switch (event.event_type) {
       case SSEventType.DO_SOMETHING:
         return this.handleDoSomething(event as DoSomethingInteractionEvent);
@@ -140,9 +116,7 @@ export class AIService {
         pre_actions: [event.testing_action],
       };
     } else {
-      description = await this.interactionService.getInteractionDescription(
-        event.interaction_name,
-      );
+      description = await this.interactionService.getInteractionDescription(event.interaction_name);
     }
 
     if (description?.ignored === true) {
@@ -181,10 +155,7 @@ export class AIService {
   }
 
   async handleWants(event: WantsInteractionEvent) {
-    const randomAction =
-      defaultWantsPrefixes[
-        Math.floor(Math.random() * defaultWantsPrefixes.length)
-      ];
+    const randomAction = defaultWantsPrefixes[Math.floor(Math.random() * defaultWantsPrefixes.length)];
     return this.runGeneration(event, {
       action: defaultWantsPrompt,
       preAssistantPreResponse: `{actor.0}:`,
@@ -204,16 +175,12 @@ export class AIService {
 
     let action;
 
-    const animation = await this.animationsService.getAnimation(
-      event.animation_author,
-      event.animation_identifier,
-    );
+    const animation = await this.animationsService.getAnimation(event.animation_author, event.animation_identifier);
 
     if (event.ww_event_type === WWEventType.ASKING) {
       action = '{actor.0} is asking {actor.1} if they want to go have sex';
     } else if (event.ww_event_type === WWEventType.STARTING) {
-      action =
-        "{actor.0} is taking {actor.1}'s hand and leading them to start {sex_category} {sex_location}.";
+      action = "{actor.0} is taking {actor.1}'s hand and leading them to start {sex_category} {sex_location}.";
       if (event.sentient_sims.length === 1) {
         action = '{actor.0} is walking to start {sex_category} {sex_location}.';
       }
@@ -269,10 +236,7 @@ export class AIService {
     });
   }
 
-  async runGeneration(
-    event: InteractionEvents,
-    options: GenerationOptions = {},
-  ): Promise<InteractionEventResult> {
+  async runGeneration(event: InteractionEvents, options: GenerationOptions = {}): Promise<InteractionEventResult> {
     const generationService = getGenerationService(this.settingsService);
     const tokenCounter = getTokenCounter(this.settingsService);
 
@@ -290,11 +254,7 @@ export class AIService {
       promptHistoryMode: options.promptHistoryMode,
     };
 
-    let promptRequest =
-      await this.promptRequestBuilderService.buildPromptRequest(
-        event,
-        promptOptions,
-      );
+    let promptRequest = await this.promptRequestBuilderService.buildPromptRequest(event, promptOptions);
 
     // save memory before any model specific formatting
     const newMemory: MemoryEntity = {
@@ -309,11 +269,9 @@ export class AIService {
     });
 
     const openAIRequestBuilder = new OpenAIRequestBuilder(tokenCounter);
-    const openAIRequest =
-      openAIRequestBuilder.buildOpenAIRequest(promptRequest);
+    const openAIRequest = openAIRequestBuilder.buildOpenAIRequest(promptRequest);
 
-    const response =
-      await generationService.sentientSimsGenerate(openAIRequest);
+    const response = await generationService.sentientSimsGenerate(openAIRequest);
 
     const stopTokens = [];
     // TODO: model specific OUTPUT formatting cleanup stop tokens
@@ -337,29 +295,17 @@ export class AIService {
     let output = cleanupAIOutput(response.text, stopTokens);
 
     // Remove preAssistantPreResponse from output
-    if (
-      promptRequest.preAssistantPreResponse &&
-      output.startsWith(promptRequest.preAssistantPreResponse.trim())
-    ) {
-      output = output
-        .substring(promptRequest.preAssistantPreResponse.trim().length)
-        .trim();
+    if (promptRequest.preAssistantPreResponse && output.startsWith(promptRequest.preAssistantPreResponse.trim())) {
+      output = output.substring(promptRequest.preAssistantPreResponse.trim().length).trim();
     }
 
-    if (
-      promptRequest.assistantPreResponse &&
-      !output.startsWith(promptRequest.assistantPreResponse)
-    ) {
+    if (promptRequest.assistantPreResponse && !output.startsWith(promptRequest.assistantPreResponse)) {
       output = [promptRequest.assistantPreResponse, output].join(' ').trim();
     }
 
-    const lastMessage =
-      openAIRequest.messages[openAIRequest.messages.length - 1];
+    const lastMessage = openAIRequest.messages[openAIRequest.messages.length - 1];
 
-    if (
-      lastMessage.role === 'assistant' &&
-      output.startsWith(lastMessage.content)
-    ) {
+    if (lastMessage.role === 'assistant' && output.startsWith(lastMessage.content)) {
       output = output.replace(lastMessage.content, '').trim();
     }
 
@@ -385,15 +331,11 @@ export class AIService {
     };
   }
 
-  async runClassification(
-    classificationRequest: ClassificationRequest,
-  ): Promise<InteractionEventResult> {
+  async runClassification(classificationRequest: ClassificationRequest): Promise<InteractionEventResult> {
     const generationService = getGenerationService(this.settingsService);
     const tokenCounter = getTokenCounter(this.settingsService);
 
-    const apiType: ApiType = this.settingsService.get(
-      SettingsEnum.AI_API_TYPE,
-    ) as ApiType;
+    const apiType: ApiType = this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType;
 
     const systemPrompt = defaultClassificationPrompt.replaceAll(
       '{classifiers}',
@@ -409,16 +351,13 @@ export class AIService {
     };
 
     getInputFormatters(apiType).forEach((formatter) => {
-      // eslint-disable-next-line no-param-reassign
       oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
     const openAIRequestBuilder = new OpenAIRequestBuilder(tokenCounter);
-    const openAIRequest =
-      openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
+    const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
 
-    const response =
-      await generationService.sentientSimsGenerate(openAIRequest);
+    const response = await generationService.sentientSimsGenerate(openAIRequest);
 
     const output = cleanAIClassificationOutput(response.text);
 
@@ -442,10 +381,7 @@ export class AIService {
       messages: event.messages,
     });
 
-    if (
-      classificationResult.status !== InteractionEventStatus.CLASSIFIED ||
-      !classificationResult.text
-    ) {
+    if (classificationResult.status !== InteractionEventStatus.CLASSIFIED || !classificationResult.text) {
       return;
     }
 
@@ -457,10 +393,7 @@ export class AIService {
       messages: event.messages,
     });
 
-    if (
-      buffDescriptionResult.status !== InteractionEventStatus.GENERATED ||
-      !buffDescriptionResult.text
-    ) {
+    if (buffDescriptionResult.status !== InteractionEventStatus.GENERATED || !buffDescriptionResult.text) {
       return;
     }
 
@@ -476,15 +409,11 @@ export class AIService {
     sendModNotification(modAddBuff);
   }
 
-  async runBuffDescription(
-    buffRequest: BuffDescriptionRequest,
-  ): Promise<InteractionEventResult> {
+  async runBuffDescription(buffRequest: BuffDescriptionRequest): Promise<InteractionEventResult> {
     const generationService = getGenerationService(this.settingsService);
     const tokenCounter = getTokenCounter(this.settingsService);
 
-    const apiType: ApiType = this.settingsService.get(
-      SettingsEnum.AI_API_TYPE,
-    ) as ApiType;
+    const apiType: ApiType = this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType;
 
     const systemPrompt = `\
 You will write a game buff description that will be displayed about the character ${buffRequest.name}.
@@ -505,16 +434,13 @@ Write me a buff description based on the conversation so that ${buffRequest.name
     };
 
     getInputFormatters(apiType).forEach((formatter) => {
-      // eslint-disable-next-line no-param-reassign
       oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
     const openAIRequestBuilder = new OpenAIRequestBuilder(tokenCounter);
-    const openAIRequest =
-      openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
+    const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
 
-    const response =
-      await generationService.sentientSimsGenerate(openAIRequest);
+    const response = await generationService.sentientSimsGenerate(openAIRequest);
 
     const output = `${buffRequest.name} ${cleanupAIOutput(response.text)}`;
 
@@ -543,9 +469,7 @@ Write me a buff description based on the conversation so that ${buffRequest.name
     }
 
     if (event.status === InteractionEventStatus.UNMAPPED_INTERACTION) {
-      log.debug(
-        `Unmapped interaction will be mapped: ${event.interaction_name}`,
-      );
+      log.debug(`Unmapped interaction will be mapped: ${event.interaction_name}`);
       if (event.sentient_sims.length <= 2) {
         notifyMapInteraction(event);
         return { status: InteractionEventStatus.MAPPING_INTERACTION };
@@ -559,7 +483,6 @@ Write me a buff description based on the conversation so that ${buffRequest.name
     return { status: InteractionEventStatus.NOOP };
   }
 
-  // eslint-disable-next-line class-methods-use-this
   playTts(text: string) {
     playTTS(text);
   }

@@ -19,15 +19,8 @@ axiosClient.interceptors.request.use((config) => {
 
 const defaultMaxRetries = 3;
 
-function retryElseThrow(
-  error: Error,
-  maxRetries: number,
-  config?: AxiosRequestConfig,
-) {
-  if (
-    typeof config?.retryCount === 'number' &&
-    config?.retryCount < maxRetries
-  ) {
+function retryElseThrow(error: Error, maxRetries: number, config?: AxiosRequestConfig) {
+  if (typeof config?.retryCount === 'number' && config?.retryCount < maxRetries) {
     config.retryCount += 1;
     log.info(`Retrying ${config.url}`);
     return axiosClient(config);
@@ -38,27 +31,13 @@ function retryElseThrow(
 
 axiosClient.interceptors.response.use(
   (response) => {
-    if (
-      typeof response?.data === 'string' &&
-      response?.config?.responseType !== 'text'
-    ) {
-      log.error(
-        'Error, unexpected string response:',
-        response?.config,
-        response?.data,
-      );
-      if (
-        typeof response?.config?.retryCount === 'number' &&
-        response?.config?.retryCount < 1
-      ) {
+    if (typeof response?.data === 'string' && response?.config?.responseType !== 'text') {
+      log.error('Error, unexpected string response:', response?.config, response?.data);
+      if (typeof response?.config?.retryCount === 'number' && response?.config?.retryCount < 1) {
         response.config.retryCount += 1;
         return axiosClient(response.config);
       }
-      return retryElseThrow(
-        new UnexpectedStringResponseError(response),
-        1,
-        response?.config,
-      );
+      return retryElseThrow(new UnexpectedStringResponseError(response), 1, response?.config);
     }
     return response;
   },
@@ -84,9 +63,7 @@ axiosClient.interceptors.response.use(
         );
       }
       case SentientSimsHTTPStatusCode.NOT_MEMBER_EXCEPTION: {
-        throw new Error(
-          'Must be a Founder or Patron to use the Sentient Sims Uncensored AI Server.',
-        );
+        throw new Error('Must be a Founder or Patron to use the Sentient Sims Uncensored AI Server.');
       }
       default: {
         return retryElseThrow(error, 1, error?.config);

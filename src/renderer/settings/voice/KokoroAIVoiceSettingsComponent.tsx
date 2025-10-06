@@ -1,13 +1,4 @@
-import {
-  Box,
-  Chip,
-  FormHelperText,
-  Grid,
-  MenuItem,
-  Select,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, Chip, FormHelperText, Grid, MenuItem, Select, Stack, Typography } from '@mui/material';
 import {
   defaultKokoroAITTSSettings,
   KokoroAISpeechModel,
@@ -93,11 +84,7 @@ export function KokoroAIVoiceSettingsComponent() {
     <Grid item xs={12} sm={8}>
       <Box>
         <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            sx={{ alignItems: 'center', mb: 1, width: '100%' }}
-          >
+          <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
             <Typography>Speech Model:</Typography>
             <Select
               size="small"
@@ -112,11 +99,7 @@ export function KokoroAIVoiceSettingsComponent() {
           </Stack>
         </Box>
         <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            sx={{ alignItems: 'center', mb: 1, width: '100%' }}
-          >
+          <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
             <Typography>Speech Voice:</Typography>
             <Select
               size="small"
@@ -139,11 +122,7 @@ export function KokoroAIVoiceSettingsComponent() {
           </Stack>
         </Box>
         <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            sx={{ alignItems: 'center', mb: 1, width: '100%' }}
-          >
+          <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
             <Typography>Local/Remote</Typography>
             <Select
               size="small"
@@ -151,9 +130,7 @@ export function KokoroAIVoiceSettingsComponent() {
               id="local-remote"
               label="Local/Remote"
               value={kokoroaiTtsSettings.value.type}
-              onChange={(change) =>
-                handleTypeChange(toKokoroType(change.target.value))
-              }
+              onChange={(change) => handleTypeChange(toKokoroType(change.target.value))}
             >
               {typeMenuItems}
             </Select>
@@ -177,18 +154,14 @@ export function KokoroAIVoiceSettingsComponent() {
         {kokoroaiTtsSettings.value.type === KokoroType.WebGPU ? (
           <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
             <FormHelperText>
-              WebGPU is Experimental. Kokoro runs completely locally using the
-              power of your graphics card. Depending on the specs and
-              configuration of your computer it may run too slow.
+              WebGPU is Experimental. Kokoro runs completely locally using the power of your graphics card. Depending on
+              the specs and configuration of your computer it may run too slow.
             </FormHelperText>
           </Box>
         ) : null}
-        {kokoroaiTtsSettings.value.type === KokoroType.WebGPU &&
-        kokoroaiTtsSettings.value.voice.length > 1 ? (
+        {kokoroaiTtsSettings.value.type === KokoroType.WebGPU && kokoroaiTtsSettings.value.voice.length > 1 ? (
           <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
-            <FormHelperText error>
-              Only one Kokoro Voice can be selected when using WebGPU
-            </FormHelperText>
+            <FormHelperText error>Only one Kokoro Voice can be selected when using WebGPU</FormHelperText>
           </Box>
         ) : null}
         <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>

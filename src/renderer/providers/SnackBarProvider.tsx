@@ -1,24 +1,12 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 
 type SnackBarContextType = {
-  showMessage: (
-    message: string,
-    severity?: 'success' | 'info' | 'warning' | 'error',
-  ) => void;
+  showMessage: (message: string, severity?: 'success' | 'info' | 'warning' | 'error') => void;
 };
 
-const SnackBarContext = createContext<SnackBarContextType | undefined>(
-  undefined,
-);
+const SnackBarContext = createContext<SnackBarContextType | undefined>(undefined);
 
 type SnackBarProviderProps = {
   children: ReactNode;
@@ -27,26 +15,15 @@ type SnackBarProviderProps = {
 export function SnackBarProvider({ children }: SnackBarProviderProps) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
-  const [severity, setSeverity] = useState<
-    'success' | 'info' | 'warning' | 'error'
-  >('info');
+  const [severity, setSeverity] = useState<'success' | 'info' | 'warning' | 'error'>('info');
 
-  const showMessage = useCallback(
-    (
-      msg: string,
-      severityType: 'success' | 'info' | 'warning' | 'error' = 'info',
-    ) => {
-      setMessage(msg);
-      setSeverity(severityType);
-      setOpen(true);
-    },
-    [],
-  );
+  const showMessage = useCallback((msg: string, severityType: 'success' | 'info' | 'warning' | 'error' = 'info') => {
+    setMessage(msg);
+    setSeverity(severityType);
+    setOpen(true);
+  }, []);
 
-  const handleClose = (
-    event: React.SyntheticEvent<any, Event> | Event,
-    reason?: string,
-  ) => {
+  const handleClose = (event: React.SyntheticEvent<any, Event> | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }

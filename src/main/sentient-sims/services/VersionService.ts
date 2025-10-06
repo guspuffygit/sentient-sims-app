@@ -1,9 +1,8 @@
-/* eslint-disable class-methods-use-this */
 import * as fs from 'fs';
 import log from 'electron-log';
 import { app } from 'electron';
 import { DirectoryService } from './DirectoryService';
-import { removeNonPrintableCharacters } from '../util/filter';
+import { filterNullAndUndefined, removeNonPrintableCharacters } from '../util/filter';
 
 export type Version = {
   version: string;
@@ -20,9 +19,7 @@ export class VersionService {
   getVersion(path: string): Version {
     if (fs.existsSync(path)) {
       log.log(`Version file exists at path: ${path}`);
-      const parsedVersion = JSON.parse(
-        fs.readFileSync(path, { encoding: 'utf-8' }),
-      );
+      const parsedVersion = JSON.parse(fs.readFileSync(path, { encoding: 'utf-8' }));
       log.log(parsedVersion);
       return parsedVersion;
     }
@@ -42,16 +39,18 @@ export class VersionService {
 
   getGameVersion(): Version {
     try {
-      const versionText = fs.readFileSync(
-        this.directoryService.getGameVersion(),
-        'utf-8',
-      );
+      const versionText = fs.readFileSync(this.directoryService.getGameVersion(), 'utf-8');
 
       return { version: removeNonPrintableCharacters(versionText).trim() };
     } catch (e: any) {
       return {
         version: 'none',
-        error: `Unable to get GameVersion.txt, do you have the correct Mods directory selected?\n${e?.message}`,
+        error: filterNullAndUndefined([
+          `Unable to get GameVersion.txt, do you have the correct Mods directory selected?`,
+          'The directory chosen should be named "Mods"',
+          'If you have OneDrive installed, it may have moved your Mods folder into OneDrive.',
+          e?.message,
+        ]).join('\n'),
       };
     }
   }

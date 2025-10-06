@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import '@testing-library/jest-dom';
 import { OpenAIService } from 'main/sentient-sims/services/OpenAIService';
 import { SettingsService } from 'main/sentient-sims/services/SettingsService';

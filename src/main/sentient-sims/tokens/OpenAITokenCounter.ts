@@ -1,4 +1,3 @@
-/* eslint-disable class-methods-use-this */
 import { encode } from '@nem035/gpt-3-encoder';
 import { TokenCounter } from './TokenCounter';
 

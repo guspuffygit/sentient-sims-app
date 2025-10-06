@@ -26,8 +26,7 @@ export default function WebGpuDebug() {
   ) {
     return (
       <FormHelperText error>
-        WebGPU is not supported in this runtime environment to use Kokoro
-        WebGPU. Use a third-party TTS service instead.
+        WebGPU is not supported in this runtime environment to use Kokoro WebGPU. Use a third-party TTS service instead.
       </FormHelperText>
     );
   }

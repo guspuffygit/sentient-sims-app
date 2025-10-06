@@ -15,9 +15,7 @@ describe('Patreon', () => {
       isFounder: jest.fn().mockReturnValue(true),
     };
 
-    const { disableNightly, nightlyText } = getNightlyAccess(
-      mockPatreonUserInstance as any,
-    );
+    const { disableNightly, nightlyText } = getNightlyAccess(mockPatreonUserInstance as any);
     expect(disableNightly).toEqual(false);
     expect(nightlyText).toEqual('Founder Early Access');
   });
@@ -28,9 +26,7 @@ describe('Patreon', () => {
       isFounder: jest.fn().mockReturnValue(false),
     };
 
-    const { disableNightly, nightlyText } = getNightlyAccess(
-      mockPatreonUserInstance as any,
-    );
+    const { disableNightly, nightlyText } = getNightlyAccess(mockPatreonUserInstance as any);
     expect(disableNightly).toEqual(false);
     expect(nightlyText).toEqual('Patreon Early Access');
   });
@@ -41,9 +37,7 @@ describe('Patreon', () => {
       isFounder: jest.fn().mockReturnValue(false),
     };
 
-    const { disableNightly, nightlyText } = getNightlyAccess(
-      mockPatreonUserInstance as any,
-    );
+    const { disableNightly, nightlyText } = getNightlyAccess(mockPatreonUserInstance as any);
     expect(disableNightly).toEqual(true);
     expect(nightlyText).toEqual('Patreon Early Access');
   });

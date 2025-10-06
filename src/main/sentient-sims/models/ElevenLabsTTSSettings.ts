@@ -48,11 +48,7 @@ export const defaultElevenLabsTTSSettings: ElevenLabsTTSSettings = {
 };
 
 export function toSpeechModel(model?: string): ElevenLabsSpeechModel {
-  if (
-    Object.values(ElevenLabsSpeechModel).includes(
-      model as ElevenLabsSpeechModel,
-    )
-  ) {
+  if (Object.values(ElevenLabsSpeechModel).includes(model as ElevenLabsSpeechModel)) {
     return model as ElevenLabsSpeechModel;
   }
 

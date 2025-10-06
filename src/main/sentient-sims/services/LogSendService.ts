@@ -1,5 +1,3 @@
-/* eslint-disable class-methods-use-this */
-/* eslint-disable import/prefer-default-export */
 import log from 'electron-log';
 import os from 'os';
 import { app } from 'electron';
@@ -52,9 +50,7 @@ export class LogSendService {
   }
 
   static newLogId() {
-    return Array.from({ length: 10 }, () =>
-      Math.random().toString(36).charAt(2),
-    ).join('');
+    return Array.from({ length: 10 }, () => Math.random().toString(36).charAt(2)).join('');
   }
 
   async sendLogsToDiscord(url: string, sendLogsRequest: SendLogsRequest) {
@@ -71,10 +67,8 @@ export class LogSendService {
         `Error Description: ${sendLogsRequest.errorDescription}`,
       ];
 
-      if (sendLogsRequest.amplifyUser) {
-        const patreonDebugTexts: string[] = GetPatreonDebugText(
-          sendLogsRequest.amplifyUser,
-        );
+      if (sendLogsRequest.userAttributes) {
+        const patreonDebugTexts: string[] = GetPatreonDebugText(sendLogsRequest.userAttributes);
         patreonDebugTexts.forEach((text) => extraData.push(text));
       }
 
@@ -82,9 +76,7 @@ export class LogSendService {
 
       if (sendLogsRequest.caughtError) {
         try {
-          endData.push(
-            `CaughtError: ${JSON.stringify(sendLogsRequest.caughtError, null, 2)}`,
-          );
+          endData.push(`CaughtError: ${JSON.stringify(sendLogsRequest.caughtError, null, 2)}`);
         } catch (err) {
           log.error(`Error attaching caughtError info to debug logs`, err);
         }
@@ -96,11 +88,7 @@ export class LogSendService {
       this.appendContentToZipFile(content, logZip, errors);
       this.appendFilesListToZipFile(logZip, errors);
       this.appendLogsFileToZipFile(logZip, errors);
-      this.appendErrorDatabaseToZipFile(
-        logZip,
-        errors,
-        sendLogsRequest?.caughtError,
-      );
+      this.appendErrorDatabaseToZipFile(logZip, errors, sendLogsRequest?.caughtError);
       this.appendLastExceptionFilesToZipFile(logZip, errors);
       this.appendAppLogsToZipFile(logZip, errors);
       this.appendConfigFileToZipFile(logZip, errors);
@@ -111,14 +99,10 @@ export class LogSendService {
       log.info('Sent logs for debugging');
 
       if (!response || !response.ok) {
-        errors.push(
-          `Failed to post message: ${response?.status} ${response?.statusText}.`,
-        );
+        errors.push(`Failed to post message: ${response?.status} ${response?.statusText}.`);
         if (response) {
           const responseJson = await response.json();
-          log.error(
-            `Response JSON Error:\n${JSON.stringify(responseJson, null, 2)}`,
-          );
+          log.error(`Response JSON Error:\n${JSON.stringify(responseJson, null, 2)}`);
           errors.push(responseJson);
         }
       }
@@ -154,10 +138,7 @@ export class LogSendService {
     ].join('\n');
   }
 
-  async sendBugReport(
-    url: string,
-    { event, username, memory, bugDetails }: InteractionBugReport,
-  ) {
+  async sendBugReport(url: string, { event, username, memory, bugDetails }: InteractionBugReport) {
     const logId = LogSendService.newLogId();
     const errors: any[] = [];
 
@@ -203,9 +184,7 @@ export class LogSendService {
       log.info('Sent interaction bug report');
 
       if (!response || !response.ok) {
-        errors.push(
-          `Failed to post message: ${response?.status} ${response?.statusText}.`,
-        );
+        errors.push(`Failed to post message: ${response?.status} ${response?.statusText}.`);
         if (response) {
           errors.push(await response.json());
         }
@@ -227,9 +206,7 @@ export class LogSendService {
       // Dont send tokens or secrets in the logs
       if (!settingsEnum.includes('Key') && !settingsEnum.includes('Token')) {
         const settingsValue = this.settingsService.getSetting(settingsEnum);
-        if (
-          Object.prototype.toString.call(settingsValue) === '[object Object]'
-        ) {
+        if (Object.prototype.toString.call(settingsValue) === '[object Object]') {
           settings.push(`${settingsEnum}: ${JSON.stringify(settingsValue)}`);
         } else {
           settings.push(`${settingsEnum}: ${settingsValue}`);
@@ -240,11 +217,7 @@ export class LogSendService {
     return settings;
   }
 
-  private appendInformationToFormData(
-    formData: FormData,
-    errors: any[],
-    content: string,
-  ) {
+  private appendInformationToFormData(formData: FormData, errors: any[], content: string) {
     try {
       formData.append('content', content.slice(0, 1900));
     } catch (err: any) {
@@ -254,13 +227,8 @@ export class LogSendService {
 
   private appendFilesListToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
-      const filesList = this.directoryService.listFilesRecursively(
-        this.directoryService.getModsFolder(),
-      );
-      zipFile.addFile(
-        'fileList.txt',
-        Buffer.from(filesList.join('\n'), 'utf-8'),
-      );
+      const filesList = this.directoryService.listFilesRecursively(this.directoryService.getModsFolder());
+      zipFile.addFile('fileList.txt', Buffer.from(filesList.join('\n'), 'utf-8'));
     } catch (err: any) {
       this.handleAppendError('Error adding file list', err, errors);
     }
@@ -275,16 +243,10 @@ export class LogSendService {
     }
   }
 
-  private appendErrorDatabaseToZipFile(
-    zipFile: AdmZip,
-    errors: any[],
-    caughtError?: CaughtError,
-  ) {
+  private appendErrorDatabaseToZipFile(zipFile: AdmZip, errors: any[], caughtError?: CaughtError) {
     try {
       if (caughtError?.databaseSession) {
-        const errorDb = this.directoryService.getSentientSimsErrorDb(
-          caughtError.databaseSession,
-        );
+        const errorDb = this.directoryService.getSentientSimsErrorDb(caughtError.databaseSession);
         zipFile.addLocalFile(errorDb);
       }
     } catch (err: any) {
@@ -292,11 +254,7 @@ export class LogSendService {
     }
   }
 
-  private appendContentToZipFile(
-    content: string,
-    zipFile: AdmZip,
-    errors: any[],
-  ) {
+  private appendContentToZipFile(content: string, zipFile: AdmZip, errors: any[]) {
     try {
       zipFile.addFile('systemconfig.txt', Buffer.from(content, 'utf-8'));
     } catch (err: any) {
@@ -306,21 +264,15 @@ export class LogSendService {
 
   private appendLastExceptionFilesToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
-      this.lastExceptionService
-        .getParsedLastExceptionFiles()
-        .forEach((lastExceptionFile) => {
-          zipFile.addFile(
-            lastExceptionFile.filename,
-            Buffer.from(lastExceptionFile.text, 'utf-8'),
-            `Created ${lastExceptionFile.created.toUTCString()}`,
-          );
-        });
+      this.lastExceptionService.getParsedLastExceptionFiles().forEach((lastExceptionFile) => {
+        zipFile.addFile(
+          lastExceptionFile.filename,
+          Buffer.from(lastExceptionFile.text, 'utf-8'),
+          `Created ${lastExceptionFile.created.toUTCString()}`,
+        );
+      });
     } catch (err: any) {
-      this.handleAppendError(
-        'Error attaching lastException files',
-        err,
-        errors,
-      );
+      this.handleAppendError('Error attaching lastException files', err, errors);
     }
   }
 
@@ -342,11 +294,7 @@ export class LogSendService {
     }
   }
 
-  private appendZipFileToFormData(
-    zipFile: AdmZip,
-    formData: FormData,
-    errors: any[],
-  ) {
+  private appendZipFileToFormData(zipFile: AdmZip, formData: FormData, errors: any[]) {
     try {
       const blob = new Blob([zipFile.toBuffer()], { type: 'application/zip' });
       formData.append('logs', blob, 'logs.zip');

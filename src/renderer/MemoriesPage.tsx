@@ -1,12 +1,6 @@
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable promise/always-return */
-import {
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Typography,
-} from '@mui/material';
+import { Button, Card, CardActions, CardContent, Typography } from '@mui/material';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
 import log from 'electron-log';
@@ -25,25 +19,16 @@ export default function MemoriesPage() {
   const textareaRef = useRef<HTMLDivElement>(null);
   const [memories, setMemories] = useState<MemoryEntity[]>([]);
   const [memoriesFocused, setMemoriesFocused] = useState(false);
-  const [editedMemory, setEditedMemory] = useState<
-    SelectedMemory | null | undefined
-  >();
+  const [editedMemory, setEditedMemory] = useState<SelectedMemory | null | undefined>();
   const { status } = useWebsocket();
 
   const addMemory = useCallback((memory: MemoryEntity) => {
     setMemories((previousMemories) => [...previousMemories, memory]);
   }, []);
 
-  const deleteMemory = useCallback(
-    (deleteMemoryRequest: DeleteMemoryRequest) => {
-      setMemories((previousMemories) =>
-        previousMemories.filter(
-          (memory) => memory.id !== deleteMemoryRequest.id,
-        ),
-      );
-    },
-    [],
-  );
+  const deleteMemory = useCallback((deleteMemoryRequest: DeleteMemoryRequest) => {
+    setMemories((previousMemories) => previousMemories.filter((memory) => memory.id !== deleteMemoryRequest.id));
+  }, []);
 
   const editMemory = useCallback((memory: MemoryEntity) => {
     setMemories((previousMemories) => {
@@ -57,11 +42,9 @@ export default function MemoriesPage() {
   }, []);
 
   useEffect(() => {
-    const removeListener = window.electron.onNewMemoryAdded(
-      (_event: any, memory: MemoryEntity) => {
-        addMemory(memory);
-      },
-    );
+    const removeListener = window.electron.onNewMemoryAdded((_event: any, memory: MemoryEntity) => {
+      addMemory(memory);
+    });
 
     return () => {
       removeListener();
@@ -129,12 +112,10 @@ export default function MemoriesPage() {
   );
 
   useEffect(() => {
-    const removeListener = window.electron.onMemoryDeleted(
-      (_event: any, deleteMemoryRequest: DeleteMemoryRequest) => {
-        deleteMemory(deleteMemoryRequest);
-        handleSetSelectedMemory(-1);
-      },
-    );
+    const removeListener = window.electron.onMemoryDeleted((_event: any, deleteMemoryRequest: DeleteMemoryRequest) => {
+      deleteMemory(deleteMemoryRequest);
+      handleSetSelectedMemory(-1);
+    });
 
     return () => {
       removeListener();
@@ -142,12 +123,10 @@ export default function MemoriesPage() {
   }, [deleteMemory, handleSetSelectedMemory]);
 
   useEffect(() => {
-    const removeListener = window.electron.onMemoryEdited(
-      (_event: any, memory: MemoryEntity) => {
-        editMemory(memory);
-        handleSetSelectedMemory(-1);
-      },
-    );
+    const removeListener = window.electron.onMemoryEdited((_event: any, memory: MemoryEntity) => {
+      editMemory(memory);
+      handleSetSelectedMemory(-1);
+    });
 
     return () => {
       removeListener();
@@ -195,63 +174,50 @@ export default function MemoriesPage() {
     }
   }, [editedMemory, handleSetSelectedMemory]);
 
-  const handleObservationEdit = useCallback(
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setEditedMemory((previousMemory) => ({
-        index: Number(previousMemory?.index),
-        memory: {
-          id: previousMemory?.memory?.id,
-          observation: event.target.value,
-          pre_action: previousMemory?.memory?.pre_action,
-          content: previousMemory?.memory?.content,
-          location_id: Number(previousMemory?.memory?.location_id),
-          timestamp: previousMemory?.memory?.timestamp,
-        },
-      }));
-    },
-    [],
-  );
+  const handleObservationEdit = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEditedMemory((previousMemory) => ({
+      index: Number(previousMemory?.index),
+      memory: {
+        id: previousMemory?.memory?.id,
+        observation: event.target.value,
+        pre_action: previousMemory?.memory?.pre_action,
+        content: previousMemory?.memory?.content,
+        location_id: Number(previousMemory?.memory?.location_id),
+        timestamp: previousMemory?.memory?.timestamp,
+      },
+    }));
+  }, []);
 
-  const handleContentEdit = useCallback(
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setEditedMemory((previousMemory) => ({
-        index: Number(previousMemory?.index),
-        memory: {
-          id: previousMemory?.memory?.id,
-          observation: previousMemory?.memory?.observation,
-          pre_action: previousMemory?.memory?.pre_action,
-          content: event.target.value,
-          location_id: Number(previousMemory?.memory?.location_id),
-          timestamp: previousMemory?.memory?.timestamp,
-        },
-      }));
-    },
-    [],
-  );
+  const handleContentEdit = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEditedMemory((previousMemory) => ({
+      index: Number(previousMemory?.index),
+      memory: {
+        id: previousMemory?.memory?.id,
+        observation: previousMemory?.memory?.observation,
+        pre_action: previousMemory?.memory?.pre_action,
+        content: event.target.value,
+        location_id: Number(previousMemory?.memory?.location_id),
+        timestamp: previousMemory?.memory?.timestamp,
+      },
+    }));
+  }, []);
 
-  const handlePreActionEdit = useCallback(
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setEditedMemory((previousMemory) => ({
-        index: Number(previousMemory?.index),
-        memory: {
-          id: previousMemory?.memory?.id,
-          observation: previousMemory?.memory?.observation,
-          pre_action: event.target.value,
-          content: previousMemory?.memory?.content,
-          location_id: Number(previousMemory?.memory?.location_id),
-          timestamp: previousMemory?.memory?.timestamp,
-        },
-      }));
-    },
-    [],
-  );
+  const handlePreActionEdit = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEditedMemory((previousMemory) => ({
+      index: Number(previousMemory?.index),
+      memory: {
+        id: previousMemory?.memory?.id,
+        observation: previousMemory?.memory?.observation,
+        pre_action: event.target.value,
+        content: previousMemory?.memory?.content,
+        location_id: Number(previousMemory?.memory?.location_id),
+        timestamp: previousMemory?.memory?.timestamp,
+      },
+    }));
+  }, []);
 
   if (!status.mod) {
-    return (
-      <AppCard>
-        Not connected to The Sims 4. Start a Sims 4 game to connect.
-      </AppCard>
-    );
+    return <AppCard>Not connected to The Sims 4. Start a Sims 4 game to connect.</AppCard>;
   }
 
   if (memories.length > 0) {
@@ -259,11 +225,7 @@ export default function MemoriesPage() {
 
     memories.forEach((memory, index) => {
       renderText.push(
-        <Typography
-          variant="body2"
-          onClick={() => handleSetSelectedMemory(index)}
-          className="hoverHighlightTypography"
-        >
+        <Typography variant="body2" onClick={() => handleSetSelectedMemory(index)} className="hoverHighlightTypography">
           {[memory.observation, memory.content].filter((m) => m).join(' ')}
         </Typography>,
       );
@@ -285,28 +247,15 @@ export default function MemoriesPage() {
               }}
             >
               <div>
-                <Button
-                  sx={{ marginRight: 1 }}
-                  color="secondary"
-                  variant="outlined"
-                  onClick={() => handleSave()}
-                >
+                <Button sx={{ marginRight: 1 }} color="secondary" variant="outlined" onClick={() => handleSave()}>
                   Save
                 </Button>
-                <Button
-                  color="secondary"
-                  variant="outlined"
-                  onClick={() => handleSetSelectedMemory(-1)}
-                >
+                <Button color="secondary" variant="outlined" onClick={() => handleSetSelectedMemory(-1)}>
                   Cancel
                 </Button>
               </div>
               <div>
-                <Button
-                  color="error"
-                  variant="outlined"
-                  onClick={() => handleDelete()}
-                >
+                <Button color="error" variant="outlined" onClick={() => handleDelete()}>
                   Delete
                 </Button>
               </div>

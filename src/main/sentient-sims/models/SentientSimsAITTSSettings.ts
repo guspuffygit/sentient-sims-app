@@ -38,9 +38,7 @@ export enum SentientSimsAISpeechOrpheusVoice {
   Zac = 'zac',
 }
 
-export type SentientSimsAISpeechVoice =
-  | SentientSimsAISpeechKokoroVoice
-  | SentientSimsAISpeechOrpheusVoice;
+export type SentientSimsAISpeechVoice = SentientSimsAISpeechKokoroVoice | SentientSimsAISpeechOrpheusVoice;
 
 export enum SentientSimsAISpeechModel {
   KOKORO = 'kokoro',
@@ -62,11 +60,7 @@ export const defaultSentientSimsAITTSSettings: SentientSimsAITTSSettings = {
 };
 
 export function toSpeechModel(model?: string): SentientSimsAISpeechModel {
-  if (
-    Object.values(SentientSimsAISpeechModel).includes(
-      model as SentientSimsAISpeechModel,
-    )
-  ) {
+  if (Object.values(SentientSimsAISpeechModel).includes(model as SentientSimsAISpeechModel)) {
     return model as SentientSimsAISpeechModel;
   }
 
@@ -74,19 +68,11 @@ export function toSpeechModel(model?: string): SentientSimsAISpeechModel {
 }
 
 export function toSpeechVoice(voice?: string): SentientSimsAISpeechVoice {
-  if (
-    Object.values(SentientSimsAISpeechKokoroVoice).includes(
-      voice as SentientSimsAISpeechKokoroVoice,
-    )
-  ) {
+  if (Object.values(SentientSimsAISpeechKokoroVoice).includes(voice as SentientSimsAISpeechKokoroVoice)) {
     return voice as SentientSimsAISpeechKokoroVoice;
   }
 
-  if (
-    Object.values(SentientSimsAISpeechOrpheusVoice).includes(
-      voice as SentientSimsAISpeechOrpheusVoice,
-    )
-  ) {
+  if (Object.values(SentientSimsAISpeechOrpheusVoice).includes(voice as SentientSimsAISpeechOrpheusVoice)) {
     return voice as SentientSimsAISpeechOrpheusVoice;
   }
 

@@ -1,12 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import { IpcRendererEvent } from 'electron';
 import { CaughtError } from 'main/sentient-sims/models/CaughtError';
 import { useMemo, useState } from 'react';
@@ -23,14 +15,12 @@ export function CaughtErrorPopupNotificationModal() {
   });
   const [sendLogModalOpen, setSendLogModalOpen] = useState(false);
 
-  window.electron.onCaughtErrorPopupNotification(
-    (_event: IpcRendererEvent, caughtError: CaughtError) => {
-      setState({
-        open: true,
-        caughtError,
-      });
-    },
-  );
+  window.electron.onCaughtErrorPopupNotification((_event: IpcRendererEvent, caughtError: CaughtError) => {
+    setState({
+      open: true,
+      caughtError,
+    });
+  });
 
   const onClose = () => {
     setState({
@@ -41,9 +31,7 @@ export function CaughtErrorPopupNotificationModal() {
 
   const errorMessage = useMemo(() => {
     if (state.caughtError?.message) {
-      return (
-        <Typography>Error Message: {state.caughtError?.message}</Typography>
-      );
+      return <Typography>Error Message: {state.caughtError?.message}</Typography>;
     }
 
     return null;
@@ -51,16 +39,8 @@ export function CaughtErrorPopupNotificationModal() {
 
   return (
     <>
-      <Dialog
-        open={state.open}
-        onClose={onClose}
-        aria-labelledby="exception-dialog-title"
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle id="exception-dialog-title">
-          Exception Occurred
-        </DialogTitle>
+      <Dialog open={state.open} onClose={onClose} aria-labelledby="exception-dialog-title" maxWidth="sm" fullWidth>
+        <DialogTitle id="exception-dialog-title">Exception Occurred</DialogTitle>
         <DialogContent dividers>{errorMessage}</DialogContent>
         <DialogActions>
           <Button onClick={onClose}>Close</Button>
@@ -76,11 +56,7 @@ export function CaughtErrorPopupNotificationModal() {
           </Button>
         </DialogActions>
       </Dialog>
-      <SendLogModal
-        open={sendLogModalOpen}
-        setOpen={setSendLogModalOpen}
-        caughtError={state.caughtError}
-      />
+      <SendLogModal open={sendLogModalOpen} setOpen={setSendLogModalOpen} caughtError={state.caughtError} />
     </>
   );
 }

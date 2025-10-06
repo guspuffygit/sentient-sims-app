@@ -10,12 +10,7 @@ function WidgetWithOverlay() {
 
   return (
     <div className="widget-wrapper">
-      <WidgetBot
-        server="1098029759201542144"
-        channel="1098054540181381222"
-        height={780}
-        width={380}
-      />
+      <WidgetBot server="1098029759201542144" channel="1098054540181381222" height={780} width={380} />
 
       <div className="overlay" onClick={handleClick} />
     </div>

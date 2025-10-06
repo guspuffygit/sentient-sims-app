@@ -1,14 +1,10 @@
-/* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
 import { Box, FormHelperText } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { useAuthenticator } from '@aws-amplify/ui-react';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
-import {
-  sentientSimsAIDefaultModel,
-  sentientSimsAIHost,
-} from 'main/sentient-sims/constants';
+import { sentientSimsAIDefaultModel, sentientSimsAIHost } from 'main/sentient-sims/constants';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
+import { useAuth } from 'renderer/providers/AuthProvider';
 import AIModelSelection from '../AIModelSelection';
 import { AIEndpointComponent } from './AIEndpointComponent';
 
@@ -16,18 +12,16 @@ type SentientSimsSettingsComponentProps = {
   apiType: ApiType;
 };
 
-export function SentientSimsSettingsComponent({
-  apiType,
-}: SentientSimsSettingsComponentProps) {
-  const { user } = useAuthenticator((context) => [context.user]);
+export function SentientSimsSettingsComponent({ apiType }: SentientSimsSettingsComponentProps) {
+  const { userAttributes } = useAuth();
 
   if (apiType !== ApiType.SentientSimsAI) {
     return <></>;
   }
 
-  const patreonUser = new PatreonUser(user);
+  const patreonUser = new PatreonUser(userAttributes);
 
-  const showLogInError = !user;
+  const showLogInError = !userAttributes;
   const showMemberError = !patreonUser.isMember();
 
   const errors: React.JSX.Element[] = [];
@@ -48,9 +42,7 @@ export function SentientSimsSettingsComponent({
 
   return (
     <>
-      {showLogInError || showMemberError ? (
-        <Box sx={{ marginBottom: 2 }}>{errors}</Box>
-      ) : null}
+      {showLogInError || showMemberError ? <Box sx={{ marginBottom: 2 }}>{errors}</Box> : null}
       <AIEndpointComponent
         type={ApiType.SentientSimsAI}
         selectedApiType={apiType}

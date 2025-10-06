@@ -1,9 +1,5 @@
-/* eslint-disable class-methods-use-this */
 import log from 'electron-log';
-import {
-  interactionDescriptions,
-  InteractionDescription,
-} from '../descriptions/interactionDescriptions';
+import { interactionDescriptions, InteractionDescription } from '../descriptions/interactionDescriptions';
 import { InteractionRepository } from '../db/InteractionRepository';
 import { BasicInteraction, InteractionDTO } from '../db/dto/InteractionDTO';
 import { notifyUnmappedInteractionChanged } from '../util/notifyRenderer';
@@ -15,13 +11,10 @@ export class InteractionService {
     this.interactionRepository = interactionRepository;
   }
 
-  async getInteractionDescription(
-    interactionName: string,
-  ): Promise<InteractionDescription | undefined> {
+  async getInteractionDescription(interactionName: string): Promise<InteractionDescription | undefined> {
     let description = interactionDescriptions.get(interactionName);
     if (!description) {
-      description =
-        await this.interactionRepository.getInteraction(interactionName);
+      description = await this.interactionRepository.getInteraction(interactionName);
     }
 
     return description;
@@ -33,13 +26,7 @@ export class InteractionService {
       action: interaction?.action,
       ignored: interaction?.ignored,
     };
-    log.debug(
-      `Updated unmapped interaction: ${JSON.stringify(
-        basicInteration,
-        null,
-        2,
-      )}`,
-    );
+    log.debug(`Updated unmapped interaction: ${JSON.stringify(basicInteration, null, 2)}`);
     await this.interactionRepository.setInteraction(basicInteration);
     notifyUnmappedInteractionChanged();
   }

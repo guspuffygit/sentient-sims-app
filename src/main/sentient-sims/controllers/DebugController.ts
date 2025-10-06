@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { Request, Response } from 'express';
 import { OpenAIKeyNotSetError } from '../services/OpenAIService';
 import { LogSendService, webhookUrl } from '../services/LogSendService';
@@ -11,15 +10,11 @@ export class DebugController {
 
   private readonly logSendService: LogSendService;
 
-  constructor(
-    settingsService: SettingsService,
-    logSendService: LogSendService,
-  ) {
+  constructor(settingsService: SettingsService, logSendService: LogSendService) {
     this.settingsService = settingsService;
     this.logSendService = logSendService;
 
-    this.healthCheckGenerationService =
-      this.healthCheckGenerationService.bind(this);
+    this.healthCheckGenerationService = this.healthCheckGenerationService.bind(this);
     this.sendDebugLogs = this.sendDebugLogs.bind(this);
     this.sendBugReport = this.sendBugReport.bind(this);
   }
@@ -49,9 +44,7 @@ export class DebugController {
 
   async sendDebugLogs(req: Request, res: Response) {
     const sendLogsRequest: SendLogsRequest = req.body;
-    res.json(
-      await this.logSendService.sendLogsToDiscord(webhookUrl, sendLogsRequest),
-    );
+    res.json(await this.logSendService.sendLogsToDiscord(webhookUrl, sendLogsRequest));
   }
 
   async sendBugReport(req: Request, res: Response) {

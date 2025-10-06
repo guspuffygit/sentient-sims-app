@@ -1,10 +1,7 @@
 import electron from 'electron';
 import log from 'electron-log';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
-import {
-  InteractionMappingEvent,
-  WWInteractionEvent,
-} from '../models/InteractionEvents';
+import { InteractionMappingEvent, WWInteractionEvent } from '../models/InteractionEvents';
 import { InteractionEventResult } from '../models/InteractionEventResult';
 import { DatabaseSession } from '../models/DatabaseSession';
 import { DeleteMemoryRequest } from '../models/GetMemoryRequest';
@@ -42,6 +39,11 @@ export function notifyMemoryDeleted(deleteMemoryRequest: DeleteMemoryRequest) {
   });
 }
 
+export function notifyPatreonLinking(isLinking: boolean) {
+  log.debug(`Sending isLinking to renderer: ${isLinking}`);
+  notifyAllWindows('on-linking-patreon', isLinking);
+}
+
 export function notifyMemoryEdited(memory: MemoryEntity) {
   log.debug('Sending memory edited to renderer');
   notifyAllWindows('on-memory-edited', memory);
@@ -54,6 +56,21 @@ export function notifyMemoryEdited(memory: MemoryEntity) {
 export function notifyLocationChanged() {
   log.debug('Notifying renderer location changed');
   notifyAllWindows('on-location-changed');
+}
+
+export function notifyRefreshAuth() {
+  log.debug('Notifying renderer to refresh auth');
+  notifyAllWindows('refresh-auth');
+}
+
+export function notifyRefreshUserAttributes() {
+  log.debug('Notifying renderer to refresh user attributes');
+  notifyAllWindows('refresh-user-attributes');
+}
+
+export function notifyGoogleAuthComplete(code: string, state: string) {
+  log.debug('Notifying renderer google auth complete');
+  notifyAllWindows('google-auth-complete', code, state);
 }
 
 export function sendChatGeneration(response: InteractionEventResult) {
@@ -77,10 +94,7 @@ export function sendPopUpCaughtErrorNotification(caughtError: CaughtError) {
 }
 
 export function notifyMapAnimation(event: WWInteractionEvent) {
-  log.debug(
-    'Notifying renderer to begin mapping animation',
-    JSON.stringify(event, null, 2),
-  );
+  log.debug('Notifying renderer to begin mapping animation', JSON.stringify(event, null, 2));
   notifyAllWindows('on-map-animation', event);
 }
 
@@ -100,9 +114,6 @@ export function notifyDatabaseLoaded(databaseSession: DatabaseSession) {
 }
 
 export function notifyMapInteraction(event: InteractionMappingEvent) {
-  log.debug(
-    'Notifying renderer to begin mapping interaction',
-    JSON.stringify(event, null, 2),
-  );
+  log.debug('Notifying renderer to begin mapping interaction', JSON.stringify(event, null, 2));
   notifyAllWindows('on-map-interaction', event);
 }

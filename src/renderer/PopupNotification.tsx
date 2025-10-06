@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Box, Modal, Typography } from '@mui/material';
 import { IpcRendererEvent } from 'electron';
 import { useState } from 'react';
@@ -9,14 +8,12 @@ export default function PopupNotificationModal() {
     message: '',
   });
 
-  window.electron.onPopupNotification(
-    (_event: IpcRendererEvent, notificationMessage: string) => {
-      setState({
-        open: true,
-        message: notificationMessage,
-      });
-    },
-  );
+  window.electron.onPopupNotification((_event: IpcRendererEvent, notificationMessage: string) => {
+    setState({
+      open: true,
+      message: notificationMessage,
+    });
+  });
 
   const onClose = () => {
     setState({

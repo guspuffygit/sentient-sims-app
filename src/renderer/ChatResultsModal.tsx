@@ -47,7 +47,7 @@ export default function ChatResultsModal() {
               );
             }
 
-            return <Typography>{value}</Typography>;
+            return <Typography key={`${index}`}>{value}</Typography>;
           })}
         </Box>
       </Modal>

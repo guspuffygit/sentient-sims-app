@@ -1,14 +1,15 @@
 import { AppBar, Box, Button, IconButton, Toolbar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAuthenticator } from '@aws-amplify/ui-react';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
 import HomeIcon from '@mui/icons-material/Home';
 import useAuthCredentials from './hooks/useAuthCredentials';
 import { useDebugMode } from './providers/DebugModeProvider';
+import { useAuth } from './providers/AuthProvider';
 import handleOpenExternalLink from './hooks/handleOpenExternalLink';
 import LogoutButton from './components/LogoutButton';
+import { LoginModal } from './components/LoginModal';
 // import { GlowingGreenOrb } from './components/GlowingGreenOrb';
 
 export type MenuBarProperties = {
@@ -17,36 +18,33 @@ export type MenuBarProperties = {
 };
 
 function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
-  const { user, signOut } = useAuthenticator((context) => [context.user]);
+  const { authStatus, signOut } = useAuth();
+  const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   const debugMode = useDebugMode();
   useAuthCredentials();
 
-  const handleOpenWiki = handleOpenExternalLink(
-    'https://github.com/guspuffygit/sentient-sims-app/wiki',
-  );
+  const logOut = () => {
+    signOut();
+  };
+
+  useEffect(() => {
+    if (authStatus === 'authenticated' && loginModalOpen) {
+      setLoginModalOpen(false);
+    }
+  }, [authStatus, loginModalOpen]);
+
+  const handleOpenWiki = handleOpenExternalLink('https://github.com/guspuffygit/sentient-sims-app/wiki');
 
   return (
     <Box sx={{ flexGrow: 1, marginBottom: 2 }}>
-      <AppBar
-        position="static"
-        color="transparent"
-        sx={{ backgroundColor: '#313339' }}
-      >
+      <AppBar position="static" color="transparent" sx={{ backgroundColor: '#313339' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Box display="flex" alignItems="center">
-            <IconButton
-              color="secondary"
-              onClick={() => navigate('/')}
-              id="homebutton"
-            >
+            <IconButton color="secondary" onClick={() => navigate('/')} id="homebutton">
               <HomeIcon />
             </IconButton>
-            <Button
-              color="secondary"
-              onClick={handleOpenWiki}
-              sx={{ marginLeft: '5px', marginRight: '10px' }}
-            >
+            <Button color="secondary" onClick={handleOpenWiki} sx={{ marginLeft: '5px', marginRight: '10px' }}>
               Wiki
             </Button>
             {/* <Box display="flex" alignItems="center">
@@ -89,81 +87,40 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
                 >
                   OfflineMemory
                 </Button>
-                <Button
-                  color="secondary"
-                  onClick={() => navigate('/chat')}
-                  sx={{ marginLeft: '5px' }}
-                  id="chat"
-                >
+                <Button color="secondary" onClick={() => navigate('/chat')} sx={{ marginLeft: '5px' }} id="chat">
                   Chat
                 </Button>
-                <Button
-                  color="secondary"
-                  onClick={() => navigate('/traits')}
-                  sx={{ marginLeft: '5px' }}
-                  id="traits"
-                >
+                <Button color="secondary" onClick={() => navigate('/traits')} sx={{ marginLeft: '5px' }} id="traits">
                   Traits
                 </Button>
               </>
             ) : null}
-            <Button
-              color="secondary"
-              onClick={() => navigate('/sims')}
-              sx={{ marginLeft: '5px' }}
-              id="sims"
-            >
+            <Button color="secondary" onClick={() => navigate('/sims')} sx={{ marginLeft: '5px' }} id="sims">
               Sims
             </Button>
-            <Button
-              color="secondary"
-              onClick={() => navigate('/locations')}
-              sx={{ marginLeft: '5px' }}
-              id="locations"
-            >
+            <Button color="secondary" onClick={() => navigate('/locations')} sx={{ marginLeft: '5px' }} id="locations">
               Locations
             </Button>
-            <Button
-              color="secondary"
-              onClick={() => navigate('/memories')}
-              sx={{ marginLeft: '5px' }}
-              id="memories"
-            >
+            <Button color="secondary" onClick={() => navigate('/memories')} sx={{ marginLeft: '5px' }} id="memories">
               Memories
             </Button>
-            <Button
-              color="secondary"
-              onClick={() => navigate('/settings')}
-              sx={{ marginLeft: '5px' }}
-              id="settings"
-            >
+            <Button color="secondary" onClick={() => navigate('/settings')} sx={{ marginLeft: '5px' }} id="settings">
               Settings
             </Button>
-            {user ? (
-              <LogoutButton signOut={signOut} />
+            {authStatus === 'authenticated' ? (
+              <LogoutButton signOut={() => logOut()} />
             ) : (
-              <Button
-                color="warning"
-                onClick={() => navigate('/login')}
-                sx={{ marginLeft: '5px' }}
-                id="login"
-              >
+              <Button color="warning" onClick={() => setLoginModalOpen(true)} sx={{ marginLeft: '5px' }} id="login">
                 Login
               </Button>
             )}
-            <IconButton
-              onClick={() => setHideSideBar(!hideSideBar)}
-              sx={{ marginLeft: '5px' }}
-            >
-              {hideSideBar ? (
-                <ViewSidebarOutlinedIcon />
-              ) : (
-                <ChevronRightOutlinedIcon />
-              )}
+            <IconButton onClick={() => setHideSideBar(!hideSideBar)} sx={{ marginLeft: '5px' }}>
+              {hideSideBar ? <ViewSidebarOutlinedIcon /> : <ChevronRightOutlinedIcon />}
             </IconButton>
           </div>
         </Toolbar>
       </AppBar>
+      <LoginModal open={loginModalOpen} setOpen={setLoginModalOpen} />
     </Box>
   );
 }

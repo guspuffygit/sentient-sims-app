@@ -34,6 +34,8 @@ export enum SettingsEnum {
   ELEVENLABS_KEY = 'elevenlabsKey',
   ELEVENLABS_ENDPOINT = 'elevenlabsEndpoint',
   ELEVENLABS_TTS_SETTINGS = 'elevenlabsTtsSettings',
+  SETUP_WIZARD_PAGE = 'setupWizardPage',
+  PATREON_LINKING = 'patreonLinking',
 }
 
 export enum DeprecatedSettingsEnum {

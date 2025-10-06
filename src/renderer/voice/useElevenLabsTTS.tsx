@@ -4,22 +4,13 @@ import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { defaultElevenLabsEndpoint } from 'main/sentient-sims/constants';
 import useSetting from 'renderer/hooks/useSetting';
-import {
-  defaultElevenLabsTTSSettings,
-  ElevenLabsTTSSettings,
-} from 'main/sentient-sims/models/ElevenLabsTTSSettings';
+import { defaultElevenLabsTTSSettings, ElevenLabsTTSSettings } from 'main/sentient-sims/models/ElevenLabsTTSSettings';
 import { TTSHook } from './TTSHook';
 
 export function useElevenLabsTTS(): TTSHook {
   const aiSettings = useAISettings();
-  const elevenLabsKeySetting = useSetting<string>(
-    SettingsEnum.ELEVENLABS_KEY,
-    '',
-  );
-  const elevenLabsEndpointSetting = useSetting<string>(
-    SettingsEnum.ELEVENLABS_ENDPOINT,
-    defaultElevenLabsEndpoint,
-  );
+  const elevenLabsKeySetting = useSetting<string>(SettingsEnum.ELEVENLABS_KEY, '');
+  const elevenLabsEndpointSetting = useSetting<string>(SettingsEnum.ELEVENLABS_ENDPOINT, defaultElevenLabsEndpoint);
   const elevenLabsTTSSettings = useSetting<ElevenLabsTTSSettings>(
     SettingsEnum.ELEVENLABS_TTS_SETTINGS,
     defaultElevenLabsTTSSettings,
@@ -62,6 +53,7 @@ export function useElevenLabsTTS(): TTSHook {
             const bodyResponse = await response.text();
             log.error(bodyResponse);
             setError(bodyResponse);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (err: any) {
             setError(errorMessage);
           }
@@ -84,6 +76,7 @@ export function useElevenLabsTTS(): TTSHook {
           };
           audio.play();
         });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err: any) {
         const errorMessage = `TTS request failed: ${error}`;
         log.error(errorMessage);

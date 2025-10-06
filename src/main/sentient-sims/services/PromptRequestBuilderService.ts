@@ -1,19 +1,10 @@
 import log from 'electron-log';
-import {
-  formatAction,
-  formatSentientSim,
-  formatDateTime,
-  formatSeason,
-} from '../formatter/PromptFormatter';
+import { formatAction, formatSentientSim, formatDateTime, formatSeason } from '../formatter/PromptFormatter';
 import { SSEvent, SSRelationships } from '../models/InteractionEvents';
 import { RepositoryService } from './RepositoryService';
 import { getSystemPrompt } from '../systemPrompts';
 import { ApiType } from '../models/ApiType';
-import {
-  FormattedMemoryMessage,
-  PreFormattedMemoryMessage,
-  PromptRequest,
-} from '../models/OpenAIRequestBuilder';
+import { FormattedMemoryMessage, PreFormattedMemoryMessage, PromptRequest } from '../models/OpenAIRequestBuilder';
 import { SentientSim } from '../models/SentientSim';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { ChatCompletionMessageRole } from '../models/ChatCompletionMessageRole';
@@ -53,18 +44,17 @@ export class PromptRequestBuilderService {
     location: LocationEntity,
     relationships?: SSRelationships,
   ): Promise<string[]> {
-    const participants =
-      await this.repositoryService.participant.getParticipants(
-        sentientSims.map((sentientSim) => {
-          try {
-            return { id: sentientSim.sim_id, fullName: sentientSim.name };
-          } catch (err: any) {
-            log.error('Help!!', err);
-            log.error(JSON.stringify(sentientSim, null, 2));
-            throw err;
-          }
-        }),
-      );
+    const participants = await this.repositoryService.participant.getParticipants(
+      sentientSims.map((sentientSim) => {
+        try {
+          return { id: sentientSim.sim_id, fullName: sentientSim.name };
+        } catch (err: any) {
+          log.error('Help!!', err);
+          log.error(JSON.stringify(sentientSim, null, 2));
+          throw err;
+        }
+      }),
+    );
 
     const formattedParticipants: string[] = [];
     const sims = new Map<string, SentientSim>();
@@ -88,17 +78,12 @@ export class PromptRequestBuilderService {
     if (relationships && relationships.relationship_bits) {
       relationships.relationship_bits.forEach((bit) => {
         if (defaultRelationshipBitDescriptions.has(bit.name)) {
-          const bitDescription = defaultRelationshipBitDescriptions.get(
-            bit.name,
-          );
+          const bitDescription = defaultRelationshipBitDescriptions.get(bit.name);
           if (!bitDescription?.ignored && bitDescription?.description) {
             relationshipDescriptions.push(
               formatAction(
                 bitDescription.description,
-                [
-                  sims.get(bit.sim_one_id) as SentientSim,
-                  sims.get(bit.sim_two_id) as SentientSim,
-                ],
+                [sims.get(bit.sim_one_id) as SentientSim, sims.get(bit.sim_two_id) as SentientSim],
                 location,
               ),
             );
@@ -108,35 +93,26 @@ export class PromptRequestBuilderService {
     }
 
     if (relationshipDescriptions.length > 0) {
-      formattedParticipants.push(
-        `<RELATIONSHIPS>\n${relationshipDescriptions.join(' ')}\n</RELATIONSHIPS>`,
-      );
+      formattedParticipants.push(`<RELATIONSHIPS>\n${relationshipDescriptions.join(' ')}\n</RELATIONSHIPS>`);
     }
 
     return formattedParticipants;
   }
 
   getMemories(sentientSims: SentientSim[]) {
-    const participantIds = sentientSims.map(
-      (sentientSim) => sentientSim.sim_id,
-    );
+    const participantIds = sentientSims.map((sentientSim) => sentientSim.sim_id);
 
     return this.repositoryService.memory.getParticipantsMemories({
       participant_ids: participantIds,
     });
   }
 
-  // eslint-disable-next-line class-methods-use-this
   groupMemories(memories: MemoryEntity[]): FormattedMemoryMessage[] {
     const messages: PreFormattedMemoryMessage[] = [];
 
     const locations: Record<number, LocationEntity> = {};
 
-    const addMessage = (
-      role: ChatCompletionMessageRole,
-      text: string,
-      locationId: number,
-    ) => {
+    const addMessage = (role: ChatCompletionMessageRole, text: string, locationId: number) => {
       if (!locations[locationId]) {
         locations[locationId] = this.repositoryService.location.getLocation({
           id: locationId,
@@ -195,16 +171,11 @@ export class PromptRequestBuilderService {
     });
 
     const formattedMessages: FormattedMemoryMessage[] = [];
-    messages.forEach((message) =>
-      formattedMessages.push({ content: message.content, role: message.role }),
-    );
+    messages.forEach((message) => formattedMessages.push({ content: message.content, role: message.role }));
     return formattedMessages;
   }
 
-  async buildPromptRequest(
-    event: SSEvent,
-    options: PromptRequestBuilderOptions,
-  ): Promise<PromptRequest> {
+  async buildPromptRequest(event: SSEvent, options: PromptRequestBuilderOptions): Promise<PromptRequest> {
     const location = this.repositoryService.location.getLocation({
       id: event.environment.location_id,
     });
@@ -250,13 +221,7 @@ export class PromptRequestBuilderService {
     const formattedStopTokens: string[] = [];
     options?.stopTokens?.forEach((stopToken) => {
       formattedStopTokens.push(
-        formatAction(
-          stopToken,
-          event.sentient_sims,
-          location,
-          options.sexCategoryType,
-          options.sexLocationType,
-        ),
+        formatAction(stopToken, event.sentient_sims, location, options.sexCategoryType, options.sexLocationType),
       );
     });
 
@@ -282,11 +247,7 @@ export class PromptRequestBuilderService {
       options.sexLocationType,
     );
 
-    const simsPromise = this.formatSims(
-      event.sentient_sims,
-      location,
-      event.relationships,
-    );
+    const simsPromise = this.formatSims(event.sentient_sims, location, event.relationships);
     const memories = this.getMemories(event.sentient_sims);
     const groupedMemories = this.groupMemories(memories);
     const sims = await simsPromise;

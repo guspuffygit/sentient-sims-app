@@ -9,15 +9,10 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import electron, {
-  app,
-  BrowserWindow,
-  shell,
-  session,
-  WebRequestFilter,
-  dialog,
-} from 'electron';
-import { autoUpdater } from 'electron-updater';
+import sourceMapSupport from 'source-map-support';
+import { app, BrowserWindow, shell, session, WebRequestFilter, dialog } from 'electron';
+import EAU from 'electron-updater';
+const { autoUpdater } = EAU;
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
@@ -28,38 +23,26 @@ import { SettingsService } from './sentient-sims/services/SettingsService';
 import { DirectoryService } from './sentient-sims/services/DirectoryService';
 import { appApiPort } from './sentient-sims/constants';
 import { SettingsEnum } from './sentient-sims/models/SettingsEnum';
-import {
-  disableDebugLogging,
-  enableDebugLogging,
-} from './sentient-sims/util/debugLog';
+import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
+import { disableDebugLogging, enableDebugLogging } from './sentient-sims/util/debugLog';
+import debug from 'electron-debug';
 
 log.initialize({ preload: true });
 
 let mainWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
-  const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();
 }
 
-const isDebug =
-  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+const isDebug = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 if (isDebug) {
-  require('electron-debug')();
+  debug();
 }
 
 const installExtensions = async () => {
-  const installer = require('electron-devtools-installer');
-  const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-  const extensions = ['REACT_DEVELOPER_TOOLS'];
-
-  return installer
-    .default(
-      extensions.map((name) => installer[name]),
-      forceDownload,
-    )
-    .catch(console.log);
+  return installExtension([REACT_DEVELOPER_TOOLS]).catch(console.log);
 };
 
 const createWindow = async () => {
@@ -69,7 +52,7 @@ const createWindow = async () => {
 
   const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../assets');
+    : path.join(process.cwd(), 'assets');
 
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
@@ -86,8 +69,8 @@ const createWindow = async () => {
       webSecurity: false, // Disable web security
       allowRunningInsecureContent: true,
       preload: app.isPackaged
-        ? path.join(__dirname, 'preload.js')
-        : path.join(__dirname, '../../.erb/dll/preload.js'),
+        ? path.join(process.cwd(), 'preload.js')
+        : path.join(process.cwd(), '.erb/dll/preload.js'),
     },
   });
 
@@ -101,6 +84,13 @@ const createWindow = async () => {
       mainWindow.minimize();
     } else {
       mainWindow.show();
+    }
+  });
+
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (url.startsWith('https://sentientsimulations.auth.us-east-1.amazoncognito.com/oauth2/authorize')) {
+      event.preventDefault();
+      shell.openExternal(url);
     }
   });
 
@@ -119,9 +109,8 @@ const createWindow = async () => {
     return { action: 'deny' };
   });
 
-  ipcHandlers();
-
   const settingsService = new SettingsService();
+  ipcHandlers(settingsService);
   const directoryService = new DirectoryService(settingsService);
 
   if (settingsService.get(SettingsEnum.DEBUG_LOGS)) {
@@ -184,32 +173,16 @@ app
       urls: [`http://localhost:${appApiPort}/login/*`],
     };
 
-    session.defaultSession.webRequest.onBeforeRequest(
-      filter,
-      // eslint-disable-next-line func-names
-      function (details) {
-        const { url } = details;
-        log.debug(`url hit: ${url}`);
-        if (url.includes('/login/callback')) {
-          log.debug(`/login/callback initiated for url: ${url}`);
-          mainWindow?.webContents.loadURL(resolveHtmlPath('index.html'));
-          setTimeout(() => {
-            electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-              if (wnd.webContents?.isDestroyed() === false) {
-                log.debug('Sending onAuth');
-                wnd.webContents.send('on-auth', url);
-              }
-            });
-          }, 3000);
-        }
-        if (url.includes('/login/signout')) {
-          log.debug('/login/signout initiated');
-          session.defaultSession.clearAuthCache();
-          session.defaultSession.clearCache();
-          session.defaultSession.clearStorageData();
-          mainWindow?.loadURL(resolveHtmlPath('index.html'));
-        }
-      },
-    );
+    session.defaultSession.webRequest.onBeforeRequest(filter, (details) => {
+      const { url } = details;
+      log.debug(`url hit: ${url}`);
+      if (url.includes('/login/signout')) {
+        log.debug('/login/signout initiated');
+        session.defaultSession.clearAuthCache();
+        session.defaultSession.clearCache();
+        session.defaultSession.clearStorageData();
+        mainWindow?.loadURL(resolveHtmlPath('index.html'));
+      }
+    });
   })
-  .catch(console.log);
+  .catch(log.error);

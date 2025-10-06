@@ -1,9 +1,5 @@
 import log from 'electron-log';
-import {
-  GoogleGenerativeAI,
-  HarmBlockThreshold,
-  HarmCategory,
-} from '@google/generative-ai';
+import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
@@ -31,9 +27,7 @@ export class GeminiService implements GenerationService {
   }
 
   getGeminiKeys(): string[] {
-    const keysString = this.settingsService.get(
-      SettingsEnum.GEMINI_KEYS,
-    ) as string;
+    const keysString = this.settingsService.get(SettingsEnum.GEMINI_KEYS) as string;
     if (!keysString || keysString.trim() === '') {
       throw new GeminiKeysNotSetError(
         'No Gemini API keys set. Please configure them in settings (e.g., key1,key2,key3).',
@@ -70,16 +64,12 @@ export class GeminiService implements GenerationService {
     },
   ];
 
-  async sentientSimsGenerate(
-    request: OpenAICompatibleRequest,
-    retries: number = 3,
-  ): Promise<SimsGenerateResponse> {
+  async sentientSimsGenerate(request: OpenAICompatibleRequest, retries: number = 3): Promise<SimsGenerateResponse> {
     const genAI = this.getGenAIClient();
     const model = genAI.getGenerativeModel({
       model: this.getGeminiModel(),
       safetySettings: this.safetySettings,
-      systemInstruction: request.messages.find((msg) => msg.role === 'system')
-        ?.content,
+      systemInstruction: request.messages.find((msg) => msg.role === 'system')?.content,
     });
 
     const contents = request.messages
@@ -104,25 +94,19 @@ export class GeminiService implements GenerationService {
     let text: string | undefined;
     for (let attempt = 0; attempt < retries; attempt += 1) {
       try {
-        // eslint-disable-next-line no-await-in-loop
         const result = await model.generateContent(fullRequest);
         text = result.response.text();
         log.debug(`Gemini Response: ${text}`);
         break;
       } catch (error: any) {
         const message = error.message || 'Unknown error';
-        log.error(
-          `Gemini Error on attempt ${attempt}/${retries}: ${message}`,
-          error,
-        );
+        log.error(`Gemini Error on attempt ${attempt}/${retries}: ${message}`, error);
         if (attempt === retries) throw error;
       }
     }
 
     if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED) && text) {
-      const language = this.settingsService.get(
-        SettingsEnum.LOCALIZATION_LANGUAGE,
-      );
+      const language = this.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE);
       if (language) {
         const translationGenAI = this.getGenAIClient();
         const translationModel = translationGenAI.getGenerativeModel({
@@ -148,28 +132,17 @@ export class GeminiService implements GenerationService {
           },
           safetySettings: this.safetySettings,
         };
-        log.debug(
-          `Gemini Translation Request: ${JSON.stringify(
-            translationRequest,
-            null,
-            2,
-          )}`,
-        );
+        log.debug(`Gemini Translation Request: ${JSON.stringify(translationRequest, null, 2)}`);
 
         for (let attempt = 0; attempt < retries; attempt += 1) {
           try {
-            const translationResult =
-              // eslint-disable-next-line no-await-in-loop
-              await translationModel.generateContent(translationRequest);
+            const translationResult = await translationModel.generateContent(translationRequest);
             text = translationResult.response.text();
             log.debug(`Gemini Translated Response: ${text}`);
             break;
           } catch (error: any) {
             const message = error.message || 'Unknown error';
-            log.error(
-              `Gemini Translation Error on attempt ${attempt}/${retries}: ${message}`,
-              error,
-            );
+            log.error(`Gemini Translation Error on attempt ${attempt}/${retries}: ${message}`, error);
             if (attempt === retries) throw error;
           }
         }

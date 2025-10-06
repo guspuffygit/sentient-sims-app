@@ -1,14 +1,4 @@
-import {
-  Box,
-  FormControlLabel,
-  Checkbox,
-  MenuItem,
-  Select,
-  Grid,
-  Slider,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, FormControlLabel, Checkbox, MenuItem, Select, Grid, Slider, Stack, Typography } from '@mui/material';
 import HelpButton from 'renderer/components/HelpButton';
 import { ApiType, ApiTypeFromValue } from 'main/sentient-sims/models/ApiType';
 import { JSX } from 'react';
@@ -41,9 +31,7 @@ export default function VoiceSettingsComponent() {
           control={
             <Checkbox
               checked={aiSettings.ttsEnabled}
-              onChange={(change) =>
-                aiSettings.ttsEnabledSetting.setSetting(change.target.checked)
-              }
+              onChange={(change) => aiSettings.ttsEnabledSetting.setSetting(change.target.checked)}
             />
           }
         />
@@ -53,11 +41,7 @@ export default function VoiceSettingsComponent() {
         <Grid container spacing={3} alignItems="center">
           <Grid item xs={12} sm={8}>
             <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
-              <Stack
-                spacing={2}
-                direction="row"
-                sx={{ alignItems: 'center', mb: 1 }}
-              >
+              <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
                 <Typography>AI:</Typography>
                 <Select
                   size="small"
@@ -65,15 +49,9 @@ export default function VoiceSettingsComponent() {
                   id="release-type-select"
                   value={aiSettings.ttsApiType}
                   sx={{ minWidth: 100, marginRight: 2 }}
-                  onChange={(change) =>
-                    aiSettings.ttsApiTypeSetting.setSetting(
-                      ApiTypeFromValue(change.target.value),
-                    )
-                  }
+                  onChange={(change) => aiSettings.ttsApiTypeSetting.setSetting(ApiTypeFromValue(change.target.value))}
                 >
-                  <MenuItem value={ApiType.SentientSimsAI}>
-                    Sentient Sims AI TTS
-                  </MenuItem>
+                  <MenuItem value={ApiType.SentientSimsAI}>Sentient Sims AI TTS</MenuItem>
                 </Select>
               </Stack>
             </Box>
@@ -81,19 +59,13 @@ export default function VoiceSettingsComponent() {
 
           <Grid item xs={12} sm={4} container spacing={2}>
             <Box sx={{ width: 300 }}>
-              <Stack
-                spacing={2}
-                direction="row"
-                sx={{ alignItems: 'center', mb: 1 }}
-              >
+              <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
                 <Typography>Volume:</Typography>
                 <VolumeDown />
                 <Slider
                   aria-label="Volume"
                   value={aiSettings.ttsVolume}
-                  onChange={(change, value) =>
-                    aiSettings.ttsVolumeSetting.setSetting(value as number)
-                  }
+                  onChange={(change, value) => aiSettings.ttsVolumeSetting.setSetting(value as number)}
                   step={0.01}
                   min={0.0}
                   max={1}

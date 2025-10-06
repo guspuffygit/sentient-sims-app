@@ -1,4 +1,3 @@
-/* eslint-disable class-methods-use-this */
 import { llamaTokenizer } from './llama/LLamaTokenizer';
 import { TokenCounter } from './TokenCounter';
 

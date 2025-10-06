@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import '@testing-library/jest-dom';
 import { DbService } from 'main/sentient-sims/services/DbService';
 import * as fs from 'fs';
@@ -7,12 +6,7 @@ import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
 import { mockDirectoryService } from './util';
 
 function locationsAreEqual(a: LocationEntity, b: LocationEntity): boolean {
-  return (
-    a.id === b.id &&
-    a.description === b.description &&
-    a.name === b.name &&
-    a.lot_type === b.lot_type
-  );
+  return a.id === b.id && a.description === b.description && a.name === b.name && a.lot_type === b.lot_type;
 }
 
 describe('LocationRepository', () => {
@@ -65,22 +59,14 @@ describe('LocationRepository', () => {
     expect(locationsAreEqual(result, expectedResult)).toBeTruthy();
 
     const allLocations = locationRepository.getAllLocations();
-    expect(
-      allLocations.some((item) => item.id === expectedResult.id),
-    ).toBeTruthy();
+    expect(allLocations.some((item) => item.id === expectedResult.id)).toBeTruthy();
 
     const modifiedLocations = locationRepository.getModifiedLocations();
-    expect(
-      modifiedLocations.some((item) => item.id === expectedResult.id),
-    ).toBeTruthy();
+    expect(modifiedLocations.some((item) => item.id === expectedResult.id)).toBeTruthy();
 
     const defaultLocations = locationRepository.getDefaultLocations();
     expect(
-      defaultLocations.some(
-        (item) =>
-          item.id === expectedResult.id &&
-          item.description === expectedResult.description,
-      ),
+      defaultLocations.some((item) => item.id === expectedResult.id && item.description === expectedResult.description),
     ).toBeFalsy();
 
     locationRepository.deleteLocation({ id: locationId });

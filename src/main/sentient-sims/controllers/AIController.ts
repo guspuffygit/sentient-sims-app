@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { Request, Response } from 'express';
 import log from 'electron-log';
 import { InteractionEvents } from '../models/InteractionEvents';
@@ -6,11 +5,7 @@ import { playTTS, sendChatGeneration } from '../util/notifyRenderer';
 import { AIService } from '../services/AIService';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { InteractionEventStatus } from '../models/InteractionEventResult';
-import {
-  BuffEventRequest,
-  BuffDescriptionRequest,
-  ClassificationRequest,
-} from '../models/OpenAIRequestBuilder';
+import { BuffEventRequest, BuffDescriptionRequest, ClassificationRequest } from '../models/OpenAIRequestBuilder';
 import { CatchErrors } from './decorators/CatchError';
 import { DbService } from '../services/DbService';
 
@@ -92,7 +87,6 @@ export class AIController {
     res.json(result);
   }
 
-  // eslint-disable-next-line class-methods-use-this
   @CatchErrors()
   async tts(req: Request, res: Response) {
     const { text } = req.query;

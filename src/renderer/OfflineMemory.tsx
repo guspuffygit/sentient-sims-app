@@ -30,9 +30,7 @@ type SaveGameParticipants = {
 };
 
 export default function OfflineMemory() {
-  const [saveGames, setSaveGames] = useState<
-    Record<string, SaveGameParticipants>
-  >({});
+  const [saveGames, setSaveGames] = useState<Record<string, SaveGameParticipants>>({});
   const [selectedSaveGame, setSelectedSaveGame] = useState('');
   const [simsViewOpen, setSimsViewOpen] = useState(false);
 
@@ -59,14 +57,12 @@ export default function OfflineMemory() {
     const result: ParticipantDTO[] = await response.json();
     const newSaveGameRecords = { ...saveGames };
     if (result.length > 0) {
-      newSaveGameRecords[`${saveGame.name}${saveGame.type}`].participants =
-        result;
+      newSaveGameRecords[`${saveGame.name}${saveGame.type}`].participants = result;
       setSaveGames(newSaveGameRecords);
       setSelectedSaveGame(`${saveGame.name}${saveGame.type}`);
       setSimsViewOpen(true);
     } else {
-      newSaveGameRecords[`${saveGame.name}${saveGame.type}`].participants =
-        undefined;
+      newSaveGameRecords[`${saveGame.name}${saveGame.type}`].participants = undefined;
       setSaveGames(newSaveGameRecords);
     }
     log.info(`Got sims: ${result.length}`);
@@ -76,10 +72,7 @@ export default function OfflineMemory() {
   if (selectedSaveGame in saveGames) {
     saveGames[selectedSaveGame].participants?.forEach((sim) => {
       tableRows.push(
-        <TableRow
-          key={sim.id}
-          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-        >
+        <TableRow key={sim.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
           <TableCell component="th" scope="row">
             {sim.name}
           </TableCell>
@@ -117,16 +110,10 @@ export default function OfflineMemory() {
                   <TableCell component="th" scope="row">
                     {saveGameParticipants.saveGame.name}
                   </TableCell>
-                  <TableCell align="left">
-                    {saveGameParticipants.saveGame.type}
-                  </TableCell>
+                  <TableCell align="left">{saveGameParticipants.saveGame.type}</TableCell>
                   <TableCell align="left">
                     {saveGameParticipants.participants !== undefined ? (
-                      <Button
-                        onClick={() => viewSims(saveGameParticipants.saveGame)}
-                      >
-                        View Sims
-                      </Button>
+                      <Button onClick={() => viewSims(saveGameParticipants.saveGame)}>View Sims</Button>
                     ) : (
                       <Typography>-</Typography>
                     )}

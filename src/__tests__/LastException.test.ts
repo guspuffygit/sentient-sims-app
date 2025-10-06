@@ -38,14 +38,9 @@ describe('Formatter', () => {
     const directoryService = mockDirectoryService();
     const lastExceptionService = new LastExceptionService(directoryService);
     const expectedFileName = 'lastException-1901283.txt';
-    const lastExceptionFile = path.join(
-      directoryService.getSims4Folder(),
-      expectedFileName,
-    );
+    const lastExceptionFile = path.join(directoryService.getSims4Folder(), expectedFileName);
 
-    directoryService.createDirectoryIfNotExist(
-      directoryService.getSims4Folder(),
-    );
+    directoryService.createDirectoryIfNotExist(directoryService.getSims4Folder());
 
     fs.copyFileSync('./src/__tests__/lastException.txt', lastExceptionFile);
 

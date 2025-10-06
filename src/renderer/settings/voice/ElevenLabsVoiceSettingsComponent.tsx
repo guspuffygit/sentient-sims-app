@@ -1,13 +1,4 @@
-import {
-  Box,
-  FormHelperText,
-  Grid,
-  MenuItem,
-  Select,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, FormHelperText, Grid, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
 import {
   defaultElevenLabsTTSSettings,
   ElevenLabsSpeechModel,
@@ -28,14 +19,13 @@ export function ElevenLabsVoiceSettingsComponent() {
     defaultElevenLabsTTSSettings,
   );
 
-  const elevenlabsKeySetting = useSetting<string>(
-    SettingsEnum.ELEVENLABS_KEY,
-    '',
-  );
+  const elevenlabsKeySetting = useSetting<string>(SettingsEnum.ELEVENLABS_KEY, '');
 
   const modelMenuItems = useMemo(() => {
     return Object.values(ElevenLabsSpeechModel).map((model) => (
-      <MenuItem value={model}>{model}</MenuItem>
+      <MenuItem key={model} value={model}>
+        {model}
+      </MenuItem>
     ));
   }, []);
 
@@ -61,11 +51,7 @@ export function ElevenLabsVoiceSettingsComponent() {
     <Grid item xs={12} sm={8}>
       <Box>
         <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            sx={{ alignItems: 'center', mb: 1, width: '100%' }}
-          >
+          <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
             <Typography>Speech Model:</Typography>
             <Select
               size="small"
@@ -85,11 +71,7 @@ export function ElevenLabsVoiceSettingsComponent() {
           </Box>
         ) : null}
         <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            sx={{ alignItems: 'center', mb: 1, width: '100%' }}
-          >
+          <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
             <TextField
               label="Voice"
               variant="outlined"

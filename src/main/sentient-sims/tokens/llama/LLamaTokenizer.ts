@@ -1,12 +1,3 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable class-methods-use-this */
-/* eslint-disable import/prefer-default-export */
-/* eslint-disable no-unused-expressions */
-/* eslint-disable no-continue */
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-bitwise */
-/* eslint-disable no-plusplus */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import log from 'electron-log';
 import { mergesBinary, vocabBase64 } from './vocab';
 
@@ -87,8 +78,7 @@ class PriorityQueue {
       (this.right(node) < this.size() && this.greater(this.right(node), node))
     ) {
       const maxChild =
-        this.right(node) < this.size() &&
-        this.greater(this.right(node), this.left(node))
+        this.right(node) < this.size() && this.greater(this.right(node), this.left(node))
           ? this.right(node)
           : this.left(node);
       this.swap(node, maxChild);
@@ -152,9 +142,7 @@ function decompressMerges(binaryMerges: string) {
 }
 
 function decodeVocabulary(base64Vocab: string) {
-  const byteArray = Uint8Array.from(base64decode(base64Vocab), (c) =>
-    c.charCodeAt(0),
-  );
+  const byteArray = Uint8Array.from(base64decode(base64Vocab), (c) => c.charCodeAt(0));
   const textDecoder = new TextDecoder('utf-8');
   return textDecoder.decode(byteArray).split('\n');
 }
@@ -169,11 +157,7 @@ function hexToUtf8Byte(hex: string) {
   return parseInt(strippedHex, 16);
 }
 
-function mapCharactersToTokenIds(
-  prompt: string,
-  addBosToken: boolean,
-  addPrecedingSpace: boolean,
-) {
+function mapCharactersToTokenIds(prompt: string, addBosToken: boolean, addPrecedingSpace: boolean) {
   const tokenIds = [];
   // Special "beginning of string" token.
   if (addBosToken) {
@@ -201,9 +185,7 @@ function mapCharactersToTokenIds(
           // This is not supposed to happen because the LLaMA vocabulary has a token corresponding to each byte,
           // but if this happens regardless, let's follow the protocol and tokenize to <UNK> token instead of crashing.
           log.error(
-            `Encountered unknown character ${character} (partial UTF-8 byte ${byte} + hex + ${utf8ByteToHex(
-              byte,
-            )})`,
+            `Encountered unknown character ${character} (partial UTF-8 byte ${byte} + hex + ${utf8ByteToHex(byte)})`,
           );
           tokenIds[tokenIds.length - 1] = 0;
         }
@@ -225,18 +207,13 @@ function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
     return [];
   }
   // Initially each character is transformed to a tokenId, later there will be merges of these.
-  const tokenIds = mapCharactersToTokenIds(
-    prompt,
-    addBosToken,
-    addPrecedingSpace,
-  );
+  const tokenIds = mapCharactersToTokenIds(prompt, addBosToken, addPrecedingSpace);
 
   // Set up priority queue to efficiently iterate merge possibilities in priority order
   const mergeQueue = new PriorityQueue((a: any, b: any) => {
     return a.mergePrio < b.mergePrio;
   });
 
-  // eslint-disable-next-line func-names
   const addToMergeQueue = function (leftNode: {
     origPos: any;
     tokenId: any;
@@ -245,15 +222,11 @@ function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
     mergePrio?: any;
     mergeToString?: any;
   }) {
-    const mergeIdentifierString = getMergeIdentifierString(
-      leftNode.tokenId,
-      leftNode.next.tokenId,
-    );
+    const mergeIdentifierString = getMergeIdentifierString(leftNode.tokenId, leftNode.next.tokenId);
     // Merge priority is primarily determined by the location of the merge in the "merges" data,
     // secondarily determined by the relative position of the node in the linked list
     // (We want to perform equal merges from left to right)
-    const mergePrio =
-      merges.get(mergeIdentifierString) * 100000 + leftNode.origPos;
+    const mergePrio = merges.get(mergeIdentifierString) * 100000 + leftNode.origPos;
     if (mergePrio) {
       // If mergePrio not found in merges, that means this merge is not possible according to vocabulary.
       leftNode.mergePrio = mergePrio;
@@ -324,6 +297,7 @@ function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
     // Consider adding to merge queue: prev--resultOfMerge
     if (resultOfMerge.prev) {
       resultOfMerge.prev.next = resultOfMerge;
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       resultOfMerge.prev;
       addToMergeQueue(resultOfMerge.prev);
     } else {
@@ -339,22 +313,14 @@ function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
 
   // Get final tokenIds by traversing the linked list
   const mergedTokenIds = [];
-  for (
-    let currTokenNode = firstTokenNode;
-    currTokenNode !== null;
-    currTokenNode = currTokenNode.next
-  ) {
+  for (let currTokenNode = firstTokenNode; currTokenNode !== null; currTokenNode = currTokenNode.next) {
     mergedTokenIds.push(currTokenNode.tokenId);
   }
 
   return mergedTokenIds;
 }
 
-function decode(
-  tokenIds: readonly number[],
-  addBosToken = true,
-  addPrecedingSpace = true,
-) {
+function decode(tokenIds: readonly number[], addBosToken = true, addPrecedingSpace = true) {
   const utf8byteVals: number[] = [];
   const startIndex = addBosToken ? 1 : 0;
   for (let i = startIndex; i < tokenIds.length; i++) {

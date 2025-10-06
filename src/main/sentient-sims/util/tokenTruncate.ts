@@ -1,4 +1,3 @@
-/* eslint-disable no-plusplus */
 import log from 'electron-log';
 import { OpenAIMessage } from '../models/OpenAIMessage';
 
@@ -36,18 +35,12 @@ export function truncateMessages(
         break;
       }
 
-      if (
-        arraysAreEqual(
-          messagesTokens.slice(i, i + breakStringTokensLength),
-          breakStringTokens,
-        )
-      ) {
+      if (arraysAreEqual(messagesTokens.slice(i, i + breakStringTokensLength), breakStringTokens)) {
         if (systemPromptUsed && systemPromptLength === 0) {
           systemPromptLength = i;
         } else {
           chunksToChopOff++;
-          const eliminatedTokens =
-            i - systemPromptLength + breakStringTokensLength - 1;
+          const eliminatedTokens = i - systemPromptLength + breakStringTokensLength - 1;
           if (messagesTokensLength - eliminatedTokens < truncateLength) {
             log.debug(
               `Eliminated tokens from prompt: ${messagesTokensLength} - ${eliminatedTokens} = ${

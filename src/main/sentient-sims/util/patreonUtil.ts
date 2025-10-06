@@ -1,11 +1,12 @@
-import { AmplifyUser } from '@aws-amplify/ui';
+import { AuthUserAttributes } from 'renderer/providers/AuthProvider';
 import { PatreonUser } from '../wrappers/PatreonUser';
 
-export function GetPatreonDebugText(user: AmplifyUser): string[] {
-  const patreonUser = new PatreonUser(user);
+export function GetPatreonDebugText(userAttributes: AuthUserAttributes): string[] {
+  const patreonUser = new PatreonUser(userAttributes);
 
   return [
-    `User: ${user?.attributes?.email ?? 'Not found'}`,
+    `User: ${userAttributes?.email ?? 'Not found'}`,
+    `Sub: ${userAttributes?.sub}`,
     `Is Patreon Linked: ${patreonUser.isPatreonLinked() ? 'Yes' : 'No'}`,
     `Patreon ID: ${patreonUser.getPatreonId()}`,
     `custom:subscription_level: ${patreonUser.getSubscriptionLevel()}`,

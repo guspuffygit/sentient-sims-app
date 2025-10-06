@@ -1,4 +1,4 @@
-export const defaultSimDescriptions: Map<String, string> = new Map(
+export const defaultSimDescriptions: Map<string, string> = new Map(
   Object.entries({
     'Travis Scott': [
       'In the sun-drenched neighborhood of Oasis Springs, Travis Scott was known as a tech-savvy whiz kid with a magnetic personality.',

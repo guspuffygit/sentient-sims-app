@@ -1,5 +1,3 @@
-/* eslint-disable no-plusplus */
-/* eslint-disable class-methods-use-this */
 import { TokenCounter } from 'main/sentient-sims/tokens/TokenCounter';
 import { OpenAICompatibleRequest } from './OpenAICompatibleRequest';
 import { ChatCompletionMessageRole } from './ChatCompletionMessageRole';
@@ -98,10 +96,7 @@ export class OpenAIRequestBuilder {
       tokenCount += userMessage.tokens;
     }
 
-    if (
-      promptRequest.assistantPreResponse ||
-      promptRequest.preAssistantPreResponse
-    ) {
+    if (promptRequest.assistantPreResponse || promptRequest.preAssistantPreResponse) {
       const content = filterNullAndUndefined([
         promptRequest.preAssistantPreResponse,
         promptRequest.assistantPreResponse,
@@ -125,7 +120,6 @@ export class OpenAIRequestBuilder {
       }
 
       if (memory.content.length <= 1) {
-        // eslint-disable-next-line no-continue
         continue;
       }
 
@@ -135,11 +129,7 @@ export class OpenAIRequestBuilder {
         tokens: newTokens,
       };
 
-      if (
-        memoryMessage.role === 'user' &&
-        promptRequest.promptHistoryMode === PromptHistoryMode.NO_USER_HISTORY
-      ) {
-        // eslint-disable-next-line no-continue
+      if (memoryMessage.role === 'user' && promptRequest.promptHistoryMode === PromptHistoryMode.NO_USER_HISTORY) {
         continue;
       }
 
@@ -150,16 +140,13 @@ export class OpenAIRequestBuilder {
       messages: [systemMessage, ...memoriesToInsert],
       maxResponseTokens: promptRequest.maxResponseTokens,
       includesAssistantPreResponse:
-        [
-          promptRequest.assistantPreResponse,
-          promptRequest.preAssistantPreResponse,
-        ].some((s) => s !== null && s !== '') || promptRequest.continue,
+        [promptRequest.assistantPreResponse, promptRequest.preAssistantPreResponse].some(
+          (s) => s !== null && s !== '',
+        ) || promptRequest.continue,
     };
   }
 
-  buildOneShotOpenAIRequest(
-    oneShotRequest: OneShotRequest,
-  ): OpenAICompatibleRequest {
+  buildOneShotOpenAIRequest(oneShotRequest: OneShotRequest): OpenAICompatibleRequest {
     const systemMessage: OpenAIMessage = {
       role: 'system',
       content: oneShotRequest.systemPrompt,
@@ -175,9 +162,7 @@ export class OpenAIRequestBuilder {
       const assistantMessage: OpenAIMessage = {
         role: 'assistant',
         content: oneShotRequest.assistantPreResponse,
-        tokens: this.tokenCounter.countTokens(
-          oneShotRequest.assistantPreResponse,
-        ),
+        tokens: this.tokenCounter.countTokens(oneShotRequest.assistantPreResponse),
       };
       messages.push(assistantMessage);
       tokenCount += assistantMessage.tokens;

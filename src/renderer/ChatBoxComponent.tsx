@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  IconButton,
-  InputAdornment,
-  TextField,
-} from '@mui/material';
+import { Card, CardContent, IconButton, InputAdornment, TextField } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { MessageInputProps } from 'main/sentient-sims/models/MessageInputProps';
 import { useMemo, useState } from 'react';
@@ -27,10 +21,7 @@ export function ChatBoxComponent({
   const inputDebounce = useDebounceHook();
 
   const endAdornment = useMemo(() => {
-    if (
-      message.message.role === 'user' ||
-      message.message.role === 'assistant'
-    ) {
+    if (message.message.role === 'user' || message.message.role === 'assistant') {
       return (
         <InputAdornment position="end" sx={{ alignItems: 'flex-end' }}>
           <IconButton onClick={() => handleDeleteMessage(index)}>
@@ -49,10 +40,7 @@ export function ChatBoxComponent({
   }
 
   return (
-    <Card
-      key={message.id}
-      style={{ marginBottom: 16, backgroundColor: 'transparent' }}
-    >
+    <Card key={message.id} style={{ marginBottom: 16, backgroundColor: 'transparent' }}>
       <CardContent style={{ padding: 0, paddingTop: 0 }}>
         <TextField
           id="outlined-textarea"

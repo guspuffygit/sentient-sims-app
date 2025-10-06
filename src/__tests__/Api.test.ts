@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import '@testing-library/jest-dom';
 import { runApi } from 'main/sentient-sims/api';
@@ -13,10 +12,7 @@ import { SSEventType } from 'main/sentient-sims/models/InteractionEvents';
 import { DbClient } from 'main/sentient-sims/clients/DbClient';
 import { DatabaseSession } from 'main/sentient-sims/models/DatabaseSession';
 import { SimAge } from 'main/sentient-sims/models/SimAge';
-import {
-  CognitoIdentityProviderClient,
-  AdminInitiateAuthCommand,
-} from '@aws-sdk/client-cognito-identity-provider';
+import { CognitoIdentityProviderClient, AdminInitiateAuthCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { defaultWantsPrefixes } from 'main/sentient-sims/constants';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
@@ -70,10 +66,7 @@ describe('Api', () => {
   it('version controller', async () => {
     fs.mkdirSync(directoryService.getSentientSimsFolder(), { recursive: true });
     const expectedVersion: Version = { version: 'expectedversion' };
-    fs.writeFileSync(
-      directoryService.getModVersionFile(),
-      JSON.stringify(expectedVersion),
-    );
+    fs.writeFileSync(directoryService.getModVersionFile(), JSON.stringify(expectedVersion));
 
     const versionClient = new VersionClient(apiUrl);
     const modVersion = await versionClient.getModVersion();
@@ -133,9 +126,7 @@ describe('Api', () => {
       },
     });
 
-    const containsWantPrefix = defaultWantsPrefixes.some((want) =>
-      result.text?.includes(want),
-    );
+    const containsWantPrefix = defaultWantsPrefixes.some((want) => result.text?.includes(want));
 
     expect(containsWantPrefix).toBeTruthy();
   }, 30000);
@@ -156,10 +147,7 @@ describe('Api', () => {
     const jwtToken = adminAuthResponse.AuthenticationResult?.IdToken || '';
     const settingsClient = new SettingsClient(apiUrl);
     await settingsClient.updateSetting(SettingsEnum.ACCESS_TOKEN, jwtToken);
-    await settingsClient.updateSetting(
-      SettingsEnum.AI_API_TYPE,
-      ApiType.SentientSimsAI,
-    );
+    await settingsClient.updateSetting(SettingsEnum.AI_API_TYPE, ApiType.SentientSimsAI);
     const aiClient = new AIClient(apiUrl);
     const models = await aiClient.getModels();
     expect(models[0].name).toEqual('Gryphe/MythoMax-L2-13b');
@@ -168,9 +156,7 @@ describe('Api', () => {
   it('test settings api', async () => {
     const settingsClient = new SettingsClient(apiUrl);
     await settingsClient.updateSetting(SettingsEnum.LOCALIZATION_ENABLED, true);
-    const result = await settingsClient.getSetting(
-      SettingsEnum.LOCALIZATION_ENABLED,
-    );
+    const result = await settingsClient.getSetting(SettingsEnum.LOCALIZATION_ENABLED);
     expect(result.value).toBeTruthy();
   }, 30000);
 });

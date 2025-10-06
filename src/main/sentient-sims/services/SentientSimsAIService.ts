@@ -1,5 +1,3 @@
-/* eslint-disable no-plusplus */
-/* eslint-disable class-methods-use-this */
 import log from 'electron-log';
 import { RawAxiosRequestHeaders } from 'axios';
 import { SettingsEnum } from '../models/SettingsEnum';
@@ -9,9 +7,7 @@ import { DecodeToken, isTokenExpired } from '../auth/tokenVerifier';
 
 export class SentientSimsAIService extends VLLMAIService {
   serviceUrl(): string {
-    return this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
-    ) as string;
+    return this.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT) as string;
   }
 
   getAuthorizationHeaders(): RawAxiosRequestHeaders {
@@ -21,18 +17,13 @@ export class SentientSimsAIService extends VLLMAIService {
   }
 
   getModel(): string {
-    return this.settingsService.get(
-      SettingsEnum.SENTIENTSIMSAI_MODEL,
-    ) as string;
+    return this.settingsService.get(SettingsEnum.SENTIENTSIMSAI_MODEL) as string;
   }
 
   async healthCheck() {
     for (let i = 0; i < 60; i++) {
-      const payload = DecodeToken(
-        `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
-      );
+      const payload = DecodeToken(`${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`);
       if (isTokenExpired(payload)) {
-        // eslint-disable-next-line no-await-in-loop, no-promise-executor-return
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }

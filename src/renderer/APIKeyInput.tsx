@@ -11,15 +11,11 @@ import { EndAdornmentTooltip } from './components/EndAdornmentTooltip';
 interface ModalProps {
   setting: SettingsHook<string>;
   aiName: string;
-  // eslint-disable-next-line react/require-default-props
+
   optional?: boolean;
 }
 
-export default function APIKeyInput({
-  setting,
-  aiName,
-  optional = false,
-}: ModalProps) {
+export default function APIKeyInput({ setting, aiName, optional = false }: ModalProps) {
   const [keyVisibility, setKeyVisibility] = useState(false);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,8 +33,7 @@ export default function APIKeyInput({
   );
 
   useEffect(() => {
-    const removeListener =
-      window.electron.onApiKeyPasteFromClipboard(onApiPasteCallback);
+    const removeListener = window.electron.onApiKeyPasteFromClipboard(onApiPasteCallback);
 
     return () => {
       removeListener();
@@ -71,9 +66,7 @@ export default function APIKeyInput({
               </EndAdornmentIconButton>
             </EndAdornmentTooltip>
             <EndAdornmentTooltip title="Paste from clipboard">
-              <EndAdornmentIconButton
-                onClick={() => window.electron.apiKeyPasteButtonClick()}
-              >
+              <EndAdornmentIconButton onClick={() => window.electron.apiKeyPasteButtonClick()}>
                 <ContentPasteIcon />
               </EndAdornmentIconButton>
             </EndAdornmentTooltip>

@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
     "incremental": true,
-    "target": "es2021",
-    "module": "NodeNext",
-    "lib": ["dom", "es2021"],
+    "target": "es2022",
+    "module": "preserve",
+    "lib": ["dom", "es2023"],
     "jsx": "react-jsx",
     "strict": true,
     "sourceMap": true,
     "baseUrl": "./src",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
@@ -33,5 +33,7 @@
     ".erb/scripts/**/*.ts",
     ".erb/scripts/**/*.js",
     ".erb/mocks/**/*.js",
+    ".erb/scripts/eslint.config.mjs",
+    ".erb/configs/eslint.config.mjs",
   ]
 }

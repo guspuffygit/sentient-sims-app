@@ -1,16 +1,10 @@
 /* eslint no-alert: off, consistent-return: off, no-useless-return: off */
 import { useState } from 'react';
-import {
-  Box,
-  CardActions,
-  IconButton,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, CardActions, IconButton, Tooltip, Typography } from '@mui/material';
 import CachedIcon from '@mui/icons-material/Cached';
 import { LoadingButton } from '@mui/lab';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { Auth } from 'aws-amplify';
+import { fetchAuthSession } from 'aws-amplify/auth';
 import { ModUpdate } from 'main/sentient-sims/services/UpdateService';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { UpdateClient } from 'main/sentient-sims/clients/UpdateClient';
@@ -25,10 +19,7 @@ const updateClient = new UpdateClient();
 export default function UpdateComponent() {
   const versions = useVersions();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const releaseType: SettingsHook<string> = useSetting<string>(
-    SettingsEnum.MOD_RELEASE,
-    'main',
-  );
+  const releaseType: SettingsHook<string> = useSetting<string>(SettingsEnum.MOD_RELEASE, 'main');
   const { updateState, handleCheckForUpdates } = useNewVersionChecker({
     setIsLoading,
     releaseType: releaseType.value,
@@ -36,38 +27,38 @@ export default function UpdateComponent() {
 
   const handleUpdate = async (forceUpdate: boolean): Promise<void> => {
     await handleCheckForUpdates();
-    const modUpdate: ModUpdate = {
-      type: releaseType.value,
-      credentials: await Auth.currentCredentials(),
-    };
-    if (updateState.newVersionAvailable || forceUpdate) {
-      setIsLoading(true);
-      return updateClient
-        .updateMod(modUpdate)
-        .then(() => {
-          return handleCheckForUpdates();
-        })
-        .catch((err) => {
-          alert(`Error installing update: ${JSON.stringify(err, null, 2)}`);
-        })
-        .finally(() => {
-          setIsLoading(false);
-          versions.refresh();
-        });
+
+    const authSession = await fetchAuthSession();
+    if (authSession.credentials) {
+      const modUpdate: ModUpdate = {
+        type: releaseType.value,
+        credentials: authSession.credentials,
+      };
+      if (updateState.newVersionAvailable || forceUpdate) {
+        setIsLoading(true);
+        return updateClient
+          .updateMod(modUpdate)
+          .then(() => {
+            return handleCheckForUpdates();
+          })
+          .catch((err) => {
+            alert(`Error installing update: ${JSON.stringify(err, null, 2)}`);
+          })
+          .finally(() => {
+            setIsLoading(false);
+            versions.refresh();
+          });
+      }
     }
 
     return;
   };
 
   let updateText = 'Update now';
-  let headerText = (
-    <Typography color="text.secondary">Status: Up to date</Typography>
-  );
+  let headerText = <Typography color="text.secondary">Status: Up to date</Typography>;
   if (versions.mod.version === 'none') {
     updateText = 'Install';
-    headerText = (
-      <Typography color="text.secondary">Ready to install</Typography>
-    );
+    headerText = <Typography color="text.secondary">Ready to install</Typography>;
   } else if (updateState.newVersionAvailable) {
     headerText = <Typography variant="h6">New Version Ready</Typography>;
   }
@@ -75,9 +66,7 @@ export default function UpdateComponent() {
   return (
     <AppCard
       cardActions={
-        <CardActions
-          sx={{ margin: 1, display: 'flex', justifyContent: 'space-between' }}
-        >
+        <CardActions sx={{ margin: 1, display: 'flex', justifyContent: 'space-between' }}>
           <div>
             <LoadingButton
               onClick={() => handleUpdate(false)}
@@ -87,9 +76,7 @@ export default function UpdateComponent() {
               variant="contained"
             >
               {updateText}{' '}
-              {updateState.newVersionAvailable && (
-                <CheckCircleIcon sx={{ marginLeft: 2, color: 'white' }} />
-              )}
+              {updateState.newVersionAvailable && <CheckCircleIcon sx={{ marginLeft: 2, color: 'white' }} />}
             </LoadingButton>
           </div>
           <div>
@@ -109,9 +96,7 @@ export default function UpdateComponent() {
         </CardActions>
       }
     >
-      <div
-        style={{ margin: 1, display: 'flex', justifyContent: 'space-between' }}
-      >
+      <div style={{ margin: 1, display: 'flex', justifyContent: 'space-between' }}>
         <div>
           <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
             <Typography variant="h6" sx={{ marginBottom: 0 }}>

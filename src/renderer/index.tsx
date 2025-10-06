@@ -7,16 +7,13 @@ import { Amplify } from 'aws-amplify';
 import '@patternfly/react-core/dist/styles/base.css';
 import '@aws-amplify/ui-react/styles.css';
 import { Authenticator } from '@aws-amplify/ui-react';
-import { appApiUrl } from 'main/sentient-sims/constants';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import theme from './theme';
-import awsExports from './aws-exports';
 import HomePage from './HomePage';
 import SettingsPage from './SettingsPage';
 import ChatPage from './ChatPage';
 import LastExceptionPage from './LastExceptionPage';
-import LoginPage from './LoginPage';
 import { DebugModeProvider } from './providers/DebugModeProvider';
 import LogViewerPage from './LogViewerPage';
 import MemoriesPage from './MemoriesPage';
@@ -30,16 +27,11 @@ import TraitsPage from './TraitsPage';
 import { AudioContextProvider } from './providers/AudioContextProvider';
 import OfflineMemory from './OfflineMemory';
 import { WebsocketProvider } from './providers/WebsocketProvider';
+import 'aws-amplify/auth/enable-oauth-listener';
+import { AuthProvider } from './providers/AuthProvider';
+import { AmplifyConfig } from './AmplifyConfig';
 
-const updatedAwsConfig = {
-  ...awsExports,
-  oauth: {
-    ...awsExports.oauth,
-    redirectSignIn: `${appApiUrl}/login/callback`,
-    redirectSignOut: `${appApiUrl}/login/signout`,
-  },
-};
-Amplify.configure(updatedAwsConfig);
+Amplify.configure(AmplifyConfig);
 
 const router = createMemoryRouter([
   {
@@ -83,16 +75,17 @@ const router = createMemoryRouter([
         element: <LastExceptionPage />,
       },
       {
-        path: '/login',
-        element: <LoginPage />,
-      },
-      {
         path: '/logs',
         element: <LogViewerPage />,
       },
     ],
   },
 ]);
+
+Object.defineProperty(window.history, 'replaceState', {
+  configurable: true,
+  value: () => {},
+});
 
 const queryClient = new QueryClient();
 
@@ -101,26 +94,28 @@ const root = createRoot(container);
 root.render(
   <ThemeProvider theme={theme}>
     <CssBaseline />
-    <React.StrictMode>
-      <Authenticator.Provider>
-        <QueryClientProvider client={queryClient}>
-          <SnackBarProvider>
-            <WebsocketProvider>
-              <VersionsProvider>
-                <AISettingsProvider>
-                  <AudioContextProvider>
-                    <ChatGenerationProvider>
-                      <DebugModeProvider>
-                        <RouterProvider router={router} />
-                      </DebugModeProvider>
-                    </ChatGenerationProvider>
-                  </AudioContextProvider>
-                </AISettingsProvider>
-              </VersionsProvider>
-            </WebsocketProvider>
-          </SnackBarProvider>
-        </QueryClientProvider>
-      </Authenticator.Provider>
-    </React.StrictMode>
+    <Authenticator.Provider>
+      <React.StrictMode>
+        <AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <SnackBarProvider>
+              <WebsocketProvider>
+                <VersionsProvider>
+                  <AISettingsProvider>
+                    <AudioContextProvider>
+                      <ChatGenerationProvider>
+                        <DebugModeProvider>
+                          <RouterProvider router={router} />
+                        </DebugModeProvider>
+                      </ChatGenerationProvider>
+                    </AudioContextProvider>
+                  </AISettingsProvider>
+                </VersionsProvider>
+              </WebsocketProvider>
+            </SnackBarProvider>
+          </QueryClientProvider>
+        </AuthProvider>
+      </React.StrictMode>
+    </Authenticator.Provider>
   </ThemeProvider>,
 );

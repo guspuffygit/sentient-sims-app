@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { Request, Response } from 'express';
 import log from 'electron-log';
 import { UpdateService } from '../services/UpdateService';
@@ -18,9 +17,7 @@ export class UpdateController {
     try {
       log.info('Starting update.');
       // expiration needs to be a Date object and not a string
-      req.body.credentials.expiration = new Date(
-        req.body.credentials.expiration,
-      );
+      req.body.credentials.expiration = new Date(req.body.credentials.expiration);
       await this.updateService.updateMod(req.body);
       res.json({ done: 'done' });
     } catch (err: any) {

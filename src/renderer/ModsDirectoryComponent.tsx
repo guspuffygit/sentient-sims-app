@@ -23,16 +23,12 @@ export function ModsDirectoryComponent() {
           endAdornment: (
             <InputAdornment position="end">
               <EndAdornmentTooltip title="Edit">
-                <EndAdornmentIconButton
-                  onClick={() => modsDirectory.openDirectoryPicker()}
-                >
+                <EndAdornmentIconButton onClick={() => modsDirectory.openDirectoryPicker()}>
                   <EditIcon />
                 </EndAdornmentIconButton>
               </EndAdornmentTooltip>
               <EndAdornmentTooltip title="Reset to Default">
-                <EndAdornmentIconButton
-                  onClick={() => modsDirectory.resetValue()}
-                >
+                <EndAdornmentIconButton onClick={() => modsDirectory.resetValue()}>
                   <RotateLeftIcon />
                 </EndAdornmentIconButton>
               </EndAdornmentTooltip>

@@ -5,10 +5,10 @@
 import webpack from 'webpack';
 import TsconfigPathsPlugins from 'tsconfig-paths-webpack-plugin';
 import webpackPaths from './webpack.paths';
-import { dependencies as externals } from '../../release/app/package.json';
+import packageJson from '../../release/app/package.json' with { type: 'json' };
 
 const configuration: webpack.Configuration = {
-  externals: [...Object.keys(externals || {})],
+  externals: [...Object.keys(packageJson.dependencies || {})],
 
   stats: 'errors-only',
 
@@ -23,7 +23,7 @@ const configuration: webpack.Configuration = {
             // Remove this line to enable type checking in webpack builds
             transpileOnly: true,
             compilerOptions: {
-              module: 'NodeNext',
+              // module: 'NodeNext',
             },
           },
         },
@@ -50,14 +50,8 @@ const configuration: webpack.Configuration = {
   },
 
   ignoreWarnings: [
-    (warning) =>
-      warning.message.includes(
-        'Critical dependency: Accessing import.meta directly is unsupported',
-      ),
-    (warning) =>
-      warning.message.includes(
-        'Critical dependency: the request of a dependency is an expression',
-      ),
+    (warning) => warning.message.includes('Critical dependency: Accessing import.meta directly is unsupported'),
+    (warning) => warning.message.includes('Critical dependency: the request of a dependency is an expression'),
     (warning) =>
       warning.message.includes(
         `Module Warning (from ./node_modules/sass-loader/dist/cjs.js):

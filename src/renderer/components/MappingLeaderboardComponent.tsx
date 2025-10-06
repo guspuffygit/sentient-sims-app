@@ -1,13 +1,4 @@
-/* eslint-disable no-plusplus */
-import {
-  Box,
-  IconButton,
-  Modal,
-  TextField,
-  Tooltip,
-  Typography,
-  styled,
-} from '@mui/material';
+import { Box, IconButton, Modal, TextField, Tooltip, Typography, styled } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
 import AppCard from 'renderer/AppCard';
 import EditIcon from '@mui/icons-material/Edit';
@@ -16,7 +7,7 @@ import { useMappingLeaderboardStats } from 'renderer/hooks/useMappingLeaderboard
 import { LoadingButton } from '@mui/lab';
 import { ChangeEvent, useState } from 'react';
 import log from 'electron-log';
-import { useAuthenticator } from '@aws-amplify/ui-react';
+import { useAuth } from '../providers/AuthProvider';
 import SpaceBetweenDiv from './SpaceBetweenDiv';
 
 type LeaderboardRowProperties = {
@@ -30,30 +21,13 @@ const HighlightedTypography = styled(Typography)({
   color: '#ff6363',
 });
 
-function LeaderboardRow({
-  isMe,
-  name,
-  count,
-  index,
-}: LeaderboardRowProperties) {
+function LeaderboardRow({ isMe, name, count, index }: LeaderboardRowProperties) {
   const what = `#${index + 1} ${name}`;
 
   return (
     <SpaceBetweenDiv key={uuidv4()}>
-      <div>
-        {isMe ? (
-          <HighlightedTypography>{what}</HighlightedTypography>
-        ) : (
-          <Typography>{what}</Typography>
-        )}
-      </div>
-      <div>
-        {isMe ? (
-          <HighlightedTypography>{count}</HighlightedTypography>
-        ) : (
-          <Typography>{count}</Typography>
-        )}
-      </div>
+      <div>{isMe ? <HighlightedTypography>{what}</HighlightedTypography> : <Typography>{what}</Typography>}</div>
+      <div>{isMe ? <HighlightedTypography>{count}</HighlightedTypography> : <Typography>{count}</Typography>}</div>
     </SpaceBetweenDiv>
   );
 }
@@ -62,10 +36,9 @@ export function MappingLeaderboardComponent() {
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
-  const { leaderboard, me, setDisplayName, deleteDisplayName } =
-    useMappingLeaderboardStats();
+  const { leaderboard, me, setDisplayName, deleteDisplayName } = useMappingLeaderboardStats();
 
-  const { user } = useAuthenticator((context) => [context.user]);
+  const { user } = useAuth();
   if (!user) {
     return null;
   }
@@ -91,9 +64,7 @@ export function MappingLeaderboardComponent() {
     }
   }
 
-  function handleInputChange(
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) {
+  function handleInputChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setUsername(event.target.value);
   }
 
@@ -137,22 +108,14 @@ export function MappingLeaderboardComponent() {
                 alignItems: 'center',
               }}
             >
-              <Typography sx={{ marginRight: 1 }}>
-                {me?.data?.displayName ?? 'Anonymous'}
-              </Typography>
-              <Tooltip
-                title="Edit your username on the leaderboard"
-                placement="top"
-              >
+              <Typography sx={{ marginRight: 1 }}>{me?.data?.displayName ?? 'Anonymous'}</Typography>
+              <Tooltip title="Edit your username on the leaderboard" placement="top">
                 <IconButton size="small" onClick={() => handleOpen()}>
                   <EditIcon />
                 </IconButton>
               </Tooltip>
               {me?.data?.displayName && (
-                <Tooltip
-                  title="Delete your username on the leaderboard"
-                  placement="top"
-                >
+                <Tooltip title="Delete your username on the leaderboard" placement="top">
                   <IconButton size="small" onClick={() => deleteDisplayName()}>
                     <ClearIcon />
                   </IconButton>
@@ -185,8 +148,7 @@ export function MappingLeaderboardComponent() {
           }}
         >
           <Typography sx={{ marginBottom: 2 }}>
-            Set your display name if you want to show up on the leaderboard as
-            something other than Anonymous
+            Set your display name if you want to show up on the leaderboard as something other than Anonymous
           </Typography>
           <TextField
             label="Display Username"
@@ -196,19 +158,10 @@ export function MappingLeaderboardComponent() {
             required
           />
           <SpaceBetweenDiv>
-            <LoadingButton
-              loading={isLoading}
-              onClick={() => handleSubmit()}
-              variant="contained"
-              sx={{ mt: 2 }}
-            >
+            <LoadingButton loading={isLoading} onClick={() => handleSubmit()} variant="contained" sx={{ mt: 2 }}>
               Submit
             </LoadingButton>
-            <LoadingButton
-              loading={isLoading}
-              sx={{ mt: 2 }}
-              onClick={() => onClose()}
-            >
+            <LoadingButton loading={isLoading} sx={{ mt: 2 }} onClick={() => onClose()}>
               Cancel
             </LoadingButton>
           </SpaceBetweenDiv>

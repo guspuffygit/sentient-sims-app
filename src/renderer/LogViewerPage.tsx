@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-no-useless-fragment */
 import { LogViewer, LogViewerSearch } from '@patternfly/react-log-viewer';
 import { Toolbar, ToolbarContent, ToolbarItem } from '@patternfly/react-core';
 import { useEffect, useRef, useState } from 'react';
@@ -78,10 +77,7 @@ export default function LogViewerPage() {
           <Toolbar>
             <ToolbarContent>
               <ToolbarItem>
-                <LogViewerSearch
-                  placeholder="Search value"
-                  minSearchChars={0}
-                />
+                <LogViewerSearch placeholder="Search value" minSearchChars={0} />
               </ToolbarItem>
             </ToolbarContent>
           </Toolbar>

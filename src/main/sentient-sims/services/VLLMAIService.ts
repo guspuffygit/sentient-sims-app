@@ -1,10 +1,5 @@
-/* eslint-disable no-plusplus */
-/* eslint-disable class-methods-use-this */
 import log from 'electron-log';
-import {
-  ChatCompletion,
-  ResponseFormatJSONSchema,
-} from 'openai/resources/index.mjs';
+import { ChatCompletion, ResponseFormatJSONSchema } from 'openai/resources/index.mjs';
 import { RawAxiosRequestHeaders } from 'axios';
 import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
@@ -64,18 +59,13 @@ export class VLLMAIService implements GenerationService {
         return modelSettings.breakStringTokens;
       }
 
-      const breakString =
-        modelSettings?.breakTokenString || tokenizerBreakString;
+      const breakString = modelSettings?.breakTokenString || tokenizerBreakString;
 
       const tokenizeResponse = await this.tokenize(model, breakString);
 
       this.breakStringTokens.set(model, tokenizeResponse.tokens);
 
-      log.debug(
-        `Set ${model} ${breakString} to ${JSON.stringify(
-          tokenizeResponse.tokens,
-        )}`,
-      );
+      log.debug(`Set ${model} ${breakString} to ${JSON.stringify(tokenizeResponse.tokens)}`);
 
       return tokenizeResponse.tokens;
     } catch (err) {
@@ -85,9 +75,7 @@ export class VLLMAIService implements GenerationService {
     }
   }
 
-  async sentientSimsGenerate(
-    request: OpenAICompatibleRequest,
-  ): Promise<SimsGenerateResponse> {
+  async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
     const model = this.getModel();
     let modelSettings = AllModelSettings.default;
     if (model in AllModelSettings) {
@@ -99,12 +87,7 @@ export class VLLMAIService implements GenerationService {
       this.getBreakStringTokens(model),
     ]);
 
-    const messages = truncateMessages(
-      modelSettings.max_tokens,
-      breakTokens,
-      messageTokens.tokens,
-      request.messages,
-    );
+    const messages = truncateMessages(modelSettings.max_tokens, breakTokens, messageTokens.tokens, request.messages);
 
     const completionRequest: VLLMChatCompletionRequest = {
       model,
@@ -157,9 +140,7 @@ export class VLLMAIService implements GenerationService {
     });
 
     const result: ChatCompletion = response.data;
-    log.debug(
-      `Info about it: ${response.status} ${JSON.stringify(result, null, 2)}`,
-    );
+    log.debug(`Info about it: ${response.status} ${JSON.stringify(result, null, 2)}`);
 
     const text = this.getOutputFromGeneration(result);
     return {
@@ -185,10 +166,7 @@ export class VLLMAIService implements GenerationService {
     return response.data;
   }
 
-  async tokenizeMessages(
-    model: string,
-    messages: OpenAIMessage[],
-  ): Promise<VLLMRTokenizeResponse> {
+  async tokenizeMessages(model: string, messages: OpenAIMessage[]): Promise<VLLMRTokenizeResponse> {
     let modelSettings = AllModelSettings.default;
     if (model in AllModelSettings) {
       modelSettings = AllModelSettings[model];
@@ -213,9 +191,7 @@ export class VLLMAIService implements GenerationService {
       headers: this.getAuthorizationHeaders(),
     });
 
-    const result: VLLMRTokenizeResponse =
-      // eslint-disable-next-line no-await-in-loop
-      await tokenizeRequestResponse.data;
+    const result: VLLMRTokenizeResponse = await tokenizeRequestResponse.data;
 
     if (result?.tokens && result?.count) {
       return result;
@@ -232,9 +208,7 @@ export class VLLMAIService implements GenerationService {
       return output.trim();
     }
 
-    log.error(
-      `Output wasnt truthy from AI:\n${JSON.stringify(generation, null, 2)}`,
-    );
+    log.error(`Output wasnt truthy from AI:\n${JSON.stringify(generation, null, 2)}`);
 
     throw new Error(`Output wasnt truthy from AI ${output}`);
   }

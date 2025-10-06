@@ -18,10 +18,7 @@ describe('MemoryRepository', () => {
       saveId: '2',
     });
     const memoryRepository = new MemoryRepository(dbService);
-    const participants: ParticipantDTO[] = [
-      { id: '128937674' },
-      { id: '18276365' },
-    ];
+    const participants: ParticipantDTO[] = [{ id: '128937674' }, { id: '18276365' }];
     const memory: MemoryEntity = {
       location_id: 90369424,
       pre_action: 'dioawjd',

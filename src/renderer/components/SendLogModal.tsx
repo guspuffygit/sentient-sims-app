@@ -2,26 +2,22 @@ import { LoadingButton } from '@mui/lab';
 import { useState, Dispatch, SetStateAction } from 'react';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { SendLogsRequest } from 'main/sentient-sims/models/SendLogsRequest';
-import { useAuthenticator } from '@aws-amplify/ui-react';
 import { Modal, Box, Divider, Grid, TextField } from '@mui/material';
 import LogSendInformationComponent from 'renderer/LogSendInformationComponent';
 import { CaughtError } from 'main/sentient-sims/models/CaughtError';
 import log from 'electron-log';
+import { useAuth } from 'renderer/providers/AuthProvider';
 import SpaceBetweenDiv from './SpaceBetweenDiv';
 
 export type SendLogModalParameters = {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
-  // eslint-disable-next-line react/require-default-props
+
   caughtError?: CaughtError;
 };
 
-export function SendLogModal({
-  open,
-  setOpen,
-  caughtError,
-}: SendLogModalParameters) {
-  const { user } = useAuthenticator((context) => [context.user]);
+export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParameters) {
+  const { user, userAttributes } = useAuth();
   const [loading, setLoading] = useState(false);
   const [discordUsername, setDiscordUsername] = useState('');
   const [errorDescription, setErrorDescription] = useState('');
@@ -34,13 +30,11 @@ export function SendLogModal({
         discordUsername,
         errorDescription,
         caughtError,
+        amplifyUser: user,
+        userAttributes,
       };
 
       log.debug(`caughtError: ${caughtError}`);
-
-      if (user) {
-        sendLogsRequest.amplifyUser = user;
-      }
 
       const response = await fetch(`${appApiUrl}/debug/send-logs`, {
         method: 'POST',
@@ -50,16 +44,12 @@ export function SendLogModal({
       const responseJson = await response.json();
       if (response.ok) {
         setOpen(false);
-        // eslint-disable-next-line no-alert
-        alert(
-          `To get support, copy paste this id into the #support channel in Discord!\n\n${responseJson.logId}`,
-        );
+
+        alert(`To get support, copy paste this id into the #support channel in Discord!\n\n${responseJson.logId}`);
       } else {
-        // eslint-disable-next-line no-alert
         alert(`Error sending logs:\n${JSON.stringify(responseJson, null, 2)}`);
       }
     } catch (err) {
-      // eslint-disable-next-line no-alert
       alert(`Error sending logs:\n${JSON.stringify(err, null, 2)}`);
     } finally {
       setLoading(false);
@@ -107,21 +97,12 @@ export function SendLogModal({
             <Grid item xs={12}>
               <SpaceBetweenDiv>
                 <div>
-                  <LoadingButton
-                    type="submit"
-                    loading={loading}
-                    color="secondary"
-                    variant="contained"
-                  >
+                  <LoadingButton type="submit" loading={loading} color="secondary" variant="contained">
                     Send Logs
                   </LoadingButton>
                 </div>
                 <div>
-                  <LoadingButton
-                    loading={loading}
-                    onClick={() => setOpen(false)}
-                    variant="contained"
-                  >
+                  <LoadingButton loading={loading} onClick={() => setOpen(false)} variant="contained">
                     Cancel
                   </LoadingButton>
                 </div>

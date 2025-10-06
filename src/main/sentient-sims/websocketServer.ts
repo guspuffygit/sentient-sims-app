@@ -32,10 +32,7 @@ let modWs: WebSocket;
 let modConnected = false;
 let rendererConnected = false;
 
-export const startWebSocketServer = (
-  logsService: LogsService,
-  settingsService: SettingsService,
-) => {
+export const startWebSocketServer = (logsService: LogsService, settingsService: SettingsService) => {
   const rendererServer = new WebSocketServer({ port: rendererWebsocketPort });
   rendererServer.on('connection', function handleRenderer(ws: WebSocket) {
     rendererWs = ws;
@@ -101,17 +98,12 @@ export const startWebSocketServer = (
       if (!parsedData.log) {
         return;
       }
-      if (
-        parsedData.log.level === LogLevel.DEBUG.toString() &&
-        !settingsService.get(SettingsEnum.DEBUG_LOGS)
-      ) {
+      if (parsedData.log.level === LogLevel.DEBUG.toString() && !settingsService.get(SettingsEnum.DEBUG_LOGS)) {
         return;
       }
 
       const formattedLog = formatLog(parsedData.log);
-      logsService
-        .appendLog([formattedLog])
-        .catch((e: any) => log.error('Unable to append to logs.txt', e));
+      logsService.appendLog([formattedLog]).catch((e: any) => log.error('Unable to append to logs.txt', e));
       if (rendererWs) {
         rendererWs.send(JSON.stringify(parsedData));
       }

@@ -1,10 +1,4 @@
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import log from 'electron-log';
 import { VersionClient } from 'main/sentient-sims/clients/VersionClient';
 import { isNewVersionAvailable } from '../versions';
@@ -29,10 +23,7 @@ const getCurrentTime = (): string => {
 
 const versionClient = new VersionClient();
 
-export default function useNewVersionChecker({
-  setIsLoading,
-  releaseType: versionType,
-}: NewVersionAvailableProps) {
+export default function useNewVersionChecker({ setIsLoading, releaseType: versionType }: NewVersionAvailableProps) {
   const [updateState, setUpdateState] = useState({
     newVersionAvailable: false,
     lastChecked: 'N/A',
@@ -44,10 +35,7 @@ export default function useNewVersionChecker({
     try {
       const modVersion = await versionClient.getModVersion();
       log.debug(`modVersion: ${modVersion.version}`);
-      const response = await isNewVersionAvailable(
-        modVersion.version,
-        versionType,
-      );
+      const response = await isNewVersionAvailable(modVersion.version, versionType);
       const currentTime = getCurrentTime();
 
       setUpdateState({

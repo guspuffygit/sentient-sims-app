@@ -1,4 +1,4 @@
-import { Box, Divider, Tab } from '@mui/material';
+import { Box, Button, Divider, Tab } from '@mui/material';
 
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
@@ -12,6 +12,7 @@ import {
 } from 'main/sentient-sims/constants';
 import { LoadingButton, TabContext, TabList, TabPanel } from '@mui/lab';
 import { SyntheticEvent, useState } from 'react';
+import ConstructionIcon from '@mui/icons-material/Construction';
 import AppCard from './AppCard';
 import DebugLogsSettingsComponent from './settings/DebugLogsSettingsComponent';
 import LocalizationSettingsComponent from './settings/LocalizationSettingsComponent';
@@ -29,6 +30,7 @@ import { useAISettings } from './providers/AISettingsProvider';
 import NovelAISettingsComponent from './settings/NovelAISettingsComponent';
 import GeminiSettingsComponent from './settings/GeminiSettingsComponent';
 import VoiceSettingsComponent from './settings/VoiceSettingsComponent';
+import { useSetupWizard } from './providers/SetupWizardProvider';
 
 enum SettingsTabSelectionValue {
   Settings = 'settings',
@@ -37,6 +39,7 @@ enum SettingsTabSelectionValue {
 
 export default function SettingsPage() {
   const aiSettings = useAISettings();
+  const setupWizard = useSetupWizard();
   const [tabSelectedValue, setTabSelectedValue] = useState('settings');
 
   const handleChange = (event: SyntheticEvent, newValue: string) => {
@@ -46,11 +49,30 @@ export default function SettingsPage() {
   return (
     <AppCard>
       <TabContext value={tabSelectedValue}>
-        <TabList onChange={handleChange} aria-label="lab API tabs example">
-          {Object.entries(SettingsTabSelectionValue).map((selectionvalue) => (
-            <Tab label={selectionvalue[0]} value={selectionvalue[1]} />
-          ))}
-        </TabList>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderBottom: 1,
+            borderColor: 'divider',
+          }}
+        >
+          <TabList onChange={handleChange} aria-label="lab API tabs example">
+            {Object.entries(SettingsTabSelectionValue).map((selectionvalue) => (
+              <Tab key={selectionvalue[0]} label={selectionvalue[0]} value={selectionvalue[1]} />
+            ))}
+          </TabList>
+
+          <Button
+            endIcon={<ConstructionIcon />}
+            variant="outlined"
+            sx={{ mr: 2 }}
+            onClick={() => setupWizard.setOpen(true)}
+          >
+            Setup Wizard
+          </Button>
+        </Box>
         <TabPanel value={SettingsTabSelectionValue.Settings}>
           <ModsDirectoryComponent />
           <DebugLogsSettingsComponent />
@@ -68,14 +90,8 @@ export default function SettingsPage() {
             <AIStatusComponent />
           </Box>
           <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-          <OpenAICompatibleSettingsComponent
-            apiType={ApiType.OpenAI}
-            selectedApiType={aiSettings.aiApiType}
-          >
-            <ApiKeyAIComponent
-              setting={SettingsEnum.OPENAI_KEY}
-              aiName="OpenAI"
-            />
+          <OpenAICompatibleSettingsComponent apiType={ApiType.OpenAI} selectedApiType={aiSettings.aiApiType}>
+            <ApiKeyAIComponent setting={SettingsEnum.OPENAI_KEY} aiName="OpenAI" />
             <AIEndpointComponent
               type={ApiType.OpenAI}
               selectedApiType={aiSettings.aiApiType}
@@ -90,15 +106,8 @@ export default function SettingsPage() {
             />
             <LocalizationSettingsComponent />
           </OpenAICompatibleSettingsComponent>
-          <OpenAICompatibleSettingsComponent
-            apiType={ApiType.VLLM}
-            selectedApiType={aiSettings.aiApiType}
-          >
-            <ApiKeyAIComponent
-              setting={SettingsEnum.VLLM_APIKEY}
-              optional
-              aiName="VLLM"
-            />
+          <OpenAICompatibleSettingsComponent apiType={ApiType.VLLM} selectedApiType={aiSettings.aiApiType}>
+            <ApiKeyAIComponent setting={SettingsEnum.VLLM_APIKEY} optional aiName="VLLM" />
             <AIEndpointComponent
               type={ApiType.VLLM}
               selectedApiType={aiSettings.aiApiType}
@@ -113,10 +122,7 @@ export default function SettingsPage() {
             />
           </OpenAICompatibleSettingsComponent>
           <NovelAISettingsComponent apiType={aiSettings.aiApiType}>
-            <ApiKeyAIComponent
-              setting={SettingsEnum.NOVELAI_KEY}
-              aiName="NovelAI"
-            />
+            <ApiKeyAIComponent setting={SettingsEnum.NOVELAI_KEY} aiName="NovelAI" />
             <AIEndpointComponent
               type={ApiType.NovelAI}
               selectedApiType={ApiType.NovelAI}
@@ -133,10 +139,7 @@ export default function SettingsPage() {
           <KoboldAISettingsComponent apiType={aiSettings.aiApiType} />
           <SentientSimsSettingsComponent apiType={aiSettings.aiApiType} />
           <GeminiSettingsComponent apiType={aiSettings.aiApiType}>
-            <ApiKeyAIComponent
-              setting={SettingsEnum.GEMINI_KEYS}
-              aiName="Gemini"
-            />
+            <ApiKeyAIComponent setting={SettingsEnum.GEMINI_KEYS} aiName="Gemini" />
             <AIEndpointComponent
               type={ApiType.Gemini}
               selectedApiType={ApiType.Gemini}

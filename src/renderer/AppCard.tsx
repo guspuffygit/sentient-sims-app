@@ -8,11 +8,7 @@ type AppCardProps = {
   actionsOnTop?: boolean;
 };
 
-export default function AppCard({
-  cardActions,
-  children,
-  actionsOnTop,
-}: AppCardProps) {
+export default function AppCard({ cardActions, children, actionsOnTop }: AppCardProps) {
   return (
     <Card sx={{ minWidth: 275, marginBottom: 2 }}>
       {actionsOnTop ? (

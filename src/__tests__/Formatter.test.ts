@@ -1,20 +1,12 @@
 import '@testing-library/jest-dom';
-import {
-  removeLastParagraph,
-  trimIncompleteSentence,
-} from 'main/sentient-sims/formatter/PromptFormatter';
+import { removeLastParagraph, trimIncompleteSentence } from 'main/sentient-sims/formatter/PromptFormatter';
 import { removeNonPrintableCharacters } from 'main/sentient-sims/util/filter';
-import {
-  epochToFormattedDate,
-  formatLog,
-} from 'main/sentient-sims/util/format';
+import { epochToFormattedDate, formatLog } from 'main/sentient-sims/util/format';
 
 describe('PromptFormatter', () => {
   it('should trim sentence', () => {
     const imcompleteSentence = 'This is a sentence. This is a';
-    expect(trimIncompleteSentence(imcompleteSentence)).toEqual(
-      'This is a sentence.',
-    );
+    expect(trimIncompleteSentence(imcompleteSentence)).toEqual('This is a sentence.');
   });
 
   it('should remove last paragraph', () => {
@@ -22,9 +14,7 @@ describe('PromptFormatter', () => {
     const lineTwo = 'Line two.';
     const lineThree = 'Line three.';
     const multipleParagraphs = [lineOne, lineTwo, lineThree];
-    expect(removeLastParagraph(multipleParagraphs.join('\n\n'))).toEqual(
-      [lineOne, lineTwo].join('\n\n'),
-    );
+    expect(removeLastParagraph(multipleParagraphs.join('\n\n'))).toEqual([lineOne, lineTwo].join('\n\n'));
   });
 
   it('remove non printable characters', () => {

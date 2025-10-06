@@ -1,18 +1,7 @@
 /* eslint-disable promise/catch-or-return */
-/* eslint-disable import/prefer-default-export */
 import { WebsocketClient } from 'main/sentient-sims/clients/WebsocketClient';
-import {
-  WebsocketStatusChange,
-  WebsocketStatusResponse,
-} from 'main/sentient-sims/models/WebsocketStatusResponse';
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { WebsocketStatusChange, WebsocketStatusResponse } from 'main/sentient-sims/models/WebsocketStatusResponse';
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 
 const websocketClient = new WebsocketClient();
 
@@ -20,9 +9,7 @@ interface WebsocketContextType {
   status: WebsocketStatusResponse;
 }
 
-const WebsocketContext = createContext<WebsocketContextType | undefined>(
-  undefined,
-);
+const WebsocketContext = createContext<WebsocketContextType | undefined>(undefined);
 
 interface WebsocketProviderProps {
   children: ReactNode;
@@ -73,9 +60,5 @@ export function WebsocketProvider({ children }: WebsocketProviderProps) {
     return { status };
   }, [status]);
 
-  return (
-    <WebsocketContext.Provider value={contextValue}>
-      {children}
-    </WebsocketContext.Provider>
-  );
+  return <WebsocketContext.Provider value={contextValue}>{children}</WebsocketContext.Provider>;
 }

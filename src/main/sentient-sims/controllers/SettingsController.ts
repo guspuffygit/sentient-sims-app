@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { Request, Response } from 'express';
 import { SettingsService } from '../services/SettingsService';
 import { notifySettingChanged } from '../util/notifyRenderer';

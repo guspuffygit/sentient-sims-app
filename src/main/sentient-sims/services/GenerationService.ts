@@ -5,9 +5,7 @@ import { AIModel } from '../models/AIModel';
 
 export interface GenerationService {
   serviceUrl(): string;
-  sentientSimsGenerate(
-    request: OpenAICompatibleRequest,
-  ): Promise<SimsGenerateResponse>;
+  sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse>;
   healthCheck(apiKey?: string): Promise<AIHealthCheckResponse>;
   getModels(): Promise<AIModel[]>;
 }

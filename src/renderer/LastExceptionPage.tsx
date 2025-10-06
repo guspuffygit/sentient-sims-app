@@ -1,13 +1,4 @@
-import {
-  Button,
-  Divider,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Typography,
-} from '@mui/material';
+import { Button, Divider, IconButton, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useState } from 'react';
 import { LastExceptionFile } from 'main/sentient-sims/services/LastExceptionService';
@@ -16,9 +7,7 @@ import useLastExceptionFiles from './hooks/useLastExceptionFiles';
 import SpaceBetweenDiv from './components/SpaceBetweenDiv';
 
 export default function LastExceptionPage() {
-  const [selectedException, setSelectedException] = useState<
-    LastExceptionFile | undefined
-  >();
+  const [selectedException, setSelectedException] = useState<LastExceptionFile | undefined>();
   const { lastExceptionFiles, deleteFiles, refresh } = useLastExceptionFiles();
 
   const renderRows: any = [];
@@ -27,10 +16,7 @@ export default function LastExceptionPage() {
     renderRows.push(
       <ListItem key={lastExceptionFile.filename} component="div" disablePadding>
         <ListItemButton onClick={() => setSelectedException(lastExceptionFile)}>
-          <ListItemText
-            primary={`${lastExceptionFile.filename}`}
-            secondary={lastExceptionFile.created.toUTCString()}
-          />
+          <ListItemText primary={`${lastExceptionFile.filename}`} secondary={lastExceptionFile.created.toUTCString()} />
         </ListItemButton>
       </ListItem>,
     );
@@ -42,11 +28,7 @@ export default function LastExceptionPage() {
         <div style={{ marginBottom: 2 }}>
           <SpaceBetweenDiv>
             <div>
-              <IconButton
-                aria-label="delete"
-                size="small"
-                onClick={() => setSelectedException(undefined)}
-              >
+              <IconButton aria-label="delete" size="small" onClick={() => setSelectedException(undefined)}>
                 <ArrowBackIcon sx={{ margin: 1 }} />
               </IconButton>
             </div>
@@ -71,11 +53,7 @@ export default function LastExceptionPage() {
           <SpaceBetweenDiv>
             <div />
             <div style={{ marginRight: 2 }}>
-              <Button
-                onClick={() => refresh()}
-                variant="outlined"
-                sx={{ marginRight: 2 }}
-              >
+              <Button onClick={() => refresh()} variant="outlined" sx={{ marginRight: 2 }}>
                 Refresh
               </Button>
               <Button

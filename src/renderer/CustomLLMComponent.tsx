@@ -7,9 +7,7 @@ export type CustomLLMComponentProperties = {
   aiName: string;
 };
 
-export default function CustomLLMComponent({
-  aiName,
-}: CustomLLMComponentProperties) {
+export default function CustomLLMComponent({ aiName }: CustomLLMComponentProperties) {
   const { customLLMStatus, testCustomLLM } = useCustomLLMHealth();
 
   return (

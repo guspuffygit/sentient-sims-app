@@ -8,14 +8,8 @@ import {
 import { ApiType } from './models/ApiType';
 import { SSEventType } from './models/InteractionEvents';
 
-export function getSystemPrompt(
-  eventType: SSEventType,
-  apiType: ApiType,
-): string {
-  if (
-    eventType === SSEventType.CHAT ||
-    eventType === SSEventType.CHAT_CONTINUE
-  ) {
+export function getSystemPrompt(eventType: SSEventType, apiType: ApiType): string {
+  if (eventType === SSEventType.CHAT || eventType === SSEventType.CHAT_CONTINUE) {
     return defaultChatPrompt;
   }
 

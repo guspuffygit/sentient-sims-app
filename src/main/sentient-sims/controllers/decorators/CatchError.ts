@@ -1,4 +1,3 @@
-/* eslint-disable func-names */
 import log from 'electron-log';
 import { Request, Response, NextFunction } from 'express';
 import { DbService } from 'main/sentient-sims/services/DbService';
@@ -13,25 +12,15 @@ export type CatchErrorsParameters = {
 };
 
 export function CatchErrors(catchErrorsParameters?: CatchErrorsParameters) {
-  return function <
-    T extends (
-      this: any,
-      req: Request,
-      res: Response,
-      next?: NextFunction,
-    ) => Promise<any>,
-  >(target: T, context: ClassMethodDecoratorContext) {
-    return async function (
-      this: ThisParameterType<T>,
-      req: Request,
-      res: Response,
-      next?: NextFunction,
-    ) {
+  return function <T extends (this: any, req: Request, res: Response, next?: NextFunction) => Promise<any>>(
+    target: T,
+    context: ClassMethodDecoratorContext,
+  ) {
+    return async function (this: ThisParameterType<T>, req: Request, res: Response, next?: NextFunction) {
       try {
         await target.call(this, req, res, next);
       } catch (err: any) {
-        const statusCode =
-          catchErrorsParameters?.statusCode ?? defaultStatusCode;
+        const statusCode = catchErrorsParameters?.statusCode ?? defaultStatusCode;
         log.error(`Error in ${String(context.name)}:`, err);
         try {
           res.status(statusCode).json({ error: err?.message });

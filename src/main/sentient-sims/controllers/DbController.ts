@@ -1,5 +1,3 @@
-/* eslint-disable promise/always-return */
-/* eslint-disable import/prefer-default-export */
 import { Request, Response } from 'express';
 import log from 'electron-log';
 import { DatabaseSession } from '../models/DatabaseSession';
@@ -20,9 +18,7 @@ export class DbController {
   async loadDatabase(req: Request, res: Response) {
     try {
       const databaseSession: DatabaseSession = req.body;
-      log.debug(
-        `Loading database: ${databaseSession.sessionId} : ${databaseSession.saveId}`,
-      );
+      log.debug(`Loading database: ${databaseSession.sessionId} : ${databaseSession.saveId}`);
 
       await this.dbService.loadDatabase(databaseSession);
       return res.json({ text: 'Db Loaded' });
@@ -35,9 +31,7 @@ export class DbController {
   async saveDatabase(req: Request, res: Response) {
     try {
       const databaseSession: DatabaseSession = req.body;
-      log.debug(
-        `Saving database: ${databaseSession.sessionId} : ${databaseSession.saveId}`,
-      );
+      log.debug(`Saving database: ${databaseSession.sessionId} : ${databaseSession.saveId}`);
 
       await this.dbService.saveDatabase(databaseSession);
       return res.json({ text: 'Db Saved' });

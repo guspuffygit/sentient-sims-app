@@ -1,43 +1,35 @@
-import {
-  ContinueInteractionEvent,
-  SSEventType,
-} from 'main/sentient-sims/models/InteractionEvents';
+import { ContinueInteractionEvent, SSEventType } from 'main/sentient-sims/models/InteractionEvents';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { SimAge } from 'main/sentient-sims/models/SimAge';
 import { containsPlayerSim } from 'main/sentient-sims/util/eventContainsPlayerSim';
-import {
-  filterNullAndUndefined,
-  removeEmojis,
-} from 'main/sentient-sims/util/filter';
+import { filterNullAndUndefined, removeEmojis } from 'main/sentient-sims/util/filter';
 import { getRandomItem } from 'main/sentient-sims/util/getRandomItem';
 import { stringType } from 'main/sentient-sims/util/typeChecks';
+import { describe, test, expect } from '@jest/globals';
 
 describe('Util', () => {
-  it('filterNullAndUndefined removes null and undefined values from list', () => {
-    expect(filterNullAndUndefined([null, '1', undefined, '2'])).toEqual([
-      '1',
-      '2',
-    ]);
+  test('filterNullAndUndefined removes null and undefined values from list', () => {
+    expect(filterNullAndUndefined([null, '1', undefined, '2'])).toEqual(['1', '2']);
   });
 
-  it('removeEmojis removes emojis correctly', () => {
+  test('removeEmojis removes emojis correctly', () => {
     expect(removeEmojis('😀🤹🏾test')).toEqual('test');
   });
 
-  it('get random item', () => {
+  test('get random item', () => {
     const result = getRandomItem([1, 2]);
     const actualResult = result === 1 || result === 2;
     expect(actualResult).toBeTruthy();
   });
 
-  it('type check string', () => {
+  test('type check string', () => {
     expect(stringType('yes')).toBeTruthy();
     expect(stringType(2)).toBeFalsy();
   });
 });
 
 describe('containsPlayerSim', () => {
-  it('list containing player sim return true', () => {
+  test('list containing player sim return true', () => {
     const sim: SentientSim = {
       careers: [
         {
