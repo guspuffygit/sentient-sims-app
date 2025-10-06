@@ -1,4 +1,3 @@
-/* eslint-disable class-methods-use-this */
 import log from 'electron-log';
 import { formatAction, formatSentientSim, formatDateTime, formatSeason } from '../formatter/PromptFormatter';
 import { SSEvent, SSRelationships } from '../models/InteractionEvents';
@@ -13,14 +12,8 @@ import { ModelSettings } from '../modelSettings';
 import { defaultRelationshipBitDescriptions } from '../descriptions/relationshipDescriptions';
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { PromptHistoryMode } from '../models/PromptHistoryMode';
-import {
-  postureDescriptions,
-  PostureType,
-} from '../descriptions/postureDescriptions';
-import {
-  ObjectDescription,
-  objectDescriptions,
-} from '../descriptions/objectDescriptions';
+import { postureDescriptions, PostureType } from '../descriptions/postureDescriptions';
+import { ObjectDescription, objectDescriptions } from '../descriptions/objectDescriptions';
 
 export type GenerationOptions = {
   action?: string;
@@ -112,16 +105,9 @@ export class PromptRequestBuilderService {
     const formattedPositions: string[] = [];
     sentientSims.forEach((sentientSim) => {
       const positionStrings: string[] = [`${sentientSim.name} is`];
-      if (
-        sentientSim.body_posture &&
-        sentientSim.body_posture in postureDescriptions
-      ) {
-        const bodyPosturePosition =
-          postureDescriptions[sentientSim.body_posture];
-        if (
-          bodyPosturePosition?.ignored !== true &&
-          bodyPosturePosition?.description
-        ) {
+      if (sentientSim.body_posture && sentientSim.body_posture in postureDescriptions) {
+        const bodyPosturePosition = postureDescriptions[sentientSim.body_posture];
+        if (bodyPosturePosition?.ignored !== true && bodyPosturePosition?.description) {
           positionStrings.push(bodyPosturePosition.description);
         }
         if (sentientSim.posture_linked_sim) {
@@ -129,24 +115,16 @@ export class PromptRequestBuilderService {
         }
 
         let objectDescription: ObjectDescription | undefined;
-        if (
-          sentientSim.target_part_owner_name &&
-          sentientSim.target_part_owner_name in objectDescriptions
-        ) {
+        if (sentientSim.target_part_owner_name && sentientSim.target_part_owner_name in objectDescriptions) {
           // This is an explicit description of a specific object
-          objectDescription =
-            objectDescriptions[sentientSim.target_part_owner_name];
+          objectDescription = objectDescriptions[sentientSim.target_part_owner_name];
         } else if (
           sentientSim.target_slot_type_set_name &&
           sentientSim.target_slot_type_set_name in objectDescriptions
         ) {
           // This ia a more generic description of a slot_type
-          objectDescription =
-            objectDescriptions[sentientSim.target_slot_type_set_name];
-        } else if (
-          sentientSim.target_name &&
-          sentientSim.target_name in objectDescriptions
-        ) {
+          objectDescription = objectDescriptions[sentientSim.target_slot_type_set_name];
+        } else if (sentientSim.target_name && sentientSim.target_name in objectDescriptions) {
           // This is fallback to target_name
           objectDescription = objectDescriptions[sentientSim.target_name];
         }
