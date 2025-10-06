@@ -37,11 +37,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - name: Diagnose Environment
-        run: |
-          echo "Node.js version: $(node -v)"
-          echo "NPM version: $(npm -v)"
-          echo "Operating System: $(uname -a)"
 
       - name: add git binaries to PATH on Windows
         if: runner.os == 'Windows'
