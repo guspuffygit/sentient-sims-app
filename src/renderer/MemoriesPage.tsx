@@ -184,6 +184,7 @@ export default function MemoriesPage() {
         content: previousMemory?.memory?.content,
         location_id: Number(previousMemory?.memory?.location_id),
         timestamp: previousMemory?.memory?.timestamp,
+        game_timestamp: previousMemory?.memory?.game_timestamp || 0,
       },
     }));
   }, []);
@@ -198,6 +199,7 @@ export default function MemoriesPage() {
         content: event.target.value,
         location_id: Number(previousMemory?.memory?.location_id),
         timestamp: previousMemory?.memory?.timestamp,
+        game_timestamp: previousMemory?.memory?.game_timestamp || 0,
       },
     }));
   }, []);
@@ -212,6 +214,7 @@ export default function MemoriesPage() {
         content: previousMemory?.memory?.content,
         location_id: Number(previousMemory?.memory?.location_id),
         timestamp: previousMemory?.memory?.timestamp,
+        game_timestamp: previousMemory?.memory?.game_timestamp || 0,
       },
     }));
   }, []);

@@ -97,6 +97,10 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
       ALTER TABLE participant
       ADD COLUMN name TEXT;
     `,
+    '007-add-memory-game-timestamp': `
+      ALTER TABLE memory
+      ADD COLUMN game_timestamp INTEGER NOT NULL DEFAULT 0;
+    `,
   }),
 );
 

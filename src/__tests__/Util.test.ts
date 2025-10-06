@@ -67,6 +67,7 @@ describe('containsPlayerSim', () => {
     };
 
     const event: ContinueInteractionEvent = {
+      game_timestamp: 0,
       event_id: 'ioj',
       event_type: SSEventType.INTERACTION,
       location_id: 0,

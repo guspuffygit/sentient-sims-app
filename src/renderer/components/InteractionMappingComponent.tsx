@@ -292,6 +292,7 @@ export function InteractionMappingComponent() {
         event_type: SSEventType.INTERACTION,
         environment: event.environment,
         sentient_sims: event.sentient_sims,
+        game_timestamp: 0,
       };
 
       const results = await Promise.all([

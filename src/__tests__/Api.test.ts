@@ -106,6 +106,7 @@ describe('Api', () => {
       is_player_sim: true,
     };
     const result = await aiClient.interactionEvent({
+      game_timestamp: 0,
       event_id: 'oiju981y28hdo1ij',
       event_type: SSEventType.WANTS,
       location_id: 0,

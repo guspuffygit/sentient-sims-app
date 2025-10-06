@@ -21,6 +21,7 @@ describe('MemoryRepository', () => {
     const participants: ParticipantDTO[] = [{ id: '128937674' }, { id: '18276365' }];
     const memory: MemoryEntity = {
       location_id: 90369424,
+      game_timestamp: 0,
       pre_action: 'dioawjd',
       content: 'foiwje9if91082u',
       observation: 'joijofi10298',

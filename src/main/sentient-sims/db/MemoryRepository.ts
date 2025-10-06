@@ -43,7 +43,7 @@ export class MemoryRepository extends Repository {
   getParticipantsMemories(getParticipantsMemoriesRequest: GetParticipantsMemoriesRequest): MemoryEntity[] {
     const placeholders = getParticipantsMemoriesRequest.participant_ids.map(() => '?').join(', ');
 
-    const query = `
+    let query = `
       SELECT * FROM (
         SELECT DISTINCT memory.*
         FROM memory
@@ -52,8 +52,12 @@ export class MemoryRepository extends Repository {
         ORDER BY memory.timestamp DESC
         LIMIT 100
       ) AS subquery
-      ORDER BY subquery.timestamp ASC;
     `;
+
+    if (getParticipantsMemoriesRequest.min_game_timestamp != null) {
+      query += ` WHERE subquery.game_timestamp >= ${getParticipantsMemoriesRequest.min_game_timestamp}`;
+    }
+    query += ` ORDER BY subquery.timestamp ASC;`;
 
     const bigIntParticipantIds = getParticipantsMemoriesRequest.participant_ids.map((participantIdString) =>
       BigInt(participantIdString),
@@ -82,9 +86,17 @@ export class MemoryRepository extends Repository {
     const result = this.dbService
       .getDb()
       .prepare(
-        'UPDATE memory SET pre_action = ?, observation = ?, content = ?, timestamp = ?, location_id = ? WHERE id = ?',
+        'UPDATE memory SET pre_action = ?, observation = ?, content = ?, timestamp = ?, location_id = ?, game_timestamp = ? WHERE id = ?',
       )
-      .run(memory.pre_action, memory.observation, memory.content, memory.timestamp, memory.location_id, memory.id);
+      .run(
+        memory.pre_action,
+        memory.observation,
+        memory.content,
+        memory.timestamp,
+        memory.location_id,
+        memory.game_timestamp,
+        memory.id,
+      );
 
     notifyMemoryEdited(memory);
 
@@ -104,7 +116,7 @@ export class MemoryRepository extends Repository {
       const updateMemoryResult = this.dbService
         .getDb()
         .prepare(
-          'INSERT OR REPLACE INTO memory(id, pre_action, observation, content, location_id) VALUES(?, ?, ?, ?, ?)',
+          'INSERT OR REPLACE INTO memory(id, pre_action, observation, content, location_id, game_timestamp) VALUES(?, ?, ?, ?, ?, ?)',
         )
         .run([
           createMemoryRequest.memory.id,
@@ -112,6 +124,7 @@ export class MemoryRepository extends Repository {
           createMemoryRequest.memory.observation,
           createMemoryRequest.memory.content,
           createMemoryRequest.memory.location_id,
+          createMemoryRequest.memory.game_timestamp,
         ]);
 
       createMemoryRequest.participants.forEach((participant) => {

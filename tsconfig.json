@@ -15,7 +15,8 @@
     "allowJs": true,
     "types": [
       "@webgpu/types",
-      "@types/node"
+      "@types/node",
+      "jest"
     ],
     "outDir": ".erb/dll"
   },

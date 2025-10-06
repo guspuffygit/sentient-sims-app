@@ -35,6 +35,7 @@ describe('Output', () => {
       const event: InteractionEvent = {
         // TODO: Deprecated
         location_id: 0,
+        game_timestamp: 0,
         sentient_sims: [
           {
             careers: [
@@ -242,7 +243,8 @@ describe('Output', () => {
         systemPrompt: 'system',
         memories: [
           {
-            content: 'Give me A',
+            content:
+              'Give me Awefawefawefawefawefwaefhwuehfwiuhefowoijoaijweoidjfaweuhgfkawhefliauhweifuhawliuehflawiuehfliauwhelifuhawleuhfawiluehflaiwuhefiluh',
             role: 'user',
           },
           {
@@ -276,7 +278,9 @@ describe('Output', () => {
       expect(result.messages[0].role).toBe('system');
       expect(result.messages[0].tokens).toBeGreaterThan(5);
 
-      expect(result.messages[1].content).toBe('Give me A');
+      expect(result.messages[1].content).toBe(
+        'Give me Awefawefawefawefawefwaefhwuehfwiuhefowoijoaijweoidjfaweuhgfkawhefliauhweifuhawliuehflawiuehfliauwhelifuhawleuhfawiluehflaiwuhefiluh',
+      );
       expect(result.messages[1].role).toBe('user');
 
       expect(result.messages[2].content).toBe('Give me B');
@@ -297,6 +301,8 @@ describe('Output', () => {
     it('buildOpenAIRequest test length', () => {
       request.maxTokens = 60;
       const result = builder.buildOpenAIRequest(request);
+
+      console.log(`REQUEST:\n${JSON.stringify(request, null, 2)}\nRESULT:\n${JSON.stringify(result, null, 2)}`);
 
       expect(result.messages[0].content).toContain('location');
       expect(result.messages[0].content).toContain('sim 1');

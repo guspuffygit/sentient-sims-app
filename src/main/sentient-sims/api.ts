@@ -95,6 +95,7 @@ export function runApi({ getAssetPath, port, settingsService, directoryService }
 
   expressApp.post('/ai/v2/generate', aiController.sentientSimsGenerate);
   expressApp.post('/ai/v2/event/interaction', aiController.interactionEvent);
+  expressApp.post('/ai/v2/event/reflect', aiController.reflectEvent);
   expressApp.post('/ai/v2/event/classification', aiController.classificationEvent);
   expressApp.post('/ai/v2/event/classification', aiController.classificationEvent);
   expressApp.post('/ai/v2/event/buff', aiController.buffDescription);

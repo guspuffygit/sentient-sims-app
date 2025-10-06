@@ -15,6 +15,7 @@ export type GetMemoryParticipantsRequest = {
 
 export type GetParticipantsMemoriesRequest = {
   participant_ids: string[];
+  min_game_timestamp?: number;
 };
 
 export type CreateMemoryRequest = {
