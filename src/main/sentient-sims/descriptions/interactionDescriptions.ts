@@ -1,11 +1,13 @@
 import { HasNotHappened } from '../filters/HasNotHappened';
 import { InitiatorIsActiveSim } from '../filters/InitiatorIsActiveSim';
+import { InteractionDescriptionOutcome } from '../models/InteractionDescriptionOutcome';
 
 export type InteractionDescription = {
   pre_actions?: string[];
   ignored?: boolean;
   filters?: any[];
   always_run?: boolean;
+  outcomes?: InteractionDescriptionOutcome[];
 };
 
 export const interactionDescriptions: Map<string, InteractionDescription> = new Map(
@@ -1251,7 +1253,7 @@ export const interactionDescriptions: Map<string, InteractionDescription> = new 
     },
     'mixer_social_ConvinceToLeaveSpouse_targeted_romance_relationship': {
       pre_actions: [
-        '{actor.0} is trying to convince {actor.1} to leave their spouse and pursue a romantic relationship.',
+        '{actor.0} is trying to convince {actor.1} to leave {actor.1.theirspouse} and pursue a romantic relationship.',
       ],
     },
     'mixer_social_SayGoodbye_targeted_Friendly_alwaysOn': {
@@ -5690,17 +5692,17 @@ export const interactionDescriptions: Map<string, InteractionDescription> = new 
     },
     'mixer_social_EnthuseAboutWedding': {
       pre_actions: [
-        '{actor.0} is excitedly talking to {actor.1} about an upcoming wedding, sharing all the details and expressing their enthusiasm.',
+        "{actor.0} is excitedly talking to {actor.1} about {actor.0} and {actor.0.theirfiance}'s upcoming wedding, sharing all the details and expressing their enthusiasm.",
       ],
     },
     'mixer_social_ExpressDoubtsMarriage': {
-      pre_actions: ['{actor.0} is expressing doubts about their impending marriage to {actor.1}.'],
+      pre_actions: ['{actor.0} is expressing doubts about marriage to {actor.1}.'],
     },
     'mixer_social_CongratulateEngagement': {
-      pre_actions: ['{actor.0} is congratulating {actor.1} on their engagement.'],
+      pre_actions: ['{actor.0} is congratulating {actor.1} on their engagement to {actor.1.theirfiance}.'],
     },
     'mixer_social_CongratulateMarriage': {
-      pre_actions: ['{actor.0} is congratulating {actor.1} on their recent marriage.'],
+      pre_actions: ['{actor.0} is congratulating {actor.1} on their recent marriage to {actor.1.theirspouse}.'],
     },
     'mixer_social_JokeAboutMarriage': {
       pre_actions: ['{actor.0} is making a playful joke about marriage to {actor.1}.'],
@@ -5709,13 +5711,15 @@ export const interactionDescriptions: Map<string, InteractionDescription> = new 
       pre_actions: ['{actor.0} is admiring the newlyweds, expressing their happiness for their union.'],
     },
     'mixer_social_GazeLovinglyNewlywed': {
-      pre_actions: ['{actor.0} is lovingly gazing at their new spouse, admiring them with affection.'],
+      pre_actions: ['{actor.0} is lovingly gazing at their new spouse {actor.0.spouse}, admiring them with affection.'],
     },
     'mixer_social_AskToBeHonorAttendant': {
-      pre_actions: ['{actor.0} is asking {actor.1} if they can be the Sim of Honor at their wedding.'],
+      pre_actions: [
+        "{actor.0} is asking {actor.1} if they can be an honored attendant at {actor.0}'s wedding between {actor.0} and {actor.0.theirfiance}.",
+      ],
     },
     'mixer_social_AskForBlessingToMarry': {
-      pre_actions: ['{actor.0} is gathering the courage to approach {actor.1} and ask for their blessing to marry.'],
+      pre_actions: ['{actor.0} is asking {actor.1} and ask for their blessing to marry.'],
     },
     'mixer_social_Wedding_WeddingTradition_AskWeddingParty': {
       pre_actions: [
@@ -5723,7 +5727,9 @@ export const interactionDescriptions: Map<string, InteractionDescription> = new 
       ],
     },
     'mixer_social_Wedding_WeddingTradition_AskToComeToWedding': {
-      pre_actions: ['{actor.0} is asking {actor.1} if they want to come to the wedding.'],
+      pre_actions: [
+        '{actor.0} is asking {actor.1} if they want to come to the wedding between {actor.0} and {actor.0.theirfiance}.',
+      ],
     },
     'mixer_social_Wedding_Bouquet_AskAbout': {
       pre_actions: ['{actor.0} is asking {actor.1} about the flower bouquet.'],
@@ -5748,24 +5754,32 @@ export const interactionDescriptions: Map<string, InteractionDescription> = new 
       pre_actions: ['{actor.0} is going to the bakery to purchase a wedding cake for their upcoming nuptials.'],
     },
     'mixer_social_AskToBeFlowerSpreader': {
-      pre_actions: ['{actor.0} is asking {actor.1} if they can be the flower spreader at the wedding.'],
+      pre_actions: [
+        '{actor.0} is asking {actor.1} if they can be the flower spreader at the wedding between {actor.0} and {actor.0.theirfiance}.',
+      ],
     },
     'mixer_social_AskToBeRingBearer': {
-      pre_actions: ['{actor.0} is asking {actor.1} to be the ring bearer at the wedding.'],
+      pre_actions: [
+        '{actor.0} is asking {actor.1} to be the ring bearer at the wedding between {actor.0} and {actor.0.theirfiance}.',
+      ],
     },
     'mixer_social_AskToBeOfficiant': {
-      pre_actions: ['{actor.0} is asking {actor.1} if they can officiate at their wedding.'],
+      pre_actions: [
+        '{actor.0} is asking {actor.1} if they can officiate at their wedding between {actor.0} and {actor.0.theirfiance}.',
+      ],
     },
     'mixer_social_ReminisceAboutWedding_targeted_Friendly_alwaysOn': {
       pre_actions: ['{actor.0} and {actor.1} are sharing memories and reminiscing about their wedding day.'],
     },
     'mixer_social_AskToBeFlowerSpreader_ChildTarget': {
       pre_actions: [
-        '{actor.0} is excitedly asking the child, {actor.1}, if they can be the flower spreader at the wedding.',
+        '{actor.0} is excitedly asking the child, {actor.1}, if they can be the flower spreader at the wedding between {actor.0} and {actor.0.theirfiance}.',
       ],
     },
     'mixer_social_AskToBeRingBearer_ChildTarget': {
-      pre_actions: ['{actor.0} is excitedly asking {actor.1} if they can be the ring bearer at the wedding.'],
+      pre_actions: [
+        '{actor.0} is excitedly asking {actor.1} if they can be the ring bearer at the wedding between {actor.0} and {actor.0.theirfiance}.',
+      ],
     },
     'mixer_social_EnthuseAboutWedding_ActorEngaged': {
       pre_actions: [

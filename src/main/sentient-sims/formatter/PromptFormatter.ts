@@ -308,6 +308,20 @@ export function formatAction(
         formattedAction = formattedAction.replaceAll(`{sex_location}`, sexLocation);
       }
     }
+
+    formattedAction = formattedAction.replaceAll(`{actor.${i}.fiance}`, sentientSims[i].fiance?.name ?? '');
+    formattedAction = formattedAction.replaceAll(`{actor.${i}.myfiance}`, sentientSims[i].fiance?.name ?? 'my fiance');
+    formattedAction = formattedAction.replaceAll(
+      `{actor.${i}.theirfiance}`,
+      sentientSims[i].fiance?.name ?? 'their fiance',
+    );
+
+    formattedAction = formattedAction.replaceAll(`{actor.${i}.myspouse}`, sentientSims[i].spouse?.name ?? 'my spouse');
+    formattedAction = formattedAction.replaceAll(
+      `{actor.${i}.theirspouse}`,
+      sentientSims[i].spouse?.name ?? 'their spouse',
+    );
+    formattedAction = formattedAction.replaceAll(`{actor.${i}.spouse}`, sentientSims[i].spouse?.name ?? '');
   }
 
   return formattedAction;
