@@ -1,13 +1,5 @@
 /* eslint-disable promise/always-return */
-import {
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  ImageList,
-  ImageListItem,
-} from '@mui/material';
+import { Box, Button, Card, CardActions, CardContent, ImageList, ImageListItem } from '@mui/material';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import log from 'electron-log';
 import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
@@ -65,9 +57,7 @@ export default function LocationsPage() {
     })
       .then((res) => res.json())
       .then((screenshotsResponse: ListScreenshotsResponse) => {
-        setScreenshots(
-          screenshotsResponse.data.map((screenshot) => screenshot.name)
-        );
+        setScreenshots(screenshotsResponse.data.map((screenshot) => screenshot.name));
       })
       .catch(() => {
         // ignore
@@ -201,20 +191,17 @@ export default function LocationsPage() {
     }));
   }, []);
 
-  const handleDescriptionEdit = useCallback(
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setEditedLocation((previousLocation) => ({
-        index: Number(previousLocation?.index),
-        location: {
-          id: Number(previousLocation?.location?.id),
-          name: previousLocation?.location?.name || '',
-          lot_type: previousLocation?.location?.lot_type || '',
-          description: event.target.value,
-        },
-      }));
-    },
-    []
-  );
+  const handleDescriptionEdit = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEditedLocation((previousLocation) => ({
+      index: Number(previousLocation?.index),
+      location: {
+        id: Number(previousLocation?.location?.id),
+        name: previousLocation?.location?.name || '',
+        lot_type: previousLocation?.location?.lot_type || '',
+        description: event.target.value,
+      },
+    }));
+  }, []);
   if (locations.length > 0) {
     if (editedLocation) {
       return (
@@ -230,12 +217,7 @@ export default function LocationsPage() {
                 }}
               >
                 <div>
-                  <Button
-                    sx={{ marginRight: 1 }}
-                    color="secondary"
-                    variant="outlined"
-                    onClick={() => handleSave()}
-                  >
+                  <Button sx={{ marginRight: 1 }} color="secondary" variant="outlined" onClick={() => handleSave()}>
                     Save
                   </Button>
                   <Button
@@ -246,20 +228,12 @@ export default function LocationsPage() {
                   >
                     Cancel
                   </Button>
-                  <Button
-                    color="secondary"
-                    variant="outlined"
-                    onClick={() => aiVision.openModal()}
-                  >
+                  <Button color="secondary" variant="outlined" onClick={() => aiVision.openModal()}>
                     <AIIcon sx={{ marginRight: 1 }} /> AI Vision
                   </Button>
                 </div>
                 <div>
-                  <Button
-                    color="error"
-                    variant="outlined"
-                    onClick={() => handleDelete()}
-                  >
+                  <Button color="error" variant="outlined" onClick={() => handleDelete()}>
                     Delete
                   </Button>
                 </div>
@@ -336,12 +310,7 @@ export default function LocationsPage() {
   return (
     <Card sx={{ minWidth: 275, marginBottom: 2, overflowY: 'scroll' }}>
       <Box sx={{ margin: 2 }}>
-        <ImageList
-          sx={{ minWidth: 275, height: 450 }}
-          variant="woven"
-          cols={5}
-          gap={8}
-        >
+        <ImageList sx={{ minWidth: 275, height: 450 }} variant="woven" cols={5} gap={8}>
           {screenshots.map((item) => (
             <ImageListItem key={item}>
               <img

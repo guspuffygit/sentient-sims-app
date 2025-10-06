@@ -8,10 +8,7 @@ export class FileController {
 
   private screenshotService: ScreenshotService;
 
-  constructor(
-    lastExceptionService: LastExceptionService,
-    screenshotService: ScreenshotService
-  ) {
+  constructor(lastExceptionService: LastExceptionService, screenshotService: ScreenshotService) {
     this.lastExceptionService = lastExceptionService;
     this.screenshotService = screenshotService;
 

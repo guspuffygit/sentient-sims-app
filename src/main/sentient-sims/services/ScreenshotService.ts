@@ -16,10 +16,7 @@ export class ScreenshotService {
 
   async listRecentScreenshots(): Promise<Screenshot[]> {
     const screenshotsFolder = this.directoryService.getScreenshotsFolder();
-    const files = await fs.promises.readdir(
-      this.directoryService.getScreenshotsFolder(),
-      { withFileTypes: true }
-    );
+    const files = await fs.promises.readdir(this.directoryService.getScreenshotsFolder(), { withFileTypes: true });
 
     files.forEach((file) => {
       log.info(file);
@@ -38,7 +35,7 @@ export class ScreenshotService {
           }
           const stats = await fs.promises.stat(filePath);
           return { key: filePath, data: stats };
-        })
+        }),
     );
 
     this.cachedScreenshots = new Map();
@@ -55,8 +52,6 @@ export class ScreenshotService {
   }
 
   async getScreenshot(filename: string) {
-    return fs.promises.readFile(
-      path.join(this.directoryService.getScreenshotsFolder(), filename)
-    );
+    return fs.promises.readFile(path.join(this.directoryService.getScreenshotsFolder(), filename));
   }
 }

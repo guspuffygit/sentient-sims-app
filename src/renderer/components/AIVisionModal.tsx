@@ -1,21 +1,9 @@
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable promise/always-return */
-import {
-  Box,
-  Button,
-  Grid,
-  ImageList,
-  ImageListItem,
-  Modal,
-  styled,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Grid, ImageList, ImageListItem, Modal, styled, Typography } from '@mui/material';
 import { useState, JSX, ChangeEvent, useCallback } from 'react';
 import { appApiUrl } from 'main/sentient-sims/constants';
-import {
-  ListScreenshotsResponse,
-  Screenshot,
-} from 'main/sentient-sims/models/ListScreenshotsResponse';
+import { ListScreenshotsResponse, Screenshot } from 'main/sentient-sims/models/ListScreenshotsResponse';
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 import SpaceBetweenDiv from './SpaceBetweenDiv';
 import { MemoryEditInput } from './MemoryEditInput';
@@ -25,15 +13,13 @@ export type AIVisionModalHook = {
   openModal: () => void;
 };
 
-const ImageListItemWithStyle = styled(ImageListItem)<{ isSelected: boolean }>(
-  ({ theme, isSelected }) => ({
-    '&:hover': {
-      cursor: 'pointer',
-      opacity: 0.8,
-    },
-    border: isSelected ? 'solid 3px blue' : 'none',
-  })
-);
+const ImageListItemWithStyle = styled(ImageListItem)<{ isSelected: boolean }>(({ theme, isSelected }) => ({
+  '&:hover': {
+    cursor: 'pointer',
+    opacity: 0.8,
+  },
+  'border': isSelected ? 'solid 3px blue' : 'none',
+}));
 
 type SelectedScreenshot = {
   name: string;
@@ -44,9 +30,7 @@ export function useAIVision(): AIVisionModalHook {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
-  const [selectedIndexes, setSelectedIndexes] = useState<SelectedScreenshot[]>(
-    []
-  );
+  const [selectedIndexes, setSelectedIndexes] = useState<SelectedScreenshot[]>([]);
   const [screenNumber, setScreenNumber] = useState<number>(0);
 
   function handleClose() {
@@ -78,19 +62,10 @@ export function useAIVision(): AIVisionModalHook {
   }
 
   function handleItemSelect(screenshot: Screenshot) {
-    if (
-      selectedIndexes.filter((idk) => idk.name === screenshot.name).length > 0
-    ) {
-      setSelectedIndexes(
-        selectedIndexes.filter(
-          (selectedItem) => selectedItem.name !== screenshot.name
-        )
-      );
+    if (selectedIndexes.filter((idk) => idk.name === screenshot.name).length > 0) {
+      setSelectedIndexes(selectedIndexes.filter((selectedItem) => selectedItem.name !== screenshot.name));
     } else if (selectedIndexes.length < 5) {
-      setSelectedIndexes([
-        ...selectedIndexes,
-        { name: screenshot.name, description: '' },
-      ]);
+      setSelectedIndexes([...selectedIndexes, { name: screenshot.name, description: '' }]);
     }
   }
 
@@ -99,16 +74,13 @@ export function useAIVision(): AIVisionModalHook {
   }
 
   const handleDescriptionEdit = useCallback(
-    (
-      event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-      index: number
-    ) => {
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
       setSelectedIndexes((previousIndexes) => {
         previousIndexes[index].description = event.target.value;
         return previousIndexes;
       });
     },
-    []
+    [],
   );
 
   const page = () => {
@@ -156,9 +128,7 @@ export function useAIVision(): AIVisionModalHook {
               <ImageListItemWithStyle
                 key={item.name}
                 cols={1}
-                isSelected={
-                  selectedIndexes.filter((i) => i.name === item.name).length > 0
-                }
+                isSelected={selectedIndexes.filter((i) => i.name === item.name).length > 0}
                 onClick={() => handleItemSelect(item)}
               >
                 <img
@@ -189,13 +159,7 @@ export function useAIVision(): AIVisionModalHook {
           p: 4,
         }}
       >
-        <Grid
-          container
-          spacing={0}
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-        >
+        <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center">
           <Grid item xs={3}>
             <Typography variant="h4" component="h2">
               Select up to 5 screenshots:

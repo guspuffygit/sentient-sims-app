@@ -105,11 +105,8 @@ export class AIController {
 
   async generateLotDescription(req: Request, res: Response) {
     try {
-      const generateLotDescriptionRequest: GenerateLotDescriptionRequest =
-        req.body;
-      const result = await this.aiService.generateLotDescription(
-        generateLotDescriptionRequest
-      );
+      const generateLotDescriptionRequest: GenerateLotDescriptionRequest = req.body;
+      const result = await this.aiService.generateLotDescription(generateLotDescriptionRequest);
       res.json(result);
     } catch (err: any) {
       log.error('Error getting models', err);

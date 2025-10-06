@@ -53,10 +53,7 @@ export function runApi({ getAssetPath, port, settingsService, directoryService }
   const versionService = new VersionService(directoryService);
   const versionController = new VersionController(versionService);
   const updateService = new UpdateService(directoryService);
-  const fileController = new FileController(
-    lastExceptionService,
-    new ScreenshotService(directoryService)
-  );
+  const fileController = new FileController(lastExceptionService, new ScreenshotService(directoryService));
   const dbService = new DbService(directoryService);
   const dbController = new DbController(dbService);
   const locationRepository = new LocationRepository(dbService);
