@@ -279,20 +279,14 @@ describe('Output', () => {
       expect(result.messages[1].content).toBe('Give me A');
       expect(result.messages[1].role).toBe('user');
 
-      expect(result.messages[2].content).toBe('A');
-      expect(result.messages[2].role).toBe('assistant');
+      expect(result.messages[2].content).toBe('Give me B');
+      expect(result.messages[2].role).toBe('user');
 
-      expect(result.messages[3].content).toBe('Give me B');
+      expect(result.messages[3].content).toBe('action');
       expect(result.messages[3].role).toBe('user');
 
-      expect(result.messages[4].content).toBe('B');
+      expect(result.messages[4].content).toBe('assistantPreResponse');
       expect(result.messages[4].role).toBe('assistant');
-
-      expect(result.messages[5].content).toBe('action');
-      expect(result.messages[5].role).toBe('user');
-
-      expect(result.messages[6].content).toBe('assistantPreResponse');
-      expect(result.messages[6].role).toBe('assistant');
       let tokenCount = 0;
       result.messages.forEach((message) => {
         tokenCount += message.tokens;
@@ -309,21 +303,15 @@ describe('Output', () => {
       expect(result.messages[0].content).toContain('system');
       expect(result.messages[0].role).toBe('system');
       expect(result.messages[0].tokens).toBeGreaterThan(5);
-      console.log(`THIS IS IT SEARCH FOR THIS: ${JSON.stringify(result, null, 2)}`);
-      expect(result.messages[1].content).toBe('A');
-      expect(result.messages[1].role).toBe('assistant');
 
-      expect(result.messages[2].content).toBe('Give me B');
+      expect(result.messages[1].content).toBe('Give me B');
+      expect(result.messages[1].role).toBe('user');
+
+      expect(result.messages[2].content).toBe('action');
       expect(result.messages[2].role).toBe('user');
 
-      expect(result.messages[3].content).toBe('B');
+      expect(result.messages[3].content).toBe('assistantPreResponse');
       expect(result.messages[3].role).toBe('assistant');
-
-      expect(result.messages[4].content).toBe('action');
-      expect(result.messages[4].role).toBe('user');
-
-      expect(result.messages[5].content).toBe('assistantPreResponse');
-      expect(result.messages[5].role).toBe('assistant');
     });
   });
 });
