@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: Checkout git repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Setup Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
@@ -36,7 +36,7 @@ jobs:
       - name: Install Node and NPM
         uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: npm
 
       - name: add git binaries to PATH on Windows
@@ -52,7 +52,7 @@ jobs:
       - name: Install and build
         run: |
           npm cache clean --force
-          npm install
+          npm ci
           npm run postinstall
           npm run build
 

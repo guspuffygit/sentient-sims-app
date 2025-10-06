@@ -24,7 +24,7 @@ jobs:
       - name: Install Dependencies
         run: |
           npm cache clean --force
-          npm install
+          npm ci
 
       - name: Compile
         run: |
