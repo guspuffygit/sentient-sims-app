@@ -24,6 +24,7 @@ jobs:
         run: |
           npm cache clean --force
           npm install
+          npm run rebuild
 
       - name: npm test
         env:
