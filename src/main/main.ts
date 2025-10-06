@@ -11,8 +11,7 @@
 import path from 'path';
 import sourceMapSupport from 'source-map-support';
 import { app, BrowserWindow, shell, session, WebRequestFilter, dialog } from 'electron';
-import EAU from 'electron-updater';
-const { autoUpdater } = EAU;
+import electronUpdater, { type AppUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
@@ -26,6 +25,13 @@ import { SettingsEnum } from './sentient-sims/models/SettingsEnum';
 import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { disableDebugLogging, enableDebugLogging } from './sentient-sims/util/debugLog';
 import debug from 'electron-debug';
+
+export function getAutoUpdater(): AppUpdater {
+  // Using destructuring to access autoUpdater due to the CommonJS module of 'electron-updater'.
+  // It is a workaround for ESM compatibility issues, see https://github.com/electron-userland/electron-builder/issues/7976.
+  const { autoUpdater } = electronUpdater;
+  return autoUpdater;
+}
 
 log.initialize({ preload: true });
 
@@ -128,6 +134,7 @@ const createWindow = async () => {
   });
 
   log.transports.file.level = 'info';
+  const autoUpdater = getAutoUpdater();
   autoUpdater.logger = log;
   try {
     autoUpdater.checkForUpdatesAndNotify();
