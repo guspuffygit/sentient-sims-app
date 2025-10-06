@@ -38,6 +38,11 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      - name: Diagnose Environment
+        run: |
+          echo "Node.js version: $(node -v)"
+          echo "NPM version: $(npm -v)"
+          echo "Operating System: $(uname -a)"
 
       - name: add git binaries to PATH on Windows
         if: runner.os == 'Windows'
