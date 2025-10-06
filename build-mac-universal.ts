@@ -1,13 +1,6 @@
 import { makeUniversalApp } from '@electron/universal';
-import { readdirSync } from 'fs';
-import * as path from 'path';
-import log from 'electron-log';
 
-const currentDirectory = path.dirname(__filename);
-log.info('current: ');
-log.info(readdirSync(`${currentDirectory}`));
-log.info('mac: ');
-log.info(readdirSync(`${currentDirectory}/mac`));
+const currentDirectory = process.cwd();
 
 (async () => {
   await makeUniversalApp({
@@ -16,5 +9,5 @@ log.info(readdirSync(`${currentDirectory}/mac`));
     outAppPath: `${currentDirectory}/universal/SentientSims.app`,
   });
 
-  log.info('Mac universal build complete');
+  console.log('Mac universal build complete');
 })();
