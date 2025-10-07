@@ -59,11 +59,6 @@ const createWindow = async () => {
   const RESOURCES_PATH = app.isPackaged
     ? path.join(process.resourcesPath, 'assets')
     : path.join(process.cwd(), 'assets');
-  log.info(`ASSETS PATH: ${RESOURCES_PATH}`);
-  const preloadJsPath = app.isPackaged
-    ? path.join(process.cwd(), 'preload.js')
-    : path.join(process.cwd(), '.erb/dll/preload.js');
-  log.info(`PRELOAD JS PATH: ${preloadJsPath}`);
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
   };
