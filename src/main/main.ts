@@ -14,7 +14,6 @@ import { app, BrowserWindow, shell, session, WebRequestFilter, dialog } from 'el
 import electronUpdater, { type AppUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
 import registerDebugToggleHotkey from './sentient-sims/registerDebugToggleHotkey';
 import ipcHandlers from './sentient-sims/ipcHandlers';
 import { runApi, runWebSocketServer } from './sentient-sims/api';
@@ -25,6 +24,7 @@ import { SettingsEnum } from './sentient-sims/models/SettingsEnum';
 import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { disableDebugLogging, enableDebugLogging } from './sentient-sims/util/debugLog';
 import debug from 'electron-debug';
+import { resolveHtmlPath } from './util';
 
 export function getAutoUpdater(): AppUpdater {
   // Using destructuring to access autoUpdater due to the CommonJS module of 'electron-updater'.
@@ -79,7 +79,7 @@ const createWindow = async () => {
     },
   });
 
-  mainWindow.loadURL(resolveHtmlPath('index.html'));
+  mainWindow.loadURL(resolveHtmlPath(getAssetPath, 'index.html'));
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
@@ -115,7 +115,7 @@ const createWindow = async () => {
   });
 
   const settingsService = new SettingsService();
-  ipcHandlers(settingsService);
+  ipcHandlers(settingsService, getAssetPath);
   const directoryService = new DirectoryService(settingsService);
 
   if (settingsService.get(SettingsEnum.DEBUG_LOGS)) {
@@ -152,6 +152,22 @@ const createWindow = async () => {
   } catch (err) {
     log.error(`Unable to check for updates and notify`, err);
   }
+
+  const filter: WebRequestFilter = {
+    urls: [`http://localhost:${appApiPort}/login/*`],
+  };
+
+  session.defaultSession.webRequest.onBeforeRequest(filter, (details) => {
+    const { url } = details;
+    log.debug(`url hit: ${url}`);
+    if (url.includes('/login/signout')) {
+      log.debug('/login/signout initiated');
+      session.defaultSession.clearAuthCache();
+      session.defaultSession.clearCache();
+      session.defaultSession.clearStorageData();
+      mainWindow?.loadURL(resolveHtmlPath(getAssetPath, 'index.html'));
+    }
+  });
 };
 
 /**
@@ -173,22 +189,6 @@ app
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();
-    });
-
-    const filter: WebRequestFilter = {
-      urls: [`http://localhost:${appApiPort}/login/*`],
-    };
-
-    session.defaultSession.webRequest.onBeforeRequest(filter, (details) => {
-      const { url } = details;
-      log.debug(`url hit: ${url}`);
-      if (url.includes('/login/signout')) {
-        log.debug('/login/signout initiated');
-        session.defaultSession.clearAuthCache();
-        session.defaultSession.clearCache();
-        session.defaultSession.clearStorageData();
-        mainWindow?.loadURL(resolveHtmlPath('index.html'));
-      }
     });
   })
   .catch(log.error);

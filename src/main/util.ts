@@ -1,10 +1,9 @@
-import { URL } from 'url';
-import path from 'path';
 import log from 'electron-log';
+import { URL } from 'url';
 
-export function resolveHtmlPath(htmlFileName: string): string {
-  const resolvedPath = path.join(process.cwd(), '../renderer', htmlFileName);
-  log.info(`New path: ${resolvedPath}`);
+export function resolveHtmlPath(getAssetPath: (...paths: string[]) => string, htmlFileName: string): string {
+  const resolvedPath = getAssetPath('../app.asar/dist/renderer', htmlFileName);
+  log.info(`new-path: ${resolvedPath}`);
   if (process.env.NODE_ENV === 'development') {
     const port = process.env.PORT || 1212;
     const url = new URL(`http://localhost:${port}`);

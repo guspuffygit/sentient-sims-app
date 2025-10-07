@@ -2,8 +2,8 @@ import electron, { IpcMainEvent, clipboard, dialog, ipcMain, shell } from 'elect
 import log from 'electron-log';
 import { SettingsEnum } from './models/SettingsEnum';
 import { SettingsService } from './services/SettingsService';
-import { resolveHtmlPath } from '../util';
 import { notifySettingChanged } from './util/notifyRenderer';
+import { resolveHtmlPath } from '../util';
 
 async function handleSelectDirectory() {
   const { canceled, filePaths } = await dialog.showOpenDialog({
@@ -16,7 +16,7 @@ async function handleSelectDirectory() {
   return null;
 }
 
-export default function ipcHandlers(settingsService: SettingsService) {
+export default function ipcHandlers(settingsService: SettingsService, getAssetPath: (...paths: string[]) => string) {
   ipcMain.handle('dialog:selectDirectory', handleSelectDirectory);
   ipcMain.on('set-setting', (_event: IpcMainEvent, setting: SettingsEnum, value: any) => {
     if (setting !== SettingsEnum.ACCESS_TOKEN) {
@@ -33,7 +33,7 @@ export default function ipcHandlers(settingsService: SettingsService) {
   ipcMain.on('on-successful-auth', () => {
     electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
       if (wnd.webContents?.isDestroyed() === false) {
-        wnd.loadURL(resolveHtmlPath('index.html'));
+        wnd.loadURL(resolveHtmlPath(getAssetPath, 'index.html'));
       }
     });
   });

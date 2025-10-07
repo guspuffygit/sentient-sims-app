@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import electron from 'electron';
 import log from 'electron-log';
 import { NotLoggedInError, PatreonService } from '../services/PatreonService';
-import { resolveHtmlPath } from '../../util';
 import { notifyRefreshUserAttributes } from '../util/notifyRenderer';
+import { resolveHtmlPath } from '../../util';
 
 export class PatreonController {
   private patreonService: PatreonService;
@@ -31,7 +31,7 @@ export class PatreonController {
       if (exception instanceof NotLoggedInError) {
         electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
           if (wnd.webContents?.isDestroyed() === false) {
-            wnd.webContents.loadURL(resolveHtmlPath('index.html#/login'));
+            wnd.webContents.loadURL(resolveHtmlPath(this.getAssetPath, 'index.html#/login'));
           }
         });
       }
