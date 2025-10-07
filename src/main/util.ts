@@ -1,11 +1,10 @@
 import { URL } from 'url';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import log from 'electron-log';
 
 export function resolveHtmlPath(htmlFileName: string): string {
+  const resolvedPath = path.join(process.cwd(), '../renderer', htmlFileName);
+  log.info(`New path: ${resolvedPath}`);
   if (process.env.NODE_ENV === 'development') {
     const port = process.env.PORT || 1212;
     const url = new URL(`http://localhost:${port}`);
@@ -13,6 +12,5 @@ export function resolveHtmlPath(htmlFileName: string): string {
     return url.href;
   }
 
-  const resolvedPath = path.resolve(__dirname, '../renderer/', htmlFileName);
   return `file://${resolvedPath}`;
 }
