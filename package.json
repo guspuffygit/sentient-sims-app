@@ -38,7 +38,7 @@
     "package": "npx tsx ./.erb/scripts/clean.ts dist && npm run build && cross-env NODE_OPTIONS=\"--import tsx\" electron-builder build --publish never",
     "rebuild": "cross-env NODE_OPTIONS=\"--import tsx\" electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "start": "tsx ./.erb/scripts/check-port-in-use.ts && npm run start:renderer",
-    "start:main": "cross-env NODE_OPTIONS=\"--import tsx\" NODE_ENV=development electron .",
+    "start:main": "cross-env NODE_OPTIONS=\"--import tsx\" NODE_ENV=development electronmon .",
     "start:preload": "cross-env NODE_ENV=development NODE_OPTIONS=\"--import tsx\" webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development NODE_OPTIONS=\"--import tsx\" webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "test": "cross-env ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest '\\.test\\.ts' '\\.test\\.tsx'",
