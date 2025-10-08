@@ -21,6 +21,7 @@ export class AIController {
     this.sentientSimsGenerate = this.sentientSimsGenerate.bind(this);
     this.interactionEvent = this.interactionEvent.bind(this);
     this.classificationEvent = this.classificationEvent.bind(this);
+    this.buffDescription = this.buffDescription.bind(this);
     this.buffEvent = this.buffEvent.bind(this);
     this.getModels = this.getModels.bind(this);
     this.tts = this.tts.bind(this);

@@ -142,7 +142,12 @@ export class VLLMAIService implements GenerationService {
     const result: ChatCompletion = response.data;
     log.debug(`Info about it: ${response.status} ${JSON.stringify(result, null, 2)}`);
 
-    const text = this.getOutputFromGeneration(result);
+    let text = this.getOutputFromGeneration(result);
+
+    if (request.guidedChoice) {
+      text = JSON.parse(text).choice;
+    }
+
     return {
       text,
       request,
