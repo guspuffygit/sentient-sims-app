@@ -16,7 +16,7 @@ async function handleSelectDirectory() {
   return null;
 }
 
-export default function ipcHandlers(settingsService: SettingsService, getAssetPath: (...paths: string[]) => string) {
+export default function ipcHandlers(settingsService: SettingsService) {
   ipcMain.handle('dialog:selectDirectory', handleSelectDirectory);
   ipcMain.on('set-setting', (_event: IpcMainEvent, setting: SettingsEnum, value: any) => {
     if (setting !== SettingsEnum.ACCESS_TOKEN) {
@@ -33,7 +33,7 @@ export default function ipcHandlers(settingsService: SettingsService, getAssetPa
   ipcMain.on('on-successful-auth', () => {
     electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
       if (wnd.webContents?.isDestroyed() === false) {
-        wnd.loadURL(resolveHtmlPath(getAssetPath, 'index.html'));
+        wnd.loadURL(resolveHtmlPath('index.html'));
       }
     });
   });

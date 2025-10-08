@@ -11,7 +11,6 @@
 import path from 'path';
 import sourceMapSupport from 'source-map-support';
 import { app, BrowserWindow, shell, session, WebRequestFilter, dialog } from 'electron';
-import electronUpdater, { type AppUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import registerDebugToggleHotkey from './sentient-sims/registerDebugToggleHotkey';
@@ -25,13 +24,6 @@ import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 import { disableDebugLogging, enableDebugLogging } from './sentient-sims/util/debugLog';
 import debug from 'electron-debug';
 import { resolveHtmlPath } from './util';
-
-export function getAutoUpdater(): AppUpdater {
-  // Using destructuring to access autoUpdater due to the CommonJS module of 'electron-updater'.
-  // It is a workaround for ESM compatibility issues, see https://github.com/electron-userland/electron-builder/issues/7976.
-  const { autoUpdater } = electronUpdater;
-  return autoUpdater;
-}
 
 log.initialize({ preload: true });
 
@@ -56,9 +48,15 @@ const createWindow = async () => {
     await installExtensions();
   }
 
-  const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(process.cwd(), 'assets');
+  let RESOURCES_PATH = path.join(process.cwd(), 'assets');
+  let preloadPath = path.join(process.cwd(), '.erb/dll/preload.js');
+  if (app.isPackaged) {
+    RESOURCES_PATH = path.join(process.resourcesPath, 'assets');
+    preloadPath = path.join(process.resourcesPath, 'app.asar/dist/main/preload.js');
+  }
+
+  log.info(`RESOURCES_PATH: ${RESOURCES_PATH}`);
+  log.info(`PRELOAD: ${preloadPath}`);
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
   };
@@ -73,13 +71,11 @@ const createWindow = async () => {
     webPreferences: {
       webSecurity: false, // Disable web security
       allowRunningInsecureContent: true,
-      preload: app.isPackaged
-        ? path.join(process.cwd(), 'preload.js')
-        : path.join(process.cwd(), '.erb/dll/preload.js'),
+      preload: preloadPath,
     },
   });
 
-  mainWindow.loadURL(resolveHtmlPath(getAssetPath, 'index.html'));
+  mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
@@ -115,7 +111,7 @@ const createWindow = async () => {
   });
 
   const settingsService = new SettingsService();
-  ipcHandlers(settingsService, getAssetPath);
+  ipcHandlers(settingsService);
   const directoryService = new DirectoryService(settingsService);
 
   if (settingsService.get(SettingsEnum.DEBUG_LOGS)) {
@@ -133,7 +129,9 @@ const createWindow = async () => {
   });
 
   log.transports.file.level = 'info';
-  const autoUpdater = getAutoUpdater();
+
+  const { autoUpdater } = await import('electron-updater');
+
   autoUpdater.logger = log;
   try {
     autoUpdater.checkForUpdatesAndNotify();
@@ -165,7 +163,7 @@ const createWindow = async () => {
       session.defaultSession.clearAuthCache();
       session.defaultSession.clearCache();
       session.defaultSession.clearStorageData();
-      mainWindow?.loadURL(resolveHtmlPath(getAssetPath, 'index.html'));
+      mainWindow?.loadURL(resolveHtmlPath('index.html'));
     }
   });
 };
