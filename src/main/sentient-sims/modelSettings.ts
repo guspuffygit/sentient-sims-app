@@ -93,7 +93,7 @@ export const AllModelSettings: ModelSettingsType = {
     top_p: 0.95,
     top_k: 40,
     repetition_penalty: 1.1,
-    max_tokens: 24000,
+    max_tokens: 11536,
   },
   'ArliAI/Llama-3.3-70B-ArliAI-RPMax-v1.4': {
     temperature: 0.8,
