@@ -50,6 +50,7 @@ export const appApiUrl = `http://localhost:${appApiPort}`;
 export const openaiDefaultEndpoint = 'https://api.openai.com/v1';
 export const koboldaiDefaultEndpoint = 'http://localhost:5000';
 export const novelaiDefaultEndpoint = 'https://api.novelai.net';
+export const novelaiGenerationDefaultEndpoint = 'https://text.novelai.net';
 export const openaiDefaultModel = 'gpt-4o-mini';
 export const novelaiDefaultModel = 'kayra-v1';
 export const sentientSimsAIDefaultModel = 'Gryphe/MythoMax-L2-13b';

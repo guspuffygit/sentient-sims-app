@@ -5,6 +5,7 @@ import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel } from '../models/AIModel';
+import { AllModelSettings } from '../modelSettings';
 
 export class NovelAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -39,12 +40,10 @@ const badWordsList = [
 
 // Used for phrase repetition penalty
 const repPenaltyAllowList = [
-  [
-    49256, 49264, 49231, 49230, 49287, 85, 49255, 49399, 49262, 336, 333, 432, 363, 468, 492, 745, 401, 426, 623, 794,
-    1096, 2919, 2072, 7379, 1259, 2110, 620, 526, 487, 16562, 603, 805, 761, 2681, 942, 8917, 653, 3513, 506, 5301, 562,
-    5010, 614, 10942, 539, 2976, 462, 5189, 567, 2032, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 588, 803, 1040,
-    49209, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-  ],
+  49256, 49264, 49231, 49230, 49287, 85, 49255, 49399, 49262, 336, 333, 432, 363, 468, 492, 745, 401, 426, 623, 794,
+  1096, 2919, 2072, 7379, 1259, 2110, 620, 526, 487, 16562, 603, 805, 761, 2681, 942, 8917, 653, 3513, 506, 5301, 562,
+  5010, 614, 10942, 539, 2976, 462, 5189, 567, 2032, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 588, 803, 1040,
+  49209, 4, 5, 6, 7, 8, 9, 10, 11, 12,
 ];
 
 type LogitBiasExp = {
@@ -56,21 +55,21 @@ type LogitBiasExp = {
 
 type NovelAIQueryParameters = {
   use_string: boolean;
-  temperature: number;
+  temperature?: number;
   max_length: number;
   min_length: number;
-  top_k: number;
-  top_p: number;
-  top_a: number;
+  top_k?: number;
+  top_p?: number;
+  top_a?: number;
   tail_free_sampling: number;
-  repetition_penalty: number;
+  repetition_penalty?: number;
   repetition_penalty_range: number;
   repetition_penalty_slope: number;
   repetition_penalty_frequency: number;
   repetition_penalty_presence: number;
   phrase_rep_pen: 'aggressive';
   bad_words_ids: number[][];
-  repetition_penalty_whitelist: number[][];
+  repetition_penalty_whitelist: number[];
   stop_sequences: number[][];
   generate_until_sentence: boolean;
   use_cache: boolean;
@@ -134,6 +133,14 @@ export class NovelAIService implements GenerationService {
     return this.settingsService.get(SettingsEnum.NOVELAI_ENDPOINT) as string;
   }
 
+  generationUrl(): string {
+    return this.settingsService.get(SettingsEnum.NOVELAI_GENERATION_ENDPOINT) as string;
+  }
+
+  getModel(): string {
+    return this.settingsService.get(SettingsEnum.NOVELAI_MODEL) as string;
+  }
+
   getNovelAIKey(): string | undefined {
     // Check app settings
     const novelAIKeyFromSettings = this.settingsService.get(SettingsEnum.NOVELAI_KEY);
@@ -183,22 +190,27 @@ export class NovelAIService implements GenerationService {
   }
 
   async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
+    const model = this.getModel();
+    let modelSettings = AllModelSettings.default;
+    if (model in AllModelSettings) {
+      modelSettings = AllModelSettings[model];
+    }
+
     const prompt = request.messages.map((m) => m.content).join('\n');
-    log.debug(`prompt: ${JSON.stringify(prompt)}`);
 
     const novelAIRequest: NovelAIRequest = {
       input: prompt,
-      model: 'kayra-v1',
+      model,
       parameters: {
         use_string: true,
-        temperature: 1.35,
+        temperature: modelSettings.temperature,
         max_length: request.maxResponseTokens,
         min_length: 1,
-        top_k: 15,
-        top_p: 0.85,
+        top_k: modelSettings.top_k,
+        top_p: modelSettings.top_p,
         top_a: 0.1,
         tail_free_sampling: 0.915,
-        repetition_penalty: 2.8,
+        repetition_penalty: modelSettings.repetition_penalty,
         repetition_penalty_range: 2048,
         repetition_penalty_slope: 0.02,
         repetition_penalty_frequency: 0.02,
@@ -215,9 +227,10 @@ export class NovelAIService implements GenerationService {
       },
     };
 
-    const url = `${this.serviceUrl()}/ai/generate`;
+    log.info(`NovelAI request: ${JSON.stringify(novelAIRequest)}`);
+
+    const url = `${this.generationUrl()}/ai/generate`;
     const authHeader = `${this.settingsService.get(SettingsEnum.NOVELAI_KEY)}`;
-    log.debug(`url: ${url}, auth: ${authHeader}`);
     const response = await fetch(url, {
       method: 'POST',
       headers: {

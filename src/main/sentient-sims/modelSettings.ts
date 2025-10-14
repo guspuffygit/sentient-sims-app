@@ -130,6 +130,13 @@ export const AllModelSettings: ModelSettingsType = {
     repetition_penalty: 1.15,
     max_tokens: 32000,
   },
+  'kayra-v1': {
+    max_tokens: 8000,
+    temperature: 1.35,
+    top_k: 15,
+    top_p: 0.85,
+    repetition_penalty: 2.8,
+  },
   'gpt-3.5-turbo': {
     temperature: 0.8,
     top_p: 0.9,

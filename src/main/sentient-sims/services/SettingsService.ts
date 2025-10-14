@@ -14,6 +14,7 @@ import {
   geminiDefaultEndpoint,
   koboldaiDefaultEndpoint,
   novelaiDefaultEndpoint,
+  novelaiGenerationDefaultEndpoint,
   openaiDefaultEndpoint,
   openaiDefaultModel,
   sentientSimsAIDefaultModel,
@@ -106,6 +107,10 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.NOVELAI_ENDPOINT.toString()]: {
         type: 'string',
         default: novelaiDefaultEndpoint,
+      },
+      [SettingsEnum.NOVELAI_GENERATION_ENDPOINT.toString()]: {
+        type: 'string',
+        default: novelaiGenerationDefaultEndpoint,
       },
       [SettingsEnum.GEMINI_KEYS.toString()]: {
         type: 'string',

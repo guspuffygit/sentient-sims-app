@@ -20,6 +20,7 @@ export enum SettingsEnum {
   KOBOLDAI_ENDPOINT = 'koboldAIEndpoint',
   SENTIENTSIMSAI_ENDPOINT = 'sentientsimsAIEndpoint',
   NOVELAI_ENDPOINT = 'novelAIEndpoint',
+  NOVELAI_GENERATION_ENDPOINT = 'novelAIGenerationEndpoint',
   GEMINI_KEYS = 'geminiKeys', // Supports multiple keys separated by commas (e.g., "key1,key2,key3")
   GEMINI_ENDPOINT = 'geminiEndpoint',
   GEMINI_MODEL = 'geminiModel',
