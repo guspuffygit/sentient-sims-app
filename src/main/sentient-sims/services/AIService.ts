@@ -442,7 +442,7 @@ Write me a buff description based on the conversation so that ${buffRequest.name
 
     const response = await generationService.sentientSimsGenerate(openAIRequest);
 
-    const output = `${buffRequest.name} ${cleanupAIOutput(response.text)}`;
+    const output = `${buffRequest.name} is feeling ${buffRequest.mood} because ${cleanupAIOutput(response.text)}`;
 
     return {
       status: InteractionEventStatus.GENERATED,
