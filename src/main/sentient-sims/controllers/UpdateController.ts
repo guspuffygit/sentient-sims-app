@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
-import { UpdateService } from '../services/UpdateService';
 import { sendPopUpNotification } from '../util/notifyRenderer';
+import { ApiContext } from '../services/ApiContext';
 
 export class UpdateController {
-  private updateService: UpdateService;
+  private ctx: ApiContext;
 
-  constructor(updateService: UpdateService) {
-    this.updateService = updateService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
 
     // Bind the method to the current instance in the constructor
     this.updateMod = this.updateMod.bind(this);
@@ -18,7 +18,7 @@ export class UpdateController {
       log.info('Starting update.');
       // expiration needs to be a Date object and not a string
       req.body.credentials.expiration = new Date(req.body.credentials.expiration);
-      await this.updateService.updateMod(req.body);
+      await this.ctx.updateService.updateMod(req.body);
       res.json({ done: 'done' });
     } catch (err: any) {
       const response = {

@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
 import { DatabaseSession } from '../models/DatabaseSession';
-import { DbService } from '../services/DbService';
+import { ApiContext } from '../services/ApiContext';
 
 export class DbController {
-  private readonly dbService: DbService;
+  private readonly ctx: ApiContext;
 
-  constructor(dbService: DbService) {
-    this.dbService = dbService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
 
     this.loadDatabase = this.loadDatabase.bind(this);
     this.saveDatabase = this.saveDatabase.bind(this);
@@ -20,7 +20,7 @@ export class DbController {
       const databaseSession: DatabaseSession = req.body;
       log.debug(`Loading database: ${databaseSession.sessionId} : ${databaseSession.saveId}`);
 
-      await this.dbService.loadDatabase(databaseSession);
+      await this.ctx.dbService.loadDatabase(databaseSession);
       return res.json({ text: 'Db Loaded' });
     } catch (err: any) {
       log.error('Error loading database', err);
@@ -33,7 +33,7 @@ export class DbController {
       const databaseSession: DatabaseSession = req.body;
       log.debug(`Saving database: ${databaseSession.sessionId} : ${databaseSession.saveId}`);
 
-      await this.dbService.saveDatabase(databaseSession);
+      await this.ctx.dbService.saveDatabase(databaseSession);
       return res.json({ text: 'Db Saved' });
     } catch (err: any) {
       log.error('Error saving database', err);
@@ -45,7 +45,7 @@ export class DbController {
     try {
       log.debug(`Unloading database`);
 
-      this.dbService.unloadDatabase();
+      this.ctx.dbService.unloadDatabase();
       return res.json({ text: 'Db unloaded' });
     } catch (err: any) {
       log.error('Error saving database', err);
@@ -57,7 +57,7 @@ export class DbController {
     try {
       log.debug(`Getting save games`);
 
-      return res.json(this.dbService.listSaveGames());
+      return res.json(this.ctx.dbService.listSaveGames());
     } catch (err: any) {
       log.error('Error saving database', err);
       return res.json({ error: err.message });

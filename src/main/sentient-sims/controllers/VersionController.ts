@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
-import { VersionService } from '../services/VersionService';
 import { sendPopUpNotification } from '../util/notifyRenderer';
+import { ApiContext } from '../services/ApiContext';
 
 export function modOutOfDate(req: Request, res: Response) {
   try {
@@ -18,10 +18,10 @@ export function modOutOfDate(req: Request, res: Response) {
 }
 
 export class VersionController {
-  private versionService: VersionService;
+  private ctx: ApiContext;
 
-  constructor(versionService: VersionService) {
-    this.versionService = versionService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
 
     this.getModVersion = this.getModVersion.bind(this);
     this.getAppVersion = this.getAppVersion.bind(this);
@@ -29,14 +29,14 @@ export class VersionController {
   }
 
   getModVersion(req: Request, res: Response) {
-    res.json(this.versionService.getModVersion());
+    res.json(this.ctx.versionService.getModVersion());
   }
 
   getAppVersion(req: Request, res: Response) {
-    res.json(this.versionService.getAppVerson());
+    res.json(this.ctx.versionService.getAppVerson());
   }
 
   getGameVersion(req: Request, res: Response) {
-    res.json(this.versionService.getGameVersion());
+    res.json(this.ctx.versionService.getGameVersion());
   }
 }

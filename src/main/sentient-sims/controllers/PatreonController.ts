@@ -1,18 +1,16 @@
 import { Request, Response } from 'express';
 import electron from 'electron';
 import log from 'electron-log';
-import { NotLoggedInError, PatreonService } from '../services/PatreonService';
+import { NotLoggedInError } from '../services/PatreonService';
 import { notifyRefreshUserAttributes } from '../util/notifyRenderer';
 import { resolveHtmlPath } from '../../util';
+import { ApiContext } from '../services/ApiContext';
 
 export class PatreonController {
-  private patreonService: PatreonService;
+  private ctx: ApiContext;
 
-  private readonly getAssetPath: (...paths: string[]) => string;
-
-  constructor(patreonService: PatreonService, getAssetPath: (...paths: string[]) => string) {
-    this.patreonService = patreonService;
-    this.getAssetPath = getAssetPath;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
 
     this.handleRedirect = this.handleRedirect.bind(this);
   }
@@ -20,11 +18,11 @@ export class PatreonController {
   async handleRedirect(req: Request, res: Response) {
     const { code } = req.query;
 
-    res.sendFile(this.getAssetPath('redirect-complete.html'));
+    res.sendFile(this.ctx.getAssetPath('redirect-complete.html'));
 
     try {
       log.debug('Handling patreon redirect');
-      await this.patreonService.handlePatreonRedirect(code as string);
+      await this.ctx.patreonService.handlePatreonRedirect(code as string);
 
       notifyRefreshUserAttributes();
     } catch (exception: any) {

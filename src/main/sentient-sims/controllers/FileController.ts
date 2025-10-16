@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { LastExceptionService } from '../services/LastExceptionService';
+import { ApiContext } from '../services/ApiContext';
 
 export class FileController {
-  private lastExceptionService: LastExceptionService;
+  private ctx: ApiContext;
 
-  constructor(lastExceptionService: LastExceptionService) {
-    this.lastExceptionService = lastExceptionService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
 
     // Bind the methods to the current instance in the constructor
     this.getLastExceptionFiles = this.getLastExceptionFiles.bind(this);
@@ -13,11 +13,11 @@ export class FileController {
   }
 
   async getLastExceptionFiles(req: Request, res: Response) {
-    res.json(this.lastExceptionService.getParsedLastExceptionFiles());
+    res.json(this.ctx.lastExceptionService.getParsedLastExceptionFiles());
   }
 
   async deleteLastExceptionFiles(req: Request, res: Response) {
-    await this.lastExceptionService.deleteLastExceptionFiles();
+    await this.ctx.lastExceptionService.deleteLastExceptionFiles();
     res.json({ done: 'done' });
   }
 }

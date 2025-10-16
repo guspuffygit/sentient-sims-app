@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import { Animation } from 'main/sentient-sims/models/Animation';
-import { AnimationsService } from '../services/AnimationsService';
+import { ApiContext } from '../services/ApiContext';
 
 export class AnimationsController {
-  private readonly animationsService: AnimationsService;
+  private readonly ctx: ApiContext;
 
-  constructor(animationsService: AnimationsService) {
-    this.animationsService = animationsService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
 
     this.getAnimations = this.getAnimations.bind(this);
     this.setAnimation = this.setAnimation.bind(this);
@@ -14,16 +14,16 @@ export class AnimationsController {
   }
 
   async getAnimations(req: Request, res: Response) {
-    res.json(await this.animationsService.getAnimations());
+    res.json(await this.ctx.animationsService.getAnimations());
   }
 
   async setAnimation(req: Request, res: Response) {
     const animation: Animation = req.body;
-    await this.animationsService.setAnimation(animation);
+    await this.ctx.animationsService.setAnimation(animation);
     res.json({ text: 'done' });
   }
 
   async isNsfwEnabled(req: Request, res: Response) {
-    res.json({ value: this.animationsService.isNsfwEnabled() });
+    res.json({ value: this.ctx.animationsService.isNsfwEnabled() });
   }
 }

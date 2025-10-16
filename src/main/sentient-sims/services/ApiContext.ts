@@ -19,21 +19,36 @@ import { InteractionRepository } from '../db/InteractionRepository';
 import { LocationRepository } from '../db/LocationRepository';
 import { MemoryRepository } from '../db/MemoryRepository';
 import { ParticipantRepository } from '../db/ParticipantRepository';
+import { ApiType } from '../models/ApiType';
+import { SettingsEnum } from '../models/SettingsEnum';
+import { AllModelSettings, ModelSettings } from '../modelSettings';
+import { LLaMaTokenCounter } from '../tokens/LLaMaTokenCounter';
+import { NovelAITokenCounter } from '../tokens/NovelAITokenCounter';
+import { OpenAITokenCounter } from '../tokens/OpenAITokenCounter';
+import { TokenCounter } from '../tokens/TokenCounter';
+import { stringType } from '../util/typeChecks';
 import { AIService } from './AIService';
 import { AnimationsService } from './AnimationsService';
 import { DbService } from './DbService';
 import { DirectoryService } from './DirectoryService';
+import { GeminiService } from './GeminiService';
+import { GenerationService } from './GenerationService';
 import { InteractionService } from './InteractionService';
+import { KoboldAIService } from './KoboldAIService';
 import { LastExceptionService } from './LastExceptionService';
 import { LogSendService } from './LogSendService';
 import { LogsService } from './LogsService';
 import { MappingService } from './MappingService';
+import { NovelAIService } from './NovelAIService';
+import { OpenAIService } from './OpenAIService';
 import { PatreonService } from './PatreonService';
 import { PromptRequestBuilderService } from './PromptRequestBuilderService';
 import { RepositoryService } from './RepositoryService';
+import { SentientSimsAIService } from './SentientSimsAIService';
 import { SettingsService } from './SettingsService';
 import { UpdateService } from './UpdateService';
 import { VersionService } from './VersionService';
+import { VLLMAIService } from './VLLMAIService';
 
 export type ApiContextParams = {
   port: number;
@@ -88,11 +103,34 @@ export class ApiContext {
   private readonly _assetsController: AssetsController;
   private readonly _mappingController: MappingController;
 
+  // --- AI Services ---
+  private readonly _sentientSimsAIService: SentientSimsAIService;
+  private readonly _koboldAIService: KoboldAIService;
+  private readonly _novelAIService: NovelAIService;
+  private readonly _geminiService: GeminiService;
+  private readonly _vllmAIService: VLLMAIService;
+  private readonly _openAIService: OpenAIService;
+
+  private readonly _novelAITokenCounter: NovelAITokenCounter;
+  private readonly _openAITokenCounter: OpenAITokenCounter;
+  private readonly _llamaTokenCounter: LLaMaTokenCounter;
+
   constructor(options: ApiContextParams) {
     this._port = options.port;
     this._getAssetPath = options.getAssetPath;
     this._settings = options.settingsService;
     this._directory = options.directoryService;
+
+    this._sentientSimsAIService = new SentientSimsAIService(this._settings);
+    this._koboldAIService = new KoboldAIService(this._settings);
+    this._novelAIService = new NovelAIService(this._settings);
+    this._geminiService = new GeminiService(this._settings);
+    this._vllmAIService = new VLLMAIService(this._settings);
+    this._openAIService = new OpenAIService(this._settings);
+
+    this._novelAITokenCounter = new NovelAITokenCounter();
+    this._openAITokenCounter = new OpenAITokenCounter();
+    this._llamaTokenCounter = new LLaMaTokenCounter();
 
     // --- Initialize Services, Repositories, and Controllers ---
     this._lastExceptionService = new LastExceptionService(this._directory);
@@ -130,23 +168,23 @@ export class ApiContext {
     );
     this._mappingService = new MappingService();
 
-    this._versionController = new VersionController(this._versionService);
-    this._fileController = new FileController(this._lastExceptionService);
-    this._dbController = new DbController(this._dbService);
-    this._memoriesController = new MemoriesController(this._memoryRepository);
-    this._participantsController = new ParticipantsController(this._participantRepository);
+    this._versionController = new VersionController(this);
+    this._fileController = new FileController(this);
+    this._dbController = new DbController(this);
+    this._memoriesController = new MemoriesController(this);
+    this._participantsController = new ParticipantsController(this);
     this._locationsController = new LocationsController(this._locationRepository);
-    this._updateController = new UpdateController(this._updateService);
+    this._updateController = new UpdateController(this);
     this._settingsController = new SettingsController(this._settings);
-    this._patreonController = new PatreonController(this._patreonService, this._getAssetPath);
-    this._loginController = new LoginController(this._getAssetPath);
-    this._debugController = new DebugController(this._settings, this._logSendService);
-    this._interactionDescriptionController = new InteractionDescriptionController(this._interactionService);
+    this._patreonController = new PatreonController(this);
+    this._loginController = new LoginController(this);
+    this._debugController = new DebugController(this);
+    this._interactionDescriptionController = new InteractionDescriptionController(this);
     this._voiceController = new VoiceController();
-    this._aiController = new AIController(this._aiService, this._dbService);
-    this._animationsController = new AnimationsController(this._animationsService);
-    this._assetsController = new AssetsController(this._getAssetPath);
-    this._mappingController = new MappingController(this._mappingService);
+    this._aiController = new AIController(this);
+    this._animationsController = new AnimationsController(this);
+    this._assetsController = new AssetsController(this);
+    this._mappingController = new MappingController(this);
   }
 
   get port(): number {
@@ -299,5 +337,109 @@ export class ApiContext {
 
   get mappingController(): MappingController {
     return this._mappingController;
+  }
+
+  private get sentientSimsAIService(): SentientSimsAIService {
+    return this._sentientSimsAIService;
+  }
+
+  private get koboldAIService(): KoboldAIService {
+    return this._koboldAIService;
+  }
+
+  private get novelAIService(): NovelAIService {
+    return this._novelAIService;
+  }
+
+  private get geminiService(): GeminiService {
+    return this._geminiService;
+  }
+
+  private get vllmAIService(): VLLMAIService {
+    return this._vllmAIService;
+  }
+
+  private get openAIService(): OpenAIService {
+    return this._openAIService;
+  }
+
+  get genai(): GenerationService {
+    const aiType = this.settingsService.get(SettingsEnum.AI_API_TYPE);
+    if (aiType === ApiType.SentientSimsAI || aiType === ApiType.CustomAI) {
+      return this.sentientSimsAIService;
+    }
+
+    if (aiType === ApiType.KoboldAI) {
+      return this.koboldAIService;
+    }
+
+    if (aiType === ApiType.NovelAI) {
+      return this.novelAIService;
+    }
+
+    if (aiType === ApiType.Gemini) {
+      return this.geminiService;
+    }
+
+    if (aiType === ApiType.VLLM) {
+      return this.vllmAIService;
+    }
+
+    return this.openAIService;
+  }
+
+  private get novelAITokenCounter(): NovelAITokenCounter {
+    return this._novelAITokenCounter;
+  }
+
+  private get openAITokenCounter(): OpenAITokenCounter {
+    return this._openAITokenCounter;
+  }
+
+  private get llamaTokenCounter(): LLaMaTokenCounter {
+    return this._llamaTokenCounter;
+  }
+
+  get tokenCounter(): TokenCounter {
+    const aiType = this.settingsService.get(SettingsEnum.AI_API_TYPE);
+
+    if (aiType === ApiType.NovelAI) {
+      return this.novelAITokenCounter;
+    }
+
+    if (aiType === ApiType.OpenAI) {
+      return this.openAITokenCounter;
+    }
+
+    return this.llamaTokenCounter;
+  }
+
+  get modelSettings(): ModelSettings {
+    const aiType = this.settingsService.get(SettingsEnum.AI_API_TYPE);
+
+    let modelSettings = AllModelSettings.default;
+    let model: string | unknown = null;
+
+    if (aiType === ApiType.OpenAI) {
+      model = this.settingsService.get(SettingsEnum.OPENAI_MODEL);
+    }
+
+    if (aiType === ApiType.SentientSimsAI) {
+      model = this.settingsService.get(SettingsEnum.SENTIENTSIMSAI_MODEL);
+    }
+
+    if (aiType === ApiType.Gemini) {
+      model = this.settingsService.get(SettingsEnum.GEMINI_MODEL);
+    }
+
+    if (aiType === ApiType.VLLM) {
+      model = this.settingsService.get(SettingsEnum.VLLM_MODEL);
+    }
+
+    if (stringType(model) && model in AllModelSettings) {
+      modelSettings = AllModelSettings[model];
+    }
+
+    return modelSettings;
   }
 }

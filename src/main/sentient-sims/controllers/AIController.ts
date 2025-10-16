@@ -2,21 +2,17 @@ import { Request, Response } from 'express';
 import log from 'electron-log';
 import { InteractionEvents } from '../models/InteractionEvents';
 import { playTTS, sendChatGeneration } from '../util/notifyRenderer';
-import { AIService } from '../services/AIService';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { InteractionEventStatus } from '../models/InteractionEventResult';
 import { BuffEventRequest, BuffDescriptionRequest, ClassificationRequest } from '../models/OpenAIRequestBuilder';
 import { CatchErrors } from './decorators/CatchError';
-import { DbService } from '../services/DbService';
+import { ApiContext } from '../services/ApiContext';
 
 export class AIController {
-  private readonly aiService: AIService;
+  private readonly ctx: ApiContext;
 
-  private readonly dbService: DbService;
-
-  constructor(aiService: AIService, dbService: DbService) {
-    this.aiService = aiService;
-    this.dbService = dbService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
 
     this.sentientSimsGenerate = this.sentientSimsGenerate.bind(this);
     this.interactionEvent = this.interactionEvent.bind(this);
@@ -30,7 +26,7 @@ export class AIController {
   @CatchErrors()
   async sentientSimsGenerate(req: Request, res: Response) {
     const promptRequest: OpenAICompatibleRequest = req.body;
-    const response = await this.aiService.generate(promptRequest);
+    const response = await this.ctx.aiService.generate(promptRequest);
     log.debug(response);
     res.json({ text: response.text });
     sendChatGeneration({
@@ -44,7 +40,7 @@ export class AIController {
   async interactionEvent(req: Request, res: Response) {
     const event: InteractionEvents = req.body;
 
-    const result = await this.aiService.interactionEvent(event);
+    const result = await this.ctx.aiService.interactionEvent(event);
     result.input = event;
     res.json(result);
     if (result.text) {
@@ -56,7 +52,7 @@ export class AIController {
   async classificationEvent(req: Request, res: Response) {
     const event: ClassificationRequest = req.body;
 
-    const result = await this.aiService.runClassification(event);
+    const result = await this.ctx.aiService.runClassification(event);
     res.json(result);
     if (result.text) {
       sendChatGeneration(result);
@@ -67,7 +63,7 @@ export class AIController {
   async buffDescription(req: Request, res: Response) {
     const event: BuffDescriptionRequest = req.body;
 
-    const result = await this.aiService.runBuffDescription(event);
+    const result = await this.ctx.aiService.runBuffDescription(event);
     res.json(result);
     if (result.text) {
       sendChatGeneration(result);
@@ -79,12 +75,12 @@ export class AIController {
     const event: BuffEventRequest = req.body;
 
     res.json({ ok: 'ok' });
-    await this.aiService.runBuff(event);
+    await this.ctx.aiService.runBuff(event);
   }
 
   @CatchErrors({ statusCode: 500 })
   async getModels(req: Request, res: Response) {
-    const result = await this.aiService.getModels();
+    const result = await this.ctx.aiService.getModels();
     res.json(result);
   }
 

@@ -1,16 +1,16 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
-import { ParticipantRepository } from '../db/ParticipantRepository';
 import { ParticipantDTO } from '../db/dto/ParticipantDTO';
 import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { SaveGame, ToSaveGameType } from '../models/SaveGame';
+import { ApiContext } from '../services/ApiContext';
 
 export class ParticipantsController {
-  private readonly participantRepository: ParticipantRepository;
+  private readonly ctx: ApiContext;
 
-  constructor(participantRepository: ParticipantRepository) {
-    this.participantRepository = participantRepository;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
 
     this.getParticipant = this.getParticipant.bind(this);
     this.getAllParticipants = this.getAllParticipants.bind(this);
@@ -22,7 +22,7 @@ export class ParticipantsController {
     try {
       const { participantId } = req.params;
       const fullName = req.query.fullName as string;
-      const result = await this.participantRepository.getParticipant({
+      const result = await this.ctx.participantRepository.getParticipant({
         id: participantId,
         fullName,
       });
@@ -44,7 +44,7 @@ export class ParticipantsController {
           type: ToSaveGameType(saveGameType),
         };
       }
-      const result = this.participantRepository.getAllParticipants(saveGame);
+      const result = this.ctx.participantRepository.getAllParticipants(saveGame);
       return res.json(result);
     } catch (err: any) {
       log.error('Error getting all participants', err);
@@ -62,7 +62,7 @@ export class ParticipantsController {
         name,
       };
 
-      this.participantRepository.updateParticipant(participant);
+      this.ctx.participantRepository.updateParticipant(participant);
       res.json({
         text: `Updated participant with id ${participant.id}`,
       });
@@ -78,7 +78,7 @@ export class ParticipantsController {
       const { participantId } = req.params;
       const participant: ParticipantDTO = { id: participantId };
 
-      this.participantRepository.deleteParticipant(participant);
+      this.ctx.participantRepository.deleteParticipant(participant);
       res.json({ text: 'Deleted' });
       sendModNotification({ type: ModWebsocketMessageType.CLEAR_SIM_CACHE });
     } catch (err: any) {

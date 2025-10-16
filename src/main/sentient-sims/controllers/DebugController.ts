@@ -1,18 +1,14 @@
 import { Request, Response } from 'express';
 import { OpenAIKeyNotSetError } from '../services/OpenAIService';
-import { LogSendService, webhookUrl } from '../services/LogSendService';
-import { SettingsService } from '../services/SettingsService';
-import { getGenerationService } from '../factories/generationServiceFactory';
+import { webhookUrl } from '../services/LogSendService';
 import { SendLogsRequest } from '../models/SendLogsRequest';
+import { ApiContext } from '../services/ApiContext';
 
 export class DebugController {
-  private readonly settingsService: SettingsService;
+  private readonly ctx: ApiContext;
 
-  private readonly logSendService: LogSendService;
-
-  constructor(settingsService: SettingsService, logSendService: LogSendService) {
-    this.settingsService = settingsService;
-    this.logSendService = logSendService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
 
     this.healthCheckGenerationService = this.healthCheckGenerationService.bind(this);
     this.sendDebugLogs = this.sendDebugLogs.bind(this);
@@ -30,8 +26,7 @@ export class DebugController {
     }
 
     try {
-      const generationService = getGenerationService(this.settingsService);
-      const response = await generationService.healthCheck(apiKey);
+      const response = await this.ctx.genai.healthCheck(apiKey);
       res.send(response);
     } catch (e: any) {
       if (e instanceof OpenAIKeyNotSetError) {
@@ -44,10 +39,10 @@ export class DebugController {
 
   async sendDebugLogs(req: Request, res: Response) {
     const sendLogsRequest: SendLogsRequest = req.body;
-    res.json(await this.logSendService.sendLogsToDiscord(webhookUrl, sendLogsRequest));
+    res.json(await this.ctx.logSendService.sendLogsToDiscord(webhookUrl, sendLogsRequest));
   }
 
   async sendBugReport(req: Request, res: Response) {
-    res.json(await this.logSendService.sendBugReport(webhookUrl, req.body));
+    res.json(await this.ctx.logSendService.sendBugReport(webhookUrl, req.body));
   }
 }
