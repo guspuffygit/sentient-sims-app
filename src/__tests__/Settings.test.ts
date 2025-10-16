@@ -1,59 +1,62 @@
 import '@testing-library/jest-dom';
-import { getGenerationService, getTokenCounter } from 'main/sentient-sims/factories/generationServiceFactory';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 import { NovelAIService } from 'main/sentient-sims/services/NovelAIService';
 import { OpenAIService } from 'main/sentient-sims/services/OpenAIService';
 import { SentientSimsAIService } from 'main/sentient-sims/services/SentientSimsAIService';
-import { SettingsService } from 'main/sentient-sims/services/SettingsService';
 import { LLaMaTokenCounter } from 'main/sentient-sims/tokens/LLaMaTokenCounter';
 import { NovelAITokenCounter } from 'main/sentient-sims/tokens/NovelAITokenCounter';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
+import { mockEnvironment } from './util';
 
 describe('Settings', () => {
+  let ctx: ApiContext;
+
+  beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const getAssetPath = (...paths: string[]) => {
+      return '';
+    };
+    const { directoryService, settingsService } = mockEnvironment();
+    ctx = new ApiContext({
+      getAssetPath,
+      port: 25198,
+      settingsService,
+      directoryService,
+    });
+  });
+
   it('should return default value', () => {
-    const settings = new SettingsService();
-    const model = settings.get(SettingsEnum.OPENAI_MODEL);
+    const model = ctx.settingsService.get(SettingsEnum.OPENAI_MODEL);
     expect(model).toEqual('gpt-4o-mini');
   });
 
   it('get ai type openai', () => {
-    const settings = new SettingsService();
-    settings.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
-    const tokenCounter = getTokenCounter(settings);
-    expect(tokenCounter instanceof OpenAITokenCounter).toBeTruthy();
+    ctx.settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
+    expect(ctx.tokenCounter instanceof OpenAITokenCounter).toBeTruthy();
 
-    const service = getGenerationService(settings);
-    expect(service instanceof OpenAIService).toBeTruthy();
+    expect(ctx.genai instanceof OpenAIService).toBeTruthy();
   });
 
   it('get ai type novelai', () => {
-    const settings = new SettingsService();
-    settings.set(SettingsEnum.AI_API_TYPE, ApiType.NovelAI);
-    const tokenCounter = getTokenCounter(settings);
-    expect(tokenCounter instanceof NovelAITokenCounter).toBeTruthy();
+    ctx.settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.NovelAI);
+    expect(ctx.tokenCounter instanceof NovelAITokenCounter).toBeTruthy();
 
-    const service = getGenerationService(settings);
-    expect(service instanceof NovelAIService).toBeTruthy();
+    expect(ctx.genai instanceof NovelAIService).toBeTruthy();
   });
 
   it('get ai type custom', () => {
-    const settings = new SettingsService();
-    settings.set(SettingsEnum.AI_API_TYPE, ApiType.CustomAI);
-    const tokenCounter = getTokenCounter(settings);
-    expect(tokenCounter instanceof LLaMaTokenCounter).toBeTruthy();
+    ctx.settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.CustomAI);
+    expect(ctx.tokenCounter instanceof LLaMaTokenCounter).toBeTruthy();
 
-    const service = getGenerationService(settings);
-    expect(service instanceof SentientSimsAIService).toBeTruthy();
+    expect(ctx.genai instanceof SentientSimsAIService).toBeTruthy();
   });
 
   it('get ai type sentient sims', () => {
-    const settings = new SettingsService();
-    settings.set(SettingsEnum.AI_API_TYPE, ApiType.SentientSimsAI);
-    const tokenCounter = getTokenCounter(settings);
-    expect(tokenCounter instanceof LLaMaTokenCounter).toBeTruthy();
+    ctx.settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.SentientSimsAI);
+    expect(ctx.tokenCounter instanceof LLaMaTokenCounter).toBeTruthy();
 
-    const service = getGenerationService(settings);
-    expect(service instanceof SentientSimsAIService).toBeTruthy();
+    expect(ctx.genai instanceof SentientSimsAIService).toBeTruthy();
   });
 });

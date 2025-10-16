@@ -46,7 +46,8 @@
     "test:e2e": "cross-env ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest 'ChromeDriver.e2e.test.ts'",
     "test:api": "cross-env ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/jest 'Api.test.ts'",
     "test:unit": "cross-env ELECTRON_RUN_AS_NODE=true JEST_DISABLE_COVERAGE=true ./node_modules/.bin/electron ./node_modules/.bin/jest '(?<!\\.it)\\.test\\.(ts|tsx)$'",
-    "test:watch": "cross-env ELECTRON_RUN_AS_NODE=true JEST_DISABLE_COVERAGE=true ./node_modules/.bin/electron ./node_modules/.bin/jest --watch-all '(?<!\\.it)\\.test\\.(ts|tsx)$'"
+    "test:watch": "cross-env ELECTRON_RUN_AS_NODE=true JEST_DISABLE_COVERAGE=true ./node_modules/.bin/electron ./node_modules/.bin/jest --watch-all '(?<!\\.it)\\.test\\.(ts|tsx)$'",
+    "check": "npm run lint && npm run compile && npm run test"
   },
   "browserslist": [],
   "prettier": {

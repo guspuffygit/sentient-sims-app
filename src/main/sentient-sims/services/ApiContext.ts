@@ -160,12 +160,7 @@ export class ApiContext {
     this._promptBuilderService = new PromptRequestBuilderService(this._repositoryService);
     this._interactionService = new InteractionService(this._interactionRepository);
 
-    this._aiService = new AIService(
-      this._settings,
-      this._promptBuilderService,
-      this._animationsService,
-      this._interactionService,
-    );
+    this._aiService = new AIService(this);
     this._mappingService = new MappingService();
 
     this._versionController = new VersionController(this);

@@ -12,20 +12,13 @@ import {
   WWInteractionEvent,
   WantsInteractionEvent,
 } from '../models/InteractionEvents';
-import { AnimationsService } from './AnimationsService';
 import { getRandomItem } from '../util/getRandomItem';
 import { InteractionEventResult, InteractionEventStatus } from '../models/InteractionEventResult';
 import { notifyMapAnimation, notifyMapInteraction, playTTS, sendChatGeneration } from '../util/notifyRenderer';
-import {
-  GenerationOptions,
-  PromptRequestBuilderOptions,
-  PromptRequestBuilderService,
-} from './PromptRequestBuilderService';
+import { GenerationOptions, PromptRequestBuilderOptions } from './PromptRequestBuilderService';
 import { containsPlayerSim } from '../util/eventContainsPlayerSim';
 import { ApiType } from '../models/ApiType';
 import { defaultClassificationPrompt, defaultWantsPrefixes, defaultWantsPrompt } from '../constants';
-import { SettingsService } from './SettingsService';
-import { getGenerationService, getModelSettings, getTokenCounter } from '../factories/generationServiceFactory';
 import {
   BuffEventRequest,
   BuffDescriptionRequest,
@@ -37,7 +30,6 @@ import { SettingsEnum } from '../models/SettingsEnum';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { cleanAIClassificationOutput, cleanupAIOutput } from '../formatter/PromptFormatter';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
-import { InteractionService } from './InteractionService';
 import { InputFormatter } from '../formatter/InputOutputFormatting';
 import { MythoMaxFormatter } from '../formatter/MythoMaxFormatter';
 import { NovelAIFormatter } from '../formatter/NovelAIFormatter';
@@ -47,6 +39,7 @@ import { InteractionDescription } from '../descriptions/interactionDescriptions'
 import { PromptHistoryMode } from '../models/PromptHistoryMode';
 import { sendModNotification } from '../websocketServer';
 import { ModAddBuff, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
+import { ApiContext } from './ApiContext';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
@@ -61,29 +54,14 @@ function getInputFormatters(apiType: ApiType): InputFormatter[] {
 }
 
 export class AIService {
-  private readonly settingsService: SettingsService;
+  private readonly ctx: ApiContext;
 
-  private readonly promptRequestBuilderService: PromptRequestBuilderService;
-
-  private readonly animationsService: AnimationsService;
-
-  private readonly interactionService: InteractionService;
-
-  constructor(
-    settingsService: SettingsService,
-    promptRequestBuilderService: PromptRequestBuilderService,
-    animationsService: AnimationsService,
-    interactionService: InteractionService,
-  ) {
-    this.settingsService = settingsService;
-    this.promptRequestBuilderService = promptRequestBuilderService;
-    this.animationsService = animationsService;
-    this.interactionService = interactionService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   async generate(promptRequest: OpenAICompatibleRequest) {
-    const generationService = getGenerationService(this.settingsService);
-    return generationService.sentientSimsGenerate(promptRequest);
+    return this.ctx.genai.sentientSimsGenerate(promptRequest);
   }
 
   async interactionEvent(event: InteractionEvents): Promise<InteractionEventResult> {
@@ -116,7 +94,7 @@ export class AIService {
         pre_actions: [event.testing_action],
       };
     } else {
-      description = await this.interactionService.getInteractionDescription(event.interaction_name);
+      description = await this.ctx.interactionService.getInteractionDescription(event.interaction_name);
     }
 
     if (description?.ignored === true) {
@@ -165,7 +143,7 @@ export class AIService {
   }
 
   async handleWickedWhims(event: WWInteractionEvent) {
-    if (!this.animationsService.isNsfwEnabled()) {
+    if (!this.ctx.animationsService.isNsfwEnabled()) {
       return { status: InteractionEventStatus.NSFW_DISABLED };
     }
 
@@ -175,7 +153,7 @@ export class AIService {
 
     let action;
 
-    const animation = await this.animationsService.getAnimation(event.animation_author, event.animation_identifier);
+    const animation = await this.ctx.animationsService.getAnimation(event.animation_author, event.animation_identifier);
 
     if (event.ww_event_type === WWEventType.ASKING) {
       action = '{actor.0} is asking {actor.1} if they want to go have sex';
@@ -189,7 +167,7 @@ export class AIService {
         action = event.testing_action;
       } else if (animation) {
         action = animation.act;
-      } else if (this.animationsService.isAnimationMappingEnabled()) {
+      } else if (this.ctx.animationsService.isAnimationMappingEnabled()) {
         return { status: InteractionEventStatus.UNMAPPED_ANIMATION };
       } else {
         return { status: InteractionEventStatus.NOOP };
@@ -237,9 +215,6 @@ export class AIService {
   }
 
   async runGeneration(event: InteractionEvents, options: GenerationOptions = {}): Promise<InteractionEventResult> {
-    const generationService = getGenerationService(this.settingsService);
-    const tokenCounter = getTokenCounter(this.settingsService);
-
     const promptOptions: PromptRequestBuilderOptions = {
       action: options.action,
       sexCategoryType: options.sexCategoryType,
@@ -248,13 +223,13 @@ export class AIService {
       assistantPreResponse: options.assistantPreResponse,
       prePreAction: options.prePreAction,
       stopTokens: options.stopTokens,
-      apiType: this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType,
-      modelSettings: getModelSettings(this.settingsService),
+      apiType: this.ctx.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType,
+      modelSettings: this.ctx.modelSettings,
       continue: options.continue,
       promptHistoryMode: options.promptHistoryMode,
     };
 
-    let promptRequest = await this.promptRequestBuilderService.buildPromptRequest(event, promptOptions);
+    let promptRequest = await this.ctx.promptBuilderService.buildPromptRequest(event, promptOptions);
 
     // save memory before any model specific formatting
     const newMemory: MemoryEntity = {
@@ -268,10 +243,10 @@ export class AIService {
       promptRequest = formatter.formatInput(promptRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(tokenCounter);
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
     const openAIRequest = openAIRequestBuilder.buildOpenAIRequest(promptRequest);
 
-    const response = await generationService.sentientSimsGenerate(openAIRequest);
+    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
 
     const stopTokens = [];
     // TODO: model specific OUTPUT formatting cleanup stop tokens
@@ -332,10 +307,7 @@ export class AIService {
   }
 
   async runClassification(classificationRequest: ClassificationRequest): Promise<InteractionEventResult> {
-    const generationService = getGenerationService(this.settingsService);
-    const tokenCounter = getTokenCounter(this.settingsService);
-
-    const apiType: ApiType = this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType;
+    const apiType: ApiType = this.ctx.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType;
 
     const systemPrompt = defaultClassificationPrompt.replaceAll(
       '{classifiers}',
@@ -354,10 +326,10 @@ export class AIService {
       oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(tokenCounter);
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
 
-    const response = await generationService.sentientSimsGenerate(openAIRequest);
+    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
 
     const output = cleanAIClassificationOutput(response.text);
 
@@ -410,10 +382,7 @@ export class AIService {
   }
 
   async runBuffDescription(buffRequest: BuffDescriptionRequest): Promise<InteractionEventResult> {
-    const generationService = getGenerationService(this.settingsService);
-    const tokenCounter = getTokenCounter(this.settingsService);
-
-    const apiType: ApiType = this.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType;
+    const apiType: ApiType = this.ctx.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType;
 
     const systemPrompt = `\
 You will write a game buff description that will be displayed about the character ${buffRequest.name}.
@@ -437,10 +406,10 @@ Write me a buff description based on the conversation so that ${buffRequest.name
       oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(tokenCounter);
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
 
-    const response = await generationService.sentientSimsGenerate(openAIRequest);
+    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
 
     const output = `${buffRequest.name} is feeling ${buffRequest.mood} because ${cleanupAIOutput(response.text)}`;
 
@@ -452,15 +421,13 @@ Write me a buff description based on the conversation so that ${buffRequest.name
   }
 
   async getModels(): Promise<AIModel[]> {
-    const generationService = getGenerationService(this.settingsService);
-
-    return generationService.getModels();
+    return this.ctx.genai.getModels();
   }
 
   async handleInteractionMapping(event: InteractionMappingEvent) {
     if (event.status === InteractionEventStatus.IGNORED) {
       log.debug(`Interaction mapped to ignored: ${event.interaction_name}`);
-      await this.interactionService.updateUnmappedInteraction({
+      await this.ctx.interactionService.updateUnmappedInteraction({
         name: event.interaction_name,
         event,
         ignored: true,
