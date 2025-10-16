@@ -1,15 +1,15 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
-import { LocationRepository } from '../db/LocationRepository';
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { DeleteLocationRequest } from '../models/DeleteLocationRequest';
 import { notifyLocationChanged } from '../util/notifyRenderer';
+import { ApiContext } from '../services/ApiContext';
 
 export class LocationsController {
-  private readonly locationRepository: LocationRepository;
+  private readonly ctx: ApiContext;
 
-  constructor(locationRepository: LocationRepository) {
-    this.locationRepository = locationRepository;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
 
     this.getLocation = this.getLocation.bind(this);
     this.getAllLocations = this.getAllLocations.bind(this);
@@ -22,7 +22,7 @@ export class LocationsController {
   async getLocation(req: Request, res: Response) {
     try {
       const { locationId } = req.params;
-      const result = this.locationRepository.getLocation({
+      const result = this.ctx.locationRepository.getLocation({
         id: Number(locationId),
       });
       return res.json(result);
@@ -34,7 +34,7 @@ export class LocationsController {
 
   async getAllLocations(req: Request, res: Response) {
     try {
-      const result = this.locationRepository.getAllLocations();
+      const result = this.ctx.locationRepository.getAllLocations();
       return res.json(result);
     } catch (err: any) {
       log.error('Error getting all locations', err);
@@ -44,7 +44,7 @@ export class LocationsController {
 
   async getDefaultLocations(req: Request, res: Response) {
     try {
-      return res.json(this.locationRepository.getDefaultLocations());
+      return res.json(this.ctx.locationRepository.getDefaultLocations());
     } catch (err: any) {
       log.error('Error getting default locations', err);
       return res.json({ error: err.message });
@@ -53,7 +53,7 @@ export class LocationsController {
 
   async getModifiedLocations(req: Request, res: Response) {
     try {
-      return res.json(this.locationRepository.getModifiedLocations());
+      return res.json(this.ctx.locationRepository.getModifiedLocations());
     } catch (err: any) {
       log.error('Error getting default locations', err);
       return res.json({ error: err.message });
@@ -63,7 +63,7 @@ export class LocationsController {
   async updateLocation(req: Request, res: Response) {
     try {
       const location: LocationEntity = req.body;
-      this.locationRepository.updateLocation(location);
+      this.ctx.locationRepository.updateLocation(location);
 
       notifyLocationChanged();
 
@@ -83,7 +83,7 @@ export class LocationsController {
         id: Number(locationId),
       };
 
-      this.locationRepository.deleteLocation(deleteLocationRequest);
+      this.ctx.locationRepository.deleteLocation(deleteLocationRequest);
 
       notifyLocationChanged();
 

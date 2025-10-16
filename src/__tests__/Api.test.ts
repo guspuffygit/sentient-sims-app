@@ -17,21 +17,10 @@ import { defaultWantsPrefixes } from 'main/sentient-sims/constants';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { SettingsClient } from 'main/sentient-sims/clients/SettingsClient';
-import { mockEnvironment } from './util';
-import { ApiContext } from 'main/sentient-sims/services/ApiContext';
+import { mockApiContext } from './util';
 
 describe('Api', () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const getAssetPath = (...paths: string[]) => {
-    return '';
-  };
-  const { directoryService, settingsService } = mockEnvironment();
-  const ctx = new ApiContext({
-    getAssetPath,
-    port: 25198,
-    settingsService,
-    directoryService,
-  });
+  const ctx = mockApiContext();
   const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server<typeof IncomingMessage, typeof ServerResponse>;
 
@@ -59,15 +48,15 @@ describe('Api', () => {
       type: 'main',
       credentials,
     });
-    const files = fs.readdirSync(directoryService.getSentientSimsFolder());
+    const files = fs.readdirSync(ctx.directoryService.getSentientSimsFolder());
     expect(files.length).toBeGreaterThan(2);
     expect(files).toContain('sentient-sims.package');
   });
 
   it('version controller', async () => {
-    fs.mkdirSync(directoryService.getSentientSimsFolder(), { recursive: true });
+    fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), { recursive: true });
     const expectedVersion: Version = { version: 'expectedversion' };
-    fs.writeFileSync(directoryService.getModVersionFile(), JSON.stringify(expectedVersion));
+    fs.writeFileSync(ctx.directoryService.getModVersionFile(), JSON.stringify(expectedVersion));
 
     const versionClient = new VersionClient(apiUrl);
     const modVersion = await versionClient.getModVersion();

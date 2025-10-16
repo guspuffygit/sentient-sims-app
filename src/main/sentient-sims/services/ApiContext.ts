@@ -43,7 +43,6 @@ import { NovelAIService } from './NovelAIService';
 import { OpenAIService } from './OpenAIService';
 import { PatreonService } from './PatreonService';
 import { PromptRequestBuilderService } from './PromptRequestBuilderService';
-import { RepositoryService } from './RepositoryService';
 import { SentientSimsAIService } from './SentientSimsAIService';
 import { SettingsService } from './SettingsService';
 import { UpdateService } from './UpdateService';
@@ -68,7 +67,6 @@ export class ApiContext {
   private readonly _versionService: VersionService;
   private readonly _updateService: UpdateService;
   private readonly _dbService: DbService;
-  private readonly _repositoryService: RepositoryService;
   private readonly _promptBuilderService: PromptRequestBuilderService;
   private readonly _logSendService: LogSendService;
   private readonly _logsService: LogsService;
@@ -152,13 +150,8 @@ export class ApiContext {
     this._participantRepository = new ParticipantRepository(this._dbService);
     this._interactionRepository = new InteractionRepository(this._settings);
 
-    this._repositoryService = new RepositoryService(
-      this._locationRepository,
-      this._memoryRepository,
-      this._participantRepository,
-    );
-    this._promptBuilderService = new PromptRequestBuilderService(this._repositoryService);
-    this._interactionService = new InteractionService(this._interactionRepository);
+    this._promptBuilderService = new PromptRequestBuilderService(this);
+    this._interactionService = new InteractionService(this);
 
     this._aiService = new AIService(this);
     this._mappingService = new MappingService();
@@ -168,7 +161,7 @@ export class ApiContext {
     this._dbController = new DbController(this);
     this._memoriesController = new MemoriesController(this);
     this._participantsController = new ParticipantsController(this);
-    this._locationsController = new LocationsController(this._locationRepository);
+    this._locationsController = new LocationsController(this);
     this._updateController = new UpdateController(this);
     this._settingsController = new SettingsController(this._settings);
     this._patreonController = new PatreonController(this);
@@ -212,10 +205,6 @@ export class ApiContext {
 
   get dbService(): DbService {
     return this._dbService;
-  }
-
-  get repositoryService(): RepositoryService {
-    return this._repositoryService;
   }
 
   get promptBuilderService(): PromptRequestBuilderService {

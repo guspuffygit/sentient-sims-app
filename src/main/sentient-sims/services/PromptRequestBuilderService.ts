@@ -1,7 +1,6 @@
 import log from 'electron-log';
 import { formatAction, formatSentientSim, formatDateTime, formatSeason } from '../formatter/PromptFormatter';
 import { SSEvent, SSRelationships } from '../models/InteractionEvents';
-import { RepositoryService } from './RepositoryService';
 import { getSystemPrompt } from '../systemPrompts';
 import { ApiType } from '../models/ApiType';
 import { FormattedMemoryMessage, PreFormattedMemoryMessage, PromptRequest } from '../models/OpenAIRequestBuilder';
@@ -12,6 +11,7 @@ import { ModelSettings } from '../modelSettings';
 import { defaultRelationshipBitDescriptions } from '../descriptions/relationshipDescriptions';
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { PromptHistoryMode } from '../models/PromptHistoryMode';
+import { ApiContext } from './ApiContext';
 
 export type GenerationOptions = {
   action?: string;
@@ -33,10 +33,10 @@ export type PromptRequestBuilderOptions = GenerationOptions & {
 };
 
 export class PromptRequestBuilderService {
-  private readonly repositoryService: RepositoryService;
+  private readonly ctx: ApiContext;
 
-  constructor(repositoryService: RepositoryService) {
-    this.repositoryService = repositoryService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   async formatSims(
@@ -44,7 +44,7 @@ export class PromptRequestBuilderService {
     location: LocationEntity,
     relationships?: SSRelationships,
   ): Promise<string[]> {
-    const participants = await this.repositoryService.participant.getParticipants(
+    const participants = await this.ctx.participantRepository.getParticipants(
       sentientSims.map((sentientSim) => {
         try {
           return { id: sentientSim.sim_id, fullName: sentientSim.name };
@@ -102,7 +102,7 @@ export class PromptRequestBuilderService {
   getMemories(sentientSims: SentientSim[]) {
     const participantIds = sentientSims.map((sentientSim) => sentientSim.sim_id);
 
-    return this.repositoryService.memory.getParticipantsMemories({
+    return this.ctx.memoryRepository.getParticipantsMemories({
       participant_ids: participantIds,
     });
   }
@@ -114,7 +114,7 @@ export class PromptRequestBuilderService {
 
     const addMessage = (role: ChatCompletionMessageRole, text: string, locationId: number) => {
       if (!locations[locationId]) {
-        locations[locationId] = this.repositoryService.location.getLocation({
+        locations[locationId] = this.ctx.locationRepository.getLocation({
           id: locationId,
         });
       }
@@ -176,7 +176,7 @@ export class PromptRequestBuilderService {
   }
 
   async buildPromptRequest(event: SSEvent, options: PromptRequestBuilderOptions): Promise<PromptRequest> {
-    const location = this.repositoryService.location.getLocation({
+    const location = this.ctx.locationRepository.getLocation({
       id: event.environment.location_id,
     });
 

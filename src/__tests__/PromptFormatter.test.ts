@@ -1,11 +1,6 @@
 import '@testing-library/jest-dom';
 import { InteractionEvent, SSEventType } from 'main/sentient-sims/models/InteractionEvents';
 import * as fs from 'fs';
-import { DbService } from 'main/sentient-sims/services/DbService';
-import { ParticipantRepository } from 'main/sentient-sims/db/ParticipantRepository';
-import { LocationRepository } from 'main/sentient-sims/db/LocationRepository';
-import { MemoryRepository } from 'main/sentient-sims/db/MemoryRepository';
-import { PromptRequestBuilderService } from 'main/sentient-sims/services/PromptRequestBuilderService';
 import {
   BodyState,
   cleanupAIOutput,
@@ -14,12 +9,12 @@ import {
   hasWWProperties,
 } from 'main/sentient-sims/formatter/PromptFormatter';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
-import { RepositoryService } from 'main/sentient-sims/services/RepositoryService';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
 import { OpenAIRequestBuilder, PromptRequest } from 'main/sentient-sims/models/OpenAIRequestBuilder';
 import { SimAge } from 'main/sentient-sims/models/SimAge';
-import { mockDirectoryService } from './util';
+import { mockApiContext } from './util';
+import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 
 describe('Output', () => {
   it('cleanup', () => {
@@ -31,6 +26,12 @@ describe('Output', () => {
   });
 
   describe('Event Formatter', () => {
+    let ctx: ApiContext;
+
+    beforeEach(() => {
+      ctx = mockApiContext();
+    });
+
     it('test', async () => {
       const event: InteractionEvent = {
         // TODO: Deprecated
@@ -127,23 +128,16 @@ describe('Output', () => {
         interaction_name: 'mixer_social_ShareFishingTips_targeted_Friendly_alwaysOn_skills',
       };
 
-      const directoryService = mockDirectoryService();
-      fs.mkdirSync(directoryService.getSentientSimsFolder(), {
+      fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), {
         recursive: true,
       });
-      const dbService = new DbService(directoryService);
-      await dbService.loadDatabase({
+
+      await ctx.dbService.loadDatabase({
         sessionId: '958127321',
         saveId: '2',
       });
-      const repositoryService = new RepositoryService(
-        new LocationRepository(dbService),
-        new MemoryRepository(dbService),
-        new ParticipantRepository(dbService),
-      );
-      const promptRequestBuilderService = new PromptRequestBuilderService(repositoryService);
 
-      const result = await promptRequestBuilderService.buildPromptRequest(event, {
+      const result = await ctx.promptBuilderService.buildPromptRequest(event, {
         action: '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
         apiType: ApiType.SentientSimsAI,
         modelSettings: {
