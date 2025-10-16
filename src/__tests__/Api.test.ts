@@ -18,6 +18,7 @@ import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { SettingsClient } from 'main/sentient-sims/clients/SettingsClient';
 import { mockEnvironment } from './util';
+import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 
 describe('Api', () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -25,17 +26,17 @@ describe('Api', () => {
     return '';
   };
   const { directoryService, settingsService } = mockEnvironment();
-  const apiOptions = {
+  const ctx = new ApiContext({
     getAssetPath,
     port: 25198,
     settingsService,
     directoryService,
-  };
-  const apiUrl = `http://localhost:${apiOptions.port}`;
+  });
+  const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server<typeof IncomingMessage, typeof ServerResponse>;
 
   beforeAll(() => {
-    server = runApi(apiOptions);
+    server = runApi(ctx);
   });
 
   afterAll(async () => {

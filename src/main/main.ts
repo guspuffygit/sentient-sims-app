@@ -24,6 +24,7 @@ import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 import { disableDebugLogging, enableDebugLogging } from './sentient-sims/util/debugLog';
 import debug from 'electron-debug';
 import { resolveHtmlPath } from './util';
+import { ApiContext } from './sentient-sims/services/ApiContext';
 
 log.initialize({ preload: true });
 
@@ -111,22 +112,23 @@ const createWindow = async () => {
   });
 
   const settingsService = new SettingsService();
-  ipcHandlers(settingsService);
   const directoryService = new DirectoryService(settingsService);
-
-  if (settingsService.get(SettingsEnum.DEBUG_LOGS)) {
-    enableDebugLogging();
-  } else {
-    disableDebugLogging();
-  }
-
-  runWebSocketServer(settingsService, directoryService);
-  runApi({
+  const ctx = new ApiContext({
     getAssetPath,
     port: appApiPort,
     settingsService,
     directoryService,
   });
+  ipcHandlers(ctx);
+
+  if (ctx.settingsService.get(SettingsEnum.DEBUG_LOGS)) {
+    enableDebugLogging();
+  } else {
+    disableDebugLogging();
+  }
+
+  runWebSocketServer(ctx);
+  runApi(ctx);
 
   log.transports.file.level = 'info';
 

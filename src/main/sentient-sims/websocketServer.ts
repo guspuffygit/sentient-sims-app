@@ -2,16 +2,15 @@
 import electron from 'electron';
 import { WebSocketServer, WebSocket } from 'ws';
 import log from 'electron-log';
-import { LogsService } from './services/LogsService';
 import { ModLogWebsocketMessage } from './models/ModLogWebsocketMessage';
 import { formatLog } from './util/format';
 import { RendererWebsocketMessage } from './models/RendererWebsocketMessage';
-import { SettingsService } from './services/SettingsService';
 import { SettingsEnum } from './models/SettingsEnum';
 import { LogLevel } from './models/LogLevel';
 import { WebsocketNotification } from './models/ModWebsocketMessage';
 import { modWebsocketPort, rendererWebsocketPort } from './constants';
 import { WebsocketStatusChange } from './models/WebsocketStatusResponse';
+import { ApiContext } from './services/ApiContext';
 
 function notifyAllWindows(message: string, ...args: any[]) {
   electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
@@ -32,7 +31,7 @@ let modWs: WebSocket;
 let modConnected = false;
 let rendererConnected = false;
 
-export const startWebSocketServer = (logsService: LogsService, settingsService: SettingsService) => {
+export const startWebSocketServer = (ctx: ApiContext) => {
   const rendererServer = new WebSocketServer({ port: rendererWebsocketPort });
   rendererServer.on('connection', function handleRenderer(ws: WebSocket) {
     rendererWs = ws;
@@ -56,7 +55,7 @@ export const startWebSocketServer = (logsService: LogsService, settingsService: 
       log.debug(`receivedRenderer: ${data}`);
     });
 
-    logsService
+    ctx.logsService
       .readLogs()
       .then((logs) => {
         try {
@@ -98,12 +97,12 @@ export const startWebSocketServer = (logsService: LogsService, settingsService: 
       if (!parsedData.log) {
         return;
       }
-      if (parsedData.log.level === LogLevel.DEBUG.toString() && !settingsService.get(SettingsEnum.DEBUG_LOGS)) {
+      if (parsedData.log.level === LogLevel.DEBUG.toString() && !ctx.settingsService.get(SettingsEnum.DEBUG_LOGS)) {
         return;
       }
 
       const formattedLog = formatLog(parsedData.log);
-      logsService.appendLog([formattedLog]).catch((e: any) => log.error('Unable to append to logs.txt', e));
+      ctx.logsService.appendLog([formattedLog]).catch((e: any) => log.error('Unable to append to logs.txt', e));
       if (rendererWs) {
         rendererWs.send(JSON.stringify(parsedData));
       }
