@@ -29,17 +29,17 @@ export class VLLMAIService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return this.ctx.settingsService.get(SettingsEnum.VLLM_ENDPOINT) as string;
+    return this.ctx.settings.get(SettingsEnum.VLLM_ENDPOINT) as string;
   }
 
   getAuthorizationHeaders(): RawAxiosRequestHeaders {
     return {
-      Authorization: `Bearer ${this.ctx.settingsService.get(SettingsEnum.VLLM_APIKEY)}`,
+      Authorization: `Bearer ${this.ctx.settings.get(SettingsEnum.VLLM_APIKEY)}`,
     };
   }
 
   getModel(): string {
-    return this.ctx.settingsService.get(SettingsEnum.VLLM_MODEL) as string;
+    return this.ctx.settings.get(SettingsEnum.VLLM_MODEL) as string;
   }
 
   async getBreakStringTokens(model: string): Promise<number[]> {

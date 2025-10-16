@@ -36,17 +36,17 @@ describe('Formatter', () => {
   it('should trim sentence', () => {
     const ctx = mockApiContext();
     const expectedFileName = 'lastException-1901283.txt';
-    const lastExceptionFile = path.join(ctx.directoryService.getSims4Folder(), expectedFileName);
+    const lastExceptionFile = path.join(ctx.directory.getSims4Folder(), expectedFileName);
 
-    ctx.directoryService.createDirectoryIfNotExist(ctx.directoryService.getSims4Folder());
+    ctx.directory.createDirectoryIfNotExist(ctx.directory.getSims4Folder());
 
     fs.copyFileSync('./src/__tests__/lastException.txt', lastExceptionFile);
 
-    const files = ctx.lastExceptionService.getLastExceptionFiles();
+    const files = ctx.lastException.getLastExceptionFiles();
     const expectedFile = files[0];
     expect(expectedFile).toEqual(lastExceptionFile);
 
-    const parsedFiles = ctx.lastExceptionService.getParsedLastExceptionFiles();
+    const parsedFiles = ctx.lastException.getParsedLastExceptionFiles();
     const actualParsedFile = parsedFiles[0];
     expect(actualParsedFile.filename).toEqual(expectedFileName);
     expect(actualParsedFile.text).toEqual(expectedParsedResult);

@@ -7,22 +7,22 @@ import { DecodeToken, isTokenExpired } from '../auth/tokenVerifier';
 
 export class SentientSimsAIService extends VLLMAIService {
   serviceUrl(): string {
-    return this.ctx.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT) as string;
+    return this.ctx.settings.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT) as string;
   }
 
   getAuthorizationHeaders(): RawAxiosRequestHeaders {
     return {
-      Authentication: `${this.ctx.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+      Authentication: `${this.ctx.settings.get(SettingsEnum.ACCESS_TOKEN)}`,
     };
   }
 
   getModel(): string {
-    return this.ctx.settingsService.get(SettingsEnum.SENTIENTSIMSAI_MODEL) as string;
+    return this.ctx.settings.get(SettingsEnum.SENTIENTSIMSAI_MODEL) as string;
   }
 
   async healthCheck() {
     for (let i = 0; i < 60; i++) {
-      const payload = DecodeToken(`${this.ctx.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`);
+      const payload = DecodeToken(`${this.ctx.settings.get(SettingsEnum.ACCESS_TOKEN)}`);
       if (isTokenExpired(payload)) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }

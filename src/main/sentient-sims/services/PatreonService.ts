@@ -20,8 +20,8 @@ export class PatreonService {
   async handlePatreonRedirect(code: string) {
     notifyPatreonLinking(true);
     try {
-      const token = this.ctx.settingsService.get(SettingsEnum.ACCESS_TOKEN) as string;
-      const url = `${this.ctx.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}/patreon-redirect?code=${code}`;
+      const token = this.ctx.settings.get(SettingsEnum.ACCESS_TOKEN) as string;
+      const url = `${this.ctx.settings.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}/patreon-redirect?code=${code}`;
       if (token) {
         log.debug(`Handling patreon redirect code: ${url}, token: ${token}`);
         try {

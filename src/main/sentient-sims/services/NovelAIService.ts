@@ -129,20 +129,20 @@ export class NovelAIService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return this.ctx.settingsService.get(SettingsEnum.NOVELAI_ENDPOINT) as string;
+    return this.ctx.settings.get(SettingsEnum.NOVELAI_ENDPOINT) as string;
   }
 
   generationUrl(): string {
-    return this.ctx.settingsService.get(SettingsEnum.NOVELAI_GENERATION_ENDPOINT) as string;
+    return this.ctx.settings.get(SettingsEnum.NOVELAI_GENERATION_ENDPOINT) as string;
   }
 
   getModel(): string {
-    return this.ctx.settingsService.get(SettingsEnum.NOVELAI_MODEL) as string;
+    return this.ctx.settings.get(SettingsEnum.NOVELAI_MODEL) as string;
   }
 
   getNovelAIKey(): string | undefined {
     // Check app settings
-    const novelAIKeyFromSettings = this.ctx.settingsService.get(SettingsEnum.NOVELAI_KEY);
+    const novelAIKeyFromSettings = this.ctx.settings.get(SettingsEnum.NOVELAI_KEY);
     if (novelAIKeyFromSettings) {
       log.debug('Using novelai key from settings');
       return novelAIKeyFromSettings as string;
@@ -226,7 +226,7 @@ export class NovelAIService implements GenerationService {
     log.info(`NovelAI request: ${JSON.stringify(novelAIRequest)}`);
 
     const url = `${this.generationUrl()}/ai/generate`;
-    const authHeader = `${this.ctx.settingsService.get(SettingsEnum.NOVELAI_KEY)}`;
+    const authHeader = `${this.ctx.settings.get(SettingsEnum.NOVELAI_KEY)}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {

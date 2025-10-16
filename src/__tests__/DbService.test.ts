@@ -9,34 +9,34 @@ describe('DbService', () => {
 
   beforeEach(() => {
     ctx = mockApiContext();
-    fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), {
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
       recursive: true,
     });
   });
 
   it('No loaded db throws exception', () => {
-    expect(ctx.dbService.getDb).toThrow(DatabaseNotLoadedError);
+    expect(ctx.db.getDb).toThrow(DatabaseNotLoadedError);
   });
 
   it('Loading unloading database', async () => {
-    ctx.dbService.loadDatabase({
+    ctx.db.loadDatabase({
       sessionId: '1872638716',
       saveId: '2',
     });
-    expect(ctx.directoryService.listSentientSimsDbUnsaved()).toHaveLength(3);
+    expect(ctx.directory.listSentientSimsDbUnsaved()).toHaveLength(3);
 
-    ctx.dbService.loadDatabase({
+    ctx.db.loadDatabase({
       sessionId: '718297398',
       saveId: '2',
     });
-    expect(ctx.directoryService.listSentientSimsDbUnsaved()).toHaveLength(6);
-    await ctx.dbService.saveDatabase({
+    expect(ctx.directory.listSentientSimsDbUnsaved()).toHaveLength(6);
+    await ctx.db.saveDatabase({
       sessionId: '718297398',
       saveId: '2',
     });
-    expect(ctx.directoryService.listSentientSimsDbUnsaved()).toHaveLength(3);
+    expect(ctx.directory.listSentientSimsDbUnsaved()).toHaveLength(3);
 
-    ctx.dbService.unloadDatabase();
-    expect(ctx.directoryService.listSentientSimsDbUnsaved()).toHaveLength(0);
+    ctx.db.unloadDatabase();
+    expect(ctx.directory.listSentientSimsDbUnsaved()).toHaveLength(0);
   });
 });

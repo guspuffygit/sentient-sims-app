@@ -7,10 +7,10 @@ import { mockApiContext } from './util';
 describe('MemoryRepository', () => {
   it('CRUD', async () => {
     const ctx = mockApiContext();
-    fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), {
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
       recursive: true,
     });
-    await ctx.dbService.loadDatabase({
+    await ctx.db.loadDatabase({
       sessionId: '7981723',
       saveId: '2',
     });

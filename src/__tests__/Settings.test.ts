@@ -28,33 +28,33 @@ describe('Settings', () => {
   });
 
   it('should return default value', () => {
-    const model = ctx.settingsService.get(SettingsEnum.OPENAI_MODEL);
+    const model = ctx.settings.get(SettingsEnum.OPENAI_MODEL);
     expect(model).toEqual('gpt-4o-mini');
   });
 
   it('get ai type openai', () => {
-    ctx.settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
+    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
     expect(ctx.tokenCounter instanceof OpenAITokenCounter).toBeTruthy();
 
     expect(ctx.genai instanceof OpenAIService).toBeTruthy();
   });
 
   it('get ai type novelai', () => {
-    ctx.settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.NovelAI);
+    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.NovelAI);
     expect(ctx.tokenCounter instanceof NovelAITokenCounter).toBeTruthy();
 
     expect(ctx.genai instanceof NovelAIService).toBeTruthy();
   });
 
   it('get ai type custom', () => {
-    ctx.settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.CustomAI);
+    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.CustomAI);
     expect(ctx.tokenCounter instanceof LLaMaTokenCounter).toBeTruthy();
 
     expect(ctx.genai instanceof SentientSimsAIService).toBeTruthy();
   });
 
   it('get ai type sentient sims', () => {
-    ctx.settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.SentientSimsAI);
+    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.SentientSimsAI);
     expect(ctx.tokenCounter instanceof LLaMaTokenCounter).toBeTruthy();
 
     expect(ctx.genai instanceof SentientSimsAIService).toBeTruthy();

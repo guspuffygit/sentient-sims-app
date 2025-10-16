@@ -19,7 +19,7 @@ export class LastExceptionService {
 
   getLastExceptionFiles() {
     const files = ['lastException', 'lastCleanException', 'lastUIException'];
-    return this.ctx.directoryService.findFilesWithKeywords(this.ctx.directoryService.getSims4Folder(), files);
+    return this.ctx.directory.findFilesWithKeywords(this.ctx.directory.getSims4Folder(), files);
   }
 
   getParsedLastExceptionFiles() {

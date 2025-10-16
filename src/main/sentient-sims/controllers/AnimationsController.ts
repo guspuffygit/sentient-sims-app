@@ -14,16 +14,16 @@ export class AnimationsController {
   }
 
   async getAnimations(req: Request, res: Response) {
-    res.json(await this.ctx.animationsService.getAnimations());
+    res.json(await this.ctx.animations.getAnimations());
   }
 
   async setAnimation(req: Request, res: Response) {
     const animation: Animation = req.body;
-    await this.ctx.animationsService.setAnimation(animation);
+    await this.ctx.animations.setAnimation(animation);
     res.json({ text: 'done' });
   }
 
   async isNsfwEnabled(req: Request, res: Response) {
-    res.json({ value: this.ctx.animationsService.isNsfwEnabled() });
+    res.json({ value: this.ctx.animations.isNsfwEnabled() });
   }
 }

@@ -29,14 +29,14 @@ export class VersionController {
   }
 
   getModVersion(req: Request, res: Response) {
-    res.json(this.ctx.versionService.getModVersion());
+    res.json(this.ctx.version.getModVersion());
   }
 
   getAppVersion(req: Request, res: Response) {
-    res.json(this.ctx.versionService.getAppVerson());
+    res.json(this.ctx.version.getAppVerson());
   }
 
   getGameVersion(req: Request, res: Response) {
-    res.json(this.ctx.versionService.getGameVersion());
+    res.json(this.ctx.version.getGameVersion());
   }
 }

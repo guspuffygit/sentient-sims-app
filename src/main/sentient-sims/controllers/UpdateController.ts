@@ -18,7 +18,7 @@ export class UpdateController {
       log.info('Starting update.');
       // expiration needs to be a Date object and not a string
       req.body.credentials.expiration = new Date(req.body.credentials.expiration);
-      await this.ctx.updateService.updateMod(req.body);
+      await this.ctx.update.updateMod(req.body);
       res.json({ done: 'done' });
     } catch (err: any) {
       const response = {

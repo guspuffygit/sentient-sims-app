@@ -16,7 +16,7 @@ export class LogsService {
    */
   async readLogs(): Promise<string[]> {
     return new Promise((resolve, reject) => {
-      fs.readFile(this.ctx.directoryService.getLogsFile(), 'utf-8', (err, data) => {
+      fs.readFile(this.ctx.directory.getLogsFile(), 'utf-8', (err, data) => {
         if (err) {
           if (err.code === 'ENOENT') {
             // File not found
@@ -44,7 +44,7 @@ export class LogsService {
     return new Promise((resolve, reject) => {
       const dataToAppend = `${lines.join('\n')}\n`;
 
-      fs.appendFile(this.ctx.directoryService.getLogsFile(), dataToAppend, 'utf-8', (err) => {
+      fs.appendFile(this.ctx.directory.getLogsFile(), dataToAppend, 'utf-8', (err) => {
         if (err) {
           reject(err);
           return;

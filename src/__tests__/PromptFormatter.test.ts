@@ -128,16 +128,16 @@ describe('Output', () => {
         interaction_name: 'mixer_social_ShareFishingTips_targeted_Friendly_alwaysOn_skills',
       };
 
-      fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), {
+      fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
         recursive: true,
       });
 
-      await ctx.dbService.loadDatabase({
+      await ctx.db.loadDatabase({
         sessionId: '958127321',
         saveId: '2',
       });
 
-      const result = await ctx.promptBuilderService.buildPromptRequest(event, {
+      const result = await ctx.promptBuilder.buildPromptRequest(event, {
         action: '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
         apiType: ApiType.SentientSimsAI,
         modelSettings: {

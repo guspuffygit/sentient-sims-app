@@ -55,7 +55,7 @@ export const startWebSocketServer = (ctx: ApiContext) => {
       log.debug(`receivedRenderer: ${data}`);
     });
 
-    ctx.logsService
+    ctx.logs
       .readLogs()
       .then((logs) => {
         try {
@@ -97,12 +97,12 @@ export const startWebSocketServer = (ctx: ApiContext) => {
       if (!parsedData.log) {
         return;
       }
-      if (parsedData.log.level === LogLevel.DEBUG.toString() && !ctx.settingsService.get(SettingsEnum.DEBUG_LOGS)) {
+      if (parsedData.log.level === LogLevel.DEBUG.toString() && !ctx.settings.get(SettingsEnum.DEBUG_LOGS)) {
         return;
       }
 
       const formattedLog = formatLog(parsedData.log);
-      ctx.logsService.appendLog([formattedLog]).catch((e: any) => log.error('Unable to append to logs.txt', e));
+      ctx.logs.appendLog([formattedLog]).catch((e: any) => log.error('Unable to append to logs.txt', e));
       if (rendererWs) {
         rendererWs.send(JSON.stringify(parsedData));
       }

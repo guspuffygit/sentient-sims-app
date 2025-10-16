@@ -39,10 +39,10 @@ export class DebugController {
 
   async sendDebugLogs(req: Request, res: Response) {
     const sendLogsRequest: SendLogsRequest = req.body;
-    res.json(await this.ctx.logSendService.sendLogsToDiscord(webhookUrl, sendLogsRequest));
+    res.json(await this.ctx.logSend.sendLogsToDiscord(webhookUrl, sendLogsRequest));
   }
 
   async sendBugReport(req: Request, res: Response) {
-    res.json(await this.ctx.logSendService.sendBugReport(webhookUrl, req.body));
+    res.json(await this.ctx.logSend.sendBugReport(webhookUrl, req.body));
   }
 }

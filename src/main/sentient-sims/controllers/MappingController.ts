@@ -22,7 +22,7 @@ export class MappingController {
     const extractedPath: string = req.query.extractedPath as string;
 
     res.json(
-      await this.ctx.mappingService.getTraits({
+      await this.ctx.mapping.getTraits({
         searchClass,
         extractedPath,
       }),
@@ -33,7 +33,7 @@ export class MappingController {
     const searchClass: string | undefined = req.query.searchClass as string | undefined;
     const extractedPath: string = req.query.extractedPath as string;
     res.json(
-      await this.ctx.mappingService.getUnmappedTraits({
+      await this.ctx.mapping.getUnmappedTraits({
         searchClass,
         extractedPath,
       }),
@@ -41,17 +41,17 @@ export class MappingController {
   }
 
   async getMoods(req: Request, res: Response) {
-    res.json(await this.ctx.mappingService.getMoods());
+    res.json(await this.ctx.mapping.getMoods());
   }
 
   async getUnmappedMoods(req: Request, res: Response) {
-    res.json(await this.ctx.mappingService.getUnmappedMoods());
+    res.json(await this.ctx.mapping.getUnmappedMoods());
   }
 
   async exportTraits(req: Request, res: Response) {
     const exportTraitsRequest: ExportTraitsRequest = req.body;
     log.debug(`ExtractedPath: ${exportTraitsRequest.extractedPath}`);
     log.debug(`Length of Traits: ${Object.keys(exportTraitsRequest.traits).length}`);
-    res.json(await this.ctx.mappingService.exportTraits(req.body));
+    res.json(await this.ctx.mapping.exportTraits(req.body));
   }
 }

@@ -94,7 +94,7 @@ export class AIService {
         pre_actions: [event.testing_action],
       };
     } else {
-      description = await this.ctx.interactionService.getInteractionDescription(event.interaction_name);
+      description = await this.ctx.interactions.getInteractionDescription(event.interaction_name);
     }
 
     if (description?.ignored === true) {
@@ -143,7 +143,7 @@ export class AIService {
   }
 
   async handleWickedWhims(event: WWInteractionEvent) {
-    if (!this.ctx.animationsService.isNsfwEnabled()) {
+    if (!this.ctx.animations.isNsfwEnabled()) {
       return { status: InteractionEventStatus.NSFW_DISABLED };
     }
 
@@ -153,7 +153,7 @@ export class AIService {
 
     let action;
 
-    const animation = await this.ctx.animationsService.getAnimation(event.animation_author, event.animation_identifier);
+    const animation = await this.ctx.animations.getAnimation(event.animation_author, event.animation_identifier);
 
     if (event.ww_event_type === WWEventType.ASKING) {
       action = '{actor.0} is asking {actor.1} if they want to go have sex';
@@ -167,7 +167,7 @@ export class AIService {
         action = event.testing_action;
       } else if (animation) {
         action = animation.act;
-      } else if (this.ctx.animationsService.isAnimationMappingEnabled()) {
+      } else if (this.ctx.animations.isAnimationMappingEnabled()) {
         return { status: InteractionEventStatus.UNMAPPED_ANIMATION };
       } else {
         return { status: InteractionEventStatus.NOOP };
@@ -223,13 +223,13 @@ export class AIService {
       assistantPreResponse: options.assistantPreResponse,
       prePreAction: options.prePreAction,
       stopTokens: options.stopTokens,
-      apiType: this.ctx.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType,
+      apiType: this.ctx.settings.get(SettingsEnum.AI_API_TYPE) as ApiType,
       modelSettings: this.ctx.modelSettings,
       continue: options.continue,
       promptHistoryMode: options.promptHistoryMode,
     };
 
-    let promptRequest = await this.ctx.promptBuilderService.buildPromptRequest(event, promptOptions);
+    let promptRequest = await this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
 
     // save memory before any model specific formatting
     const newMemory: MemoryEntity = {
@@ -307,7 +307,7 @@ export class AIService {
   }
 
   async runClassification(classificationRequest: ClassificationRequest): Promise<InteractionEventResult> {
-    const apiType: ApiType = this.ctx.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType;
+    const apiType: ApiType = this.ctx.settings.get(SettingsEnum.AI_API_TYPE) as ApiType;
 
     const systemPrompt = defaultClassificationPrompt.replaceAll(
       '{classifiers}',
@@ -382,7 +382,7 @@ export class AIService {
   }
 
   async runBuffDescription(buffRequest: BuffDescriptionRequest): Promise<InteractionEventResult> {
-    const apiType: ApiType = this.ctx.settingsService.get(SettingsEnum.AI_API_TYPE) as ApiType;
+    const apiType: ApiType = this.ctx.settings.get(SettingsEnum.AI_API_TYPE) as ApiType;
 
     const systemPrompt = `\
 You will write a game buff description that will be displayed about the character ${buffRequest.name}.
@@ -427,7 +427,7 @@ Write me a buff description based on the conversation so that ${buffRequest.name
   async handleInteractionMapping(event: InteractionMappingEvent) {
     if (event.status === InteractionEventStatus.IGNORED) {
       log.debug(`Interaction mapped to ignored: ${event.interaction_name}`);
-      await this.ctx.interactionService.updateUnmappedInteraction({
+      await this.ctx.interactions.updateUnmappedInteraction({
         name: event.interaction_name,
         event,
         ignored: true,

@@ -13,11 +13,11 @@ export class FileController {
   }
 
   async getLastExceptionFiles(req: Request, res: Response) {
-    res.json(this.ctx.lastExceptionService.getParsedLastExceptionFiles());
+    res.json(this.ctx.lastException.getParsedLastExceptionFiles());
   }
 
   async deleteLastExceptionFiles(req: Request, res: Response) {
-    await this.ctx.lastExceptionService.deleteLastExceptionFiles();
+    await this.ctx.lastException.deleteLastExceptionFiles();
     res.json({ done: 'done' });
   }
 }

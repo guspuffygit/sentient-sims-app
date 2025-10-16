@@ -6,10 +6,10 @@ import { mockApiContext, randomString } from './util';
 describe('ParticipantRepository', () => {
   it('CRUD', async () => {
     const ctx = mockApiContext();
-    fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), {
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
       recursive: true,
     });
-    await ctx.dbService.loadDatabase({
+    await ctx.db.loadDatabase({
       sessionId: '9587321',
       saveId: '2',
     });

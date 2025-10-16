@@ -56,33 +56,7 @@ export type ApiContextParams = {
   directoryService: DirectoryService;
 };
 
-export class ApiContext {
-  private readonly _port: number;
-  private readonly _getAssetPath: (...paths: string[]) => string;
-  private readonly _settings: SettingsService;
-  private readonly _directory: DirectoryService;
-
-  // --- Services ---
-  private readonly _lastExceptionService: LastExceptionService;
-  private readonly _versionService: VersionService;
-  private readonly _updateService: UpdateService;
-  private readonly _dbService: DbService;
-  private readonly _promptBuilderService: PromptRequestBuilderService;
-  private readonly _logSendService: LogSendService;
-  private readonly _logsService: LogsService;
-  private readonly _patreonService: PatreonService;
-  private readonly _animationsService: AnimationsService;
-  private readonly _interactionService: InteractionService;
-  private readonly _aiService: AIService;
-  private readonly _mappingService: MappingService;
-
-  // --- Repositories ---
-  private readonly _locationRepository: LocationRepository;
-  private readonly _memoryRepository: MemoryRepository;
-  private readonly _participantRepository: ParticipantRepository;
-  private readonly _interactionRepository: InteractionRepository;
-
-  // --- Controllers ---
+class ControllerContext {
   private readonly _versionController: VersionController;
   private readonly _fileController: FileController;
   private readonly _dbController: DbController;
@@ -101,6 +75,121 @@ export class ApiContext {
   private readonly _assetsController: AssetsController;
   private readonly _mappingController: MappingController;
 
+  constructor(ctx: ApiContext) {
+    this._versionController = new VersionController(ctx);
+    this._fileController = new FileController(ctx);
+    this._dbController = new DbController(ctx);
+    this._memoriesController = new MemoriesController(ctx);
+    this._participantsController = new ParticipantsController(ctx);
+    this._locationsController = new LocationsController(ctx);
+    this._updateController = new UpdateController(ctx);
+    this._settingsController = new SettingsController(ctx);
+    this._patreonController = new PatreonController(ctx);
+    this._loginController = new LoginController(ctx);
+    this._debugController = new DebugController(ctx);
+    this._interactionDescriptionController = new InteractionDescriptionController(ctx);
+    this._voiceController = new VoiceController();
+    this._aiController = new AIController(ctx);
+    this._animationsController = new AnimationsController(ctx);
+    this._assetsController = new AssetsController(ctx);
+    this._mappingController = new MappingController(ctx);
+  }
+
+  get version(): VersionController {
+    return this._versionController;
+  }
+
+  get file(): FileController {
+    return this._fileController;
+  }
+
+  get db(): DbController {
+    return this._dbController;
+  }
+
+  get memories(): MemoriesController {
+    return this._memoriesController;
+  }
+
+  get participants(): ParticipantsController {
+    return this._participantsController;
+  }
+
+  get locations(): LocationsController {
+    return this._locationsController;
+  }
+
+  get update(): UpdateController {
+    return this._updateController;
+  }
+
+  get settings(): SettingsController {
+    return this._settingsController;
+  }
+
+  get patreon(): PatreonController {
+    return this._patreonController;
+  }
+
+  get login(): LoginController {
+    return this._loginController;
+  }
+
+  get debug(): DebugController {
+    return this._debugController;
+  }
+
+  get interactionDescription(): InteractionDescriptionController {
+    return this._interactionDescriptionController;
+  }
+
+  get voice(): VoiceController {
+    return this._voiceController;
+  }
+
+  get ai(): AIController {
+    return this._aiController;
+  }
+
+  get animations(): AnimationsController {
+    return this._animationsController;
+  }
+
+  get assets(): AssetsController {
+    return this._assetsController;
+  }
+
+  get mapping(): MappingController {
+    return this._mappingController;
+  }
+}
+
+export class ApiContext {
+  private readonly _port: number;
+  private readonly _getAssetPath: (...paths: string[]) => string;
+  private readonly _settings: SettingsService;
+  private readonly _directory: DirectoryService;
+
+  // --- Services ---
+  private readonly _lastException: LastExceptionService;
+  private readonly _version: VersionService;
+  private readonly _update: UpdateService;
+  private readonly _db: DbService;
+  private readonly _promptBuilder: PromptRequestBuilderService;
+  private readonly _logSendService: LogSendService;
+  private readonly _logsService: LogsService;
+  private readonly _patreonService: PatreonService;
+  private readonly _animationsService: AnimationsService;
+  private readonly _interactionService: InteractionService;
+  private readonly _aiService: AIService;
+  private readonly _mappingService: MappingService;
+
+  // --- Repositories ---
+  private readonly _locationRepository: LocationRepository;
+  private readonly _memoryRepository: MemoryRepository;
+  private readonly _participantRepository: ParticipantRepository;
+  private readonly _interactionRepository: InteractionRepository;
+
   // --- AI Services ---
   private readonly _sentientSimsAIService: SentientSimsAIService;
   private readonly _koboldAIService: KoboldAIService;
@@ -112,6 +201,8 @@ export class ApiContext {
   private readonly _novelAITokenCounter: NovelAITokenCounter;
   private readonly _openAITokenCounter: OpenAITokenCounter;
   private readonly _llamaTokenCounter: LLaMaTokenCounter;
+
+  private readonly _controller: ControllerContext;
 
   constructor(options: ApiContextParams) {
     this._port = options.port;
@@ -131,43 +222,27 @@ export class ApiContext {
     this._llamaTokenCounter = new LLaMaTokenCounter();
 
     // --- Initialize Services, Repositories, and Controllers ---
-    this._lastExceptionService = new LastExceptionService(this);
-    this._versionService = new VersionService(this);
-    this._updateService = new UpdateService(this);
-    this._dbService = new DbService(this);
+    this._lastException = new LastExceptionService(this);
+    this._version = new VersionService(this);
+    this._update = new UpdateService(this);
+    this._db = new DbService(this);
     this._logsService = new LogsService(this);
     this._logSendService = new LogSendService(this);
     this._patreonService = new PatreonService(this);
     this._animationsService = new AnimationsService(this);
 
-    this._locationRepository = new LocationRepository(this._dbService);
-    this._memoryRepository = new MemoryRepository(this._dbService);
-    this._participantRepository = new ParticipantRepository(this._dbService);
+    this._locationRepository = new LocationRepository(this._db);
+    this._memoryRepository = new MemoryRepository(this._db);
+    this._participantRepository = new ParticipantRepository(this._db);
     this._interactionRepository = new InteractionRepository(this);
 
-    this._promptBuilderService = new PromptRequestBuilderService(this);
+    this._promptBuilder = new PromptRequestBuilderService(this);
     this._interactionService = new InteractionService(this);
 
     this._aiService = new AIService(this);
     this._mappingService = new MappingService();
 
-    this._versionController = new VersionController(this);
-    this._fileController = new FileController(this);
-    this._dbController = new DbController(this);
-    this._memoriesController = new MemoriesController(this);
-    this._participantsController = new ParticipantsController(this);
-    this._locationsController = new LocationsController(this);
-    this._updateController = new UpdateController(this);
-    this._settingsController = new SettingsController(this);
-    this._patreonController = new PatreonController(this);
-    this._loginController = new LoginController(this);
-    this._debugController = new DebugController(this);
-    this._interactionDescriptionController = new InteractionDescriptionController(this);
-    this._voiceController = new VoiceController();
-    this._aiController = new AIController(this);
-    this._animationsController = new AnimationsController(this);
-    this._assetsController = new AssetsController(this);
-    this._mappingController = new MappingController(this);
+    this._controller = new ControllerContext(this);
   }
 
   get port(): number {
@@ -178,59 +253,59 @@ export class ApiContext {
     return this._getAssetPath(...paths);
   }
 
-  get settingsService(): SettingsService {
+  get settings(): SettingsService {
     return this._settings;
   }
 
-  get directoryService(): DirectoryService {
+  get directory(): DirectoryService {
     return this._directory;
   }
 
-  get lastExceptionService(): LastExceptionService {
-    return this._lastExceptionService;
+  get lastException(): LastExceptionService {
+    return this._lastException;
   }
 
-  get versionService(): VersionService {
-    return this._versionService;
+  get version(): VersionService {
+    return this._version;
   }
 
-  get updateService(): UpdateService {
-    return this._updateService;
+  get update(): UpdateService {
+    return this._update;
   }
 
-  get dbService(): DbService {
-    return this._dbService;
+  get db(): DbService {
+    return this._db;
   }
 
-  get promptBuilderService(): PromptRequestBuilderService {
-    return this._promptBuilderService;
+  get promptBuilder(): PromptRequestBuilderService {
+    return this._promptBuilder;
   }
 
-  get logSendService(): LogSendService {
+  get logSend(): LogSendService {
     return this._logSendService;
   }
 
-  get logsService(): LogsService {
+  get logs(): LogsService {
     return this._logsService;
   }
 
-  get patreonService(): PatreonService {
+  get patreon(): PatreonService {
     return this._patreonService;
   }
 
-  get animationsService(): AnimationsService {
+  get animations(): AnimationsService {
     return this._animationsService;
   }
 
-  get interactionService(): InteractionService {
+  get interactions(): InteractionService {
     return this._interactionService;
   }
 
-  get aiService(): AIService {
+  get ai(): AIService {
     return this._aiService;
   }
 
-  get mappingService(): MappingService {
+  get mapping(): MappingService {
     return this._mappingService;
   }
 
@@ -248,74 +323,6 @@ export class ApiContext {
 
   get interactionRepository(): InteractionRepository {
     return this._interactionRepository;
-  }
-
-  get versionController(): VersionController {
-    return this._versionController;
-  }
-
-  get fileController(): FileController {
-    return this._fileController;
-  }
-
-  get dbController(): DbController {
-    return this._dbController;
-  }
-
-  get memoriesController(): MemoriesController {
-    return this._memoriesController;
-  }
-
-  get participantsController(): ParticipantsController {
-    return this._participantsController;
-  }
-
-  get locationsController(): LocationsController {
-    return this._locationsController;
-  }
-
-  get updateController(): UpdateController {
-    return this._updateController;
-  }
-
-  get settingsController(): SettingsController {
-    return this._settingsController;
-  }
-
-  get patreonController(): PatreonController {
-    return this._patreonController;
-  }
-
-  get loginController(): LoginController {
-    return this._loginController;
-  }
-
-  get debugController(): DebugController {
-    return this._debugController;
-  }
-
-  get interactionDescriptionController(): InteractionDescriptionController {
-    return this._interactionDescriptionController;
-  }
-
-  get voiceController(): VoiceController {
-    return this._voiceController;
-  }
-
-  get aiController(): AIController {
-    return this._aiController;
-  }
-
-  get animationsController(): AnimationsController {
-    return this._animationsController;
-  }
-
-  get assetsController(): AssetsController {
-    return this._assetsController;
-  }
-
-  get mappingController(): MappingController {
-    return this._mappingController;
   }
 
   private get sentientSimsAIService(): SentientSimsAIService {
@@ -343,7 +350,7 @@ export class ApiContext {
   }
 
   get genai(): GenerationService {
-    const aiType = this.settingsService.get(SettingsEnum.AI_API_TYPE);
+    const aiType = this.settings.get(SettingsEnum.AI_API_TYPE);
     if (aiType === ApiType.SentientSimsAI || aiType === ApiType.CustomAI) {
       return this.sentientSimsAIService;
     }
@@ -380,7 +387,7 @@ export class ApiContext {
   }
 
   get tokenCounter(): TokenCounter {
-    const aiType = this.settingsService.get(SettingsEnum.AI_API_TYPE);
+    const aiType = this.settings.get(SettingsEnum.AI_API_TYPE);
 
     if (aiType === ApiType.NovelAI) {
       return this.novelAITokenCounter;
@@ -394,25 +401,25 @@ export class ApiContext {
   }
 
   get modelSettings(): ModelSettings {
-    const aiType = this.settingsService.get(SettingsEnum.AI_API_TYPE);
+    const aiType = this.settings.get(SettingsEnum.AI_API_TYPE);
 
     let modelSettings = AllModelSettings.default;
     let model: string | unknown = null;
 
     if (aiType === ApiType.OpenAI) {
-      model = this.settingsService.get(SettingsEnum.OPENAI_MODEL);
+      model = this.settings.get(SettingsEnum.OPENAI_MODEL);
     }
 
     if (aiType === ApiType.SentientSimsAI) {
-      model = this.settingsService.get(SettingsEnum.SENTIENTSIMSAI_MODEL);
+      model = this.settings.get(SettingsEnum.SENTIENTSIMSAI_MODEL);
     }
 
     if (aiType === ApiType.Gemini) {
-      model = this.settingsService.get(SettingsEnum.GEMINI_MODEL);
+      model = this.settings.get(SettingsEnum.GEMINI_MODEL);
     }
 
     if (aiType === ApiType.VLLM) {
-      model = this.settingsService.get(SettingsEnum.VLLM_MODEL);
+      model = this.settings.get(SettingsEnum.VLLM_MODEL);
     }
 
     if (stringType(model) && model in AllModelSettings) {
@@ -420,5 +427,9 @@ export class ApiContext {
     }
 
     return modelSettings;
+  }
+
+  get controller(): ControllerContext {
+    return this._controller;
   }
 }

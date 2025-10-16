@@ -19,15 +19,15 @@ export class GeminiService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return this.ctx.settingsService.get(SettingsEnum.GEMINI_ENDPOINT) as string;
+    return this.ctx.settings.get(SettingsEnum.GEMINI_ENDPOINT) as string;
   }
 
   getGeminiModel(): string {
-    return this.ctx.settingsService.get(SettingsEnum.GEMINI_MODEL) as string;
+    return this.ctx.settings.get(SettingsEnum.GEMINI_MODEL) as string;
   }
 
   getGeminiKeys(): string[] {
-    const keysString = this.ctx.settingsService.get(SettingsEnum.GEMINI_KEYS) as string;
+    const keysString = this.ctx.settings.get(SettingsEnum.GEMINI_KEYS) as string;
     if (!keysString || keysString.trim() === '') {
       throw new GeminiKeysNotSetError(
         'No Gemini API keys set. Please configure them in settings (e.g., key1,key2,key3).',
@@ -105,8 +105,8 @@ export class GeminiService implements GenerationService {
       }
     }
 
-    if (this.ctx.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED) && text) {
-      const language = this.ctx.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE);
+    if (this.ctx.settings.get(SettingsEnum.LOCALIZATION_ENABLED) && text) {
+      const language = this.ctx.settings.get(SettingsEnum.LOCALIZATION_LANGUAGE);
       if (language) {
         const translationGenAI = this.getGenAIClient();
         const translationModel = translationGenAI.getGenerativeModel({

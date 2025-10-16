@@ -18,7 +18,7 @@ describe('OpenAIServiceIT', () => {
   });
 
   it('sentientSimsGenerate', async () => {
-    ctx.settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, false);
+    ctx.settings.set(SettingsEnum.LOCALIZATION_ENABLED, false);
     const promptRequest: PromptRequest = {
       participants: 'Gus',
       location: 'Square cube',
@@ -45,7 +45,7 @@ describe('OpenAIServiceIT', () => {
   }, 20000);
 
   it('sentientSimsGenerateJsonSchema', async () => {
-    ctx.settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, false);
+    ctx.settings.set(SettingsEnum.LOCALIZATION_ENABLED, false);
     const promptRequest: OneShotRequest = {
       messages: ['yes?'],
       systemPrompt: 'system prompt',
@@ -60,8 +60,8 @@ describe('OpenAIServiceIT', () => {
 
   it('translation', async () => {
     // No way this test is gonna pass every time
-    ctx.settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, true);
-    ctx.settingsService.set(SettingsEnum.LOCALIZATION_LANGUAGE, 'Spanish');
+    ctx.settings.set(SettingsEnum.LOCALIZATION_ENABLED, true);
+    ctx.settings.set(SettingsEnum.LOCALIZATION_LANGUAGE, 'Spanish');
     const systemPrompt = 'Return the text "Alright?"';
     const promptRequest: PromptRequest = {
       participants: '',

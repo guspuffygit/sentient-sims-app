@@ -96,7 +96,7 @@ export class LogSendService {
     }
 
     if (errors.length === 0) {
-      this.ctx.lastExceptionService.deleteLastExceptionFiles();
+      this.ctx.lastException.deleteLastExceptionFiles();
     }
 
     return {
@@ -112,10 +112,10 @@ export class LogSendService {
       `Platform: ${os.platform()}`,
       `Architecture: ${os.arch()}`,
       `OS Release: ${os.release()}`,
-      `Mods Folder: ${this.ctx.directoryService.getModsFolder()}`,
-      `Mod Version: ${this.ctx.versionService.getModVersion().version}`,
+      `Mods Folder: ${this.ctx.directory.getModsFolder()}`,
+      `Mod Version: ${this.ctx.version.getModVersion().version}`,
       `App Version: ${app.getVersion()}`,
-      `Game Version: ${this.ctx.versionService.getGameVersion().version}`,
+      `Game Version: ${this.ctx.version.getGameVersion().version}`,
       ...this.getSettings(),
       ...endData,
     ].join('\n');
@@ -188,7 +188,7 @@ export class LogSendService {
     Object.values(SettingsEnum).forEach((settingsEnum) => {
       // Dont send tokens or secrets in the logs
       if (!settingsEnum.includes('Key') && !settingsEnum.includes('Token')) {
-        const settingsValue = this.ctx.settingsService.getSetting(settingsEnum);
+        const settingsValue = this.ctx.settings.getSetting(settingsEnum);
         if (Object.prototype.toString.call(settingsValue) === '[object Object]') {
           settings.push(`${settingsEnum}: ${JSON.stringify(settingsValue)}`);
         } else {
@@ -210,7 +210,7 @@ export class LogSendService {
 
   private appendFilesListToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
-      const filesList = this.ctx.directoryService.listFilesRecursively(this.ctx.directoryService.getModsFolder());
+      const filesList = this.ctx.directory.listFilesRecursively(this.ctx.directory.getModsFolder());
       zipFile.addFile('fileList.txt', Buffer.from(filesList.join('\n'), 'utf-8'));
     } catch (err: any) {
       this.handleAppendError('Error adding file list', err, errors);
@@ -219,7 +219,7 @@ export class LogSendService {
 
   private appendLogsFileToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
-      const logFile = this.ctx.directoryService.getLogsFile();
+      const logFile = this.ctx.directory.getLogsFile();
       zipFile.addLocalFile(logFile);
     } catch (err: any) {
       this.handleAppendError('Error attaching mod log file', err, errors);
@@ -229,7 +229,7 @@ export class LogSendService {
   private appendErrorDatabaseToZipFile(zipFile: AdmZip, errors: any[], caughtError?: CaughtError) {
     try {
       if (caughtError?.databaseSession) {
-        const errorDb = this.ctx.directoryService.getSentientSimsErrorDb(caughtError.databaseSession);
+        const errorDb = this.ctx.directory.getSentientSimsErrorDb(caughtError.databaseSession);
         zipFile.addLocalFile(errorDb);
       }
     } catch (err: any) {
@@ -247,7 +247,7 @@ export class LogSendService {
 
   private appendLastExceptionFilesToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
-      this.ctx.lastExceptionService.getParsedLastExceptionFiles().forEach((lastExceptionFile) => {
+      this.ctx.lastException.getParsedLastExceptionFiles().forEach((lastExceptionFile) => {
         zipFile.addFile(
           lastExceptionFile.filename,
           Buffer.from(lastExceptionFile.text, 'utf-8'),
@@ -270,7 +270,7 @@ export class LogSendService {
 
   private appendConfigFileToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
-      const configFile = this.ctx.directoryService.getConfigFile();
+      const configFile = this.ctx.directory.getConfigFile();
       zipFile.addLocalFile(configFile);
     } catch (err: any) {
       this.handleAppendError('Error attaching Config.log file', err, errors);

@@ -18,9 +18,9 @@ export class InteractionRepository {
   async fetchInteractions(): Promise<Map<string, BasicInteraction>> {
     const response = await axiosClient({
       url: '/interactions',
-      baseURL: `${this.ctx.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
+      baseURL: `${this.ctx.settings.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
       headers: {
-        Authentication: `${this.ctx.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+        Authentication: `${this.ctx.settings.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
     });
 
@@ -44,9 +44,9 @@ export class InteractionRepository {
       url: '/interactions',
       method: 'POST',
       data: interaction,
-      baseURL: `${this.ctx.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
+      baseURL: `${this.ctx.settings.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
       headers: {
-        Authentication: `${this.ctx.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+        Authentication: `${this.ctx.settings.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
     });
 

@@ -27,16 +27,16 @@ export class OpenAIService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return this.ctx.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) as string;
+    return this.ctx.settings.get(SettingsEnum.OPENAI_ENDPOINT) as string;
   }
 
   getOpenAIModel(): string {
-    return this.ctx.settingsService.get(SettingsEnum.OPENAI_MODEL) as string;
+    return this.ctx.settings.get(SettingsEnum.OPENAI_MODEL) as string;
   }
 
   getOpenAIKey(): string | undefined {
     // Check app settings
-    const openAIKeyFromSettings = this.ctx.settingsService.get(SettingsEnum.OPENAI_KEY);
+    const openAIKeyFromSettings = this.ctx.settings.get(SettingsEnum.OPENAI_KEY);
     if (openAIKeyFromSettings) {
       log.debug('Using openai key from settings');
       return openAIKeyFromSettings as string;
@@ -105,7 +105,7 @@ export class OpenAIService implements GenerationService {
       }),
     };
 
-    if (request.guidedChoice && this.ctx.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) === openaiDefaultEndpoint) {
+    if (request.guidedChoice && this.ctx.settings.get(SettingsEnum.OPENAI_ENDPOINT) === openaiDefaultEndpoint) {
       const schema: ResponseFormatJSONSchema = {
         json_schema: {
           name: 'thechoice',
@@ -133,12 +133,12 @@ export class OpenAIService implements GenerationService {
     const result = await this.getOpenAIClient().chat.completions.create(completionRequest);
     let text = this.getOutputFromGeneration(result);
 
-    if (request.guidedChoice && this.ctx.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) === openaiDefaultEndpoint) {
+    if (request.guidedChoice && this.ctx.settings.get(SettingsEnum.OPENAI_ENDPOINT) === openaiDefaultEndpoint) {
       text = JSON.parse(text).choice.trim();
     }
 
-    if (this.ctx.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED)) {
-      text = await this.translate(text, this.ctx.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE) as string);
+    if (this.ctx.settings.get(SettingsEnum.LOCALIZATION_ENABLED)) {
+      text = await this.translate(text, this.ctx.settings.get(SettingsEnum.LOCALIZATION_LANGUAGE) as string);
     }
 
     return {
@@ -209,7 +209,7 @@ export class OpenAIService implements GenerationService {
 
     const aiModels: AIModel[] = [];
     models.data.forEach((model) => {
-      if (this.ctx.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) !== openaiDefaultEndpoint) {
+      if (this.ctx.settings.get(SettingsEnum.OPENAI_ENDPOINT) !== openaiDefaultEndpoint) {
         aiModels.push({
           name: model.id,
           displayName: model.id,

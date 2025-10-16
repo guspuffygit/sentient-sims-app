@@ -22,7 +22,7 @@ export class PatreonController {
 
     try {
       log.debug('Handling patreon redirect');
-      await this.ctx.patreonService.handlePatreonRedirect(code as string);
+      await this.ctx.patreon.handlePatreonRedirect(code as string);
 
       notifyRefreshUserAttributes();
     } catch (exception: any) {

@@ -121,7 +121,7 @@ const createWindow = async () => {
   });
   ipcHandlers(ctx);
 
-  if (ctx.settingsService.get(SettingsEnum.DEBUG_LOGS)) {
+  if (ctx.settings.get(SettingsEnum.DEBUG_LOGS)) {
     enableDebugLogging();
   } else {
     disableDebugLogging();

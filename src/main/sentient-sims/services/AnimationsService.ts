@@ -20,9 +20,9 @@ export class AnimationsService {
   async getAnimations() {
     const response = await axiosClient({
       url: '/animations',
-      baseURL: `${this.ctx.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
+      baseURL: `${this.ctx.settings.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
       headers: {
-        Authentication: `${this.ctx.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+        Authentication: `${this.ctx.settings.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
     });
 
@@ -34,9 +34,9 @@ export class AnimationsService {
       url: '/animations',
       method: 'POST',
       data: animation,
-      baseURL: `${this.ctx.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
+      baseURL: `${this.ctx.settings.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
       headers: {
-        Authentication: `${this.ctx.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+        Authentication: `${this.ctx.settings.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
     });
 
@@ -58,14 +58,14 @@ export class AnimationsService {
   }
 
   isNsfwEnabled(): boolean {
-    if (this.ctx.settingsService.get(SettingsEnum.AI_API_TYPE) !== ApiType.OpenAI) {
+    if (this.ctx.settings.get(SettingsEnum.AI_API_TYPE) !== ApiType.OpenAI) {
       return true;
     }
 
-    return this.ctx.settingsService.get(SettingsEnum.NSFW_ENABLED) as boolean;
+    return this.ctx.settings.get(SettingsEnum.NSFW_ENABLED) as boolean;
   }
 
   isAnimationMappingEnabled(): boolean {
-    return this.ctx.settingsService.get(SettingsEnum.MAPPING_NOTIFICATION_ENABLED) as boolean;
+    return this.ctx.settings.get(SettingsEnum.MAPPING_NOTIFICATION_ENABLED) as boolean;
   }
 }

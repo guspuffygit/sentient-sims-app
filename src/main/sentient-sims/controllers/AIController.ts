@@ -26,7 +26,7 @@ export class AIController {
   @CatchErrors()
   async sentientSimsGenerate(req: Request, res: Response) {
     const promptRequest: OpenAICompatibleRequest = req.body;
-    const response = await this.ctx.aiService.generate(promptRequest);
+    const response = await this.ctx.ai.generate(promptRequest);
     log.debug(response);
     res.json({ text: response.text });
     sendChatGeneration({
@@ -40,7 +40,7 @@ export class AIController {
   async interactionEvent(req: Request, res: Response) {
     const event: InteractionEvents = req.body;
 
-    const result = await this.ctx.aiService.interactionEvent(event);
+    const result = await this.ctx.ai.interactionEvent(event);
     result.input = event;
     res.json(result);
     if (result.text) {
@@ -52,7 +52,7 @@ export class AIController {
   async classificationEvent(req: Request, res: Response) {
     const event: ClassificationRequest = req.body;
 
-    const result = await this.ctx.aiService.runClassification(event);
+    const result = await this.ctx.ai.runClassification(event);
     res.json(result);
     if (result.text) {
       sendChatGeneration(result);
@@ -63,7 +63,7 @@ export class AIController {
   async buffDescription(req: Request, res: Response) {
     const event: BuffDescriptionRequest = req.body;
 
-    const result = await this.ctx.aiService.runBuffDescription(event);
+    const result = await this.ctx.ai.runBuffDescription(event);
     res.json(result);
     if (result.text) {
       sendChatGeneration(result);
@@ -75,12 +75,12 @@ export class AIController {
     const event: BuffEventRequest = req.body;
 
     res.json({ ok: 'ok' });
-    await this.ctx.aiService.runBuff(event);
+    await this.ctx.ai.runBuff(event);
   }
 
   @CatchErrors({ statusCode: 500 })
   async getModels(req: Request, res: Response) {
-    const result = await this.ctx.aiService.getModels();
+    const result = await this.ctx.ai.getModels();
     res.json(result);
   }
 

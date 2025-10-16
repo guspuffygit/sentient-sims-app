@@ -14,11 +14,11 @@ export class InteractionDescriptionController {
 
   async updateInteraction(req: Request, res: Response) {
     const interaction: InteractionDTO = req.body;
-    await this.ctx.interactionService.updateUnmappedInteraction(interaction);
+    await this.ctx.interactions.updateUnmappedInteraction(interaction);
     res.json({ done: 'done' });
   }
 
   async getIgnoredInteractions(req: Request, res: Response) {
-    res.json(await this.ctx.interactionService.getIgnoredInteractions());
+    res.json(await this.ctx.interactions.getIgnoredInteractions());
   }
 }

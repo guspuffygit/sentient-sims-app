@@ -29,7 +29,7 @@ export class VersionService {
   }
 
   getModVersion(): Version {
-    const modVersionFile = this.ctx.directoryService.getModVersionFile();
+    const modVersionFile = this.ctx.directory.getModVersionFile();
     return this.getVersion(modVersionFile);
   }
 
@@ -39,7 +39,7 @@ export class VersionService {
 
   getGameVersion(): Version {
     try {
-      const versionText = fs.readFileSync(this.ctx.directoryService.getGameVersion(), 'utf-8');
+      const versionText = fs.readFileSync(this.ctx.directory.getGameVersion(), 'utf-8');
 
       return { version: removeNonPrintableCharacters(versionText).trim() };
     } catch (e: any) {

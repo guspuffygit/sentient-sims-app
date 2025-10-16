@@ -20,13 +20,13 @@ export class UpdateService {
 
   async updateMod({ type, credentials }: ModUpdate) {
     try {
-      const modsFolder = this.ctx.directoryService.getModsFolder();
+      const modsFolder = this.ctx.directory.getModsFolder();
       if (!fs.existsSync(modsFolder)) {
         log.info(`Creating mods folder: ${modsFolder}`);
         fs.mkdirSync(modsFolder, { recursive: true });
       }
 
-      const zippedModFile = this.ctx.directoryService.getZippedModFile();
+      const zippedModFile = this.ctx.directory.getZippedModFile();
       if (fs.existsSync(zippedModFile)) {
         log.info(`Zipped mod file exists, deleting: ${zippedModFile}`);
         fs.rmSync(zippedModFile);
@@ -65,13 +65,13 @@ export class UpdateService {
         throw new Error('Response body is undefined.');
       }
 
-      const sentientSimsFolder = this.ctx.directoryService.getSentientSimsFolder();
+      const sentientSimsFolder = this.ctx.directory.getSentientSimsFolder();
       if (!fs.existsSync(sentientSimsFolder)) {
         log.info(`Sentient Sims folder did not exist, creating: ${sentientSimsFolder}`);
         fs.mkdirSync(sentientSimsFolder);
       }
 
-      const scriptsFolderExists = fs.existsSync(this.ctx.directoryService.getSentientSimsScriptsFolder());
+      const scriptsFolderExists = fs.existsSync(this.ctx.directory.getSentientSimsScriptsFolder());
 
       const zip = new AdmZip(zippedModFile);
       zip
@@ -92,7 +92,7 @@ export class UpdateService {
 
       log.info(`Update completed.`);
     } finally {
-      this.ctx.directoryService.filesToDelete().forEach((fileToDelete) => {
+      this.ctx.directory.filesToDelete().forEach((fileToDelete) => {
         if (fs.existsSync(fileToDelete)) {
           log.info(`File exists, deleting: ${fileToDelete}`);
           fs.rmSync(fileToDelete);

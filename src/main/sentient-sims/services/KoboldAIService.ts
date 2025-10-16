@@ -19,7 +19,7 @@ export class KoboldAIService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return this.ctx.settingsService.get(SettingsEnum.KOBOLDAI_ENDPOINT) as string;
+    return this.ctx.settings.get(SettingsEnum.KOBOLDAI_ENDPOINT) as string;
   }
 
   async generate(prompt: string, maxResponseTokens: number): Promise<string> {

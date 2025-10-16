@@ -13,10 +13,10 @@ describe('Version Service', () => {
     };
 
     // Test no version file existing
-    expect(ctx.versionService.getModVersion().version).toEqual('none');
+    expect(ctx.version.getModVersion().version).toEqual('none');
 
-    ctx.directoryService.createDirectoryIfNotExist(path.dirname(ctx.directoryService.getModVersionFile()));
-    fs.writeFileSync(ctx.directoryService.getModVersionFile(), JSON.stringify(version));
-    expect(ctx.versionService.getModVersion().version).toEqual(version.version);
+    ctx.directory.createDirectoryIfNotExist(path.dirname(ctx.directory.getModVersionFile()));
+    fs.writeFileSync(ctx.directory.getModVersionFile(), JSON.stringify(version));
+    expect(ctx.version.getModVersion().version).toEqual(version.version);
   });
 });

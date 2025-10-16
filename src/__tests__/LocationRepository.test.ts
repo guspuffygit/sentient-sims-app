@@ -10,10 +10,10 @@ function locationsAreEqual(a: LocationEntity, b: LocationEntity): boolean {
 describe('LocationRepository', () => {
   it('is_generic', async () => {
     const ctx = mockApiContext();
-    fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), {
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
       recursive: true,
     });
-    await ctx.dbService.loadDatabase({
+    await ctx.db.loadDatabase({
       sessionId: '1237632',
       saveId: '2',
     });
@@ -32,10 +32,10 @@ describe('LocationRepository', () => {
 
   it('CRUD', async () => {
     const ctx = mockApiContext();
-    fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), {
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
       recursive: true,
     });
-    await ctx.dbService.loadDatabase({
+    await ctx.db.loadDatabase({
       sessionId: '1231237632',
       saveId: '2',
     });

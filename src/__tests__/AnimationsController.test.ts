@@ -23,7 +23,7 @@ describe('AnimationsController', () => {
   });
 
   it('OpenAI Not selected Returns True', async () => {
-    ctx.settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.NovelAI);
+    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.NovelAI);
 
     const req = {} as Request;
     const res = {
@@ -31,14 +31,14 @@ describe('AnimationsController', () => {
       json: jest.fn(),
     } as unknown as Response;
 
-    await ctx.animationsController.isNsfwEnabled(req, res);
+    await ctx.controller.animations.isNsfwEnabled(req, res);
 
     expect(res.json).toHaveBeenCalledWith({ value: true });
   });
 
   it('OpenAI ApiType NSFW Disabled Returns False', async () => {
-    ctx.settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
-    ctx.settingsService.set(SettingsEnum.NSFW_ENABLED, false);
+    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
+    ctx.settings.set(SettingsEnum.NSFW_ENABLED, false);
 
     const req = {} as Request;
     const res = {
@@ -46,14 +46,14 @@ describe('AnimationsController', () => {
       json: jest.fn(),
     } as unknown as Response;
 
-    await ctx.animationsController.isNsfwEnabled(req, res);
+    await ctx.controller.animations.isNsfwEnabled(req, res);
 
     expect(res.json).toHaveBeenCalledWith({ value: false });
   });
 
   it('Force NSFW Enabled Returns True', async () => {
-    ctx.settingsService.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
-    ctx.settingsService.set(SettingsEnum.NSFW_ENABLED, true);
+    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
+    ctx.settings.set(SettingsEnum.NSFW_ENABLED, true);
 
     const req = {} as Request;
     const res = {
@@ -61,7 +61,7 @@ describe('AnimationsController', () => {
       json: jest.fn(),
     } as unknown as Response;
 
-    await ctx.animationsController.isNsfwEnabled(req, res);
+    await ctx.controller.animations.isNsfwEnabled(req, res);
 
     expect(res.json).toHaveBeenCalledWith({ value: true });
   });

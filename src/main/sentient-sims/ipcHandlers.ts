@@ -22,12 +22,12 @@ export default function ipcHandlers(ctx: ApiContext) {
     if (setting !== SettingsEnum.ACCESS_TOKEN) {
       log.debug(`set-setting: ${setting.toString()}, value: ${value}`);
     }
-    ctx.settingsService.set(setting, value);
+    ctx.settings.set(setting, value);
 
     notifySettingChanged(setting, value);
   });
   ipcMain.on('reset-setting', (_event: IpcMainEvent, setting: SettingsEnum) => {
-    const value = ctx.settingsService.resetSetting(setting.toString());
+    const value = ctx.settings.resetSetting(setting.toString());
     notifySettingChanged(setting, value);
   });
   ipcMain.on('on-successful-auth', () => {

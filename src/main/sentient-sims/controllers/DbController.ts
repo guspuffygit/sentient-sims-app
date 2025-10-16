@@ -20,7 +20,7 @@ export class DbController {
       const databaseSession: DatabaseSession = req.body;
       log.debug(`Loading database: ${databaseSession.sessionId} : ${databaseSession.saveId}`);
 
-      await this.ctx.dbService.loadDatabase(databaseSession);
+      await this.ctx.db.loadDatabase(databaseSession);
       return res.json({ text: 'Db Loaded' });
     } catch (err: any) {
       log.error('Error loading database', err);
@@ -33,7 +33,7 @@ export class DbController {
       const databaseSession: DatabaseSession = req.body;
       log.debug(`Saving database: ${databaseSession.sessionId} : ${databaseSession.saveId}`);
 
-      await this.ctx.dbService.saveDatabase(databaseSession);
+      await this.ctx.db.saveDatabase(databaseSession);
       return res.json({ text: 'Db Saved' });
     } catch (err: any) {
       log.error('Error saving database', err);
@@ -45,7 +45,7 @@ export class DbController {
     try {
       log.debug(`Unloading database`);
 
-      this.ctx.dbService.unloadDatabase();
+      this.ctx.db.unloadDatabase();
       return res.json({ text: 'Db unloaded' });
     } catch (err: any) {
       log.error('Error saving database', err);
@@ -57,7 +57,7 @@ export class DbController {
     try {
       log.debug(`Getting save games`);
 
-      return res.json(this.ctx.dbService.listSaveGames());
+      return res.json(this.ctx.db.listSaveGames());
     } catch (err: any) {
       log.error('Error saving database', err);
       return res.json({ error: err.message });

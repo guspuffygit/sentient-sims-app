@@ -48,15 +48,15 @@ describe('Api', () => {
       type: 'main',
       credentials,
     });
-    const files = fs.readdirSync(ctx.directoryService.getSentientSimsFolder());
+    const files = fs.readdirSync(ctx.directory.getSentientSimsFolder());
     expect(files.length).toBeGreaterThan(2);
     expect(files).toContain('sentient-sims.package');
   });
 
   it('version controller', async () => {
-    fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), { recursive: true });
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
     const expectedVersion: Version = { version: 'expectedversion' };
-    fs.writeFileSync(ctx.directoryService.getModVersionFile(), JSON.stringify(expectedVersion));
+    fs.writeFileSync(ctx.directory.getModVersionFile(), JSON.stringify(expectedVersion));
 
     const versionClient = new VersionClient(apiUrl);
     const modVersion = await versionClient.getModVersion();
