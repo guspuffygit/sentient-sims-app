@@ -11,41 +11,42 @@ import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { notifyDatabaseLoaded } from '../util/notifyRenderer';
 import { SaveGame, SaveGameType } from '../models/SaveGame';
+import { ApiContext } from './ApiContext';
 
 export class DbService {
-  private directoryService: DirectoryService;
+  private ctx: ApiContext;
 
   private db?: Database;
 
   private databaseSession?: DatabaseSession | null;
 
-  constructor(directoryService: DirectoryService) {
-    this.directoryService = directoryService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   async loadDatabase(databaseSession: DatabaseSession) {
-    const unsavedDb = this.directoryService.getSentientSimsDbUnsaved(databaseSession);
-    const savedDb = this.directoryService.getSentientSimsDb(databaseSession);
+    const unsavedDb = this.ctx.directoryService.getSentientSimsDbUnsaved(databaseSession);
+    const savedDb = this.ctx.directoryService.getSentientSimsDb(databaseSession);
 
     // Only needed for db migration to multi-slot saves, remove after awhile
     if (databaseSession.action === 'perform_migrate_single_slot_save') {
-      if (DirectoryService.fileExistsSync(`${this.directoryService.getSingleSlotSentientSimsDB()}.backup`)) {
+      if (DirectoryService.fileExistsSync(`${this.ctx.directoryService.getSingleSlotSentientSimsDB()}.backup`)) {
         log.info('Database is already migrated');
         return;
       }
-      if (!DirectoryService.fileExistsSync(this.directoryService.getSingleSlotSentientSimsDB())) {
+      if (!DirectoryService.fileExistsSync(this.ctx.directoryService.getSingleSlotSentientSimsDB())) {
         log.info('No single slot save exists');
         return;
       }
       log.info(`Migrating single slot save to new slot:\n${unsavedDb}\n${savedDb}`);
-      fs.copyFileSync(this.directoryService.getSingleSlotSentientSimsDB(), unsavedDb);
-      fs.copyFileSync(this.directoryService.getSingleSlotSentientSimsDB(), savedDb);
+      fs.copyFileSync(this.ctx.directoryService.getSingleSlotSentientSimsDB(), unsavedDb);
+      fs.copyFileSync(this.ctx.directoryService.getSingleSlotSentientSimsDB(), savedDb);
       log.info(`Done copying, moving single slot save to backup`);
       fs.renameSync(
-        this.directoryService.getSingleSlotSentientSimsDB(),
-        `${this.directoryService.getSingleSlotSentientSimsDB()}.backup`,
+        this.ctx.directoryService.getSingleSlotSentientSimsDB(),
+        `${this.ctx.directoryService.getSingleSlotSentientSimsDB()}.backup`,
       );
-    } else if (DirectoryService.fileExistsSync(this.directoryService.getSingleSlotSentientSimsDB())) {
+    } else if (DirectoryService.fileExistsSync(this.ctx.directoryService.getSingleSlotSentientSimsDB())) {
       log.info('Single slot save exists, sending notification to mod');
       sendModNotification({
         type: ModWebsocketMessageType.MIGRATE_SINGLE_SLOT_SAVE,
@@ -84,7 +85,7 @@ export class DbService {
   }
 
   getDatabaseTemp(saveGame: SaveGame): Database {
-    const saveGameDb = this.directoryService.getSentientSimsSaveGame(saveGame);
+    const saveGameDb = this.ctx.directoryService.getSentientSimsSaveGame(saveGame);
 
     log.info(`loadDatabaseTemp db: ${saveGameDb}`);
 
@@ -110,7 +111,7 @@ export class DbService {
   cleanupUnsavedDatabases(databaseSession: DatabaseSession) {
     let unsavedDatabases;
     try {
-      unsavedDatabases = this.directoryService.listSentientSimsDbUnsaved();
+      unsavedDatabases = this.ctx.directoryService.listSentientSimsDbUnsaved();
     } catch (err: any) {
       log.error('Unabled to list unsaved databases', err);
       return;
@@ -128,8 +129,8 @@ export class DbService {
   }
 
   async saveDatabase(databaseSession: DatabaseSession) {
-    const unsavedDb = this.directoryService.getSentientSimsDbUnsaved(databaseSession);
-    const savedDb = this.directoryService.getSentientSimsDb(databaseSession);
+    const unsavedDb = this.ctx.directoryService.getSentientSimsDbUnsaved(databaseSession);
+    const savedDb = this.ctx.directoryService.getSentientSimsDb(databaseSession);
     log.debug(`saveDatabase unsavedDb: ${unsavedDb} savedDb: ${savedDb}`);
 
     if (DirectoryService.fileExistsSync(unsavedDb)) {
@@ -142,8 +143,8 @@ export class DbService {
   async copyErrorDatabase(): Promise<DatabaseSession | null> {
     try {
       if (this.databaseSession) {
-        const unsavedDb = this.directoryService.getSentientSimsDbUnsaved(this.databaseSession);
-        const errorDb = this.directoryService.getSentientSimsErrorDb(this.databaseSession);
+        const unsavedDb = this.ctx.directoryService.getSentientSimsDbUnsaved(this.databaseSession);
+        const errorDb = this.ctx.directoryService.getSentientSimsErrorDb(this.databaseSession);
 
         if (DirectoryService.fileExistsSync(unsavedDb)) {
           fs.copyFileSync(unsavedDb, errorDb);
@@ -163,7 +164,7 @@ export class DbService {
     this.db = undefined;
 
     // Cleanup unsaved databases
-    this.directoryService.listSentientSimsDbUnsaved().forEach((unsavedDb) => fs.rmSync(unsavedDb));
+    this.ctx.directoryService.listSentientSimsDbUnsaved().forEach((unsavedDb) => fs.rmSync(unsavedDb));
 
     this.databaseSession = null;
 
@@ -189,7 +190,7 @@ export class DbService {
 
   listSaveGames(): SaveGame[] {
     const saveGames: SaveGame[] = [];
-    const unsavedGames = this.directoryService.listSentientSimsDbUnsaved();
+    const unsavedGames = this.ctx.directoryService.listSentientSimsDbUnsaved();
     unsavedGames.forEach((game) => {
       const unsaveGameName = path.basename(game).replace('-sentient-sims-unsaved.db', '');
       if (!unsaveGameName.includes('-shm') && !unsaveGameName.includes('-wal')) {
@@ -200,7 +201,7 @@ export class DbService {
       }
     });
 
-    const savedGames = this.directoryService.listSentientSimsDbSaved();
+    const savedGames = this.ctx.directoryService.listSentientSimsDbSaved();
     savedGames.forEach((game) => {
       saveGames.push({
         name: path.basename(game).replace('-sentient-sims.db', ''),

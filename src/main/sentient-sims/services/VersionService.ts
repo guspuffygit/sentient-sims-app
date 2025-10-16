@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import log from 'electron-log';
 import { app } from 'electron';
-import { DirectoryService } from './DirectoryService';
 import { filterNullAndUndefined, removeNonPrintableCharacters } from '../util/filter';
+import { ApiContext } from './ApiContext';
 
 export type Version = {
   version: string;
@@ -10,10 +10,10 @@ export type Version = {
 };
 
 export class VersionService {
-  private directoryService: DirectoryService;
+  private ctx: ApiContext;
 
-  constructor(directoryService: DirectoryService) {
-    this.directoryService = directoryService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   getVersion(path: string): Version {
@@ -29,7 +29,7 @@ export class VersionService {
   }
 
   getModVersion(): Version {
-    const modVersionFile = this.directoryService.getModVersionFile();
+    const modVersionFile = this.ctx.directoryService.getModVersionFile();
     return this.getVersion(modVersionFile);
   }
 
@@ -39,7 +39,7 @@ export class VersionService {
 
   getGameVersion(): Version {
     try {
-      const versionText = fs.readFileSync(this.directoryService.getGameVersion(), 'utf-8');
+      const versionText = fs.readFileSync(this.ctx.directoryService.getGameVersion(), 'utf-8');
 
       return { version: removeNonPrintableCharacters(versionText).trim() };
     } catch (e: any) {

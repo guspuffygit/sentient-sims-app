@@ -1,7 +1,7 @@
 import log from 'electron-log';
-import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { notifyPatreonLinking, sendPopUpNotification } from '../util/notifyRenderer';
+import { ApiContext } from './ApiContext';
 
 export class NotLoggedInError extends Error {
   constructor(message: string) {
@@ -11,17 +11,17 @@ export class NotLoggedInError extends Error {
 }
 
 export class PatreonService {
-  private settingsService: SettingsService;
+  private ctx: ApiContext;
 
-  constructor(settingsService: SettingsService) {
-    this.settingsService = settingsService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   async handlePatreonRedirect(code: string) {
     notifyPatreonLinking(true);
     try {
-      const token = this.settingsService.get(SettingsEnum.ACCESS_TOKEN) as string;
-      const url = `${this.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}/patreon-redirect?code=${code}`;
+      const token = this.ctx.settingsService.get(SettingsEnum.ACCESS_TOKEN) as string;
+      const url = `${this.ctx.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}/patreon-redirect?code=${code}`;
       if (token) {
         log.debug(`Handling patreon redirect code: ${url}, token: ${token}`);
         try {

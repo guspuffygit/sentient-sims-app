@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { SettingsService } from '../services/SettingsService';
 import { notifySettingChanged } from '../util/notifyRenderer';
+import { ApiContext } from '../services/ApiContext';
 
 export class SettingsController {
-  private settingsService: SettingsService;
+  private ctx: ApiContext;
 
-  constructor(settingsService: SettingsService) {
-    this.settingsService = settingsService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
 
     this.updateSetting = this.updateSetting.bind(this);
     this.getSetting = this.getSetting.bind(this);
@@ -16,17 +16,17 @@ export class SettingsController {
   async updateSetting(req: Request, res: Response) {
     const { appSetting } = req.params;
     const { value } = req.body;
-    res.json({ value: this.settingsService.setSetting(appSetting, value) });
+    res.json({ value: this.ctx.settingsService.setSetting(appSetting, value) });
     notifySettingChanged(appSetting, value);
   }
 
   async getSetting(req: Request, res: Response) {
     const { appSetting } = req.params;
-    res.json({ value: this.settingsService.getSetting(appSetting) });
+    res.json({ value: this.ctx.settingsService.getSetting(appSetting) });
   }
 
   async resetSetting(req: Request, res: Response) {
     const { appSetting } = req.params;
-    res.json({ value: this.settingsService.resetSetting(appSetting) });
+    res.json({ value: this.ctx.settingsService.resetSetting(appSetting) });
   }
 }

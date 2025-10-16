@@ -2,13 +2,13 @@ import log from 'electron-log';
 import OpenAI from 'openai';
 import { ChatCompletion, ResponseFormatJSONSchema } from 'openai/resources/index.js';
 import { ChatCompletionCreateParams } from 'openai/resources/chat/completions.js';
-import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel } from '../models/AIModel';
 import { openaiDefaultEndpoint } from '../constants';
+import { ApiContext } from './ApiContext';
 
 export class OpenAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -18,25 +18,25 @@ export class OpenAIKeyNotSetError extends Error {
 }
 
 export class OpenAIService implements GenerationService {
-  private readonly settingsService: SettingsService;
+  private readonly ctx: ApiContext;
 
   private openAIClient?: OpenAI;
 
-  constructor(settingsService: SettingsService) {
-    this.settingsService = settingsService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   serviceUrl(): string {
-    return this.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) as string;
+    return this.ctx.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) as string;
   }
 
   getOpenAIModel(): string {
-    return this.settingsService.get(SettingsEnum.OPENAI_MODEL) as string;
+    return this.ctx.settingsService.get(SettingsEnum.OPENAI_MODEL) as string;
   }
 
   getOpenAIKey(): string | undefined {
     // Check app settings
-    const openAIKeyFromSettings = this.settingsService.get(SettingsEnum.OPENAI_KEY);
+    const openAIKeyFromSettings = this.ctx.settingsService.get(SettingsEnum.OPENAI_KEY);
     if (openAIKeyFromSettings) {
       log.debug('Using openai key from settings');
       return openAIKeyFromSettings as string;
@@ -105,7 +105,7 @@ export class OpenAIService implements GenerationService {
       }),
     };
 
-    if (request.guidedChoice && this.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) === openaiDefaultEndpoint) {
+    if (request.guidedChoice && this.ctx.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) === openaiDefaultEndpoint) {
       const schema: ResponseFormatJSONSchema = {
         json_schema: {
           name: 'thechoice',
@@ -133,12 +133,12 @@ export class OpenAIService implements GenerationService {
     const result = await this.getOpenAIClient().chat.completions.create(completionRequest);
     let text = this.getOutputFromGeneration(result);
 
-    if (request.guidedChoice && this.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) === openaiDefaultEndpoint) {
+    if (request.guidedChoice && this.ctx.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) === openaiDefaultEndpoint) {
       text = JSON.parse(text).choice.trim();
     }
 
-    if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED)) {
-      text = await this.translate(text, this.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE) as string);
+    if (this.ctx.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED)) {
+      text = await this.translate(text, this.ctx.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE) as string);
     }
 
     return {
@@ -209,7 +209,7 @@ export class OpenAIService implements GenerationService {
 
     const aiModels: AIModel[] = [];
     models.data.forEach((model) => {
-      if (this.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) !== openaiDefaultEndpoint) {
+      if (this.ctx.settingsService.get(SettingsEnum.OPENAI_ENDPOINT) !== openaiDefaultEndpoint) {
         aiModels.push({
           name: model.id,
           displayName: model.id,

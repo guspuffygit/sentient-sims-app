@@ -1,23 +1,19 @@
 import '@testing-library/jest-dom';
 import * as fs from 'fs';
-import { DbService } from 'main/sentient-sims/services/DbService';
-import { MemoryRepository } from 'main/sentient-sims/db/MemoryRepository';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
-import { mockDirectoryService } from './util';
+import { mockApiContext } from './util';
 
 describe('MemoryRepository', () => {
   it('CRUD', async () => {
-    const directoryService = mockDirectoryService();
-    fs.mkdirSync(directoryService.getSentientSimsFolder(), {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), {
       recursive: true,
     });
-    const dbService = new DbService(directoryService);
-    await dbService.loadDatabase({
+    await ctx.dbService.loadDatabase({
       sessionId: '7981723',
       saveId: '2',
     });
-    const memoryRepository = new MemoryRepository(dbService);
     const participants: ParticipantDTO[] = [{ id: '128937674' }, { id: '18276365' }];
     const memory: MemoryEntity = {
       location_id: 90369424,
@@ -25,7 +21,7 @@ describe('MemoryRepository', () => {
       content: 'foiwje9if91082u',
       observation: 'joijofi10298',
     };
-    const result = memoryRepository.createMemory({
+    const result = ctx.memoryRepository.createMemory({
       memory,
       participants,
     });
@@ -37,7 +33,7 @@ describe('MemoryRepository', () => {
     expect(result.timestamp).toBeTruthy();
 
     // Check createMemory also created memory_participants rows
-    const memoryParticipants = memoryRepository.getMemoryParticipants({
+    const memoryParticipants = ctx.memoryRepository.getMemoryParticipants({
       memory_id: Number(result.id),
     });
     expect(memoryParticipants).toHaveLength(2);
@@ -52,53 +48,53 @@ describe('MemoryRepository', () => {
     memory.id = result.id;
     memory.observation = expectedObservation;
 
-    memoryRepository.updateMemory(memory);
+    ctx.memoryRepository.updateMemory(memory);
 
-    const updatedMemory = memoryRepository.getMemory({
+    const updatedMemory = ctx.memoryRepository.getMemory({
       id: Number(memory.id),
     });
     expect(updatedMemory.observation).toEqual(expectedObservation);
 
-    const results = memoryRepository.getMemories();
+    const results = ctx.memoryRepository.getMemories();
     expect(results).toHaveLength(1);
     expect(updatedMemory).toEqual(results[0]);
 
-    const noParticipantMemories = memoryRepository.getParticipantsMemories({
+    const noParticipantMemories = ctx.memoryRepository.getParticipantsMemories({
       participant_ids: ['9857897436'],
     });
     expect(noParticipantMemories).toHaveLength(0);
 
-    const participantMemories = memoryRepository.getParticipantsMemories({
+    const participantMemories = ctx.memoryRepository.getParticipantsMemories({
       participant_ids: ['128937674', '18276365'],
     });
     expect(participantMemories).toHaveLength(1);
 
     // Delete item
-    memoryRepository.deleteMemory({ id: Number(memory.id) });
-    const noResults = memoryRepository.getMemories();
+    ctx.memoryRepository.deleteMemory({ id: Number(memory.id) });
+    const noResults = ctx.memoryRepository.getMemories();
     expect(noResults).toHaveLength(0);
 
     // Links rows in memory_participants table should be cascade deleted
-    const noMemoryParticipants = memoryRepository.getMemoryParticipants({
+    const noMemoryParticipants = ctx.memoryRepository.getMemoryParticipants({
       memory_id: Number(result.id),
     });
     expect(noMemoryParticipants).toHaveLength(0);
 
     // Test deleteAllMemories
-    memoryRepository.createMemory({
+    ctx.memoryRepository.createMemory({
       memory,
       participants,
     });
-    memoryRepository.createMemory({
+    ctx.memoryRepository.createMemory({
       memory,
       participants,
     });
-    memoryRepository.deleteAllMemories();
-    const noResultsDeleteAll = memoryRepository.getMemories();
+    ctx.memoryRepository.deleteAllMemories();
+    const noResultsDeleteAll = ctx.memoryRepository.getMemories();
     expect(noResultsDeleteAll).toHaveLength(0);
 
     const throwsError = jest.fn(() => {
-      memoryRepository.getMemory({ id: 99999 });
+      ctx.memoryRepository.getMemory({ id: 99999 });
     });
     expect(throwsError).toThrow();
   });

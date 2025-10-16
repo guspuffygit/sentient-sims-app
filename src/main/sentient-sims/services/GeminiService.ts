@@ -1,6 +1,5 @@
 import log from 'electron-log';
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
-import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
@@ -10,24 +9,25 @@ import { getRandomItem } from '../util/getRandomItem';
 import { GeminiKeysNotSetError } from '../exceptions/GeminiKeyNotSetError';
 import { GeminiAPIError } from '../exceptions/GeminiAPIError';
 import { axiosClient } from '../clients/AxiosClient';
+import { ApiContext } from './ApiContext';
 
 export class GeminiService implements GenerationService {
-  private readonly settingsService: SettingsService;
+  private readonly ctx: ApiContext;
 
-  constructor(settingsService: SettingsService) {
-    this.settingsService = settingsService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   serviceUrl(): string {
-    return this.settingsService.get(SettingsEnum.GEMINI_ENDPOINT) as string;
+    return this.ctx.settingsService.get(SettingsEnum.GEMINI_ENDPOINT) as string;
   }
 
   getGeminiModel(): string {
-    return this.settingsService.get(SettingsEnum.GEMINI_MODEL) as string;
+    return this.ctx.settingsService.get(SettingsEnum.GEMINI_MODEL) as string;
   }
 
   getGeminiKeys(): string[] {
-    const keysString = this.settingsService.get(SettingsEnum.GEMINI_KEYS) as string;
+    const keysString = this.ctx.settingsService.get(SettingsEnum.GEMINI_KEYS) as string;
     if (!keysString || keysString.trim() === '') {
       throw new GeminiKeysNotSetError(
         'No Gemini API keys set. Please configure them in settings (e.g., key1,key2,key3).',
@@ -105,8 +105,8 @@ export class GeminiService implements GenerationService {
       }
     }
 
-    if (this.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED) && text) {
-      const language = this.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE);
+    if (this.ctx.settingsService.get(SettingsEnum.LOCALIZATION_ENABLED) && text) {
+      const language = this.ctx.settingsService.get(SettingsEnum.LOCALIZATION_LANGUAGE);
       if (language) {
         const translationGenAI = this.getGenAIClient();
         const translationModel = translationGenAI.getGenerativeModel({

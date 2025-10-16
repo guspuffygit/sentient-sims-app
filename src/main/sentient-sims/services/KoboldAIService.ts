@@ -1,25 +1,25 @@
 import log from 'electron-log';
-import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { sendPopUpNotification } from '../util/notifyRenderer';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel } from '../models/AIModel';
+import { ApiContext } from './ApiContext';
 
 type KoboldAIModelResponse = {
   result: string;
 };
 
 export class KoboldAIService implements GenerationService {
-  private settingsService: SettingsService;
+  private ctx: ApiContext;
 
-  constructor(settingsService: SettingsService) {
-    this.settingsService = settingsService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   serviceUrl(): string {
-    return this.settingsService.get(SettingsEnum.KOBOLDAI_ENDPOINT) as string;
+    return this.ctx.settingsService.get(SettingsEnum.KOBOLDAI_ENDPOINT) as string;
   }
 
   async generate(prompt: string, maxResponseTokens: number): Promise<string> {

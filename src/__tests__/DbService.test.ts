@@ -1,45 +1,42 @@
 import '@testing-library/jest-dom';
-import { DbService } from 'main/sentient-sims/services/DbService';
 import * as fs from 'fs';
 import { DatabaseNotLoadedError } from 'main/sentient-sims/exceptions/DatabaseNotLoadedError';
-import { DirectoryService } from 'main/sentient-sims/services/DirectoryService';
-import { mockDirectoryService } from './util';
+import { mockApiContext } from './util';
+import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 
 describe('DbService', () => {
-  let directoryService: DirectoryService;
-  let dbService: DbService;
+  let ctx: ApiContext;
 
   beforeEach(() => {
-    directoryService = mockDirectoryService();
-    fs.mkdirSync(directoryService.getSentientSimsFolder(), {
+    ctx = mockApiContext();
+    fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), {
       recursive: true,
     });
-    dbService = new DbService(directoryService);
   });
 
   it('No loaded db throws exception', () => {
-    expect(dbService.getDb).toThrow(DatabaseNotLoadedError);
+    expect(ctx.dbService.getDb).toThrow(DatabaseNotLoadedError);
   });
 
   it('Loading unloading database', async () => {
-    dbService.loadDatabase({
+    ctx.dbService.loadDatabase({
       sessionId: '1872638716',
       saveId: '2',
     });
-    expect(directoryService.listSentientSimsDbUnsaved()).toHaveLength(3);
+    expect(ctx.directoryService.listSentientSimsDbUnsaved()).toHaveLength(3);
 
-    dbService.loadDatabase({
+    ctx.dbService.loadDatabase({
       sessionId: '718297398',
       saveId: '2',
     });
-    expect(directoryService.listSentientSimsDbUnsaved()).toHaveLength(6);
-    await dbService.saveDatabase({
+    expect(ctx.directoryService.listSentientSimsDbUnsaved()).toHaveLength(6);
+    await ctx.dbService.saveDatabase({
       sessionId: '718297398',
       saveId: '2',
     });
-    expect(directoryService.listSentientSimsDbUnsaved()).toHaveLength(3);
+    expect(ctx.directoryService.listSentientSimsDbUnsaved()).toHaveLength(3);
 
-    dbService.unloadDatabase();
-    expect(directoryService.listSentientSimsDbUnsaved()).toHaveLength(0);
+    ctx.dbService.unloadDatabase();
+    expect(ctx.directoryService.listSentientSimsDbUnsaved()).toHaveLength(0);
   });
 });

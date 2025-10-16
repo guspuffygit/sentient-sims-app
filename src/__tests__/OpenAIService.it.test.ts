@@ -1,23 +1,24 @@
 import '@testing-library/jest-dom';
 import { OpenAIService } from 'main/sentient-sims/services/OpenAIService';
-import { SettingsService } from 'main/sentient-sims/services/SettingsService';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { OneShotRequest, OpenAIRequestBuilder, PromptRequest } from 'main/sentient-sims/models/OpenAIRequestBuilder';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
+import { ApiContext } from 'main/sentient-sims/services/ApiContext';
+import { mockApiContext } from './util';
 
 describe('OpenAIServiceIT', () => {
-  let settingsService: SettingsService;
+  let ctx: ApiContext;
   let openAIService: OpenAIService;
   let builder: OpenAIRequestBuilder;
 
   beforeEach(() => {
-    settingsService = new SettingsService();
-    openAIService = new OpenAIService(settingsService);
+    ctx = mockApiContext();
+    openAIService = new OpenAIService(ctx);
     builder = new OpenAIRequestBuilder(new OpenAITokenCounter());
   });
 
   it('sentientSimsGenerate', async () => {
-    settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, false);
+    ctx.settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, false);
     const promptRequest: PromptRequest = {
       participants: 'Gus',
       location: 'Square cube',
@@ -44,7 +45,7 @@ describe('OpenAIServiceIT', () => {
   }, 20000);
 
   it('sentientSimsGenerateJsonSchema', async () => {
-    settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, false);
+    ctx.settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, false);
     const promptRequest: OneShotRequest = {
       messages: ['yes?'],
       systemPrompt: 'system prompt',
@@ -59,8 +60,8 @@ describe('OpenAIServiceIT', () => {
 
   it('translation', async () => {
     // No way this test is gonna pass every time
-    settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, true);
-    settingsService.set(SettingsEnum.LOCALIZATION_LANGUAGE, 'Spanish');
+    ctx.settingsService.set(SettingsEnum.LOCALIZATION_ENABLED, true);
+    ctx.settingsService.set(SettingsEnum.LOCALIZATION_LANGUAGE, 'Spanish');
     const systemPrompt = 'Return the text "Alright?"';
     const promptRequest: PromptRequest = {
       participants: '',

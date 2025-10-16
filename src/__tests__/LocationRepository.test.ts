@@ -1,9 +1,7 @@
 import '@testing-library/jest-dom';
-import { DbService } from 'main/sentient-sims/services/DbService';
 import * as fs from 'fs';
-import { LocationRepository } from 'main/sentient-sims/db/LocationRepository';
 import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
-import { mockDirectoryService } from './util';
+import { mockApiContext } from './util';
 
 function locationsAreEqual(a: LocationEntity, b: LocationEntity): boolean {
   return a.id === b.id && a.description === b.description && a.name === b.name && a.lot_type === b.lot_type;
@@ -11,23 +9,21 @@ function locationsAreEqual(a: LocationEntity, b: LocationEntity): boolean {
 
 describe('LocationRepository', () => {
   it('is_generic', async () => {
-    const directoryService = mockDirectoryService();
-    fs.mkdirSync(directoryService.getSentientSimsFolder(), {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), {
       recursive: true,
     });
-    const dbService = new DbService(directoryService);
-    await dbService.loadDatabase({
+    await ctx.dbService.loadDatabase({
       sessionId: '1237632',
       saveId: '2',
     });
-    const locationRepository = new LocationRepository(dbService);
 
     // Check generic location is returned when id doesnt exist in defaultLocationDescriptions
-    const result = locationRepository.getLocation({ id: 11111 });
+    const result = ctx.locationRepository.getLocation({ id: 11111 });
     expect(result.is_generic).toBeTruthy();
 
     // Check default location description is returned
-    const defaultResult = locationRepository.getLocation({
+    const defaultResult = ctx.locationRepository.getLocation({
       id: 254110336,
     });
     expect(defaultResult.is_generic).toBeFalsy();
@@ -35,16 +31,14 @@ describe('LocationRepository', () => {
   });
 
   it('CRUD', async () => {
-    const directoryService = mockDirectoryService();
-    fs.mkdirSync(directoryService.getSentientSimsFolder(), {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), {
       recursive: true,
     });
-    const dbService = new DbService(directoryService);
-    await dbService.loadDatabase({
+    await ctx.dbService.loadDatabase({
       sessionId: '1231237632',
       saveId: '2',
     });
-    const locationRepository = new LocationRepository(dbService);
 
     const locationId = 254110336;
 
@@ -54,23 +48,23 @@ describe('LocationRepository', () => {
       lot_type: 'New Lot Type',
       description: 'New description',
     };
-    locationRepository.updateLocation(expectedResult);
-    const result = locationRepository.getLocation({ id: locationId });
+    ctx.locationRepository.updateLocation(expectedResult);
+    const result = ctx.locationRepository.getLocation({ id: locationId });
     expect(locationsAreEqual(result, expectedResult)).toBeTruthy();
 
-    const allLocations = locationRepository.getAllLocations();
+    const allLocations = ctx.locationRepository.getAllLocations();
     expect(allLocations.some((item) => item.id === expectedResult.id)).toBeTruthy();
 
-    const modifiedLocations = locationRepository.getModifiedLocations();
+    const modifiedLocations = ctx.locationRepository.getModifiedLocations();
     expect(modifiedLocations.some((item) => item.id === expectedResult.id)).toBeTruthy();
 
-    const defaultLocations = locationRepository.getDefaultLocations();
+    const defaultLocations = ctx.locationRepository.getDefaultLocations();
     expect(
       defaultLocations.some((item) => item.id === expectedResult.id && item.description === expectedResult.description),
     ).toBeFalsy();
 
-    locationRepository.deleteLocation({ id: locationId });
-    const defaultResult = locationRepository.getLocation({
+    ctx.locationRepository.deleteLocation({ id: locationId });
+    const defaultResult = ctx.locationRepository.getLocation({
       id: locationId,
     });
     expect(defaultResult.name).toEqual('The Futures Past');

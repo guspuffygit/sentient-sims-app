@@ -120,35 +120,30 @@ export class ApiContext {
     this._directory = options.directoryService;
 
     this._sentientSimsAIService = new SentientSimsAIService(this);
-    this._koboldAIService = new KoboldAIService(this._settings);
+    this._koboldAIService = new KoboldAIService(this);
     this._novelAIService = new NovelAIService(this);
-    this._geminiService = new GeminiService(this._settings);
+    this._geminiService = new GeminiService(this);
     this._vllmAIService = new VLLMAIService(this);
-    this._openAIService = new OpenAIService(this._settings);
+    this._openAIService = new OpenAIService(this);
 
     this._novelAITokenCounter = new NovelAITokenCounter();
     this._openAITokenCounter = new OpenAITokenCounter();
     this._llamaTokenCounter = new LLaMaTokenCounter();
 
     // --- Initialize Services, Repositories, and Controllers ---
-    this._lastExceptionService = new LastExceptionService(this._directory);
-    this._versionService = new VersionService(this._directory);
-    this._updateService = new UpdateService(this._directory);
-    this._dbService = new DbService(this._directory);
-    this._logsService = new LogsService(this._directory);
-    this._logSendService = new LogSendService(
-      this._settings,
-      this._directory,
-      this._lastExceptionService,
-      this._versionService,
-    );
-    this._patreonService = new PatreonService(this._settings);
-    this._animationsService = new AnimationsService(this._settings);
+    this._lastExceptionService = new LastExceptionService(this);
+    this._versionService = new VersionService(this);
+    this._updateService = new UpdateService(this);
+    this._dbService = new DbService(this);
+    this._logsService = new LogsService(this);
+    this._logSendService = new LogSendService(this);
+    this._patreonService = new PatreonService(this);
+    this._animationsService = new AnimationsService(this);
 
     this._locationRepository = new LocationRepository(this._dbService);
     this._memoryRepository = new MemoryRepository(this._dbService);
     this._participantRepository = new ParticipantRepository(this._dbService);
-    this._interactionRepository = new InteractionRepository(this._settings);
+    this._interactionRepository = new InteractionRepository(this);
 
     this._promptBuilderService = new PromptRequestBuilderService(this);
     this._interactionService = new InteractionService(this);
@@ -163,7 +158,7 @@ export class ApiContext {
     this._participantsController = new ParticipantsController(this);
     this._locationsController = new LocationsController(this);
     this._updateController = new UpdateController(this);
-    this._settingsController = new SettingsController(this._settings);
+    this._settingsController = new SettingsController(this);
     this._patreonController = new PatreonController(this);
     this._loginController = new LoginController(this);
     this._debugController = new DebugController(this);

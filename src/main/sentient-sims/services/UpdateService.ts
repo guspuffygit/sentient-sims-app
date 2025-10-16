@@ -4,7 +4,7 @@ import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
 import AdmZip from 'adm-zip';
 import log from 'electron-log';
-import { DirectoryService } from './DirectoryService';
+import { ApiContext } from './ApiContext';
 
 export type ModUpdate = {
   type: string;
@@ -12,21 +12,21 @@ export type ModUpdate = {
 };
 
 export class UpdateService {
-  private directoryService: DirectoryService;
+  private ctx: ApiContext;
 
-  constructor(directoryService: DirectoryService) {
-    this.directoryService = directoryService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   async updateMod({ type, credentials }: ModUpdate) {
     try {
-      const modsFolder = this.directoryService.getModsFolder();
+      const modsFolder = this.ctx.directoryService.getModsFolder();
       if (!fs.existsSync(modsFolder)) {
         log.info(`Creating mods folder: ${modsFolder}`);
         fs.mkdirSync(modsFolder, { recursive: true });
       }
 
-      const zippedModFile = this.directoryService.getZippedModFile();
+      const zippedModFile = this.ctx.directoryService.getZippedModFile();
       if (fs.existsSync(zippedModFile)) {
         log.info(`Zipped mod file exists, deleting: ${zippedModFile}`);
         fs.rmSync(zippedModFile);
@@ -65,13 +65,13 @@ export class UpdateService {
         throw new Error('Response body is undefined.');
       }
 
-      const sentientSimsFolder = this.directoryService.getSentientSimsFolder();
+      const sentientSimsFolder = this.ctx.directoryService.getSentientSimsFolder();
       if (!fs.existsSync(sentientSimsFolder)) {
         log.info(`Sentient Sims folder did not exist, creating: ${sentientSimsFolder}`);
         fs.mkdirSync(sentientSimsFolder);
       }
 
-      const scriptsFolderExists = fs.existsSync(this.directoryService.getSentientSimsScriptsFolder());
+      const scriptsFolderExists = fs.existsSync(this.ctx.directoryService.getSentientSimsScriptsFolder());
 
       const zip = new AdmZip(zippedModFile);
       zip
@@ -92,7 +92,7 @@ export class UpdateService {
 
       log.info(`Update completed.`);
     } finally {
-      this.directoryService.filesToDelete().forEach((fileToDelete) => {
+      this.ctx.directoryService.filesToDelete().forEach((fileToDelete) => {
         if (fs.existsSync(fileToDelete)) {
           log.info(`File exists, deleting: ${fileToDelete}`);
           fs.rmSync(fileToDelete);

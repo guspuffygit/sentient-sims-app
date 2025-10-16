@@ -1,26 +1,26 @@
 import log from 'electron-log';
 import { InteractionDescription, interactionDescriptions } from '../descriptions/interactionDescriptions';
 import { IgnoredInteractionsResponse } from '../models/IgnoredInteractionsResponse';
-import { SettingsService } from '../services/SettingsService';
 import { BasicInteraction } from './dto/InteractionDTO';
 import { axiosClient } from '../clients/AxiosClient';
 import { SettingsEnum } from '../models/SettingsEnum';
+import { ApiContext } from '../services/ApiContext';
 
 export class InteractionRepository {
-  private settingsService: SettingsService;
+  private ctx: ApiContext;
 
   private interactions?: Map<string, BasicInteraction>;
 
-  constructor(settingsService: SettingsService) {
-    this.settingsService = settingsService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   async fetchInteractions(): Promise<Map<string, BasicInteraction>> {
     const response = await axiosClient({
       url: '/interactions',
-      baseURL: `${this.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
+      baseURL: `${this.ctx.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
       headers: {
-        Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+        Authentication: `${this.ctx.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
     });
 
@@ -44,9 +44,9 @@ export class InteractionRepository {
       url: '/interactions',
       method: 'POST',
       data: interaction,
-      baseURL: `${this.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
+      baseURL: `${this.ctx.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
       headers: {
-        Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+        Authentication: `${this.ctx.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
     });
 

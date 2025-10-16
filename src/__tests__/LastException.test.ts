@@ -1,8 +1,7 @@
 import '@testing-library/jest-dom';
 import fs from 'fs';
-import { LastExceptionService } from 'main/sentient-sims/services/LastExceptionService';
 import path from 'path';
-import { mockDirectoryService } from './util';
+import { mockApiContext } from './util';
 
 const expectedParsedResult = `[manus] Setup error for service sentient_sims_service. This will likely cause additional errors in the future. (ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host)
 Traceback (most recent call last):
@@ -35,20 +34,19 @@ ClientInfo isn't here`;
 
 describe('Formatter', () => {
   it('should trim sentence', () => {
-    const directoryService = mockDirectoryService();
-    const lastExceptionService = new LastExceptionService(directoryService);
+    const ctx = mockApiContext();
     const expectedFileName = 'lastException-1901283.txt';
-    const lastExceptionFile = path.join(directoryService.getSims4Folder(), expectedFileName);
+    const lastExceptionFile = path.join(ctx.directoryService.getSims4Folder(), expectedFileName);
 
-    directoryService.createDirectoryIfNotExist(directoryService.getSims4Folder());
+    ctx.directoryService.createDirectoryIfNotExist(ctx.directoryService.getSims4Folder());
 
     fs.copyFileSync('./src/__tests__/lastException.txt', lastExceptionFile);
 
-    const files = lastExceptionService.getLastExceptionFiles();
+    const files = ctx.lastExceptionService.getLastExceptionFiles();
     const expectedFile = files[0];
     expect(expectedFile).toEqual(lastExceptionFile);
 
-    const parsedFiles = lastExceptionService.getParsedLastExceptionFiles();
+    const parsedFiles = ctx.lastExceptionService.getParsedLastExceptionFiles();
     const actualParsedFile = parsedFiles[0];
     expect(actualParsedFile.filename).toEqual(expectedFileName);
     expect(actualParsedFile.text).toEqual(expectedParsedResult);

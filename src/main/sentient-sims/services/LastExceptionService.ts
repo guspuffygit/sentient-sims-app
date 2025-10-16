@@ -2,7 +2,7 @@ import log from 'electron-log';
 import path from 'path';
 import * as fs from 'fs';
 import xml2js from 'xml2js';
-import { DirectoryService } from './DirectoryService';
+import { ApiContext } from './ApiContext';
 
 export type LastExceptionFile = {
   filename: string;
@@ -11,15 +11,15 @@ export type LastExceptionFile = {
 };
 
 export class LastExceptionService {
-  private directoryService: DirectoryService;
+  private ctx: ApiContext;
 
-  constructor(directoryService: DirectoryService) {
-    this.directoryService = directoryService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   getLastExceptionFiles() {
     const files = ['lastException', 'lastCleanException', 'lastUIException'];
-    return this.directoryService.findFilesWithKeywords(this.directoryService.getSims4Folder(), files);
+    return this.ctx.directoryService.findFilesWithKeywords(this.ctx.directoryService.getSims4Folder(), files);
   }
 
   getParsedLastExceptionFiles() {

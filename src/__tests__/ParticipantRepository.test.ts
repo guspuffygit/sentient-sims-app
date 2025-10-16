@@ -1,30 +1,26 @@
 import '@testing-library/jest-dom';
-import { ParticipantRepository } from 'main/sentient-sims/db/ParticipantRepository';
-import { DbService } from 'main/sentient-sims/services/DbService';
 import * as fs from 'fs';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
-import { mockDirectoryService, randomString } from './util';
+import { mockApiContext, randomString } from './util';
 
 describe('ParticipantRepository', () => {
   it('CRUD', async () => {
-    const directoryService = mockDirectoryService();
-    fs.mkdirSync(directoryService.getSentientSimsFolder(), {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directoryService.getSentientSimsFolder(), {
       recursive: true,
     });
-    const dbService = new DbService(directoryService);
-    await dbService.loadDatabase({
+    await ctx.dbService.loadDatabase({
       sessionId: '9587321',
       saveId: '2',
     });
-    const participantRepository = new ParticipantRepository(dbService);
 
     const participant: ParticipantDTO = {
       id: '9223372036854775807', // Max 64 bit int
       description: randomString(),
     };
-    participantRepository.updateParticipant(participant);
+    ctx.participantRepository.updateParticipant(participant);
 
-    const result = await participantRepository.getParticipants([
+    const result = await ctx.participantRepository.getParticipants([
       {
         id: participant.id,
         fullName: 'Some name',
@@ -42,12 +38,12 @@ describe('ParticipantRepository', () => {
     expect(result[1].description).toBeFalsy();
     expect(result.length).toEqual(2);
 
-    participantRepository.deleteParticipant(participant);
+    ctx.participantRepository.deleteParticipant(participant);
 
     const noDescription: ParticipantDTO = { id: '91283' };
-    participantRepository.updateParticipant(noDescription);
+    ctx.participantRepository.updateParticipant(noDescription);
 
-    const noDescriptionResult = await participantRepository.getParticipants([
+    const noDescriptionResult = await ctx.participantRepository.getParticipants([
       {
         id: noDescription.id,
         fullName: 'some name',
@@ -57,25 +53,25 @@ describe('ParticipantRepository', () => {
     expect(noDescriptionResult[0].description).toBeNull();
 
     noDescription.description = randomString();
-    participantRepository.updateParticipant(noDescription);
-    const descriptionChangedResult = await participantRepository.getParticipants([
+    ctx.participantRepository.updateParticipant(noDescription);
+    const descriptionChangedResult = await ctx.participantRepository.getParticipants([
       { id: noDescription.id, fullName: 'some name' },
     ]);
     expect(descriptionChangedResult[0].description).toEqual(noDescription.description);
 
-    const defaultSimDescription = await participantRepository.getParticipant({
+    const defaultSimDescription = await ctx.participantRepository.getParticipant({
       id: '187263',
       fullName: 'Travis Scott',
     });
 
     expect(defaultSimDescription.description).toBeTruthy();
 
-    const noDefaultSimDescription = await participantRepository.getParticipant({
+    const noDefaultSimDescription = await ctx.participantRepository.getParticipant({
       id: '187263123',
       fullName: 'No Name',
     });
 
-    const allParticipants = participantRepository.getAllParticipants();
+    const allParticipants = ctx.participantRepository.getAllParticipants();
     expect(allParticipants.some((item) => item.id === '187263' && item.name === 'Travis Scott')).toBeTruthy();
 
     expect(noDefaultSimDescription.description).toBeUndefined();

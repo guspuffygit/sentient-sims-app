@@ -1,28 +1,28 @@
 import { Animation } from 'main/sentient-sims/models/Animation';
-import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { ApiType } from '../models/ApiType';
 import { axiosClient } from '../clients/AxiosClient';
+import { ApiContext } from './ApiContext';
 
 export function getAnimationKey(animationAuthor: string, animationIdentifier: string) {
   return `${animationAuthor}:${animationIdentifier}`;
 }
 
 export class AnimationsService {
-  private settingsService: SettingsService;
+  private ctx: ApiContext;
 
   private animations?: Map<string, Animation>;
 
-  constructor(settingsService: SettingsService) {
-    this.settingsService = settingsService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   async getAnimations() {
     const response = await axiosClient({
       url: '/animations',
-      baseURL: `${this.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
+      baseURL: `${this.ctx.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
       headers: {
-        Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+        Authentication: `${this.ctx.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
     });
 
@@ -34,9 +34,9 @@ export class AnimationsService {
       url: '/animations',
       method: 'POST',
       data: animation,
-      baseURL: `${this.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
+      baseURL: `${this.ctx.settingsService.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
       headers: {
-        Authentication: `${this.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
+        Authentication: `${this.ctx.settingsService.get(SettingsEnum.ACCESS_TOKEN)}`,
       },
     });
 
@@ -58,14 +58,14 @@ export class AnimationsService {
   }
 
   isNsfwEnabled(): boolean {
-    if (this.settingsService.get(SettingsEnum.AI_API_TYPE) !== ApiType.OpenAI) {
+    if (this.ctx.settingsService.get(SettingsEnum.AI_API_TYPE) !== ApiType.OpenAI) {
       return true;
     }
 
-    return this.settingsService.get(SettingsEnum.NSFW_ENABLED) as boolean;
+    return this.ctx.settingsService.get(SettingsEnum.NSFW_ENABLED) as boolean;
   }
 
   isAnimationMappingEnabled(): boolean {
-    return this.settingsService.get(SettingsEnum.MAPPING_NOTIFICATION_ENABLED) as boolean;
+    return this.ctx.settingsService.get(SettingsEnum.MAPPING_NOTIFICATION_ENABLED) as boolean;
   }
 }
