@@ -1,7 +1,6 @@
 import log from 'electron-log';
 import { ChatCompletion, ResponseFormatJSONSchema } from 'openai/resources/index.mjs';
 import { RawAxiosRequestHeaders } from 'axios';
-import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
@@ -13,50 +12,47 @@ import {
   VLLMTokenizeChatRequest,
   VLLMTokenizeTextRequest,
 } from '../models/VLLMChatCompletionRequest';
-import { AllModelSettings } from '../modelSettings';
 import { OpenAIMessage } from '../models/OpenAIMessage';
 import { tokenizerBreakString } from '../constants';
 import { truncateMessages } from '../util/tokenTruncate';
 import { TokenizeException } from '../exceptions/TokenizeException';
 import { axiosClient } from '../clients/AxiosClient';
+import { ApiContext } from './ApiContext';
 
 export class VLLMAIService implements GenerationService {
-  protected settingsService: SettingsService;
+  protected ctx: ApiContext;
 
   protected breakStringTokens: Map<string, number[]> = new Map();
 
-  constructor(settingsService: SettingsService) {
-    this.settingsService = settingsService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   serviceUrl(): string {
-    return this.settingsService.get(SettingsEnum.VLLM_ENDPOINT) as string;
+    return this.ctx.settingsService.get(SettingsEnum.VLLM_ENDPOINT) as string;
   }
 
   getAuthorizationHeaders(): RawAxiosRequestHeaders {
     return {
-      Authorization: `Bearer ${this.settingsService.get(SettingsEnum.VLLM_APIKEY)}`,
+      Authorization: `Bearer ${this.ctx.settingsService.get(SettingsEnum.VLLM_APIKEY)}`,
     };
   }
 
   getModel(): string {
-    return this.settingsService.get(SettingsEnum.VLLM_MODEL) as string;
+    return this.ctx.settingsService.get(SettingsEnum.VLLM_MODEL) as string;
   }
 
   async getBreakStringTokens(model: string): Promise<number[]> {
     try {
-      if (this.breakStringTokens.has(model)) {
-        return this.breakStringTokens.get(model) as number[];
-      }
-
-      let modelSettings = AllModelSettings.default;
-      if (model in AllModelSettings) {
-        modelSettings = AllModelSettings[model];
-      }
+      const modelSettings = this.ctx.modelSettings;
 
       if (modelSettings.breakStringTokens) {
-        log.debug('returning tokens as is');
+        log.debug('returning model settings break string tokens');
         return modelSettings.breakStringTokens;
+      }
+
+      if (this.breakStringTokens.has(model)) {
+        return this.breakStringTokens.get(model) as number[];
       }
 
       const breakString = modelSettings?.breakTokenString || tokenizerBreakString;
@@ -77,10 +73,7 @@ export class VLLMAIService implements GenerationService {
 
   async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
     const model = this.getModel();
-    let modelSettings = AllModelSettings.default;
-    if (model in AllModelSettings) {
-      modelSettings = AllModelSettings[model];
-    }
+    const modelSettings = this.ctx.modelSettings;
 
     const [messageTokens, breakTokens] = await Promise.all([
       this.tokenizeMessages(model, request.messages),
@@ -172,10 +165,7 @@ export class VLLMAIService implements GenerationService {
   }
 
   async tokenizeMessages(model: string, messages: OpenAIMessage[]): Promise<VLLMRTokenizeResponse> {
-    let modelSettings = AllModelSettings.default;
-    if (model in AllModelSettings) {
-      modelSettings = AllModelSettings[model];
-    }
+    const modelSettings = this.ctx.modelSettings;
     const breakString = modelSettings?.breakTokenString || tokenizerBreakString;
 
     const tokenizeRequest: VLLMTokenizeChatRequest = {

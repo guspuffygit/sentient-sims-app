@@ -121,11 +121,11 @@ export class ApiContext {
     this._settings = options.settingsService;
     this._directory = options.directoryService;
 
-    this._sentientSimsAIService = new SentientSimsAIService(this._settings);
+    this._sentientSimsAIService = new SentientSimsAIService(this);
     this._koboldAIService = new KoboldAIService(this._settings);
-    this._novelAIService = new NovelAIService(this._settings);
+    this._novelAIService = new NovelAIService(this);
     this._geminiService = new GeminiService(this._settings);
-    this._vllmAIService = new VLLMAIService(this._settings);
+    this._vllmAIService = new VLLMAIService(this);
     this._openAIService = new OpenAIService(this._settings);
 
     this._novelAITokenCounter = new NovelAITokenCounter();

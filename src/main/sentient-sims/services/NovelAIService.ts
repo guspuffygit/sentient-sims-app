@@ -1,11 +1,10 @@
 import log from 'electron-log';
-import { SettingsService } from './SettingsService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel } from '../models/AIModel';
-import { AllModelSettings } from '../modelSettings';
+import { ApiContext } from './ApiContext';
 
 export class NovelAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -123,27 +122,27 @@ type NovelAIGenerateResponse = {
 };
 
 export class NovelAIService implements GenerationService {
-  private readonly settingsService: SettingsService;
+  private readonly ctx: ApiContext;
 
-  constructor(settingsService: SettingsService) {
-    this.settingsService = settingsService;
+  constructor(ctx: ApiContext) {
+    this.ctx = ctx;
   }
 
   serviceUrl(): string {
-    return this.settingsService.get(SettingsEnum.NOVELAI_ENDPOINT) as string;
+    return this.ctx.settingsService.get(SettingsEnum.NOVELAI_ENDPOINT) as string;
   }
 
   generationUrl(): string {
-    return this.settingsService.get(SettingsEnum.NOVELAI_GENERATION_ENDPOINT) as string;
+    return this.ctx.settingsService.get(SettingsEnum.NOVELAI_GENERATION_ENDPOINT) as string;
   }
 
   getModel(): string {
-    return this.settingsService.get(SettingsEnum.NOVELAI_MODEL) as string;
+    return this.ctx.settingsService.get(SettingsEnum.NOVELAI_MODEL) as string;
   }
 
   getNovelAIKey(): string | undefined {
     // Check app settings
-    const novelAIKeyFromSettings = this.settingsService.get(SettingsEnum.NOVELAI_KEY);
+    const novelAIKeyFromSettings = this.ctx.settingsService.get(SettingsEnum.NOVELAI_KEY);
     if (novelAIKeyFromSettings) {
       log.debug('Using novelai key from settings');
       return novelAIKeyFromSettings as string;
@@ -191,10 +190,7 @@ export class NovelAIService implements GenerationService {
 
   async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
     const model = this.getModel();
-    let modelSettings = AllModelSettings.default;
-    if (model in AllModelSettings) {
-      modelSettings = AllModelSettings[model];
-    }
+    const modelSettings = this.ctx.modelSettings;
 
     const prompt = request.messages.map((m) => m.content).join('\n');
 
@@ -230,7 +226,7 @@ export class NovelAIService implements GenerationService {
     log.info(`NovelAI request: ${JSON.stringify(novelAIRequest)}`);
 
     const url = `${this.generationUrl()}/ai/generate`;
-    const authHeader = `${this.settingsService.get(SettingsEnum.NOVELAI_KEY)}`;
+    const authHeader = `${this.ctx.settingsService.get(SettingsEnum.NOVELAI_KEY)}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
