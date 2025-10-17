@@ -20,12 +20,10 @@ import { LocationRepository } from '../db/LocationRepository';
 import { MemoryRepository } from '../db/MemoryRepository';
 import { ParticipantRepository } from '../db/ParticipantRepository';
 import { ApiType } from '../models/ApiType';
-import { AllModelSettings, ModelSettings } from '../modelSettings';
 import { LLaMaTokenCounter } from '../tokens/LLaMaTokenCounter';
 import { NovelAITokenCounter } from '../tokens/NovelAITokenCounter';
 import { OpenAITokenCounter } from '../tokens/OpenAITokenCounter';
 import { TokenCounter } from '../tokens/TokenCounter';
-import { stringType } from '../util/typeChecks';
 import { AIService } from './AIService';
 import { AnimationsService } from './AnimationsService';
 import { DbService } from './DbService';
@@ -38,6 +36,7 @@ import { LastExceptionService } from './LastExceptionService';
 import { LogSendService } from './LogSendService';
 import { LogsService } from './LogsService';
 import { MappingService } from './MappingService';
+import { ModelSettingsService } from './ModelSettingsService';
 import { NovelAIService } from './NovelAIService';
 import { OpenAIService } from './OpenAIService';
 import { PatreonService } from './PatreonService';
@@ -196,6 +195,7 @@ export class ApiContext {
   private readonly _geminiService: GeminiService;
   private readonly _vllmAIService: VLLMAIService;
   private readonly _openAIService: OpenAIService;
+  private readonly _modelSettingsService: ModelSettingsService;
 
   private readonly _novelAITokenCounter: NovelAITokenCounter;
   private readonly _openAITokenCounter: OpenAITokenCounter;
@@ -229,6 +229,7 @@ export class ApiContext {
     this._logSendService = new LogSendService(this);
     this._patreonService = new PatreonService(this);
     this._animationsService = new AnimationsService(this);
+    this._modelSettingsService = new ModelSettingsService(this);
 
     this._locationRepository = new LocationRepository(this._db);
     this._memoryRepository = new MemoryRepository(this._db);
@@ -306,6 +307,10 @@ export class ApiContext {
 
   get mapping(): MappingService {
     return this._mappingService;
+  }
+
+  get modelSettings(): ModelSettingsService {
+    return this._modelSettingsService;
   }
 
   get locationRepository(): LocationRepository {
@@ -399,33 +404,22 @@ export class ApiContext {
     return this.llamaTokenCounter;
   }
 
-  get modelSettings(): ModelSettings {
+  get aiModel(): string | undefined {
     const aiType = this.settings.aiApiType;
 
-    let modelSettings = AllModelSettings.default;
-    let model: string | unknown = null;
-
     if (aiType === ApiType.OpenAI) {
-      model = this.settings.openaiModel;
+      return this.settings.openaiModel;
+    } else if (aiType === ApiType.SentientSimsAI) {
+      return this.settings.sentientSimsAIModel;
+    } else if (aiType === ApiType.Gemini) {
+      return this.settings.geminiModel;
+    } else if (aiType === ApiType.VLLM) {
+      return this.settings.vllmModel;
+    } else if (aiType === ApiType.NovelAI) {
+      return this.settings.novelAIModel;
     }
 
-    if (aiType === ApiType.SentientSimsAI) {
-      model = this.settings.sentientSimsAIModel;
-    }
-
-    if (aiType === ApiType.Gemini) {
-      model = this.settings.geminiModel;
-    }
-
-    if (aiType === ApiType.VLLM) {
-      model = this.settings.vllmModel;
-    }
-
-    if (stringType(model) && model in AllModelSettings) {
-      modelSettings = AllModelSettings[model];
-    }
-
-    return modelSettings;
+    return undefined;
   }
 
   get controller(): ControllerContext {

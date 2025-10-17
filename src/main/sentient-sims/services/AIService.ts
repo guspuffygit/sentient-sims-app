@@ -223,7 +223,7 @@ export class AIService {
       prePreAction: options.prePreAction,
       stopTokens: options.stopTokens,
       apiType: this.ctx.settings.aiApiType,
-      modelSettings: this.ctx.modelSettings,
+      modelSettings: await this.ctx.modelSettings.getModelSettings(),
       continue: options.continue,
       promptHistoryMode: options.promptHistoryMode,
     };

@@ -189,7 +189,7 @@ export class NovelAIService implements GenerationService {
 
   async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
     const model = this.getModel();
-    const modelSettings = this.ctx.modelSettings;
+    const modelSettings = await this.ctx.modelSettings.getModelSettings();
 
     const prompt = request.messages.map((m) => m.content).join('\n');
 
