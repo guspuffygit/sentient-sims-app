@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
-import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 import { NovelAIService } from 'main/sentient-sims/services/NovelAIService';
 import { OpenAIService } from 'main/sentient-sims/services/OpenAIService';
@@ -33,28 +32,28 @@ describe('Settings', () => {
   });
 
   it('get ai type openai', () => {
-    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
+    ctx.settings.aiApiType = ApiType.OpenAI;
     expect(ctx.tokenCounter instanceof OpenAITokenCounter).toBeTruthy();
 
     expect(ctx.genai instanceof OpenAIService).toBeTruthy();
   });
 
   it('get ai type novelai', () => {
-    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.NovelAI);
+    ctx.settings.aiApiType = ApiType.NovelAI;
     expect(ctx.tokenCounter instanceof NovelAITokenCounter).toBeTruthy();
 
     expect(ctx.genai instanceof NovelAIService).toBeTruthy();
   });
 
   it('get ai type custom', () => {
-    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.CustomAI);
+    ctx.settings.aiApiType = ApiType.CustomAI;
     expect(ctx.tokenCounter instanceof LLaMaTokenCounter).toBeTruthy();
 
     expect(ctx.genai instanceof SentientSimsAIService).toBeTruthy();
   });
 
   it('get ai type sentient sims', () => {
-    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.SentientSimsAI);
+    ctx.settings.aiApiType = ApiType.SentientSimsAI;
     expect(ctx.tokenCounter instanceof LLaMaTokenCounter).toBeTruthy();
 
     expect(ctx.genai instanceof SentientSimsAIService).toBeTruthy();

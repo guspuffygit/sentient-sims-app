@@ -1,5 +1,4 @@
 import '@testing-library/jest-dom';
-import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { Request, Response } from 'express';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { mockEnvironment } from './util';
@@ -23,7 +22,7 @@ describe('AnimationsController', () => {
   });
 
   it('OpenAI Not selected Returns True', async () => {
-    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.NovelAI);
+    ctx.settings.aiApiType = ApiType.NovelAI;
 
     const req = {} as Request;
     const res = {
@@ -37,8 +36,8 @@ describe('AnimationsController', () => {
   });
 
   it('OpenAI ApiType NSFW Disabled Returns False', async () => {
-    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
-    ctx.settings.set(SettingsEnum.NSFW_ENABLED, false);
+    ctx.settings.aiApiType = ApiType.OpenAI;
+    ctx.settings.nsfwEnabled = false;
 
     const req = {} as Request;
     const res = {
@@ -52,8 +51,8 @@ describe('AnimationsController', () => {
   });
 
   it('Force NSFW Enabled Returns True', async () => {
-    ctx.settings.set(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
-    ctx.settings.set(SettingsEnum.NSFW_ENABLED, true);
+    ctx.settings.aiApiType = ApiType.OpenAI;
+    ctx.settings.nsfwEnabled = true;
 
     const req = {} as Request;
     const res = {

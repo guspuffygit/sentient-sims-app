@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom';
 import { OpenAIService } from 'main/sentient-sims/services/OpenAIService';
-import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { OneShotRequest, OpenAIRequestBuilder, PromptRequest } from 'main/sentient-sims/models/OpenAIRequestBuilder';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
@@ -18,7 +17,7 @@ describe('OpenAIServiceIT', () => {
   });
 
   it('sentientSimsGenerate', async () => {
-    ctx.settings.set(SettingsEnum.LOCALIZATION_ENABLED, false);
+    ctx.settings.localizationEnabled = false;
     const promptRequest: PromptRequest = {
       participants: 'Gus',
       location: 'Square cube',
@@ -45,7 +44,7 @@ describe('OpenAIServiceIT', () => {
   }, 20000);
 
   it('sentientSimsGenerateJsonSchema', async () => {
-    ctx.settings.set(SettingsEnum.LOCALIZATION_ENABLED, false);
+    ctx.settings.localizationEnabled = false;
     const promptRequest: OneShotRequest = {
       messages: ['yes?'],
       systemPrompt: 'system prompt',
@@ -60,8 +59,8 @@ describe('OpenAIServiceIT', () => {
 
   it('translation', async () => {
     // No way this test is gonna pass every time
-    ctx.settings.set(SettingsEnum.LOCALIZATION_ENABLED, true);
-    ctx.settings.set(SettingsEnum.LOCALIZATION_LANGUAGE, 'Spanish');
+    ctx.settings.localizationEnabled = true;
+    ctx.settings.localizationLanguage = 'Spanish';
     const systemPrompt = 'Return the text "Alright?"';
     const promptRequest: PromptRequest = {
       participants: '',
