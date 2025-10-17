@@ -95,6 +95,7 @@ export class VLLMAIService implements GenerationService {
       add_generation_prompt: !request.includesAssistantPreResponse,
       continue_final_message: request.includesAssistantPreResponse,
       stop: modelSettings.stop,
+      chat_template_kwargs: modelSettings.chat_template_kwargs,
     };
 
     if (request.guidedChoice) {

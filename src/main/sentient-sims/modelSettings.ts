@@ -8,6 +8,7 @@ export type ModelSettings = {
   breakStringTokens?: number[];
   maxResponseTokens?: number;
   stop?: string[];
+  chat_template_kwargs?: Map<string, any>;
 };
 
 export type ModelSettingsType = {
