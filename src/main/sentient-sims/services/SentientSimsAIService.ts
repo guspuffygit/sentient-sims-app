@@ -1,28 +1,27 @@
 import log from 'electron-log';
 import { RawAxiosRequestHeaders } from 'axios';
-import { SettingsEnum } from '../models/SettingsEnum';
 import { axiosClient } from '../clients/AxiosClient';
 import { VLLMAIService } from './VLLMAIService';
 import { DecodeToken, isTokenExpired } from '../auth/tokenVerifier';
 
 export class SentientSimsAIService extends VLLMAIService {
   serviceUrl(): string {
-    return this.ctx.settings.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT) as string;
+    return this.ctx.settings.sentientSimsAIEndpoint;
   }
 
   getAuthorizationHeaders(): RawAxiosRequestHeaders {
     return {
-      Authentication: `${this.ctx.settings.get(SettingsEnum.ACCESS_TOKEN)}`,
+      Authentication: this.ctx.settings.accessToken,
     };
   }
 
   getModel(): string {
-    return this.ctx.settings.get(SettingsEnum.SENTIENTSIMSAI_MODEL) as string;
+    return this.ctx.settings.sentientSimsAIModel;
   }
 
   async healthCheck() {
     for (let i = 0; i < 60; i++) {
-      const payload = DecodeToken(`${this.ctx.settings.get(SettingsEnum.ACCESS_TOKEN)}`);
+      const payload = DecodeToken(`${this.ctx.settings.accessToken}`);
       if (isTokenExpired(payload)) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }

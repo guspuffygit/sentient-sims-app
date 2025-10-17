@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import path from 'path';
 import log from 'electron-log';
-import { SettingsEnum } from '../models/SettingsEnum';
 import { SettingsService } from './SettingsService';
 import { DatabaseSession } from '../models/DatabaseSession';
 import { SaveGame, SaveGameType } from '../models/SaveGame';
@@ -14,7 +13,7 @@ export class DirectoryService {
   }
 
   getModsFolder(): string {
-    return this.settingsService.get(SettingsEnum.MODS_DIRECTORY) as string;
+    return this.settingsService.modsDirectory;
   }
 
   getSims4Folder(): string {

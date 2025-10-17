@@ -26,7 +26,6 @@ import {
   OneShotRequest,
   OpenAIRequestBuilder,
 } from '../models/OpenAIRequestBuilder';
-import { SettingsEnum } from '../models/SettingsEnum';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { cleanAIClassificationOutput, cleanupAIOutput } from '../formatter/PromptFormatter';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
@@ -223,7 +222,7 @@ export class AIService {
       assistantPreResponse: options.assistantPreResponse,
       prePreAction: options.prePreAction,
       stopTokens: options.stopTokens,
-      apiType: this.ctx.settings.get(SettingsEnum.AI_API_TYPE) as ApiType,
+      apiType: this.ctx.settings.aiApiType,
       modelSettings: this.ctx.modelSettings,
       continue: options.continue,
       promptHistoryMode: options.promptHistoryMode,
@@ -307,7 +306,7 @@ export class AIService {
   }
 
   async runClassification(classificationRequest: ClassificationRequest): Promise<InteractionEventResult> {
-    const apiType: ApiType = this.ctx.settings.get(SettingsEnum.AI_API_TYPE) as ApiType;
+    const apiType: ApiType = this.ctx.settings.aiApiType;
 
     const systemPrompt = defaultClassificationPrompt.replaceAll(
       '{classifiers}',
@@ -382,7 +381,7 @@ export class AIService {
   }
 
   async runBuffDescription(buffRequest: BuffDescriptionRequest): Promise<InteractionEventResult> {
-    const apiType: ApiType = this.ctx.settings.get(SettingsEnum.AI_API_TYPE) as ApiType;
+    const apiType: ApiType = this.ctx.settings.aiApiType;
 
     const systemPrompt = `\
 You will write a game buff description that will be displayed about the character ${buffRequest.name}.

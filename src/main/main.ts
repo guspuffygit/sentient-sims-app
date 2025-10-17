@@ -19,7 +19,6 @@ import { runApi, runWebSocketServer } from './sentient-sims/api';
 import { SettingsService } from './sentient-sims/services/SettingsService';
 import { DirectoryService } from './sentient-sims/services/DirectoryService';
 import { appApiPort } from './sentient-sims/constants';
-import { SettingsEnum } from './sentient-sims/models/SettingsEnum';
 import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { disableDebugLogging, enableDebugLogging } from './sentient-sims/util/debugLog';
 import debug from 'electron-debug';
@@ -121,7 +120,7 @@ const createWindow = async () => {
   });
   ipcHandlers(ctx);
 
-  if (ctx.settings.get(SettingsEnum.DEBUG_LOGS)) {
+  if (ctx.settings.debugLogs) {
     enableDebugLogging();
   } else {
     disableDebugLogging();

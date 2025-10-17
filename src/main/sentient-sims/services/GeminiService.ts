@@ -1,6 +1,5 @@
 import log from 'electron-log';
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
-import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
@@ -19,15 +18,15 @@ export class GeminiService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return this.ctx.settings.get(SettingsEnum.GEMINI_ENDPOINT) as string;
+    return this.ctx.settings.geminiEndpoint;
   }
 
   getGeminiModel(): string {
-    return this.ctx.settings.get(SettingsEnum.GEMINI_MODEL) as string;
+    return this.ctx.settings.geminiModel;
   }
 
   getGeminiKeys(): string[] {
-    const keysString = this.ctx.settings.get(SettingsEnum.GEMINI_KEYS) as string;
+    const keysString = this.ctx.settings.geminiKeys;
     if (!keysString || keysString.trim() === '') {
       throw new GeminiKeysNotSetError(
         'No Gemini API keys set. Please configure them in settings (e.g., key1,key2,key3).',
@@ -105,8 +104,8 @@ export class GeminiService implements GenerationService {
       }
     }
 
-    if (this.ctx.settings.get(SettingsEnum.LOCALIZATION_ENABLED) && text) {
-      const language = this.ctx.settings.get(SettingsEnum.LOCALIZATION_LANGUAGE);
+    if (this.ctx.settings.localizationEnabled && text) {
+      const language = this.ctx.settings.localizationLanguage;
       if (language) {
         const translationGenAI = this.getGenAIClient();
         const translationModel = translationGenAI.getGenerativeModel({

@@ -20,7 +20,6 @@ import { LocationRepository } from '../db/LocationRepository';
 import { MemoryRepository } from '../db/MemoryRepository';
 import { ParticipantRepository } from '../db/ParticipantRepository';
 import { ApiType } from '../models/ApiType';
-import { SettingsEnum } from '../models/SettingsEnum';
 import { AllModelSettings, ModelSettings } from '../modelSettings';
 import { LLaMaTokenCounter } from '../tokens/LLaMaTokenCounter';
 import { NovelAITokenCounter } from '../tokens/NovelAITokenCounter';
@@ -350,7 +349,7 @@ export class ApiContext {
   }
 
   get genai(): GenerationService {
-    const aiType = this.settings.get(SettingsEnum.AI_API_TYPE);
+    const aiType = this.settings.aiApiType;
     if (aiType === ApiType.SentientSimsAI || aiType === ApiType.CustomAI) {
       return this.sentientSimsAIService;
     }
@@ -387,7 +386,7 @@ export class ApiContext {
   }
 
   get tokenCounter(): TokenCounter {
-    const aiType = this.settings.get(SettingsEnum.AI_API_TYPE);
+    const aiType = this.settings.aiApiType;
 
     if (aiType === ApiType.NovelAI) {
       return this.novelAITokenCounter;
@@ -401,25 +400,25 @@ export class ApiContext {
   }
 
   get modelSettings(): ModelSettings {
-    const aiType = this.settings.get(SettingsEnum.AI_API_TYPE);
+    const aiType = this.settings.aiApiType;
 
     let modelSettings = AllModelSettings.default;
     let model: string | unknown = null;
 
     if (aiType === ApiType.OpenAI) {
-      model = this.settings.get(SettingsEnum.OPENAI_MODEL);
+      model = this.settings.openaiModel;
     }
 
     if (aiType === ApiType.SentientSimsAI) {
-      model = this.settings.get(SettingsEnum.SENTIENTSIMSAI_MODEL);
+      model = this.settings.sentientSimsAIModel;
     }
 
     if (aiType === ApiType.Gemini) {
-      model = this.settings.get(SettingsEnum.GEMINI_MODEL);
+      model = this.settings.geminiModel;
     }
 
     if (aiType === ApiType.VLLM) {
-      model = this.settings.get(SettingsEnum.VLLM_MODEL);
+      model = this.settings.vllmModel;
     }
 
     if (stringType(model) && model in AllModelSettings) {

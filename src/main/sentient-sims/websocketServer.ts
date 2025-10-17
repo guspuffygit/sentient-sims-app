@@ -5,7 +5,6 @@ import log from 'electron-log';
 import { ModLogWebsocketMessage } from './models/ModLogWebsocketMessage';
 import { formatLog } from './util/format';
 import { RendererWebsocketMessage } from './models/RendererWebsocketMessage';
-import { SettingsEnum } from './models/SettingsEnum';
 import { LogLevel } from './models/LogLevel';
 import { WebsocketNotification } from './models/ModWebsocketMessage';
 import { modWebsocketPort, rendererWebsocketPort } from './constants';
@@ -97,7 +96,7 @@ export const startWebSocketServer = (ctx: ApiContext) => {
       if (!parsedData.log) {
         return;
       }
-      if (parsedData.log.level === LogLevel.DEBUG.toString() && !ctx.settings.get(SettingsEnum.DEBUG_LOGS)) {
+      if (parsedData.log.level === LogLevel.DEBUG.toString() && !ctx.settings.debugLogs) {
         return;
       }
 

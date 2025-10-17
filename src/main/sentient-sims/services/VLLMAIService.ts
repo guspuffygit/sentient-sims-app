@@ -1,7 +1,6 @@
 import log from 'electron-log';
 import { ChatCompletion, ResponseFormatJSONSchema } from 'openai/resources/index.mjs';
 import { RawAxiosRequestHeaders } from 'axios';
-import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
@@ -29,17 +28,17 @@ export class VLLMAIService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return this.ctx.settings.get(SettingsEnum.VLLM_ENDPOINT) as string;
+    return this.ctx.settings.vllmEndpoint;
   }
 
   getAuthorizationHeaders(): RawAxiosRequestHeaders {
     return {
-      Authorization: `Bearer ${this.ctx.settings.get(SettingsEnum.VLLM_APIKEY)}`,
+      Authorization: `Bearer ${this.ctx.settings.vllmApiKey}`,
     };
   }
 
   getModel(): string {
-    return this.ctx.settings.get(SettingsEnum.VLLM_MODEL) as string;
+    return `${this.ctx.settings.vllmModel}`;
   }
 
   async getBreakStringTokens(model: string): Promise<number[]> {

@@ -1,5 +1,4 @@
 import log from 'electron-log';
-import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { sendPopUpNotification } from '../util/notifyRenderer';
@@ -19,7 +18,7 @@ export class KoboldAIService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return this.ctx.settings.get(SettingsEnum.KOBOLDAI_ENDPOINT) as string;
+    return this.ctx.settings.koboldaiEndpoint;
   }
 
   async generate(prompt: string, maxResponseTokens: number): Promise<string> {

@@ -3,7 +3,6 @@ import { InteractionDescription, interactionDescriptions } from '../descriptions
 import { IgnoredInteractionsResponse } from '../models/IgnoredInteractionsResponse';
 import { BasicInteraction } from './dto/InteractionDTO';
 import { axiosClient } from '../clients/AxiosClient';
-import { SettingsEnum } from '../models/SettingsEnum';
 import { ApiContext } from '../services/ApiContext';
 
 export class InteractionRepository {
@@ -18,9 +17,9 @@ export class InteractionRepository {
   async fetchInteractions(): Promise<Map<string, BasicInteraction>> {
     const response = await axiosClient({
       url: '/interactions',
-      baseURL: `${this.ctx.settings.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
+      baseURL: this.ctx.settings.sentientSimsAIEndpoint,
       headers: {
-        Authentication: `${this.ctx.settings.get(SettingsEnum.ACCESS_TOKEN)}`,
+        Authentication: this.ctx.settings.accessToken,
       },
     });
 
@@ -44,9 +43,9 @@ export class InteractionRepository {
       url: '/interactions',
       method: 'POST',
       data: interaction,
-      baseURL: `${this.ctx.settings.get(SettingsEnum.SENTIENTSIMSAI_ENDPOINT)}`,
+      baseURL: this.ctx.settings.sentientSimsAIEndpoint,
       headers: {
-        Authentication: `${this.ctx.settings.get(SettingsEnum.ACCESS_TOKEN)}`,
+        Authentication: this.ctx.settings.accessToken,
       },
     });
 

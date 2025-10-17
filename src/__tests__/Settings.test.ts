@@ -28,7 +28,7 @@ describe('Settings', () => {
   });
 
   it('should return default value', () => {
-    const model = ctx.settings.get(SettingsEnum.OPENAI_MODEL);
+    const model = ctx.settings.openaiModel;
     expect(model).toEqual('gpt-4o-mini');
   });
 
@@ -58,5 +58,14 @@ describe('Settings', () => {
     expect(ctx.tokenCounter instanceof LLaMaTokenCounter).toBeTruthy();
 
     expect(ctx.genai instanceof SentientSimsAIService).toBeTruthy();
+  });
+
+  it('ai api type from get returns correct value', () => {
+    expect(ctx.settings.aiApiType).toEqual(ApiType.OpenAI);
+  });
+
+  it('ai api type from get returns correct value after set', () => {
+    ctx.settings.aiApiType = ApiType.ElevenLabs;
+    expect(ctx.settings.aiApiType).toEqual(ApiType.ElevenLabs);
   });
 });

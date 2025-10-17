@@ -1,5 +1,4 @@
 import log from 'electron-log';
-import { SettingsEnum } from '../models/SettingsEnum';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
@@ -129,20 +128,20 @@ export class NovelAIService implements GenerationService {
   }
 
   serviceUrl(): string {
-    return this.ctx.settings.get(SettingsEnum.NOVELAI_ENDPOINT) as string;
+    return this.ctx.settings.novelAIEndpoint;
   }
 
   generationUrl(): string {
-    return this.ctx.settings.get(SettingsEnum.NOVELAI_GENERATION_ENDPOINT) as string;
+    return this.ctx.settings.novelAIGenerationEndpoint;
   }
 
   getModel(): string {
-    return this.ctx.settings.get(SettingsEnum.NOVELAI_MODEL) as string;
+    return this.ctx.settings.novelAIModel;
   }
 
   getNovelAIKey(): string | undefined {
     // Check app settings
-    const novelAIKeyFromSettings = this.ctx.settings.get(SettingsEnum.NOVELAI_KEY);
+    const novelAIKeyFromSettings = this.ctx.settings.novelAIKey;
     if (novelAIKeyFromSettings) {
       log.debug('Using novelai key from settings');
       return novelAIKeyFromSettings as string;
@@ -226,7 +225,7 @@ export class NovelAIService implements GenerationService {
     log.info(`NovelAI request: ${JSON.stringify(novelAIRequest)}`);
 
     const url = `${this.generationUrl()}/ai/generate`;
-    const authHeader = `${this.ctx.settings.get(SettingsEnum.NOVELAI_KEY)}`;
+    const authHeader = `${this.ctx.settings.novelAIKey}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
