@@ -31,6 +31,7 @@ export type PromptRequest = {
   continue?: boolean;
   promptHistoryMode?: PromptHistoryMode;
   postures?: string;
+  preAction?: string;
 };
 
 export type OneShotRequest = {
@@ -87,11 +88,11 @@ export class OpenAIRequestBuilder {
     const memoriesToInsert: OpenAIMessage[] = [];
     let tokenCount = systemMessage.tokens;
 
-    if (promptRequest.action) {
+    if (promptRequest.action || promptRequest.preAction) {
       const userMessage: OpenAIMessage = {
         role: 'user',
-        content: promptRequest.action,
-        tokens: this.tokenCounter.countTokens(promptRequest.action),
+        content: promptRequest.action ?? promptRequest.preAction ?? '',
+        tokens: this.tokenCounter.countTokens(promptRequest.action ?? promptRequest.preAction ?? ''),
       };
       memoriesToInsert.push(userMessage);
       tokenCount += userMessage.tokens;

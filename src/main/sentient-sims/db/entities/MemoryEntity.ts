@@ -5,4 +5,5 @@ export type MemoryEntity = {
   content?: string;
   location_id: number;
   timestamp?: string;
+  action?: string;
 };

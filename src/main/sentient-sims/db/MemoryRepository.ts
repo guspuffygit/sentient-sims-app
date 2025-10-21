@@ -82,9 +82,17 @@ export class MemoryRepository extends Repository {
     const result = this.dbService
       .getDb()
       .prepare(
-        'UPDATE memory SET pre_action = ?, observation = ?, content = ?, timestamp = ?, location_id = ? WHERE id = ?',
+        'UPDATE memory SET pre_action = ?, observation = ?, content = ?, timestamp = ?, location_id = ?, action = ? WHERE id = ?',
       )
-      .run(memory.pre_action, memory.observation, memory.content, memory.timestamp, memory.location_id, memory.id);
+      .run(
+        memory.pre_action,
+        memory.observation,
+        memory.content,
+        memory.timestamp,
+        memory.location_id,
+        memory.action,
+        memory.id,
+      );
 
     notifyMemoryEdited(memory);
 
@@ -104,7 +112,7 @@ export class MemoryRepository extends Repository {
       const updateMemoryResult = this.dbService
         .getDb()
         .prepare(
-          'INSERT OR REPLACE INTO memory(id, pre_action, observation, content, location_id) VALUES(?, ?, ?, ?, ?)',
+          'INSERT OR REPLACE INTO memory(id, pre_action, observation, content, location_id, action) VALUES(?, ?, ?, ?, ?, ?)',
         )
         .run([
           createMemoryRequest.memory.id,
@@ -112,6 +120,7 @@ export class MemoryRepository extends Repository {
           createMemoryRequest.memory.observation,
           createMemoryRequest.memory.content,
           createMemoryRequest.memory.location_id,
+          createMemoryRequest.memory.action,
         ]);
 
       createMemoryRequest.participants.forEach((participant) => {

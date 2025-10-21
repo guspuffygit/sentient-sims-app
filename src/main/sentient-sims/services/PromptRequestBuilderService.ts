@@ -17,6 +17,7 @@ import { ObjectDescription, objectDescriptions } from '../descriptions/objectDes
 
 export type GenerationOptions = {
   action?: string;
+  preAction?: string;
   prePreAction?: string;
   preAssistantPreResponse?: string;
   assistantPreResponse?: string;
@@ -212,6 +213,10 @@ export class PromptRequestBuilderService {
         addMessage('user', memory.pre_action, memory.location_id);
       }
 
+      if (memory.action && memory.action.trim()) {
+        addMessage('user', memory.action, memory.location_id);
+      }
+
       if (memory.observation && memory.observation.trim()) {
         addMessage('user', memory.observation, memory.location_id);
       }
@@ -239,6 +244,18 @@ export class PromptRequestBuilderService {
     if (options.action) {
       formattedAction = formatAction(
         options.action,
+        event.sentient_sims,
+        location,
+        options.sexCategoryType,
+        options.sexLocationType,
+        postures,
+      );
+    }
+
+    let formattedPreAction;
+    if (options.preAction) {
+      formattedPreAction = formatAction(
+        options.preAction,
         event.sentient_sims,
         location,
         options.sexCategoryType,
@@ -341,6 +358,7 @@ export class PromptRequestBuilderService {
       continue: options.continue,
       promptHistoryMode: options.promptHistoryMode,
       postures,
+      preAction: formattedPreAction,
     };
   }
 }

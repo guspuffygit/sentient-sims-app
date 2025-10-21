@@ -20,6 +20,7 @@ describe('MemoryRepository', () => {
       pre_action: 'dioawjd',
       content: 'foiwje9if91082u',
       observation: 'joijofi10298',
+      action: 'ojf0192830hkljh12',
     };
     const result = ctx.memoryRepository.createMemory({
       memory,
@@ -31,6 +32,7 @@ describe('MemoryRepository', () => {
     expect(result.observation).toEqual(memory.observation);
     expect(result.location_id).toEqual(memory.location_id);
     expect(result.timestamp).toBeTruthy();
+    expect(result.action).toEqual(memory.action);
 
     // Check createMemory also created memory_participants rows
     const memoryParticipants = ctx.memoryRepository.getMemoryParticipants({

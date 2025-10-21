@@ -110,9 +110,9 @@ export class AIService {
     }
 
     if (description?.pre_actions) {
-      const action = getRandomItem(description.pre_actions);
+      const preAction = getRandomItem(description.pre_actions);
       return this.runGeneration(event, {
-        action,
+        preAction,
         prePreAction: 'At {location} ({location_type}), {postures},',
       });
     }
@@ -134,7 +134,7 @@ export class AIService {
   async handleWants(event: WantsInteractionEvent) {
     const randomAction = defaultWantsPrefixes[Math.floor(Math.random() * defaultWantsPrefixes.length)];
     return this.runGeneration(event, {
-      action: defaultWantsPrompt,
+      preAction: defaultWantsPrompt,
       preAssistantPreResponse: `{actor.0}:`,
       assistantPreResponse: randomAction,
       promptHistoryMode: PromptHistoryMode.NO_USER_HISTORY,
@@ -150,22 +150,22 @@ export class AIService {
       return { status: InteractionEventStatus.NOOP };
     }
 
-    let action;
+    let preAction;
 
     const animation = await this.ctx.animations.getAnimation(event.animation_author, event.animation_identifier);
 
     if (event.ww_event_type === WWEventType.ASKING) {
-      action = '{actor.0} is asking {actor.1} if they want to go have sex';
+      preAction = '{actor.0} is asking {actor.1} if they want to go have sex';
     } else if (event.ww_event_type === WWEventType.STARTING) {
-      action = "{actor.0} is taking {actor.1}'s hand and leading them to start {sex_category} {sex_location}.";
+      preAction = "{actor.0} is taking {actor.1}'s hand and leading them to start {sex_category} {sex_location}.";
       if (event.sentient_sims.length === 1) {
-        action = '{actor.0} is walking to start {sex_category} {sex_location}.';
+        preAction = '{actor.0} is walking to start {sex_category} {sex_location}.';
       }
     } else if (event.ww_event_type === WWEventType.ACTIVE) {
       if (event.testing_action) {
-        action = event.testing_action;
+        preAction = event.testing_action;
       } else if (animation) {
-        action = animation.act;
+        preAction = animation.act;
       } else if (this.ctx.animations.isAnimationMappingEnabled()) {
         return { status: InteractionEventStatus.UNMAPPED_ANIMATION };
       } else {
@@ -183,7 +183,7 @@ export class AIService {
     }
 
     return this.runGeneration(event, {
-      action,
+      preAction,
       prePreAction: 'At {location} ({location_type}), {postures},',
       sexCategoryType: event.sex_category,
       sexLocationType: event.sex_location,
@@ -220,6 +220,7 @@ export class AIService {
       sexLocationType: options.sexLocationType,
       preAssistantPreResponse: options.preAssistantPreResponse,
       assistantPreResponse: options.assistantPreResponse,
+      preAction: options.preAction,
       prePreAction: options.prePreAction,
       stopTokens: options.stopTokens,
       apiType: this.ctx.settings.aiApiType,
@@ -234,8 +235,11 @@ export class AIService {
     const newMemory: MemoryEntity = {
       location_id: event.environment.location_id,
     };
+    if (promptRequest.preAction) {
+      newMemory.pre_action = promptRequest.preAction;
+    }
     if (promptRequest.action) {
-      newMemory.pre_action = promptRequest.action;
+      newMemory.action = promptRequest.action;
     }
 
     getInputFormatters(promptOptions.apiType).forEach((formatter) => {

@@ -184,6 +184,7 @@ export default function MemoriesPage() {
         content: previousMemory?.memory?.content,
         location_id: Number(previousMemory?.memory?.location_id),
         timestamp: previousMemory?.memory?.timestamp,
+        action: previousMemory?.memory?.action,
       },
     }));
   }, []);
@@ -198,6 +199,7 @@ export default function MemoriesPage() {
         content: event.target.value,
         location_id: Number(previousMemory?.memory?.location_id),
         timestamp: previousMemory?.memory?.timestamp,
+        action: previousMemory?.memory?.action,
       },
     }));
   }, []);
@@ -212,6 +214,22 @@ export default function MemoriesPage() {
         content: previousMemory?.memory?.content,
         location_id: Number(previousMemory?.memory?.location_id),
         timestamp: previousMemory?.memory?.timestamp,
+        action: previousMemory?.memory?.action,
+      },
+    }));
+  }, []);
+
+  const handleActionEdit = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setEditedMemory((previousMemory) => ({
+      index: Number(previousMemory?.index),
+      memory: {
+        id: previousMemory?.memory?.id,
+        observation: previousMemory?.memory?.observation,
+        pre_action: previousMemory?.memory?.pre_action,
+        content: previousMemory?.memory?.content,
+        location_id: Number(previousMemory?.memory?.location_id),
+        timestamp: previousMemory?.memory?.timestamp,
+        action: event.target.value,
       },
     }));
   }, []);
@@ -226,7 +244,7 @@ export default function MemoriesPage() {
     memories.forEach((memory, index) => {
       renderText.push(
         <Typography variant="body2" onClick={() => handleSetSelectedMemory(index)} className="hoverHighlightTypography">
-          {[memory.observation, memory.content].filter((m) => m).join(' ')}
+          {[memory.observation, memory.action, memory.content].filter((m) => m).join('\n')}
         </Typography>,
       );
       renderText.push(<Typography> </Typography>);
@@ -272,6 +290,7 @@ export default function MemoriesPage() {
             handleEdit={handlePreActionEdit}
             value={editedMemory?.memory?.pre_action}
           />
+          <MemoryEditInput label="Action" handleEdit={handleActionEdit} value={editedMemory?.memory?.action} />
           <MemoryEditInput
             label="Content"
             handleEdit={handleContentEdit}

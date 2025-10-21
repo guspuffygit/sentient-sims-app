@@ -97,6 +97,10 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
       ALTER TABLE participant
       ADD COLUMN name TEXT;
     `,
+    '007-add-action-memories': `
+      ALTER TABLE memory
+      ADD COLUMN action TEXT;
+    `,
   }),
 );
 

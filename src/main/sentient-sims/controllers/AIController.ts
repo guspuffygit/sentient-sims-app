@@ -40,6 +40,8 @@ export class AIController {
   async interactionEvent(req: Request, res: Response) {
     const event: InteractionEvents = req.body;
 
+    log.debug(`Interaction event: ${JSON.stringify(req.body)}`);
+
     const result = await this.ctx.ai.interactionEvent(event);
     result.input = event;
     res.json(result);
