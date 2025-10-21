@@ -1,7 +1,7 @@
 import { SentientSimCareer } from './SentientSimCareer';
 import { SimAge } from './SimAge';
 
-export type SentientSim = {
+export type SentientSimProperties = {
   description?: string;
   careers: SentientSimCareer[];
   name: string;
@@ -26,4 +26,21 @@ export type SentientSim = {
   is_player_sim: boolean;
   upper_body?: number;
   lower_body?: number;
+  body_posture?: string;
+  body_posture_target?: string;
+  back_posture?: string;
+  back_posture_target?: string;
+  left_posture?: string;
+  left_posture_target?: string;
+  right_posture?: string;
+  right_posture_target?: string;
+  target_name?: string;
+  target_part_owner_name?: string;
+  target_slot_type_set_name?: string;
+};
+
+export type SentientSim = SentientSimProperties & {
+  spouse?: SentientSimProperties;
+  fiance?: SentientSimProperties;
+  posture_linked_sim?: SentientSimProperties;
 };

@@ -30,6 +30,7 @@ export type PromptRequest = {
   stopTokens?: string[];
   continue?: boolean;
   promptHistoryMode?: PromptHistoryMode;
+  postures?: string;
 };
 
 export type OneShotRequest = {
