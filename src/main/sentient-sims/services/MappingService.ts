@@ -105,7 +105,7 @@ export type ExportTraitsRequest = {
 export class MappingService {
   async getTraits({ searchClass, extractedPath }: TraitsParameters) {
     log.debug(`extracted path: ${extractedPath}`);
-    const traitsPath = path.join(extractedPath, 'Trait');
+    const traitsPath = path.join(extractedPath);
     const stringsPath = path.join(extractedPath, 'strings.json');
     const parsedStrings: any = JSON.parse(fs.readFileSync(stringsPath, 'utf-8'));
     const stringMap: Record<string, string> = {};
@@ -125,44 +125,51 @@ export class MappingService {
 
     const instances: Instance[] = [];
 
-    xmlFiles.forEach((xmlFile) => {
-      let xml = fs.readFileSync(xmlFile, 'utf-8');
-      const result: any = xmlParser.parse(xml);
-      if (result?.I) {
-        const instanceXml: InstanceXML = result.I;
-        if (
-          instanceXml?.$a_c &&
-          instanceXml?.$a_i === 'trait' &&
-          instanceXml?.$a_m &&
-          instanceXml?.$a_n &&
-          instanceXml?.$a_s
-        ) {
-          if (Array.isArray(instanceXml?.T)) {
-            const newT: any[] = [];
-            instanceXml.T.forEach((tInstance) => {
-              if (tInstance?.$a_n in textProperties && '#text' in tInstance && tInstance['#text'] in stringMap) {
-                xml = xml.replace(tInstance['#text'], stringMap[tInstance['#text']]);
-                if ('#text' in tInstance) {
-                  tInstance['#text'] = stringMap[tInstance['#text']];
-                }
+    xmlFiles
+      .filter((xmlFile) => xmlFile.endsWith('.TraitTuning.xml'))
+      .forEach((xmlFile) => {
+        let xml = fs.readFileSync(xmlFile, 'utf-8');
+        try {
+          const result: any = xmlParser.parse(xml);
+          if (result?.I) {
+            const instanceXml: InstanceXML = result.I;
+            if (
+              instanceXml?.$a_c &&
+              instanceXml?.$a_i === 'trait' &&
+              instanceXml?.$a_m &&
+              instanceXml?.$a_n &&
+              instanceXml?.$a_s
+            ) {
+              if (Array.isArray(instanceXml?.T)) {
+                const newT: any[] = [];
+                instanceXml.T.forEach((tInstance) => {
+                  if (tInstance?.$a_n in textProperties && '#text' in tInstance && tInstance['#text'] in stringMap) {
+                    xml = xml.replace(tInstance['#text'], stringMap[tInstance['#text']]);
+                    if ('#text' in tInstance) {
+                      tInstance['#text'] = stringMap[tInstance['#text']];
+                    }
+                  }
+                  newT.push(tInstance);
+                });
+                instanceXml.T = newT;
               }
-              newT.push(tInstance);
-            });
-            instanceXml.T = newT;
-          }
 
-          const instance = toInstance(instanceXml, xml);
+              const instance = toInstance(instanceXml, xml);
 
-          if (searchClass) {
-            if (instance.class === searchClass) {
-              instances.push(instance);
+              if (searchClass) {
+                if (instance.class === searchClass) {
+                  instances.push(instance);
+                }
+              } else {
+                instances.push(instance);
+              }
             }
-          } else {
-            instances.push(instance);
           }
+        } catch (err) {
+          log.error(`Unable to parse xml file: ${xmlFile}`, err);
+          throw err;
         }
-      }
-    });
+      });
 
     const traits: TraitMapping[] = [];
     const traitsMap: Record<string, TraitMapping> = {};
