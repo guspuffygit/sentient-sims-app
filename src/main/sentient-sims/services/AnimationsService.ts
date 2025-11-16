@@ -48,7 +48,13 @@ export class AnimationsService {
   }
 
   async saveLocalAnimation(animation: Animation) {
+    if (!animation.author || !animation.id) {
+      log.error(`[Override] Lokale Animation konnte nicht gespeichert werden: Author oder ID fehlen.`);
+      return;
+    }
+
     const animationKey = getAnimationKey(animation.author, animation.id);
+
     try {
       const sentientSimsFolder = this.ctx.directory.getSentientSimsFolder();
       const localMapPath = path.join(sentientSimsFolder, 'user_animation_overrides.json');
