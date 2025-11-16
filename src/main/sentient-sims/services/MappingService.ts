@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { moodDescriptions, MoodMapping } from '../descriptions/moodDescriptions';
 import { traitDescriptions, TraitMapping } from '../descriptions/traitDescriptions';
-import { toTraitType, TraitType } from '../models/TraitType';
+import { toTraitType } from '../models/TraitType';
 
 export type Instance = {
   class: string;
@@ -100,6 +100,8 @@ type TraitsParameters = {
 export type ExportTraitsRequest = {
   extractedPath: string;
   traits: Record<string, TraitMapping>;
+  variableName?: string;
+  modDescription?: string;
 };
 
 export class MappingService {
@@ -268,12 +270,42 @@ export class MappingService {
     };
   }
 
-  async exportTraits({ extractedPath, traits }: ExportTraitsRequest) {
+  async exportTraits({ extractedPath, traits, variableName, modDescription }: ExportTraitsRequest) {
     const exportedPath = path.join(extractedPath, 'extracted.json');
-    let theOutput = JSON.stringify(traits, null, 2);
-    Object.keys(TraitType).forEach((traitType) => {
-      theOutput = theOutput.replaceAll(`"trait_type": "${traitType}"`, `"trait_type": TraitType.${traitType}`);
-    });
+
+    let theOutput = '';
+
+    if (modDescription) {
+      theOutput += `/* ${modDescription} */\n`;
+    }
+
+    if (variableName) {
+      theOutput += `const ${variableName}: Record<string, TraitMapping> = {\n`;
+    } else {
+      theOutput += '{\n';
+    }
+
+    for (const [key, trait] of Object.entries(traits)) {
+      theOutput += `  ${key}: {\n`;
+      theOutput += `    name: '${trait.name}',\n`;
+      if (trait.ignored !== undefined) {
+        theOutput += `    ignored: ${trait.ignored},\n`;
+      }
+      if (trait.description) {
+        const escapedDescription = trait.description.replace(/'/g, "\\'").replace(/\n/g, '\\n');
+        theOutput += `    description: '${escapedDescription}',\n`;
+      }
+      theOutput += `    class: '${trait.class}',\n`;
+      theOutput += `    trait_type: TraitType.${trait.trait_type},\n`;
+      theOutput += `  },\n`;
+    }
+
+    if (variableName) {
+      theOutput += '};\n';
+    } else {
+      theOutput += '}\n';
+    }
+
     fs.writeFileSync(exportedPath, theOutput, 'utf-8');
   }
 }

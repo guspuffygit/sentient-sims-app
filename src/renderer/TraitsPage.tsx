@@ -50,6 +50,8 @@ export default function TraitsPage() {
   const [inputField, setInputField] = useState('');
   const extractedPath = useSetting<string>(SettingsEnum.TRAIT_MAPPING_PATH, '');
   const [filterTraitType, setFilterTraitType] = useState<string>('');
+  const [variableName, setVariableName] = useState('');
+  const [modDescription, setModDescription] = useState('');
 
   const filteredTraits = useMemo(() => {
     if (filterTraitType) {
@@ -223,6 +225,14 @@ export default function TraitsPage() {
     extractedPath.setSetting(event.target.value);
   };
 
+  const handleVariableNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setVariableName(event.target.value);
+  };
+
+  const handleModDescriptionChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setModDescription(event.target.value);
+  };
+
   const handleKeyDown = (event: any) => {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -255,6 +265,8 @@ export default function TraitsPage() {
     const exportTraitsRequest: ExportTraitsRequest = {
       extractedPath: extractedPath.value,
       traits: results,
+      variableName: variableName,
+      modDescription: modDescription,
     };
 
     fetch(`${appApiUrl}/traits/export`, {
@@ -313,7 +325,22 @@ export default function TraitsPage() {
 
           {/* Miscellaneous Information */}
           <Grid item xs={12} sm={4}>
-            <Typography variant="body2" />
+            <TextField
+              label="Variable Name (for Export)"
+              variant="outlined"
+              fullWidth
+              value={variableName}
+              onChange={handleVariableNameChange}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              label="Mod Description (for Export)"
+              variant="outlined"
+              fullWidth
+              value={modDescription}
+              onChange={handleModDescriptionChange}
+              sx={{ mb: 2 }}
+            />
             <TextField
               label="S4tk Extracted Path"
               variant="outlined"
