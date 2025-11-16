@@ -49,7 +49,7 @@ export class AnimationsService {
 
   async saveLocalAnimation(animation: Animation) {
     if (!animation.author || !animation.id) {
-      log.error(`[Override] Lokale Animation konnte nicht gespeichert werden: Author oder ID fehlen.`);
+      log.error(`[Override] Local Animation could not be saved: Author or ID be missing.`);
       return;
     }
 

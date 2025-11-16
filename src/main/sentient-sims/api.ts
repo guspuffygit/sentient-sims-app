@@ -72,12 +72,17 @@ export function runApi(ctx: ApiContext) {
   expressApp.get('/animations/nsfw-enabled', ctx.controller.animations.isNsfwEnabled);
   expressApp.post('/animations', ctx.controller.animations.setAnimation);
 
+  expressApp.post('/animations/save-locally', ctx.controller.animations.saveAnimationLocally);
+
   expressApp.get('/interactions/ignored', ctx.controller.interactionDescription.getIgnoredInteractions);
   expressApp.get('/traits', ctx.controller.mapping.getTraits);
   expressApp.get('/traits/unmapped', ctx.controller.mapping.getUnmappedTraits);
   expressApp.post('/traits/export', ctx.controller.mapping.exportTraits);
   expressApp.get('/moods', ctx.controller.mapping.getMoods);
   expressApp.get('/moods/unmapped', ctx.controller.mapping.getUnmappedMoods);
+
+  expressApp.post('/interactions/save-locally', ctx.controller.interactionDescription.saveInteractionLocally);
+
   expressApp.post('/interactions', ctx.controller.interactionDescription.updateInteraction);
   expressApp.get('/voice/phonemize', ctx.controller.voice.phonemize);
   expressApp.get('/websocket/isconnected', new WebsocketController().isConnected);
