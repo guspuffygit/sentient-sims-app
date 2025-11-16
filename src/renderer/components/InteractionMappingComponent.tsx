@@ -221,33 +221,6 @@ export function InteractionMappingComponent() {
       return;
     }
 
-    async function handleSaveLocally() {
-      if (!event) return;
-      setLoading(true);
-
-      const formattedOutput = replaceKeyValuePairs(
-        input,
-        getMappingStringReplacementPairs(event.sentient_sims),
-        getMappingStringErrorPairs(event.sentient_sims),
-      );
-
-      const interaction: InteractionDTO = {
-        name: event.interaction_name,
-        event,
-        action: formattedOutput.actionString,
-        ignored: false,
-      };
-
-      try {
-        await window.electron.ipcRenderer.invoke('save-interaction-locally', interaction);
-      } catch (error) {
-        log.error('Error saving interaction locally:', error);
-      }
-
-      setLoading(false);
-      onClose();
-    }
-
     setLoading(true);
 
     const formattedOutput = replaceKeyValuePairs(
@@ -291,6 +264,41 @@ export function InteractionMappingComponent() {
       }
     } catch (error) {
       log.error('An error occurred saving interaction:', error);
+    }
+
+    setLoading(false);
+    onClose();
+  }
+
+  async function handleSaveLocally() {
+    if (!event || !event.interaction_name) {
+      log.error('Cannot save locally, event or interaction_name is missing');
+      return;
+    }
+
+    setLoading(true);
+
+    const formattedOutput = replaceKeyValuePairs(
+      input,
+      getMappingStringReplacementPairs(event.sentient_sims),
+      getMappingStringErrorPairs(event.sentient_sims),
+    );
+
+    const interaction: InteractionDTO = {
+      name: event.interaction_name,
+      event,
+      action: formattedOutput.actionString,
+      ignored: false,
+    };
+
+    try {
+      await fetch(`${appApiUrl}/interactions/save-locally`, {
+        method: 'POST',
+        body: JSON.stringify(interaction),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (error) {
+      log.error('Error saving interaction locally:', error);
     }
 
     setLoading(false);
@@ -412,6 +420,17 @@ export function InteractionMappingComponent() {
                       sx={{ marginRight: 1 }}
                     >
                       Save + Add Memory
+                    </LoadingButton>
+                  </Tooltip>
+                  <Tooltip title="This will save interaction mapping localy">
+                    <LoadingButton
+                      loading={loading}
+                      color="primary"
+                      variant="contained"
+                      onClick={handleSaveLocally}
+                      sx={{ marginRight: 1 }}
+                    >
+                      Save Locally
                     </LoadingButton>
                   </Tooltip>
                   <Tooltip title="This will save the interaction mapping without modifying Sims memories.">
