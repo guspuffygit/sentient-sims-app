@@ -10,7 +10,7 @@
  */
 import path from 'path';
 import sourceMapSupport from 'source-map-support';
-import { app, BrowserWindow, shell, session, WebRequestFilter, dialog } from 'electron';
+import { app, BrowserWindow, shell, session, WebRequestFilter } from 'electron'; //dialog removed
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import registerDebugToggleHotkey from './sentient-sims/registerDebugToggleHotkey';

@@ -12,6 +12,7 @@ export class InteractionDescriptionController {
     this.updateInteraction = this.updateInteraction.bind(this);
     this.getIgnoredInteractions = this.getIgnoredInteractions.bind(this);
     this.saveInteractionLocally = this.saveInteractionLocally.bind(this);
+    this.getOnlineInteractions = this.getOnlineInteractions.bind(this);
   }
 
   async updateInteraction(req: Request, res: Response) {
@@ -32,6 +33,17 @@ export class InteractionDescriptionController {
     } catch (err) {
       log.error('[Controller] Error saving interaction locally:', err);
       res.status(500).json({ error: 'Failed to save interaction locally.' });
+    }
+  }
+
+  async getOnlineInteractions(req: Request, res: Response) {
+    try {
+      const interactions = await this.ctx.interactionRepository.getInteractions();
+
+      res.json(Object.fromEntries(interactions));
+    } catch (err) {
+      log.error('[Controller] Error getting all interactions:', err);
+      res.status(500).json({ error: 'Failed to get interactions.' });
     }
   }
 }

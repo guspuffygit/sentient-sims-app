@@ -13,6 +13,7 @@ export class AnimationsController {
     this.setAnimation = this.setAnimation.bind(this);
     this.isNsfwEnabled = this.isNsfwEnabled.bind(this);
     this.saveAnimationLocally = this.saveAnimationLocally.bind(this);
+    this.getOnlineAnimations = this.getOnlineAnimations.bind(this);
   }
 
   async getAnimations(req: Request, res: Response) {
@@ -33,6 +34,16 @@ export class AnimationsController {
     } catch (err) {
       log.error('[Controller] Error saving animation locally:', err);
       res.status(500).json({ error: 'Failed to save animation locally.' });
+    }
+  }
+
+  async getOnlineAnimations(req: Request, res: Response) {
+    try {
+      const animations = await this.ctx.animations.getAnimations();
+      res.json(Object.fromEntries(animations));
+    } catch (err) {
+      log.error('[Controller] Error getting all animations:', err);
+      res.status(500).json({ error: 'Failed to get animations.' });
     }
   }
 

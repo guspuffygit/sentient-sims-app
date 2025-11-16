@@ -68,6 +68,8 @@ export function runApi(ctx: ApiContext) {
   expressApp.get('/db/unload', ctx.controller.db.unloadDatabase);
   expressApp.get('/db/list', ctx.controller.db.getSaveGames);
 
+  expressApp.get('/animations/online-all', ctx.controller.animations.getOnlineAnimations);
+
   expressApp.get('/animations', ctx.controller.animations.getAnimations);
   expressApp.get('/animations/nsfw-enabled', ctx.controller.animations.isNsfwEnabled);
   expressApp.post('/animations', ctx.controller.animations.setAnimation);
@@ -75,6 +77,9 @@ export function runApi(ctx: ApiContext) {
   expressApp.post('/animations/save-locally', ctx.controller.animations.saveAnimationLocally);
 
   expressApp.get('/interactions/ignored', ctx.controller.interactionDescription.getIgnoredInteractions);
+
+  expressApp.get('/interactions/online-all', ctx.controller.interactionDescription.getOnlineInteractions);
+
   expressApp.get('/traits', ctx.controller.mapping.getTraits);
   expressApp.get('/traits/unmapped', ctx.controller.mapping.getUnmappedTraits);
   expressApp.post('/traits/export', ctx.controller.mapping.exportTraits);

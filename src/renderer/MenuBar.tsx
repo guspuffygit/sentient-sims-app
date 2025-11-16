@@ -93,6 +93,14 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
                 <Button color="secondary" onClick={() => navigate('/traits')} sx={{ marginLeft: '5px' }} id="traits">
                   Traits
                 </Button>
+                <Button
+                  color="secondary"
+                  onClick={() => navigate('/mapping-browser')}
+                  sx={{ marginLeft: '5px' }}
+                  id="mapping-browser"
+                >
+                  Mapping Browser
+                </Button>
               </>
             ) : null}
             <Button color="secondary" onClick={() => navigate('/sims')} sx={{ marginLeft: '5px' }} id="sims">
