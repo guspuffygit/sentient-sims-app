@@ -2,6 +2,9 @@ import { Animation } from 'main/sentient-sims/models/Animation';
 import { ApiType } from '../models/ApiType';
 import { axiosClient } from '../clients/AxiosClient';
 import { ApiContext } from './ApiContext';
+import fs from 'fs';
+import path from 'path';
+import log from 'electron-log';
 
 export function getAnimationKey(animationAuthor: string, animationIdentifier: string) {
   return `${animationAuthor}:${animationIdentifier}`;
@@ -9,11 +12,12 @@ export function getAnimationKey(animationAuthor: string, animationIdentifier: st
 
 export class AnimationsService {
   private ctx: ApiContext;
-
+  private localAnimations?: Map<string, Animation>;
   private animations?: Map<string, Animation>;
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
+    this.loadLocalAnimations();
   }
 
   async getAnimations() {
@@ -26,6 +30,21 @@ export class AnimationsService {
     });
 
     return response.data;
+  }
+
+  private loadLocalAnimations() {
+    try {
+      const sentientSimsFolder = this.ctx.directory.getSentientSimsFolder();
+      const localMapPath = path.join(sentientSimsFolder, 'user_animation_overrides.json');
+
+      if (fs.existsSync(localMapPath)) {
+        const fileContent = fs.readFileSync(localMapPath, 'utf-8');
+        this.localAnimations = new Map(Object.entries(JSON.parse(fileContent)));
+        log.info(`[Override] Local Animations-Overrides loaded Successfully.`);
+      }
+    } catch (err) {
+      log.error('[Override] could not load local Animations-Overrides', err);
+    }
   }
 
   async setAnimation(animation: Animation) {
@@ -49,10 +68,17 @@ export class AnimationsService {
   async getAnimation(animationAuthor: string, animationIdentifier: string) {
     const animationKey = getAnimationKey(animationAuthor, animationIdentifier);
 
+    const localAnimation = this.localAnimations?.get(animationKey);
+    if (localAnimation) {
+      log.debug(`[Override] Load '${animationKey}' from user_animation_overrides.json`);
+      return localAnimation;
+    }
+
     if (!this.animations) {
       this.animations = new Map(Object.entries(await this.getAnimations()));
     }
 
+    log.debug(`[Online] Load '${animationKey}' from Sentient Sims API`);
     return this.animations.get(animationKey);
   }
 
