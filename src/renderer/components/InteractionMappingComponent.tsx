@@ -221,6 +221,33 @@ export function InteractionMappingComponent() {
       return;
     }
 
+    async function handleSaveLocally() {
+      if (!event) return;
+      setLoading(true);
+
+      const formattedOutput = replaceKeyValuePairs(
+        input,
+        getMappingStringReplacementPairs(event.sentient_sims),
+        getMappingStringErrorPairs(event.sentient_sims),
+      );
+
+      const interaction: InteractionDTO = {
+        name: event.interaction_name,
+        event,
+        action: formattedOutput.actionString,
+        ignored: false,
+      };
+
+      try {
+        await window.electron.ipcRenderer.invoke('save-interaction-locally', interaction);
+      } catch (error) {
+        log.error('Error saving interaction locally:', error);
+      }
+
+      setLoading(false);
+      onClose();
+    }
+
     setLoading(true);
 
     const formattedOutput = replaceKeyValuePairs(

@@ -47,6 +47,29 @@ export class AnimationsService {
     }
   }
 
+  async saveLocalAnimation(animation: Animation) {
+    const animationKey = getAnimationKey(animation.author, animation.id);
+    try {
+      const sentientSimsFolder = this.ctx.directory.getSentientSimsFolder();
+      const localMapPath = path.join(sentientSimsFolder, 'user_animation_overrides.json');
+
+      let localOverrides: Record<string, Animation> = {};
+      if (fs.existsSync(localMapPath)) {
+        const fileContent = fs.readFileSync(localMapPath, 'utf-8');
+        localOverrides = JSON.parse(fileContent);
+      }
+
+      localOverrides[animationKey] = animation;
+
+      this.localAnimations = new Map(Object.entries(localOverrides));
+
+      fs.writeFileSync(localMapPath, JSON.stringify(localOverrides, null, 2));
+      log.info(`[Override] Local animation '${animationKey}' saved.`);
+    } catch (err) {
+      log.error(`[Override] local animation could not be saved`, err);
+    }
+  }
+
   async setAnimation(animation: Animation) {
     const response = await axiosClient({
       url: '/animations',

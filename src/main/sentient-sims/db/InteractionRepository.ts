@@ -44,6 +44,25 @@ export class InteractionRepository {
     }
   }
 
+  async saveLocalInteraction(interaction: BasicInteraction) {
+    try {
+      const sentientSimsFolder = this.ctx.directory.getSentientSimsFolder();
+      const localMapPath = path.join(sentientSimsFolder, 'user_interaction_overrides.json');
+      let localOverrides: Record<string, BasicInteraction> = {};
+      if (fs.existsSync(localMapPath)) {
+        const fileContent = fs.readFileSync(localMapPath, 'utf-8');
+        localOverrides = JSON.parse(fileContent);
+      }
+      localOverrides[interaction.name] = interaction;
+      this.localInteractions = new Map(Object.entries(localOverrides));
+
+      fs.writeFileSync(localMapPath, JSON.stringify(localOverrides, null, 2));
+      log.info(`[Override] Local interaction '${interaction.name}' saved.`);
+    } catch (err) {
+      log.error(`[Override] Local Interaction could not be saved`, err);
+    }
+  }
+
   async getInteractions(): Promise<Map<string, BasicInteraction>> {
     if (!this.interactions) {
       try {

@@ -204,6 +204,33 @@ export function AnimationMappingComponent() {
       return;
     }
 
+    async function handleSaveLocally() {
+      if (!event) return;
+      setLoading(true);
+
+      const formattedOutput = replaceKeyValuePairs(
+        input,
+        getMappingStringReplacementPairs(event.sentient_sims),
+        getMappingStringErrorPairs(event.sentient_sims),
+      );
+
+      const animation: Animation = {
+        id: event.animation_identifier,
+        name: event.animation_name,
+        author: event.animation_author,
+        act: formattedOutput.actionString,
+      };
+
+      try {
+        await window.electron.ipcRenderer.invoke('save-animation-locally', animation);
+      } catch (error) {
+        log.error('Error saving animation locally:', error);
+      }
+
+      setLoading(false);
+      onClose();
+    }
+
     setLoading(true);
 
     const formattedOutput = replaceKeyValuePairs(

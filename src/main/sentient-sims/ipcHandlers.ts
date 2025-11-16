@@ -4,6 +4,7 @@ import { SettingsEnum } from './models/SettingsEnum';
 import { notifySettingChanged } from './util/notifyRenderer';
 import { resolveHtmlPath } from '../util';
 import { ApiContext } from './services/ApiContext';
+import { InteractionDTO } from './db/dto/InteractionDTO';
 
 async function handleSelectDirectory() {
   const { canceled, filePaths } = await dialog.showOpenDialog({
@@ -47,5 +48,14 @@ export default function ipcHandlers(ctx: ApiContext) {
         wnd.webContents.send('on-api-key-paste-from-clipboard', clipboardResults);
       }
     });
+  });
+  ipcMain.handle('save-interaction-locally', async (event, interaction: InteractionDTO) => {
+    const interactionRepo = ctx.interactionRepository;
+    return interactionRepo.saveLocalInteraction(interaction);
+  });
+
+  ipcMain.handle('save-animation-locally', async (event, animation: Animation) => {
+    const animationService = ctx.animations;
+    return animationService.saveLocalAnimation(animation);
   });
 }
