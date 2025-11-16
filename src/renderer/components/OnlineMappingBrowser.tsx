@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, List, TextField, Typography, Paper } from '@mui/material';
+import { Box, Button, CircularProgress, List, TextField, Typography, Paper, Pagination } from '@mui/material';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { BasicInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
 import { Animation } from 'main/sentient-sims/models/Animation';
@@ -160,6 +160,7 @@ export default function OnlineMappingBrowser() {
               <MappingItem key={mapping.key} mappingKey={mapping.key} mapping={mapping} mappingType={mappingType!} />
             ))}
           </List>
+
           <Box
             sx={{
               display: 'flex',
@@ -168,18 +169,14 @@ export default function OnlineMappingBrowser() {
               mt: 2,
             }}
           >
-            <Button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
-              Previous
-            </Button>
-            <Typography sx={{ margin: '0 16px' }}>
-              Page {currentPage} of {pageCount}
-            </Typography>
-            <Button
-              onClick={() => setCurrentPage((p) => Math.min(pageCount, p + 1))}
-              disabled={currentPage === pageCount}
-            >
-              Next
-            </Button>
+            <Pagination
+              count={pageCount}
+              page={currentPage}
+              onChange={(event, value) => setCurrentPage(value)}
+              color="primary"
+              showFirstButton
+              showLastButton
+            />
           </Box>
         </>
       )}
