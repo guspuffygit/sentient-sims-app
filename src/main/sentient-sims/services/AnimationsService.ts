@@ -20,16 +20,27 @@ export class AnimationsService {
     this.loadLocalAnimations();
   }
 
-  async getAnimations() {
-    const response = await axiosClient({
-      url: '/animations',
-      baseURL: this.ctx.settings.sentientSimsAIEndpoint,
-      headers: {
-        Authentication: this.ctx.settings.accessToken,
-      },
-    });
+  async getAnimations(): Promise<Map<string, Animation>> {
+    if (this.animations) {
+      return this.animations;
+    }
 
-    return response.data;
+    try {
+      const response = await axiosClient({
+        url: '/animations',
+        baseURL: this.ctx.settings.sentientSimsAIEndpoint,
+        headers: {
+          Authentication: this.ctx.settings.accessToken,
+        },
+      });
+
+      this.animations = new Map(Object.entries(response.data));
+    } catch (err) {
+      log.error(`[AnimationService] Unable to fetch animations from API`, err);
+      this.animations = new Map<string, Animation>();
+    }
+
+    return this.animations;
   }
 
   private loadLocalAnimations() {
@@ -103,12 +114,10 @@ export class AnimationsService {
       return localAnimation;
     }
 
-    if (!this.animations) {
-      this.animations = new Map(Object.entries(await this.getAnimations()));
-    }
+    const animationsMap = await this.getAnimations();
 
     log.debug(`[Online] Load '${animationKey}' from Sentient Sims API`);
-    return this.animations.get(animationKey);
+    return animationsMap.get(animationKey);
   }
 
   isNsfwEnabled(): boolean {

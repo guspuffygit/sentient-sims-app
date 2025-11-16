@@ -72,7 +72,7 @@ export class InteractionRepository {
       }
     }
 
-    return new Map<string, BasicInteraction>();
+    return this.interactions || new Map<string, BasicInteraction>();
   }
 
   async setInteraction(interaction: BasicInteraction) {
