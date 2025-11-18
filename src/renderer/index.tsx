@@ -30,6 +30,7 @@ import { WebsocketProvider } from './providers/WebsocketProvider';
 import 'aws-amplify/auth/enable-oauth-listener';
 import { AuthProvider } from './providers/AuthProvider';
 import { AmplifyConfig } from './AmplifyConfig';
+import OnlineMappingBrowser from './components/OnlineMappingBrowser';
 
 Amplify.configure(AmplifyConfig);
 
@@ -45,6 +46,10 @@ const router = createMemoryRouter([
       {
         path: '/traits',
         element: <TraitsPage />,
+      },
+      {
+        path: '/mapping-browser',
+        element: <OnlineMappingBrowser />,
       },
       {
         path: '/settings',

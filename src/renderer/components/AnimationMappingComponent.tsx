@@ -203,9 +203,7 @@ export function AnimationMappingComponent() {
     if (!event) {
       return;
     }
-
     setLoading(true);
-
     const formattedOutput = replaceKeyValuePairs(
       input,
       getMappingStringReplacementPairs(event.sentient_sims),
@@ -247,6 +245,41 @@ export function AnimationMappingComponent() {
       }
     } catch (error) {
       log.error('An error occurred saving animation:', error);
+    }
+
+    setLoading(false);
+    onClose();
+  }
+
+  async function handleSaveLocally() {
+    if (!event || !event.animation_identifier || !event.animation_name || !event.animation_author) {
+      log.error('Cannot save locally, event or required fields are missing');
+      return;
+    }
+
+    setLoading(true);
+
+    const formattedOutput = replaceKeyValuePairs(
+      input,
+      getMappingStringReplacementPairs(event.sentient_sims),
+      getMappingStringErrorPairs(event.sentient_sims),
+    );
+
+    const animation: Animation = {
+      id: event.animation_identifier,
+      name: event.animation_name,
+      author: event.animation_author,
+      act: formattedOutput.actionString,
+    };
+
+    try {
+      await fetch(`${appApiUrl}/animations/save-locally`, {
+        method: 'POST',
+        body: JSON.stringify(animation),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (error) {
+      log.error('Error saving animation locally:', error);
     }
 
     setLoading(false);
@@ -369,6 +402,17 @@ export function AnimationMappingComponent() {
                       sx={{ marginRight: 1 }}
                     >
                       Save + Add Memory
+                    </LoadingButton>
+                  </Tooltip>
+                  <Tooltip title="This will save animation mapping localy">
+                    <LoadingButton
+                      loading={loading}
+                      color="primary"
+                      variant="contained"
+                      onClick={handleSaveLocally}
+                      sx={{ marginRight: 1 }}
+                    >
+                      Save Locally
                     </LoadingButton>
                   </Tooltip>
                   <Tooltip title="This will save the animation mapping without modifying Sims memories.">
