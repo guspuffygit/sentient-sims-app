@@ -5,6 +5,7 @@ import { notifySettingChanged } from './util/notifyRenderer';
 import { resolveHtmlPath } from '../util';
 import { ApiContext } from './services/ApiContext';
 import { InteractionDTO } from './db/dto/InteractionDTO';
+import { Animation } from './models/Animation';
 
 async function handleSelectDirectory() {
   const { canceled, filePaths } = await dialog.showOpenDialog({
