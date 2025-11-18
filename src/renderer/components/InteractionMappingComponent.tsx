@@ -18,6 +18,7 @@ import { appApiUrl } from 'main/sentient-sims/constants';
 import { CreateMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
 import { InteractionDTO } from 'main/sentient-sims/db/dto/InteractionDTO';
 import SpaceBetweenDiv from './SpaceBetweenDiv';
+import { BasicInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
 
 type SimMappingRowProperties = {
   sentientSim: SentientSim;
@@ -284,9 +285,8 @@ export function InteractionMappingComponent() {
       getMappingStringErrorPairs(event.sentient_sims),
     );
 
-    const interaction: InteractionDTO = {
+    const interaction: BasicInteraction = {
       name: event.interaction_name,
-      event,
       action: formattedOutput.actionString,
       ignored: false,
     };
