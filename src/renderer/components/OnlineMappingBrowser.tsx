@@ -106,7 +106,7 @@ export default function OnlineMappingBrowser() {
 
       setMappings(mappingList);
     } catch (err) {
-      log.error(`[MappingBrowser] Mappings konnten nicht geladen werden:`, err);
+      log.error(`[MappingBrowser] Mappings could not be loaded:`, err);
     }
     setLoading(false);
   };
