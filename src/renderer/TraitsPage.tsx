@@ -326,7 +326,7 @@ export default function TraitsPage() {
           {/* Miscellaneous Information */}
           <Grid item xs={12} sm={4}>
             <TextField
-              label="Mod Name (Use _ instant of space)"
+              label="Variable Name (for Export)"
               variant="outlined"
               fullWidth
               value={variableName}
@@ -334,7 +334,7 @@ export default function TraitsPage() {
               sx={{ mb: 2 }}
             />
             <TextField
-              label="Mod Description"
+              label="Mod Description (for Export)"
               variant="outlined"
               fullWidth
               value={modDescription}
