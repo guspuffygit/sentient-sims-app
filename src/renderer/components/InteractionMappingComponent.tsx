@@ -18,6 +18,7 @@ import { appApiUrl } from 'main/sentient-sims/constants';
 import { CreateMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
 import { InteractionDTO } from 'main/sentient-sims/db/dto/InteractionDTO';
 import SpaceBetweenDiv from './SpaceBetweenDiv';
+import { BasicInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
 
 type SimMappingRowProperties = {
   sentientSim: SentientSim;
@@ -270,6 +271,40 @@ export function InteractionMappingComponent() {
     onClose();
   }
 
+  async function handleSaveLocally() {
+    if (!event || !event.interaction_name) {
+      log.error('Cannot save locally, event or interaction_name is missing');
+      return;
+    }
+
+    setLoading(true);
+
+    const formattedOutput = replaceKeyValuePairs(
+      input,
+      getMappingStringReplacementPairs(event.sentient_sims),
+      getMappingStringErrorPairs(event.sentient_sims),
+    );
+
+    const interaction: BasicInteraction = {
+      name: event.interaction_name,
+      action: formattedOutput.actionString,
+      ignored: false,
+    };
+
+    try {
+      await fetch(`${appApiUrl}/interactions/save-locally`, {
+        method: 'POST',
+        body: JSON.stringify(interaction),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (error) {
+      log.error('Error saving interaction locally:', error);
+    }
+
+    setLoading(false);
+    onClose();
+  }
+
   async function handleTest() {
     if (!event) {
       return;
@@ -385,6 +420,17 @@ export function InteractionMappingComponent() {
                       sx={{ marginRight: 1 }}
                     >
                       Save + Add Memory
+                    </LoadingButton>
+                  </Tooltip>
+                  <Tooltip title="This will save interaction mapping localy">
+                    <LoadingButton
+                      loading={loading}
+                      color="primary"
+                      variant="contained"
+                      onClick={handleSaveLocally}
+                      sx={{ marginRight: 1 }}
+                    >
+                      Save Locally
                     </LoadingButton>
                   </Tooltip>
                   <Tooltip title="This will save the interaction mapping without modifying Sims memories.">
