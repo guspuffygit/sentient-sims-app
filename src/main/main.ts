@@ -10,7 +10,7 @@
  */
 import path from 'path';
 import sourceMapSupport from 'source-map-support';
-import { app, BrowserWindow, shell, session, WebRequestFilter } from 'electron'; //dialog removed
+import { app, BrowserWindow, shell, session, WebRequestFilter, dialog } from 'electron';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import registerDebugToggleHotkey from './sentient-sims/registerDebugToggleHotkey';
@@ -130,7 +130,7 @@ const createWindow = async () => {
   runApi(ctx);
 
   log.transports.file.level = 'info';
-  /*
+
   const { autoUpdater } = await import('electron-updater');
 
   autoUpdater.logger = log;
@@ -151,7 +151,7 @@ const createWindow = async () => {
   } catch (err) {
     log.error(`Unable to check for updates and notify`, err);
   }
-*/
+
   const filter: WebRequestFilter = {
     urls: [`http://localhost:${appApiPort}/login/*`],
   };
