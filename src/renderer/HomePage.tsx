@@ -8,12 +8,12 @@ export default function HomePage() {
   return (
     <div>
       <Grid container spacing={2}>
-        <Grid item xs={6}>
+        <Grid size={6}>
           <UpdateComponent />
           <DebugCard />
           <MappingLeaderboardComponent />
         </Grid>
-        <Grid item xs={6}>
+        <Grid size={6}>
           <ThankYouCardPatreon />
         </Grid>
       </Grid>

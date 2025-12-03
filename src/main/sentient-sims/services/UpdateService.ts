@@ -52,7 +52,7 @@ export class UpdateService {
         }
 
         // Wait for the write stream to finish writing the data
-        await new Promise((resolve, reject) => {
+        await new Promise<void>((resolve, reject) => {
           outputStream.on('finish', resolve);
           outputStream.on('error', reject);
         });

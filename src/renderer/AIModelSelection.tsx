@@ -88,7 +88,7 @@ export default function AIModelSelection({
     );
 
     return { menuItems, models, currentSelectedModelAvailable };
-  }, [aiModels?.data, aiModel.value]);
+  }, [aiModels.data, aiModel.value]);
 
   if (aiModels.isFetching || aiModels.isLoading) {
     return (

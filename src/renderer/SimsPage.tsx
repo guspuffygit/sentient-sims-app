@@ -218,9 +218,10 @@ export default function SimsPage() {
                 }}
                 onRowSelectionModelChange={(selectedRow) => {
                   try {
+                    const selectedId = selectedRow.ids.values().next().value;
                     for (let i = 0; i < sims.length; i++) {
                       const sim = sims[i];
-                      if (sim.id === selectedRow[0]) {
+                      if (sim.id === selectedId) {
                         setEditedSim({
                           sim,
                           index: i,

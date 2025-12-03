@@ -81,7 +81,7 @@ export function KokoroAIVoiceSettingsComponent() {
   }
 
   return (
-    <Grid item xs={12} sm={8}>
+    <Grid size={{ xs: 12, sm: 8 }}>
       <Box>
         <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
           <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>

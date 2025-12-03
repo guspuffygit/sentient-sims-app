@@ -1,6 +1,6 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-import { useEffect, useState, ChangeEvent, useMemo, useCallback, JSX } from 'react';
+import { useState, ChangeEvent, useMemo, useCallback, JSX } from 'react';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import {
   Box,
@@ -105,13 +105,13 @@ export default function TraitsPage() {
   Object.keys(traitCounts).forEach((traitTypeKey) => {
     if (traitCounts[traitTypeKey].mapped === traitCounts[traitTypeKey].mapped - traitCounts[traitTypeKey].unmapped) {
       selectMenuItems.push(
-        <MenuItem value={traitTypeKey}>
+        <MenuItem value={traitTypeKey} key={traitTypeKey}>
           {traitTypeKey}: {traitCounts[traitTypeKey].mapped}
         </MenuItem>,
       );
     } else {
       selectMenuItems.push(
-        <MenuItem value={traitTypeKey}>
+        <MenuItem value={traitTypeKey} key={traitTypeKey}>
           {traitTypeKey}: {traitCounts[traitTypeKey].mapped - traitCounts[traitTypeKey].unmapped}/
           {traitCounts[traitTypeKey].mapped}
         </MenuItem>,
@@ -127,17 +127,20 @@ export default function TraitsPage() {
       .then((response: TraitResponse) => {
         // log.debug(JSON.stringify(response.data, null, 2));
         setTraits(response.data);
+
+        const initialFiltered = filterTraitType
+          ? response.data.filter((t) => t.trait_type === filterTraitType)
+          : response.data;
+
+        if (initialFiltered.length > 0) {
+          setInputField(initialFiltered[0]?.description || '');
+        } else {
+          setInputField('');
+        }
+        setSelectedIndex(0);
       })
       .finally(() => setLoadingTraits(false));
-  }, [extractedPath.value]);
-
-  useEffect(() => {
-    if (filteredTraits.length > 0) {
-      setInputField(filteredTraits[selectedIndex]?.description || '');
-    } else {
-      setInputField('');
-    }
-  }, [selectedIndex, filteredTraits]);
+  }, [extractedPath.value, filterTraitType]);
 
   const updateIgnored = (value: number | string) => {
     setTraits((previousTraits) => {
@@ -164,9 +167,21 @@ export default function TraitsPage() {
   };
 
   const handleChangeTraitType = (event: SelectChangeEvent<string>) => {
-    setFilterTraitType(event.target.value);
+    const newFilterType = event.target.value;
+    setFilterTraitType(newFilterType);
     setSelectedIndex(0);
-    setInputField(filteredTraits[0]?.description || '');
+
+    // FIX 3: Manually calculate the next description and set it immediately
+    // This avoids waiting for a render cycle
+    let nextTrait: TraitMapping | undefined;
+
+    if (newFilterType) {
+      nextTrait = traits.find((trait) => trait.trait_type === newFilterType);
+    } else {
+      nextTrait = traits[0];
+    }
+
+    setInputField(nextTrait?.description || '');
   };
 
   function updateDescription() {
@@ -192,6 +207,7 @@ export default function TraitsPage() {
     if (selectedIndex > 0) {
       const newIndex = selectedIndex - 1;
       setSelectedIndex(newIndex);
+      // Already correct: sets input based on new index immediately
       setInputField(filteredTraits[newIndex]?.description || '');
     }
   };
@@ -201,6 +217,7 @@ export default function TraitsPage() {
     if (selectedIndex + 1 < filteredTraits.length) {
       const newIndex = selectedIndex + 1;
       setSelectedIndex(newIndex);
+      // Already correct: sets input based on new index immediately
       setInputField(filteredTraits[newIndex]?.description || '');
     }
   };
@@ -211,6 +228,7 @@ export default function TraitsPage() {
     for (let i = selectedIndex + 1; i < filteredTraits.length; i++) {
       if (!filteredTraits[i]?.description && filteredTraits[i]?.ignored === undefined) {
         setSelectedIndex(i);
+        // Already correct: sets input based on new index immediately
         setInputField(filteredTraits[i]?.description || '');
         break;
       }
@@ -297,7 +315,7 @@ export default function TraitsPage() {
       <Box sx={{ p: 3 }}>
         <Grid container spacing={3} alignItems="center">
           {/* Trait Information */}
-          <Grid item xs={12} sm={4}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <Typography variant="subtitle1" fontWeight="bold">
               Trait Details - {selectedIndex + 1} / {filteredTraits.length} - Unmapped: {unmapped}
             </Typography>
@@ -307,15 +325,15 @@ export default function TraitsPage() {
           </Grid>
 
           {/* Select Menus */}
-          <Grid item xs={12} sm={4} container spacing={2}>
-            <Grid item xs={6}>
+          <Grid size={{ xs: 12, sm: 4 }} container spacing={2}>
+            <Grid size={6}>
               <Select value={ignored} onChange={handleChangeIgnored} fullWidth displayEmpty>
                 <MenuItem value={0}>Ignored?</MenuItem>
                 <MenuItem value={1}>Ignored = True</MenuItem>
                 <MenuItem value={2}>Ignored = False</MenuItem>
               </Select>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={6}>
               <Select value={filterTraitType} onChange={handleChangeTraitType} fullWidth displayEmpty>
                 <MenuItem value="">No Filter</MenuItem>
                 {selectMenuItems}
@@ -324,7 +342,7 @@ export default function TraitsPage() {
           </Grid>
 
           {/* Miscellaneous Information */}
-          <Grid item xs={12} sm={4}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <TextField
               label="Variable Name (for Export)"
               variant="outlined"
@@ -351,7 +369,7 @@ export default function TraitsPage() {
           </Grid>
 
           {/* Input Field */}
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <Typography variant="body2">{prefix}</Typography>
             <TextField
               label="Description"
@@ -364,13 +382,13 @@ export default function TraitsPage() {
           </Grid>
 
           {/* Action Buttons */}
-          <Grid item xs={12} sm={5} container spacing={2} justifyContent="center">
-            <Grid item>
+          <Grid size={{ xs: 12, sm: 6 }} container spacing={2} justifyContent="center">
+            <Grid>
               <Button variant="contained" color="secondary" onClick={handleBack}>
                 Back
               </Button>
             </Grid>
-            <Grid item>
+            <Grid>
               <Button
                 variant="contained"
                 color="error"
@@ -382,22 +400,22 @@ export default function TraitsPage() {
                 Next (Ignore)
               </Button>
             </Grid>
-            <Grid item>
+            <Grid>
               <Button variant="contained" color="primary" onClick={handleForward}>
                 Next
               </Button>
             </Grid>
-            <Grid item>
+            <Grid>
               <Button variant="outlined" onClick={handleSkip}>
                 Skip
               </Button>
             </Grid>
-            <Grid item>
+            <Grid>
               <LoadingButton variant="contained" loading={loadingExport} onClick={exportResults}>
                 Export
               </LoadingButton>
             </Grid>
-            <Grid item>
+            <Grid>
               <LoadingButton variant="contained" loading={loadingTraits} onClick={loadItems}>
                 Load
               </LoadingButton>

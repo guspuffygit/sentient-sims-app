@@ -1,7 +1,7 @@
-import log from 'electron-log';
+import { useQuery } from '@tanstack/react-query';
 import { VersionClient } from 'main/sentient-sims/clients/VersionClient';
 import { Version } from 'main/sentient-sims/services/VersionService';
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, useContext } from 'react';
 
 interface VersionsContextType {
   app: Version;
@@ -28,43 +28,37 @@ export function useVersions() {
 const versionClient = new VersionClient();
 
 export function VersionsProvider({ children }: VersionsProviderProps) {
-  const [loading, setLoading] = useState(false);
-  const [app, setApp] = useState<Version>({ version: 'none' });
-  const [mod, setMod] = useState<Version>({ version: 'none' });
-  const [game, setGame] = useState<Version>({ version: 'none' });
+  const app = useQuery<Version>({
+    queryKey: ['appVersion'],
+    queryFn: async () => versionClient.getAppVersion(),
+    initialData: { version: 'none' },
+  });
+  const mod = useQuery<Version>({
+    queryKey: ['modVersion'],
+    queryFn: async () => versionClient.getModVersion(),
+    initialData: { version: 'none' },
+  });
+  const game = useQuery<Version>({
+    queryKey: ['gameVersion'],
+    queryFn: async () => versionClient.getGameVersion(),
+    initialData: { version: 'none' },
+  });
 
   const refresh = async () => {
-    setLoading(true);
-
-    await Promise.all([
-      versionClient
-        .getAppVersion()
-        .then((result) => setApp(result))
-        .catch((err: any) => log.error('Error getting app version', err)),
-      versionClient
-        .getModVersion()
-        .then((result) => setMod(result))
-        .catch((err: any) => log.error('Error getting mod version', err)),
-      versionClient
-        .getGameVersion()
-        .then((result) => setGame(result))
-        .catch((err: any) => log.error('Error getting game version', err)),
-    ]).finally(() => setLoading(false));
+    await Promise.all([app.refetch(), mod.refetch(), game.refetch()]);
   };
 
-  useEffect(() => {
-    refresh();
-  }, []);
-
-  const contextValue = useMemo(() => {
-    return {
-      app,
-      mod,
-      game,
-      loading,
-      refresh,
-    };
-  }, [app, game, loading, mod]);
-
-  return <VersionsContext.Provider value={contextValue}>{children}</VersionsContext.Provider>;
+  return (
+    <VersionsContext.Provider
+      value={{
+        app: app.data,
+        mod: mod.data,
+        game: game.data,
+        loading: app.isLoading || mod.isLoading || game.isLoading,
+        refresh,
+      }}
+    >
+      {children}
+    </VersionsContext.Provider>
+  );
 }

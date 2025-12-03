@@ -134,7 +134,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
   }, [sentientsimsaiTtsSettings.value.speed]);
 
   return (
-    <Grid item xs={12} sm={8}>
+    <Grid size={{ xs: 12, sm: 8 }}>
       <Box>
         <Box>{errors}</Box>
         <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>

@@ -402,7 +402,7 @@ function AIProviderPage({ setPage }: PageProps) {
             </Typography>
             <Grid container spacing={2} justifyContent="center" alignItems="stretch" sx={{ marginBottom: 4 }}>
               {cardData.map((card) => (
-                <Grid item key={card.header} xs={12} sm={6} md={4} lg={2.4}>
+                <Grid key={card.header} size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
                   <Card
                     sx={{
                       'height': '100%',

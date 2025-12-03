@@ -20,12 +20,12 @@ export default function App() {
     <SetupWizardProvider>
       <Container maxWidth={false} className="root">
         <Grid container spacing={3}>
-          <Grid item xs={mainWindowWidth}>
+          <Grid size={mainWindowWidth}>
             <MenuBar hideSideBar={hideSideBar} setHideSideBar={setHideSideBar} />
             <Outlet />
           </Grid>
           {hideSideBar ? null : (
-            <Grid item xs={3.5}>
+            <Grid size={3.5}>
               <WidgetWithOverlay />
             </Grid>
           )}

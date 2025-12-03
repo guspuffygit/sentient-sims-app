@@ -88,7 +88,7 @@ export default function ChatPage() {
               </div>
               <div>
                 <Grid container alignItems="center">
-                  <Grid item>
+                  <Grid>
                     {input ? (
                       <Button onClick={() => onOpenInputView()} color="secondary">
                         Event JSON
@@ -98,10 +98,10 @@ export default function ChatPage() {
                       Count
                     </Button>
                   </Grid>
-                  <Grid item>
+                  <Grid>
                     <Typography sx={{ marginRight: 2, marginLeft: 2 }}>Tokens: {0}</Typography>
                   </Grid>
-                  <Grid item>
+                  <Grid>
                     <Button onClick={resetMessages} color="primary">
                       Reset
                     </Button>

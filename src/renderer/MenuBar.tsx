@@ -1,6 +1,6 @@
 import { AppBar, Box, Button, IconButton, Toolbar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
 import HomeIcon from '@mui/icons-material/Home';
@@ -28,11 +28,9 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
     signOut();
   };
 
-  useEffect(() => {
-    if (authStatus === 'authenticated' && loginModalOpen) {
-      setLoginModalOpen(false);
-    }
-  }, [authStatus, loginModalOpen]);
+  if (authStatus === 'authenticated' && loginModalOpen) {
+    setLoginModalOpen(false);
+  }
 
   const handleOpenWiki = handleOpenExternalLink('https://github.com/guspuffygit/sentient-sims-app/wiki');
 

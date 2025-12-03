@@ -263,9 +263,10 @@ export default function LocationsPage() {
               }}
               onRowSelectionModelChange={(selectedRow) => {
                 try {
+                  const selectedId = selectedRow.ids.values().next().value;
                   for (let i = 0; i < locations.length; i++) {
                     const location = locations[i];
-                    if (location.id === selectedRow[0]) {
+                    if (location.id === selectedId) {
                       setEditedLocation({
                         location,
                         index: i,

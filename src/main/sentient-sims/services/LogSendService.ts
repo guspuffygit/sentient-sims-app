@@ -279,7 +279,7 @@ export class LogSendService {
 
   private appendZipFileToFormData(zipFile: AdmZip, formData: FormData, errors: any[]) {
     try {
-      const blob = new Blob([zipFile.toBuffer()], { type: 'application/zip' });
+      const blob = new Blob([zipFile.toBuffer() as any], { type: 'application/zip' });
       formData.append('logs', blob, 'logs.zip');
     } catch (err: any) {
       this.handleAppendError('Error attaching logs zip file', err, errors);

@@ -39,7 +39,7 @@ export default function VoiceSettingsComponent() {
       </Box>
       {aiSettings.ttsEnabled ? (
         <Grid container spacing={3} alignItems="center">
-          <Grid item xs={12} sm={8}>
+          <Grid size={{ xs: 12, sm: 8 }}>
             <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
               <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
                 <Typography>AI:</Typography>
@@ -57,7 +57,7 @@ export default function VoiceSettingsComponent() {
             </Box>
           </Grid>
 
-          <Grid item xs={12} sm={4} container spacing={2}>
+          <Grid size={{ xs: 12, sm: 4 }} container spacing={2}>
             <Box sx={{ width: 300 }}>
               <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
                 <Typography>Volume:</Typography>

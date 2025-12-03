@@ -14,16 +14,10 @@ import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 export default defineConfig([
   eslint.configs.recommended,
   tseslint.configs.recommended,
+  reactHooks.configs.flat.recommended,
   {
     files: ['**/*.test.ts'],
     plugins: { jest: pluginJest },
-  },
-  {
-    files: ['src/**/*.{js,jsx,ts,tsx}'],
-    plugins: {
-      'react-hooks': reactHooks,
-    },
-    extends: ['react-hooks/recommended'],
   },
   {
     files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],

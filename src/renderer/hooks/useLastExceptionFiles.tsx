@@ -1,36 +1,31 @@
+import { useQuery } from '@tanstack/react-query';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { LastExceptionFile } from 'main/sentient-sims/services/LastExceptionService';
-import { useEffect, useState } from 'react';
 
 export default function useLastExceptionFiles() {
-  const [lastExceptionFiles, setLastExceptionFiles] = useState<LastExceptionFile[]>([]);
-
-  async function getLastExceptionFiles() {
-    const response = await fetch(`${appApiUrl}/files/last-exception`);
-    const jsonResponse = await response.json();
-    // convert Date string back to Date object
-    jsonResponse.forEach((lastExceptionFile: any) => (lastExceptionFile.created = new Date(lastExceptionFile.created)));
-    setLastExceptionFiles(jsonResponse);
-  }
-
-  useEffect(() => {
-    getLastExceptionFiles();
-  }, []);
+  const lastExceptionFiles = useQuery<LastExceptionFile[]>({
+    queryKey: ['lastExceptionFiles'],
+    queryFn: async () => {
+      const response = await fetch(`${appApiUrl}/files/last-exception`);
+      const jsonResponse = await response.json();
+      // convert Date string back to Date object
+      jsonResponse.forEach(
+        (lastExceptionFile: any) => (lastExceptionFile.created = new Date(lastExceptionFile.created)),
+      );
+      return jsonResponse;
+    },
+  });
 
   async function deleteFiles() {
     await fetch(`${appApiUrl}/files/last-exception`, {
       method: 'DELETE',
     });
-    await getLastExceptionFiles();
-  }
-
-  async function refresh() {
-    return getLastExceptionFiles();
+    await lastExceptionFiles.refetch();
   }
 
   return {
-    lastExceptionFiles,
+    lastExceptionFiles: lastExceptionFiles.data ?? [],
     deleteFiles,
-    refresh,
+    refresh: async () => lastExceptionFiles.refetch(),
   };
 }

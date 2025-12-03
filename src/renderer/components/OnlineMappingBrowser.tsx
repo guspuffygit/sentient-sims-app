@@ -3,7 +3,7 @@ import { appApiUrl } from 'main/sentient-sims/constants';
 import { BasicInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
 import { Animation } from 'main/sentient-sims/models/Animation';
 import log from 'electron-log';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { LoadingButton } from '@mui/lab';
 import { useDebounce } from 'renderer/hooks/useDebounce';
 
@@ -116,10 +116,6 @@ export default function OnlineMappingBrowser() {
     return mappings.filter((m) => m.key.toLowerCase().includes(debouncedFilter.toLowerCase()));
   }, [mappings, debouncedFilter]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [debouncedFilter]);
-
   const paginatedMappings = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -147,7 +143,10 @@ export default function OnlineMappingBrowser() {
           label="Filter by name..."
           variant="outlined"
           value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          onChange={(e) => {
+            setFilter(e.target.value);
+            setCurrentPage(1);
+          }}
         />
       </Paper>
 

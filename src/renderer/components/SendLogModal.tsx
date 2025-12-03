@@ -74,7 +74,7 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
         <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
         <form onSubmit={handleSendLogs}>
           <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12}>
+            <Grid size={12}>
               <TextField
                 fullWidth
                 label="Discord Username"
@@ -83,7 +83,7 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
                 required
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <TextField
                 fullWidth
                 label="Describe Error"
@@ -94,7 +94,7 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
                 rows={4}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <SpaceBetweenDiv>
                 <div>
                   <LoadingButton type="submit" loading={loading} color="secondary" variant="contained">
