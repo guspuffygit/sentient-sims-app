@@ -58,6 +58,11 @@ export const tokenizerBreakString = '<<BREAK>>';
 export const defaultWantsPrefixes = ['I want to', 'I would like', 'I feel'];
 export const defaultGeminiModel = 'gemini-2.0-flash-exp';
 export const geminiDefaultEndpoint = 'https://generativelanguage.googleapis.com/v1beta';
+
+// ADDED: Player2 default configuration values for cost-effective AI integration
+export const player2DefaultEndpoint = 'https://api.player2.game/v1/';
+export const player2DefaultModel = 'gpt-3.5-turbo';
+
 export const defaultTTSEnabled = false;
 export const defaultTTSVolume = 0.75;
 export const defaultElevenLabsEndpoint = 'https://api.elevenlabs.io/v1';

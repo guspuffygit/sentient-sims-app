@@ -16,6 +16,9 @@ export function getAIHelperText(apiType: ApiType) {
   if (apiType === ApiType.Gemini) {
     return 'Google Gemini AI using your personal API keys (supports multiple keys separated by commas).';
   }
+  if (apiType === ApiType.Player2) { // UPDATED: Removed model mention
+    return 'Player2 cost-effective AI service. Auto-detects Player2 App or use manual API key.';
+  }
 
   return 'Custom Local or remote AI running on your own PC';
 }
@@ -34,6 +37,7 @@ export function AISelectionComponent() {
         onChange={(change) => aiApiTypeSetting.setSetting(ApiTypeFromValue(change.target.value))}
       >
         <MenuItem value={ApiType.OpenAI}>OpenAI</MenuItem>
+        <MenuItem value={ApiType.Player2}>Player2</MenuItem> {/* ADDED: Player2 option */}
         <MenuItem value={ApiType.SentientSimsAI}>Sentient Sims Uncensored AI (Founder/Patreon)</MenuItem>
         <MenuItem value={ApiType.NovelAI}>NovelAI</MenuItem>
         <MenuItem value={ApiType.KoboldAI}>Kobold AI</MenuItem>

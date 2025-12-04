@@ -19,6 +19,8 @@ import {
   openaiDefaultModel,
   sentientSimsAIDefaultModel,
   sentientSimsAIHost,
+  player2DefaultEndpoint,  // ADDED: Import Player2 default endpoint
+  player2DefaultModel,     // ADDED: Import Player2 default model
 } from '../constants';
 import { disableDebugLogging, enableDebugLogging } from '../util/debugLog';
 import { defaultSentientSimsAITTSSettings, SentientSimsAITTSSettings } from '../models/SentientSimsAITTSSettings';
@@ -71,6 +73,19 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.NOVELAI_KEY.toString()]: {
         type: 'string',
         default: '',
+      },
+      // ADDED: Player2 settings schema definitions
+      [SettingsEnum.PLAYER2_KEY.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.PLAYER2_ENDPOINT.toString()]: {
+        type: 'string',
+        default: player2DefaultEndpoint,
+      },
+      [SettingsEnum.PLAYER2_MODEL.toString()]: {
+        type: 'string',
+        default: player2DefaultModel,
       },
       [SettingsEnum.LOCALIZATION_ENABLED.toString()]: {
         type: 'boolean',
@@ -301,6 +316,31 @@ export class SettingsService {
 
   set novelAIKey(value: string) {
     this.set(SettingsEnum.NOVELAI_KEY, value);
+  }
+
+  // ADDED: Player2 settings getters and setters for complete integration
+  get player2Key(): string {
+    return this.get(SettingsEnum.PLAYER2_KEY) as string;
+  }
+
+  set player2Key(value: string) {
+    this.set(SettingsEnum.PLAYER2_KEY, value);
+  }
+
+  get player2Endpoint(): string {
+    return this.get(SettingsEnum.PLAYER2_ENDPOINT) as string;
+  }
+
+  set player2Endpoint(value: string) {
+    this.set(SettingsEnum.PLAYER2_ENDPOINT, value);
+  }
+
+  get player2Model(): string {
+    return this.get(SettingsEnum.PLAYER2_MODEL) as string;
+  }
+
+  set player2Model(value: string) {
+    this.set(SettingsEnum.PLAYER2_MODEL, value);
   }
 
   get localizationEnabled(): boolean {

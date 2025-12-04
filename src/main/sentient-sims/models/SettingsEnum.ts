@@ -8,6 +8,7 @@ export enum SettingsEnum {
   ACCESS_TOKEN = 'accessToken',
   OPENAI_KEY = 'openaiKey',
   NOVELAI_KEY = 'novelaiKey',
+  PLAYER2_KEY = 'player2Key',  // New Player2 API key
   LOCALIZATION_ENABLED = 'localizationEnabled',
   LOCALIZATION_LANGUAGE = 'localizationLanguage',
   DEBUG_LOGS = 'debugLogs',
@@ -21,6 +22,8 @@ export enum SettingsEnum {
   SENTIENTSIMSAI_ENDPOINT = 'sentientsimsAIEndpoint',
   NOVELAI_ENDPOINT = 'novelAIEndpoint',
   NOVELAI_GENERATION_ENDPOINT = 'novelAIGenerationEndpoint',
+  PLAYER2_ENDPOINT = 'player2Endpoint',  // New Player2 endpoint
+  PLAYER2_MODEL = 'player2Model',        // New Player2 model
   GEMINI_KEYS = 'geminiKeys', // Supports multiple keys separated by commas (e.g., "key1,key2,key3")
   GEMINI_ENDPOINT = 'geminiEndpoint',
   GEMINI_MODEL = 'geminiModel',

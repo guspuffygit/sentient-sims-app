@@ -6,6 +6,7 @@ export enum ApiType {
   NovelAI = 'novelai',
   KoboldAI = 'koboldai',
   Gemini = 'gemini',
+  Player2 = 'player2',  // New Player2 provider
   Kokoro = 'kokoro',
   ElevenLabs = 'elevenlabs',
 }
@@ -22,6 +23,8 @@ export function ApiTypeFromValue(value: any): ApiType {
       return ApiType.NovelAI;
     case ApiType.Gemini:
       return ApiType.Gemini;
+    case ApiType.Player2:
+      return ApiType.Player2;  // New case
     case ApiType.Kokoro:
       return ApiType.Kokoro;
     case ApiType.ElevenLabs:
@@ -47,6 +50,8 @@ export function ApiTypeName(apiType: ApiType): string {
       return 'VLLM';
     case ApiType.Gemini:
       return 'Gemini';
+    case ApiType.Player2:
+      return 'Player2';  // New display name
     case ApiType.Kokoro:
       return 'Kokoro';
     case ApiType.ElevenLabs:
