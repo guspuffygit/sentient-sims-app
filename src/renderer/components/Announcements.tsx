@@ -132,17 +132,14 @@ export const useAnnouncements = () => {
         const response = await axios.get<AnnouncementMessage[]>(`${appApiUrl}/announcements`);
         const rawData = response.data;
 
-        // select: transform logic
         const formattedData: AnnouncementMessage[] = rawData.map((announcement: any) => ({
           ...announcement,
-          timestamp: new Date(announcement.timestamp),
+          timestamp: new Date(announcement.timestamp), // Date doesnt parse with JSON.parse(), so it must be converted from a string to Date
         }));
-
-        log.info(JSON.stringify(formattedData, null, 2));
 
         setData(formattedData);
       } catch (err) {
-        console.error('Failed to fetch announcements:', err);
+        log.error('Failed to fetch announcements:', err);
       }
     };
 

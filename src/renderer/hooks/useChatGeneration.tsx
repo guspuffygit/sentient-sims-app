@@ -1,7 +1,6 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { defaultMythoMaxSystemPrompt, defaultSystemPrompt } from 'main/sentient-sims/constants';
 import { ChatCompletionMessageRole } from 'main/sentient-sims/models/ChatCompletionMessageRole';
-import { generateUUID } from '@widgetbot/react-embed/dist/util';
 import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { MessageInputProps } from 'main/sentient-sims/models/MessageInputProps';
@@ -78,7 +77,7 @@ export default function useChatGeneration(): ChatGeneration {
       if (result.request?.messages) {
         result.request.messages.forEach((message) => {
           updatedMessages.push({
-            id: generateUUID(),
+            id: uuidv4(),
             message,
           });
         });
@@ -88,7 +87,7 @@ export default function useChatGeneration(): ChatGeneration {
             updatedMessages[updatedMessages.length - 1].message.content += ` ${result.text}`;
           } else {
             updatedMessages.push({
-              id: generateUUID(),
+              id: uuidv4(),
               message: {
                 role: 'assistant',
                 content: result.text,
@@ -118,7 +117,7 @@ export default function useChatGeneration(): ChatGeneration {
     setMessages((previousMessages) => [
       ...previousMessages,
       {
-        id: generateUUID(),
+        id: uuidv4(),
         message,
       },
     ]);
