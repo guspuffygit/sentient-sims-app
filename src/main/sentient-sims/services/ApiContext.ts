@@ -9,6 +9,7 @@ import { LocationsController } from '../controllers/LocationsController';
 import { LoginController } from '../controllers/LoginController';
 import { MappingController } from '../controllers/MappingController';
 import { MemoriesController } from '../controllers/MemoriesController';
+import { NewsController } from '../controllers/NewsController';
 import { ParticipantsController } from '../controllers/ParticipantsController';
 import { PatreonController } from '../controllers/PatreonController';
 import { SettingsController } from '../controllers/SettingsController';
@@ -72,6 +73,7 @@ class ControllerContext {
   private readonly _animationsController: AnimationsController;
   private readonly _assetsController: AssetsController;
   private readonly _mappingController: MappingController;
+  private readonly _newsController: NewsController;
 
   constructor(ctx: ApiContext) {
     this._versionController = new VersionController(ctx);
@@ -91,6 +93,7 @@ class ControllerContext {
     this._animationsController = new AnimationsController(ctx);
     this._assetsController = new AssetsController(ctx);
     this._mappingController = new MappingController(ctx);
+    this._newsController = new NewsController(ctx);
   }
 
   get version(): VersionController {
@@ -159,6 +162,10 @@ class ControllerContext {
 
   get mapping(): MappingController {
     return this._mappingController;
+  }
+
+  get news(): NewsController {
+    return this._newsController;
   }
 }
 

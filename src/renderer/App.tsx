@@ -3,13 +3,13 @@ import { Container, Grid } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import { useState } from 'react';
 import MenuBar from './MenuBar';
-import WidgetWithOverlay from './WidgetWithOverlay';
 import PopupNotificationModal from './PopupNotification';
 import { AnimationMappingComponent } from './components/AnimationMappingComponent';
 import { InteractionMappingComponent } from './components/InteractionMappingComponent';
 import { CaughtErrorPopupNotificationModal } from './CaughtErrorPopupNotificationModal';
 import { SetupWizardProvider } from './providers/SetupWizardProvider';
 import { PatreonLinkingModal } from './components/PatreonLinkingModal';
+import { Announcements } from './components/Announcements';
 
 export default function App() {
   const [hideSideBar, setHideSideBar] = useState(false);
@@ -26,7 +26,7 @@ export default function App() {
           </Grid>
           {hideSideBar ? null : (
             <Grid size={3.5}>
-              <WidgetWithOverlay />
+              <Announcements />
             </Grid>
           )}
         </Grid>

@@ -11,13 +11,14 @@ import { AIClient } from 'main/sentient-sims/clients/AIClient';
 import { OpenAIMessage } from 'main/sentient-sims/models/OpenAIMessage';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import useSetting from './useSetting';
+import { v4 as uuidv4 } from 'uuid';
 
 const aiClient = new AIClient();
 
 function defaultMessages(systemPrompt: string): MessageInputProps[] {
   return [
     {
-      id: generateUUID(),
+      id: uuidv4(),
       message: {
         role: 'system',
         content: systemPrompt,
@@ -25,7 +26,7 @@ function defaultMessages(systemPrompt: string): MessageInputProps[] {
       },
     },
     {
-      id: generateUUID(),
+      id: uuidv4(),
       message: {
         role: 'user',
         content: '',

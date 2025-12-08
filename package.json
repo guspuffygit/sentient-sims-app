@@ -74,7 +74,6 @@
     "@patternfly/react-log-viewer": "^6.3.0",
     "@patternfly/react-styles": "^6.4.0",
     "@tanstack/react-query": "^5.90.11",
-    "@widgetbot/react-embed": "^1.7.0",
     "adm-zip": "^0.5.10",
     "aws-amplify": "^6.15.6",
     "axios": "^1.13.2",
