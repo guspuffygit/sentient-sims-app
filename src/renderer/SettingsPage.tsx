@@ -9,6 +9,8 @@ import {
   novelaiDefaultModel,
   openaiDefaultEndpoint,
   openaiDefaultModel,
+  player2DefaultEndpoint,  // NUEVO: Importar constante Player2
+  player2DefaultModel,     // NUEVO: Importar constante Player2
 } from 'main/sentient-sims/constants';
 import { LoadingButton, TabContext, TabList, TabPanel } from '@mui/lab';
 import { SyntheticEvent, useState } from 'react';
@@ -31,6 +33,8 @@ import NovelAISettingsComponent from './settings/NovelAISettingsComponent';
 import GeminiSettingsComponent from './settings/GeminiSettingsComponent';
 import VoiceSettingsComponent from './settings/VoiceSettingsComponent';
 import { useSetupWizard } from './providers/SetupWizardProvider';
+import Player2SettingsComponent from './settings/Player2SettingsComponent'; // ADDED: Import Player2 component
+
 
 enum SettingsTabSelectionValue {
   Settings = 'settings',
@@ -121,6 +125,18 @@ export default function SettingsPage() {
               endpointSetting={SettingsEnum.VLLM_ENDPOINT}
             />
           </OpenAICompatibleSettingsComponent>
+
+          {/* ==================== SECCION PLAYER2 ==================== */}
+          <Player2SettingsComponent apiType={aiSettings.aiApiType}>
+          <ApiKeyAIComponent setting={SettingsEnum.PLAYER2_KEY} aiName="Player2" />
+          <AIEndpointComponent
+            type={ApiType.Player2}
+            selectedApiType={aiSettings.aiApiType}
+            settingsEnum={SettingsEnum.PLAYER2_ENDPOINT}
+          />
+        </Player2SettingsComponent>
+          {/* ==================== FIN SECCION PLAYER2 ==================== */}
+
           <NovelAISettingsComponent apiType={aiSettings.aiApiType}>
             <ApiKeyAIComponent setting={SettingsEnum.NOVELAI_KEY} aiName="NovelAI" />
             <AIEndpointComponent

@@ -217,6 +217,20 @@ const cardData: CardData[] = [
     ],
   },
   {
+    header: 'Player2',
+    page: WizardPage.PLAYER2_SETUP,
+    data: [
+      {
+        header: 'Cost',
+        points: ['Cost-effective', 'Pay-as-you-go', 'Cheaper than OpenAI'],
+      },
+      {
+        header: 'Features',
+        points: ['OpenAI-compatible models', 'Auto-detects Player2 App', 'Easy setup'],
+      },
+    ],
+  },
+  {
     header: 'Self Hosted',
     page: WizardPage.SELF_HOSTED_SETUP,
     data: [
@@ -779,6 +793,140 @@ function GeminiSetupPage({ setPage }: PageProps) {
   );
 }
 
+function Player2SetupPage({ setPage }: PageProps) {
+  const { testAI, aiStatus, aiApiTypeSetting } = useAISettings();
+
+  useEffect(() => {
+    aiApiTypeSetting.setSetting(ApiType.Player2);
+  }, [aiApiTypeSetting]);
+
+  return (
+    <>
+      <Box flexGrow={1}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+          }}
+        >
+          <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 2 }}>
+            Player2 Setup
+          </Typography>
+          <Typography align="center" sx={{ mb: 2 }}>
+            Player2 offers cost-effective AI with automatic authentication options.
+          </Typography>
+          <Typography align="center" sx={{ mb: 3 }}>
+            Choose one of these authentication methods:
+          </Typography>
+
+          {/* Option 1: Player2 App */}
+          <Box sx={{ mb: 4, p: 3, border: '1px solid', borderColor: 'primary.main', borderRadius: 2 }}>
+            <Typography variant="h6" color="primary" gutterBottom>
+              Option 1: Player2 App (Recommended)
+            </Typography>
+            <List sx={{ listStyle: 'decimal', pl: 2 }} dense>
+              <ListItem sx={{ display: 'list-item' }}>
+                <ListItemText>
+                  Download and install the Player2 App from{' '}
+                  <Link
+                    href="https://player2.game/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    color="primary"
+                    sx={{ fontWeight: '500' }}
+                  >
+                    player2.game
+                  </Link>
+                </ListItemText>
+              </ListItem>
+              <ListItem sx={{ display: 'list-item' }}>
+                <ListItemText primary="Create an account and log in to your Player2 account in the app" />
+              </ListItem>
+              <ListItem sx={{ display: 'list-item' }}>
+                <ListItemText primary="Keep the Player2 App running - Sentient Sims will auto-detect it!" />
+              </ListItem>
+            </List>
+          </Box>
+
+          {/* Option 2: Manual API Key */}
+          <Box sx={{ mb: 4, p: 3, border: '1px solid', borderColor: 'secondary.main', borderRadius: 2 }}>
+            <Typography variant="h6" color="secondary" gutterBottom>
+              Option 2: Manual API Key
+            </Typography>
+            <List sx={{ listStyle: 'decimal', pl: 2 }} dense>
+              <ListItem sx={{ display: 'list-item' }}>
+                <ListItemText>
+                  Get your API key from{' '}
+                  <Link
+                    href="http://gerikuylerk.com/SentientSims"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    color="primary"
+                    sx={{ fontWeight: '500' }}
+                  >
+                    gerikuylerk.com/SentientSims
+                  </Link>
+                </ListItemText>
+              </ListItem>
+              <ListItem sx={{ display: 'list-item' }}>
+                <ListItemText primary="Follow the instructions to generate your API key" />
+              </ListItem>
+              <ListItem sx={{ display: 'list-item', mb: 2 }}>
+                <ListItemText primary="Enter your API key here (optional if using Player2 App):" />
+              </ListItem>
+            </List>
+            <Box sx={{ ml: 2 }}>
+              <ApiKeyAIComponent setting={SettingsEnum.PLAYER2_KEY} aiName="Player2" />
+            </Box>
+          </Box>
+
+          <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column">
+            <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
+              <AIStatusComponent />
+            </Box>
+            <LoadingButton
+              loading={aiStatus.loading}
+              onClick={() => testAI()}
+              sx={{ marginRight: 2 }}
+              color="primary"
+              variant="outlined"
+            >
+              Test Connection
+            </LoadingButton>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+              💡 If you have the Player2 App running and logged in, the test should work automatically without entering an API key!
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+      <Box display="flex" justifyContent="center" alignItems="center">
+        <LoadingButton
+          type="submit"
+          loading={aiStatus.loading}
+          onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
+          color="secondary"
+          variant="contained"
+          sx={{ mr: 2 }}
+        >
+          Back
+        </LoadingButton>
+        <LoadingButton
+          type="submit"
+          loading={aiStatus.loading}
+          onClick={() => setPage(WizardPage.CONNECT_MOD)}
+          color="secondary"
+          variant="contained"
+        >
+          Next
+        </LoadingButton>
+      </Box>
+    </>
+  );
+}
+
 function SelfHostedSetupPage({ setPage }: PageProps) {
   return (
     <>
@@ -867,6 +1015,7 @@ export function SetupWizardModal({ open, setOpen }: SetupWizardModalParameters) 
         {currentWizardPage.value === WizardPage.SENTIENT_SIMS_AI_SETUP && <SentientSimsAISetupPage setPage={setPage} />}
         {currentWizardPage.value === WizardPage.OPEN_AI_SETUP && <OpenAISetupPage setPage={setPage} />}
         {currentWizardPage.value === WizardPage.GEMINI_SETUP && <GeminiSetupPage setPage={setPage} />}
+        {currentWizardPage.value === WizardPage.PLAYER2_SETUP && <Player2SetupPage setPage={setPage} />}
         {currentWizardPage.value === WizardPage.SELF_HOSTED_SETUP && <SelfHostedSetupPage setPage={setPage} />}
         {currentWizardPage.value === WizardPage.CONNECT_MOD && <ConnectModPage setPage={setPage} setOpen={setOpen} />}
         {currentWizardPage.value === WizardPage.INSTALL_MOD && <InstallModPage setPage={setPage} />}

@@ -7,6 +7,7 @@ export enum WizardPage {
   SENTIENT_SIMS_AI_SETUP = 'sentient_sims_ai_setup',
   OPEN_AI_SETUP = 'open_ai_setup',
   GEMINI_SETUP = 'gemini_setup',
+  PLAYER2_SETUP = 'player2_setup',  // ADDED: Player2 wizard page
   SELF_HOSTED_SETUP = 'self_hosted_setup',
 }
 

@@ -41,6 +41,7 @@ import { ModelSettingsService } from './ModelSettingsService';
 import { NovelAIService } from './NovelAIService';
 import { OpenAIService } from './OpenAIService';
 import { PatreonService } from './PatreonService';
+import { Player2Service } from './Player2Service'; // ADDED: Import Player2Service for API integration
 import { PromptRequestBuilderService } from './PromptRequestBuilderService';
 import { SentientSimsAIService } from './SentientSimsAIService';
 import { SettingsService } from './SettingsService';
@@ -202,6 +203,7 @@ export class ApiContext {
   private readonly _geminiService: GeminiService;
   private readonly _vllmAIService: VLLMAIService;
   private readonly _openAIService: OpenAIService;
+  private readonly _player2Service: Player2Service; // ADDED: Player2 AI service instance
   private readonly _modelSettingsService: ModelSettingsService;
 
   private readonly _novelAITokenCounter: NovelAITokenCounter;
@@ -216,12 +218,14 @@ export class ApiContext {
     this._settings = options.settingsService;
     this._directory = options.directoryService;
 
+    // Initialize AI services - each provider has its own service instance
     this._sentientSimsAIService = new SentientSimsAIService(this);
     this._koboldAIService = new KoboldAIService(this);
     this._novelAIService = new NovelAIService(this);
     this._geminiService = new GeminiService(this);
     this._vllmAIService = new VLLMAIService(this);
     this._openAIService = new OpenAIService(this);
+    this._player2Service = new Player2Service(this); // ADDED: Initialize Player2 service for cost-effective AI generation
 
     this._novelAITokenCounter = new NovelAITokenCounter();
     this._openAITokenCounter = new OpenAITokenCounter();
@@ -360,6 +364,11 @@ export class ApiContext {
     return this._openAIService;
   }
 
+  private get player2Service(): Player2Service { // ADDED: Getter for Player2 service instance
+    return this._player2Service;
+  }
+
+  // MODIFIED: Added Player2 case to the generation service selector
   get genai(): GenerationService {
     const aiType = this.settings.aiApiType;
     if (aiType === ApiType.SentientSimsAI || aiType === ApiType.CustomAI) {
@@ -382,7 +391,11 @@ export class ApiContext {
       return this.vllmAIService;
     }
 
-    return this.openAIService;
+    if (aiType === ApiType.Player2) { // ADDED: Return Player2 service when Player2 is selected as AI provider
+      return this.player2Service;
+    }
+
+    return this.openAIService; // Default to OpenAI for backwards compatibility
   }
 
   private get novelAITokenCounter(): NovelAITokenCounter {
@@ -397,6 +410,7 @@ export class ApiContext {
     return this._llamaTokenCounter;
   }
 
+  // MODIFIED: Added Player2 to use OpenAI token counter since it uses compatible API
   get tokenCounter(): TokenCounter {
     const aiType = this.settings.aiApiType;
 
@@ -404,13 +418,14 @@ export class ApiContext {
       return this.novelAITokenCounter;
     }
 
-    if (aiType === ApiType.OpenAI) {
+    if (aiType === ApiType.OpenAI || aiType === ApiType.Player2) { // ADDED: Player2 uses OpenAI-compatible token counting
       return this.openAITokenCounter;
     }
 
     return this.llamaTokenCounter;
   }
 
+  // MODIFIED: Added Player2 model setting support
   get aiModel(): string | undefined {
     const aiType = this.settings.aiApiType;
 
@@ -424,6 +439,8 @@ export class ApiContext {
       return this.settings.vllmModel;
     } else if (aiType === ApiType.NovelAI) {
       return this.settings.novelAIModel;
+    } else if (aiType === ApiType.Player2) { // ADDED: Return Player2 model setting for model selection
+      return this.settings.player2Model;
     }
 
     return undefined;
