@@ -114,7 +114,7 @@ export class LogSendService {
       `OS Release: ${os.release()}`,
       `Mods Folder: ${this.ctx.directory.getModsFolder()}`,
       `Mod Version: ${this.ctx.version.getModVersion().version}`,
-      `App Version: ${app.getVersion()}`,
+      `App Version: ${this.ctx.version.getAppVerson().version}`,
       `Game Version: ${this.ctx.version.getGameVersion().version}`,
       ...this.getSettings(),
       ...endData,
