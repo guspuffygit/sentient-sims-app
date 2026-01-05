@@ -101,6 +101,10 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
       ALTER TABLE memory
       ADD COLUMN action TEXT;
     `,
+    '008-add-memories-event-type': `
+      ALTER TABLE memory
+      ADD COLUMN event_type TEXT;
+    `,
   }),
 );
 

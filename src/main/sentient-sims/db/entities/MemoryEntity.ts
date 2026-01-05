@@ -6,4 +6,5 @@ export type MemoryEntity = {
   location_id: number;
   timestamp?: string;
   action?: string;
+  event_type?: string;
 };

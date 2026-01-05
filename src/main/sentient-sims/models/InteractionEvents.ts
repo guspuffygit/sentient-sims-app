@@ -131,4 +131,6 @@ export type InteractionEvents =
   | ContinueInteractionEvent
   | InteractionEvent
   | DoSomethingInteractionEvent
-  | InteractionMappingEvent;
+  | InteractionMappingEvent
+  | ChatInteractionEvent
+  | ChatContinueInteractionEvent;

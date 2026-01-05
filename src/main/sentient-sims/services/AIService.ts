@@ -234,6 +234,7 @@ export class AIService {
     // save memory before any model specific formatting
     const newMemory: MemoryEntity = {
       location_id: event.environment.location_id,
+      event_type: event.event_type,
     };
     if (promptRequest.preAction) {
       newMemory.pre_action = promptRequest.preAction;
@@ -269,7 +270,6 @@ export class AIService {
     log.debug(`stop tokens: ${JSON.stringify(stopTokens, null, 2)}`);
 
     // TODO: Add an options for formatted stop tokens that aren't necessarily in the prompt
-
     let output = cleanupAIOutput(response.text, stopTokens);
 
     // Remove preAssistantPreResponse from output
