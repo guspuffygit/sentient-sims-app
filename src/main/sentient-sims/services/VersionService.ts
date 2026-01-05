@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import log from 'electron-log';
-import { app } from 'electron';
 import { filterNullAndUndefined, removeNonPrintableCharacters } from '../util/filter';
 import { ApiContext } from './ApiContext';
 
@@ -10,10 +9,12 @@ export type Version = {
 };
 
 export class VersionService {
-  private ctx: ApiContext;
+  private readonly ctx: ApiContext;
+  private readonly appVersion: string;
 
-  constructor(ctx: ApiContext) {
+  constructor(ctx: ApiContext, appVersion: string) {
     this.ctx = ctx;
+    this.appVersion = appVersion;
   }
 
   getVersion(path: string): Version {
@@ -35,7 +36,7 @@ export class VersionService {
 
   getAppVerson(): Version {
     try {
-      return { version: app.getVersion() };
+      return { version: this.appVersion };
     } catch (e: any) {
       return {
         version: 'none',

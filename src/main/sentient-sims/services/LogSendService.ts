@@ -1,6 +1,5 @@
 import log from 'electron-log';
 import os from 'os';
-import { app } from 'electron';
 import AdmZip from 'adm-zip';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { InteractionBugReport } from '../models/InteractionBugReport';

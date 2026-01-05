@@ -53,6 +53,7 @@ export type ApiContextParams = {
   getAssetPath: (...paths: string[]) => string;
   settingsService: SettingsService;
   directoryService: DirectoryService;
+  appVersion: string;
 };
 
 class ControllerContext {
@@ -229,7 +230,7 @@ export class ApiContext {
 
     // --- Initialize Services, Repositories, and Controllers ---
     this._lastException = new LastExceptionService(this);
-    this._version = new VersionService(this);
+    this._version = new VersionService(this, options.appVersion);
     this._update = new UpdateService(this);
     this._db = new DbService(this);
     this._logsService = new LogsService(this);

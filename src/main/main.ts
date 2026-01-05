@@ -117,6 +117,7 @@ const createWindow = async () => {
     port: appApiPort,
     settingsService,
     directoryService,
+    appVersion: app.getVersion(),
   });
   ipcHandlers(ctx);
 

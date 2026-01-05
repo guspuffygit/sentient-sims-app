@@ -23,6 +23,7 @@ describe('Settings', () => {
       port: 25198,
       settingsService,
       directoryService,
+      appVersion: '1.0.0',
     });
   });
 

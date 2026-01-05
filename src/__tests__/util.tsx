@@ -47,5 +47,6 @@ export function mockApiContext(params?: MockApiContextParams): ApiContext {
     port: params?.port ?? 25198,
     settingsService: params?.settingsService ?? settingsService,
     directoryService: params?.directoryService ?? directoryService,
+    appVersion: '1.0.0',
   });
 }
