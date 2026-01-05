@@ -39,7 +39,7 @@ export class ParticipantRepository extends Repository {
       name: participantRequest.fullName,
     };
 
-    if (participant.description) {
+    if (participant.description || result.length === 0) {
       this.updateParticipant(participant);
     }
 
