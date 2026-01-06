@@ -5,24 +5,17 @@ import { InteractionEvents } from '../models/InteractionEvents';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { ApiClient } from './ApiClient';
+import { axiosClient } from './AxiosClient';
 
 export class AIClient extends ApiClient {
   async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
-    const response = await fetch(`${this.apiUrl}/ai/v2/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request),
-    });
-    return response.json();
+    const response = await axiosClient.post<SimsGenerateResponse>(`${this.apiUrl}/ai/v2/generate`, request);
+    return response.data;
   }
 
   async interactionEvent(event: InteractionEvents): Promise<InteractionEventResult> {
-    const response = await fetch(`${this.apiUrl}/ai/v2/event/interaction`, {
-      method: 'POST',
-      body: JSON.stringify(event),
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return response.json();
+    const response = await axiosClient.post<InteractionEventResult>(`${this.apiUrl}/ai/v2/event/interaction`, event);
+    return response.data;
   }
 
   async getModels(): Promise<AIModel[]> {

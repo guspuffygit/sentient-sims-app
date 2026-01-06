@@ -3,6 +3,14 @@ import log from 'electron-log';
 import { sendPopUpNotification } from '../util/notifyRenderer';
 import { ApiContext } from '../services/ApiContext';
 
+export type UpdateModResponse = {
+  done?: 'done';
+  error?: {
+    stack?: string;
+    message?: string;
+  };
+};
+
 export class UpdateController {
   private ctx: ApiContext;
 
@@ -19,9 +27,10 @@ export class UpdateController {
       // expiration needs to be a Date object and not a string
       req.body.credentials.expiration = new Date(req.body.credentials.expiration);
       await this.ctx.update.updateMod(req.body);
-      res.json({ done: 'done' });
+      const response: UpdateModResponse = { done: 'done' };
+      res.json(response);
     } catch (err: any) {
-      const response = {
+      const response: UpdateModResponse = {
         error: {
           stack: err?.stack,
           message: err?.message,
@@ -29,7 +38,7 @@ export class UpdateController {
       };
       log.error(`Error updating:`, err);
       sendPopUpNotification(err?.message);
-      res.status(500).json(response);
+      res.status(200).json(response);
     }
   }
 }

@@ -17,8 +17,8 @@ import log from 'electron-log';
 import { LoadingButton } from '@mui/lab';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { CreateMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
-import { AIClient } from 'main/sentient-sims/clients/AIClient';
 import SpaceBetweenDiv from './SpaceBetweenDiv';
+import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 
 type SimMappingRowProperties = {
   sentientSim: SentientSim;
@@ -146,7 +146,7 @@ export function SimMappingRow({ sentientSim, setInput }: SimMappingRowProperties
   );
 }
 
-const aiClient = new AIClient();
+const client = new SentientSimsAppClient();
 
 export function AnimationMappingComponent() {
   const [event, setEvent] = useState<WWInteractionEvent | undefined | null>();
@@ -237,11 +237,7 @@ export function AnimationMappingComponent() {
             };
           }),
         };
-        await fetch(`${appApiUrl}/memories`, {
-          method: 'POST',
-          body: JSON.stringify(memory),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        await client.memories.createMemory(memory);
       }
     } catch (error) {
       log.error('An error occurred saving animation:', error);
@@ -304,9 +300,9 @@ export function AnimationMappingComponent() {
 
     try {
       const results = await Promise.all([
-        aiClient.interactionEvent(event),
-        aiClient.interactionEvent(event),
-        aiClient.interactionEvent(event),
+        client.ai.interactionEvent(event),
+        client.ai.interactionEvent(event),
+        client.ai.interactionEvent(event),
       ]);
 
       setTestResults(results);

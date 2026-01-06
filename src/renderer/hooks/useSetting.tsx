@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { appApiUrl } from 'main/sentient-sims/constants';
+import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 
 export type SettingsHook<T> = {
   value: T;
@@ -9,6 +9,8 @@ export type SettingsHook<T> = {
   setSetting: (settingValue: T) => Promise<void>;
   resetSetting: () => Promise<void>;
 };
+
+const client = new SentientSimsAppClient();
 
 export default function useSetting<T = any>(settingsEnum: SettingsEnum, defaultValue: any = ''): SettingsHook<T> {
   const settingName = settingsEnum.toString();
@@ -20,8 +22,7 @@ export default function useSetting<T = any>(settingsEnum: SettingsEnum, defaultV
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${appApiUrl}/settings/app/${settingName}`);
-      const result = await response.json();
+      const result = await client.settings.getSetting(settingName);
       setValue((prev: any) => (prev !== result.value ? result.value : prev));
     } catch (err: any) {
       log.error(`Unable to get setting ${settingName}`, err);

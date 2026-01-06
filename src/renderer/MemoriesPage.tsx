@@ -1,19 +1,19 @@
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable promise/always-return */
 import { Button, Card, CardActions, CardContent, Typography } from '@mui/material';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
 import log from 'electron-log';
-import { appApiUrl } from 'main/sentient-sims/constants';
 import { DeleteMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
 import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { useWebsocket } from './providers/WebsocketProvider';
+import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 
 type SelectedMemory = {
   memory: MemoryEntity;
   index: number;
 };
+
+const client = new SentientSimsAppClient();
 
 export default function MemoriesPage() {
   const textareaRef = useRef<HTMLDivElement>(null);
@@ -60,13 +60,9 @@ export default function MemoriesPage() {
   }, [memories]);
 
   function getMemories() {
-    fetch(`${appApiUrl}/memories`, {
-      headers: { 'Content-Type': 'application/json' },
-    })
-      .then((res) => res.json())
-      .then((memoriesResponse: MemoryEntity[]) => {
-        setMemories(memoriesResponse);
-      })
+    client.memories
+      .getMemories()
+      .then((memoriesResponse) => setMemories(memoriesResponse))
       .catch(() => {
         // ignore
       });
@@ -137,38 +133,31 @@ export default function MemoriesPage() {
     if (editedMemory) {
       log.debug(`Edited Memory: ${JSON.stringify(editedMemory.memory)}`);
 
-      const url = `${appApiUrl}/memories/${editedMemory.memory.id}`;
-      fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editedMemory.memory),
-      })
-        .then((res) => res.json())
-        .then(() => {})
-        .catch((error: any) => {
-          log.error('Error saving updated memory', error);
-          if (error.cause) {
-            log.error(error.cause);
-          }
-        })
-        .finally(() => {
-          handleSetSelectedMemory(-1);
-        });
+      try {
+        await client.memories.updateMemory(editedMemory.memory);
+      } catch (error: any) {
+        log.error('Error saving updated memory', error);
+        if (error.cause) {
+          log.error(error.cause);
+        }
+      } finally {
+        handleSetSelectedMemory(-1);
+      }
     } else {
       handleSetSelectedMemory(-1);
     }
   }
 
-  const handleDelete = useCallback(() => {
-    if (editedMemory) {
-      fetch(`${appApiUrl}/memories/${editedMemory.memory.id}`, {
-        method: 'DELETE',
-      }).catch((error: any) => {
+  const handleDelete = useCallback(async () => {
+    if (editedMemory && editedMemory.memory.id) {
+      try {
+        await client.memories.deleteMemory(editedMemory.memory.id);
+      } catch (error: any) {
         log.error('Deletion of memory failed', error);
         if (error.cause) {
           log.error(error.cause);
         }
-      });
+      }
     } else {
       handleSetSelectedMemory(-1);
     }

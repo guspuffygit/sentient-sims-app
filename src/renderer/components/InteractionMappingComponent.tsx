@@ -13,12 +13,12 @@ import { JSX } from 'react/jsx-runtime';
 import { InteractionEventResult } from 'main/sentient-sims/models/InteractionEventResult';
 import log from 'electron-log';
 import { LoadingButton } from '@mui/lab';
-import { AIClient } from 'main/sentient-sims/clients/AIClient';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { CreateMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
 import { InteractionDTO } from 'main/sentient-sims/db/dto/InteractionDTO';
 import SpaceBetweenDiv from './SpaceBetweenDiv';
 import { BasicInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
+import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 
 type SimMappingRowProperties = {
   sentientSim: SentientSim;
@@ -146,7 +146,7 @@ export function SimMappingRow({ sentientSim, setInput }: SimMappingRowProperties
   );
 }
 
-const aiClient = new AIClient();
+const client = new SentientSimsAppClient();
 
 export function InteractionMappingComponent() {
   const [event, setEvent] = useState<InteractionMappingEvent | undefined | null>();
@@ -257,11 +257,7 @@ export function InteractionMappingComponent() {
             };
           }),
         };
-        await fetch(`${appApiUrl}/memories`, {
-          method: 'POST',
-          body: JSON.stringify(memory),
-          headers: { 'Content-Type': 'application/json' },
-        });
+        await client.memories.createMemory(memory);
       }
     } catch (error) {
       log.error('An error occurred saving interaction:', error);
@@ -330,9 +326,9 @@ export function InteractionMappingComponent() {
       };
 
       const results = await Promise.all([
-        aiClient.interactionEvent(testEvent),
-        aiClient.interactionEvent(testEvent),
-        aiClient.interactionEvent(testEvent),
+        client.ai.interactionEvent(testEvent),
+        client.ai.interactionEvent(testEvent),
+        client.ai.interactionEvent(testEvent),
       ]);
 
       results.forEach((result) => {

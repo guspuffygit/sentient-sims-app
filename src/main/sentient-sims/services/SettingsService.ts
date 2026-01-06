@@ -19,7 +19,7 @@ import {
   openaiDefaultEndpoint,
   openaiDefaultModel,
   sentientSimsAIDefaultModel,
-  sentientSimsAIHost,
+  defaultSentientSimsAIHost,
 } from '../constants';
 import { disableDebugLogging, enableDebugLogging } from '../util/debugLog';
 import { defaultSentientSimsAITTSSettings, SentientSimsAITTSSettings } from '../models/SentientSimsAITTSSettings';
@@ -99,7 +99,7 @@ export function defaultStore(cwd?: string) {
       },
       [SettingsEnum.SENTIENTSIMSAI_ENDPOINT.toString()]: {
         type: 'string',
-        default: sentientSimsAIHost,
+        default: defaultSentientSimsAIHost,
       },
       [SettingsEnum.KOBOLDAI_ENDPOINT.toString()]: {
         type: 'string',
@@ -185,7 +185,7 @@ export function defaultStore(cwd?: string) {
     migrations: {
       '3.1.0': (store) => {
         if (store.get(DeprecatedSettingsEnum.CUSTOM_LLM_ENABLED)) {
-          if (store.get(DeprecatedSettingsEnum.CUSTOM_LLM_ENABLED) === sentientSimsAIHost) {
+          if (store.get(DeprecatedSettingsEnum.CUSTOM_LLM_ENABLED) === defaultSentientSimsAIHost) {
             store.set(SettingsEnum.AI_API_TYPE, ApiType.SentientSimsAI.toString());
           } else {
             store.set(SettingsEnum.AI_API_TYPE, ApiType.CustomAI.toString());

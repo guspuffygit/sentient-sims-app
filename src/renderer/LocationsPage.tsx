@@ -1,15 +1,14 @@
-/* eslint-disable promise/always-return */
 import { Button, Card, CardActions, CardContent } from '@mui/material';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import log from 'electron-log';
 import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { appApiUrl } from 'main/sentient-sims/constants';
 import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
 import { useOnDatabaseLoaded } from './hooks/useOnDatabaseLoaded';
 import { useWebsocket } from './providers/WebsocketProvider';
+import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 
 type SelectedLocation = {
   location: LocationEntity;
@@ -28,19 +27,17 @@ const columns: GridColDef[] = [
   },
 ];
 
+const client = new SentientSimsAppClient();
+
 export default function LocationsPage() {
   const [locations, setLocations] = useState<LocationEntity[]>([]);
   const [editedLocation, setEditedLocation] = useState<SelectedLocation | null | undefined>();
   const { status } = useWebsocket();
 
   function getLocations() {
-    fetch(`${appApiUrl}/locations`, {
-      headers: { 'Content-Type': 'application/json' },
-    })
-      .then((res) => res.json())
-      .then((locationsResponse: LocationEntity[]) => {
-        setLocations(locationsResponse);
-      })
+    client.locations
+      .getAllLocations()
+      .then((allLocations) => setLocations(allLocations))
       .catch(() => {
         // ignore
       });
@@ -105,13 +102,7 @@ export default function LocationsPage() {
       log.debug(`Edited Location: ${JSON.stringify(editedLocation.location)}`);
 
       try {
-        const url = `${appApiUrl}/locations`;
-
-        await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(editedLocation.location),
-        });
+        await client.locations.updateLocation(editedLocation.location);
 
         setLocations((previousLocations) => {
           const newLocations = [...previousLocations];
@@ -132,10 +123,7 @@ export default function LocationsPage() {
   const handleDelete = useCallback(async () => {
     if (editedLocation) {
       try {
-        log.info(`Deleting Location: ${editedLocation.location.id}`);
-        await fetch(`${appApiUrl}/locations/${editedLocation.location.id}`, {
-          method: 'DELETE',
-        });
+        await client.locations.deleteLocation(editedLocation.location.id);
       } catch (error: any) {
         log.error('Deletion of location failed', error);
         if (error.cause) {

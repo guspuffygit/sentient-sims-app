@@ -91,6 +91,9 @@ export class UpdateService {
         });
 
       log.info(`Update completed.`);
+    } catch (err: any) {
+      log.error(`Unable to update mod`, err);
+      throw new Error(`Unable to update mod, make sure The Sims 4 is closed before updating.`);
     } finally {
       this.ctx.directory.filesToDelete().forEach((fileToDelete) => {
         if (fs.existsSync(fileToDelete)) {

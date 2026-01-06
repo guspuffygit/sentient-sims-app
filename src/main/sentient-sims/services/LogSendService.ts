@@ -9,6 +9,7 @@ import { SendLogsRequest } from '../models/SendLogsRequest';
 import { GetPatreonDebugText } from '../util/patreonUtil';
 import { CaughtError } from '../models/CaughtError';
 import { ApiContext } from './ApiContext';
+import { SendLogsResponse } from '../models/SendLogsResponse';
 
 export const webhookUrl = [
   'https://d',
@@ -35,7 +36,7 @@ export class LogSendService {
     return Array.from({ length: 10 }, () => Math.random().toString(36).charAt(2)).join('');
   }
 
-  async sendLogsToDiscord(url: string, sendLogsRequest: SendLogsRequest) {
+  async sendLogsToDiscord(url: string, sendLogsRequest: SendLogsRequest): Promise<SendLogsResponse> {
     const logId = LogSendService.newLogId();
     const errors: any[] = [];
 

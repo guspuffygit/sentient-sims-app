@@ -17,12 +17,11 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import log from 'electron-log';
-import { appApiUrl } from 'main/sentient-sims/constants';
-import { DbClient } from 'main/sentient-sims/clients/DbClient';
 import { SaveGame } from 'main/sentient-sims/models/SaveGame';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
+import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 
-const dbClient = new DbClient();
+const client = new SentientSimsAppClient();
 
 type SaveGameParticipants = {
   saveGame: SaveGame;
@@ -35,7 +34,7 @@ export default function OfflineMemory() {
   const [simsViewOpen, setSimsViewOpen] = useState(false);
 
   useEffect(() => {
-    dbClient.getSaveGames().then((newSaveGames) => {
+    client.db.getSaveGames().then((newSaveGames) => {
       const newSaveGameRecords: Record<string, SaveGameParticipants> = {};
       newSaveGames.forEach((saveGame) => {
         newSaveGameRecords[`${saveGame.name}${saveGame.type}`] = {
@@ -48,13 +47,7 @@ export default function OfflineMemory() {
   }, []);
 
   const viewSims = async (saveGame: SaveGame) => {
-    const response = await fetch(
-      `${appApiUrl}/participants?saveGameId=${saveGame.name}&saveGameType=${saveGame.type.toString()}`,
-      {
-        headers: { 'Content-Type': 'application/json' },
-      },
-    );
-    const result: ParticipantDTO[] = await response.json();
+    const result = await client.participant.getParticipants(saveGame.name, saveGame.type);
     const newSaveGameRecords = { ...saveGames };
     if (result.length > 0) {
       newSaveGameRecords[`${saveGame.name}${saveGame.type}`].participants = result;

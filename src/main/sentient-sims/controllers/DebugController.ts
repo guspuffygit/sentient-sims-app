@@ -3,6 +3,7 @@ import { OpenAIKeyNotSetError } from '../services/OpenAIService';
 import { webhookUrl } from '../services/LogSendService';
 import { SendLogsRequest } from '../models/SendLogsRequest';
 import { ApiContext } from '../services/ApiContext';
+import { SendLogsResponse } from '../models/SendLogsResponse';
 
 export class DebugController {
   private readonly ctx: ApiContext;
@@ -39,7 +40,8 @@ export class DebugController {
 
   async sendDebugLogs(req: Request, res: Response) {
     const sendLogsRequest: SendLogsRequest = req.body;
-    res.json(await this.ctx.logSend.sendLogsToDiscord(webhookUrl, sendLogsRequest));
+    const response: SendLogsResponse = await this.ctx.logSend.sendLogsToDiscord(webhookUrl, sendLogsRequest);
+    res.json(response);
   }
 
   async sendBugReport(req: Request, res: Response) {

@@ -37,7 +37,7 @@ export const defaultClassificationPrompt = [
   'Based on the user input, classify the converation with one of the following moods. Return only a single word of the mood that you think classifies the conversation:\n\n{classifiers}',
 ].join(' ');
 
-export const sentientSimsAIHost = 'https://ai.sentientsimulations.com';
+export const defaultSentientSimsAIHost = 'https://ai.sentientsimulations.com';
 
 export const defaultWantsSystemPrompt = 'You are the following character in the following location:';
 export const defaultWantsPrompt =

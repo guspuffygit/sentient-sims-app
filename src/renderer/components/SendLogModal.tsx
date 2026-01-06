@@ -1,6 +1,5 @@
 import { LoadingButton } from '@mui/lab';
 import { useState, Dispatch, SetStateAction } from 'react';
-import { appApiUrl } from 'main/sentient-sims/constants';
 import { SendLogsRequest } from 'main/sentient-sims/models/SendLogsRequest';
 import { Modal, Box, Divider, Grid, TextField } from '@mui/material';
 import LogSendInformationComponent from 'renderer/LogSendInformationComponent';
@@ -8,6 +7,7 @@ import { CaughtError } from 'main/sentient-sims/models/CaughtError';
 import log from 'electron-log';
 import { useAuth } from 'renderer/providers/AuthProvider';
 import SpaceBetweenDiv from './SpaceBetweenDiv';
+import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 
 export type SendLogModalParameters = {
   open: boolean;
@@ -15,6 +15,8 @@ export type SendLogModalParameters = {
 
   caughtError?: CaughtError;
 };
+
+const client = new SentientSimsAppClient();
 
 export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParameters) {
   const { user, userAttributes } = useAuth();
@@ -36,22 +38,22 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
 
       log.debug(`caughtError: ${caughtError}`);
 
-      const response = await fetch(`${appApiUrl}/debug/send-logs`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sendLogsRequest),
-      });
-      const responseJson = await response.json();
-      if (response.ok) {
-        setOpen(false);
-
-        alert(`To get support, copy paste this id into the #support channel in Discord!\n\n${responseJson.logId}`);
-      } else {
-        alert(`Error sending logs:\n${JSON.stringify(responseJson, null, 2)}`);
+      const response = await client.debug.sendDebugLogs(sendLogsRequest);
+      if (response.errors.length > 0) {
+        return alert(
+          [
+            `Attempted to send logs and encountered errors.`,
+            `Logs may not have been sent.`,
+            `To get support, copy paste this id into the #support channel in Discord.`,
+            response.logId,
+          ].join('\n\n'),
+        );
       }
+      return alert(`To get support, copy paste this id into the #support channel in Discord!\n\n${response.logId}`);
     } catch (err) {
       alert(`Error sending logs:\n${JSON.stringify(err, null, 2)}`);
     } finally {
+      setOpen(false);
       setLoading(false);
     }
   };

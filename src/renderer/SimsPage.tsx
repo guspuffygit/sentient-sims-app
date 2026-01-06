@@ -1,15 +1,14 @@
-/* eslint-disable promise/always-return */
 import { Button, Card, CardActions, CardContent, Typography } from '@mui/material';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import log from 'electron-log';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { appApiUrl } from 'main/sentient-sims/constants';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
 import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
 import { useOnDatabaseLoaded } from './hooks/useOnDatabaseLoaded';
 import { useWebsocket } from './providers/WebsocketProvider';
+import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 
 type SelectedSim = {
   sim: ParticipantDTO;
@@ -26,19 +25,17 @@ const columns: GridColDef[] = [
   },
 ];
 
+const client = new SentientSimsAppClient();
+
 export default function SimsPage() {
   const [sims, setSims] = useState<ParticipantDTO[]>([]);
   const [editedSim, setEditedSim] = useState<SelectedSim | null | undefined>();
   const { status } = useWebsocket();
 
   function getSims() {
-    fetch(`${appApiUrl}/participants`, {
-      headers: { 'Content-Type': 'application/json' },
-    })
-      .then((res) => res.json())
-      .then((simsResponse: ParticipantDTO[]) => {
-        setSims(simsResponse);
-      })
+    client.participant
+      .getParticipants()
+      .then((participants) => setSims(participants))
       .catch(() => {
         // ignore
       });
@@ -103,13 +100,7 @@ export default function SimsPage() {
       log.debug(`Edited Sim: ${JSON.stringify(editedSim.sim)}`);
 
       try {
-        const url = `${appApiUrl}/participants/${editedSim.sim.id}`;
-
-        await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(editedSim.sim),
-        });
+        await client.participant.updateParticipant(editedSim.sim);
       } catch (error: any) {
         log.error('Error saving updated sim', error);
         if (error.cause) {
@@ -125,9 +116,7 @@ export default function SimsPage() {
     if (editedSim) {
       try {
         log.info(`Deleting Sim: ${editedSim.sim.id}`);
-        await fetch(`${appApiUrl}/participants/${editedSim.sim.id}`, {
-          method: 'DELETE',
-        });
+        await client.participant.deleteParticipant(editedSim.sim.id);
       } catch (error: any) {
         log.error('Deletion of sim failed', error);
         if (error.cause) {

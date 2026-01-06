@@ -1,19 +1,14 @@
 import { InteractionDTO } from '../db/dto/InteractionDTO';
 import { ApiClient } from './ApiClient';
+import { axiosClient } from './AxiosClient';
 
 export class InteractionClient extends ApiClient {
   async updateInteraction(interaction: InteractionDTO) {
-    return fetch(`${this.apiUrl}/interactions`, {
-      method: 'POST',
-      body: JSON.stringify(interaction),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    return axiosClient.post(`${this.apiUrl}/interactions`, interaction);
   }
 
   async getInteractions(): Promise<InteractionDTO[]> {
-    const response = await fetch(`${this.apiUrl}/interactions`);
-    return response.json();
+    const response = await axiosClient<InteractionDTO[]>(`${this.apiUrl}/interactions`);
+    return response.data;
   }
 }

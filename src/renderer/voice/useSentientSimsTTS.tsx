@@ -3,7 +3,7 @@ import log from 'electron-log';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting from 'renderer/hooks/useSetting';
-import { sentientSimsAIHost } from 'main/sentient-sims/constants';
+import { defaultSentientSimsAIHost } from 'main/sentient-sims/constants';
 import {
   defaultSentientSimsAITTSSettings,
   SentientSimsAITTSSettings,
@@ -15,7 +15,10 @@ import { TTSHook } from './TTSHook';
 
 export function useSentientSimsTTS(): TTSHook {
   const aiSettings = useAISettings();
-  const sentientSimsAIEndpointSetting = useSetting<string>(SettingsEnum.SENTIENTSIMSAI_ENDPOINT, sentientSimsAIHost);
+  const sentientSimsAIEndpointSetting = useSetting<string>(
+    SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
+    defaultSentientSimsAIHost,
+  );
   const sentientSimsAITokenSetting = useSetting<string>(SettingsEnum.ACCESS_TOKEN, '');
   const sentientSimsAITTSSettings = useSetting<SentientSimsAITTSSettings>(
     SettingsEnum.SENTIENTSIMSAI_TTS_SETTINGS,

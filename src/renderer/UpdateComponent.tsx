@@ -7,14 +7,14 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { ModUpdate } from 'main/sentient-sims/services/UpdateService';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { UpdateClient } from 'main/sentient-sims/clients/UpdateClient';
 import AppCard from './AppCard';
 import useNewVersionChecker from './hooks/useNewVersionChecker';
 import useSetting, { SettingsHook } from './hooks/useSetting';
 import { useVersions } from './providers/VersionsProvider';
 import { ReleaseTypeSelector } from './components/ReleaseTypeSelector';
+import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 
-const updateClient = new UpdateClient();
+const client = new SentientSimsAppClient();
 
 export default function UpdateComponent() {
   const versions = useVersions();
@@ -36,13 +36,10 @@ export default function UpdateComponent() {
       };
       if (updateState.newVersionAvailable || forceUpdate) {
         setIsLoading(true);
-        return updateClient
+        return client.update
           .updateMod(modUpdate)
           .then(() => {
             return handleCheckForUpdates();
-          })
-          .catch((err) => {
-            alert(`Error installing update: ${JSON.stringify(err, null, 2)}`);
           })
           .finally(() => {
             setIsLoading(false);

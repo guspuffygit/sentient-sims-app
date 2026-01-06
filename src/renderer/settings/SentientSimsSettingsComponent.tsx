@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, FormHelperText } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
-import { sentientSimsAIDefaultModel, sentientSimsAIHost } from 'main/sentient-sims/constants';
+import { sentientSimsAIDefaultModel, defaultSentientSimsAIHost } from 'main/sentient-sims/constants';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import { useAuth } from 'renderer/providers/AuthProvider';
 import AIModelSelection from '../AIModelSelection';
@@ -51,7 +51,7 @@ export function SentientSimsSettingsComponent({ apiType }: SentientSimsSettingsC
       <AIModelSelection
         apiType={apiType}
         defaultModel={sentientSimsAIDefaultModel}
-        defaultEndpoint={sentientSimsAIHost}
+        defaultEndpoint={defaultSentientSimsAIHost}
         modelSetting={SettingsEnum.SENTIENTSIMSAI_MODEL}
         endpointSetting={SettingsEnum.SENTIENTSIMSAI_ENDPOINT}
       />
