@@ -17,8 +17,8 @@ async function test() {
   });
   await ctx.db.loadDatabase({
     saveId: '2_2611478528',
-    sessionId: '1767634504678'
-  })
+    sessionId: '1767634504678',
+  });
   console.log(ctx.memoryRepository.getMemories());
 }
 
