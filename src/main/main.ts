@@ -111,6 +111,8 @@ const createWindow = async () => {
   });
 
   const settingsService = new SettingsService();
+  settingsService.runMigrations();
+
   const directoryService = new DirectoryService(settingsService);
   const ctx = new ApiContext({
     getAssetPath,

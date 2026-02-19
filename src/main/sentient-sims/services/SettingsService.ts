@@ -552,6 +552,15 @@ export class SettingsService {
 
     this.set(SettingsEnum.MAX_RESPONSE_TOKENS, value);
   }
+
+  runMigrations() {
+    if (this.sentientSimsAITtsSettings.model.toString() === 'kokoro') {
+      log.info(`Updating kokoro model name to hexgrad/Kokoro-82M`);
+      const aiTTSSettings = this.sentientSimsAITtsSettings;
+      aiTTSSettings.model = 'hexgrad/Kokoro-82M';
+      this.sentientSimsAITtsSettings = aiTTSSettings;
+    }
+  }
 }
 
 function stringOrUndefined(value: unknown): string | undefined {
