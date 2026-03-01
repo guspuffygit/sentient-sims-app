@@ -41,7 +41,7 @@ export enum SentientSimsAISpeechOrpheusVoice {
 export type SentientSimsAISpeechVoice = SentientSimsAISpeechKokoroVoice | SentientSimsAISpeechOrpheusVoice;
 
 export enum SentientSimsAISpeechModel {
-  KOKORO = 'hexgrad/Kokoro-82M',
+  KOKORO = 'kokoro',
   ORPHEUS = 'canopylabs/orpheus-3b-0.1-ft',
 }
 

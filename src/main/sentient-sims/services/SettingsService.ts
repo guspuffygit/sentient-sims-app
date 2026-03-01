@@ -560,6 +560,13 @@ export class SettingsService {
       aiTTSSettings.model = 'hexgrad/Kokoro-82M';
       this.sentientSimsAITtsSettings = aiTTSSettings;
     }
+
+    if (this.sentientSimsAITtsSettings.model.toString() === 'hexgrad/Kokoro-82M') {
+      log.info(`Updating kokoro model name to kokoro`);
+      const aiTTSSettings = this.sentientSimsAITtsSettings;
+      aiTTSSettings.model = 'kokoro';
+      this.sentientSimsAITtsSettings = aiTTSSettings;
+    }
   }
 }
 
