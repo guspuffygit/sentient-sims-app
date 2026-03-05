@@ -7,4 +7,5 @@ export type MemoryEntity = {
   timestamp?: string;
   action?: string;
   event_type?: string;
+  interaction_name?: string;
 };

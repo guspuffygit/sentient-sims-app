@@ -38,6 +38,7 @@ function defaultMessages(systemPrompt: string): MessageInputProps[] {
 export interface ChatGeneration {
   messages: MessageInputProps[];
   input?: string | null;
+  interactionName?: string;
   loading: boolean;
   generateChat: () => Promise<void>;
   countTokens: () => void;
@@ -56,6 +57,7 @@ export default function useChatGeneration(): ChatGeneration {
   const [generationLoadedCallback, setGenerationLoadedCallback] = useState<() => void>(() => {});
   const [messages, setMessages] = useState<MessageInputProps[]>(defaultMessages(defaultSystemPrompt));
   const [input, setInput] = useState<string | undefined | null>();
+  const [interactionName, setInteractionName] = useState<string | undefined>();
   const maxResponseTokensState = useState(90);
 
   const resetMessages = useCallback(() => {
@@ -104,6 +106,9 @@ export default function useChatGeneration(): ChatGeneration {
           } catch (e: any) {
             log.error(`Unable to stringify input`, e);
           }
+          setInteractionName(result.input?.interaction_name ?? undefined);
+        } else {
+          setInteractionName(undefined);
         }
         generationLoadedCallback();
       }
@@ -207,6 +212,7 @@ export default function useChatGeneration(): ChatGeneration {
 
   return {
     input,
+    interactionName,
     messages,
     loading,
     generateChat,

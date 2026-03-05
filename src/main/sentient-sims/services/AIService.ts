@@ -242,6 +242,9 @@ export class AIService {
     if (promptRequest.action) {
       newMemory.action = promptRequest.action;
     }
+    if ('interaction_name' in event) {
+      newMemory.interaction_name = (event as any).interaction_name;
+    }
 
     getInputFormatters(promptOptions.apiType).forEach((formatter) => {
       promptRequest = formatter.formatInput(promptRequest);

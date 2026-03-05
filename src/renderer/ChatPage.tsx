@@ -1,7 +1,8 @@
-import { Box, Button, CardActions, Grid, Modal, TextField, Typography } from '@mui/material';
+import { Box, Button, CardActions, Chip, Grid, Modal, Snackbar, TextField, Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import SendIcon from '@mui/icons-material/Send';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useCallback, useRef, useState } from 'react';
 import log from 'electron-log';
 import { ChatBoxComponent } from './ChatBoxComponent';
@@ -12,6 +13,7 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const {
     input,
+    interactionName,
     messages,
     loading,
     generateChat,
@@ -48,6 +50,14 @@ export default function ChatPage() {
   };
 
   const [openInputView, setOpenInputView] = useState(false);
+  const [copiedSnackbar, setCopiedSnackbar] = useState(false);
+
+  const copyInteractionName = () => {
+    if (interactionName) {
+      navigator.clipboard.writeText(interactionName);
+      setCopiedSnackbar(true);
+    }
+  };
   function onOpenInputView() {
     setOpenInputView(true);
   }
@@ -66,6 +76,22 @@ export default function ChatPage() {
         ))}
         <div ref={messagesEndRef} />
       </Box>
+      {interactionName && (
+        <Box sx={{ display: 'flex', alignItems: 'center', px: 2, py: 0.5 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
+            Interaction:
+          </Typography>
+          <Chip
+            label={interactionName}
+            size="small"
+            variant="outlined"
+            onClick={copyInteractionName}
+            onDelete={copyInteractionName}
+            deleteIcon={<ContentCopyIcon fontSize="small" />}
+            sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}
+          />
+        </Box>
+      )}
       <CardActions sx={{ flexDirection: 'column', alignItems: 'stretch' }}>
         {loading ? (
           <CircularProgress disableShrink />
@@ -160,6 +186,12 @@ export default function ChatPage() {
           </div>
         </Box>
       </Modal>
+      <Snackbar
+        open={copiedSnackbar}
+        autoHideDuration={1500}
+        onClose={() => setCopiedSnackbar(false)}
+        message="Copied to clipboard"
+      />
     </>
   );
 }

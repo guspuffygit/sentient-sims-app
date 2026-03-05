@@ -1,4 +1,5 @@
-import { Button, Card, CardActions, CardContent, Typography } from '@mui/material';
+import { Box, Button, Card, CardActions, CardContent, Chip, Snackbar, Typography } from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
 import log from 'electron-log';
@@ -21,6 +22,12 @@ export default function MemoriesPage() {
   const [memoriesFocused, setMemoriesFocused] = useState(false);
   const [editedMemory, setEditedMemory] = useState<SelectedMemory | null | undefined>();
   const { status } = useWebsocket();
+  const [copiedSnackbar, setCopiedSnackbar] = useState(false);
+
+  const copyInteractionName = (name: string) => {
+    navigator.clipboard.writeText(name);
+    setCopiedSnackbar(true);
+  };
 
   const addMemory = useCallback((memory: MemoryEntity) => {
     setMemories((previousMemories) => [...previousMemories, memory]);
@@ -167,13 +174,9 @@ export default function MemoriesPage() {
     setEditedMemory((previousMemory) => ({
       index: Number(previousMemory?.index),
       memory: {
-        id: previousMemory?.memory?.id,
+        ...previousMemory?.memory,
         observation: event.target.value,
-        pre_action: previousMemory?.memory?.pre_action,
-        content: previousMemory?.memory?.content,
         location_id: Number(previousMemory?.memory?.location_id),
-        timestamp: previousMemory?.memory?.timestamp,
-        action: previousMemory?.memory?.action,
       },
     }));
   }, []);
@@ -182,13 +185,9 @@ export default function MemoriesPage() {
     setEditedMemory((previousMemory) => ({
       index: Number(previousMemory?.index),
       memory: {
-        id: previousMemory?.memory?.id,
-        observation: previousMemory?.memory?.observation,
-        pre_action: previousMemory?.memory?.pre_action,
+        ...previousMemory?.memory,
         content: event.target.value,
         location_id: Number(previousMemory?.memory?.location_id),
-        timestamp: previousMemory?.memory?.timestamp,
-        action: previousMemory?.memory?.action,
       },
     }));
   }, []);
@@ -197,13 +196,9 @@ export default function MemoriesPage() {
     setEditedMemory((previousMemory) => ({
       index: Number(previousMemory?.index),
       memory: {
-        id: previousMemory?.memory?.id,
-        observation: previousMemory?.memory?.observation,
+        ...previousMemory?.memory,
         pre_action: event.target.value,
-        content: previousMemory?.memory?.content,
         location_id: Number(previousMemory?.memory?.location_id),
-        timestamp: previousMemory?.memory?.timestamp,
-        action: previousMemory?.memory?.action,
       },
     }));
   }, []);
@@ -212,13 +207,9 @@ export default function MemoriesPage() {
     setEditedMemory((previousMemory) => ({
       index: Number(previousMemory?.index),
       memory: {
-        id: previousMemory?.memory?.id,
-        observation: previousMemory?.memory?.observation,
-        pre_action: previousMemory?.memory?.pre_action,
-        content: previousMemory?.memory?.content,
-        location_id: Number(previousMemory?.memory?.location_id),
-        timestamp: previousMemory?.memory?.timestamp,
+        ...previousMemory?.memory,
         action: event.target.value,
+        location_id: Number(previousMemory?.memory?.location_id),
       },
     }));
   }, []);
@@ -269,6 +260,22 @@ export default function MemoriesPage() {
             </CardActions>
           }
         >
+          {editedMemory?.memory?.interaction_name && (
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
+                Interaction:
+              </Typography>
+              <Chip
+                label={editedMemory.memory.interaction_name}
+                size="small"
+                variant="outlined"
+                onClick={() => copyInteractionName(editedMemory.memory.interaction_name!)}
+                onDelete={() => copyInteractionName(editedMemory.memory.interaction_name!)}
+                deleteIcon={<ContentCopyIcon fontSize="small" />}
+                sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}
+              />
+            </Box>
+          )}
           <MemoryEditInput
             label="Observation (Shown only to the AI)"
             handleEdit={handleObservationEdit}
@@ -308,9 +315,25 @@ export default function MemoriesPage() {
           </CardContent>
         </Card>
         {editMemoryBox}
+        <Snackbar
+          open={copiedSnackbar}
+          autoHideDuration={1500}
+          onClose={() => setCopiedSnackbar(false)}
+          message="Copied to clipboard"
+        />
       </div>
     );
   }
 
-  return <AppCard>Interactions between Sims in game will appear here.</AppCard>;
+  return (
+    <>
+      <AppCard>Interactions between Sims in game will appear here.</AppCard>
+      <Snackbar
+        open={copiedSnackbar}
+        autoHideDuration={1500}
+        onClose={() => setCopiedSnackbar(false)}
+        message="Copied to clipboard"
+      />
+    </>
+  );
 }

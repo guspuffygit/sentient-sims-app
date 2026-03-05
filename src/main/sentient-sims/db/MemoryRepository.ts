@@ -82,7 +82,7 @@ export class MemoryRepository extends Repository {
     const result = this.dbService
       .getDb()
       .prepare(
-        'UPDATE memory SET pre_action = ?, observation = ?, content = ?, timestamp = ?, location_id = ?, action = ?, event_type = ? WHERE id = ?',
+        'UPDATE memory SET pre_action = ?, observation = ?, content = ?, timestamp = ?, location_id = ?, action = ?, event_type = ?, interaction_name = ? WHERE id = ?',
       )
       .run(
         memory.pre_action,
@@ -92,6 +92,7 @@ export class MemoryRepository extends Repository {
         memory.location_id,
         memory.action,
         memory.event_type,
+        memory.interaction_name,
         memory.id,
       );
 
@@ -113,7 +114,7 @@ export class MemoryRepository extends Repository {
       const updateMemoryResult = this.dbService
         .getDb()
         .prepare(
-          'INSERT OR REPLACE INTO memory(id, pre_action, observation, content, location_id, action, event_type) VALUES(?, ?, ?, ?, ?, ?, ?)',
+          'INSERT OR REPLACE INTO memory(id, pre_action, observation, content, location_id, action, event_type, interaction_name) VALUES(?, ?, ?, ?, ?, ?, ?, ?)',
         )
         .run([
           createMemoryRequest.memory.id,
@@ -123,6 +124,7 @@ export class MemoryRepository extends Repository {
           createMemoryRequest.memory.location_id,
           createMemoryRequest.memory.action,
           createMemoryRequest.memory.event_type,
+          createMemoryRequest.memory.interaction_name,
         ]);
 
       createMemoryRequest.participants.forEach((participant) => {
