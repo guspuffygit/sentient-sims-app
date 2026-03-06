@@ -68,27 +68,86 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           npm exec electron-builder -- --publish always ${{ matrix.platform.cmd }}
-      - name: Publish Universal Mac Build
+      - name: Prepare universal mac artifacts
         if: matrix.platform.arch == 'x64'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           export VERSION=$(jq -r .version release/app/package.json)
-          if [ "$BUILD_ARCHITECTURE" = "x64" ]; then
-            npx tsx ci-prepare-mac-universal-artifacts.ts
-            npx tsx build-mac-universal.ts
-            echo "$APPLE_P12_BASE64" | base64 --decode > certificate.p12
-            security create-keychain -p "" build.keychain
-            security default-keychain -s build.keychain
-            security unlock-keychain -p "" build.keychain
-            security import certificate.p12 -k build.keychain -P "$APPLE_P12_PASSWORD" -T /usr/bin/codesign
-            security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
-            codesign --force --deep --sign "Developer ID Application: Sentient Simulations LLC (JKSSH5AMBR)" universal/SentientSims.app
-            npm exec electron-builder -- --publish always --prepackaged universal/SentientSims.app --mac --universal -c.mac.target.arch='universal'
-          fi
+          npx tsx ci-prepare-mac-universal-artifacts.ts
+          npx tsx build-mac-universal.ts
+
+      - name: Import signing certificate
+        if: matrix.platform.arch == 'x64'
         env:
-          # These values are used for auto updates signing
           APPLE_P12_BASE64: ${{ secrets.APPLE_P12_BASE64 }}
           APPLE_P12_PASSWORD: ${{ secrets.APPLE_P12_PASSWORD }}
-          # This is used for uploading release assets to github
+        run: |
+          echo "$APPLE_P12_BASE64" | base64 --decode > certificate.p12
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security import certificate.p12 -k build.keychain -P "$APPLE_P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+          rm certificate.p12
+
+      - name: Sign universal app
+        if: matrix.platform.arch == 'x64'
+        run: |
+          IDENTITY="Developer ID Application: Sentient Simulations LLC (JKSSH5AMBR)"
+          ENTITLEMENTS="assets/entitlements.mac.plist"
+          APP="universal/SentientSims.app"
+
+          # 1. Sign all dylibs and native modules (innermost binaries first)
+          find "$APP" -type f \( -name "*.dylib" -o -name "*.node" \) | while read -r file; do
+            codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$file"
+          done
+
+          # 2. Sign standalone executables inside frameworks (chrome_crashpad_handler, ShipIt, etc.)
+          find "$APP/Contents/Frameworks" -type f -perm +111 ! -name "*.dylib" ! -name "*.node" | while read -r file; do
+            if file "$file" | grep -q "Mach-O"; then
+              codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$file"
+            fi
+          done
+
+          # 3. Sign each framework's main binary, then the framework bundle
+          for fw in "$APP/Contents/Frameworks"/*.framework; do
+            fw_name=$(basename "$fw" .framework)
+            if [ -f "$fw/Versions/A/$fw_name" ]; then
+              codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$fw/Versions/A/$fw_name"
+            fi
+            codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$fw"
+          done
+
+          # 4. Sign helper apps
+          for helper in "$APP/Contents/Frameworks"/*.app; do
+            codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$helper"
+          done
+
+          # 5. Sign main binary and app bundle
+          codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/MacOS/SentientSims"
+          codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP"
+
+      - name: Verify signature
+        if: matrix.platform.arch == 'x64'
+        run: |
+          codesign --verify --deep --strict --verbose=2 universal/SentientSims.app
+
+      - name: Notarize universal app
+        if: matrix.platform.arch == 'x64'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent universal/SentientSims.app SentientSims.zip
+          xcrun notarytool submit SentientSims.zip --apple-id "$APPLE_ID" --password "$APPLE_ID_PASS" --team-id "$APPLE_TEAM_ID" --wait
+          xcrun stapler staple "universal/SentientSims.app"
+
+      - name: Publish universal mac build
+        if: matrix.platform.arch == 'x64'
+        env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BUILD_ARCHITECTURE: ${{ matrix.platform.arch }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          npm exec electron-builder -- --publish always --prepackaged universal/SentientSims.app --mac --universal -c.mac.target.arch='universal'
