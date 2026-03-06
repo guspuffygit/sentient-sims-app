@@ -3,7 +3,9 @@
     "allow": [
       "Bash(gh run:*)",
       "Bash(jq:*)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(git push:*)",
+      "Bash(git:*)"
     ]
   }
 }

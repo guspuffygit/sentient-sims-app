@@ -110,12 +110,14 @@ jobs:
           codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/SentientSims Helper (GPU).app"
           codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/SentientSims Helper (Renderer).app"
           codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/SentientSims Helper.app"
-          codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework"
-          codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/Electron Framework.framework"
-          codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/Squirrel.framework/Versions/A/Squirrel"
-          codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/Squirrel.framework"
-          codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/ReactiveObjC.framework/Versions/A/ReactiveObjC"
-          codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/ReactiveObjC.framework"
+          # Sign all frameworks (inner binary then bundle) to handle Electron, Squirrel, ReactiveObjC, Mantle, etc.
+          for fw in "$APP/Contents/Frameworks"/*.framework; do
+            fw_name=$(basename "$fw" .framework)
+            if [ -f "$fw/Versions/A/$fw_name" ]; then
+              codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$fw/Versions/A/$fw_name"
+            fi
+            codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$fw"
+          done
           codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/MacOS/SentientSims"
           codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP"
 
