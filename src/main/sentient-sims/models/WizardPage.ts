@@ -3,6 +3,7 @@ export enum WizardPage {
   MOD_SETUP = 'mod_setup',
   CONNECT_MOD = 'connect_mod',
   INSTALL_MOD = 'install_mod',
+  ENABLE_MODS = 'enable_mods',
   AI_PROVIDER_SETUP = 'ai_provider_setup',
   SENTIENT_SIMS_AI_SETUP = 'sentient_sims_ai_setup',
   OPEN_AI_SETUP = 'open_ai_setup',

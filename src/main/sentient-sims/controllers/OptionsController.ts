@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import path from 'path';
 import { Request, Response } from 'express';
 import { ApiContext } from '../services/ApiContext';
+import log from 'electron-log';
 
 export class OptionsController {
   private ctx: ApiContext;
@@ -14,6 +15,8 @@ export class OptionsController {
 
   async getOptionsStatus(_req: Request, res: Response) {
     const optionsPath = path.join(this.ctx.directory.getSims4Folder(), 'Options.ini');
+
+    log.debug(`Options path: ${optionsPath}`);
 
     if (!fs.existsSync(optionsPath)) {
       res.status(404).json({ error: `Options.ini not found at ${optionsPath}` });
@@ -32,6 +35,8 @@ export class OptionsController {
   }
   async fixOptions(_req: Request, res: Response) {
     const optionsPath = path.join(this.ctx.directory.getSims4Folder(), 'Options.ini');
+
+    log.debug(`Options path: ${optionsPath}`);
 
     if (!fs.existsSync(optionsPath)) {
       res.status(404).json({ error: `Options.ini not found at ${optionsPath}` });

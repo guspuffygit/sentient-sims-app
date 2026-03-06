@@ -3,6 +3,7 @@ import { AIClient } from './AIClient';
 import { DbClient } from './DbClient';
 import { DebugClient } from './DebugClient';
 import { FilesClient } from './FilesClient';
+import { OptionsClient } from './OptionsClient';
 import { InteractionClient } from './InteractionClient';
 import { LocationsClient } from './LocationsClient';
 import { MemoriesClient } from './MemoriesClient';
@@ -31,6 +32,7 @@ export class SentientSimsAppClient {
   private readonly _debug: DebugClient;
   private readonly _sentientSimsAiApi: SentientSimsAiApiClient;
   private readonly _files: FilesClient;
+  private readonly _options: OptionsClient;
 
   constructor(apiUrl?: string) {
     const url = apiUrl ?? appApiUrl;
@@ -50,6 +52,7 @@ export class SentientSimsAppClient {
     this._debug = new DebugClient(url);
     this._sentientSimsAiApi = new SentientSimsAiApiClient(url);
     this._files = new FilesClient(url);
+    this._options = new OptionsClient(url);
   }
 
   get ai(): AIClient {
@@ -110,5 +113,9 @@ export class SentientSimsAppClient {
 
   get files(): FilesClient {
     return this._files;
+  }
+
+  get options(): OptionsClient {
+    return this._options;
   }
 }

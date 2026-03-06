@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab';
-import { Dispatch, SetStateAction, useEffect } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import {
   Modal,
   Box,
@@ -15,7 +15,10 @@ import {
   Stepper,
   Step,
   StepLabel,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
+import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { ModsDirectoryComponent } from 'renderer/ModsDirectoryComponent';
 import { useVersions } from 'renderer/providers/VersionsProvider';
@@ -291,6 +294,195 @@ function InstallModPage({ setPage }: PageProps) {
         </LoadingButton>
         <LoadingButton
           type="submit"
+          onClick={() => setPage(WizardPage.ENABLE_MODS)}
+          color="secondary"
+          variant="contained"
+        >
+          Next
+        </LoadingButton>
+      </Box>
+    </>
+  );
+}
+
+const optionsClient = new SentientSimsAppClient();
+
+function EnableModsPage({ setPage }: PageProps) {
+  const [loading, setLoading] = useState(true);
+  const [modsEnabled, setModsEnabled] = useState<boolean | null>(null);
+  const [scriptModsOn, setScriptModsOn] = useState<boolean | null>(null);
+  const [autoFixFailed, setAutoFixFailed] = useState(false);
+  const [fileNotFound, setFileNotFound] = useState(false);
+
+  const checkAndFix = async () => {
+    setLoading(true);
+    setAutoFixFailed(false);
+    setFileNotFound(false);
+
+    try {
+      const status = await optionsClient.options.getOptionsStatus();
+      setModsEnabled(status.modsEnabled);
+      setScriptModsOn(status.scriptModsOn);
+
+      if (status.modsEnabled === true && status.scriptModsOn === true) {
+        setLoading(false);
+        return;
+      }
+
+      // Try to auto-fix
+      try {
+        const fixed = await optionsClient.options.fixOptions();
+        setModsEnabled(fixed.modsEnabled);
+        setScriptModsOn(fixed.scriptModsOn);
+        if (!(fixed.modsEnabled === true && fixed.scriptModsOn === true)) {
+          setAutoFixFailed(true);
+        }
+      } catch {
+        setAutoFixFailed(true);
+      }
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        setFileNotFound(true);
+      } else {
+        setAutoFixFailed(true);
+      }
+    }
+    setLoading(false);
+  };
+
+  const initialized = useRef<boolean | null>(null);
+  if (initialized.current == null) {
+    initialized.current = true;
+    checkAndFix();
+  }
+
+  const allGood = modsEnabled === true && scriptModsOn === true;
+
+  return (
+    <>
+      <Box flexGrow={1}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '60%',
+          }}
+        >
+          <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 2 }}>
+            Enable Mods
+          </Typography>
+
+          {loading && (
+            <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column" sx={{ mt: 4 }}>
+              <CircularProgress size={40} />
+              <Typography sx={{ mt: 2 }}>Checking mod settings...</Typography>
+            </Box>
+          )}
+
+          {!loading && allGood && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              Mods and script mods are enabled. You&apos;re all set!
+            </Alert>
+          )}
+
+          {!loading && !allGood && !fileNotFound && !autoFixFailed && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              Mod settings need to be updated.
+            </Alert>
+          )}
+
+          {!loading && autoFixFailed && !fileNotFound && (
+            <>
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                Unable to automatically enable mods. Please enable them manually:
+              </Alert>
+              <List sx={{ listStyle: 'decimal', pl: 2 }} dense>
+                <ListItem sx={{ display: 'list-item' }}>
+                  <ListItemText>Open The Sims 4</ListItemText>
+                </ListItem>
+                <ListItem sx={{ display: 'list-item' }}>
+                  <ListItemText>
+                    Enable mods by following this guide:{' '}
+                    <Link
+                      href="https://support.curseforge.com/en/support/solutions/articles/9000221442-downloading-and-installing-the-sims-4-mods-pc-manual-guide-"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      color="primary"
+                      sx={{ fontWeight: '500' }}
+                    >
+                      How to enable mods in The Sims 4
+                    </Link>
+                  </ListItemText>
+                </ListItem>
+                <ListItem sx={{ display: 'list-item' }}>
+                  <ListItemText>Restart the game after enabling mods</ListItemText>
+                </ListItem>
+              </List>
+            </>
+          )}
+
+          {!loading && fileNotFound && (
+            <>
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                Options.ini not found. You need to launch The Sims 4 at least once to generate the settings file, then
+                enable mods:
+              </Alert>
+              <List sx={{ listStyle: 'decimal', pl: 2 }} dense>
+                <ListItem sx={{ display: 'list-item' }}>
+                  <ListItemText>Launch The Sims 4 and reach the main menu</ListItemText>
+                </ListItem>
+                <ListItem sx={{ display: 'list-item' }}>
+                  <ListItemText>Close the game</ListItemText>
+                </ListItem>
+                <ListItem sx={{ display: 'list-item' }}>
+                  <ListItemText>
+                    Click the &quot;Re-check&quot; button below, and this step should complete automatically
+                  </ListItemText>
+                </ListItem>
+              </List>
+            </>
+          )}
+
+          {!loading && !allGood && (
+            <Box display="flex" justifyContent="center" sx={{ mt: 2 }}>
+              <LoadingButton onClick={() => checkAndFix()} color="secondary" variant="outlined">
+                Re-check
+              </LoadingButton>
+            </Box>
+          )}
+
+          {!loading && (
+            <Box display="flex" justifyContent="center" alignItems="center" sx={{ mt: 3 }} flexDirection="column">
+              <Typography variant="body2">
+                Mods Enabled:{' '}
+                <Typography component="span" variant="body2" color={modsEnabled ? 'success.main' : 'error.main'}>
+                  {modsEnabled ? 'Yes' : 'No'}
+                </Typography>
+              </Typography>
+              <Typography variant="body2">
+                Script Mods Enabled:{' '}
+                <Typography component="span" variant="body2" color={scriptModsOn ? 'success.main' : 'error.main'}>
+                  {scriptModsOn ? 'Yes' : 'No'}
+                </Typography>
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      </Box>
+      <Box display="flex" justifyContent="center" alignItems="center">
+        <LoadingButton
+          type="submit"
+          onClick={() => setPage(WizardPage.INSTALL_MOD)}
+          color="secondary"
+          variant="contained"
+          sx={{ mr: 2 }}
+        >
+          Back
+        </LoadingButton>
+        <LoadingButton
+          type="submit"
           onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
           color="secondary"
           variant="contained"
@@ -323,23 +515,6 @@ function ConnectModPage({ setPage, setOpen }: PageProps) {
           <List sx={{ listStyle: 'decimal', pl: 2 }} dense>
             <ListItem sx={{ display: 'list-item' }}>
               <ListItemText>Open The Sims 4</ListItemText>
-            </ListItem>
-            <ListItem sx={{ display: 'list-item' }}>
-              <ListItemText>
-                If you have never played with Sims 4 mods before, enable mods{' '}
-                <Link
-                  href="https://support.curseforge.com/en/support/solutions/articles/9000221442-downloading-and-installing-the-sims-4-mods-pc-manual-guide-"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  color="primary"
-                  sx={{ fontWeight: '500' }}
-                >
-                  How to enable mods in The Sims 4
-                </Link>
-              </ListItemText>
-            </ListItem>
-            <ListItem sx={{ display: 'list-item' }}>
-              <ListItemText>Make sure to restart the game if you just enabled mods for the first time</ListItemText>
             </ListItem>
             <ListItem sx={{ display: 'list-item' }}>
               <ListItemText>Create a new game, or load an old one so that you can see and control a Sim</ListItemText>
@@ -870,6 +1045,7 @@ export function SetupWizardModal({ open, setOpen }: SetupWizardModalParameters) 
         {currentWizardPage.value === WizardPage.SELF_HOSTED_SETUP && <SelfHostedSetupPage setPage={setPage} />}
         {currentWizardPage.value === WizardPage.CONNECT_MOD && <ConnectModPage setPage={setPage} setOpen={setOpen} />}
         {currentWizardPage.value === WizardPage.INSTALL_MOD && <InstallModPage setPage={setPage} />}
+        {currentWizardPage.value === WizardPage.ENABLE_MODS && <EnableModsPage setPage={setPage} />}
       </Box>
     </Modal>
   );
