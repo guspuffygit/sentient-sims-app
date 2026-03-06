@@ -93,6 +93,8 @@ export function runApi(ctx: ApiContext) {
   expressApp.get('/websocket/isconnected', new WebsocketController().isConnected);
   expressApp.get('/announcements', ctx.controller.news.getNews);
 
+  expressApp.get('/options/status', ctx.controller.options.getOptionsStatus);
+
   return expressApp.listen(ctx.port, () => {
     log.debug(`Server is running on port ${ctx.port}`);
   });

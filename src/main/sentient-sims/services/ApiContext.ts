@@ -10,6 +10,7 @@ import { LoginController } from '../controllers/LoginController';
 import { MappingController } from '../controllers/MappingController';
 import { MemoriesController } from '../controllers/MemoriesController';
 import { NewsController } from '../controllers/NewsController';
+import { OptionsController } from '../controllers/OptionsController';
 import { ParticipantsController } from '../controllers/ParticipantsController';
 import { PatreonController } from '../controllers/PatreonController';
 import { SettingsController } from '../controllers/SettingsController';
@@ -75,6 +76,7 @@ class ControllerContext {
   private readonly _assetsController: AssetsController;
   private readonly _mappingController: MappingController;
   private readonly _newsController: NewsController;
+  private readonly _optionsController: OptionsController;
 
   constructor(ctx: ApiContext) {
     this._versionController = new VersionController(ctx);
@@ -95,6 +97,7 @@ class ControllerContext {
     this._assetsController = new AssetsController(ctx);
     this._mappingController = new MappingController(ctx);
     this._newsController = new NewsController(ctx);
+    this._optionsController = new OptionsController(ctx);
   }
 
   get version(): VersionController {
@@ -167,6 +170,10 @@ class ControllerContext {
 
   get news(): NewsController {
     return this._newsController;
+  }
+
+  get options(): OptionsController {
+    return this._optionsController;
   }
 }
 
