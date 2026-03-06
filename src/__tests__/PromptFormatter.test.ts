@@ -5,9 +5,11 @@ import {
   BodyState,
   cleanupAIOutput,
   formatListToString,
+  formatWeather,
   formatWWProperties,
   hasWWProperties,
 } from 'main/sentient-sims/formatter/PromptFormatter';
+import { SSEnvironment } from 'main/sentient-sims/models/InteractionEvents';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
@@ -225,6 +227,136 @@ describe('Output', () => {
     });
   });
 
+  describe('formatWeather', () => {
+    let environment: SSEnvironment;
+
+    beforeEach(() => {
+      environment = {
+        location_id: 0,
+        world_id: 0,
+        time: { second: 0, minute: 0, hour: 12, day: 3, week: 1 },
+      };
+    });
+
+    it('returns undefined when weather is not present', () => {
+      expect(formatWeather(environment)).toBeUndefined();
+    });
+
+    it('returns temperature only when no other conditions', () => {
+      environment.weather = {
+        temperature: 0,
+        temperature_name: 'Warm',
+        rain: 0,
+        snow: 0,
+        thunder: 0,
+        lightning: 0,
+        wind: 0,
+      };
+
+      const result = formatWeather(environment);
+      expect(result).toBe('<WEATHER>the temperature is warm.</WEATHER>');
+    });
+
+    it('includes rain when raining', () => {
+      environment.weather = {
+        temperature: -2,
+        temperature_name: 'Cold',
+        rain: 0.5,
+        snow: 0,
+        thunder: 0,
+        lightning: 0,
+        wind: 0,
+      };
+
+      const result = formatWeather(environment);
+      expect(result).toBe('<WEATHER>the temperature is cold, it is raining.</WEATHER>');
+    });
+
+    it('includes all active weather conditions', () => {
+      environment.weather = {
+        temperature: -3,
+        temperature_name: 'Freezing',
+        rain: 0,
+        snow: 0.6,
+        thunder: 0.4,
+        lightning: 0.3,
+        wind: 0.5,
+      };
+
+      const result = formatWeather(environment);
+      expect(result).toBe(
+        '<WEATHER>the temperature is freezing, it is snowing, there is thunder, there is lightning, it is windy.</WEATHER>',
+      );
+    });
+
+    it('includes rain and thunder storm', () => {
+      environment.weather = {
+        temperature: 1,
+        temperature_name: 'Hot',
+        rain: 0.7,
+        snow: 0,
+        thunder: 0.5,
+        lightning: 0.4,
+        wind: 0.6,
+      };
+
+      const result = formatWeather(environment);
+      expect(result).toBe(
+        '<WEATHER>the temperature is hot, it is raining, there is thunder, there is lightning, it is windy.</WEATHER>',
+      );
+    });
+
+    it('includes cloud type when present', () => {
+      environment.weather = {
+        temperature: -1,
+        temperature_name: 'Cool',
+        rain: 0,
+        snow: 0,
+        thunder: 0,
+        lightning: 0,
+        wind: 0,
+        cloud_type: 'Clear',
+      };
+
+      const result = formatWeather(environment);
+      expect(result).toBe('<WEATHER>the sky is clear, the temperature is cool.</WEATHER>');
+    });
+
+    it('includes partly cloudy sky', () => {
+      environment.weather = {
+        temperature: -1,
+        temperature_name: 'Cool',
+        rain: 0,
+        snow: 0,
+        thunder: 0,
+        lightning: 0,
+        wind: 0,
+        cloud_type: 'Partly Cloudy',
+      };
+
+      const result = formatWeather(environment);
+      expect(result).toBe('<WEATHER>the sky is partly cloudy, the temperature is cool.</WEATHER>');
+    });
+
+    it('includes dark rainclouds with rain', () => {
+      environment.weather = {
+        temperature: -2,
+        temperature_name: 'Cold',
+        rain: 0.5,
+        snow: 0,
+        thunder: 0.4,
+        lightning: 0.3,
+        wind: 0,
+        cloud_type: 'Dark Rainclouds',
+      };
+
+      const result = formatWeather(environment);
+      expect(result).toBe(
+        '<WEATHER>the sky is dark rainclouds, the temperature is cold, it is raining, there is thunder, there is lightning.</WEATHER>',
+      );
+    });
+  });
+
   describe('OpenAIRequestBuilder', () => {
     const builder = new OpenAIRequestBuilder(new OpenAITokenCounter());
     let request: PromptRequest;
@@ -286,6 +418,23 @@ describe('Output', () => {
         tokenCount += message.tokens;
       });
       console.log(`Tokens: ${tokenCount}`);
+    });
+
+    it('buildOpenAIRequest includes weather in system message', () => {
+      request.weather = '<WEATHER>the temperature is cold, it is raining.</WEATHER>';
+      const result = builder.buildOpenAIRequest(request);
+
+      expect(result.messages[0].content).toContain('<WEATHER>the temperature is cold, it is raining.</WEATHER>');
+      expect(result.messages[0].content).toContain('Eternal Summer');
+      expect(result.messages[0].content).toContain('location');
+    });
+
+    it('buildOpenAIRequest excludes weather when undefined', () => {
+      const result = builder.buildOpenAIRequest(request);
+
+      expect(result.messages[0].content).not.toContain('<WEATHER>');
+      expect(result.messages[0].content).toContain('Eternal Summer');
+      expect(result.messages[0].content).toContain('The day is Monday at 7:51 AM.');
     });
 
     it('buildOpenAIRequest test length', () => {

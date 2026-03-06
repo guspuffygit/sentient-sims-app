@@ -18,6 +18,7 @@ export type PromptRequest = {
   location: string;
   dateTime: string;
   season: string;
+  weather?: string;
   participants: string;
   systemPrompt: string;
   memories: FormattedMemoryMessage[];
@@ -72,13 +73,14 @@ export class OpenAIRequestBuilder {
   }
 
   buildOpenAIRequest(promptRequest: PromptRequest): OpenAICompatibleRequest {
-    const systemMessageContent = [
+    const systemMessageContent = filterNullAndUndefined([
       promptRequest.systemPrompt,
       promptRequest.location,
       promptRequest.dateTime,
       promptRequest.season,
+      promptRequest.weather,
       promptRequest.participants,
-    ].join('\n\n');
+    ]).join('\n\n');
     const systemMessage: OpenAIMessage = {
       role: 'system',
       content: systemMessageContent,

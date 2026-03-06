@@ -45,11 +45,22 @@ export type SSSeason = {
   season_segment: SSSeasonSegment;
 };
 
+export type SSWeather = {
+  temperature: number;
+  temperature_name: string;
+  rain: number;
+  snow: number;
+  thunder: number;
+  lightning: number;
+  wind: number;
+  cloud_type?: string;
+};
+
 export type SSEnvironment = {
   location_id: number;
   world_id: number;
   time: SSTime;
-  weather?: any;
+  weather?: SSWeather;
   season?: SSSeason;
 };
 

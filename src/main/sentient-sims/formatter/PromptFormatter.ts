@@ -2,7 +2,7 @@ import { LocationEntity } from '../db/entities/LocationEntity';
 import { getCareerTrackLevel } from '../descriptions/careerDescriptions';
 import { moodDescriptions } from '../descriptions/moodDescriptions';
 import { getSexCategory, getSexLocation } from '../descriptions/wwDescriptions';
-import { SSEnvironment, SSSeasonSegment, SSSeasonType } from '../models/InteractionEvents';
+import { SSEnvironment, SSSeasonSegment, SSSeasonType, SSWeather } from '../models/InteractionEvents';
 import { SentientSim } from '../models/SentientSim';
 import { SimAge } from '../models/SimAge';
 import { removeEmojis } from '../util/filter';
@@ -528,4 +528,45 @@ export function formatSeason(environment: SSEnvironment): string {
   }
 
   return `<SEASON>${segmentString} ${seasonString}</SEASON>`;
+}
+
+function formatWeatherConditions(weather: SSWeather): string[] {
+  const conditions: string[] = [];
+
+  if (weather.cloud_type) {
+    conditions.push(`the sky is ${weather.cloud_type.toLowerCase()}`);
+  }
+
+  conditions.push(`the temperature is ${weather.temperature_name.toLowerCase()}`);
+
+  if (weather.rain > 0) {
+    conditions.push('it is raining');
+  }
+
+  if (weather.snow > 0) {
+    conditions.push('it is snowing');
+  }
+
+  if (weather.thunder > 0) {
+    conditions.push('there is thunder');
+  }
+
+  if (weather.lightning > 0) {
+    conditions.push('there is lightning');
+  }
+
+  if (weather.wind > 0) {
+    conditions.push('it is windy');
+  }
+
+  return conditions;
+}
+
+export function formatWeather(environment: SSEnvironment): string | undefined {
+  if (!environment.weather) {
+    return undefined;
+  }
+
+  const conditions = formatWeatherConditions(environment.weather);
+  return `<WEATHER>${conditions.join(', ')}.</WEATHER>`;
 }

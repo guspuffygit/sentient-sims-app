@@ -1,5 +1,11 @@
 import log from 'electron-log';
-import { formatAction, formatSentientSim, formatDateTime, formatSeason } from '../formatter/PromptFormatter';
+import {
+  formatAction,
+  formatSentientSim,
+  formatDateTime,
+  formatSeason,
+  formatWeather,
+} from '../formatter/PromptFormatter';
 import { SSEvent, SSRelationships } from '../models/InteractionEvents';
 import { getSystemPrompt } from '../systemPrompts';
 import { ApiType } from '../models/ApiType';
@@ -238,6 +244,7 @@ export class PromptRequestBuilderService {
 
     const dateTime = formatDateTime(event.environment);
     const season = formatSeason(event.environment);
+    const weather = formatWeather(event.environment);
     const postures = this.formatSimPostures(event.sentient_sims);
 
     let formattedAction;
@@ -356,6 +363,7 @@ export class PromptRequestBuilderService {
       location: formattedLocation,
       dateTime,
       season,
+      weather,
       memories: groupedMemories,
       action: formattedAction,
       maxResponseTokens,
