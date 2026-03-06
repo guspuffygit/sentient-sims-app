@@ -114,6 +114,8 @@ jobs:
           codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/Electron Framework.framework"
           codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/Squirrel.framework/Versions/A/Squirrel"
           codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/Squirrel.framework"
+          codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/ReactiveObjC.framework/Versions/A/ReactiveObjC"
+          codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/Frameworks/ReactiveObjC.framework"
           codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP/Contents/MacOS/SentientSims"
           codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --verbose=4 --sign "$IDENTITY" "$APP"
 
