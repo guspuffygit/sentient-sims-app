@@ -52,4 +52,54 @@ describe('OptionsController', () => {
     const body = await res.json();
     expect(body).toEqual({ modsEnabled: null, scriptModsOn: null });
   });
+
+  it('fix returns 404 when Options.ini does not exist', async () => {
+    const sims4Folder = ctx.directory.getSims4Folder();
+    const optionsPath = `${sims4Folder}/Options.ini`;
+    if (fs.existsSync(optionsPath)) fs.unlinkSync(optionsPath);
+
+    const res = await fetch(`${apiUrl}/options/fix`, { method: 'POST' });
+    expect(res.status).toBe(404);
+  });
+
+  it('fix updates existing wrong values', async () => {
+    const sims4Folder = ctx.directory.getSims4Folder();
+    fs.mkdirSync(sims4Folder, { recursive: true });
+    fs.writeFileSync(`${sims4Folder}/Options.ini`, 'modsdisabled = 1\nscriptmodsenabled = 0\n');
+
+    const res = await fetch(`${apiUrl}/options/fix`, { method: 'POST' });
+    const body = await res.json();
+    expect(body).toEqual({ modsEnabled: true, scriptModsOn: true });
+
+    const content = fs.readFileSync(`${sims4Folder}/Options.ini`, 'utf-8');
+    expect(content).toContain('modsdisabled = 0');
+    expect(content).toContain('scriptmodsenabled = 1');
+  });
+
+  it('fix adds missing settings', async () => {
+    const sims4Folder = ctx.directory.getSims4Folder();
+    fs.writeFileSync(`${sims4Folder}/Options.ini`, 'someothersetting = 5\n');
+
+    const res = await fetch(`${apiUrl}/options/fix`, { method: 'POST' });
+    const body = await res.json();
+    expect(body).toEqual({ modsEnabled: true, scriptModsOn: true });
+
+    const content = fs.readFileSync(`${sims4Folder}/Options.ini`, 'utf-8');
+    expect(content).toContain('someothersetting = 5');
+    expect(content).toContain('modsdisabled = 0');
+    expect(content).toContain('scriptmodsenabled = 1');
+  });
+
+  it('fix preserves already correct values', async () => {
+    const sims4Folder = ctx.directory.getSims4Folder();
+    const original = 'modsdisabled = 0\nscriptmodsenabled = 1\n';
+    fs.writeFileSync(`${sims4Folder}/Options.ini`, original);
+
+    const res = await fetch(`${apiUrl}/options/fix`, { method: 'POST' });
+    const body = await res.json();
+    expect(body).toEqual({ modsEnabled: true, scriptModsOn: true });
+
+    const content = fs.readFileSync(`${sims4Folder}/Options.ini`, 'utf-8');
+    expect(content).toBe(original);
+  });
 });
