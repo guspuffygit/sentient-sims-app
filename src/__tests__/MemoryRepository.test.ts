@@ -100,4 +100,87 @@ describe('MemoryRepository', () => {
     });
     expect(throwsError).toThrow();
   });
+
+  it('should store interaction_name from normal interactions', async () => {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
+      recursive: true,
+    });
+    await ctx.db.loadDatabase({
+      sessionId: '1111111',
+      saveId: '1',
+    });
+
+    const memory: MemoryEntity = {
+      location_id: 12345,
+      pre_action: 'test pre action',
+      content: 'test content',
+      interaction_name: 'mixer_social_GossipAbout',
+    };
+    const result = ctx.memoryRepository.createMemory({
+      memory,
+      participants: [{ id: '100' }],
+    });
+
+    expect(result.interaction_name).toEqual('mixer_social_GossipAbout');
+
+    const fetched = ctx.memoryRepository.getMemory({ id: Number(result.id) });
+    expect(fetched.interaction_name).toEqual('mixer_social_GossipAbout');
+  });
+
+  it('should store interaction_name from wicked whims animation_name', async () => {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
+      recursive: true,
+    });
+    await ctx.db.loadDatabase({
+      sessionId: '2222222',
+      saveId: '1',
+    });
+
+    const memory: MemoryEntity = {
+      location_id: 67890,
+      pre_action: 'ww pre action',
+      content: 'ww content',
+      interaction_name: 'some_animation_name',
+    };
+    const result = ctx.memoryRepository.createMemory({
+      memory,
+      participants: [{ id: '200' }, { id: '201' }],
+    });
+
+    expect(result.interaction_name).toEqual('some_animation_name');
+
+    const fetched = ctx.memoryRepository.getMemory({ id: Number(result.id) });
+    expect(fetched.interaction_name).toEqual('some_animation_name');
+  });
+
+  it('should update interaction_name', async () => {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
+      recursive: true,
+    });
+    await ctx.db.loadDatabase({
+      sessionId: '3333333',
+      saveId: '1',
+    });
+
+    const memory: MemoryEntity = {
+      location_id: 11111,
+      pre_action: 'pre action',
+      content: 'content',
+      interaction_name: 'original_name',
+    };
+    const result = ctx.memoryRepository.createMemory({
+      memory,
+      participants: [{ id: '300' }],
+    });
+
+    memory.id = result.id;
+    memory.interaction_name = 'updated_name';
+    ctx.memoryRepository.updateMemory(memory);
+
+    const updated = ctx.memoryRepository.getMemory({ id: Number(result.id) });
+    expect(updated.interaction_name).toEqual('updated_name');
+  });
 });

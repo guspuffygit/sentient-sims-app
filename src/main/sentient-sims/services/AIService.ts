@@ -242,8 +242,11 @@ export class AIService {
     if (promptRequest.action) {
       newMemory.action = promptRequest.action;
     }
+
     if ('interaction_name' in event) {
-      newMemory.interaction_name = (event as any).interaction_name;
+      newMemory.interaction_name = event.interaction_name;
+    } else if ('animation_name' in event) {
+      newMemory.interaction_name = event.animation_name;
     }
 
     getInputFormatters(promptOptions.apiType).forEach((formatter) => {
