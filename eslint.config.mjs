@@ -1,9 +1,9 @@
 import { defineConfig, globalIgnores } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 import eslint from '@eslint/js';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
+import eslintReact from '@eslint-react/eslint-plugin';
+import importX from 'eslint-plugin-import-x';
 import globals from 'globals';
-import reactPlugin from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 // @ts-expect-error there are no types for this and it works fine
 import pluginPromise from 'eslint-plugin-promise';
@@ -12,64 +12,31 @@ import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 
 export default defineConfig([
   eslint.configs.recommended,
-  tseslint.configs.recommended,
+  tseslint.configs.strictTypeChecked,
   reactHooks.configs.flat.recommended,
+  eslintReact.configs['recommended-type-checked'],
+  importX.flatConfigs.recommended,
+  importX.flatConfigs.typescript,
+  importX.flatConfigs.electron,
+  pluginPromise.configs['flat/recommended'],
+  eslintConfigPrettier,
+  eslintPluginPrettierRecommended,
   {
     files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],
-    ...jsxA11y.flatConfigs.recommended,
     languageOptions: {
-      ...jsxA11y.flatConfigs.recommended.languageOptions,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
       globals: {
         ...globals.serviceworker,
         ...globals.browser,
       },
     },
   },
-  eslintConfigPrettier,
-  eslintPluginPrettierRecommended,
-  reactPlugin.configs.flat.recommended,
-  reactPlugin.configs.flat['jsx-runtime'],
-  pluginPromise.configs['flat/recommended'],
-  // {
-  //   extends: ['erb'],
-  //   // plugins: { tseslint },
-  //   rules: {
-  //     // A temporary hack related to IDE not resolving correct package.json
-  //     'import/no-extraneous-dependencies': 'off',
-  //     'react/react-in-jsx-scope': 'off',
-  //     'react/jsx-filename-extension': 'off',
-  //     'import/extensions': 'off',
-  //     'import/no-unresolved': 'off',
-  //     'import/no-import-module-exports': 'off',
-  //     'no-shadow': 'off',
-  //     '@typescript-eslint/no-shadow': 'error',
-  //     'no-unused-vars': 'off',
-  //     '@typescript-eslint/no-unused-vars': 'error',
-  //     'jest/expect-expect': 'off',
-  //   },
-  //   settings: {
-  //     'import/resolver': {
-  //       // See https://github.com/benmosher/eslint-plugin-import/issues/1396#issuecomment-575727774 for line below
-  //       node: {},
-  //       webpack: {
-  //         config: eslintConfig,
-  //       },
-  //       typescript: {},
-  //     },
-  //     'import/parsers': {
-  //       '@typescript-eslint/parser': ['.ts', '.tsx'],
-  //     },
-  //   },
-  // },
   {
     files: ['**/*'],
     rules: {
-      'import/no-extraneous-dependencies': 'off',
-      'react/react-in-jsx-scope': 'off',
-      'react/jsx-filename-extension': 'off',
-      'import/extensions': 'off',
-      'import/no-unresolved': 'off',
-      'import/no-import-module-exports': 'off',
       'no-shadow': 'off',
       '@typescript-eslint/no-shadow': 'error',
       'no-unused-vars': 'off',
