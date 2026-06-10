@@ -7,12 +7,7 @@ It also manages game state, saves, memories, locations, and participants via a l
 Commands:
   npm run start       Dev mode (renderer dev server + main process)
   npm run build       Production build (main + renderer via webpack)
-  npm run lint        ESLint with flat config
-  npm run compile     TypeScript type-check (tsc --noEmit --skipLibCheck)
-  npm run check       Lint + compile + test (full CI check)
-  npm run test        All tests (unit + integration)
-  npm run test:unit   Unit tests only (excludes *.it.test.* files)
-  npm run test:watch  Watch mode for unit tests
+  AWS_PROFILE=sentientsims npm run check Run all the compile, integration/unit tests, and eslint. Run this after each change to verify
 
 Single test: edit the regex in test:single or run directly:
   cross-env ELECTRON_RUN_AS_NODE=true NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" JEST_DISABLE_COVERAGE=true ./node_modules/.bin/electron ./node_modules/.bin/jest 'YourTest.test.ts'
