@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import * as fs from 'fs';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
@@ -95,7 +94,7 @@ describe('MemoryRepository', () => {
     const noResultsDeleteAll = ctx.memoryRepository.getMemories();
     expect(noResultsDeleteAll).toHaveLength(0);
 
-    const throwsError = jest.fn(() => {
+    const throwsError = vi.fn(() => {
       ctx.memoryRepository.getMemory({ id: 99999 });
     });
     expect(throwsError).toThrow();

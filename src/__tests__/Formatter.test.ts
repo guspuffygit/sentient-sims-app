@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { removeLastParagraph, trimIncompleteSentence } from 'main/sentient-sims/formatter/PromptFormatter';
 import { removeNonPrintableCharacters } from 'main/sentient-sims/util/filter';
 import { epochToFormattedDate, formatLog } from 'main/sentient-sims/util/format';
@@ -22,7 +21,7 @@ describe('PromptFormatter', () => {
   });
 
   it('epochToFormattedDate', () => {
-    const throwError = jest.fn(() => {
+    const throwError = vi.fn(() => {
       epochToFormattedDate('invalid date');
     });
     expect(throwError).toThrow('Invalid epoch string');

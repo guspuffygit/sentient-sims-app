@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 import { NovelAIService } from 'main/sentient-sims/services/NovelAIService';

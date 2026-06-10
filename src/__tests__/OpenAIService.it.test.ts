@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { OpenAIService } from 'main/sentient-sims/services/OpenAIService';
 import { OneShotRequest, OpenAIRequestBuilder, PromptRequest } from 'main/sentient-sims/models/OpenAIRequestBuilder';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';

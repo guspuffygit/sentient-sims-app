@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { OpenAIService } from 'main/sentient-sims/services/OpenAIService';
 import { mockApiContext } from './util';
 

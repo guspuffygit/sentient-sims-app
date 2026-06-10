@@ -9,11 +9,13 @@ Commands:
   npm run build       Production build (main + preload + renderer via electron-vite)
   AWS_PROFILE=sentientsims npm run check Run all the compile, integration/unit tests, and eslint. Run this after each change to verify
 
-Single test: edit the regex in test:single or run directly:
-  cross-env ELECTRON_RUN_AS_NODE=true NODE_OPTIONS="$NODE_OPTIONS --experimental-vm-modules" JEST_DISABLE_COVERAGE=true ./node_modules/.bin/electron ./node_modules/.bin/jest 'YourTest.test.ts'
+Single test: edit the filename filter in test:single or run directly (Vitest takes a substring filename filter):
+  cross-env NODE_ENV=test ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/vitest run YourTest
 
-Tests run through Electron's Node runtime (ELECTRON_RUN_AS_NODE=true) with Jest.
-Integration tests (.it.test.ts) require OPENAI_KEY env var.
+Tests run through Electron's Node runtime (ELECTRON_RUN_AS_NODE=true) with Vitest (config in vitest.config.ts,
+setup in vitest.setup.ts). This is required because the native better-sqlite3 addon is built for Electron's ABI,
+not system Node's. Vitest runs files serially (fileParallelism: false) to avoid Express port collisions.
+Integration tests (.it.test.ts) require OPENAI_KEY env var; the AWS-backed tests in Api.test.ts need AWS_PROFILE=sentientsims.
 
 Architecture:
 

@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import * as fs from 'fs';
 import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
 import { mockApiContext } from './util';

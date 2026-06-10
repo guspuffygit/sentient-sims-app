@@ -5,7 +5,7 @@ import { containsPlayerSim } from 'main/sentient-sims/util/eventContainsPlayerSi
 import { filterNullAndUndefined, removeEmojis } from 'main/sentient-sims/util/filter';
 import { getRandomItem } from 'main/sentient-sims/util/getRandomItem';
 import { stringType } from 'main/sentient-sims/util/typeChecks';
-import { describe, test, expect } from '@jest/globals';
+import { describe, test, expect } from 'vitest';
 
 describe('Util', () => {
   test('filterNullAndUndefined removes null and undefined values from list', () => {

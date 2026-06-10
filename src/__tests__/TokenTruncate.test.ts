@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { OpenAIMessage } from 'main/sentient-sims/models/OpenAIMessage';
 import { arraysAreEqual, truncateMessages } from 'main/sentient-sims/util/tokenTruncate';
 

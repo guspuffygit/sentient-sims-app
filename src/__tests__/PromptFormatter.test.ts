@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { InteractionEvent, SSEventType } from 'main/sentient-sims/models/InteractionEvents';
 import * as fs from 'fs';
 import {

@@ -1,9 +1,8 @@
-import '@testing-library/jest-dom';
 import fs from 'fs';
 import { Version } from 'main/sentient-sims/services/VersionService';
 import path from 'path';
 import { mockApiContext } from './util';
-import { describe, test, expect } from '@jest/globals';
+import { describe, test, expect } from 'vitest';
 
 describe('Version Service', () => {
   test('get modVersion', () => {

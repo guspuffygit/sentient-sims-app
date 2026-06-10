@@ -1,5 +1,4 @@
 import { defineConfig, globalIgnores } from 'eslint/config';
-import pluginJest from 'eslint-plugin-jest';
 import tseslint from 'typescript-eslint';
 import eslint from '@eslint/js';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
@@ -15,10 +14,6 @@ export default defineConfig([
   eslint.configs.recommended,
   tseslint.configs.recommended,
   reactHooks.configs.flat.recommended,
-  {
-    files: ['**/*.test.ts'],
-    plugins: { jest: pluginJest },
-  },
   {
     files: ['**/*.{js,mjs,cjs,jsx,mjsx,ts,tsx,mtsx}'],
     ...jsxA11y.flatConfigs.recommended,
@@ -79,7 +74,6 @@ export default defineConfig([
       '@typescript-eslint/no-shadow': 'error',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'error',
-      'jest/expect-expect': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },

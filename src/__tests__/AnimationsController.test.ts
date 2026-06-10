@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import { Request, Response } from 'express';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { mockEnvironment } from './util';
@@ -27,8 +26,8 @@ describe('AnimationsController', () => {
 
     const req = {} as Request;
     const res = {
-      status: jest.fn(() => res),
-      json: jest.fn(),
+      status: vi.fn(() => res),
+      json: vi.fn(),
     } as unknown as Response;
 
     await ctx.controller.animations.isNsfwEnabled(req, res);
@@ -42,8 +41,8 @@ describe('AnimationsController', () => {
 
     const req = {} as Request;
     const res = {
-      status: jest.fn(() => res),
-      json: jest.fn(),
+      status: vi.fn(() => res),
+      json: vi.fn(),
     } as unknown as Response;
 
     await ctx.controller.animations.isNsfwEnabled(req, res);
@@ -57,8 +56,8 @@ describe('AnimationsController', () => {
 
     const req = {} as Request;
     const res = {
-      status: jest.fn(() => res),
-      json: jest.fn(),
+      status: vi.fn(() => res),
+      json: vi.fn(),
     } as unknown as Response;
 
     await ctx.controller.animations.isNsfwEnabled(req, res);

@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { DirectoryService } from 'main/sentient-sims/services/DirectoryService';
 import { SettingsService, defaultStore } from 'main/sentient-sims/services/SettingsService';
 import path from 'path';
@@ -11,7 +12,7 @@ export function randomString() {
 export function mockDirectoryService(mockPath?: string, settingsService?: SettingsService): DirectoryService {
   const directoryService = new DirectoryService(settingsService ?? new SettingsService());
   const fakePath = mockPath ?? path.join(os.tmpdir(), 'sentient-sims-app-test', randomString());
-  jest.spyOn(directoryService, 'getModsFolder').mockImplementation(() => fakePath);
+  vi.spyOn(directoryService, 'getModsFolder').mockImplementation(() => fakePath);
   return directoryService;
 }
 

@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import fs from 'fs';
 import path from 'path';
 import { mockApiContext } from './util';

@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import * as fs from 'fs';
 import { DatabaseNotLoadedError } from 'main/sentient-sims/exceptions/DatabaseNotLoadedError';
 import { mockApiContext } from './util';

@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import * as fs from 'fs';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
 import { mockApiContext, randomString } from './util';

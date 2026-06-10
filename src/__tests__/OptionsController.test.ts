@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import * as fs from 'fs';
 import { IncomingMessage, Server, ServerResponse } from 'http';
 import { runApi } from 'main/sentient-sims/api';
