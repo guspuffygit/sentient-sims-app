@@ -13,7 +13,7 @@ import { ApiContext } from './services/ApiContext';
 
 function notifyAllWindows(message: string, ...args: any[]) {
   electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-    if (wnd.webContents?.isDestroyed() === false) {
+    if (!wnd.webContents?.isDestroyed()) {
       wnd.webContents.send(message, ...args);
     }
   });
@@ -101,7 +101,9 @@ export const startWebSocketServer = (ctx: ApiContext) => {
       }
 
       const formattedLog = formatLog(parsedData.log);
-      ctx.logs.appendLog([formattedLog]).catch((e: any) => log.error('Unable to append to logs.txt', e));
+      ctx.logs.appendLog([formattedLog]).catch((e: any) => {
+        log.error('Unable to append to logs.txt', e);
+      });
       if (rendererWs) {
         rendererWs.send(JSON.stringify(parsedData));
       }

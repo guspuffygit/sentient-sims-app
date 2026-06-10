@@ -138,7 +138,9 @@ export default function TraitsPage() {
         }
         setSelectedIndex(0);
       })
-      .finally(() => setLoadingTraits(false));
+      .finally(() => {
+        setLoadingTraits(false);
+      });
   }, [extractedPath.value, filterTraitType]);
 
   const updateIgnored = (value: number | string) => {
@@ -165,7 +167,7 @@ export default function TraitsPage() {
     updateIgnored(event.target.value);
   };
 
-  const handleChangeTraitType = (event: SelectChangeEvent<string>) => {
+  const handleChangeTraitType = (event: SelectChangeEvent) => {
     const newFilterType = event.target.value;
     setFilterTraitType(newFilterType);
     setSelectedIndex(0);
@@ -290,7 +292,9 @@ export default function TraitsPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(exportTraitsRequest),
-    }).finally(() => setLoadingExport(false));
+    }).finally(() => {
+      setLoadingExport(false);
+    });
   };
 
   const xml: string | string[] = getFormattedXml(filteredTraits[selectedIndex]?.xml);

@@ -6,7 +6,7 @@ import { mockApiContext } from './util';
 describe('OptionsController', () => {
   const ctx = mockApiContext({ port: 25199 });
   const apiUrl = `http://localhost:${ctx.port}`;
-  let server: Server<typeof IncomingMessage, typeof ServerResponse>;
+  let server: Server;
 
   beforeAll(() => {
     server = runApi(ctx);
@@ -14,7 +14,9 @@ describe('OptionsController', () => {
 
   afterAll(async () => {
     await new Promise<void>((resolve, reject) => {
-      server.close((err: any) => (err ? reject(err) : resolve()));
+      server.close((err: any) => {
+        err ? reject(err) : resolve();
+      });
     });
   });
 

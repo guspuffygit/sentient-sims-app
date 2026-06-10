@@ -6,7 +6,7 @@ export default function registerDebugToggleHotkey() {
     log.info('Control+Shift+D is pressed');
 
     electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-      if (wnd.webContents?.isDestroyed() === false) {
+      if (!wnd.webContents?.isDestroyed()) {
         wnd.webContents.send('debug-mode-toggle');
       }
     });

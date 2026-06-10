@@ -19,7 +19,7 @@ interface AuthContextType {
   user?: AuthUser;
   userAttributes?: AuthUserAttributes;
   loading: boolean;
-  signOut: (data?: AuthEventData | undefined) => void;
+  signOut: (data?: AuthEventData) => void;
   refreshUserAttributes: () => Promise<void>;
 }
 

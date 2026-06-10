@@ -147,7 +147,9 @@ export const useAnnouncements = () => {
 
     const intervalId = setInterval(fetchAnnouncements, 3 * 60 * 1000);
 
-    return () => clearInterval(intervalId);
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   return data;
@@ -162,7 +164,9 @@ export const Announcements = () => {
       bottomRef.current?.scrollIntoView();
     }, 50);
 
-    return () => clearTimeout(scrollTimeout);
+    return () => {
+      clearTimeout(scrollTimeout);
+    };
   }, [announcements]);
 
   const cards: JSX.Element[] = useMemo(() => {

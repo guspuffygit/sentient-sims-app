@@ -139,9 +139,7 @@ export type ChatInteractionEvent = SSEvent & {
 export type InteractionEvents =
   | WWInteractionEvent
   | WantsInteractionEvent
-  | ContinueInteractionEvent
   | InteractionEvent
   | DoSomethingInteractionEvent
   | InteractionMappingEvent
-  | ChatInteractionEvent
-  | ChatContinueInteractionEvent;
+  | ChatInteractionEvent;

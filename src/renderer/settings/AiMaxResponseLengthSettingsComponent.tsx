@@ -27,7 +27,7 @@ export function AiMaxResponseLengthSettingsComponent() {
         <Slider
           aria-label="Volume"
           value={maxResponseTokens.value}
-          onChange={(change, value) => maxResponseTokens.setSetting(value as number)}
+          onChange={(change, value) => maxResponseTokens.setSetting(value)}
           step={1}
           min={30}
           max={600}

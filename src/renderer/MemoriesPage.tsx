@@ -69,7 +69,9 @@ export default function MemoriesPage() {
   function getMemories() {
     client.memories
       .getMemories()
-      .then((memoriesResponse) => setMemories(memoriesResponse))
+      .then((memoriesResponse) => {
+        setMemories(memoriesResponse);
+      })
       .catch(() => {
         // ignore
       });
@@ -223,7 +225,13 @@ export default function MemoriesPage() {
 
     memories.forEach((memory, index) => {
       renderText.push(
-        <Typography variant="body2" onClick={() => handleSetSelectedMemory(index)} className="hoverHighlightTypography">
+        <Typography
+          variant="body2"
+          onClick={() => {
+            handleSetSelectedMemory(index);
+          }}
+          className="hoverHighlightTypography"
+        >
           {[memory.observation, memory.action, memory.content].filter((m) => m).join('\n')}
         </Typography>,
       );
@@ -248,7 +256,13 @@ export default function MemoriesPage() {
                 <Button sx={{ marginRight: 1 }} color="secondary" variant="outlined" onClick={() => handleSave()}>
                   Save
                 </Button>
-                <Button color="secondary" variant="outlined" onClick={() => handleSetSelectedMemory(-1)}>
+                <Button
+                  color="secondary"
+                  variant="outlined"
+                  onClick={() => {
+                    handleSetSelectedMemory(-1);
+                  }}
+                >
                   Cancel
                 </Button>
               </div>
@@ -275,8 +289,12 @@ export default function MemoriesPage() {
                 label={editedMemory.memory.interaction_name}
                 size="small"
                 variant="outlined"
-                onClick={() => copyInteractionName(editedMemory.memory.interaction_name!)}
-                onDelete={() => copyInteractionName(editedMemory.memory.interaction_name!)}
+                onClick={() => {
+                  copyInteractionName(editedMemory.memory.interaction_name!);
+                }}
+                onDelete={() => {
+                  copyInteractionName(editedMemory.memory.interaction_name!);
+                }}
                 deleteIcon={<ContentCopyIcon fontSize="small" />}
                 sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}
               />
@@ -306,8 +324,12 @@ export default function MemoriesPage() {
     return (
       <div>
         <Card
-          onMouseEnter={() => setMemoriesFocused(true)}
-          onMouseLeave={() => setMemoriesFocused(false)}
+          onMouseEnter={() => {
+            setMemoriesFocused(true);
+          }}
+          onMouseLeave={() => {
+            setMemoriesFocused(false);
+          }}
           sx={{
             minWidth: 275,
             maxHeight: editedMemory ? 400 : 700,
@@ -324,7 +346,9 @@ export default function MemoriesPage() {
         <Snackbar
           open={copiedSnackbar}
           autoHideDuration={1500}
-          onClose={() => setCopiedSnackbar(false)}
+          onClose={() => {
+            setCopiedSnackbar(false);
+          }}
           message="Copied to clipboard"
         />
       </div>
@@ -337,7 +361,9 @@ export default function MemoriesPage() {
       <Snackbar
         open={copiedSnackbar}
         autoHideDuration={1500}
-        onClose={() => setCopiedSnackbar(false)}
+        onClose={() => {
+          setCopiedSnackbar(false);
+        }}
         message="Copied to clipboard"
       />
     </>

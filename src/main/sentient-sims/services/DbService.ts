@@ -164,12 +164,14 @@ export class DbService {
     this.db = undefined;
 
     // Cleanup unsaved databases
-    this.ctx.directory.listSentientSimsDbUnsaved().forEach((unsavedDb) => fs.rmSync(unsavedDb));
+    this.ctx.directory.listSentientSimsDbUnsaved().forEach((unsavedDb) => {
+      fs.rmSync(unsavedDb);
+    });
 
     this.databaseSession = null;
 
     electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-      if (wnd.webContents?.isDestroyed() === false) {
+      if (!wnd.webContents?.isDestroyed()) {
         log.debug('Sending database unloaded');
         wnd.webContents.send('on-database-unloaded');
       }

@@ -27,7 +27,9 @@ export function MemoryEditInput({ rows, value, label, handleEdit, forceShow = fa
         multiline
         rows={rows}
         value={value}
-        onChange={(event) => handleEdit(event)}
+        onChange={(event) => {
+          handleEdit(event);
+        }}
         size="small"
         label={label}
         fullWidth

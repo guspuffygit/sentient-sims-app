@@ -70,15 +70,15 @@ export class AIService {
       case SSEventType.CHAT:
         return this.handleChat(event as ChatInteractionEvent);
       case SSEventType.CHAT_CONTINUE:
-        return this.handleChatContinue(event as ChatContinueInteractionEvent);
+        return this.handleChatContinue(event);
       case SSEventType.INTERACTION:
         return this.handleInteraction(event as InteractionEvent);
       case SSEventType.WICKED_WHIMS:
         return this.handleWickedWhims(event as WWInteractionEvent);
       case SSEventType.WANTS:
-        return this.handleWants(event as WantsInteractionEvent);
+        return this.handleWants(event);
       case SSEventType.CONTINUE:
-        return this.handleContinue(event as ContinueInteractionEvent);
+        return this.handleContinue(event);
       case SSEventType.INTERACTION_MAPPING:
         return this.handleInteractionMapping(event as InteractionMappingEvent);
       default:

@@ -116,10 +116,22 @@ export default function ChatPage() {
                 <Button type="submit" onClick={() => onGenerateMultiple()} color="primary" endIcon={<SendIcon />}>
                   Send 10
                 </Button>
-                <Button onClick={() => addNewMessage('user')} color="primary" endIcon={<AddCircleIcon />}>
+                <Button
+                  onClick={() => {
+                    addNewMessage('user');
+                  }}
+                  color="primary"
+                  endIcon={<AddCircleIcon />}
+                >
                   Add User
                 </Button>
-                <Button onClick={() => addNewMessage('assistant')} color="primary" endIcon={<AddCircleIcon />}>
+                <Button
+                  onClick={() => {
+                    addNewMessage('assistant');
+                  }}
+                  color="primary"
+                  endIcon={<AddCircleIcon />}
+                >
                   Add Assistant
                 </Button>
               </div>
@@ -132,7 +144,12 @@ export default function ChatPage() {
                 >
                   <Grid>
                     {input ? (
-                      <Button onClick={() => onOpenInputView()} color="secondary">
+                      <Button
+                        onClick={() => {
+                          onOpenInputView();
+                        }}
+                        color="secondary"
+                      >
                         Event JSON
                       </Button>
                     ) : null}
@@ -162,7 +179,9 @@ export default function ChatPage() {
                 label="Max Output"
                 variant="outlined"
                 value={maxResponseTokensState[0]}
-                onChange={(change) => maxResponseTokensState[1](Number(change.target.value))}
+                onChange={(change) => {
+                  maxResponseTokensState[1](Number(change.target.value));
+                }}
                 sx={{ width: '100px' }}
               />
             </div>
@@ -170,7 +189,12 @@ export default function ChatPage() {
         )}
       </CardActions>
       {resultsModal.resultsModal}
-      <Modal open={openInputView} onClose={() => setOpenInputView(false)}>
+      <Modal
+        open={openInputView}
+        onClose={() => {
+          setOpenInputView(false);
+        }}
+      >
         <Box
           sx={{
             height: 650,
@@ -205,7 +229,9 @@ export default function ChatPage() {
       <Snackbar
         open={copiedSnackbar}
         autoHideDuration={1500}
-        onClose={() => setCopiedSnackbar(false)}
+        onClose={() => {
+          setCopiedSnackbar(false);
+        }}
         message="Copied to clipboard"
       />
     </>

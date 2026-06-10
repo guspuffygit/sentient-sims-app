@@ -25,8 +25,12 @@ export function useThankYous() {
   useEffect(() => {
     client.sentientSimulationsWebsite
       .getThankYous()
-      .then((response) => setThankYous(response))
-      .catch((err: unknown) => log.error(`Unable to fetch thank yous`, err));
+      .then((response) => {
+        setThankYous(response);
+      })
+      .catch((err: unknown) => {
+        log.error(`Unable to fetch thank yous`, err);
+      });
   }, []);
 
   return thankYous;

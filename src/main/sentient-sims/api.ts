@@ -102,5 +102,5 @@ export function runApi(ctx: ApiContext) {
 }
 
 export function runWebSocketServer(ctx: ApiContext) {
-  return startWebSocketServer(ctx);
+  startWebSocketServer(ctx);
 }

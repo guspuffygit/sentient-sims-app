@@ -1,8 +1,7 @@
 /* eslint no-alert: off, consistent-return: off, no-useless-return: off */
 import { useState } from 'react';
-import { Box, CardActions, IconButton, Tooltip, Typography } from '@mui/material';
+import { Box, CardActions, IconButton, Tooltip, Typography, Button } from '@mui/material';
 import CachedIcon from '@mui/icons-material/Cached';
-import { Button } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { ModUpdate } from 'main/sentient-sims/services/UpdateService';

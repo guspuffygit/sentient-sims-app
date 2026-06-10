@@ -23,7 +23,7 @@ export function SnackBarProvider({ children }: SnackBarProviderProps) {
     setOpen(true);
   }, []);
 
-  const handleClose = (event: React.SyntheticEvent<any, Event> | Event, reason?: string) => {
+  const handleClose = (event: React.SyntheticEvent<any> | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }

@@ -34,7 +34,7 @@ export default function ipcHandlers(ctx: ApiContext) {
   });
   ipcMain.on('on-successful-auth', () => {
     electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-      if (wnd.webContents?.isDestroyed() === false) {
+      if (!wnd.webContents?.isDestroyed()) {
         wnd.loadURL(resolveHtmlPath('index.html'));
       }
     });
@@ -45,7 +45,7 @@ export default function ipcHandlers(ctx: ApiContext) {
   ipcMain.on('paste-clipboard-to-api-key-button-click', () => {
     const clipboardResults = clipboard.readText();
     electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-      if (wnd.webContents?.isDestroyed() === false) {
+      if (!wnd.webContents?.isDestroyed()) {
         wnd.webContents.send('on-api-key-paste-from-clipboard', clipboardResults);
       }
     });

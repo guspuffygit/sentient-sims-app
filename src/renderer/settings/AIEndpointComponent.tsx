@@ -28,14 +28,18 @@ export function AIEndpointComponent({ type, selectedApiType, settingsEnum, onCha
     aiEndpoint.setSetting(value);
 
     if (onChange) {
-      inputDebounce(() => onChange(value), 600);
+      inputDebounce(() => {
+        onChange(value);
+      }, 600);
     }
   }
 
   async function reset() {
     await aiEndpoint.resetSetting();
     if (onChange) {
-      inputDebounce(() => onChange(aiEndpoint.value), 600);
+      inputDebounce(() => {
+        onChange(aiEndpoint.value);
+      }, 600);
     }
   }
 
@@ -56,7 +60,9 @@ export function AIEndpointComponent({ type, selectedApiType, settingsEnum, onCha
           value={aiEndpoint.value}
           size="small"
           fullWidth
-          onChange={(change) => handleChange(change.target.value)}
+          onChange={(change) => {
+            handleChange(change.target.value);
+          }}
           slotProps={{
             input: {
               endAdornment: (

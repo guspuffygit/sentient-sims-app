@@ -73,7 +73,9 @@ export function ElevenLabsVoiceSettingsComponent() {
               id="tts-models"
               label="TTS Model"
               value={sentientsimsaiTtsSettings.value.model}
-              onChange={(change) => handleModelChange(change.target.value)}
+              onChange={(change) => {
+                handleModelChange(change.target.value);
+              }}
             >
               {modelMenuItems}
             </Select>
@@ -111,7 +113,9 @@ export function ElevenLabsVoiceSettingsComponent() {
               variant="outlined"
               fullWidth
               value={sentientsimsaiTtsSettings.value.voice}
-              onChange={(change) => handleVoiceChange(change.target.value)}
+              onChange={(change) => {
+                handleVoiceChange(change.target.value);
+              }}
               sx={{ marginRight: 4 }}
             />
             <TestVoiceButton />

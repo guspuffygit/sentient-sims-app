@@ -39,7 +39,9 @@ export default function DebugCard() {
               minHeight: '30px',
             }}
             sx={{ marginLeft: 1 }}
-            onClick={() => onTest()}
+            onClick={() => {
+              onTest();
+            }}
             disabled={versions.loading || aiStatus.loading}
           >
             <CachedIcon />

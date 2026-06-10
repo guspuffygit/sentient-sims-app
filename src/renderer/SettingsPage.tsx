@@ -69,7 +69,9 @@ export default function SettingsPage() {
             endIcon={<ConstructionIcon />}
             variant="outlined"
             sx={{ mr: 2 }}
-            onClick={() => setupWizard.setOpen(true)}
+            onClick={() => {
+              setupWizard.setOpen(true);
+            }}
           >
             Setup Wizard
           </Button>

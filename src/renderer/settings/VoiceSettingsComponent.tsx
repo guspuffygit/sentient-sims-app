@@ -83,7 +83,7 @@ export default function VoiceSettingsComponent() {
                 <Slider
                   aria-label="Volume"
                   value={aiSettings.ttsVolume}
-                  onChange={(change, value) => aiSettings.ttsVolumeSetting.setSetting(value as number)}
+                  onChange={(change, value) => aiSettings.ttsVolumeSetting.setSetting(value)}
                   step={0.01}
                   min={0.0}
                   max={1}

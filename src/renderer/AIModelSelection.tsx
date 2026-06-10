@@ -1,8 +1,7 @@
-import { Box, FormHelperText, IconButton, MenuItem, Select, SelectChangeEvent, Tooltip } from '@mui/material';
+import { Box, FormHelperText, IconButton, MenuItem, Select, SelectChangeEvent, Tooltip, Button } from '@mui/material';
 import UndoIcon from '@mui/icons-material/Undo';
 import SyncIcon from '@mui/icons-material/Sync';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { Button } from '@mui/material';
 import { AIModel, compareAIModels } from 'main/sentient-sims/models/AIModel';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { useMemo, JSX } from 'react';

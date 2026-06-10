@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
-import { InteractionDTO } from '../db/dto/InteractionDTO';
+import { InteractionDTO, BasicInteraction } from '../db/dto/InteractionDTO';
 import { ApiContext } from '../services/ApiContext';
 import log from 'electron-log';
-import { BasicInteraction } from '../db/dto/InteractionDTO';
 
 export class InteractionDescriptionController {
   private readonly ctx: ApiContext;

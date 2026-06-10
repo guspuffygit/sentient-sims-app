@@ -14,9 +14,8 @@ import { InteractionEventResult } from 'main/sentient-sims/models/InteractionEve
 import log from 'electron-log';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { CreateMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
-import { InteractionDTO } from 'main/sentient-sims/db/dto/InteractionDTO';
+import { InteractionDTO, BasicInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
 import SpaceBetweenDiv from './SpaceBetweenDiv';
-import { BasicInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 
 type SimMappingRowProperties = {
@@ -57,7 +56,7 @@ export function replaceKeyValuePairs(
 
       const regex = new RegExp(`\\b${replacement.mapping}\\b`, 'gi');
 
-      return node.split(regex).reduce((acc, value, index, array) => {
+      return node.split(regex).reduce<ReactNode[]>((acc, value, index, array) => {
         acc.push(value);
         if (index < array.length - 1) {
           acc.push(
@@ -67,7 +66,7 @@ export function replaceKeyValuePairs(
           );
         }
         return acc;
-      }, [] as ReactNode[]);
+      }, []);
     });
   });
 
@@ -75,13 +74,13 @@ export function replaceKeyValuePairs(
     actionString = actionString.flatMap((node) => {
       const regex = new RegExp(`\\b${replacement.mapping}\\b`, 'gi');
 
-      return node.split(regex).reduce((acc, value, index, array) => {
+      return node.split(regex).reduce<string[]>((acc, value, index, array) => {
         acc.push(value);
         if (index < array.length - 1) {
           acc.push(replacement.actor);
         }
         return acc;
-      }, [] as string[]);
+      }, []);
     });
   });
 
@@ -97,7 +96,7 @@ export function replaceKeyValuePairs(
         foundError = true;
       }
 
-      return node.split(regex).reduce((acc, value, index, array) => {
+      return node.split(regex).reduce<ReactNode[]>((acc, value, index, array) => {
         acc.push(value);
         if (index < array.length - 1) {
           acc.push(
@@ -107,7 +106,7 @@ export function replaceKeyValuePairs(
           );
         }
         return acc;
-      }, [] as ReactNode[]);
+      }, []);
     });
   });
 
@@ -126,19 +125,67 @@ export function SimMappingRow({ sentientSim, setInput }: SimMappingRowProperties
 
   return (
     <Box>
-      <Button onClick={() => add(`${sentientSim.name}`)}>{sentientSim.name}</Button>
+      <Button
+        onClick={() => {
+          add(sentientSim.name);
+        }}
+      >
+        {sentientSim.name}
+      </Button>
       {sentientSim.gender === 'Male' ? (
         <>
-          <Button onClick={() => add(`he.${sentientSim.name}`)}>he</Button>
-          <Button onClick={() => add(`him.${sentientSim.name}`)}>him</Button>
-          <Button onClick={() => add(`his.${sentientSim.name}`)}>his</Button>
-          <Button onClick={() => add(`himself.${sentientSim.name}`)}>himself</Button>
+          <Button
+            onClick={() => {
+              add(`he.${sentientSim.name}`);
+            }}
+          >
+            he
+          </Button>
+          <Button
+            onClick={() => {
+              add(`him.${sentientSim.name}`);
+            }}
+          >
+            him
+          </Button>
+          <Button
+            onClick={() => {
+              add(`his.${sentientSim.name}`);
+            }}
+          >
+            his
+          </Button>
+          <Button
+            onClick={() => {
+              add(`himself.${sentientSim.name}`);
+            }}
+          >
+            himself
+          </Button>
         </>
       ) : (
         <>
-          <Button onClick={() => add(`she.${sentientSim.name}`)}>she</Button>
-          <Button onClick={() => add(`her.${sentientSim.name}`)}>her</Button>
-          <Button onClick={() => add(`herself.${sentientSim.name}`)}>herself</Button>
+          <Button
+            onClick={() => {
+              add(`she.${sentientSim.name}`);
+            }}
+          >
+            she
+          </Button>
+          <Button
+            onClick={() => {
+              add(`her.${sentientSim.name}`);
+            }}
+          >
+            her
+          </Button>
+          <Button
+            onClick={() => {
+              add(`herself.${sentientSim.name}`);
+            }}
+          >
+            herself
+          </Button>
         </>
       )}
     </Box>
@@ -203,7 +250,13 @@ export function InteractionMappingComponent() {
       }
       rows.push(
         <Box>
-          <Button onClick={() => add(nonInitiatorParticipants.join(', '))}>non_initiator_participants</Button>
+          <Button
+            onClick={() => {
+              add(nonInitiatorParticipants.join(', '));
+            }}
+          >
+            non_initiator_participants
+          </Button>
         </Box>,
       );
       // {non_initiator_participants}
@@ -370,7 +423,9 @@ export function InteractionMappingComponent() {
             multiline
             rows={5}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+            }}
             size="small"
             // label={label}
             fullWidth
@@ -445,7 +500,14 @@ export function InteractionMappingComponent() {
                       Save
                     </Button>
                   </Tooltip>
-                  <Button loading={loading} color="secondary" variant="outlined" onClick={() => setTestResults([])}>
+                  <Button
+                    loading={loading}
+                    color="secondary"
+                    variant="outlined"
+                    onClick={() => {
+                      setTestResults([]);
+                    }}
+                  >
                     Edit
                   </Button>
                 </div>
@@ -465,7 +527,13 @@ export function InteractionMappingComponent() {
               )}
             </div>
             <div>
-              <Button color="secondary" variant="outlined" onClick={() => onClose()}>
+              <Button
+                color="secondary"
+                variant="outlined"
+                onClick={() => {
+                  onClose();
+                }}
+              >
                 Cancel
               </Button>
             </div>

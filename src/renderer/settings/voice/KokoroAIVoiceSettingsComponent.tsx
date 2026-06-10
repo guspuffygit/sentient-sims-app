@@ -106,7 +106,9 @@ export function KokoroAIVoiceSettingsComponent() {
               id="tts-models"
               label="TTS Model"
               value={kokoroaiTtsSettings.value.model}
-              onChange={(change) => handleModelChange(change.target.value)}
+              onChange={(change) => {
+                handleModelChange(change.target.value);
+              }}
             >
               {modelMenuItems}
             </Select>
@@ -136,7 +138,9 @@ export function KokoroAIVoiceSettingsComponent() {
               label="Voice"
               multiple
               value={kokoroaiTtsSettings.value.voice}
-              onChange={(change) => handleVoiceChange(change.target.value)}
+              onChange={(change) => {
+                handleVoiceChange(change.target.value);
+              }}
               renderValue={(selected) => (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {selected.map((value) => (
@@ -172,7 +176,9 @@ export function KokoroAIVoiceSettingsComponent() {
               id="local-remote"
               label="Local/Remote"
               value={kokoroaiTtsSettings.value.type}
-              onChange={(change) => handleTypeChange(toKokoroType(change.target.value))}
+              onChange={(change) => {
+                handleTypeChange(toKokoroType(change.target.value));
+              }}
             >
               {typeMenuItems}
             </Select>

@@ -35,7 +35,9 @@ export default function SimsPage() {
   function getSims() {
     client.participant
       .getParticipants()
-      .then((participants) => setSims(participants))
+      .then((participants) => {
+        setSims(participants);
+      })
       .catch(() => {
         // ignore
       });
@@ -163,7 +165,13 @@ export default function SimsPage() {
                 <Button sx={{ marginRight: 1 }} color="secondary" variant="outlined" onClick={() => handleSave()}>
                   Save
                 </Button>
-                <Button color="secondary" variant="outlined" onClick={() => handleSetSelectedSim(-1)}>
+                <Button
+                  color="secondary"
+                  variant="outlined"
+                  onClick={() => {
+                    handleSetSelectedSim(-1);
+                  }}
+                >
                   Cancel
                 </Button>
               </div>

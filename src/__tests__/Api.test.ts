@@ -19,7 +19,7 @@ import { mockApiContext } from './util';
 describe('Api', () => {
   const ctx = mockApiContext();
   const apiUrl = `http://localhost:${ctx.port}`;
-  let server: Server<typeof IncomingMessage, typeof ServerResponse>;
+  let server: Server;
 
   beforeAll(() => {
     server = runApi(ctx);

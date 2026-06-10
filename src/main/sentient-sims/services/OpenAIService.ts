@@ -38,7 +38,7 @@ export class OpenAIService implements GenerationService {
     const openAIKeyFromSettings = this.ctx.settings.openaiKey;
     if (openAIKeyFromSettings) {
       log.debug('Using openai key from settings');
-      return openAIKeyFromSettings as string;
+      return openAIKeyFromSettings;
     }
 
     // Check environment variable

@@ -31,7 +31,9 @@ export function WebsocketProvider({ children }: WebsocketProviderProps) {
   });
 
   useEffect(() => {
-    websocketClient.isConnected().then((newStatus) => setStatus(newStatus));
+    websocketClient.isConnected().then((newStatus) => {
+      setStatus(newStatus);
+    });
   }, []);
 
   useEffect(() => {

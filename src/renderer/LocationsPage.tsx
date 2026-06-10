@@ -37,7 +37,9 @@ export default function LocationsPage() {
   function getLocations() {
     client.locations
       .getAllLocations()
-      .then((allLocations) => setLocations(allLocations))
+      .then((allLocations) => {
+        setLocations(allLocations);
+      })
       .catch(() => {
         // ignore
       });
@@ -194,7 +196,13 @@ export default function LocationsPage() {
               <Button sx={{ marginRight: 1 }} color="secondary" variant="outlined" onClick={() => handleSave()}>
                 Save
               </Button>
-              <Button color="secondary" variant="outlined" onClick={() => handleSetSelectedLocation(-1)}>
+              <Button
+                color="secondary"
+                variant="outlined"
+                onClick={() => {
+                  handleSetSelectedLocation(-1);
+                }}
+              >
                 Cancel
               </Button>
             </div>

@@ -46,7 +46,9 @@ export function ChatBoxComponent({
           id="outlined-textarea"
           label={message.message.role}
           fullWidth
-          onChange={(event) => handleTextChange(event.target.value)}
+          onChange={(event) => {
+            handleTextChange(event.target.value);
+          }}
           variant="filled"
           multiline
           value={text}

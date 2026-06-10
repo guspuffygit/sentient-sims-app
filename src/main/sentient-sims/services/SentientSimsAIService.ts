@@ -22,7 +22,7 @@ export class SentientSimsAIService extends VLLMAIService {
 
   async healthCheck() {
     for (let i = 0; i < 60; i++) {
-      const payload = DecodeToken(`${this.ctx.settings.accessToken}`);
+      const payload = DecodeToken(this.ctx.settings.accessToken);
       if (isTokenExpired(payload)) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }

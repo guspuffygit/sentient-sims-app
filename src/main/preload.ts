@@ -107,7 +107,7 @@ const electronHandler = {
     return () => ipcRenderer.removeListener('on-map-animation', callback);
   },
   apiKeyPasteButtonClick: () => {
-    return ipcRenderer.send('paste-clipboard-to-api-key-button-click');
+    ipcRenderer.send('paste-clipboard-to-api-key-button-click');
   },
   onApiKeyPasteFromClipboard: (callback: any) => {
     ipcRenderer.on('on-api-key-paste-from-clipboard', callback);

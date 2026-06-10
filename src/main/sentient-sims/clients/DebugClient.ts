@@ -22,7 +22,7 @@ export class DebugClient extends ApiClient {
     const params: Record<string, string> = {};
     if (apiKey) params.apiKey = apiKey;
 
-    const response = await axiosClient.get<any>(`${this.apiUrl}/debug/test-ai`, { params });
+    const response = await axiosClient.get(`${this.apiUrl}/debug/test-ai`, { params });
     return response.data;
   }
 
@@ -31,7 +31,7 @@ export class DebugClient extends ApiClient {
    * Sends debug logs to the configured webhook (Discord).
    */
   async sendDebugLogs(request: SendLogsRequest): Promise<SendLogsResponse> {
-    const response = await axiosClient.post<any>(`${this.apiUrl}/debug/send-logs`, request);
+    const response = await axiosClient.post(`${this.apiUrl}/debug/send-logs`, request);
     return response.data;
   }
 
@@ -40,7 +40,7 @@ export class DebugClient extends ApiClient {
    * Sends a bug report/interaction log.
    */
   async sendBugReport(reportData: any): Promise<any> {
-    const response = await axiosClient.post<any>(`${this.apiUrl}/debug/interaction`, reportData);
+    const response = await axiosClient.post(`${this.apiUrl}/debug/interaction`, reportData);
     return response.data;
   }
 }

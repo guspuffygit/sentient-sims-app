@@ -42,7 +42,9 @@ export default function useAuthCredentials() {
     ); // 15 minutes in milliseconds
 
     // Clean up the interval when the component unmounts
-    return () => clearInterval(intervalId);
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -23,7 +23,7 @@ export class DebugController {
   async healthCheckGenerationService(req: Request, res: Response) {
     let { apiKey } = req.query;
     if (apiKey !== undefined) {
-      apiKey = apiKey as string;
+      apiKey = apiKey;
     }
 
     try {

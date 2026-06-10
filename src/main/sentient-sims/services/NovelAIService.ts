@@ -144,7 +144,7 @@ export class NovelAIService implements GenerationService {
     const novelAIKeyFromSettings = this.ctx.settings.novelAIKey;
     if (novelAIKeyFromSettings) {
       log.debug('Using novelai key from settings');
-      return novelAIKeyFromSettings as string;
+      return novelAIKeyFromSettings;
     }
 
     throw new NovelAIKeyNotSetError('No NovelAI Key set, Edit NovelAI Key to set it');
@@ -225,7 +225,7 @@ export class NovelAIService implements GenerationService {
     log.info(`NovelAI request: ${JSON.stringify(novelAIRequest)}`);
 
     const url = `${this.generationUrl()}/ai/generate`;
-    const authHeader = `${this.ctx.settings.novelAIKey}`;
+    const authHeader = this.ctx.settings.novelAIKey;
     const response = await fetch(url, {
       method: 'POST',
       headers: {

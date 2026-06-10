@@ -15,8 +15,12 @@ export default function LastExceptionPage() {
   lastExceptionFiles.forEach((lastExceptionFile) => {
     renderRows.push(
       <ListItem key={lastExceptionFile.filename} component="div" disablePadding>
-        <ListItemButton onClick={() => setSelectedException(lastExceptionFile)}>
-          <ListItemText primary={`${lastExceptionFile.filename}`} secondary={lastExceptionFile.created.toUTCString()} />
+        <ListItemButton
+          onClick={() => {
+            setSelectedException(lastExceptionFile);
+          }}
+        >
+          <ListItemText primary={lastExceptionFile.filename} secondary={lastExceptionFile.created.toUTCString()} />
         </ListItemButton>
       </ListItem>,
     );
@@ -28,7 +32,13 @@ export default function LastExceptionPage() {
         <div style={{ marginBottom: 2 }}>
           <SpaceBetweenDiv>
             <div>
-              <IconButton aria-label="delete" size="small" onClick={() => setSelectedException(undefined)}>
+              <IconButton
+                aria-label="delete"
+                size="small"
+                onClick={() => {
+                  setSelectedException(undefined);
+                }}
+              >
                 <ArrowBackIcon sx={{ margin: 1 }} />
               </IconButton>
             </div>

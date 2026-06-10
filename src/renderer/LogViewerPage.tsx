@@ -34,8 +34,12 @@ export default function LogViewerPage() {
 
   useEffect(() => {
     const ws = new WebSocket(`ws://localhost:${rendererWebsocketPort}`);
-    ws.onopen = () => log.debug('Renderer opened connection with app');
-    ws.onclose = () => log.debug('Renderer closed connection with app');
+    ws.onopen = () => {
+      log.debug('Renderer opened connection with app');
+    };
+    ws.onclose = () => {
+      log.debug('Renderer closed connection with app');
+    };
 
     ws.onmessage = (e) => {
       const msg: RendererWebsocketMessage = JSON.parse(e.data);

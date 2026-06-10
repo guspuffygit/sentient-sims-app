@@ -113,7 +113,9 @@ export function AISettingsProvider({ children }: AISettingsProviderProps) {
       testAI();
     }, 3500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+    };
   }, []);
 
   return <AISettingsContext.Provider value={contextValue}>{children}</AISettingsContext.Provider>;

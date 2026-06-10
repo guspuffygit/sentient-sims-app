@@ -60,7 +60,9 @@ export function OpenAIVoiceSettingsComponent() {
             id="tts-models"
             label="TTS Model"
             value={openaiTtsSettings.value.model}
-            onChange={(change) => handleModelChange(change.target.value)}
+            onChange={(change) => {
+              handleModelChange(change.target.value);
+            }}
           >
             {modelMenuItems}
           </Select>
@@ -89,7 +91,9 @@ export function OpenAIVoiceSettingsComponent() {
             id="voice"
             label="Voice"
             value={openaiTtsSettings.value.voice}
-            onChange={(change) => handleVoiceChange(change.target.value)}
+            onChange={(change) => {
+              handleVoiceChange(change.target.value);
+            }}
           >
             {voiceMenuItems}
           </Select>

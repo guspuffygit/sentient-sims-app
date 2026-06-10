@@ -1,7 +1,6 @@
-import { Button } from '@mui/material';
+import { Button, Modal, Box, Divider, Grid, TextField } from '@mui/material';
 import { useState, Dispatch, SetStateAction } from 'react';
 import { SendLogsRequest } from 'main/sentient-sims/models/SendLogsRequest';
-import { Modal, Box, Divider, Grid, TextField } from '@mui/material';
 import LogSendInformationComponent from 'renderer/LogSendInformationComponent';
 import { CaughtError } from 'main/sentient-sims/models/CaughtError';
 import log from 'electron-log';
@@ -40,7 +39,7 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
 
       const response = await client.debug.sendDebugLogs(sendLogsRequest);
       if (response.errors.length > 0) {
-        return alert(
+        alert(
           [
             `Attempted to send logs and encountered errors.`,
             `Logs may not have been sent.`,
@@ -48,8 +47,10 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
             response.logId,
           ].join('\n\n'),
         );
+        return;
       }
-      return alert(`To get support, copy paste this id into the #support channel in Discord!\n\n${response.logId}`);
+      alert(`To get support, copy paste this id into the #support channel in Discord!\n\n${response.logId}`);
+      return;
     } catch (err) {
       alert(`Error sending logs:\n${JSON.stringify(err, null, 2)}`);
     } finally {
@@ -59,7 +60,12 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
   };
 
   return (
-    <Modal open={open} onClose={() => setOpen(false)}>
+    <Modal
+      open={open}
+      onClose={() => {
+        setOpen(false);
+      }}
+    >
       <Box
         sx={{
           position: 'absolute',
@@ -87,7 +93,9 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
                 fullWidth
                 label="Discord Username"
                 value={discordUsername}
-                onChange={(e) => setDiscordUsername(e.target.value)}
+                onChange={(e) => {
+                  setDiscordUsername(e.target.value);
+                }}
                 required
               />
             </Grid>
@@ -96,7 +104,9 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
                 fullWidth
                 label="Describe Error"
                 value={errorDescription}
-                onChange={(e) => setErrorDescription(e.target.value)}
+                onChange={(e) => {
+                  setErrorDescription(e.target.value);
+                }}
                 required
                 multiline
                 rows={4}
@@ -110,7 +120,13 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
                   </Button>
                 </div>
                 <div>
-                  <Button loading={loading} onClick={() => setOpen(false)} variant="contained">
+                  <Button
+                    loading={loading}
+                    onClick={() => {
+                      setOpen(false);
+                    }}
+                    variant="contained"
+                  >
                     Cancel
                   </Button>
                 </div>

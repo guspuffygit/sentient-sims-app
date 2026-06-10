@@ -18,7 +18,13 @@ export function PatreonSubscribingComponent() {
       <Typography variant="body2" sx={{ marginBottom: 2 }}>
         External browser was opened to subscribe to Patreon...
       </Typography>
-      <Button onClick={() => setSubscribingInProgress(false)}>Cancel</Button>
+      <Button
+        onClick={() => {
+          setSubscribingInProgress(false);
+        }}
+      >
+        Cancel
+      </Button>
     </>
   );
 

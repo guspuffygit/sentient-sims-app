@@ -32,7 +32,13 @@ export function LoginComponent() {
       <Typography variant="body2" sx={{ marginBottom: 2 }}>
         External browser was opened to login with Google...
       </Typography>
-      <Button onClick={() => setAuthInProgress(false)}>Cancel</Button>
+      <Button
+        onClick={() => {
+          setAuthInProgress(false);
+        }}
+      >
+        Cancel
+      </Button>
     </>
   );
 

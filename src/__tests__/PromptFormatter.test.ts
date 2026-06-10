@@ -1,4 +1,4 @@
-import { InteractionEvent, SSEventType } from 'main/sentient-sims/models/InteractionEvents';
+import { InteractionEvent, SSEventType, SSEnvironment } from 'main/sentient-sims/models/InteractionEvents';
 import * as fs from 'fs';
 import {
   BodyState,
@@ -8,7 +8,6 @@ import {
   formatWWProperties,
   hasWWProperties,
 } from 'main/sentient-sims/formatter/PromptFormatter';
-import { SSEnvironment } from 'main/sentient-sims/models/InteractionEvents';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';

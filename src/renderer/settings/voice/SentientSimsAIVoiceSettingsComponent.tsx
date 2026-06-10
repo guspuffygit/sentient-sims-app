@@ -160,7 +160,9 @@ export function SentientSimsAIVoiceSettingsComponent() {
               id="tts-models"
               label="TTS Model"
               value={sentientsimsaiTtsSettings.value.model}
-              onChange={(change) => handleModelChange(change.target.value)}
+              onChange={(change) => {
+                handleModelChange(change.target.value);
+              }}
             >
               {modelMenuItems}
             </Select>
@@ -190,7 +192,9 @@ export function SentientSimsAIVoiceSettingsComponent() {
               label="Voice"
               multiple={sentientsimsaiTtsSettings.value.model === SentientSimsAISpeechModel.KOKORO}
               value={sentientsimsaiTtsSettings.value.voice}
-              onChange={(change) => handleVoiceChange(change.target.value)}
+              onChange={(change) => {
+                handleVoiceChange(change.target.value);
+              }}
               renderValue={(selected) => (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {selected.map((value) => (
@@ -226,7 +230,9 @@ export function SentientSimsAIVoiceSettingsComponent() {
               <Slider
                 aria-label="Speed"
                 value={speed}
-                onChange={(change, value) => handleSpeedChange(value as number)}
+                onChange={(change, value) => {
+                  handleSpeedChange(value);
+                }}
                 step={0.01}
                 min={0.4}
                 max={2}

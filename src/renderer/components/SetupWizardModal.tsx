@@ -1,6 +1,5 @@
-import { Button } from '@mui/material';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import {
+  Button,
   Modal,
   Box,
   Grid,
@@ -18,6 +17,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { ModsDirectoryComponent } from 'renderer/ModsDirectoryComponent';
@@ -81,7 +81,14 @@ function InitialSetupPage({ setPage }: PageProps) {
           alignItems: 'center',
         }}
       >
-        <Button type="submit" onClick={() => setPage(WizardPage.MOD_SETUP)} color="secondary" variant="contained">
+        <Button
+          type="submit"
+          onClick={() => {
+            setPage(WizardPage.MOD_SETUP);
+          }}
+          color="secondary"
+          variant="contained"
+        >
           Next
         </Button>
       </Box>
@@ -171,7 +178,9 @@ function ModSetupPage({ setPage }: PageProps) {
         <Button
           type="submit"
           loading={versions.loading}
-          onClick={() => setPage(WizardPage.INIT)}
+          onClick={() => {
+            setPage(WizardPage.INIT);
+          }}
           color="secondary"
           variant="contained"
           sx={{ marginRight: 4 }}
@@ -181,7 +190,9 @@ function ModSetupPage({ setPage }: PageProps) {
         <Button
           type="submit"
           loading={versions.loading}
-          onClick={() => setPage(WizardPage.INSTALL_MOD)}
+          onClick={() => {
+            setPage(WizardPage.INSTALL_MOD);
+          }}
           color="secondary"
           variant="contained"
         >
@@ -344,14 +355,23 @@ function InstallModPage({ setPage }: PageProps) {
       >
         <Button
           type="submit"
-          onClick={() => setPage(WizardPage.MOD_SETUP)}
+          onClick={() => {
+            setPage(WizardPage.MOD_SETUP);
+          }}
           color="secondary"
           variant="contained"
           sx={{ mr: 2 }}
         >
           Back
         </Button>
-        <Button type="submit" onClick={() => setPage(WizardPage.ENABLE_MODS)} color="secondary" variant="contained">
+        <Button
+          type="submit"
+          onClick={() => {
+            setPage(WizardPage.ENABLE_MODS);
+          }}
+          color="secondary"
+          variant="contained"
+        >
           Next
         </Button>
       </Box>
@@ -567,7 +587,9 @@ function EnableModsPage({ setPage }: PageProps) {
       >
         <Button
           type="submit"
-          onClick={() => setPage(WizardPage.INSTALL_MOD)}
+          onClick={() => {
+            setPage(WizardPage.INSTALL_MOD);
+          }}
           color="secondary"
           variant="contained"
           sx={{ mr: 2 }}
@@ -576,7 +598,9 @@ function EnableModsPage({ setPage }: PageProps) {
         </Button>
         <Button
           type="submit"
-          onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
+          onClick={() => {
+            setPage(WizardPage.AI_PROVIDER_SETUP);
+          }}
           color="secondary"
           variant="contained"
         >
@@ -652,7 +676,9 @@ function ConnectModPage({ setPage, setOpen }: PageProps) {
       >
         <Button
           type="submit"
-          onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
+          onClick={() => {
+            setPage(WizardPage.AI_PROVIDER_SETUP);
+          }}
           color="secondary"
           variant="contained"
           sx={{ mr: 2 }}
@@ -729,7 +755,12 @@ function AIProviderPage({ setPage }: PageProps) {
                       },
                     }}
                   >
-                    <CardContent sx={{ flexGrow: 1 }} onClick={() => setPage(card.page)}>
+                    <CardContent
+                      sx={{ flexGrow: 1 }}
+                      onClick={() => {
+                        setPage(card.page);
+                      }}
+                    >
                       <Typography variant="h5" component="div" gutterBottom>
                         {card.header}
                       </Typography>
@@ -786,7 +817,14 @@ function AIProviderPage({ setPage }: PageProps) {
           flexDirection: 'column',
         }}
       >
-        <Button type="submit" onClick={() => setPage(WizardPage.INSTALL_MOD)} color="secondary" variant="contained">
+        <Button
+          type="submit"
+          onClick={() => {
+            setPage(WizardPage.INSTALL_MOD);
+          }}
+          color="secondary"
+          variant="contained"
+        >
           Back
         </Button>
       </Box>
@@ -932,7 +970,9 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
         <Button
           type="submit"
           loading={aiStatus.loading}
-          onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
+          onClick={() => {
+            setPage(WizardPage.AI_PROVIDER_SETUP);
+          }}
           color="secondary"
           variant="contained"
           sx={{ mr: 2 }}
@@ -942,7 +982,9 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
         <Button
           type="submit"
           loading={aiStatus.loading}
-          onClick={() => setPage(WizardPage.CONNECT_MOD)}
+          onClick={() => {
+            setPage(WizardPage.CONNECT_MOD);
+          }}
           color="secondary"
           variant="contained"
         >
@@ -1088,7 +1130,9 @@ function OpenAISetupPage({ setPage }: PageProps) {
         <Button
           type="submit"
           loading={aiStatus.loading}
-          onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
+          onClick={() => {
+            setPage(WizardPage.AI_PROVIDER_SETUP);
+          }}
           color="secondary"
           variant="contained"
           sx={{ mr: 2 }}
@@ -1098,7 +1142,9 @@ function OpenAISetupPage({ setPage }: PageProps) {
         <Button
           type="submit"
           loading={aiStatus.loading}
-          onClick={() => setPage(WizardPage.CONNECT_MOD)}
+          onClick={() => {
+            setPage(WizardPage.CONNECT_MOD);
+          }}
           color="secondary"
           variant="contained"
         >
@@ -1151,14 +1197,23 @@ function GeminiSetupPage({ setPage }: PageProps) {
       >
         <Button
           type="submit"
-          onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
+          onClick={() => {
+            setPage(WizardPage.AI_PROVIDER_SETUP);
+          }}
           color="secondary"
           variant="contained"
           sx={{ mr: 2 }}
         >
           Back
         </Button>
-        <Button type="submit" onClick={() => setPage(WizardPage.CONNECT_MOD)} color="secondary" variant="contained">
+        <Button
+          type="submit"
+          onClick={() => {
+            setPage(WizardPage.CONNECT_MOD);
+          }}
+          color="secondary"
+          variant="contained"
+        >
           Next
         </Button>
       </Box>
@@ -1207,14 +1262,23 @@ function SelfHostedSetupPage({ setPage }: PageProps) {
       >
         <Button
           type="submit"
-          onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
+          onClick={() => {
+            setPage(WizardPage.AI_PROVIDER_SETUP);
+          }}
           color="secondary"
           variant="contained"
           sx={{ mr: 2 }}
         >
           Back
         </Button>
-        <Button type="submit" onClick={() => setPage(WizardPage.CONNECT_MOD)} color="secondary" variant="contained">
+        <Button
+          type="submit"
+          onClick={() => {
+            setPage(WizardPage.CONNECT_MOD);
+          }}
+          color="secondary"
+          variant="contained"
+        >
           Next
         </Button>
       </Box>

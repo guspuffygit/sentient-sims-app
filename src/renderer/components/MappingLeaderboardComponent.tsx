@@ -1,9 +1,8 @@
-import { Box, IconButton, Modal, TextField, Tooltip, Typography, styled } from '@mui/material';
+import { Box, IconButton, Modal, TextField, Tooltip, Typography, styled, Button } from '@mui/material';
 import AppCard from 'renderer/AppCard';
 import EditIcon from '@mui/icons-material/Edit';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useMappingLeaderboardStats } from 'renderer/hooks/useMappingLeaderboardStats';
-import { Button } from '@mui/material';
 import { ChangeEvent, useState } from 'react';
 import log from 'electron-log';
 import { useAuth } from '../providers/AuthProvider';
@@ -109,7 +108,12 @@ export function MappingLeaderboardComponent() {
             >
               <Typography sx={{ marginRight: 1 }}>{me?.data?.displayName ?? 'Anonymous'}</Typography>
               <Tooltip title="Edit your username on the leaderboard" placement="top">
-                <IconButton size="small" onClick={() => handleOpen()}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    handleOpen();
+                  }}
+                >
                   <EditIcon />
                 </IconButton>
               </Tooltip>
@@ -152,7 +156,9 @@ export function MappingLeaderboardComponent() {
           <TextField
             label="Display Username"
             value={username}
-            onChange={(event) => handleInputChange(event)}
+            onChange={(event) => {
+              handleInputChange(event);
+            }}
             fullWidth
             required
           />

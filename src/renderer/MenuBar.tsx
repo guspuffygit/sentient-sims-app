@@ -119,13 +119,29 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
               Settings
             </Button>
             {authStatus === 'authenticated' ? (
-              <LogoutButton signOut={() => logOut()} />
+              <LogoutButton
+                signOut={() => {
+                  logOut();
+                }}
+              />
             ) : (
-              <Button color="warning" onClick={() => setLoginModalOpen(true)} sx={{ marginLeft: '5px' }} id="login">
+              <Button
+                color="warning"
+                onClick={() => {
+                  setLoginModalOpen(true);
+                }}
+                sx={{ marginLeft: '5px' }}
+                id="login"
+              >
                 Login
               </Button>
             )}
-            <IconButton onClick={() => setHideSideBar(!hideSideBar)} sx={{ marginLeft: '5px' }}>
+            <IconButton
+              onClick={() => {
+                setHideSideBar(!hideSideBar);
+              }}
+              sx={{ marginLeft: '5px' }}
+            >
               {hideSideBar ? <ViewSidebarOutlinedIcon /> : <ChevronRightOutlinedIcon />}
             </IconButton>
           </div>

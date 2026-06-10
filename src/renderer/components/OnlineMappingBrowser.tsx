@@ -66,7 +66,9 @@ function MappingItem({
         multiline
         variant="outlined"
         value={action}
-        onChange={(e) => setAction(e.target.value)}
+        onChange={(e) => {
+          setAction(e.target.value);
+        }}
         sx={{ mt: 1, mb: 1 }}
       />
       <Button loading={loading} variant="contained" size="small" onClick={handleSave}>
@@ -170,7 +172,9 @@ export default function OnlineMappingBrowser() {
             <Pagination
               count={pageCount}
               page={currentPage}
-              onChange={(event, value) => setCurrentPage(value)}
+              onChange={(event, value) => {
+                setCurrentPage(value);
+              }}
               color="primary"
               showFirstButton
               showLastButton

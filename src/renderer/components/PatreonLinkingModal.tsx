@@ -17,7 +17,12 @@ export function PatreonLinkingModal() {
   }, []);
 
   return (
-    <Modal open={open} onClose={() => setOpen(false)}>
+    <Modal
+      open={open}
+      onClose={() => {
+        setOpen(false);
+      }}
+    >
       <Box
         sx={{
           position: 'absolute',

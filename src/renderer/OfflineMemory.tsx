@@ -117,7 +117,12 @@ export default function OfflineMemory() {
           </Table>
         </TableContainer>
       </CardContent>
-      <Modal open={simsViewOpen} onClose={() => setSimsViewOpen(false)}>
+      <Modal
+        open={simsViewOpen}
+        onClose={() => {
+          setSimsViewOpen(false);
+        }}
+      >
         <Box
           sx={{
             height: 700,

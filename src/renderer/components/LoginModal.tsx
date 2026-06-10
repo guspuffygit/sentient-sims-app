@@ -27,7 +27,12 @@ export function LoginModal({ open, setOpen }: LoginModalParameters) {
   }, []);
 
   return (
-    <Modal open={open} onClose={() => setOpen(false)}>
+    <Modal
+      open={open}
+      onClose={() => {
+        setOpen(false);
+      }}
+    >
       <Box
         sx={{
           position: 'absolute',
