@@ -74,6 +74,7 @@ const createWindow = async () => {
     autoHideMenuBar: true,
     icon: getAssetPath('icon.png'),
     thickFrame: false,
+    backgroundColor: '#2f3136',
     webPreferences: {
       webSecurity: false, // Disable web security
       allowRunningInsecureContent: true,
