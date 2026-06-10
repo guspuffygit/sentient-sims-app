@@ -14,7 +14,7 @@
     "link-modules": "node --import tsx ../../.erb/scripts/link-modules.ts"
   },
   "dependencies": {
-    "better-sqlite3": "12.4.1",
+    "better-sqlite3": "12.10.0",
     "node-gyp": "11.4.2"
   }
 }
