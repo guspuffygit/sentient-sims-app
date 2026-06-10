@@ -1,4 +1,4 @@
-import { LoadingButton } from '@mui/lab';
+import { Button } from '@mui/material';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import {
   Modal,
@@ -22,7 +22,7 @@ import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAp
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { ModsDirectoryComponent } from 'renderer/ModsDirectoryComponent';
 import { useVersions } from 'renderer/providers/VersionsProvider';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import ApiKeyAIComponent from 'renderer/ApiKeyAIComponent';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
@@ -53,7 +53,11 @@ interface PageProps {
 function InitialSetupPage({ setPage }: PageProps) {
   return (
     <>
-      <Box flexGrow={1}>
+      <Box
+        sx={{
+          flexGrow: 1,
+        }}
+      >
         <Box
           sx={{
             position: 'absolute',
@@ -70,15 +74,16 @@ function InitialSetupPage({ setPage }: PageProps) {
           </Typography>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <LoadingButton
-          type="submit"
-          onClick={() => setPage(WizardPage.MOD_SETUP)}
-          color="secondary"
-          variant="contained"
-        >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Button type="submit" onClick={() => setPage(WizardPage.MOD_SETUP)} color="secondary" variant="contained">
           Next
-        </LoadingButton>
+        </Button>
       </Box>
     </>
   );
@@ -89,7 +94,11 @@ function ModSetupPage({ setPage }: PageProps) {
 
   return (
     <>
-      <Box flexGrow={1}>
+      <Box
+        sx={{
+          flexGrow: 1,
+        }}
+      >
         <Box
           sx={{
             position: 'absolute',
@@ -110,16 +119,36 @@ function ModSetupPage({ setPage }: PageProps) {
             folder.
           </Typography>
           <ModsDirectoryComponent />
-          <Box display="flex" justifyContent="center" alignItems="center" sx={{ mb: 2 }} flexDirection="column">
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexDirection: 'column',
+              mb: 2,
+            }}
+          >
             <VersionFormHelper text="Game Version" version={versions.game} />
             {versions.game.version !== 'none' && (
-              <Typography variant="body2" color="success.main" sx={{ mt: 1 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'success.main',
+                  mt: 1,
+                }}
+              >
                 Sims 4 Mods folder successfully found
               </Typography>
             )}
           </Box>
-          <Box display="flex" justifyContent="center" alignItems="center">
-            <LoadingButton
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Button
               type="submit"
               loading={versions.loading}
               onClick={() => versions.refresh()}
@@ -128,12 +157,18 @@ function ModSetupPage({ setPage }: PageProps) {
               endIcon={versions.game.version !== 'none' ? <CheckCircleOutlineIcon /> : undefined}
             >
               Test
-            </LoadingButton>
+            </Button>
           </Box>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <LoadingButton
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Button
           type="submit"
           loading={versions.loading}
           onClick={() => setPage(WizardPage.INIT)}
@@ -142,8 +177,8 @@ function ModSetupPage({ setPage }: PageProps) {
           sx={{ marginRight: 4 }}
         >
           Back
-        </LoadingButton>
-        <LoadingButton
+        </Button>
+        <Button
           type="submit"
           loading={versions.loading}
           onClick={() => setPage(WizardPage.INSTALL_MOD)}
@@ -151,7 +186,7 @@ function ModSetupPage({ setPage }: PageProps) {
           variant="contained"
         >
           Next
-        </LoadingButton>
+        </Button>
       </Box>
     </>
   );
@@ -252,7 +287,11 @@ const cardData: CardData[] = [
 function InstallModPage({ setPage }: PageProps) {
   return (
     <>
-      <Box flexGrow={1}>
+      <Box
+        sx={{
+          flexGrow: 1,
+        }}
+      >
         <Box
           sx={{
             position: 'absolute',
@@ -262,7 +301,14 @@ function InstallModPage({ setPage }: PageProps) {
             width: '50%',
           }}
         >
-          <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 2 }}>
+          <Typography
+            variant="body1"
+            align="center"
+            sx={{
+              color: 'text.secondary',
+              mb: 2,
+            }}
+          >
             Install the mod
           </Typography>
           <Typography align="center" sx={{ mb: 2 }}>
@@ -277,13 +323,26 @@ function InstallModPage({ setPage }: PageProps) {
           <Typography align="center" sx={{ mb: 5 }}>
             New versions of the app install automatically.
           </Typography>
-          <Box sx={{ width: '100%' }} justifyContent="center" alignItems="center" display="flex">
+          <Box
+            sx={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              display: 'flex',
+              width: '100%',
+            }}
+          >
             <UpdateComponent />
           </Box>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <LoadingButton
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Button
           type="submit"
           onClick={() => setPage(WizardPage.MOD_SETUP)}
           color="secondary"
@@ -291,15 +350,10 @@ function InstallModPage({ setPage }: PageProps) {
           sx={{ mr: 2 }}
         >
           Back
-        </LoadingButton>
-        <LoadingButton
-          type="submit"
-          onClick={() => setPage(WizardPage.ENABLE_MODS)}
-          color="secondary"
-          variant="contained"
-        >
+        </Button>
+        <Button type="submit" onClick={() => setPage(WizardPage.ENABLE_MODS)} color="secondary" variant="contained">
           Next
-        </LoadingButton>
+        </Button>
       </Box>
     </>
   );
@@ -360,7 +414,11 @@ function EnableModsPage({ setPage }: PageProps) {
 
   return (
     <>
-      <Box flexGrow={1}>
+      <Box
+        sx={{
+          flexGrow: 1,
+        }}
+      >
         <Box
           sx={{
             position: 'absolute',
@@ -370,12 +428,27 @@ function EnableModsPage({ setPage }: PageProps) {
             width: '60%',
           }}
         >
-          <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 2 }}>
+          <Typography
+            variant="body1"
+            align="center"
+            sx={{
+              color: 'text.secondary',
+              mb: 2,
+            }}
+          >
             Enable Mods
           </Typography>
 
           {loading && (
-            <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column" sx={{ mt: 4 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'column',
+                mt: 4,
+              }}
+            >
               <CircularProgress size={40} />
               <Typography sx={{ mt: 2 }}>Checking mod settings...</Typography>
             </Box>
@@ -446,15 +519,29 @@ function EnableModsPage({ setPage }: PageProps) {
           )}
 
           {!loading && !allGood && (
-            <Box display="flex" justifyContent="center" sx={{ mt: 2 }}>
-              <LoadingButton onClick={() => checkAndFix()} color="secondary" variant="outlined">
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                mt: 2,
+              }}
+            >
+              <Button onClick={() => checkAndFix()} color="secondary" variant="outlined">
                 Re-check
-              </LoadingButton>
+              </Button>
             </Box>
           )}
 
           {!loading && (
-            <Box display="flex" justifyContent="center" alignItems="center" sx={{ mt: 3 }} flexDirection="column">
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'column',
+                mt: 3,
+              }}
+            >
               <Typography variant="body2">
                 Mods Enabled:{' '}
                 <Typography component="span" variant="body2" color={modsEnabled ? 'success.main' : 'error.main'}>
@@ -471,8 +558,14 @@ function EnableModsPage({ setPage }: PageProps) {
           )}
         </Box>
       </Box>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <LoadingButton
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Button
           type="submit"
           onClick={() => setPage(WizardPage.INSTALL_MOD)}
           color="secondary"
@@ -480,15 +573,15 @@ function EnableModsPage({ setPage }: PageProps) {
           sx={{ mr: 2 }}
         >
           Back
-        </LoadingButton>
-        <LoadingButton
+        </Button>
+        <Button
           type="submit"
           onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
           color="secondary"
           variant="contained"
         >
           Next
-        </LoadingButton>
+        </Button>
       </Box>
     </>
   );
@@ -499,10 +592,21 @@ function ConnectModPage({ setPage, setOpen }: PageProps) {
 
   return (
     <>
-      <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 2 }}>
+      <Typography
+        variant="body1"
+        align="center"
+        sx={{
+          color: 'text.secondary',
+          mb: 2,
+        }}
+      >
         Connect to The Sims 4
       </Typography>
-      <Box flexGrow={1}>
+      <Box
+        sx={{
+          flexGrow: 1,
+        }}
+      >
         <Box
           sx={{
             position: 'absolute',
@@ -523,7 +627,15 @@ function ConnectModPage({ setPage, setOpen }: PageProps) {
               <ListItemText>The connection should now show that the mod and app are connected</ListItemText>
             </ListItem>
           </List>
-          <Box display="flex" justifyContent="center" alignItems="center" sx={{ mt: 3 }} flexDirection="column">
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexDirection: 'column',
+              mt: 3,
+            }}
+          >
             <Typography variant="body2">Connection Status: </Typography>
             <Typography variant="body2" color={status.mod ? 'success.main' : 'error.main'} sx={{ mt: 1 }}>
               {status.mod ? 'Connected Successfully' : 'Not connected'}
@@ -531,8 +643,14 @@ function ConnectModPage({ setPage, setOpen }: PageProps) {
           </Box>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <LoadingButton
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Button
           type="submit"
           onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
           color="secondary"
@@ -540,8 +658,8 @@ function ConnectModPage({ setPage, setOpen }: PageProps) {
           sx={{ mr: 2 }}
         >
           Back
-        </LoadingButton>
-        <LoadingButton
+        </Button>
+        <Button
           type="submit"
           onClick={() => {
             if (setOpen) {
@@ -552,7 +670,7 @@ function ConnectModPage({ setPage, setOpen }: PageProps) {
           variant="contained"
         >
           Finish
-        </LoadingButton>
+        </Button>
       </Box>
     </>
   );
@@ -561,7 +679,11 @@ function ConnectModPage({ setPage, setOpen }: PageProps) {
 function AIProviderPage({ setPage }: PageProps) {
   return (
     <>
-      <Box flexGrow={1}>
+      <Box
+        sx={{
+          flexGrow: 1,
+        }}
+      >
         <Box
           sx={{
             position: 'absolute',
@@ -572,10 +694,25 @@ function AIProviderPage({ setPage }: PageProps) {
           }}
         >
           <Box sx={{ maxWidth: '1200px', width: '100%' }}>
-            <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 2 }}>
+            <Typography
+              variant="body1"
+              align="center"
+              sx={{
+                color: 'text.secondary',
+                mb: 2,
+              }}
+            >
               Choose which AI service you would like to use for your game.
             </Typography>
-            <Grid container spacing={2} justifyContent="center" alignItems="stretch" sx={{ marginBottom: 4 }}>
+            <Grid
+              container
+              spacing={2}
+              sx={{
+                justifyContent: 'center',
+                alignItems: 'stretch',
+                marginBottom: 4,
+              }}
+            >
               {cardData.map((card) => (
                 <Grid key={card.header} size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
                   <Card
@@ -641,15 +778,17 @@ function AIProviderPage({ setPage }: PageProps) {
           </Box>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column">
-        <LoadingButton
-          type="submit"
-          onClick={() => setPage(WizardPage.INSTALL_MOD)}
-          color="secondary"
-          variant="contained"
-        >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'column',
+        }}
+      >
+        <Button type="submit" onClick={() => setPage(WizardPage.INSTALL_MOD)} color="secondary" variant="contained">
           Back
-        </LoadingButton>
+        </Button>
       </Box>
     </>
   );
@@ -705,10 +844,23 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
 
   return (
     <>
-      <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 2 }}>
+      <Typography
+        variant="body1"
+        align="center"
+        sx={{
+          color: 'text.secondary',
+          mb: 2,
+        }}
+      >
         Sentient Sims AI Setup
       </Typography>
-      <Box display="flex" justifyContent="center" alignItems="center">
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <Stepper activeStep={activeStep} sx={{ width: '70%' }}>
           <Step key="login" completed={isLoggedIn}>
             <StepLabel>
@@ -733,7 +885,11 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
           </Step>
         </Stepper>
       </Box>
-      <Box flexGrow={1}>
+      <Box
+        sx={{
+          flexGrow: 1,
+        }}
+      >
         <Box
           sx={{
             position: 'absolute',
@@ -749,7 +905,15 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
             <PatreonSubscribingComponent />
           )}
           {userAttributes && patreonUser.isPatreonLinked() && patreonUser.isSubscriber() && (
-            <Box minWidth={400} minHeight={400} justifyContent="center" alignItems="center" sx={{ display: 'flex' }}>
+            <Box
+              sx={{
+                minWidth: 400,
+                minHeight: 400,
+                justifyContent: 'center',
+                alignItems: 'center',
+                display: 'flex',
+              }}
+            >
               <Typography variant="body2" sx={{ marginRight: 1 }}>
                 Patreon Setup Complete
               </Typography>
@@ -758,8 +922,14 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
           )}
         </Box>
       </Box>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <LoadingButton
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Button
           type="submit"
           loading={aiStatus.loading}
           onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
@@ -768,8 +938,8 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
           sx={{ mr: 2 }}
         >
           Back
-        </LoadingButton>
-        <LoadingButton
+        </Button>
+        <Button
           type="submit"
           loading={aiStatus.loading}
           onClick={() => setPage(WizardPage.CONNECT_MOD)}
@@ -777,7 +947,7 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
           variant="contained"
         >
           Next
-        </LoadingButton>
+        </Button>
       </Box>
     </>
   );
@@ -792,7 +962,11 @@ function OpenAISetupPage({ setPage }: PageProps) {
 
   return (
     <>
-      <Box flexGrow={1}>
+      <Box
+        sx={{
+          flexGrow: 1,
+        }}
+      >
         <Box
           sx={{
             position: 'absolute',
@@ -802,7 +976,14 @@ function OpenAISetupPage({ setPage }: PageProps) {
             width: '70%',
           }}
         >
-          <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 2 }}>
+          <Typography
+            variant="body1"
+            align="center"
+            sx={{
+              color: 'text.secondary',
+              mb: 2,
+            }}
+          >
             Open AI Setup
           </Typography>
           <Typography align="center" sx={{ mb: 2 }}>
@@ -868,11 +1049,24 @@ function OpenAISetupPage({ setPage }: PageProps) {
             </ListItem>
             <ApiKeyAIComponent setting={SettingsEnum.OPENAI_KEY} aiName="OpenAI" />
           </List>
-          <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column">
-            <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexDirection: 'column',
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: 1,
+              }}
+            >
               <AIStatusComponent />
             </Box>
-            <LoadingButton
+            <Button
               loading={aiStatus.loading}
               onClick={() => testAI()}
               sx={{ marginRight: 2 }}
@@ -880,12 +1074,18 @@ function OpenAISetupPage({ setPage }: PageProps) {
               variant="outlined"
             >
               Test
-            </LoadingButton>
+            </Button>
           </Box>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <LoadingButton
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Button
           type="submit"
           loading={aiStatus.loading}
           onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
@@ -894,8 +1094,8 @@ function OpenAISetupPage({ setPage }: PageProps) {
           sx={{ mr: 2 }}
         >
           Back
-        </LoadingButton>
-        <LoadingButton
+        </Button>
+        <Button
           type="submit"
           loading={aiStatus.loading}
           onClick={() => setPage(WizardPage.CONNECT_MOD)}
@@ -903,7 +1103,7 @@ function OpenAISetupPage({ setPage }: PageProps) {
           variant="contained"
         >
           Next
-        </LoadingButton>
+        </Button>
       </Box>
     </>
   );
@@ -912,10 +1112,21 @@ function OpenAISetupPage({ setPage }: PageProps) {
 function GeminiSetupPage({ setPage }: PageProps) {
   return (
     <>
-      <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 2 }}>
+      <Typography
+        variant="body1"
+        align="center"
+        sx={{
+          color: 'text.secondary',
+          mb: 2,
+        }}
+      >
         Gemini AI Setup
       </Typography>
-      <Box flexGrow={1}>
+      <Box
+        sx={{
+          flexGrow: 1,
+        }}
+      >
         <Box
           sx={{
             position: 'absolute',
@@ -931,8 +1142,14 @@ function GeminiSetupPage({ setPage }: PageProps) {
           </Typography>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <LoadingButton
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Button
           type="submit"
           onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
           color="secondary"
@@ -940,15 +1157,10 @@ function GeminiSetupPage({ setPage }: PageProps) {
           sx={{ mr: 2 }}
         >
           Back
-        </LoadingButton>
-        <LoadingButton
-          type="submit"
-          onClick={() => setPage(WizardPage.CONNECT_MOD)}
-          color="secondary"
-          variant="contained"
-        >
+        </Button>
+        <Button type="submit" onClick={() => setPage(WizardPage.CONNECT_MOD)} color="secondary" variant="contained">
           Next
-        </LoadingButton>
+        </Button>
       </Box>
     </>
   );
@@ -957,10 +1169,21 @@ function GeminiSetupPage({ setPage }: PageProps) {
 function SelfHostedSetupPage({ setPage }: PageProps) {
   return (
     <>
-      <Typography variant="body1" color="text.secondary" align="center" sx={{ mb: 2 }}>
+      <Typography
+        variant="body1"
+        align="center"
+        sx={{
+          color: 'text.secondary',
+          mb: 2,
+        }}
+      >
         Self Hosted Setup
       </Typography>
-      <Box flexGrow={1}>
+      <Box
+        sx={{
+          flexGrow: 1,
+        }}
+      >
         <Box
           sx={{
             position: 'absolute',
@@ -975,8 +1198,14 @@ function SelfHostedSetupPage({ setPage }: PageProps) {
           </Typography>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="center" alignItems="center">
-        <LoadingButton
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Button
           type="submit"
           onClick={() => setPage(WizardPage.AI_PROVIDER_SETUP)}
           color="secondary"
@@ -984,15 +1213,10 @@ function SelfHostedSetupPage({ setPage }: PageProps) {
           sx={{ mr: 2 }}
         >
           Back
-        </LoadingButton>
-        <LoadingButton
-          type="submit"
-          onClick={() => setPage(WizardPage.CONNECT_MOD)}
-          color="secondary"
-          variant="contained"
-        >
+        </Button>
+        <Button type="submit" onClick={() => setPage(WizardPage.CONNECT_MOD)} color="secondary" variant="contained">
           Next
-        </LoadingButton>
+        </Button>
       </Box>
     </>
   );
@@ -1019,8 +1243,8 @@ export function SetupWizardModal({ open, setOpen }: SetupWizardModalParameters) 
       }}
     >
       <Box
-        minHeight="90%"
         sx={{
+          minHeight: '90%',
           position: 'absolute',
           top: '50%',
           left: '50%',

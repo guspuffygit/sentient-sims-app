@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Box, CardActions, IconButton, Tooltip, Typography } from '@mui/material';
 import CachedIcon from '@mui/icons-material/Cached';
-import { LoadingButton } from '@mui/lab';
+import { Button } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { ModUpdate } from 'main/sentient-sims/services/UpdateService';
@@ -52,10 +52,26 @@ export default function UpdateComponent() {
   };
 
   let updateText = 'Update now';
-  let headerText = <Typography color="text.secondary">Status: Up to date</Typography>;
+  let headerText = (
+    <Typography
+      sx={{
+        color: 'text.secondary',
+      }}
+    >
+      Status: Up to date
+    </Typography>
+  );
   if (versions.mod.version === 'none') {
     updateText = 'Install';
-    headerText = <Typography color="text.secondary">Ready to install</Typography>;
+    headerText = (
+      <Typography
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
+        Ready to install
+      </Typography>
+    );
   } else if (updateState.newVersionAvailable) {
     headerText = <Typography variant="h6">New Version Ready</Typography>;
   }
@@ -65,7 +81,7 @@ export default function UpdateComponent() {
       cardActions={
         <CardActions sx={{ margin: 1, display: 'flex', justifyContent: 'space-between' }}>
           <div>
-            <LoadingButton
+            <Button
               onClick={() => handleUpdate(false)}
               loading={isLoading}
               disabled={!updateState.newVersionAvailable}
@@ -74,19 +90,14 @@ export default function UpdateComponent() {
             >
               {updateText}{' '}
               {updateState.newVersionAvailable && <CheckCircleIcon sx={{ marginLeft: 2, color: 'white' }} />}
-            </LoadingButton>
+            </Button>
           </div>
           <div>
             {versions.mod.version !== 'none' && (
               <Tooltip title="Force reinstalls the latest version of the mod">
-                <LoadingButton
-                  onClick={() => handleUpdate(true)}
-                  loading={isLoading}
-                  color="warning"
-                  variant="outlined"
-                >
+                <Button onClick={() => handleUpdate(true)} loading={isLoading} color="warning" variant="outlined">
                   Reinstall
-                </LoadingButton>
+                </Button>
               </Tooltip>
             )}
           </div>
@@ -95,7 +106,13 @@ export default function UpdateComponent() {
     >
       <div style={{ margin: 1, display: 'flex', justifyContent: 'space-between' }}>
         <div>
-          <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: 1,
+            }}
+          >
             <Typography variant="h6" sx={{ marginBottom: 0 }}>
               Mod Update
             </Typography>
@@ -119,7 +136,12 @@ export default function UpdateComponent() {
           </Box>
           {headerText}
 
-          <Typography sx={{ fontSize: 14 }} color="text.secondary">
+          <Typography
+            sx={{
+              color: 'text.secondary',
+              fontSize: 14,
+            }}
+          >
             Last Checked: {updateState.lastChecked}
           </Typography>
         </div>

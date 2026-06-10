@@ -15,7 +15,12 @@ export function MemoryEditInput({ rows, value, label, handleEdit, forceShow = fa
   }
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
       <TextField
         id="outlined-basic"
         variant="outlined"

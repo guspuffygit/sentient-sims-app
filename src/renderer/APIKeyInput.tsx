@@ -51,27 +51,29 @@ export default function APIKeyInput({ setting, aiName, optional = false }: Modal
       size="small"
       fullWidth
       required={!optional}
-      InputProps={{
-        endAdornment: (
-          <InputAdornment position="end">
-            <EndAdornmentTooltip title="Toggle Visibility">
-              <EndAdornmentIconButton
-                style={{
-                  paddingRight: 10,
-                  paddingLeft: 10,
-                }}
-                onClick={() => setKeyVisibility(!keyVisibility)}
-              >
-                {keyVisibility ? <VisibilityIcon /> : <VisibilityOffIcon />}
-              </EndAdornmentIconButton>
-            </EndAdornmentTooltip>
-            <EndAdornmentTooltip title="Paste from clipboard">
-              <EndAdornmentIconButton onClick={() => window.electron.apiKeyPasteButtonClick()}>
-                <ContentPasteIcon />
-              </EndAdornmentIconButton>
-            </EndAdornmentTooltip>
-          </InputAdornment>
-        ),
+      slotProps={{
+        input: {
+          endAdornment: (
+            <InputAdornment position="end">
+              <EndAdornmentTooltip title="Toggle Visibility">
+                <EndAdornmentIconButton
+                  style={{
+                    paddingRight: 10,
+                    paddingLeft: 10,
+                  }}
+                  onClick={() => setKeyVisibility(!keyVisibility)}
+                >
+                  {keyVisibility ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                </EndAdornmentIconButton>
+              </EndAdornmentTooltip>
+              <EndAdornmentTooltip title="Paste from clipboard">
+                <EndAdornmentIconButton onClick={() => window.electron.apiKeyPasteButtonClick()}>
+                  <ContentPasteIcon />
+                </EndAdornmentIconButton>
+              </EndAdornmentTooltip>
+            </InputAdornment>
+          ),
+        },
       }}
     />
   );

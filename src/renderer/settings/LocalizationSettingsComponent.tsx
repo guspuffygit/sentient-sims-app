@@ -9,7 +9,13 @@ export default function LocalizationSettingsComponent() {
 
   return (
     <>
-      <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          marginBottom: 2,
+        }}
+      >
         <FormControlLabel
           label="Translate/Language"
           control={
@@ -22,7 +28,13 @@ export default function LocalizationSettingsComponent() {
         <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/How%E2%80%90to-Use-The-Sentient-Sims-App#translation-and-language-support" />
       </Box>
       {localizationEnabled.value ? (
-        <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            marginBottom: 2,
+          }}
+        >
           <TextField
             focused
             id="outlined-basic"

@@ -64,7 +64,12 @@ export default function ChatPage() {
 
   return (
     <>
-      <Box height={650} overflow="auto">
+      <Box
+        sx={{
+          height: 650,
+          overflow: 'auto',
+        }}
+      >
         {messages.map((message, index) => (
           <ChatBoxComponent
             index={index}
@@ -78,7 +83,13 @@ export default function ChatPage() {
       </Box>
       {interactionName && (
         <Box sx={{ display: 'flex', alignItems: 'center', px: 2, py: 0.5 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+              mr: 1,
+            }}
+          >
             Interaction:
           </Typography>
           <Chip
@@ -113,7 +124,12 @@ export default function ChatPage() {
                 </Button>
               </div>
               <div>
-                <Grid container alignItems="center">
+                <Grid
+                  container
+                  sx={{
+                    alignItems: 'center',
+                  }}
+                >
                   <Grid>
                     {input ? (
                       <Button onClick={() => onOpenInputView()} color="secondary">
@@ -156,9 +172,9 @@ export default function ChatPage() {
       {resultsModal.resultsModal}
       <Modal open={openInputView} onClose={() => setOpenInputView(false)}>
         <Box
-          height={650}
-          overflow="auto"
           sx={{
+            height: 650,
+            overflow: 'auto',
             position: 'absolute',
             top: '50%',
             left: '50%',

@@ -27,7 +27,13 @@ export function PatreonSubscribingComponent() {
       <Typography align="center" variant="body2" sx={{ mt: 1, mb: 1 }}>
         Click this button to open Patreon to subscribe
       </Typography>
-      <Box display="flex" justifyContent="center" alignItems="center">
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <PatreonButton url="https://www.patreon.com/SentientSims/membership" onClick={onClick} />
       </Box>
     </>
@@ -48,11 +54,14 @@ export function PatreonSubscribingComponent() {
 
   return (
     <Box
-      minWidth={400}
-      minHeight={400}
-      justifyContent="center"
-      alignItems="center"
-      sx={{ display: 'flex', flexDirection: 'column' }}
+      sx={{
+        minWidth: 400,
+        minHeight: 400,
+        justifyContent: 'center',
+        alignItems: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
     >
       {subscribingInProgress ? cancelSubscribingInProgress : subscribeToPatreon}
       <Typography variant="body2" sx={{ marginTop: 2 }}>

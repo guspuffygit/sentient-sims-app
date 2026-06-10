@@ -14,7 +14,6 @@ import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { JSX } from 'react/jsx-runtime';
 import { InteractionEventResult } from 'main/sentient-sims/models/InteractionEventResult';
 import log from 'electron-log';
-import { LoadingButton } from '@mui/lab';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { CreateMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
 import SpaceBetweenDiv from './SpaceBetweenDiv';
@@ -338,7 +337,13 @@ export function AnimationMappingComponent() {
     testOutcome = (
       <>
         {rows}
-        <Box display="flex" alignItems="center" sx={{ marginTop: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            marginTop: 1,
+          }}
+        >
           <TextField
             id="outlined-basic"
             variant="outlined"
@@ -390,7 +395,7 @@ export function AnimationMappingComponent() {
               {testResults.length > 0 ? (
                 <div>
                   <Tooltip title="This will save the animation mapping, and add Test 1 to your Sims memories.">
-                    <LoadingButton
+                    <Button
                       loading={loading}
                       color="secondary"
                       variant="outlined"
@@ -398,10 +403,10 @@ export function AnimationMappingComponent() {
                       sx={{ marginRight: 1 }}
                     >
                       Save + Add Memory
-                    </LoadingButton>
+                    </Button>
                   </Tooltip>
                   <Tooltip title="This will save animation mapping localy">
-                    <LoadingButton
+                    <Button
                       loading={loading}
                       color="primary"
                       variant="contained"
@@ -409,10 +414,10 @@ export function AnimationMappingComponent() {
                       sx={{ marginRight: 1 }}
                     >
                       Save Locally
-                    </LoadingButton>
+                    </Button>
                   </Tooltip>
                   <Tooltip title="This will save the animation mapping without modifying Sims memories.">
-                    <LoadingButton
+                    <Button
                       loading={loading}
                       color="secondary"
                       variant="outlined"
@@ -420,20 +425,15 @@ export function AnimationMappingComponent() {
                       sx={{ marginRight: 1 }}
                     >
                       Save
-                    </LoadingButton>
+                    </Button>
                   </Tooltip>
-                  <LoadingButton
-                    loading={loading}
-                    color="secondary"
-                    variant="outlined"
-                    onClick={() => setTestResults([])}
-                  >
+                  <Button loading={loading} color="secondary" variant="outlined" onClick={() => setTestResults([])}>
                     Edit
-                  </LoadingButton>
+                  </Button>
                 </div>
               ) : (
                 <div>
-                  <LoadingButton
+                  <Button
                     loading={loading}
                     color="secondary"
                     variant="outlined"
@@ -442,14 +442,14 @@ export function AnimationMappingComponent() {
                     sx={{ marginRight: 1 }}
                   >
                     Test
-                  </LoadingButton>
+                  </Button>
                 </div>
               )}
             </div>
             <div>
-              <LoadingButton color="secondary" variant="outlined" onClick={() => onClose()}>
+              <Button color="secondary" variant="outlined" onClick={() => onClose()}>
                 Cancel
-              </LoadingButton>
+              </Button>
             </div>
           </SpaceBetweenDiv>
         </Box>

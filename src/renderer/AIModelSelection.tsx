@@ -2,7 +2,7 @@ import { Box, FormHelperText, IconButton, MenuItem, Select, SelectChangeEvent, T
 import UndoIcon from '@mui/icons-material/Undo';
 import SyncIcon from '@mui/icons-material/Sync';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { LoadingButton } from '@mui/lab';
+import { Button } from '@mui/material';
 import { AIModel, compareAIModels } from 'main/sentient-sims/models/AIModel';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { useMemo, JSX } from 'react';
@@ -92,14 +92,20 @@ export default function AIModelSelection({
 
   if (aiModels.isFetching || aiModels.isLoading) {
     return (
-      <LoadingButton loading size="large" variant="outlined" disabled>
+      <Button loading size="large" variant="outlined" disabled>
         <span>models</span>
-      </LoadingButton>
+      </Button>
     );
   }
 
   return (
-    <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        marginBottom: 1,
+      }}
+    >
       {aiModels.isError ? (
         <FormHelperText sx={{ m: 1 }} error>
           Error: {aiModels.error.message}

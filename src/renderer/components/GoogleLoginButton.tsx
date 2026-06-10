@@ -1,5 +1,4 @@
-import { Button } from '@mui/material';
-import { Box, styled } from '@mui/system';
+import { Box, Button, styled } from '@mui/material';
 import { AssetsImage } from './AssetsImage';
 
 const GoogleButton = styled(Button)(() => ({
@@ -58,7 +57,14 @@ export type GoogleLoginButtonProps = {
 
 export function GoogleLoginButton({ onClick }: GoogleLoginButtonProps) {
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" sx={{ marginTop: 3 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 3,
+      }}
+    >
       <GoogleButton startIcon={<AssetsImage name="google-logo.png" width={25} height={25} />} onClick={onClick}>
         Sign in with Google
       </GoogleButton>

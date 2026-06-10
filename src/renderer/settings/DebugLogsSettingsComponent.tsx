@@ -7,7 +7,13 @@ export default function DebugLogsSettingsComponent() {
   const debugLogsEnabled = useSetting(SettingsEnum.DEBUG_LOGS, false);
 
   return (
-    <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        marginBottom: 2,
+      }}
+    >
       <FormControlLabel
         label="Enable Debug Logging"
         control={

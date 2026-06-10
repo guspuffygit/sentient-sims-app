@@ -16,7 +16,13 @@ export function AiMaxResponseLengthSettingsComponent() {
       <Alert severity="warning" sx={{ mt: 2, mb: 2 }}>
         DEBUG: Only mess with this if you know what you are doing
       </Alert>
-      <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          marginBottom: 2,
+        }}
+      >
         <Typography>Max Response Tokens:</Typography>
         <Slider
           aria-label="Volume"

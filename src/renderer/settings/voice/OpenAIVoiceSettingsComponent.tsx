@@ -37,8 +37,22 @@ export function OpenAIVoiceSettingsComponent() {
 
   return (
     <Box>
-      <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-        <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          marginBottom: 1,
+        }}
+      >
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 1,
+            width: '100%',
+          }}
+        >
           <Typography>Speech Model:</Typography>
           <Select
             size="small"
@@ -52,8 +66,22 @@ export function OpenAIVoiceSettingsComponent() {
           </Select>
         </Stack>
       </Box>
-      <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-        <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          marginBottom: 1,
+        }}
+      >
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 1,
+            width: '100%',
+          }}
+        >
           <Typography>Speech Voice:</Typography>
           <Select
             size="small"

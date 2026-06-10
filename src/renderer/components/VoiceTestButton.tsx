@@ -1,4 +1,4 @@
-import { LoadingButton } from '@mui/lab';
+import { Button } from '@mui/material';
 import log from 'electron-log';
 import { useTTS } from 'renderer/providers/AudioContextProvider';
 
@@ -10,7 +10,7 @@ export function TestVoiceButton({ disabled }: TestVoiceButtonProperties) {
   const tts = useTTS();
 
   return (
-    <LoadingButton
+    <Button
       color="primary"
       variant="outlined"
       onClick={() => {
@@ -22,6 +22,6 @@ export function TestVoiceButton({ disabled }: TestVoiceButtonProperties) {
       disableElevation={disabled}
     >
       Test
-    </LoadingButton>
+    </Button>
   );
 }

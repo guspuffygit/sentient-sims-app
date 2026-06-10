@@ -24,7 +24,13 @@ export function AISelectionComponent() {
   const { aiApiType, aiApiTypeSetting } = useAISettings();
 
   return (
-    <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        marginBottom: 2,
+      }}
+    >
       <Select
         size="small"
         labelId="release-type-select-label"

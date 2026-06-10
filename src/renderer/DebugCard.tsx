@@ -20,7 +20,13 @@ export default function DebugCard() {
 
   return (
     <AppCard>
-      <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          marginBottom: 1,
+        }}
+      >
         <Typography variant="h6" gutterBottom>
           Debug Info
         </Typography>

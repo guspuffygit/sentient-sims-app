@@ -19,7 +19,6 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import { atomOneDarkReasonable } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { TraitMapping } from 'main/sentient-sims/descriptions/traitDescriptions';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { LoadingButton } from '@mui/lab';
 import { ExportTraitsRequest } from 'main/sentient-sims/services/MappingService';
 import { toTraitType } from 'main/sentient-sims/models/TraitType';
 import AppCard from './AppCard';
@@ -313,10 +312,21 @@ export default function TraitsPage() {
   return (
     <AppCard>
       <Box sx={{ p: 3 }}>
-        <Grid container spacing={3} alignItems="center">
+        <Grid
+          container
+          spacing={3}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           {/* Trait Information */}
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="subtitle1" fontWeight="bold">
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               Trait Details - {selectedIndex + 1} / {filteredTraits.length} - Unmapped: {unmapped}
             </Typography>
             <FormHelperText>Name: {filteredTraits[selectedIndex]?.name}</FormHelperText>
@@ -382,7 +392,14 @@ export default function TraitsPage() {
           </Grid>
 
           {/* Action Buttons */}
-          <Grid size={{ xs: 12, sm: 6 }} container spacing={2} justifyContent="center">
+          <Grid
+            size={{ xs: 12, sm: 6 }}
+            container
+            spacing={2}
+            sx={{
+              justifyContent: 'center',
+            }}
+          >
             <Grid>
               <Button variant="contained" color="secondary" onClick={handleBack}>
                 Back
@@ -411,14 +428,14 @@ export default function TraitsPage() {
               </Button>
             </Grid>
             <Grid>
-              <LoadingButton variant="contained" loading={loadingExport} onClick={exportResults}>
+              <Button variant="contained" loading={loadingExport} onClick={exportResults}>
                 Export
-              </LoadingButton>
+              </Button>
             </Grid>
             <Grid>
-              <LoadingButton variant="contained" loading={loadingTraits} onClick={loadItems}>
+              <Button variant="contained" loading={loadingTraits} onClick={loadItems}>
                 Load
-              </LoadingButton>
+              </Button>
             </Grid>
           </Grid>
         </Grid>

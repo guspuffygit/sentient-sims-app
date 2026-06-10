@@ -41,7 +41,13 @@ export function AIEndpointComponent({ type, selectedApiType, settingsEnum, onCha
 
   return (
     <>
-      <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          marginBottom: 2,
+        }}
+      >
         <TextField
           focused
           id="outlined-basic"
@@ -51,16 +57,18 @@ export function AIEndpointComponent({ type, selectedApiType, settingsEnum, onCha
           size="small"
           fullWidth
           onChange={(change) => handleChange(change.target.value)}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <EndAdornmentTooltip title="Reset to Default">
-                  <EndAdornmentIconButton onClick={() => reset()}>
-                    <RotateLeftIcon />
-                  </EndAdornmentIconButton>
-                </EndAdornmentTooltip>
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <EndAdornmentTooltip title="Reset to Default">
+                    <EndAdornmentIconButton onClick={() => reset()}>
+                      <RotateLeftIcon />
+                    </EndAdornmentIconButton>
+                  </EndAdornmentTooltip>
+                </InputAdornment>
+              ),
+            },
           }}
         />
       </Box>

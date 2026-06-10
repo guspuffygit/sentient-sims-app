@@ -3,7 +3,7 @@ import AppCard from 'renderer/AppCard';
 import EditIcon from '@mui/icons-material/Edit';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useMappingLeaderboardStats } from 'renderer/hooks/useMappingLeaderboardStats';
-import { LoadingButton } from '@mui/lab';
+import { Button } from '@mui/material';
 import { ChangeEvent, useState } from 'react';
 import log from 'electron-log';
 import { useAuth } from '../providers/AuthProvider';
@@ -157,12 +157,12 @@ export function MappingLeaderboardComponent() {
             required
           />
           <SpaceBetweenDiv>
-            <LoadingButton loading={isLoading} onClick={() => handleSubmit()} variant="contained" sx={{ mt: 2 }}>
+            <Button loading={isLoading} onClick={() => handleSubmit()} variant="contained" sx={{ mt: 2 }}>
               Submit
-            </LoadingButton>
-            <LoadingButton loading={isLoading} sx={{ mt: 2 }} onClick={() => onClose()}>
+            </Button>
+            <Button loading={isLoading} sx={{ mt: 2 }} onClick={() => onClose()}>
               Cancel
-            </LoadingButton>
+            </Button>
           </SpaceBetweenDiv>
         </Box>
       </Modal>

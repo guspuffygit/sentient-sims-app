@@ -10,7 +10,7 @@ import {
   openaiDefaultEndpoint,
   openaiDefaultModel,
 } from 'main/sentient-sims/constants';
-import { LoadingButton, TabContext, TabList, TabPanel } from '@mui/lab';
+import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { SyntheticEvent, useState } from 'react';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import AppCard from './AppCard';
@@ -78,8 +78,14 @@ export default function SettingsPage() {
           <ModsDirectoryComponent />
           <DebugLogsSettingsComponent />
           <AISelectionComponent />
-          <Box display="flex" alignItems="center" sx={{ marginBottom: 3 }}>
-            <LoadingButton
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: 3,
+            }}
+          >
+            <Button
               loading={aiSettings.aiStatus.loading}
               onClick={() => aiSettings.testAI()}
               sx={{ marginRight: 2 }}
@@ -87,7 +93,7 @@ export default function SettingsPage() {
               variant="outlined"
             >
               Test
-            </LoadingButton>
+            </Button>
             <AIStatusComponent />
           </Box>
           <Divider sx={{ marginTop: 2, marginBottom: 2 }} />

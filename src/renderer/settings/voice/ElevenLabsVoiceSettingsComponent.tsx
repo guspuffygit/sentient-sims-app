@@ -50,8 +50,22 @@ export function ElevenLabsVoiceSettingsComponent() {
   return (
     <Grid size={{ xs: 12, sm: 8 }}>
       <Box>
-        <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-          <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            marginBottom: 1,
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 1,
+              width: '100%',
+            }}
+          >
             <Typography>Speech Model:</Typography>
             <Select
               size="small"
@@ -66,12 +80,32 @@ export function ElevenLabsVoiceSettingsComponent() {
           </Stack>
         </Box>
         {tts?.error ? (
-          <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: 2,
+            }}
+          >
             <FormHelperText error>Error: {tts?.error}</FormHelperText>
           </Box>
         ) : null}
-        <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-          <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            marginBottom: 1,
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 1,
+              width: '100%',
+            }}
+          >
             <TextField
               label="Voice"
               variant="outlined"

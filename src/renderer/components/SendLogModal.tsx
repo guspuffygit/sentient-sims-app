@@ -1,4 +1,4 @@
-import { LoadingButton } from '@mui/lab';
+import { Button } from '@mui/material';
 import { useState, Dispatch, SetStateAction } from 'react';
 import { SendLogsRequest } from 'main/sentient-sims/models/SendLogsRequest';
 import { Modal, Box, Divider, Grid, TextField } from '@mui/material';
@@ -75,7 +75,13 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
         <LogSendInformationComponent />
         <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
         <form onSubmit={handleSendLogs}>
-          <Grid container spacing={2} alignItems="center">
+          <Grid
+            container
+            spacing={2}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             <Grid size={12}>
               <TextField
                 fullWidth
@@ -99,14 +105,14 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
             <Grid size={12}>
               <SpaceBetweenDiv>
                 <div>
-                  <LoadingButton type="submit" loading={loading} color="secondary" variant="contained">
+                  <Button type="submit" loading={loading} color="secondary" variant="contained">
                     Send Logs
-                  </LoadingButton>
+                  </Button>
                 </div>
                 <div>
-                  <LoadingButton loading={loading} onClick={() => setOpen(false)} variant="contained">
+                  <Button loading={loading} onClick={() => setOpen(false)} variant="contained">
                     Cancel
-                  </LoadingButton>
+                  </Button>
                 </div>
               </SpaceBetweenDiv>
             </Grid>

@@ -55,7 +55,13 @@ function AvatarCard({ name, url, type }: AvatarCardProps) {
   }, [type]);
 
   return (
-    <Stack alignItems="center" direction="row" spacing={1}>
+    <Stack
+      direction="row"
+      spacing={1}
+      sx={{
+        alignItems: 'center',
+      }}
+    >
       <Avatar
         alt={name}
         src={url}
@@ -87,7 +93,15 @@ export function ThankYouCardPatreon() {
       <Typography align="center" sx={{ marginBottom: 2 }}>
         Special Thank you to Devs and Patrons!
       </Typography>
-      <Stack direction="row" spacing={{ xs: 1, sm: 1 }} flexWrap="wrap" useFlexGap sx={{ marginTop: 1 }}>
+      <Stack
+        direction="row"
+        spacing={{ xs: 1, sm: 1 }}
+        useFlexGap
+        sx={{
+          flexWrap: 'wrap',
+          marginTop: 1,
+        }}
+      >
         {thankYous.dev.map((thankYouUser) => {
           return (
             <AvatarCard
@@ -100,7 +114,15 @@ export function ThankYouCardPatreon() {
         })}
       </Stack>
       {tier2Exists ? (
-        <Stack direction="row" spacing={{ xs: 1, sm: 1 }} flexWrap="wrap" useFlexGap sx={{ marginTop: 1 }}>
+        <Stack
+          direction="row"
+          spacing={{ xs: 1, sm: 1 }}
+          useFlexGap
+          sx={{
+            flexWrap: 'wrap',
+            marginTop: 1,
+          }}
+        >
           {thankYous.tier2.map((thankYouUser) => {
             return (
               <AvatarCard
@@ -114,7 +136,15 @@ export function ThankYouCardPatreon() {
         </Stack>
       ) : null}
       {tier1Exists ? (
-        <Stack direction="row" spacing={{ xs: 1, sm: 1 }} flexWrap="wrap" useFlexGap sx={{ marginTop: 1 }}>
+        <Stack
+          direction="row"
+          spacing={{ xs: 1, sm: 1 }}
+          useFlexGap
+          sx={{
+            flexWrap: 'wrap',
+            marginTop: 1,
+          }}
+        >
           {thankYous.tier1.map((thankYouUser) => {
             return (
               <AvatarCard

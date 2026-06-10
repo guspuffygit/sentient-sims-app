@@ -4,7 +4,6 @@ import { BasicInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
 import { Animation } from 'main/sentient-sims/models/Animation';
 import log from 'electron-log';
 import { useMemo, useState } from 'react';
-import { LoadingButton } from '@mui/lab';
 import { useDebounce } from 'renderer/hooks/useDebounce';
 
 type GenericMapping = {
@@ -70,9 +69,9 @@ function MappingItem({
         onChange={(e) => setAction(e.target.value)}
         sx={{ mt: 1, mb: 1 }}
       />
-      <LoadingButton loading={loading} variant="contained" size="small" onClick={handleSave}>
+      <Button loading={loading} variant="contained" size="small" onClick={handleSave}>
         Save Locally
-      </LoadingButton>
+      </Button>
     </Paper>
   );
 }

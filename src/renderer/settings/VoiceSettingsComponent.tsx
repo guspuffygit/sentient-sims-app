@@ -25,7 +25,13 @@ export default function VoiceSettingsComponent() {
 
   return (
     <>
-      <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          marginBottom: 2,
+        }}
+      >
         <FormControlLabel
           label="Enable Text to Speech"
           control={
@@ -38,9 +44,21 @@ export default function VoiceSettingsComponent() {
         <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/Voice#tts" />
       </Box>
       {aiSettings.ttsEnabled ? (
-        <Grid container spacing={3} alignItems="center">
+        <Grid
+          container
+          spacing={3}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <Grid size={{ xs: 12, sm: 8 }}>
-            <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: 2,
+              }}
+            >
               <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
                 <Typography>AI:</Typography>
                 <Select

@@ -38,7 +38,12 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
     <Box sx={{ flexGrow: 1, marginBottom: 2 }}>
       <AppBar position="static" color="transparent" sx={{ backgroundColor: '#313339' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Box display="flex" alignItems="center">
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
             <IconButton color="secondary" onClick={() => navigate('/')} id="homebutton">
               <HomeIcon />
             </IconButton>

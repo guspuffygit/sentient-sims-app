@@ -1,5 +1,5 @@
 import { Card, CardContent, IconButton, InputAdornment, TextField } from '@mui/material';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutlined';
 import { MessageInputProps } from 'main/sentient-sims/models/MessageInputProps';
 import { useMemo, useState } from 'react';
 import { useDebounceHook } from './hooks/useDebounceHook';
@@ -51,8 +51,10 @@ export function ChatBoxComponent({
           multiline
           value={text}
           style={{ height: '100%', margin: 0 }}
-          InputProps={{
-            endAdornment,
+          slotProps={{
+            input: {
+              endAdornment,
+            },
           }}
         />
       </CardContent>

@@ -262,7 +262,13 @@ export default function MemoriesPage() {
         >
           {editedMemory?.memory?.interaction_name && (
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'text.secondary',
+                  mr: 1,
+                }}
+              >
                 Interaction:
               </Typography>
               <Chip

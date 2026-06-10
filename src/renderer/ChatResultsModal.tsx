@@ -24,9 +24,9 @@ export default function ChatResultsModal() {
     resultsModal: (
       <Modal open={state.open} onClose={onClose}>
         <Box
-          height={650}
-          overflow="auto"
           sx={{
+            height: 650,
+            overflow: 'auto',
             position: 'absolute',
             top: '50%',
             left: '50%',

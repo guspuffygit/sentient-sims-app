@@ -137,8 +137,22 @@ export function SentientSimsAIVoiceSettingsComponent() {
     <Grid size={{ xs: 12, sm: 8 }}>
       <Box>
         <Box>{errors}</Box>
-        <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-          <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            marginBottom: 1,
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 1,
+              width: '100%',
+            }}
+          >
             <Typography>Speech Model:</Typography>
             <Select
               size="small"
@@ -152,8 +166,22 @@ export function SentientSimsAIVoiceSettingsComponent() {
             </Select>
           </Stack>
         </Box>
-        <Box display="flex" alignItems="center" sx={{ marginBottom: 1 }}>
-          <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            marginBottom: 1,
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 1,
+              width: '100%',
+            }}
+          >
             <Typography>Speech Voice:</Typography>
             <Select
               size="small"
@@ -176,7 +204,15 @@ export function SentientSimsAIVoiceSettingsComponent() {
           </Stack>
         </Box>
         <Box>
-          <Stack direction="row" justifyContent="space-between" sx={{ alignItems: 'center', mb: 1, width: '100%' }}>
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 1,
+              width: '100%',
+            }}
+          >
             {sentientsimsaiTtsSettings.value.model === SentientSimsAISpeechModel.KOKORO && (
               <FormHelperText>You can select multiple voices to create a custom voice</FormHelperText>
             )}
@@ -205,7 +241,14 @@ export function SentientSimsAIVoiceSettingsComponent() {
           </Box>
         )}
         {tts?.error && (
-          <Box display="flex" alignItems="center" sx={{ marginBottom: 2, marginTop: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: 2,
+              marginTop: 2,
+            }}
+          >
             <FormHelperText error>Error: {tts?.error}</FormHelperText>
           </Box>
         )}

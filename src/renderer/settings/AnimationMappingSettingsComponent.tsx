@@ -21,7 +21,13 @@ export function AnimationMappingSettingsComponent({ apiType }: AnimationMappingS
   }
 
   return (
-    <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        marginBottom: 2,
+      }}
+    >
       <FormControlLabel
         label="Enable Animation Mapping"
         control={<Checkbox checked={animationMappingEnabled.value} onChange={onAnimationMappingEnabledChange} />}

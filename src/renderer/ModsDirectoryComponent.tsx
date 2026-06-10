@@ -9,7 +9,13 @@ export function ModsDirectoryComponent() {
   const modsDirectory = useModsDirectory();
 
   return (
-    <Box display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        marginBottom: 2,
+      }}
+    >
       <TextField
         focused
         id="outlined-basic"
@@ -18,22 +24,24 @@ export function ModsDirectoryComponent() {
         value={modsDirectory.value}
         size="small"
         fullWidth
-        InputProps={{
-          readOnly: true,
-          endAdornment: (
-            <InputAdornment position="end">
-              <EndAdornmentTooltip title="Edit">
-                <EndAdornmentIconButton onClick={() => modsDirectory.openDirectoryPicker()}>
-                  <EditIcon />
-                </EndAdornmentIconButton>
-              </EndAdornmentTooltip>
-              <EndAdornmentTooltip title="Reset to Default">
-                <EndAdornmentIconButton onClick={() => modsDirectory.resetValue()}>
-                  <RotateLeftIcon />
-                </EndAdornmentIconButton>
-              </EndAdornmentTooltip>
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            readOnly: true,
+            endAdornment: (
+              <InputAdornment position="end">
+                <EndAdornmentTooltip title="Edit">
+                  <EndAdornmentIconButton onClick={() => modsDirectory.openDirectoryPicker()}>
+                    <EditIcon />
+                  </EndAdornmentIconButton>
+                </EndAdornmentTooltip>
+                <EndAdornmentTooltip title="Reset to Default">
+                  <EndAdornmentIconButton onClick={() => modsDirectory.resetValue()}>
+                    <RotateLeftIcon />
+                  </EndAdornmentIconButton>
+                </EndAdornmentTooltip>
+              </InputAdornment>
+            ),
+          },
         }}
       />
     </Box>

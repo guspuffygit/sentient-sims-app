@@ -119,9 +119,9 @@ export default function OfflineMemory() {
       </CardContent>
       <Modal open={simsViewOpen} onClose={() => setSimsViewOpen(false)}>
         <Box
-          height={700}
-          overflow="auto"
           sx={{
+            height: 700,
+            overflow: 'auto',
             position: 'absolute',
             top: '50%',
             left: '50%',
