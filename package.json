@@ -87,7 +87,6 @@
     "react-window": "^1.8.9",
     "sharp": "^0.34.5",
     "source-map-support": "^0.5.21",
-    "uuid": "9.0.1",
     "vkbeautify": "^0.99.3",
     "xml2js": "^0.6.0"
   },
@@ -113,7 +112,6 @@
     "@types/request": "^2.48.8",
     "@types/selenium-webdriver": "^4.1.21",
     "@types/source-map-support": "^0.5.10",
-    "@types/uuid": "^9.0.2",
     "@types/vkbeautify": "^0.99.4",
     "@types/xml2js": "^0.4.11",
     "@vitejs/plugin-react": "^5.2.0",

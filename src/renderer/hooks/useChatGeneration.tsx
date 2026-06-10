@@ -10,14 +10,13 @@ import { AIClient } from 'main/sentient-sims/clients/AIClient';
 import { OpenAIMessage } from 'main/sentient-sims/models/OpenAIMessage';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import useSetting from './useSetting';
-import { v4 as uuidv4 } from 'uuid';
 
 const aiClient = new AIClient();
 
 function defaultMessages(systemPrompt: string): MessageInputProps[] {
   return [
     {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       message: {
         role: 'system',
         content: systemPrompt,
@@ -25,7 +24,7 @@ function defaultMessages(systemPrompt: string): MessageInputProps[] {
       },
     },
     {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       message: {
         role: 'user',
         content: '',
@@ -79,7 +78,7 @@ export default function useChatGeneration(): ChatGeneration {
       if (result.request?.messages) {
         result.request.messages.forEach((message) => {
           updatedMessages.push({
-            id: uuidv4(),
+            id: crypto.randomUUID(),
             message,
           });
         });
@@ -89,7 +88,7 @@ export default function useChatGeneration(): ChatGeneration {
             updatedMessages[updatedMessages.length - 1].message.content += ` ${result.text}`;
           } else {
             updatedMessages.push({
-              id: uuidv4(),
+              id: crypto.randomUUID(),
               message: {
                 role: 'assistant',
                 content: result.text,
@@ -122,7 +121,7 @@ export default function useChatGeneration(): ChatGeneration {
     setMessages((previousMessages) => [
       ...previousMessages,
       {
-        id: uuidv4(),
+        id: crypto.randomUUID(),
         message,
       },
     ]);

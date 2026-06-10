@@ -1,5 +1,4 @@
 import { Box, IconButton, Modal, TextField, Tooltip, Typography, styled } from '@mui/material';
-import { v4 as uuidv4 } from 'uuid';
 import AppCard from 'renderer/AppCard';
 import EditIcon from '@mui/icons-material/Edit';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -25,7 +24,7 @@ function LeaderboardRow({ isMe, name, count, index }: LeaderboardRowProperties) 
   const what = `#${index + 1} ${name}`;
 
   return (
-    <SpaceBetweenDiv key={uuidv4()}>
+    <SpaceBetweenDiv>
       <div>{isMe ? <HighlightedTypography>{what}</HighlightedTypography> : <Typography>{what}</Typography>}</div>
       <div>{isMe ? <HighlightedTypography>{count}</HighlightedTypography> : <Typography>{count}</Typography>}</div>
     </SpaceBetweenDiv>
@@ -57,7 +56,7 @@ export function MappingLeaderboardComponent() {
             name={userAnimationInfo.displayName}
             count={userAnimationInfo.mappedCount}
             index={i}
-            key={uuidv4()}
+            key={userAnimationInfo.displayName}
           />,
         );
       }
