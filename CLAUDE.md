@@ -5,8 +5,8 @@ It acts as a secure proxy between the game and various AI APIs (OpenAI, Gemini, 
 It also manages game state, saves, memories, locations, and participants via a local SQLite database.
 
 Commands:
-  npm run start       Dev mode (renderer dev server + main process)
-  npm run build       Production build (main + renderer via webpack)
+  npm run start       Dev mode (electron-vite dev: renderer HMR + main/preload rebuild + Electron)
+  npm run build       Production build (main + preload + renderer via electron-vite)
   AWS_PROFILE=sentientsims npm run check Run all the compile, integration/unit tests, and eslint. Run this after each change to verify
 
 Single test: edit the regex in test:single or run directly:
@@ -46,7 +46,9 @@ Frontend (src/renderer/):
 
 IPC: ipcHandlers.ts registers Electron IPC handlers (dialog, settings, clipboard, navigation). Renderer uses window.electron.ipcRenderer for direct main process calls, and HTTP clients for Express API calls.
 
-Build: electron-react-boilerplate webpack setup in .erb/configs/. Builds to release/app/dist/. Packaging via electron-builder (Windows NSIS, macOS DMG, Linux AppImage).
+Build: electron-vite (config at electron.vite.config.ts) builds main/preload/renderer to release/app/dist/{main,preload,renderer}/. All node_modules deps are bundled (build.externalizeDeps: false); only native modules from release/app/package.json (better-sqlite3) stay external. Packaging via electron-builder (Windows NSIS, macOS DMG, Linux AppImage).
+
+Signing/notarization secrets (macOS packaging): the Developer ID cert arrives as base64 in APPLE_P12_BASE64 (password APPLE_P12_PASSWORD); notarization uses APPLE_ID/APPLE_ID_PASS/APPLE_TEAM_ID, and electron-builder reads CSC_LINK/CSC_KEY_PASSWORD. NEVER print these — no env, env | grep, echo, or cat of the .p12. Decode the cert straight to a gitignored file (printf '%s' "$APPLE_P12_BASE64" | base64 -d > certificate.p12) and reference everything by variable name only. See the "Never expose secrets" rule in the global CLAUDE.md.
 
 Code conventions:
   TypeScript strict mode throughout

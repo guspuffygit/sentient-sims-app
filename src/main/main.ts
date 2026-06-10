@@ -22,6 +22,10 @@ import { appApiPort } from './sentient-sims/constants';
 import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { disableDebugLogging, enableDebugLogging } from './sentient-sims/util/debugLog';
 import debug from 'electron-debug';
+// electron-updater is CommonJS; import the default (whole module) and destructure
+// locally. A bare dynamic import() would be left external by the bundler and break
+// the packaged app (electron-updater ships only in the bundle, not release/app/node_modules).
+import electronUpdater from 'electron-updater';
 import { resolveHtmlPath } from './util';
 import { ApiContext } from './sentient-sims/services/ApiContext';
 
@@ -49,11 +53,13 @@ const createWindow = async () => {
   }
 
   let RESOURCES_PATH = path.join(process.cwd(), 'assets');
-  let preloadPath = path.join(process.cwd(), '.erb/dll/preload.js');
   if (app.isPackaged) {
     RESOURCES_PATH = path.join(process.resourcesPath, 'assets');
-    preloadPath = path.join(process.resourcesPath, 'app.asar/dist/main/preload.js');
   }
+
+  // main bundle lives at dist/main/main.js, preload at dist/preload/preload.js.
+  // __dirname resolves correctly both unpacked (dev) and inside app.asar (prod).
+  const preloadPath = path.join(__dirname, '../preload/preload.js');
 
   log.info(`RESOURCES_PATH: ${RESOURCES_PATH}`);
   log.info(`PRELOAD: ${preloadPath}`);
@@ -134,7 +140,7 @@ const createWindow = async () => {
 
   log.transports.file.level = 'info';
 
-  const { autoUpdater } = await import('electron-updater');
+  const { autoUpdater } = electronUpdater;
 
   autoUpdater.logger = log;
   try {

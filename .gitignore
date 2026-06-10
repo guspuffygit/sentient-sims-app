@@ -31,3 +31,7 @@ extracted
 extracted/
 .claude/settings.local.json
 
+# Code-signing certificate (materialized from APPLE_P12_BASE64 at build time)
+certificate.p12
+*.p12
+
