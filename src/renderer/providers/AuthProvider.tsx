@@ -1,7 +1,7 @@
 import { AuthEventData, AuthStatus } from '@aws-amplify/ui';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { fetchUserAttributes } from '@aws-amplify/auth';
-import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, use, useCallback, useEffect, useMemo, useState } from 'react';
 import log from 'electron-log';
 import { AuthUser } from 'aws-amplify/auth';
 
@@ -30,7 +30,7 @@ interface AuthProviderProps {
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context = use(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within a AuthProvider');
   }
@@ -102,5 +102,5 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
   }, [authStatus, loading, signOut, user, userAttributes, refreshUserAttributes]);
 
-  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
+  return <AuthContext value={contextValue}>{children}</AuthContext>;
 }

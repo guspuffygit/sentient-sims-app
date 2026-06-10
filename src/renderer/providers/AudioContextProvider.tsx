@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, use, useCallback, useEffect, useMemo, useState } from 'react';
 import log from 'electron-log';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { useElevenLabsTTS } from 'renderer/voice/useElevenLabsTTS';
@@ -96,11 +96,11 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
     };
   }, [speak, stop, isWebGPUSupported, tts]);
 
-  return <TTSAudioContext.Provider value={contextValue}>{children}</TTSAudioContext.Provider>;
+  return <TTSAudioContext value={contextValue}>{children}</TTSAudioContext>;
 }
 
 export const useTTS = (): TTSAudioContextType => {
-  const context = useContext(TTSAudioContext);
+  const context = use(TTSAudioContext);
   if (!context) {
     throw new Error('useTTS must be used within a TTSProvider');
   }

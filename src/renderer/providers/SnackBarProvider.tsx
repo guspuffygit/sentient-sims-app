@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
+import React, { createContext, use, useState, ReactNode, useCallback, useMemo } from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 
@@ -35,19 +35,19 @@ export function SnackBarProvider({ children }: SnackBarProviderProps) {
   }, [showMessage]);
 
   return (
-    <SnackBarContext.Provider value={contextValue}>
+    <SnackBarContext value={contextValue}>
       {children}
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity={severity} sx={{ width: '100%' }}>
           {message}
         </Alert>
       </Snackbar>
-    </SnackBarContext.Provider>
+    </SnackBarContext>
   );
 }
 
 export const useSnackBar = () => {
-  const context = useContext(SnackBarContext);
+  const context = use(SnackBarContext);
   if (context === undefined) {
     throw new Error('useSnackBar must be used within a SnackBarProvider');
   }

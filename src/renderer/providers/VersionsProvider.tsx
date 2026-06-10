@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { VersionClient } from 'main/sentient-sims/clients/VersionClient';
 import { Version } from 'main/sentient-sims/services/VersionService';
-import { createContext, ReactNode, useContext } from 'react';
+import { createContext, ReactNode, use } from 'react';
 
 interface VersionsContextType {
   app: Version;
@@ -18,7 +18,7 @@ interface VersionsProviderProps {
 }
 
 export function useVersions() {
-  const context = useContext(VersionsContext);
+  const context = use(VersionsContext);
   if (!context) {
     throw new Error('useVersions must be used within a VersionsProvider');
   }
@@ -49,7 +49,7 @@ export function VersionsProvider({ children }: VersionsProviderProps) {
   };
 
   return (
-    <VersionsContext.Provider
+    <VersionsContext
       value={{
         app: app.data,
         mod: mod.data,
@@ -59,6 +59,6 @@ export function VersionsProvider({ children }: VersionsProviderProps) {
       }}
     >
       {children}
-    </VersionsContext.Provider>
+    </VersionsContext>
   );
 }

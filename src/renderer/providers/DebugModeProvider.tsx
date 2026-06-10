@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, use, useEffect, useMemo, useState } from 'react';
 
 // Define the context for the debug mode
 interface DebugModeContextType {
@@ -15,7 +15,7 @@ interface DebugModeProviderProps {
 
 // Custom hook to use the DebugModeContext
 export function useDebugMode() {
-  const context = useContext(DebugModeContext);
+  const context = use(DebugModeContext);
   if (!context) {
     throw new Error('useDebugMode must be used within a DebugModeProvider');
   }
@@ -39,5 +39,5 @@ export function DebugModeProvider({ children }: DebugModeProviderProps) {
     return { isEnabled: debugModeEnabled, enableDebugMode };
   }, [debugModeEnabled]);
 
-  return <DebugModeContext.Provider value={contextValue}>{children}</DebugModeContext.Provider>;
+  return <DebugModeContext value={contextValue}>{children}</DebugModeContext>;
 }

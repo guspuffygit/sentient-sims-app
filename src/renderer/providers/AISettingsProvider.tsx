@@ -3,7 +3,7 @@ import { appApiUrl, defaultTTSEnabled, defaultTTSVolume } from 'main/sentient-si
 import { AIHealthCheckResponse, AITestStatus } from 'main/sentient-sims/models/AIHealthCheckResponse';
 import { ApiType, ApiTypeFromValue, ApiTypeName } from 'main/sentient-sims/models/ApiType';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, use, useEffect, useMemo, useState } from 'react';
 import useSetting, { SettingsHook } from 'renderer/hooks/useSetting';
 
 interface AISettingsContextType {
@@ -27,7 +27,7 @@ interface AISettingsProviderProps {
 }
 
 export function useAISettings() {
-  const context = useContext(AISettingsContext);
+  const context = use(AISettingsContext);
   if (!context) {
     throw new Error('useAISettings must be used within a AISettingsProvider');
   }
@@ -118,5 +118,5 @@ export function AISettingsProvider({ children }: AISettingsProviderProps) {
     };
   }, []);
 
-  return <AISettingsContext.Provider value={contextValue}>{children}</AISettingsContext.Provider>;
+  return <AISettingsContext value={contextValue}>{children}</AISettingsContext>;
 }

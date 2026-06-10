@@ -1,4 +1,4 @@
-import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useMemo, useState } from 'react';
+import { createContext, Dispatch, ReactNode, SetStateAction, use, useMemo, useState } from 'react';
 import { SetupWizardModal } from 'renderer/components/SetupWizardModal';
 
 interface SetupWizardContextType {
@@ -14,7 +14,7 @@ interface SetupWizardProviderProps {
 
 // Custom hook to use the SetupWizardContext
 export function useSetupWizard() {
-  const context = useContext(SetupWizardContext);
+  const context = use(SetupWizardContext);
   if (!context) {
     throw new Error('useSetupWizard must be used within a SetupWizardProvider');
   }
@@ -29,9 +29,9 @@ export function SetupWizardProvider({ children }: SetupWizardProviderProps) {
   }, [isOpen]);
 
   return (
-    <SetupWizardContext.Provider value={contextValue}>
+    <SetupWizardContext value={contextValue}>
       <SetupWizardModal open={isOpen} setOpen={setOpen} />
       {children}
-    </SetupWizardContext.Provider>
+    </SetupWizardContext>
   );
 }

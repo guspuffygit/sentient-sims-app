@@ -1,7 +1,7 @@
 /* eslint-disable promise/catch-or-return */
 import { WebsocketClient } from 'main/sentient-sims/clients/WebsocketClient';
 import { WebsocketStatusChange, WebsocketStatusResponse } from 'main/sentient-sims/models/WebsocketStatusResponse';
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, use, useEffect, useMemo, useState } from 'react';
 
 const websocketClient = new WebsocketClient();
 
@@ -17,7 +17,7 @@ interface WebsocketProviderProps {
 
 // Custom hook to use the WebsocketContext
 export function useWebsocket() {
-  const context = useContext(WebsocketContext);
+  const context = use(WebsocketContext);
   if (!context) {
     throw new Error('useWebsocket must be used within a WebsocketProvider');
   }
@@ -62,5 +62,5 @@ export function WebsocketProvider({ children }: WebsocketProviderProps) {
     return { status };
   }, [status]);
 
-  return <WebsocketContext.Provider value={contextValue}>{children}</WebsocketContext.Provider>;
+  return <WebsocketContext value={contextValue}>{children}</WebsocketContext>;
 }

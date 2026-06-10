@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext } from 'react';
+import { createContext, ReactNode, use } from 'react';
 import useChatGeneration, { ChatGeneration } from 'renderer/hooks/useChatGeneration';
 
 export const ChatGenerationContext = createContext<ChatGeneration | undefined>(undefined);
@@ -10,7 +10,7 @@ interface ChatProviderProps {
 
 // Custom hook to use the ChatGenerationContext
 export function useChatGenerationContext() {
-  const context = useContext(ChatGenerationContext);
+  const context = use(ChatGenerationContext);
 
   if (!context) {
     throw new Error('useChatGenerationContext must be used within a ChatProvider');
@@ -21,5 +21,5 @@ export function useChatGenerationContext() {
 export function ChatGenerationProvider({ children }: ChatProviderProps) {
   const chatGeneration = useChatGeneration();
 
-  return <ChatGenerationContext.Provider value={chatGeneration}>{children}</ChatGenerationContext.Provider>;
+  return <ChatGenerationContext value={chatGeneration}>{children}</ChatGenerationContext>;
 }
