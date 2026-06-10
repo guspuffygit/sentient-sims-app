@@ -140,7 +140,7 @@
     "globals": "^16.4.0",
     "node-abi": "^4.31.0",
     "prettier": "^3.7.4",
-    "react-syntax-highlighter": "^15.6.1",
+    "react-syntax-highlighter": "^16.1.1",
     "react-test-renderer": "^19.2.1",
     "rimraf": "^4.1.2",
     "selenium-webdriver": "^4.17.0",
