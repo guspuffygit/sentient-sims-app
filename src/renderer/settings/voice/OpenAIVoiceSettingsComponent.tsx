@@ -20,7 +20,7 @@ export function OpenAIVoiceSettingsComponent() {
   Object.entries(OpenAISpeechVoice).forEach((key) => voiceMenuItems.push(<MenuItem value={key[1]}>{key[0]}</MenuItem>));
 
   function handleModelChange(model: string) {
-    openaiTtsSettings.setSetting({
+    return openaiTtsSettings.setSetting({
       model: toSpeechModel(model),
       voice: openaiTtsSettings.value.voice,
       response_format: openaiTtsSettings.value.response_format,
@@ -28,7 +28,7 @@ export function OpenAIVoiceSettingsComponent() {
   }
 
   function handleVoiceChange(voice: string) {
-    openaiTtsSettings.setSetting({
+    return openaiTtsSettings.setSetting({
       model: openaiTtsSettings.value.model,
       voice: toSpeechVoice(voice),
       response_format: openaiTtsSettings.value.response_format,
@@ -61,7 +61,7 @@ export function OpenAIVoiceSettingsComponent() {
             label="TTS Model"
             value={openaiTtsSettings.value.model}
             onChange={(change) => {
-              handleModelChange(change.target.value);
+              void handleModelChange(change.target.value);
             }}
           >
             {modelMenuItems}
@@ -92,7 +92,7 @@ export function OpenAIVoiceSettingsComponent() {
             label="Voice"
             value={openaiTtsSettings.value.voice}
             onChange={(change) => {
-              handleVoiceChange(change.target.value);
+              void handleVoiceChange(change.target.value);
             }}
           >
             {voiceMenuItems}

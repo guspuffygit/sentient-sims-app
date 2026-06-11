@@ -42,8 +42,8 @@ export function KokoroAIVoiceSettingsComponent() {
     typeMenuItems.push(<MenuItem value={key[1]}>{key[0]}</MenuItem>);
   });
 
-  function handleModelChange(model: string) {
-    kokoroaiTtsSettings.setSetting({
+  async function handleModelChange(model: string) {
+    return kokoroaiTtsSettings.setSetting({
       model: toSpeechModel(model),
       voice: kokoroaiTtsSettings.value.voice,
       response_format: kokoroaiTtsSettings.value.response_format,
@@ -51,7 +51,7 @@ export function KokoroAIVoiceSettingsComponent() {
     });
   }
 
-  function handleVoiceChange(voice: string | KokoroAISpeechVoice[]) {
+  async function handleVoiceChange(voice: string | KokoroAISpeechVoice[]) {
     const voices: KokoroAISpeechVoice[] = [];
     if (typeof voice === 'string') {
       voice.split(',').forEach((v) => voices.push(toSpeechVoice(v)));
@@ -63,7 +63,7 @@ export function KokoroAIVoiceSettingsComponent() {
       return;
     }
 
-    kokoroaiTtsSettings.setSetting({
+    return kokoroaiTtsSettings.setSetting({
       model: kokoroaiTtsSettings.value.model,
       voice: voices,
       response_format: kokoroaiTtsSettings.value.response_format,
@@ -71,8 +71,8 @@ export function KokoroAIVoiceSettingsComponent() {
     });
   }
 
-  function handleTypeChange(type: KokoroType) {
-    kokoroaiTtsSettings.setSetting({
+  async function handleTypeChange(type: KokoroType) {
+    return kokoroaiTtsSettings.setSetting({
       model: kokoroaiTtsSettings.value.model,
       voice: kokoroaiTtsSettings.value.voice,
       response_format: kokoroaiTtsSettings.value.response_format,
@@ -107,7 +107,7 @@ export function KokoroAIVoiceSettingsComponent() {
               label="TTS Model"
               value={kokoroaiTtsSettings.value.model}
               onChange={(change) => {
-                handleModelChange(change.target.value);
+                void handleModelChange(change.target.value);
               }}
             >
               {modelMenuItems}
@@ -139,7 +139,7 @@ export function KokoroAIVoiceSettingsComponent() {
               multiple
               value={kokoroaiTtsSettings.value.voice}
               onChange={(change) => {
-                handleVoiceChange(change.target.value);
+                void handleVoiceChange(change.target.value);
               }}
               renderValue={(selected) => (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -177,7 +177,7 @@ export function KokoroAIVoiceSettingsComponent() {
               label="Local/Remote"
               value={kokoroaiTtsSettings.value.type}
               onChange={(change) => {
-                handleTypeChange(toKokoroType(change.target.value));
+                void handleTypeChange(toKokoroType(change.target.value));
               }}
             >
               {typeMenuItems}
@@ -200,7 +200,7 @@ export function KokoroAIVoiceSettingsComponent() {
         >
           <TestVoiceButton />
         </Box>
-        {tts?.error ? (
+        {tts.error ? (
           <Box
             sx={{
               display: 'flex',
@@ -208,7 +208,7 @@ export function KokoroAIVoiceSettingsComponent() {
               marginBottom: 2,
             }}
           >
-            <FormHelperText error>Error: {tts?.error}</FormHelperText>
+            <FormHelperText error>Error: {tts.error}</FormHelperText>
           </Box>
         ) : null}
         {kokoroaiTtsSettings.value.type === KokoroType.WebGPU ? (
