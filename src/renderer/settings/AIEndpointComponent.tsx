@@ -16,7 +16,7 @@ type AIEndpointComponentProps = {
 };
 
 export function AIEndpointComponent({ type, selectedApiType, settingsEnum, onChange }: AIEndpointComponentProps) {
-  const aiEndpoint = useSetting(settingsEnum);
+  const aiEndpoint = useSetting(settingsEnum, '');
 
   const inputDebounce = useDebounceHook();
 

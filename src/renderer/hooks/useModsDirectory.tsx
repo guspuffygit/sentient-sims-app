@@ -3,7 +3,7 @@ import log from 'electron-log';
 import useSetting from './useSetting';
 
 export function useModsDirectory() {
-  const modsDirectory = useSetting(SettingsEnum.MODS_DIRECTORY);
+  const modsDirectory = useSetting(SettingsEnum.MODS_DIRECTORY, '');
 
   const handleDirectoryPicker = async () => {
     try {

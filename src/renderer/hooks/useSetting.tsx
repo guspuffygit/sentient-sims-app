@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
@@ -12,70 +13,61 @@ export type SettingsHook<T> = {
 
 const client = new SentientSimsAppClient();
 
-export default function useSetting<T = any>(settingsEnum: SettingsEnum, defaultValue: any = ''): SettingsHook<T> {
+export default function useSetting<T>(settingsEnum: SettingsEnum, defaultValue: T): SettingsHook<T> {
   const settingName = settingsEnum.toString();
-  const [isLoading, setIsLoading] = useState(false);
-  const [value, setValue] = useState<T>(defaultValue);
-  const [bounceTimeout, setBounceTimeout] = useState<ReturnType<typeof setTimeout> | null>();
+  const queryClient = useQueryClient();
+  const bounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleGetSetting = useCallback(async () => {
-    setIsLoading(true);
+  const { data, isLoading } = useQuery({
+    queryKey: ['setting', settingName],
+    queryFn: async () => {
+      try {
+        const result = await client.settings.getSetting(settingName);
+        return result.value as T;
+      } catch (err) {
+        log.error(`Unable to get setting ${settingName}`, err);
+        throw err;
+      }
+    },
+    staleTime: Infinity,
+  });
 
-    try {
-      const result = await client.settings.getSetting(settingName);
-      setValue((prev: any) => (prev !== result.value ? result.value : prev));
-    } catch (err: any) {
-      log.error(`Unable to get setting ${settingName}`, err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [settingName]);
+  const value = data ?? defaultValue;
 
-  async function setSetting(settingValue: any) {
-    if (bounceTimeout) {
-      clearTimeout(bounceTimeout);
-    }
+  const setSetting = useCallback(
+    (settingValue: T): Promise<void> => {
+      if (bounceTimeoutRef.current) {
+        clearTimeout(bounceTimeoutRef.current);
+      }
+      queryClient.setQueryData<T>(['setting', settingName], settingValue);
+      bounceTimeoutRef.current = setTimeout(() => {
+        log.debug(`Setting debounce running: ${settingsEnum.toString()}, value: ${String(settingValue)}`);
+        window.electron.setSetting(settingsEnum, settingValue);
+      }, 600);
+      return Promise.resolve();
+    },
+    [queryClient, settingName, settingsEnum],
+  );
 
-    setValue(settingValue);
-
-    // debounce so that we dont send a bunch of requests back and forth
-    const timeout = setTimeout(() => {
-      log.debug(`Setting debounce running: ${settingsEnum.toString()}, value: ${settingValue}`);
-      window.electron.setSetting(settingsEnum, settingValue);
-    }, 600);
-
-    setBounceTimeout(timeout);
-  }
-
-  async function resetSetting() {
+  const resetSetting = useCallback(async (): Promise<void> => {
     if (defaultValue) {
       await setSetting(defaultValue);
     } else {
       window.electron.resetSetting(settingsEnum);
     }
-  }
+  }, [defaultValue, setSetting, settingsEnum]);
 
   useEffect(() => {
-    handleGetSetting();
-  }, [handleGetSetting]);
-
-  useEffect(() => {
-    const unsubscribe = window.electron.onSettingChange((_event: any, setting: SettingsEnum, newValue: any) => {
+    const unsubscribe = window.electron.onSettingChange((_event: unknown, setting: SettingsEnum, newValue: unknown) => {
       if (setting === settingsEnum) {
-        log.debug(`New value: ${newValue}`);
-        setValue(newValue);
+        log.debug(`New value: ${String(newValue)}`);
+        queryClient.setQueryData<T>(['setting', settingName], newValue as T);
       }
     });
-
     return () => {
       unsubscribe();
     };
-  });
+  }, [queryClient, settingName, settingsEnum]);
 
-  return {
-    isLoading,
-    value,
-    setSetting,
-    resetSetting,
-  };
+  return { value, isLoading, setSetting, resetSetting };
 }
