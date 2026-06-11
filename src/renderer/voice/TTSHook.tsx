@@ -1,5 +1,5 @@
 export interface TTSHook {
-  speak: (text: string) => void;
+  speak: (text: string) => Promise<void>;
   stop: () => void;
   isPlaying: boolean;
   clearQueue?: () => void;

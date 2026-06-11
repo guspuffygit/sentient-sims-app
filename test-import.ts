@@ -22,4 +22,4 @@ async function test() {
   console.log(ctx.memoryRepository.getMemories());
 }
 
-test();
+void test();

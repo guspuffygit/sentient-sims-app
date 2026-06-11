@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { useState, useCallback, useRef, useEffect } from 'react';
 import log from 'electron-log';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
@@ -133,7 +134,7 @@ export function useSentientSimsTTS(): TTSHook {
             URL.revokeObjectURL(audioUrl);
             resolve();
           };
-          audio.play();
+          void audio.play();
         });
       } else {
         await new Promise((resolve) => {
@@ -164,11 +165,11 @@ export function useSentientSimsTTS(): TTSHook {
         const response = await axiosClient<SentenceTokenizeResponse>(options);
         const { sentences } = response.data;
 
-        if (sentences?.length > 0) {
+        if (sentences.length > 0) {
           sentences.forEach((sentence) => sentenceQueueRef.current.push(sentence));
           log.debug(`Queued ${sentences.length} sentences. Starting fetcher and player.`);
-          fetcherLoop();
-          playerLoop();
+          void fetcherLoop();
+          void playerLoop();
         } else {
           log.error('No sentences returned from tokenization.');
         }
