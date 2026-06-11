@@ -101,8 +101,8 @@ root.render(
     <CssBaseline />
     <Authenticator.Provider>
       <React.StrictMode>
-        <AuthProvider>
-          <QueryClientProvider client={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
             <SnackBarProvider>
               <WebsocketProvider>
                 <VersionsProvider>
@@ -118,8 +118,8 @@ root.render(
                 </VersionsProvider>
               </WebsocketProvider>
             </SnackBarProvider>
-          </QueryClientProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </QueryClientProvider>
       </React.StrictMode>
     </Authenticator.Provider>
   </ThemeProvider>,

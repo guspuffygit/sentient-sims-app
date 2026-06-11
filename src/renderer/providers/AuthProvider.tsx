@@ -1,9 +1,10 @@
 import { AuthEventData, AuthStatus } from '@aws-amplify/ui';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import { fetchUserAttributes } from '@aws-amplify/auth';
-import { createContext, ReactNode, use, useCallback, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, use, useCallback, useEffect, useMemo } from 'react';
 import log from 'electron-log';
 import { AuthUser } from 'aws-amplify/auth';
+import { useQuery } from '@tanstack/react-query';
 
 export type AuthUserAttributes = {
   subscriptionLevel?: string;
@@ -39,40 +40,37 @@ export function useAuth() {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const { user, authStatus, signOut } = useAuthenticator();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [userAttributes, setUserAttributes] = useState<AuthUserAttributes | undefined>();
+
+  const {
+    data: userAttributes,
+    isFetching,
+    refetch,
+  } = useQuery<AuthUserAttributes>({
+    queryKey: ['userAttributes', authStatus === 'authenticated' ? user.userId : undefined],
+    enabled: authStatus === 'authenticated',
+    queryFn: async () => {
+      const attributes = await fetchUserAttributes();
+      log.debug(`User attributes: ${JSON.stringify(attributes, null, 2)}`);
+      return {
+        email: attributes.email,
+        subscriptionLevel: attributes['custom:subscription_level'],
+        founderStatus: attributes['custom:founderstatus'],
+        sub: attributes.sub ?? user.userId,
+        emailVerified: attributes.email_verified === 'true',
+        patreonId: attributes.preferred_username,
+      };
+    },
+  });
 
   const refreshUserAttributes = useCallback(async () => {
-    if (user) {
-      try {
-        setLoading(true);
-        const attributes = await fetchUserAttributes();
-        log.debug(`User attributes: ${JSON.stringify(attributes, null, 2)}`);
-        setUserAttributes({
-          email: attributes.email,
-          subscriptionLevel: attributes['custom:subscription_level'],
-          founderStatus: attributes['custom:founderstatus'],
-          sub: attributes.sub ?? user.userId,
-          emailVerified: attributes.email_verified === 'true',
-          patreonId: attributes.preferred_username,
-        });
-      } catch (error) {
-        log.error('Failed to retrieve user attributes', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-  }, [user]);
-
-  useEffect(() => {
-    refreshUserAttributes();
-  }, [refreshUserAttributes]);
+    await refetch();
+  }, [refetch]);
 
   useEffect(() => {
     const removeListener = window.electron.refreshUserAttributes(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       (_event: any) => {
-        refreshUserAttributes();
+        void refreshUserAttributes();
       },
     );
 
@@ -88,7 +86,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         `User: ${JSON.stringify(user)}`,
         `AuthStatus: ${authStatus}`,
         `UserAttributes: ${JSON.stringify(userAttributes)}`,
-        `Loading: ${loading}`,
+        `Loading: ${isFetching}`,
       ].join('\n'),
     );
 
@@ -96,11 +94,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       user,
       authStatus,
       signOut,
-      loading,
-      userAttributes: user && userAttributes,
+      loading: isFetching,
+      userAttributes,
       refreshUserAttributes,
     };
-  }, [authStatus, loading, signOut, user, userAttributes, refreshUserAttributes]);
+  }, [authStatus, isFetching, signOut, user, userAttributes, refreshUserAttributes]);
 
   return <AuthContext value={contextValue}>{children}</AuthContext>;
 }
