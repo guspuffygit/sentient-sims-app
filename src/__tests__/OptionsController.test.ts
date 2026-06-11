@@ -1,6 +1,7 @@
 import * as fs from 'fs';
-import { IncomingMessage, Server, ServerResponse } from 'http';
+import { Server } from 'http';
 import { runApi } from 'main/sentient-sims/api';
+import { OptionsStatus } from 'main/sentient-sims/clients/OptionsClient';
 import { mockApiContext } from './util';
 
 describe('OptionsController', () => {
@@ -14,8 +15,12 @@ describe('OptionsController', () => {
 
   afterAll(async () => {
     await new Promise<void>((resolve, reject) => {
-      server.close((err: any) => {
-        err ? reject(err) : resolve();
+      server.close((err: Error | undefined) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
       });
     });
   });
@@ -32,7 +37,7 @@ describe('OptionsController', () => {
 
     const res = await fetch(`${apiUrl}/options/status`);
     expect(res.status).toBe(200);
-    const body = await res.json();
+    const body = (await res.json()) as OptionsStatus;
     expect(body).toEqual({ modsEnabled: true, scriptModsOn: true });
   });
 
@@ -41,7 +46,7 @@ describe('OptionsController', () => {
     fs.writeFileSync(`${sims4Folder}/Options.ini`, 'modsdisabled = 1\nscriptmodsenabled = 0\n');
 
     const res = await fetch(`${apiUrl}/options/status`);
-    const body = await res.json();
+    const body = (await res.json()) as OptionsStatus;
     expect(body).toEqual({ modsEnabled: false, scriptModsOn: false });
   });
 
@@ -50,7 +55,7 @@ describe('OptionsController', () => {
     fs.writeFileSync(`${sims4Folder}/Options.ini`, 'someothersetting = 5\n');
 
     const res = await fetch(`${apiUrl}/options/status`);
-    const body = await res.json();
+    const body = (await res.json()) as OptionsStatus;
     expect(body).toEqual({ modsEnabled: null, scriptModsOn: null });
   });
 
@@ -69,7 +74,7 @@ describe('OptionsController', () => {
     fs.writeFileSync(`${sims4Folder}/Options.ini`, 'modsdisabled = 1\nscriptmodsenabled = 0\n');
 
     const res = await fetch(`${apiUrl}/options/fix`, { method: 'POST' });
-    const body = await res.json();
+    const body = (await res.json()) as OptionsStatus;
     expect(body).toEqual({ modsEnabled: true, scriptModsOn: true });
 
     const content = fs.readFileSync(`${sims4Folder}/Options.ini`, 'utf-8');
@@ -82,7 +87,7 @@ describe('OptionsController', () => {
     fs.writeFileSync(`${sims4Folder}/Options.ini`, 'someothersetting = 5\n');
 
     const res = await fetch(`${apiUrl}/options/fix`, { method: 'POST' });
-    const body = await res.json();
+    const body = (await res.json()) as OptionsStatus;
     expect(body).toEqual({ modsEnabled: true, scriptModsOn: true });
 
     const content = fs.readFileSync(`${sims4Folder}/Options.ini`, 'utf-8');
@@ -97,7 +102,7 @@ describe('OptionsController', () => {
     fs.writeFileSync(`${sims4Folder}/Options.ini`, original);
 
     const res = await fetch(`${apiUrl}/options/fix`, { method: 'POST' });
-    const body = await res.json();
+    const body = (await res.json()) as OptionsStatus;
     expect(body).toEqual({ modsEnabled: true, scriptModsOn: true });
 
     const content = fs.readFileSync(`${sims4Folder}/Options.ini`, 'utf-8');

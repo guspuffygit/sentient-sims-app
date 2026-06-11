@@ -3,7 +3,7 @@ import { runApi } from 'main/sentient-sims/api';
 import * as fs from 'fs';
 import { Version } from 'main/sentient-sims/services/VersionService';
 import { VersionClient } from 'main/sentient-sims/clients/VersionClient';
-import { IncomingMessage, Server, ServerResponse } from 'http';
+import { Server } from 'http';
 import { UpdateClient } from 'main/sentient-sims/clients/UpdateClient';
 import { AIClient } from 'main/sentient-sims/clients/AIClient';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
@@ -27,7 +27,7 @@ describe('Api', () => {
 
   afterAll(async () => {
     await new Promise<void>((resolve, reject) => {
-      server.close((err: any) => {
+      server.close((err: Error | undefined) => {
         if (err) {
           console.error('Error', err);
           reject(err);

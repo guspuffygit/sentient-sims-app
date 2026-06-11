@@ -1,5 +1,5 @@
 import { runApi } from 'main/sentient-sims/api';
-import { IncomingMessage, Server, ServerResponse } from 'http';
+import { Server } from 'http';
 import { AIClient } from 'main/sentient-sims/clients/AIClient';
 import { CognitoIdentityProviderClient, AdminInitiateAuthCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
@@ -18,7 +18,7 @@ describe('ApiIT', () => {
 
   afterAll(async () => {
     await new Promise<void>((resolve, reject) => {
-      server.close((err: any) => {
+      server.close((err: Error | undefined) => {
         if (err) {
           console.error('Error', err);
           reject(err);

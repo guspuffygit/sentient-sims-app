@@ -3,7 +3,7 @@ import releasePackageJson from './release/app/package.json' with { type: 'json' 
 import packageJson from './package.json' with { type: 'json' };
 import * as nodeAbi from 'node-abi';
 
-function extractBetterSQLite(context: any, url: string) {
+function extractBetterSQLite(context: { appOutDir: string }, url: string) {
   const fullPath = `${context.appOutDir}/SentientSims.app/Contents/Resources/app.asar.unpacked/node_modules/better-sqlite3/build/Release/better_sqlite3.node`;
   const outFile = 'better-sqlite3.tar.gz';
   const command = `wget ${url} -O ${outFile}`;
@@ -20,7 +20,7 @@ if (betterSqlite3Version !== releasePackageJson.dependencies['better-sqlite3'].r
 const abiVersion = nodeAbi.getAbi(packageJson.devDependencies.electron.replace('^', ''), 'electron');
 console.log(`ABI Version is ${abiVersion}`);
 
-export default async function (context: any) {
+export default function (context: { appOutDir: string }) {
   if (process.env.BUILD_ARCHITECTURE === 'arm64') {
     extractBetterSQLite(
       context,
