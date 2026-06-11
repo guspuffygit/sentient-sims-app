@@ -64,8 +64,8 @@ export function AISettingsProvider({ children }: AISettingsProviderProps) {
     try {
       const response = await fetch(url);
       const result: AIHealthCheckResponse = await response.json();
-      status = result?.status || '';
-      error = result?.error || '';
+      status = result.status || '';
+      error = result.error || '';
     } catch (err) {
       error = `Error getting AI Status: ${err}`;
       if (err instanceof Error) {

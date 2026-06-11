@@ -17,7 +17,7 @@ export default function LogViewerPage() {
 
   const handleClick = () => {
     shouldScrollToBottom.current = true;
-    logViewerRef?.current?.scrollToBottom();
+    logViewerRef.current?.scrollToBottom();
   };
 
   const onScroll = (event: any) => {
@@ -26,7 +26,7 @@ export default function LogViewerPage() {
     } else if (event.scrollOffsetToBottom === -1) {
       // continue to scroll until we hit the bottom
       shouldScrollToBottom.current = true;
-      logViewerRef?.current?.scrollToBottom();
+      logViewerRef.current?.scrollToBottom();
     } else {
       shouldScrollToBottom.current = false;
     }
@@ -43,23 +43,23 @@ export default function LogViewerPage() {
 
     ws.onmessage = (e) => {
       const msg: RendererWebsocketMessage = JSON.parse(e.data);
-      if (msg?.log?.message) {
+      if (msg.log?.message) {
         const formattedLogMessage = formatLog(msg.log);
         setLogs((prevLogs) => [...prevLogs, formattedLogMessage]);
-      } else if (msg?.logs) {
+      } else if (msg.logs) {
         setLogs((prevLogs) => msg.logs || prevLogs);
 
         // Scroll to the bottom after logs are loaded
         setTimeout(() => {
           if (shouldScrollToBottom.current) {
-            logViewerRef?.current?.scrollToBottom();
+            logViewerRef.current?.scrollToBottom();
           }
         }, 300);
       }
 
       scrollToBottomDebounce.current(() => {
         if (shouldScrollToBottom.current) {
-          logViewerRef?.current?.scrollToBottom();
+          logViewerRef.current?.scrollToBottom();
         }
       }, 300);
     };

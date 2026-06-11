@@ -142,10 +142,10 @@ export default function LocationsPage() {
     setEditedLocation((previousLocation) => ({
       index: Number(previousLocation?.index),
       location: {
-        id: Number(previousLocation?.location?.id),
+        id: Number(previousLocation?.location.id),
         name: event.target.value,
-        lot_type: previousLocation?.location?.lot_type || '',
-        description: previousLocation?.location?.description || '',
+        lot_type: previousLocation?.location.lot_type || '',
+        description: previousLocation?.location.description || '',
       },
     }));
   }, []);
@@ -154,10 +154,10 @@ export default function LocationsPage() {
     setEditedLocation((previousLocation) => ({
       index: Number(previousLocation?.index),
       location: {
-        id: Number(previousLocation?.location?.id),
-        name: previousLocation?.location?.name || '',
+        id: Number(previousLocation?.location.id),
+        name: previousLocation?.location.name || '',
         lot_type: event.target.value,
-        description: previousLocation?.location?.description || '',
+        description: previousLocation?.location.description || '',
       },
     }));
   }, []);
@@ -166,9 +166,9 @@ export default function LocationsPage() {
     setEditedLocation((previousLocation) => ({
       index: Number(previousLocation?.index),
       location: {
-        id: Number(previousLocation?.location?.id),
-        name: previousLocation?.location?.name || '',
-        lot_type: previousLocation?.location?.lot_type || '',
+        id: Number(previousLocation?.location.id),
+        name: previousLocation?.location.name || '',
+        lot_type: previousLocation?.location.lot_type || '',
         description: event.target.value,
       },
     }));
@@ -219,21 +219,21 @@ export default function LocationsPage() {
           rows={1}
           handleEdit={handleNameEdit}
           forceShow
-          value={editedLocation?.location?.name}
+          value={editedLocation.location.name}
         />
         <MemoryEditInput
           label="Lot Type"
           rows={1}
           handleEdit={handleLotTypeEdit}
           forceShow
-          value={editedLocation?.location?.lot_type}
+          value={editedLocation.location.lot_type}
         />
         <MemoryEditInput
           label="Description"
           handleEdit={handleDescriptionEdit}
           rows={5}
           forceShow
-          value={editedLocation?.location?.description}
+          value={editedLocation.location.description}
         />
       </AppCard>
     );

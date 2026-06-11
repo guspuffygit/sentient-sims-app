@@ -33,11 +33,11 @@ export type InstanceXML = {
 
 export function toInstance(instanceXML: InstanceXML, xml: string): Instance {
   let traitType = 'NONE';
-  if (instanceXML?.E) {
+  if (instanceXML.E) {
     log.debug(`OUTPUT: ${JSON.stringify(instanceXML, null, 2)}`);
-    instanceXML?.E?.forEach((attribute) => {
-      if (attribute?.$a_n === 'trait_type' && attribute?.['#text']) {
-        traitType = attribute?.['#text'];
+    instanceXML.E.forEach((attribute) => {
+      if (attribute.$a_n === 'trait_type' && attribute['#text']) {
+        traitType = attribute['#text'];
       }
     });
   }
@@ -136,13 +136,13 @@ export class MappingService {
           if (result?.I) {
             const instanceXml: InstanceXML = result.I;
             if (
-              instanceXml?.$a_c &&
-              instanceXml?.$a_i === 'trait' &&
-              instanceXml?.$a_m &&
-              instanceXml?.$a_n &&
-              instanceXml?.$a_s
+              instanceXml.$a_c &&
+              instanceXml.$a_i === 'trait' &&
+              instanceXml.$a_m &&
+              instanceXml.$a_n &&
+              instanceXml.$a_s
             ) {
-              if (Array.isArray(instanceXml?.T)) {
+              if (Array.isArray(instanceXml.T)) {
                 const newT: any[] = [];
                 instanceXml.T.forEach((tInstance) => {
                   if (tInstance?.$a_n in textProperties && '#text' in tInstance && tInstance['#text'] in stringMap) {
@@ -182,8 +182,8 @@ export class MappingService {
         let ignored: boolean | undefined;
         let description: string | undefined;
         if (instance.name in traitDescriptions) {
-          ignored = traitDescriptions[instance.name]?.ignored;
-          description = traitDescriptions[instance.name]?.description;
+          ignored = traitDescriptions[instance.name].ignored;
+          description = traitDescriptions[instance.name].description;
         }
         const traitMapping: TraitMapping = {
           ignored,
@@ -227,11 +227,11 @@ export class MappingService {
       if (result?.I) {
         const instanceXml: InstanceXML = result.I;
         if (
-          instanceXml?.$a_c &&
-          instanceXml?.$a_i === 'mood' &&
-          instanceXml?.$a_m &&
-          instanceXml?.$a_n &&
-          instanceXml?.$a_s
+          instanceXml.$a_c &&
+          instanceXml.$a_i === 'mood' &&
+          instanceXml.$a_m &&
+          instanceXml.$a_n &&
+          instanceXml.$a_s
         ) {
           const instance = toInstance(instanceXml, xml);
           instances.push(instance);

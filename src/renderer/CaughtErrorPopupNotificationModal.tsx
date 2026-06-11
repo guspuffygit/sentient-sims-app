@@ -49,7 +49,7 @@ export function CaughtErrorPopupNotificationModal() {
 
   const errorMessage = useMemo(() => {
     if (state.caughtError?.message) {
-      return <Typography>Error Message: {state.caughtError?.message}</Typography>;
+      return <Typography>Error Message: {state.caughtError.message}</Typography>;
     }
 
     return null;

@@ -166,7 +166,7 @@ export class NovelAIService implements GenerationService {
       const subscription: NovelAISubscription = await response.json();
       log.info(`data: ${JSON.stringify(subscription, null, 2)}`);
       return {
-        status: `Subscription ${subscription.active}, Max Context ${subscription?.perks?.contextTokens}, Tier ${subscription.tier}`,
+        status: `Subscription ${subscription.active}, Max Context ${subscription.perks?.contextTokens}, Tier ${subscription.tier}`,
       };
     }
 

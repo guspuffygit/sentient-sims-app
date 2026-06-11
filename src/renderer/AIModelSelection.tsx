@@ -65,7 +65,7 @@ export default function AIModelSelection({
     const menuItems: JSX.Element[] = [];
     const models: AIModel[] = [];
 
-    if (!aiModels?.data)
+    if (!aiModels.data)
       return {
         menuItems,
         models,

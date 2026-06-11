@@ -109,7 +109,7 @@ export class AIService {
       return { status: InteractionEventStatus.UNMAPPED_INTERACTION };
     }
 
-    if (description?.pre_actions) {
+    if (description.pre_actions) {
       const preAction = getRandomItem(description.pre_actions);
       return this.runGeneration(event, {
         preAction,
@@ -269,7 +269,7 @@ export class AIService {
       stopTokens.push('### Response:');
       stopTokens.push('### Response: (length = medium)');
     }
-    promptRequest?.stopTokens?.forEach((stopToken) => {
+    promptRequest.stopTokens?.forEach((stopToken) => {
       stopTokens.push(stopToken);
     });
 

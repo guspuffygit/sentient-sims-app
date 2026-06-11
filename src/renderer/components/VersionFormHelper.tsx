@@ -8,8 +8,8 @@ export type VersionFormHelperProps = {
 };
 
 export function VersionFormHelper({ text, version }: VersionFormHelperProps) {
-  if (version?.error) {
-    const errors = version?.error.split('\n');
+  if (version.error) {
+    const errors = version.error.split('\n');
     const elements: JSX.Element[] = [];
     for (let i = 0; i < errors.length; i += 1) {
       if (i === 0) {

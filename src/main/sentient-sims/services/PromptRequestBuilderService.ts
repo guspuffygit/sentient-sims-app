@@ -114,7 +114,7 @@ export class PromptRequestBuilderService {
       const positionStrings: string[] = [`${sentientSim.name} is`];
       if (sentientSim.body_posture && sentientSim.body_posture in postureDescriptions) {
         const bodyPosturePosition = postureDescriptions[sentientSim.body_posture];
-        if (bodyPosturePosition?.ignored !== true && bodyPosturePosition?.description) {
+        if (bodyPosturePosition.ignored !== true && bodyPosturePosition.description) {
           positionStrings.push(bodyPosturePosition.description);
         }
         if (sentientSim.posture_linked_sim) {
@@ -298,7 +298,7 @@ export class PromptRequestBuilderService {
     }
 
     const formattedStopTokens: string[] = [];
-    options?.stopTokens?.forEach((stopToken) => {
+    options.stopTokens?.forEach((stopToken) => {
       formattedStopTokens.push(
         formatAction(
           stopToken,

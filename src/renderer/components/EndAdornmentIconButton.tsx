@@ -14,7 +14,7 @@ export function EndAdornmentIconButton(props: EndAdornmentIconButtonProps) {
         maxHeight: '30px',
         minWidth: '30px',
         minHeight: '30px',
-        ...props?.style,
+        ...props.style,
       }}
     />
   );

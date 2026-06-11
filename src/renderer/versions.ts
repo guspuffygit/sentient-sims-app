@@ -23,7 +23,7 @@ export async function isNewVersionAvailable(currentVersionId: string, type = 'ma
 
     const response = await s3Client.send(headObjectCommand);
 
-    const latestVersionId = response?.Metadata?.version;
+    const latestVersionId = response.Metadata?.version;
     log.debug(`latestVersionId: ${latestVersionId}`);
     const yourVersionId = currentVersionId;
 
@@ -37,7 +37,7 @@ export async function isNewVersionAvailable(currentVersionId: string, type = 'ma
         };
         try {
           const updateModResponse = await client.update.updateMod(modUpdate);
-          return updateModResponse?.done ? false : true;
+          return updateModResponse.done ? false : true;
         } catch (err) {
           log.error(`Unable to request update to mod`, err);
         }

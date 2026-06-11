@@ -54,7 +54,7 @@ export class VLLMAIService implements GenerationService {
         return this.breakStringTokens.get(model) as number[];
       }
 
-      const breakString = modelSettings?.breakTokenString || tokenizerBreakString;
+      const breakString = modelSettings.breakTokenString || tokenizerBreakString;
 
       const tokenizeResponse = await this.tokenize(model, breakString);
 
@@ -166,7 +166,7 @@ export class VLLMAIService implements GenerationService {
 
   async tokenizeMessages(model: string, messages: OpenAIMessage[]): Promise<VLLMRTokenizeResponse> {
     const modelSettings = await this.ctx.modelSettings.getModelSettings();
-    const breakString = modelSettings?.breakTokenString || tokenizerBreakString;
+    const breakString = modelSettings.breakTokenString || tokenizerBreakString;
 
     const tokenizeRequest: VLLMTokenizeChatRequest = {
       model,
@@ -188,7 +188,7 @@ export class VLLMAIService implements GenerationService {
 
     const result: VLLMRTokenizeResponse = await tokenizeRequestResponse.data;
 
-    if (result?.tokens && result?.count) {
+    if (result.tokens && result.count) {
       return result;
     }
 

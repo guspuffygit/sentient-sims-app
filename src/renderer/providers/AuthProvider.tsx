@@ -50,10 +50,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         log.debug(`User attributes: ${JSON.stringify(attributes, null, 2)}`);
         setUserAttributes({
           email: attributes.email,
-          subscriptionLevel: attributes?.['custom:subscription_level'],
-          founderStatus: attributes?.['custom:founderstatus'],
+          subscriptionLevel: attributes['custom:subscription_level'],
+          founderStatus: attributes['custom:founderstatus'],
           sub: attributes.sub ?? user.userId,
-          emailVerified: attributes?.email_verified === 'true',
+          emailVerified: attributes.email_verified === 'true',
           patreonId: attributes.preferred_username,
         });
       } catch (error) {

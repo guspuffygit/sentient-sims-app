@@ -23,8 +23,8 @@ export class InteractionService {
   async updateUnmappedInteraction(interaction: InteractionDTO) {
     const basicInteration: BasicInteraction = {
       name: interaction.name,
-      action: interaction?.action,
-      ignored: interaction?.ignored,
+      action: interaction.action,
+      ignored: interaction.ignored,
     };
     log.debug(`Updated unmapped interaction: ${JSON.stringify(basicInteration, null, 2)}`);
     await this.ctx.interactionRepository.setInteraction(basicInteration);

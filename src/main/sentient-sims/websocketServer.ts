@@ -12,8 +12,8 @@ import { WebsocketStatusChange } from './models/WebsocketStatusResponse';
 import { ApiContext } from './services/ApiContext';
 
 function notifyAllWindows(message: string, ...args: any[]) {
-  electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-    if (!wnd.webContents?.isDestroyed()) {
+  electron.BrowserWindow.getAllWindows().forEach((wnd) => {
+    if (!wnd.webContents.isDestroyed()) {
       wnd.webContents.send(message, ...args);
     }
   });

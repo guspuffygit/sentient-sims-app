@@ -151,7 +151,7 @@ describe('Output', () => {
 
       console.log(JSON.stringify(result, null, 2));
 
-      expect(result?.action).toEqual(
+      expect(result.action).toEqual(
         'Ricky Rickerson and Richy Richardson are having a friendly conversation, sharing fishing tips.',
       );
 

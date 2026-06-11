@@ -246,7 +246,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
             </Stack>
           </Box>
         )}
-        {tts?.error && (
+        {tts.error && (
           <Box
             sx={{
               display: 'flex',
@@ -255,7 +255,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
               marginTop: 2,
             }}
           >
-            <FormHelperText error>Error: {tts?.error}</FormHelperText>
+            <FormHelperText error>Error: {tts.error}</FormHelperText>
           </Box>
         )}
       </Box>

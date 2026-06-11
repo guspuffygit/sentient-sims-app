@@ -10,8 +10,8 @@ import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { CaughtError } from '../models/CaughtError';
 
 function notifyAllWindows(message: string, ...args: any[]) {
-  electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-    if (!wnd.webContents?.isDestroyed()) {
+  electron.BrowserWindow.getAllWindows().forEach((wnd) => {
+    if (!wnd.webContents.isDestroyed()) {
       wnd.webContents.send(message, ...args);
     }
   });

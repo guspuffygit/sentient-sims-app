@@ -30,7 +30,7 @@ export default function ChatPage() {
   handleGenerationLoaded(
     useCallback(() => {
       setTimeout(() => {
-        messagesEndRef?.current?.scrollIntoView();
+        messagesEndRef.current?.scrollIntoView();
       }, 500);
     }, []),
   );

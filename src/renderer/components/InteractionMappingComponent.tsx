@@ -213,7 +213,7 @@ export function InteractionMappingComponent() {
         onClose();
         setEvent(interactionEvent);
 
-        if (interactionEvent?.testing_action) {
+        if (interactionEvent.testing_action) {
           const formattedInput = replaceActorStringWithSimNames(
             interactionEvent.testing_action,
             getMappingStringReplacementPairs(interactionEvent.sentient_sims),
@@ -296,7 +296,7 @@ export function InteractionMappingComponent() {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      if (!testResults?.[0].memory) {
+      if (!testResults[0].memory) {
         throw Error('No test results present when saving interaction');
       }
 
@@ -363,8 +363,8 @@ export function InteractionMappingComponent() {
     try {
       const testOutput = replaceKeyValuePairs(
         input,
-        getMappingStringReplacementPairs(event?.sentient_sims),
-        getMappingStringErrorPairs(event?.sentient_sims),
+        getMappingStringReplacementPairs(event.sentient_sims),
+        getMappingStringErrorPairs(event.sentient_sims),
       );
 
       const testEvent: InteractionEvent = {

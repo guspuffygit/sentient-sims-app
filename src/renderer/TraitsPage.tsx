@@ -64,7 +64,7 @@ export default function TraitsPage() {
     const traitTypeCounts: Record<string, TraitCount> = {};
     traits.forEach((trait) => {
       if (trait.trait_type) {
-        const unmapped = !trait?.description && trait?.ignored === undefined;
+        const unmapped = !trait.description && trait.ignored === undefined;
         if (trait.trait_type in traitTypeCounts) {
           traitTypeCounts[trait.trait_type].mapped += 1;
           if (unmapped) {
@@ -308,7 +308,7 @@ export default function TraitsPage() {
 
   let unmapped = 0;
   filteredTraits.forEach((trait) => {
-    if (!trait?.description && trait?.ignored === undefined) {
+    if (!trait.description && trait.ignored === undefined) {
       unmapped += 1;
     }
   });

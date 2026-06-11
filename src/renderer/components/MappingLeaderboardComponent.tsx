@@ -46,7 +46,7 @@ export function MappingLeaderboardComponent() {
     for (let i = 0; i < leaderboard.data.length; i++) {
       const userAnimationInfo = leaderboard.data[i];
 
-      const isMe = userAnimationInfo.displayName === me?.data?.displayName;
+      const isMe = userAnimationInfo.displayName === me.data?.displayName;
 
       if (i < 5 || isMe) {
         rows.push(
@@ -75,7 +75,7 @@ export function MappingLeaderboardComponent() {
   }
 
   function handleOpen() {
-    setUsername(me?.data?.displayName ?? 'Anonymous');
+    setUsername(me.data?.displayName ?? 'Anonymous');
     setOpen(true);
   }
 
@@ -106,7 +106,7 @@ export function MappingLeaderboardComponent() {
                 alignItems: 'center',
               }}
             >
-              <Typography sx={{ marginRight: 1 }}>{me?.data?.displayName ?? 'Anonymous'}</Typography>
+              <Typography sx={{ marginRight: 1 }}>{me.data?.displayName ?? 'Anonymous'}</Typography>
               <Tooltip title="Edit your username on the leaderboard" placement="top">
                 <IconButton
                   size="small"
@@ -117,7 +117,7 @@ export function MappingLeaderboardComponent() {
                   <EditIcon />
                 </IconButton>
               </Tooltip>
-              {me?.data?.displayName && (
+              {me.data?.displayName && (
                 <Tooltip title="Delete your username on the leaderboard" placement="top">
                   <IconButton size="small" onClick={() => deleteDisplayName()}>
                     <ClearIcon />

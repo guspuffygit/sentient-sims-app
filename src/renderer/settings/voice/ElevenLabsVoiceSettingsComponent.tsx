@@ -81,7 +81,7 @@ export function ElevenLabsVoiceSettingsComponent() {
             </Select>
           </Stack>
         </Box>
-        {tts?.error ? (
+        {tts.error ? (
           <Box
             sx={{
               display: 'flex',
@@ -89,7 +89,7 @@ export function ElevenLabsVoiceSettingsComponent() {
               marginBottom: 2,
             }}
           >
-            <FormHelperText error>Error: {tts?.error}</FormHelperText>
+            <FormHelperText error>Error: {tts.error}</FormHelperText>
           </Box>
         ) : null}
         <Box

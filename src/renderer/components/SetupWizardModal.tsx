@@ -766,7 +766,7 @@ function AIProviderPage({ setPage }: PageProps) {
                       </Typography>
                       {card.data.map((asdf) => (
                         <>
-                          {asdf?.header && <Typography variant="subtitle1">{asdf.header}</Typography>}
+                          {asdf.header && <Typography variant="subtitle1">{asdf.header}</Typography>}
 
                           <List dense>
                             {asdf.points.map((point, pointIndex) => (

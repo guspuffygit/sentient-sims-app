@@ -36,9 +36,7 @@ export function formatListToString(items: string[]): string {
 
 function formatMoods(moods: string[]): string[] {
   return moods
-    .filter(
-      (mood) => mood in moodDescriptions && !moodDescriptions[mood]?.ignored && moodDescriptions[mood]?.description,
-    )
+    .filter((mood) => mood in moodDescriptions && !moodDescriptions[mood].ignored && moodDescriptions[mood].description)
     .map((mood) => moodDescriptions[mood].description as string);
 }
 
@@ -157,7 +155,7 @@ export function formatSentientSim(sentientSim: SentientSim): string {
   sentientSim.traits
     .filter((trait) => trait in traitDescriptions)
     .map((trait) => traitDescriptions[trait])
-    .filter((trait) => !trait?.ignored && trait?.description)
+    .filter((trait) => !trait.ignored && trait.description)
     .forEach((trait) => {
       if (trait.trait_type === TraitType.LIKE) {
         if (trait.class === 'AttractionPreference') {

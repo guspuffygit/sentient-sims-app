@@ -28,7 +28,7 @@ export default function CustomLLMWorkersModal({ open, onClose, workers }: ModalP
   const rows: any[] = [];
   try {
     if (workers) {
-      workers?.forEach((worker, index) => {
+      workers.forEach((worker, index) => {
         rows.push({
           id: index,
           name: worker.name,

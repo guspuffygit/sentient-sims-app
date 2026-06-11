@@ -178,7 +178,7 @@ export default function MemoriesPage() {
       memory: {
         ...previousMemory?.memory,
         observation: event.target.value,
-        location_id: Number(previousMemory?.memory?.location_id),
+        location_id: Number(previousMemory?.memory.location_id),
       },
     }));
   }, []);
@@ -189,7 +189,7 @@ export default function MemoriesPage() {
       memory: {
         ...previousMemory?.memory,
         content: event.target.value,
-        location_id: Number(previousMemory?.memory?.location_id),
+        location_id: Number(previousMemory?.memory.location_id),
       },
     }));
   }, []);
@@ -200,7 +200,7 @@ export default function MemoriesPage() {
       memory: {
         ...previousMemory?.memory,
         pre_action: event.target.value,
-        location_id: Number(previousMemory?.memory?.location_id),
+        location_id: Number(previousMemory?.memory.location_id),
       },
     }));
   }, []);
@@ -211,7 +211,7 @@ export default function MemoriesPage() {
       memory: {
         ...previousMemory?.memory,
         action: event.target.value,
-        location_id: Number(previousMemory?.memory?.location_id),
+        location_id: Number(previousMemory?.memory.location_id),
       },
     }));
   }, []);
@@ -274,7 +274,7 @@ export default function MemoriesPage() {
             </CardActions>
           }
         >
-          {editedMemory?.memory?.interaction_name && (
+          {editedMemory.memory.interaction_name && (
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
               <Typography
                 variant="caption"
@@ -303,19 +303,19 @@ export default function MemoriesPage() {
           <MemoryEditInput
             label="Observation (Shown only to the AI)"
             handleEdit={handleObservationEdit}
-            value={editedMemory?.memory?.observation}
+            value={editedMemory.memory.observation}
           />
           <MemoryEditInput
             label="Pre Action (Shown only to the AI)"
             handleEdit={handlePreActionEdit}
-            value={editedMemory?.memory?.pre_action}
+            value={editedMemory.memory.pre_action}
           />
-          <MemoryEditInput label="Action" handleEdit={handleActionEdit} value={editedMemory?.memory?.action} />
+          <MemoryEditInput label="Action" handleEdit={handleActionEdit} value={editedMemory.memory.action} />
           <MemoryEditInput
             label="Content"
             handleEdit={handleContentEdit}
             rows={5}
-            value={editedMemory?.memory?.content}
+            value={editedMemory.memory.content}
           />
         </AppCard>
       );

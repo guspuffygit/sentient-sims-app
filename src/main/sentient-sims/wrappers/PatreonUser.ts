@@ -13,7 +13,7 @@ export class PatreonUser {
 
   getSubscriptionLevel() {
     if (this.userAttributes?.subscriptionLevel) {
-      return this.userAttributes?.subscriptionLevel;
+      return this.userAttributes.subscriptionLevel;
     }
 
     return 'free';

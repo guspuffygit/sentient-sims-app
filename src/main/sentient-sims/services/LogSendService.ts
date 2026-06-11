@@ -71,7 +71,7 @@ export class LogSendService {
       this.appendContentToZipFile(content, logZip, errors);
       this.appendFilesListToZipFile(logZip, errors);
       this.appendLogsFileToZipFile(logZip, errors);
-      this.appendErrorDatabaseToZipFile(logZip, errors, sendLogsRequest?.caughtError);
+      this.appendErrorDatabaseToZipFile(logZip, errors, sendLogsRequest.caughtError);
       this.appendLastExceptionFilesToZipFile(logZip, errors);
       this.appendAppLogsToZipFile(logZip, errors);
       this.appendConfigFileToZipFile(logZip, errors);
@@ -135,13 +135,13 @@ export class LogSendService {
         `Event Type: ${event.event_type}`,
       ];
 
-      if (memory?.pre_action) {
+      if (memory.pre_action) {
         interactionBugInfo.push(`Pre Action: ${memory.pre_action}`);
       }
-      if (memory?.content) {
+      if (memory.content) {
         interactionBugInfo.push(`Content: ${memory.content}`);
       }
-      if (memory?.observation) {
+      if (memory.observation) {
         interactionBugInfo.push(`Observation: ${memory.observation}`);
       }
 

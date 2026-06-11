@@ -135,8 +135,8 @@ export default function SimsPage() {
     setEditedSim((previousSim) => ({
       index: Number(previousSim?.index),
       sim: {
-        id: previousSim?.sim?.id || '',
-        name: previousSim?.sim?.name || '',
+        id: previousSim?.sim.id || '',
+        name: previousSim?.sim.name || '',
         description: event.target.value,
       },
     }));
@@ -189,7 +189,7 @@ export default function SimsPage() {
             handleEdit={handleDescriptionEdit}
             rows={5}
             forceShow
-            value={editedSim?.sim?.description}
+            value={editedSim.sim.description}
           />
         </AppCard>
       );

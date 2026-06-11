@@ -170,8 +170,8 @@ export class DbService {
 
     this.databaseSession = null;
 
-    electron?.BrowserWindow?.getAllWindows().forEach((wnd) => {
-      if (!wnd.webContents?.isDestroyed()) {
+    electron.BrowserWindow.getAllWindows().forEach((wnd) => {
+      if (!wnd.webContents.isDestroyed()) {
         log.debug('Sending database unloaded');
         wnd.webContents.send('on-database-unloaded');
       }
@@ -183,7 +183,7 @@ export class DbService {
       return this.getDatabaseTemp(saveGame);
     }
 
-    if (this?.db) {
+    if (this.db) {
       return this.db;
     }
 
