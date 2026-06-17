@@ -34,6 +34,12 @@ function defaultMessages(systemPrompt: string): MessageInputProps[] {
   ];
 }
 
+function defaultMessagesForApiType(apiType: ApiType): MessageInputProps[] {
+  return apiType === ApiType.OpenAI
+    ? defaultMessages(defaultSystemPrompt)
+    : defaultMessages(defaultMythoMaxSystemPrompt);
+}
+
 export interface ChatGeneration {
   messages: MessageInputProps[];
   input?: string | null;
@@ -54,22 +60,20 @@ export default function useChatGeneration(): ChatGeneration {
   const apiType = useSetting(SettingsEnum.AI_API_TYPE, ApiType.OpenAI);
   const [loading, setLoading] = useState(false);
   const [generationLoadedCallback, setGenerationLoadedCallback] = useState<() => void>(() => {});
-  const [messages, setMessages] = useState<MessageInputProps[]>(defaultMessages(defaultSystemPrompt));
+  const [messages, setMessages] = useState<MessageInputProps[]>(() => defaultMessagesForApiType(apiType.value));
   const [input, setInput] = useState<string | undefined | null>();
   const [interactionName, setInteractionName] = useState<string | undefined>();
-  const maxResponseTokensState = useState(90);
+  const [maxResponseTokens, setMaxResponseTokens] = useState(90);
+  const [prevApiType, setPrevApiType] = useState(apiType.value);
+
+  if (prevApiType !== apiType.value) {
+    setPrevApiType(apiType.value);
+    setMessages(defaultMessagesForApiType(apiType.value));
+  }
 
   const resetMessages = useCallback(() => {
-    if (apiType.value === ApiType.OpenAI) {
-      setMessages(defaultMessages(defaultSystemPrompt));
-    } else {
-      setMessages(defaultMessages(defaultMythoMaxSystemPrompt));
-    }
+    setMessages(defaultMessagesForApiType(apiType.value));
   }, [apiType.value]);
-
-  useEffect(() => {
-    resetMessages();
-  }, [resetMessages]);
 
   useEffect(() => {
     const removeListener = window.electron.onChatGeneration((_event: any, result: InteractionEventResult) => {
@@ -105,7 +109,8 @@ export default function useChatGeneration(): ChatGeneration {
           } catch (e: any) {
             log.error(`Unable to stringify input`, e);
           }
-          setInteractionName(result.input?.interaction_name ?? undefined);
+          const inputWithName = result.input as { interaction_name?: string } | undefined;
+          setInteractionName(inputWithName?.interaction_name ?? undefined);
         } else {
           setInteractionName(undefined);
         }
@@ -137,9 +142,9 @@ export default function useChatGeneration(): ChatGeneration {
     });
     return {
       messages: requestMessages,
-      maxResponseTokens: maxResponseTokensState[0],
+      maxResponseTokens,
     };
-  }, [maxResponseTokensState, messages]);
+  }, [maxResponseTokens, messages]);
 
   const countTokens = () => {
     // TODO: Reimplement this
@@ -222,6 +227,6 @@ export default function useChatGeneration(): ChatGeneration {
     countTokens,
     generateMultipleChat,
     handleGenerationLoaded: setGenerationLoadedCallback,
-    maxResponseTokensState,
+    maxResponseTokensState: [maxResponseTokens, setMaxResponseTokens],
   };
 }
