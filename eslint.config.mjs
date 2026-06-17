@@ -1,8 +1,8 @@
 import { defineConfig, globalIgnores } from 'eslint/config';
-import tseslint from 'typescript-eslint';
+import { configs as tseslintConfigs } from 'typescript-eslint';
 import eslint from '@eslint/js';
 import eslintReact from '@eslint-react/eslint-plugin';
-import importX from 'eslint-plugin-import-x';
+import { flatConfigs as importXFlatConfigs } from 'eslint-plugin-import-x';
 import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 // @ts-expect-error there are no types for this and it works fine
@@ -12,12 +12,13 @@ import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 
 export default defineConfig([
   eslint.configs.recommended,
-  tseslint.configs.strictTypeChecked,
+  tseslintConfigs.strictTypeChecked,
   reactHooks.configs.flat.recommended,
   eslintReact.configs['recommended-type-checked'],
-  importX.flatConfigs.recommended,
-  importX.flatConfigs.typescript,
-  importX.flatConfigs.electron,
+  importXFlatConfigs.recommended,
+  importXFlatConfigs.typescript,
+  importXFlatConfigs.electron,
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   pluginPromise.configs['flat/recommended'],
   eslintConfigPrettier,
   eslintPluginPrettierRecommended,

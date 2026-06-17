@@ -83,11 +83,12 @@ export class OpenAIService implements GenerationService {
       return {
         error: noModelsAvailableErrorMessage,
       };
-    } catch (error: any) {
+    } catch (error) {
       log.error('Error testing OpenAI API:', error);
 
+      const message = error instanceof Error ? error.message : String(error);
       return {
-        error: `not working, ${error?.message}`,
+        error: `not working, ${message}`,
       };
     }
   }
@@ -133,7 +134,8 @@ export class OpenAIService implements GenerationService {
     let text = this.getOutputFromGeneration(result);
 
     if (request.guidedChoice && this.ctx.settings.openaiEndpoint === openaiDefaultEndpoint) {
-      text = JSON.parse(text).choice.trim();
+      const parsed = JSON.parse(text) as { choice: string };
+      text = parsed.choice.trim();
     }
 
     if (this.ctx.settings.localizationEnabled) {
@@ -152,7 +154,7 @@ export class OpenAIService implements GenerationService {
       return output.trim();
     }
 
-    log.error(`Output wasnt truthy from OpenAI API:\n${generation}`);
+    log.error(`Output wasnt truthy from OpenAI API:\n${JSON.stringify(generation)}`);
 
     throw new Error(`Output wasnt truthy from OpenAI API ${output}`);
   }

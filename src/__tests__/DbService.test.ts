@@ -14,7 +14,7 @@ describe('DbService', () => {
   });
 
   it('No loaded db throws exception', () => {
-    expect(ctx.db.getDb).toThrow(DatabaseNotLoadedError);
+    expect(() => ctx.db.getDb()).toThrow(DatabaseNotLoadedError);
   });
 
   it('Loading unloading database', async () => {

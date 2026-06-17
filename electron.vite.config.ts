@@ -16,7 +16,7 @@ import appPackage from './release/app/package.json';
  * true` disables that so all deps are bundled, then this hard `external` list forces
  * back out the handful that genuinely must be required at runtime.
  */
-const nativeExternals = Object.keys(appPackage.dependencies || {});
+const nativeExternals = Object.keys(appPackage.dependencies);
 // `ws` pulls these optional native addons via try/catch require(); keep them
 // external so the runtime require runs (ws falls back to JS if they're absent),
 // instead of Rollup failing to resolve them at build time.

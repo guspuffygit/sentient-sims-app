@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import sourceMapSupport from 'source-map-support';
+import { install as installSourceMapSupport } from 'source-map-support';
 import { app, BrowserWindow, shell, session, WebRequestFilter, dialog } from 'electron';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -34,7 +34,7 @@ log.initialize({ preload: true });
 let mainWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
-  sourceMapSupport.install();
+  installSourceMapSupport();
 }
 
 const isDebug = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
@@ -141,25 +141,24 @@ const createWindow = async () => {
 
   log.transports.file.level = 'info';
 
+  // eslint-disable-next-line import-x/no-named-as-default-member
   const { autoUpdater } = electronUpdater;
 
   autoUpdater.logger = log;
   try {
     void autoUpdater.checkForUpdatesAndNotify();
-    if (mainWindow) {
-      autoUpdater.on('update-downloaded', (info) => {
-        void dialog
-          .showMessageBox({
-            type: 'question',
-            buttons: ['Install and Restart'],
-            defaultId: 0,
-            message: `Update ${info.version} has been downloaded and is ready to install, please restart to install the update.`,
-          })
-          .then(() => {
-            autoUpdater.quitAndInstall();
-          });
-      });
-    }
+    autoUpdater.on('update-downloaded', (info) => {
+      void dialog
+        .showMessageBox({
+          type: 'question',
+          buttons: ['Install and Restart'],
+          defaultId: 0,
+          message: `Update ${info.version} has been downloaded and is ready to install, please restart to install the update.`,
+        })
+        .then(() => {
+          autoUpdater.quitAndInstall();
+        });
+    });
   } catch (err) {
     log.error(`Unable to check for updates and notify`, err);
   }
@@ -202,4 +201,6 @@ app
       if (mainWindow === null) void createWindow();
     });
   })
-  .catch(log.error);
+  .catch((err: unknown) => {
+    log.error(err);
+  });

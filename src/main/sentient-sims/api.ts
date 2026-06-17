@@ -1,4 +1,9 @@
-import express, { NextFunction, Request, RequestHandler, Response } from 'express';
+// Controller methods are pre-bound to `this` in their constructors, so passing
+// references to wrap() is safe even though @typescript-eslint can't see the
+// bindings. Disable the unbound-method rule for this file rather than wrap
+// every route handler in an extra arrow function.
+/* eslint-disable @typescript-eslint/unbound-method */
+import express, { json, NextFunction, Request, RequestHandler, Response } from 'express';
 import log from 'electron-log';
 import { modOutOfDate } from './controllers/VersionController';
 import { DebugController } from './controllers/DebugController';
@@ -11,12 +16,13 @@ type RouteHandler = (req: Request, res: Response, next?: NextFunction) => unknow
 const wrap =
   (fn: RouteHandler): RequestHandler =>
   (req, res, next) => {
+    // eslint-disable-next-line promise/no-callback-in-promise
     void Promise.resolve(fn(req, res, next)).catch(next);
   };
 
 export function runApi(ctx: ApiContext) {
   const expressApp = express();
-  expressApp.use(express.json({ limit: 52428800 }));
+  expressApp.use(json({ limit: 52428800 }));
 
   expressApp.get('/debug/health', wrap(DebugController.appHealthCheck));
   expressApp.get('/debug/test-ai', wrap(ctx.controller.debug.healthCheckGenerationService));
