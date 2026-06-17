@@ -81,7 +81,9 @@ export default function UpdateComponent() {
         <CardActions sx={{ margin: 1, display: 'flex', justifyContent: 'space-between' }}>
           <div>
             <Button
-              onClick={() => handleUpdate(false)}
+              onClick={() => {
+                void handleUpdate(false);
+              }}
               loading={isLoading}
               disabled={!updateState.newVersionAvailable}
               color="success"
@@ -94,7 +96,14 @@ export default function UpdateComponent() {
           <div>
             {versions.mod.version !== 'none' && (
               <Tooltip title="Force reinstalls the latest version of the mod">
-                <Button onClick={() => handleUpdate(true)} loading={isLoading} color="warning" variant="outlined">
+                <Button
+                  onClick={() => {
+                    void handleUpdate(true);
+                  }}
+                  loading={isLoading}
+                  color="warning"
+                  variant="outlined"
+                >
                   Reinstall
                 </Button>
               </Tooltip>
@@ -125,7 +134,9 @@ export default function UpdateComponent() {
                     minHeight: '30px',
                   }}
                   sx={{ marginLeft: 1 }}
-                  onClick={handleCheckForUpdates}
+                  onClick={() => {
+                    void handleCheckForUpdates();
+                  }}
                   disabled={versions.loading || isLoading}
                 >
                   <CachedIcon />

@@ -119,7 +119,12 @@ export function MappingLeaderboardComponent() {
               </Tooltip>
               {me.data?.displayName && (
                 <Tooltip title="Delete your username on the leaderboard" placement="top">
-                  <IconButton size="small" onClick={() => deleteDisplayName()}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      void deleteDisplayName();
+                    }}
+                  >
                     <ClearIcon />
                   </IconButton>
                 </Tooltip>
@@ -137,7 +142,12 @@ export function MappingLeaderboardComponent() {
         </SpaceBetweenDiv>
         {rows}
       </AppCard>
-      <Modal open={open} onClose={() => onClose()}>
+      <Modal
+        open={open}
+        onClose={() => {
+          void onClose();
+        }}
+      >
         <Box
           sx={{
             position: 'absolute',
@@ -163,10 +173,23 @@ export function MappingLeaderboardComponent() {
             required
           />
           <SpaceBetweenDiv>
-            <Button loading={isLoading} onClick={() => handleSubmit()} variant="contained" sx={{ mt: 2 }}>
+            <Button
+              loading={isLoading}
+              onClick={() => {
+                void handleSubmit();
+              }}
+              variant="contained"
+              sx={{ mt: 2 }}
+            >
               Submit
             </Button>
-            <Button loading={isLoading} sx={{ mt: 2 }} onClick={() => onClose()}>
+            <Button
+              loading={isLoading}
+              sx={{ mt: 2 }}
+              onClick={() => {
+                void onClose();
+              }}
+            >
               Cancel
             </Button>
           </SpaceBetweenDiv>

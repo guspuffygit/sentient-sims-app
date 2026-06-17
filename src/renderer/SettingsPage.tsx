@@ -89,7 +89,9 @@ export default function SettingsPage() {
           >
             <Button
               loading={aiSettings.aiStatus.loading}
-              onClick={() => aiSettings.testAI()}
+              onClick={() => {
+                void aiSettings.testAI();
+              }}
               sx={{ marginRight: 2 }}
               color="primary"
               variant="outlined"

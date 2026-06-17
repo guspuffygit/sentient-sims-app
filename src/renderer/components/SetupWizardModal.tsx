@@ -158,7 +158,9 @@ function ModSetupPage({ setPage }: PageProps) {
             <Button
               type="submit"
               loading={versions.loading}
-              onClick={() => versions.refresh()}
+              onClick={() => {
+                void versions.refresh();
+              }}
               color="secondary"
               variant="contained"
               endIcon={versions.game.version !== 'none' ? <CheckCircleOutlineIcon /> : undefined}
@@ -546,7 +548,13 @@ function EnableModsPage({ setPage }: PageProps) {
                 mt: 2,
               }}
             >
-              <Button onClick={() => checkAndFix()} color="secondary" variant="outlined">
+              <Button
+                onClick={() => {
+                  void checkAndFix();
+                }}
+                color="secondary"
+                variant="outlined"
+              >
                 Re-check
               </Button>
             </Box>
@@ -1110,7 +1118,9 @@ function OpenAISetupPage({ setPage }: PageProps) {
             </Box>
             <Button
               loading={aiStatus.loading}
-              onClick={() => testAI()}
+              onClick={() => {
+                void testAI();
+              }}
               sx={{ marginRight: 2 }}
               color="primary"
               variant="outlined"

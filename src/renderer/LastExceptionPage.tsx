@@ -63,14 +63,22 @@ export default function LastExceptionPage() {
           <SpaceBetweenDiv>
             <div />
             <div style={{ marginRight: 2 }}>
-              <Button onClick={() => refresh()} variant="outlined" sx={{ marginRight: 2 }}>
+              <Button
+                onClick={() => {
+                  void refresh();
+                }}
+                variant="outlined"
+                sx={{ marginRight: 2 }}
+              >
                 Refresh
               </Button>
               <Button
                 color="error"
                 variant="outlined"
                 disabled={lastExceptionFiles.length === 0}
-                onClick={() => deleteFiles()}
+                onClick={() => {
+                  void deleteFiles();
+                }}
               >
                 Clear All
               </Button>

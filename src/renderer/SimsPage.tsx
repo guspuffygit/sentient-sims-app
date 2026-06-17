@@ -162,7 +162,14 @@ export default function SimsPage() {
               }}
             >
               <div>
-                <Button sx={{ marginRight: 1 }} color="secondary" variant="outlined" onClick={() => handleSave()}>
+                <Button
+                  sx={{ marginRight: 1 }}
+                  color="secondary"
+                  variant="outlined"
+                  onClick={() => {
+                    void handleSave();
+                  }}
+                >
                   Save
                 </Button>
                 <Button
@@ -176,7 +183,13 @@ export default function SimsPage() {
                 </Button>
               </div>
               <div>
-                <Button color="error" variant="outlined" onClick={() => handleDelete()}>
+                <Button
+                  color="error"
+                  variant="outlined"
+                  onClick={() => {
+                    void handleDelete();
+                  }}
+                >
                   Delete
                 </Button>
               </div>

@@ -123,7 +123,12 @@ export default function AIModelSelection({
       )}
       {aiEndpoint.value === defaultEndpoint ? (
         <Tooltip title="Reset to Default">
-          <IconButton sx={{ marginLeft: 1 }} onClick={() => aiModel.resetSetting()}>
+          <IconButton
+            sx={{ marginLeft: 1 }}
+            onClick={() => {
+              void aiModel.resetSetting();
+            }}
+          >
             <UndoIcon />
           </IconButton>
         </Tooltip>
@@ -131,7 +136,9 @@ export default function AIModelSelection({
       <Tooltip title="Refresh Models">
         <IconButton
           sx={{ marginLeft: 1 }}
-          onClick={() => aiModels.refetch()}
+          onClick={() => {
+            void aiModels.refetch();
+          }}
           disabled={aiModels.isFetching || aiModels.isLoading}
         >
           <SyncIcon />

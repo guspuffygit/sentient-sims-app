@@ -80,7 +80,11 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
       >
         <LogSendInformationComponent />
         <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-        <form onSubmit={handleSendLogs}>
+        <form
+          onSubmit={(e) => {
+            void handleSendLogs(e);
+          }}
+        >
           <Grid
             container
             spacing={2}

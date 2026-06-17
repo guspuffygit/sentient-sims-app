@@ -472,7 +472,9 @@ export function InteractionMappingComponent() {
                       loading={loading}
                       color="secondary"
                       variant="outlined"
-                      onClick={() => handleSave(true)}
+                      onClick={() => {
+                        void handleSave(true);
+                      }}
                       sx={{ marginRight: 1 }}
                     >
                       Save + Add Memory
@@ -483,7 +485,9 @@ export function InteractionMappingComponent() {
                       loading={loading}
                       color="primary"
                       variant="contained"
-                      onClick={handleSaveLocally}
+                      onClick={() => {
+                        void handleSaveLocally();
+                      }}
                       sx={{ marginRight: 1 }}
                     >
                       Save Locally
@@ -494,7 +498,9 @@ export function InteractionMappingComponent() {
                       loading={loading}
                       color="secondary"
                       variant="outlined"
-                      onClick={() => handleSave(false)}
+                      onClick={() => {
+                        void handleSave(false);
+                      }}
                       sx={{ marginRight: 1 }}
                     >
                       Save
@@ -517,7 +523,9 @@ export function InteractionMappingComponent() {
                     loading={loading}
                     color="secondary"
                     variant="outlined"
-                    onClick={() => handleTest()}
+                    onClick={() => {
+                      void handleTest();
+                    }}
                     disabled={output.hasErrors}
                     sx={{ marginRight: 1 }}
                   >

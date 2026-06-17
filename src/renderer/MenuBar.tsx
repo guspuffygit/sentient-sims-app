@@ -44,7 +44,13 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
               alignItems: 'center',
             }}
           >
-            <IconButton color="secondary" onClick={() => navigate('/')} id="homebutton">
+            <IconButton
+              color="secondary"
+              onClick={() => {
+                void navigate('/');
+              }}
+              id="homebutton"
+            >
               <HomeIcon />
             </IconButton>
             <Button color="secondary" onClick={handleOpenWiki} sx={{ marginLeft: '5px', marginRight: '10px' }}>
@@ -84,21 +90,39 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
               <>
                 <Button
                   color="secondary"
-                  onClick={() => navigate('/offlinememory')}
+                  onClick={() => {
+                    void navigate('/offlinememory');
+                  }}
                   sx={{ marginLeft: '5px' }}
                   id="offlinememory"
                 >
                   OfflineMemory
                 </Button>
-                <Button color="secondary" onClick={() => navigate('/chat')} sx={{ marginLeft: '5px' }} id="chat">
+                <Button
+                  color="secondary"
+                  onClick={() => {
+                    void navigate('/chat');
+                  }}
+                  sx={{ marginLeft: '5px' }}
+                  id="chat"
+                >
                   Chat
                 </Button>
-                <Button color="secondary" onClick={() => navigate('/traits')} sx={{ marginLeft: '5px' }} id="traits">
+                <Button
+                  color="secondary"
+                  onClick={() => {
+                    void navigate('/traits');
+                  }}
+                  sx={{ marginLeft: '5px' }}
+                  id="traits"
+                >
                   Traits
                 </Button>
                 <Button
                   color="secondary"
-                  onClick={() => navigate('/mapping-browser')}
+                  onClick={() => {
+                    void navigate('/mapping-browser');
+                  }}
                   sx={{ marginLeft: '5px' }}
                   id="mapping-browser"
                 >
@@ -106,16 +130,44 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
                 </Button>
               </>
             ) : null}
-            <Button color="secondary" onClick={() => navigate('/sims')} sx={{ marginLeft: '5px' }} id="sims">
+            <Button
+              color="secondary"
+              onClick={() => {
+                void navigate('/sims');
+              }}
+              sx={{ marginLeft: '5px' }}
+              id="sims"
+            >
               Sims
             </Button>
-            <Button color="secondary" onClick={() => navigate('/locations')} sx={{ marginLeft: '5px' }} id="locations">
+            <Button
+              color="secondary"
+              onClick={() => {
+                void navigate('/locations');
+              }}
+              sx={{ marginLeft: '5px' }}
+              id="locations"
+            >
               Locations
             </Button>
-            <Button color="secondary" onClick={() => navigate('/memories')} sx={{ marginLeft: '5px' }} id="memories">
+            <Button
+              color="secondary"
+              onClick={() => {
+                void navigate('/memories');
+              }}
+              sx={{ marginLeft: '5px' }}
+              id="memories"
+            >
               Memories
             </Button>
-            <Button color="secondary" onClick={() => navigate('/settings')} sx={{ marginLeft: '5px' }} id="settings">
+            <Button
+              color="secondary"
+              onClick={() => {
+                void navigate('/settings');
+              }}
+              sx={{ marginLeft: '5px' }}
+              id="settings"
+            >
               Settings
             </Button>
             {authStatus === 'authenticated' ? (

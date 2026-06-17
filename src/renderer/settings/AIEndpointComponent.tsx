@@ -68,7 +68,11 @@ export function AIEndpointComponent({ type, selectedApiType, settingsEnum, onCha
               endAdornment: (
                 <InputAdornment position="end">
                   <EndAdornmentTooltip title="Reset to Default">
-                    <EndAdornmentIconButton onClick={() => reset()}>
+                    <EndAdornmentIconButton
+                      onClick={() => {
+                        void reset();
+                      }}
+                    >
                       <RotateLeftIcon />
                     </EndAdornmentIconButton>
                   </EndAdornmentTooltip>

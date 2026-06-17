@@ -21,7 +21,9 @@ export default function LocalizationSettingsComponent() {
           control={
             <Checkbox
               checked={localizationEnabled.value}
-              onChange={(change) => localizationEnabled.setSetting(change.target.checked)}
+              onChange={(change) => {
+                void localizationEnabled.setSetting(change.target.checked);
+              }}
             />
           }
         />
@@ -43,7 +45,9 @@ export default function LocalizationSettingsComponent() {
             value={localizationLanguage.value}
             size="small"
             fullWidth
-            onChange={(change) => localizationLanguage.setSetting(change.target.value)}
+            onChange={(change) => {
+              void localizationLanguage.setSetting(change.target.value);
+            }}
             sx={{ marginRight: 2 }}
           />
         </Box>

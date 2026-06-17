@@ -147,15 +147,17 @@ const createWindow = async () => {
   try {
     void autoUpdater.checkForUpdatesAndNotify();
     if (mainWindow) {
-      autoUpdater.on('update-downloaded', async (info) => {
-        await dialog.showMessageBox({
-          type: 'question',
-          buttons: ['Install and Restart'],
-          defaultId: 0,
-          message: `Update ${info.version} has been downloaded and is ready to install, please restart to install the update.`,
-        });
-
-        autoUpdater.quitAndInstall();
+      autoUpdater.on('update-downloaded', (info) => {
+        void dialog
+          .showMessageBox({
+            type: 'question',
+            buttons: ['Install and Restart'],
+            defaultId: 0,
+            message: `Update ${info.version} has been downloaded and is ready to install, please restart to install the update.`,
+          })
+          .then(() => {
+            autoUpdater.quitAndInstall();
+          });
       });
     }
   } catch (err) {

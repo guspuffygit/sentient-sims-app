@@ -105,7 +105,13 @@ export default function OfflineMemory() {
                   <TableCell align="left">{saveGameParticipants.saveGame.type}</TableCell>
                   <TableCell align="left">
                     {saveGameParticipants.participants !== undefined ? (
-                      <Button onClick={() => viewSims(saveGameParticipants.saveGame)}>View Sims</Button>
+                      <Button
+                        onClick={() => {
+                          void viewSims(saveGameParticipants.saveGame);
+                        }}
+                      >
+                        View Sims
+                      </Button>
                     ) : (
                       <Typography>-</Typography>
                     )}

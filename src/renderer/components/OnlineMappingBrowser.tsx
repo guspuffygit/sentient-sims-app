@@ -71,7 +71,14 @@ function MappingItem({
         }}
         sx={{ mt: 1, mb: 1 }}
       />
-      <Button loading={loading} variant="contained" size="small" onClick={handleSave}>
+      <Button
+        loading={loading}
+        variant="contained"
+        size="small"
+        onClick={() => {
+          void handleSave();
+        }}
+      >
         Save Locally
       </Button>
     </Paper>
@@ -132,10 +139,22 @@ export default function OnlineMappingBrowser() {
       </Typography>
       <Paper sx={{ p: 2, mb: 2 }}>
         <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-          <Button variant="contained" onClick={() => loadMappings('interactions')} disabled={loading}>
+          <Button
+            variant="contained"
+            onClick={() => {
+              void loadMappings('interactions');
+            }}
+            disabled={loading}
+          >
             Load Online Interactions
           </Button>
-          <Button variant="contained" onClick={() => loadMappings('animations')} disabled={loading}>
+          <Button
+            variant="contained"
+            onClick={() => {
+              void loadMappings('animations');
+            }}
+            disabled={loading}
+          >
             Load Online Animations
           </Button>
         </Box>

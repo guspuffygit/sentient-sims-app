@@ -27,7 +27,9 @@ export function ReleaseTypeSelector() {
         id="release-type-select"
         value={releaseType.value}
         sx={{ minWidth: 100 }}
-        onChange={handleChangeReleaseType}
+        onChange={(event) => {
+          void handleChangeReleaseType(event);
+        }}
       >
         <MenuItem value="main">Stable</MenuItem>
         <MenuItem disabled={disableNightly} value="develop">

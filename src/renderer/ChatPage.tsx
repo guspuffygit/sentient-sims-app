@@ -110,10 +110,24 @@ export default function ChatPage() {
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <div>
-                <Button type="submit" onClick={generateChat} color="primary" endIcon={<SendIcon />}>
+                <Button
+                  type="submit"
+                  onClick={() => {
+                    void generateChat();
+                  }}
+                  color="primary"
+                  endIcon={<SendIcon />}
+                >
                   Send
                 </Button>
-                <Button type="submit" onClick={() => onGenerateMultiple()} color="primary" endIcon={<SendIcon />}>
+                <Button
+                  type="submit"
+                  onClick={() => {
+                    void onGenerateMultiple();
+                  }}
+                  color="primary"
+                  endIcon={<SendIcon />}
+                >
                   Send 10
                 </Button>
                 <Button
