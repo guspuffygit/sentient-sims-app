@@ -145,9 +145,12 @@ export const useAnnouncements = () => {
 
     void fetchAnnouncements();
 
-    const intervalId = setInterval(() => {
-      void fetchAnnouncements();
-    }, 3 * 60 * 1000);
+    const intervalId = setInterval(
+      () => {
+        void fetchAnnouncements();
+      },
+      3 * 60 * 1000,
+    );
 
     return () => {
       clearInterval(intervalId);
