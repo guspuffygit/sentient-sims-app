@@ -82,7 +82,7 @@ const createWindow = async () => {
     },
   });
 
-  mainWindow.loadURL(resolveHtmlPath('index.html'));
+  void mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
@@ -98,7 +98,7 @@ const createWindow = async () => {
   mainWindow.webContents.on('will-navigate', (event, url) => {
     if (url.startsWith('https://sentientsimulations.auth.us-east-1.amazoncognito.com/oauth2/authorize')) {
       event.preventDefault();
-      shell.openExternal(url);
+      void shell.openExternal(url);
     }
   });
 
@@ -113,7 +113,7 @@ const createWindow = async () => {
 
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
-    shell.openExternal(edata.url);
+    void shell.openExternal(edata.url);
     return { action: 'deny' };
   });
 
@@ -145,7 +145,7 @@ const createWindow = async () => {
 
   autoUpdater.logger = log;
   try {
-    autoUpdater.checkForUpdatesAndNotify();
+    void autoUpdater.checkForUpdatesAndNotify();
     if (mainWindow) {
       autoUpdater.on('update-downloaded', async (info) => {
         await dialog.showMessageBox({
@@ -171,10 +171,10 @@ const createWindow = async () => {
     log.debug(`url hit: ${url}`);
     if (url.includes('/login/signout')) {
       log.debug('/login/signout initiated');
-      session.defaultSession.clearAuthCache();
-      session.defaultSession.clearCache();
-      session.defaultSession.clearStorageData();
-      mainWindow?.loadURL(resolveHtmlPath('index.html'));
+      void session.defaultSession.clearAuthCache();
+      void session.defaultSession.clearCache();
+      void session.defaultSession.clearStorageData();
+      void mainWindow?.loadURL(resolveHtmlPath('index.html'));
     }
   });
 };
@@ -193,11 +193,11 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
-    createWindow();
+    void createWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) createWindow();
+      if (mainWindow === null) void createWindow();
     });
   })
   .catch(log.error);

@@ -47,7 +47,7 @@ export function PatreonSubscribingComponent() {
 
   useEffect(() => {
     const performTask = () => {
-      refreshUserAttributes();
+      void refreshUserAttributes();
     };
 
     const intervalId = setInterval(performTask, 10000);

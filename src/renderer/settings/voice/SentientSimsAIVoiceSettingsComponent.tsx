@@ -79,7 +79,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
       voice = [SentientSimsAISpeechOrpheusVoice.Tara];
     }
 
-    sentientsimsaiTtsSettings.setSetting({
+    void sentientsimsaiTtsSettings.setSetting({
       model: speechModel,
       voice,
       response_format: sentientsimsaiTtsSettings.value.response_format,
@@ -88,7 +88,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
   }
 
   function handleSpeedChange(speed: number) {
-    sentientsimsaiTtsSettings.setSetting({
+    void sentientsimsaiTtsSettings.setSetting({
       model: sentientsimsaiTtsSettings.value.model,
       voice: sentientsimsaiTtsSettings.value.voice,
       response_format: sentientsimsaiTtsSettings.value.response_format,
@@ -117,7 +117,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
       return;
     }
 
-    sentientsimsaiTtsSettings.setSetting({
+    void sentientsimsaiTtsSettings.setSetting({
       model: sentientsimsaiTtsSettings.value.model,
       voice: voices,
       response_format: sentientsimsaiTtsSettings.value.response_format,

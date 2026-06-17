@@ -1,5 +1,5 @@
 /* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
+
 import { useState, ChangeEvent, useMemo, useCallback, JSX } from 'react';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import {
@@ -121,7 +121,7 @@ export default function TraitsPage() {
   const loadItems = useCallback(() => {
     setLoadingTraits(true);
     const params = new URLSearchParams({ extractedPath: extractedPath.value });
-    fetch(`${appApiUrl}/traits?${params.toString()}`)
+    void fetch(`${appApiUrl}/traits?${params.toString()}`)
       .then((result) => result.json())
       .then((response: TraitResponse) => {
         // log.debug(JSON.stringify(response.data, null, 2));
@@ -241,7 +241,7 @@ export default function TraitsPage() {
   };
 
   const handleExtractedPathChange = (event: ChangeEvent<HTMLInputElement>) => {
-    extractedPath.setSetting(event.target.value);
+    void extractedPath.setSetting(event.target.value);
   };
 
   const handleVariableNameChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -288,7 +288,7 @@ export default function TraitsPage() {
       modDescription: modDescription,
     };
 
-    fetch(`${appApiUrl}/traits/export`, {
+    void fetch(`${appApiUrl}/traits/export`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(exportTraitsRequest),

@@ -19,14 +19,14 @@ export default function APIKeyInput({ setting, aiName, optional = false }: Modal
   const [keyVisibility, setKeyVisibility] = useState(false);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setting.setSetting(event.target.value);
+    void setting.setSetting(event.target.value);
   };
 
   const onApiPasteCallback = useCallback(
     function onApiKeyPasteFromClipboard(_event: any, text: string) {
       const pastedText = text.trim();
       if (pastedText) {
-        setting.setSetting(pastedText);
+        void setting.setSetting(pastedText);
       }
     },
     [setting],

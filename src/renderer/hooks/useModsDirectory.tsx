@@ -10,7 +10,7 @@ export function useModsDirectory() {
       const filePath = await window.electron.selectDirectory();
       if (filePath) {
         log.info(`Changed Mods directory to: ${filePath}`);
-        modsDirectory.setSetting(filePath);
+        await modsDirectory.setSetting(filePath);
       }
     } catch (error) {
       log.error('Error selecting directory:', error);

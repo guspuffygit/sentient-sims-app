@@ -37,7 +37,7 @@ export default function VoiceSettingsComponent() {
           control={
             <Checkbox
               checked={aiSettings.ttsEnabled}
-              onChange={(change) => aiSettings.ttsEnabledSetting.setSetting(change.target.checked)}
+              onChange={(change) => void aiSettings.ttsEnabledSetting.setSetting(change.target.checked)}
             />
           }
         />
@@ -67,7 +67,9 @@ export default function VoiceSettingsComponent() {
                   id="release-type-select"
                   value={aiSettings.ttsApiType}
                   sx={{ minWidth: 100, marginRight: 2 }}
-                  onChange={(change) => aiSettings.ttsApiTypeSetting.setSetting(ApiTypeFromValue(change.target.value))}
+                  onChange={(change) =>
+                    void aiSettings.ttsApiTypeSetting.setSetting(ApiTypeFromValue(change.target.value))
+                  }
                 >
                   <MenuItem value={ApiType.SentientSimsAI}>Sentient Sims AI TTS</MenuItem>
                 </Select>
@@ -83,7 +85,7 @@ export default function VoiceSettingsComponent() {
                 <Slider
                   aria-label="Volume"
                   value={aiSettings.ttsVolume}
-                  onChange={(change, value) => aiSettings.ttsVolumeSetting.setSetting(value)}
+                  onChange={(change, value) => void aiSettings.ttsVolumeSetting.setSetting(value)}
                   step={0.01}
                   min={0.0}
                   max={1}

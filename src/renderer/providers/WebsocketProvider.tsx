@@ -1,4 +1,3 @@
-/* eslint-disable promise/catch-or-return */
 import { WebsocketClient } from 'main/sentient-sims/clients/WebsocketClient';
 import { WebsocketStatusChange, WebsocketStatusResponse } from 'main/sentient-sims/models/WebsocketStatusResponse';
 import { createContext, ReactNode, use, useEffect, useMemo, useState } from 'react';
@@ -31,7 +30,7 @@ export function WebsocketProvider({ children }: WebsocketProviderProps) {
   });
 
   useEffect(() => {
-    websocketClient.isConnected().then((newStatus) => {
+    void websocketClient.isConnected().then((newStatus) => {
       setStatus(newStatus);
     });
   }, []);

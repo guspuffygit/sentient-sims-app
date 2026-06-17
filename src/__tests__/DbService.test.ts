@@ -18,13 +18,13 @@ describe('DbService', () => {
   });
 
   it('Loading unloading database', async () => {
-    ctx.db.loadDatabase({
+    await ctx.db.loadDatabase({
       sessionId: '1872638716',
       saveId: '2',
     });
     expect(ctx.directory.listSentientSimsDbUnsaved()).toHaveLength(3);
 
-    ctx.db.loadDatabase({
+    await ctx.db.loadDatabase({
       sessionId: '718297398',
       saveId: '2',
     });

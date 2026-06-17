@@ -14,7 +14,7 @@ export function TestVoiceButton({ disabled }: TestVoiceButtonProperties) {
       color="primary"
       variant="outlined"
       onClick={() => {
-        tts.speak('Hello, this is a demo of my voice.');
+        void tts.speak('Hello, this is a demo of my voice.');
         log.debug(`Test Voice Button clicked`);
       }}
       loading={tts.isPlaying}

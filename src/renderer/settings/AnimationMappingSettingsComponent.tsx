@@ -13,7 +13,7 @@ export function AnimationMappingSettingsComponent({ apiType }: AnimationMappingS
   const animationMappingEnabled = useSetting(SettingsEnum.MAPPING_NOTIFICATION_ENABLED, true);
 
   const onAnimationMappingEnabledChange = (change: ChangeEvent<HTMLInputElement>) => {
-    animationMappingEnabled.setSetting(change.target.checked);
+    void animationMappingEnabled.setSetting(change.target.checked);
   };
 
   if (apiType === ApiType.OpenAI) {

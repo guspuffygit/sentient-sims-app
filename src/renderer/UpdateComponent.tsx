@@ -42,7 +42,7 @@ export default function UpdateComponent() {
           })
           .finally(() => {
             setIsLoading(false);
-            versions.refresh();
+            void versions.refresh();
           });
       }
     }

@@ -96,7 +96,7 @@ export class LogSendService {
     }
 
     if (errors.length === 0) {
-      this.ctx.lastException.deleteLastExceptionFiles();
+      await this.ctx.lastException.deleteLastExceptionFiles();
     }
 
     return {

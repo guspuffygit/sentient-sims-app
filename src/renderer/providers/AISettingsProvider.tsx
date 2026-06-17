@@ -110,7 +110,7 @@ export function AISettingsProvider({ children }: AISettingsProviderProps) {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      testAI();
+      void testAI();
     }, 3500);
 
     return () => {

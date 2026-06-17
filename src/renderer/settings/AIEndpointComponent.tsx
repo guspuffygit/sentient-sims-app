@@ -25,7 +25,7 @@ export function AIEndpointComponent({ type, selectedApiType, settingsEnum, onCha
   }
 
   function handleChange(value: string) {
-    aiEndpoint.setSetting(value);
+    void aiEndpoint.setSetting(value);
 
     if (onChange) {
       inputDebounce(() => {

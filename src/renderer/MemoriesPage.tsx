@@ -25,7 +25,7 @@ export default function MemoriesPage() {
   const [copiedSnackbar, setCopiedSnackbar] = useState(false);
 
   const copyInteractionName = (name: string) => {
-    navigator.clipboard.writeText(name);
+    void navigator.clipboard.writeText(name);
     setCopiedSnackbar(true);
   };
 

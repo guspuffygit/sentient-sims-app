@@ -74,7 +74,7 @@ export function useElevenLabsTTS(): TTSHook {
             setAudioSource(null);
             resolve();
           };
-          audio.play();
+          void audio.play();
         });
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err: any) {

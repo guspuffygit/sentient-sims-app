@@ -20,7 +20,7 @@ export default function DebugLogsSettingsComponent() {
           <Checkbox
             checked={debugLogsEnabled.value}
             onChange={(change) => {
-              debugLogsEnabled.setSetting(change.target.checked);
+              void debugLogsEnabled.setSetting(change.target.checked);
               if (change.target.checked) {
                 log.transports.console.level = 'debug';
               } else {

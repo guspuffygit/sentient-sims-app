@@ -59,7 +59,7 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
       setIsWebGPUSupported(supported);
     }
 
-    checkSupport();
+    void checkSupport();
   }, []);
 
   const speak = useCallback(
@@ -67,7 +67,7 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
       if (!text.trim()) return;
 
       if (aiSettings.ttsEnabled) {
-        tts?.speak(text);
+        await tts?.speak(text);
       }
     },
     [aiSettings.ttsEnabled, tts],
@@ -79,7 +79,7 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
 
   useEffect(() => {
     const removeListener = window.electron.onVoice((_event: any, text: string) => {
-      speak(text);
+      void speak(text);
     });
     return () => {
       removeListener();

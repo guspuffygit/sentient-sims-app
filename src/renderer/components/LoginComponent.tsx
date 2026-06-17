@@ -22,7 +22,7 @@ export function LoginComponent() {
         window.localStorage.removeItem(key);
       });
     setAuthInProgress(true);
-    signInWithRedirect({
+    void signInWithRedirect({
       provider: 'Google',
     });
   };

@@ -30,7 +30,7 @@ export function ElevenLabsVoiceSettingsComponent() {
   }, []);
 
   function handleModelChange(model: string) {
-    sentientsimsaiTtsSettings.setSetting({
+    void sentientsimsaiTtsSettings.setSetting({
       model: toSpeechModel(model),
       voice: sentientsimsaiTtsSettings.value.voice,
       output_format: sentientsimsaiTtsSettings.value.output_format,
@@ -39,7 +39,7 @@ export function ElevenLabsVoiceSettingsComponent() {
   }
 
   function handleVoiceChange(voice: string) {
-    sentientsimsaiTtsSettings.setSetting({
+    void sentientsimsaiTtsSettings.setSetting({
       model: sentientsimsaiTtsSettings.value.model,
       voice,
       output_format: sentientsimsaiTtsSettings.value.output_format,

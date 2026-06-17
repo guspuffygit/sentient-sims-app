@@ -54,7 +54,7 @@ export default function ChatPage() {
 
   const copyInteractionName = () => {
     if (interactionName) {
-      navigator.clipboard.writeText(interactionName);
+      void navigator.clipboard.writeText(interactionName);
       setCopiedSnackbar(true);
     }
   };

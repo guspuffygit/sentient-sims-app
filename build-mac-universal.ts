@@ -2,7 +2,7 @@ import { makeUniversalApp } from '@electron/universal';
 
 const currentDirectory = process.cwd();
 
-(async () => {
+void (async () => {
   await makeUniversalApp({
     x64AppPath: `${currentDirectory}/mac/SentientSims.app`,
     arm64AppPath: `${currentDirectory}/mac-arm64/SentientSims.app`,

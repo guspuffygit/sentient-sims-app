@@ -143,7 +143,7 @@ export const useAnnouncements = () => {
       }
     };
 
-    fetchAnnouncements();
+    void fetchAnnouncements();
 
     const intervalId = setInterval(fetchAnnouncements, 3 * 60 * 1000);
 

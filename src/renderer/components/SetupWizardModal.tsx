@@ -427,7 +427,7 @@ function EnableModsPage({ setPage }: PageProps) {
   const initialized = useRef<boolean | null>(null);
   if (initialized.current == null) {
     initialized.current = true;
-    checkAndFix();
+    void checkAndFix();
   }
 
   const allGood = modsEnabled === true && scriptModsOn === true;
@@ -838,7 +838,7 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
   const patreonUser = new PatreonUser(userAttributes);
 
   useEffect(() => {
-    aiApiTypeSetting.setSetting(ApiType.SentientSimsAI);
+    void aiApiTypeSetting.setSetting(ApiType.SentientSimsAI);
   }, [aiApiTypeSetting]);
 
   const notLoggedIn = (
@@ -999,7 +999,7 @@ function OpenAISetupPage({ setPage }: PageProps) {
   const { testAI, aiStatus, aiApiTypeSetting } = useAISettings();
 
   useEffect(() => {
-    aiApiTypeSetting.setSetting(ApiType.OpenAI);
+    void aiApiTypeSetting.setSetting(ApiType.OpenAI);
   }, [aiApiTypeSetting]);
 
   return (
@@ -1289,7 +1289,7 @@ function SelfHostedSetupPage({ setPage }: PageProps) {
 export function SetupWizardModal({ open, setOpen }: SetupWizardModalParameters) {
   const currentWizardPage = useSetting<string>(SettingsEnum.SETUP_WIZARD_PAGE, WizardPage.INIT);
   const setPage = (wizardPage: WizardPage) => {
-    currentWizardPage.setSetting(wizardPage.toString());
+    void currentWizardPage.setSetting(wizardPage.toString());
   };
 
   useEffect(() => {

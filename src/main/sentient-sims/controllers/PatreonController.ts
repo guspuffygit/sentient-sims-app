@@ -29,7 +29,7 @@ export class PatreonController {
       if (exception instanceof NotLoggedInError) {
         electron.BrowserWindow.getAllWindows().forEach((wnd) => {
           if (!wnd.webContents.isDestroyed()) {
-            wnd.webContents.loadURL(resolveHtmlPath('index.html#/login'));
+            void wnd.webContents.loadURL(resolveHtmlPath('index.html#/login'));
           }
         });
       }

@@ -35,12 +35,12 @@ export default function ipcHandlers(ctx: ApiContext) {
   ipcMain.on('on-successful-auth', () => {
     electron.BrowserWindow.getAllWindows().forEach((wnd) => {
       if (!wnd.webContents.isDestroyed()) {
-        wnd.loadURL(resolveHtmlPath('index.html'));
+        void wnd.loadURL(resolveHtmlPath('index.html'));
       }
     });
   });
   ipcMain.on('open-browser-link', (_event: IpcMainEvent, link: string) => {
-    shell.openExternal(link);
+    void shell.openExternal(link);
   });
   ipcMain.on('paste-clipboard-to-api-key-button-click', () => {
     const clipboardResults = clipboard.readText();

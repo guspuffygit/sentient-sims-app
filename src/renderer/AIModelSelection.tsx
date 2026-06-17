@@ -58,7 +58,7 @@ export default function AIModelSelection({
 
   const handleChange = (event: SelectChangeEvent) => {
     const model = event.target.value;
-    aiModel.setSetting(model);
+    void aiModel.setSetting(model);
   };
 
   const selectChildren = useMemo(() => {

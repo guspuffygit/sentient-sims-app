@@ -88,7 +88,7 @@ export function MappingLeaderboardComponent() {
       log.error('Error changing username', err);
     }
 
-    onClose();
+    await onClose();
   }
 
   if (leaderboard.error || leaderboard.isPending) {

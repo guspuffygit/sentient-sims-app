@@ -50,7 +50,7 @@ export default function useNewVersionChecker({ setIsLoading, releaseType: versio
   }, [setIsLoading, versionType]);
 
   useEffect(() => {
-    handleCheckForUpdates();
+    void handleCheckForUpdates();
   }, [handleCheckForUpdates, versionType]);
 
   return { updateState, handleCheckForUpdates };

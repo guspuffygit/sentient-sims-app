@@ -1,4 +1,3 @@
-/* eslint-disable promise/catch-or-return */
 /* eslint-disable promise/always-return */
 import {
   Box,
@@ -34,7 +33,7 @@ export default function OfflineMemory() {
   const [simsViewOpen, setSimsViewOpen] = useState(false);
 
   useEffect(() => {
-    client.db.getSaveGames().then((newSaveGames) => {
+    void client.db.getSaveGames().then((newSaveGames) => {
       const newSaveGameRecords: Record<string, SaveGameParticipants> = {};
       newSaveGames.forEach((saveGame) => {
         newSaveGameRecords[`${saveGame.name}${saveGame.type}`] = {

@@ -14,8 +14,8 @@ export default function DebugCard() {
   const { aiStatus, testAI } = useAISettings();
 
   const onTest = () => {
-    testAI();
-    versions.refresh();
+    void testAI();
+    void versions.refresh();
   };
 
   return (
