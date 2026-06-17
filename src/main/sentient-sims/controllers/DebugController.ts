@@ -4,6 +4,7 @@ import { webhookUrl } from '../services/LogSendService';
 import { SendLogsRequest } from '../models/SendLogsRequest';
 import { ApiContext } from '../services/ApiContext';
 import { SendLogsResponse } from '../models/SendLogsResponse';
+import { InteractionBugReport } from '../models/InteractionBugReport';
 
 export class DebugController {
   private readonly ctx: ApiContext;
@@ -27,22 +28,24 @@ export class DebugController {
     try {
       const response = await this.ctx.genai.healthCheck(apiKeyString);
       res.send(response);
-    } catch (e: any) {
+    } catch (e) {
       if (e instanceof OpenAIKeyNotSetError) {
         res.status(400).send({ status: 'API key not set!' });
-      } else {
+      } else if (e instanceof Error) {
         res.status(500).send({ error: `${e.name}: ${e.message}` });
+      } else {
+        res.status(500).send({ error: String(e) });
       }
     }
   }
 
   async sendDebugLogs(req: Request, res: Response) {
-    const sendLogsRequest: SendLogsRequest = req.body;
+    const sendLogsRequest = req.body as SendLogsRequest;
     const response: SendLogsResponse = await this.ctx.logSend.sendLogsToDiscord(webhookUrl, sendLogsRequest);
     res.json(response);
   }
 
   async sendBugReport(req: Request, res: Response) {
-    res.json(await this.ctx.logSend.sendBugReport(webhookUrl, req.body));
+    res.json(await this.ctx.logSend.sendBugReport(webhookUrl, req.body as InteractionBugReport));
   }
 }

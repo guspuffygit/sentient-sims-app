@@ -342,14 +342,17 @@ export function AnimationMappingComponent() {
 
     setLoading(true);
 
-    event.testing_action = testOutput.actionString;
-    event.ww_event_type = WWEventType.ACTIVE;
+    const testEvent = {
+      ...event,
+      testing_action: testOutput.actionString,
+      ww_event_type: WWEventType.ACTIVE,
+    };
 
     try {
       const results = await Promise.all([
-        client.ai.interactionEvent(event),
-        client.ai.interactionEvent(event),
-        client.ai.interactionEvent(event),
+        client.ai.interactionEvent(testEvent),
+        client.ai.interactionEvent(testEvent),
+        client.ai.interactionEvent(testEvent),
       ]);
 
       setTestResults(results);
@@ -370,17 +373,23 @@ export function AnimationMappingComponent() {
     );
   }
 
-  let testOutcome;
+  let testOutcome: ReactNode;
   if (testResults.length > 0) {
-    testOutcome = [];
+    const items: ReactNode[] = [];
     testResults.forEach((result, index) => {
-      testOutcome.push(<Typography sx={{ marginBottom: 1 }}>Test {index + 1}:</Typography>);
-      testOutcome.push(
-        <Typography variant="body2" sx={{ marginBottom: 1 }}>
+      const itemKey = `${index}-${result.text ?? ''}`;
+      items.push(
+        <Typography key={`label-${itemKey}`} sx={{ marginBottom: 1 }}>
+          Test {index + 1}:
+        </Typography>,
+      );
+      items.push(
+        <Typography key={`result-${itemKey}`} variant="body2" sx={{ marginBottom: 1 }}>
           {result.text}
         </Typography>,
       );
     });
+    testOutcome = items;
   } else {
     testOutcome = (
       <>

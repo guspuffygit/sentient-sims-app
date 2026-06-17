@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-// import { phonemize } from '../voice/phonemize';
 import { CatchErrors } from './decorators/CatchError';
 
 export class VoiceController {
@@ -8,7 +7,7 @@ export class VoiceController {
   }
 
   @CatchErrors({ statusCode: 400 })
-  async phonemize(req: Request, res: Response) {
+  phonemize(req: Request, res: Response) {
     const { text, language } = req.query;
 
     if (typeof text !== 'string') {
@@ -20,7 +19,6 @@ export class VoiceController {
       return;
     }
 
-    // res.send(await phonemize(text, language));
     res.send('OK');
   }
 }

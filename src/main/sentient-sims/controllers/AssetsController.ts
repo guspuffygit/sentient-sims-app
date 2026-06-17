@@ -11,7 +11,7 @@ export class AssetsController {
     this.getAssetsFile = this.getAssetsFile.bind(this);
   }
 
-  async getAssetsFile(req: Request, res: Response) {
+  getAssetsFile(req: Request, res: Response) {
     const { filename } = req.params;
     const filePath = this.ctx.getAssetPath(filename);
     res.setHeader('Content-Type', 'image/png');

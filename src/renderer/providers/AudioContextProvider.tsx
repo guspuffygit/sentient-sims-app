@@ -20,7 +20,7 @@ interface AudioContextProviderProps {
 }
 
 async function checkWebGPU(): Promise<boolean> {
-  if (!navigator.gpu) {
+  if (!('gpu' in navigator)) {
     log.warn('WebGPU is not supported in this environment.');
     return false;
   }

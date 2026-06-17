@@ -9,7 +9,7 @@ import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { CaughtError } from '../models/CaughtError';
 
-function notifyAllWindows(message: string, ...args: any[]) {
+function notifyAllWindows(message: string, ...args: unknown[]) {
   electron.BrowserWindow.getAllWindows().forEach((wnd) => {
     if (!wnd.webContents.isDestroyed()) {
       wnd.webContents.send(message, ...args);
@@ -17,7 +17,7 @@ function notifyAllWindows(message: string, ...args: any[]) {
   });
 }
 
-export function notifySettingChanged(setting: any, value: any) {
+export function notifySettingChanged(setting: string, value: unknown) {
   notifyAllWindows('setting-changed', setting, value);
 }
 

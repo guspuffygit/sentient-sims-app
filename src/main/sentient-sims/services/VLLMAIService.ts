@@ -4,7 +4,7 @@ import { RawAxiosRequestHeaders } from 'axios';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
-import { AIModel, responseToAIModels } from '../models/AIModel';
+import { AIModel, AIModelResponse, responseToAIModels } from '../models/AIModel';
 import {
   VLLMChatCompletionRequest,
   VLLMRTokenizeResponse,
@@ -66,7 +66,7 @@ export class VLLMAIService implements GenerationService {
     } catch (err) {
       const errorMessage = `Unable to tokenize break string tokens`;
       log.error(errorMessage, err);
-      throw new Error(errorMessage);
+      throw new Error(errorMessage, { cause: err });
     }
   }
 
@@ -124,7 +124,7 @@ export class VLLMAIService implements GenerationService {
 
     log.debug(`Request: ${JSON.stringify(completionRequest, null, 2)}`);
 
-    const response = await axiosClient({
+    const response = await axiosClient<ChatCompletion>({
       url: '/v1/chat/completions',
       method: 'POST',
       data: completionRequest,
@@ -132,13 +132,13 @@ export class VLLMAIService implements GenerationService {
       headers: this.getAuthorizationHeaders(),
     });
 
-    const result: ChatCompletion = response.data;
+    const result = response.data;
     log.debug(`Info about it: ${response.status} ${JSON.stringify(result, null, 2)}`);
 
     let text = this.getOutputFromGeneration(result);
 
     if (request.guidedChoice) {
-      text = JSON.parse(text).choice;
+      text = (JSON.parse(text) as { choice: string }).choice;
     }
 
     return {
@@ -153,7 +153,7 @@ export class VLLMAIService implements GenerationService {
       prompt: text,
       add_special_tokens: false,
     };
-    const response = await axiosClient({
+    const response = await axiosClient<VLLMRTokenizeResponse>({
       url: '/tokenize',
       method: 'POST',
       data: tokenizeRequest,
@@ -178,7 +178,7 @@ export class VLLMAIService implements GenerationService {
       }),
     };
 
-    const tokenizeRequestResponse = await axiosClient({
+    const tokenizeRequestResponse = await axiosClient<VLLMRTokenizeResponse>({
       url: '/tokenize',
       method: 'POST',
       data: tokenizeRequest,
@@ -186,13 +186,13 @@ export class VLLMAIService implements GenerationService {
       headers: this.getAuthorizationHeaders(),
     });
 
-    const result: VLLMRTokenizeResponse = await tokenizeRequestResponse.data;
+    const result = tokenizeRequestResponse.data;
 
-    if (result.tokens && result.count) {
+    if (result.tokens.length > 0 && result.count) {
       return result;
     }
 
-    log.error(`tokenizeMessages response is not valid: ${result}`);
+    log.error(`tokenizeMessages response is not valid: ${JSON.stringify(result)}`);
 
     throw new TokenizeException(result);
   }
@@ -220,11 +220,11 @@ export class VLLMAIService implements GenerationService {
       return {
         status: 'OK',
       };
-    } catch (e: any) {
+    } catch (e) {
       log.error('Error checking health', e);
 
       return {
-        error: e?.message || `${e}`,
+        error: e instanceof Error ? e.message : String(e),
       };
     }
   }
@@ -238,9 +238,9 @@ export class VLLMAIService implements GenerationService {
         headers: this.getAuthorizationHeaders(),
       };
       log.info(`Options: ${JSON.stringify(options, null, 2)}`);
-      const response = await axiosClient(options);
+      const response = await axiosClient<AIModelResponse>(options);
       return responseToAIModels(response.data);
-    } catch (e: any) {
+    } catch (e) {
       log.error('Error getting models', e);
 
       throw e;

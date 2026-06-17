@@ -18,7 +18,7 @@ export class InteractionRepository {
   }
 
   async fetchInteractions(): Promise<Map<string, BasicInteraction>> {
-    const response = await axiosClient({
+    const response = await axiosClient<Record<string, BasicInteraction>>({
       url: '/interactions',
       baseURL: this.ctx.settings.sentientSimsAIEndpoint,
       headers: {
@@ -27,7 +27,7 @@ export class InteractionRepository {
       },
     });
 
-    return response.data;
+    return new Map(Object.entries(response.data));
   }
 
   private loadLocalInteractions() {
@@ -37,7 +37,8 @@ export class InteractionRepository {
 
       if (fs.existsSync(localMapPath)) {
         const fileContent = fs.readFileSync(localMapPath, 'utf-8');
-        this.localInteractions = new Map(Object.entries(JSON.parse(fileContent)));
+        const parsed = JSON.parse(fileContent) as Record<string, BasicInteraction>;
+        this.localInteractions = new Map(Object.entries(parsed));
         log.info(`[Override] Local interaction-overrides loaded successfully.`);
       }
     } catch (err) {
@@ -45,14 +46,14 @@ export class InteractionRepository {
     }
   }
 
-  async saveLocalInteraction(interaction: BasicInteraction) {
+  saveLocalInteraction(interaction: BasicInteraction) {
     try {
       const sentientSimsFolder = this.ctx.directory.getSentientSimsFolder();
       const localMapPath = path.join(sentientSimsFolder, 'user_interaction_overrides.json');
       let localOverrides: Record<string, BasicInteraction> = {};
       if (fs.existsSync(localMapPath)) {
         const fileContent = fs.readFileSync(localMapPath, 'utf-8');
-        localOverrides = JSON.parse(fileContent);
+        localOverrides = JSON.parse(fileContent) as Record<string, BasicInteraction>;
       }
       localOverrides[interaction.name] = interaction;
       this.localInteractions = new Map(Object.entries(localOverrides));
@@ -77,7 +78,7 @@ export class InteractionRepository {
   }
 
   async setInteraction(interaction: BasicInteraction) {
-    const response = await axiosClient({
+    const response = await axiosClient<Record<string, BasicInteraction>>({
       url: '/interactions',
       method: 'POST',
       data: interaction,
@@ -131,7 +132,7 @@ export class InteractionRepository {
 
     interactionDescriptions.forEach((description, name) => {
       if (description.ignored) {
-        ignoredInteractionNames.push(name.toString());
+        ignoredInteractionNames.push(name);
       }
     });
 

@@ -9,8 +9,5 @@ export interface AssetsImageProps {
 }
 
 export function AssetsImage({ name, width, height }: AssetsImageProps) {
-  return (
-    // eslint-disable-next-line jsx-a11y/alt-text
-    <img src={`${appApiUrl}/files/${name}`} width={width} height={height} />
-  );
+  return <img src={`${appApiUrl}/files/${name}`} width={width} height={height} alt={name} />;
 }

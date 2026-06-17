@@ -57,7 +57,7 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
               ) AS has_null_timestamp;
             `,
           )
-          .get() as any;
+          .get() as { has_null_timestamp: number };
 
         return result.has_null_timestamp === 1;
       }
@@ -125,8 +125,8 @@ const createDbMigrationsTable = (db: Database) => {
 };
 
 const getAppliedMigrations = (db: Database): string[] => {
-  const rows = db.prepare('SELECT name FROM migrations').all();
-  return rows.map((row: any) => row.name);
+  const rows = db.prepare('SELECT name FROM migrations').all() as { name: string }[];
+  return rows.map((row) => row.name);
 };
 
 const applyMigration = (db: Database, dbMigration: DbMigration) => {

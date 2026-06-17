@@ -1,8 +1,16 @@
 import log from 'electron-log';
 import path from 'path';
 import * as fs from 'fs';
-import xml2js from 'xml2js';
+import { Parser } from 'xml2js';
 import { ApiContext } from './ApiContext';
+
+type LastExceptionXml = {
+  root: {
+    report: {
+      desyncdata: string[];
+    }[];
+  };
+};
 
 export type LastExceptionFile = {
   filename: string;
@@ -30,12 +38,12 @@ export class LastExceptionService {
       const lastExceptionData = fs.readFileSync(lastExceptionFile, 'utf-8');
       let lastExceptionString = lastExceptionData;
       try {
-        const parser = new xml2js.Parser();
-        parser.parseString(lastExceptionData, (err: any, result: any) => {
+        const parser = new Parser();
+        parser.parseString(lastExceptionData, (err: Error | null, result: LastExceptionXml) => {
           const stackTrace = result.root.report[0].desyncdata[0];
-          lastExceptionString = `${stackTrace}`.replace(/\r\n/g, '\n');
+          lastExceptionString = stackTrace.replace(/\r\n/g, '\n');
         });
-      } catch (parseError: any) {
+      } catch (parseError) {
         const message = `Error parsing lastException file: ${filename}`;
         log.error(message, parseError);
       }
@@ -52,7 +60,7 @@ export class LastExceptionService {
     return files;
   }
 
-  async deleteLastExceptionFiles() {
+  deleteLastExceptionFiles() {
     log.info('Clearing last exception files:');
 
     const files = this.getLastExceptionFiles();

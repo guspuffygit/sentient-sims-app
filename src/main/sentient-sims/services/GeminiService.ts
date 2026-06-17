@@ -107,7 +107,7 @@ export class GeminiService implements GenerationService {
     }
 
     return {
-      text: text!.trim(),
+      text: text?.trim() ?? '',
       request,
     };
   }
@@ -127,8 +127,8 @@ export class GeminiService implements GenerationService {
       }
 
       return { error: 'Gemini API returned no text' };
-    } catch (error: any) {
-      if (error?.message) {
+    } catch (error) {
+      if (error instanceof Error && error.message) {
         return { error: `Gemini API not working: ${error.message}` };
       }
 
@@ -144,12 +144,10 @@ export class GeminiService implements GenerationService {
     try {
       const pager = await genAI.models.list();
       let page = pager.page;
-      while (true) {
-        page.forEach((model) => models.push(model));
-        if (!pager.hasNextPage()) {
-          break;
-        }
+      page.forEach((model) => models.push(model));
+      while (pager.hasNextPage()) {
         page = await pager.nextPage();
+        page.forEach((model) => models.push(model));
       }
 
       const filteredModels = models
@@ -207,10 +205,12 @@ export class GeminiService implements GenerationService {
           if (error.status === 429) {
             throw new Error(
               `The Gemini AI free trial is restricted to not allow any free usage. To use Gemini AI, you need to setup a billing account https://aistudio.google.com/usage?tab=billing`,
+              { cause: error },
             );
           } else if (error.status === 400 && error.message.includes('Developer instruction is not enabled for')) {
             throw new Error(
               `This Gemini AI model is not compatible with Sentient Sims, please choose a different Gemini AI model`,
+              { cause: error },
             );
           }
         }

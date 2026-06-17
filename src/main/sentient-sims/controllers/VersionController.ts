@@ -12,8 +12,8 @@ export function modOutOfDate(req: Request, res: Response) {
     return res.json({
       error: errorMessage,
     });
-  } catch (err: any) {
-    return res.json({ error: err.message });
+  } catch (err) {
+    return res.json({ error: err instanceof Error ? err.message : String(err) });
   }
 }
 

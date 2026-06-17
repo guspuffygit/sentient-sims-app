@@ -1,6 +1,6 @@
 /* eslint-disable promise/always-return */
 import electron from 'electron';
-import { WebSocketServer, WebSocket } from 'ws';
+import { WebSocketServer, WebSocket, RawData } from 'ws';
 import log from 'electron-log';
 import { ModLogWebsocketMessage } from './models/ModLogWebsocketMessage';
 import { formatLog } from './util/format';
@@ -11,7 +11,7 @@ import { modWebsocketPort, rendererWebsocketPort } from './constants';
 import { WebsocketStatusChange } from './models/WebsocketStatusResponse';
 import { ApiContext } from './services/ApiContext';
 
-function notifyAllWindows(message: string, ...args: any[]) {
+function notifyAllWindows(message: string, ...args: unknown[]) {
   electron.BrowserWindow.getAllWindows().forEach((wnd) => {
     if (!wnd.webContents.isDestroyed()) {
       wnd.webContents.send(message, ...args);
@@ -19,13 +19,23 @@ function notifyAllWindows(message: string, ...args: any[]) {
   });
 }
 
+function rawDataToString(data: RawData): string {
+  if (Array.isArray(data)) {
+    return Buffer.concat(data).toString('utf-8');
+  }
+  if (data instanceof ArrayBuffer) {
+    return Buffer.from(data).toString('utf-8');
+  }
+  return data.toString('utf-8');
+}
+
 function notifyWebsocketStatus(status: WebsocketStatusChange) {
   log.debug(`Websocket status changed ${status.type} : ${status.status}`);
   notifyAllWindows('websocket-status-change', status);
 }
 
-let rendererWs: WebSocket;
-let modWs: WebSocket;
+let rendererWs: WebSocket | undefined;
+let modWs: WebSocket | undefined;
 
 let modConnected = false;
 let rendererConnected = false;
@@ -48,10 +58,12 @@ export const startWebSocketServer = (ctx: ApiContext) => {
       });
     });
 
-    ws.on('error', log.error);
+    ws.on('error', (err) => {
+      log.error(err);
+    });
 
-    ws.on('message', function message(data: any) {
-      log.debug(`receivedRenderer: ${data}`);
+    ws.on('message', function message(data) {
+      log.debug(`receivedRenderer: ${rawDataToString(data)}`);
     });
 
     ctx.logs
@@ -62,11 +74,11 @@ export const startWebSocketServer = (ctx: ApiContext) => {
             logs,
           };
           ws.send(JSON.stringify(logMessage));
-        } catch (e: any) {
+        } catch (e) {
           log.error('Unable to send logs from logs.txt to renderer', e);
         }
       })
-      .catch((err: any) => {
+      .catch((err: unknown) => {
         log.error('Unable to read logs from logs.txt', err);
       });
   });
@@ -88,20 +100,22 @@ export const startWebSocketServer = (ctx: ApiContext) => {
       });
     });
 
-    ws.on('error', log.error);
+    ws.on('error', (err) => {
+      log.error(err);
+    });
 
-    ws.on('message', function message(data: any) {
-      const parsedData: ModLogWebsocketMessage = JSON.parse(data.toString());
+    ws.on('message', function message(data) {
+      const parsedData = JSON.parse(rawDataToString(data)) as ModLogWebsocketMessage;
 
       if (!parsedData.log) {
         return;
       }
-      if (parsedData.log.level === LogLevel.DEBUG.toString() && !ctx.settings.debugLogs) {
+      if (parsedData.log.level === (LogLevel.DEBUG as string) && !ctx.settings.debugLogs) {
         return;
       }
 
       const formattedLog = formatLog(parsedData.log);
-      ctx.logs.appendLog([formattedLog]).catch((e: any) => {
+      ctx.logs.appendLog([formattedLog]).catch((e: unknown) => {
         log.error('Unable to append to logs.txt', e);
       });
       if (rendererWs) {
@@ -116,7 +130,7 @@ export function sendModNotification(notification: WebsocketNotification) {
     if (modWs) {
       modWs.send(JSON.stringify(notification));
     }
-  } catch (err: any) {
+  } catch (err) {
     log.error('Unable to send message to mod via websocket', err);
   }
 }

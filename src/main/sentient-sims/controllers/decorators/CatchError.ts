@@ -12,23 +12,24 @@ export type CatchErrorsParameters = {
 };
 
 export function CatchErrors(catchErrorsParameters?: CatchErrorsParameters) {
-  return function <T extends (this: any, req: Request, res: Response, next?: NextFunction) => Promise<any>>(
+  return function <T extends (this: any, req: Request, res: Response, next?: NextFunction) => unknown>(
     target: T,
     context: ClassMethodDecoratorContext,
   ) {
     return async function (this: ThisParameterType<T>, req: Request, res: Response, next?: NextFunction) {
       try {
         await target.call(this, req, res, next);
-      } catch (err: any) {
+      } catch (err) {
         const statusCode = catchErrorsParameters?.statusCode ?? defaultStatusCode;
         log.error(`Error in ${String(context.name)}:`, err);
+        const message = err instanceof Error ? err.message : String(err);
         try {
-          res.status(statusCode).json({ error: err?.message });
+          res.status(statusCode).json({ error: message });
         } finally {
           // ask the user if they want to send logs
           // Send Logs + the error stuff
           const caughtError: CaughtError = {
-            message: err?.message,
+            message,
             statusCode,
             body: req.body,
             url: req.url,
@@ -36,8 +37,8 @@ export function CatchErrors(catchErrorsParameters?: CatchErrorsParameters) {
           };
           if (this?.dbService) {
             log.debug(`DbService was there`);
-            const dbService = this?.dbService as DbService;
-            caughtError.databaseSession = await dbService.copyErrorDatabase();
+            const dbService = this.dbService as DbService;
+            caughtError.databaseSession = dbService.copyErrorDatabase();
           }
 
           sendPopUpCaughtErrorNotification(caughtError);

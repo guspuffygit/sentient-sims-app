@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { useState, useCallback, useRef, useEffect } from 'react';
 import log from 'electron-log';
+import axios from 'axios';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting from 'renderer/hooks/useSetting';
@@ -91,8 +92,8 @@ export function useSentientSimsTTS(): TTSHook {
         const audioUrl = URL.createObjectURL(audioBlob);
         log.debug(`Audio URL created and queued: ${audioUrl}`);
         audioUrlQueueRef.current.push(audioUrl);
-      } catch (err: any) {
-        const errorMessage = `TTS request failed: ${err.message}`;
+      } catch (err) {
+        const errorMessage = `TTS request failed: ${err instanceof Error ? err.message : String(err)}`;
         log.error(errorMessage);
         setError(errorMessage);
         break;
@@ -173,9 +174,10 @@ export function useSentientSimsTTS(): TTSHook {
         } else {
           log.error('No sentences returned from tokenization.');
         }
-      } catch (err: any) {
-        const errorMessage = `Sentence tokenization failed: ${err.message}`;
-        log.error(errorMessage, err.response?.data);
+      } catch (err) {
+        const errorMessage = `Sentence tokenization failed: ${err instanceof Error ? err.message : String(err)}`;
+        const responseData: unknown = axios.isAxiosError(err) ? err.response?.data : undefined;
+        log.error(errorMessage, responseData);
         setError(errorMessage);
       }
     },

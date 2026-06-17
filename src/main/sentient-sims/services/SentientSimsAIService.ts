@@ -29,7 +29,7 @@ export class SentientSimsAIService extends VLLMAIService {
     }
 
     try {
-      const response = await axiosClient({
+      const response = await axiosClient<string>({
         url: '/health',
         timeout: 5000,
         responseType: 'text',
@@ -37,13 +37,13 @@ export class SentientSimsAIService extends VLLMAIService {
         headers: this.getAuthorizationHeaders(),
       });
       return {
-        status: await response.data,
+        status: response.data,
       };
-    } catch (e: any) {
+    } catch (e) {
       log.error('Error checking Sentient Sims AI health', e);
 
       return {
-        error: e?.message || `${e}`,
+        error: e instanceof Error ? e.message : String(e),
       };
     }
   }

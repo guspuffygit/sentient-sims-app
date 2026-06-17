@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Box, Divider, Modal, Typography } from '@mui/material';
 
 export type ChatResultsState = {
@@ -38,16 +38,17 @@ export default function ChatResultsModal() {
           }}
         >
           {state.results.map((value, index) => {
+            const key = `${index}-${value}`;
             if (index + 1 !== state.results.length) {
               return (
-                <>
+                <Fragment key={key}>
                   <Typography>{value}</Typography>
                   <Divider sx={{ marginTop: 1, marginBottom: 1 }} />
-                </>
+                </Fragment>
               );
             }
 
-            return <Typography key={`${index}`}>{value}</Typography>;
+            return <Typography key={key}>{value}</Typography>;
           })}
         </Box>
       </Modal>

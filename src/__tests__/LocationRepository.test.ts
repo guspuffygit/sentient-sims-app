@@ -7,12 +7,12 @@ function locationsAreEqual(a: LocationEntity, b: LocationEntity): boolean {
 }
 
 describe('LocationRepository', () => {
-  it('is_generic', async () => {
+  it('is_generic', () => {
     const ctx = mockApiContext();
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
       recursive: true,
     });
-    await ctx.db.loadDatabase({
+    ctx.db.loadDatabase({
       sessionId: '1237632',
       saveId: '2',
     });
@@ -29,12 +29,12 @@ describe('LocationRepository', () => {
     expect(defaultResult.name).toEqual('The Futures Past');
   });
 
-  it('CRUD', async () => {
+  it('CRUD', () => {
     const ctx = mockApiContext();
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
       recursive: true,
     });
-    await ctx.db.loadDatabase({
+    ctx.db.loadDatabase({
       sessionId: '1231237632',
       saveId: '2',
     });

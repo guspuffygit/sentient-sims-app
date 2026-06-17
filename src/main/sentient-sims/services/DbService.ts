@@ -24,7 +24,7 @@ export class DbService {
     this.ctx = ctx;
   }
 
-  async loadDatabase(databaseSession: DatabaseSession) {
+  loadDatabase(databaseSession: DatabaseSession) {
     const unsavedDb = this.ctx.directory.getSentientSimsDbUnsaved(databaseSession);
     const savedDb = this.ctx.directory.getSentientSimsDb(databaseSession);
 
@@ -63,20 +63,17 @@ export class DbService {
 
     try {
       this.db = new DatabaseConstructor(unsavedDb);
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error opening database', err);
       throw err;
     }
 
-    // Once the above promise is resolved (i.e., DB opened successfully), proceed with migration
-    if (this.db) {
-      try {
-        migrate(this.db); // Await the migration
-        log.info('DB Migration complete');
-      } catch (migrationErr: any) {
-        log.error('DB migration failed', migrationErr);
-        throw migrationErr;
-      }
+    try {
+      migrate(this.db);
+      log.info('DB Migration complete');
+    } catch (migrationErr) {
+      log.error('DB migration failed', migrationErr);
+      throw migrationErr;
     }
 
     this.databaseSession = databaseSession;
@@ -92,15 +89,15 @@ export class DbService {
     let tempDb: Database;
     try {
       tempDb = new DatabaseConstructor(saveGameDb);
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error opening temp database', err);
       throw err;
     }
 
     try {
-      migrate(tempDb); // Await the migration
+      migrate(tempDb);
       log.info('Temp DB Migration complete');
-    } catch (migrationErr: any) {
+    } catch (migrationErr) {
       log.error('Temp DB migration failed', migrationErr);
       throw migrationErr;
     }
@@ -112,7 +109,7 @@ export class DbService {
     let unsavedDatabases;
     try {
       unsavedDatabases = this.ctx.directory.listSentientSimsDbUnsaved();
-    } catch (err: any) {
+    } catch (err) {
       log.error('Unabled to list unsaved databases', err);
       return;
     }
@@ -122,7 +119,7 @@ export class DbService {
       .forEach((unsavedDb) => {
         try {
           fs.rmSync(unsavedDb);
-        } catch (err: any) {
+        } catch (err) {
           log.error(`Unable to remove unsaved db sessionId: ${databaseSession.sessionId}`, err);
         }
       });
@@ -140,7 +137,7 @@ export class DbService {
     this.cleanupUnsavedDatabases(databaseSession);
   }
 
-  async copyErrorDatabase(): Promise<DatabaseSession | null> {
+  copyErrorDatabase(): DatabaseSession | null {
     try {
       if (this.databaseSession) {
         const unsavedDb = this.ctx.directory.getSentientSimsDbUnsaved(this.databaseSession);

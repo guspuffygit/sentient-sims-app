@@ -1,6 +1,6 @@
 import { Button, Divider, IconButton, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { LastExceptionFile } from 'main/sentient-sims/services/LastExceptionService';
 import AppCard from './AppCard';
 import useLastExceptionFiles from './hooks/useLastExceptionFiles';
@@ -10,7 +10,7 @@ export default function LastExceptionPage() {
   const [selectedException, setSelectedException] = useState<LastExceptionFile | undefined>();
   const { lastExceptionFiles, deleteFiles, refresh } = useLastExceptionFiles();
 
-  const renderRows: any = [];
+  const renderRows: ReactNode[] = [];
 
   lastExceptionFiles.forEach((lastExceptionFile) => {
     renderRows.push(

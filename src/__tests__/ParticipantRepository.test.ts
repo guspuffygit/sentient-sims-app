@@ -3,12 +3,12 @@ import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
 import { mockApiContext, randomString } from './util';
 
 describe('ParticipantRepository', () => {
-  it('CRUD', async () => {
+  it('CRUD', () => {
     const ctx = mockApiContext();
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
       recursive: true,
     });
-    await ctx.db.loadDatabase({
+    ctx.db.loadDatabase({
       sessionId: '9587321',
       saveId: '2',
     });
@@ -19,7 +19,7 @@ describe('ParticipantRepository', () => {
     };
     ctx.participantRepository.updateParticipant(participant);
 
-    const result = await ctx.participantRepository.getParticipants([
+    const result = ctx.participantRepository.getParticipants([
       {
         id: participant.id,
         fullName: 'Some name',
@@ -42,7 +42,7 @@ describe('ParticipantRepository', () => {
     const noDescription: ParticipantDTO = { id: '91283' };
     ctx.participantRepository.updateParticipant(noDescription);
 
-    const noDescriptionResult = await ctx.participantRepository.getParticipants([
+    const noDescriptionResult = ctx.participantRepository.getParticipants([
       {
         id: noDescription.id,
         fullName: 'some name',
@@ -53,19 +53,19 @@ describe('ParticipantRepository', () => {
 
     noDescription.description = randomString();
     ctx.participantRepository.updateParticipant(noDescription);
-    const descriptionChangedResult = await ctx.participantRepository.getParticipants([
+    const descriptionChangedResult = ctx.participantRepository.getParticipants([
       { id: noDescription.id, fullName: 'some name' },
     ]);
     expect(descriptionChangedResult[0].description).toEqual(noDescription.description);
 
-    const defaultSimDescription = await ctx.participantRepository.getParticipant({
+    const defaultSimDescription = ctx.participantRepository.getParticipant({
       id: '187263',
       fullName: 'Travis Scott',
     });
 
     expect(defaultSimDescription.description).toBeTruthy();
 
-    const noDefaultSimDescription = await ctx.participantRepository.getParticipant({
+    const noDefaultSimDescription = ctx.participantRepository.getParticipant({
       id: '187263123',
       fullName: 'No Name',
     });

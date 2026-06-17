@@ -32,7 +32,7 @@ describe('Output', () => {
       ctx = mockApiContext();
     });
 
-    it('test', async () => {
+    it('test', () => {
       const event: InteractionEvent = {
         // TODO: Deprecated
         location_id: 0,
@@ -132,12 +132,12 @@ describe('Output', () => {
         recursive: true,
       });
 
-      await ctx.db.loadDatabase({
+      ctx.db.loadDatabase({
         sessionId: '958127321',
         saveId: '2',
       });
 
-      const result = await ctx.promptBuilder.buildPromptRequest(event, {
+      const result = ctx.promptBuilder.buildPromptRequest(event, {
         action: '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
         apiType: ApiType.SentientSimsAI,
         modelSettings: {

@@ -1,4 +1,3 @@
-/* eslint react/require-default-props: off */
 import { Card, CardContent } from '@mui/material';
 import { ReactNode, JSX } from 'react';
 

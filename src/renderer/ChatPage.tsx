@@ -3,7 +3,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import SendIcon from '@mui/icons-material/Send';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { useCallback, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import log from 'electron-log';
 import { ChatBoxComponent } from './ChatBoxComponent';
 import ChatResultsModal from './ChatResultsModal';
@@ -27,13 +27,17 @@ export default function ChatPage() {
     maxResponseTokensState,
   } = useChatGenerationContext();
 
-  handleGenerationLoaded(
-    useCallback(() => {
-      setTimeout(() => {
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    handleGenerationLoaded(() => () => {
+      timeoutId = setTimeout(() => {
         messagesEndRef.current?.scrollIntoView();
       }, 500);
-    }, []),
-  );
+    });
+    return () => {
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+    };
+  }, [handleGenerationLoaded]);
 
   const resultsModal = ChatResultsModal();
 

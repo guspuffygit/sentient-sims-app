@@ -395,17 +395,23 @@ export function InteractionMappingComponent() {
     setLoading(false);
   }
 
-  let testOutcome;
+  let testOutcome: ReactNode;
   if (testResults.length > 0) {
-    testOutcome = [];
+    const items: ReactNode[] = [];
     testResults.forEach((result, index) => {
-      testOutcome.push(<Typography sx={{ marginBottom: 1 }}>Test {index + 1}:</Typography>);
-      testOutcome.push(
-        <Typography variant="body2" sx={{ marginBottom: 1 }}>
+      const itemKey = `${index}-${result.text ?? ''}`;
+      items.push(
+        <Typography key={`label-${itemKey}`} sx={{ marginBottom: 1 }}>
+          Test {index + 1}:
+        </Typography>,
+      );
+      items.push(
+        <Typography key={`result-${itemKey}`} variant="body2" sx={{ marginBottom: 1 }}>
           {result.text}
         </Typography>,
       );
     });
+    testOutcome = items;
   } else {
     testOutcome = (
       <>

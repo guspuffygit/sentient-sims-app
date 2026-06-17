@@ -7,7 +7,7 @@ export class WebsocketController {
     this.isConnected = this.isConnected.bind(this);
   }
 
-  async isConnected(req: Request, res: Response) {
+  isConnected(req: Request, res: Response) {
     const response: WebsocketStatusResponse = {
       mod: isWebSocketConnected('mod'),
       renderer: isWebSocketConnected('renderer'),

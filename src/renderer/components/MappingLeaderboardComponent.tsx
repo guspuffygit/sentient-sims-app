@@ -68,7 +68,7 @@ export function MappingLeaderboardComponent() {
 
   const isLoading = me.isLoading || leaderboard.isLoading || loading;
 
-  async function onClose() {
+  function onClose() {
     setOpen(false);
     setUsername('');
     setLoading(false);
@@ -84,11 +84,11 @@ export function MappingLeaderboardComponent() {
 
     try {
       await setDisplayName(username);
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error changing username', err);
     }
 
-    await onClose();
+    onClose();
   }
 
   if (leaderboard.error || leaderboard.isPending) {
@@ -145,7 +145,7 @@ export function MappingLeaderboardComponent() {
       <Modal
         open={open}
         onClose={() => {
-          void onClose();
+          onClose();
         }}
       >
         <Box
@@ -187,7 +187,7 @@ export function MappingLeaderboardComponent() {
               loading={isLoading}
               sx={{ mt: 2 }}
               onClick={() => {
-                void onClose();
+                onClose();
               }}
             >
               Cancel

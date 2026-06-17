@@ -34,9 +34,7 @@ export function CaughtErrorPopupNotificationModal() {
     );
 
     return () => {
-      if (removeListener) {
-        removeListener();
-      }
+      removeListener();
     };
   }, []);
 

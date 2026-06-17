@@ -21,11 +21,11 @@ export function refreshAuth() {
       log.debug('Updating auth token');
       window.electron.setSetting(SettingsEnum.ACCESS_TOKEN, authSession.tokens?.idToken?.toString());
     })
-    .catch((error: any) => {
+    .catch((error: unknown) => {
       if (error === 'The user is not authenticated') {
         log.debug('User is not logged in');
       } else {
-        log.error(`Unknown Error: ${error}`);
+        log.error(`Unknown Error: ${error instanceof Error ? error.message : JSON.stringify(error)}`);
       }
     });
 }
@@ -47,13 +47,10 @@ export default function useAuthCredentials() {
     };
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async function onRefreshAuth(_event: any) {
-    refreshAuth();
-  }
-
   useEffect(() => {
-    const removeListener = window.electron.refreshAuth(onRefreshAuth);
+    const removeListener = window.electron.refreshAuth(() => {
+      refreshAuth();
+    });
 
     return () => {
       removeListener();

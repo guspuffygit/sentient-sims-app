@@ -20,9 +20,9 @@ async function handleSelectDirectory() {
 
 export default function ipcHandlers(ctx: ApiContext) {
   ipcMain.handle('dialog:selectDirectory', handleSelectDirectory);
-  ipcMain.on('set-setting', (_event: IpcMainEvent, setting: SettingsEnum, value: any) => {
+  ipcMain.on('set-setting', (_event: IpcMainEvent, setting: SettingsEnum, value: unknown) => {
     if (setting !== SettingsEnum.ACCESS_TOKEN) {
-      log.debug(`set-setting: ${setting.toString()}, value: ${value}`);
+      log.debug(`set-setting: ${setting}, value: ${String(value)}`);
     }
     ctx.settings.set(setting, value);
 
@@ -50,13 +50,13 @@ export default function ipcHandlers(ctx: ApiContext) {
       }
     });
   });
-  ipcMain.handle('save-interaction-locally', async (event, interaction: InteractionDTO) => {
+  ipcMain.handle('save-interaction-locally', (event, interaction: InteractionDTO) => {
     const interactionRepo = ctx.interactionRepository;
-    return interactionRepo.saveLocalInteraction(interaction);
+    interactionRepo.saveLocalInteraction(interaction);
   });
 
-  ipcMain.handle('save-animation-locally', async (event, animation: Animation) => {
+  ipcMain.handle('save-animation-locally', (event, animation: Animation) => {
     const animationService = ctx.animations;
-    return animationService.saveLocalAnimation(animation);
+    animationService.saveLocalAnimation(animation);
   });
 }

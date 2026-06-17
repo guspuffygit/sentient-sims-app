@@ -1,6 +1,6 @@
 export type NovelAITokenizer = {
-  config: any;
-  vocab: any;
-  specialTokens: any;
-  merges: any;
+  config: { splitRegex: string };
+  vocab: Record<string, number>;
+  specialTokens: string[];
+  merges: string[][];
 };

@@ -14,7 +14,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import log from 'electron-log';
 import { SaveGame } from 'main/sentient-sims/models/SaveGame';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
@@ -60,7 +60,7 @@ export default function OfflineMemory() {
     log.info(`Got sims: ${result.length}`);
   };
 
-  const tableRows: any = [];
+  const tableRows: ReactNode[] = [];
   if (selectedSaveGame in saveGames) {
     saveGames[selectedSaveGame].participants?.forEach((sim) => {
       tableRows.push(

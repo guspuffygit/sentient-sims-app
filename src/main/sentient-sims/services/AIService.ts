@@ -171,15 +171,13 @@ export class AIService {
       } else {
         return { status: InteractionEventStatus.NOOP };
       }
-    } else if (event.ww_event_type === WWEventType.MAPPING) {
+    } else {
       if (animation?.act) {
         event.animation_name = animation.name;
         event.testing_action = animation.act;
       }
       notifyMapAnimation(event);
       return { status: InteractionEventStatus.MAPPING_ANIMATION };
-    } else {
-      throw Error(`Unknown WWEventType: ${event.ww_event_type}`);
     }
 
     return this.runGeneration(event, {
@@ -229,7 +227,7 @@ export class AIService {
       promptHistoryMode: options.promptHistoryMode,
     };
 
-    let promptRequest = await this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
+    let promptRequest = this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
 
     // save memory before any model specific formatting
     const newMemory: MemoryEntity = {

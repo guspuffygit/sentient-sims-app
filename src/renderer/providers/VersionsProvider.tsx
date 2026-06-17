@@ -54,7 +54,7 @@ export function VersionsProvider({ children }: VersionsProviderProps) {
         app: app.data,
         mod: mod.data,
         game: game.data,
-        loading: app.isLoading || mod.isLoading || game.isLoading,
+        loading: app.isFetching || mod.isFetching || game.isFetching,
         refresh,
       }}
     >

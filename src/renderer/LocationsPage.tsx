@@ -39,6 +39,7 @@ export default function LocationsPage() {
       .getAllLocations()
       .then((allLocations) => {
         setLocations(allLocations);
+        return allLocations;
       })
       .catch(() => {
         // ignore
@@ -111,9 +112,9 @@ export default function LocationsPage() {
           newLocations[editedLocation.index] = editedLocation.location;
           return newLocations;
         });
-      } catch (error: any) {
+      } catch (error) {
         log.error('Error saving updated location', error);
-        if (error.cause) {
+        if (error instanceof Error && error.cause) {
           log.error(error.cause);
         }
       }
@@ -126,9 +127,9 @@ export default function LocationsPage() {
     if (editedLocation) {
       try {
         await client.locations.deleteLocation(editedLocation.location.id);
-      } catch (error: any) {
+      } catch (error) {
         log.error('Deletion of location failed', error);
-        if (error.cause) {
+        if (error instanceof Error && error.cause) {
           log.error(error.cause);
         }
       }

@@ -48,12 +48,8 @@ export class PromptRequestBuilderService {
     this.ctx = ctx;
   }
 
-  async formatSims(
-    sentientSims: SentientSim[],
-    location: LocationEntity,
-    relationships?: SSRelationships,
-  ): Promise<string[]> {
-    const participants = await this.ctx.participantRepository.getParticipants(
+  formatSims(sentientSims: SentientSim[], location: LocationEntity, relationships?: SSRelationships): string[] {
+    const participants = this.ctx.participantRepository.getParticipants(
       sentientSims.map((sentientSim) => {
         try {
           return { id: sentientSim.sim_id, fullName: sentientSim.name };
@@ -237,7 +233,7 @@ export class PromptRequestBuilderService {
     return formattedMessages;
   }
 
-  async buildPromptRequest(event: SSEvent, options: PromptRequestBuilderOptions): Promise<PromptRequest> {
+  buildPromptRequest(event: SSEvent, options: PromptRequestBuilderOptions): PromptRequest {
     const location = this.ctx.locationRepository.getLocation({
       id: event.environment.location_id,
     });
@@ -335,10 +331,9 @@ export class PromptRequestBuilderService {
       postures,
     );
 
-    const simsPromise = this.formatSims(event.sentient_sims, location, event.relationships);
+    const sims = this.formatSims(event.sentient_sims, location, event.relationships);
     const memories = this.getMemories(event.sentient_sims);
     const groupedMemories = this.groupMemories(memories);
-    const sims = await simsPromise;
     const formattedLocation = formatAction(
       '<LOCATION>\n{location} ({location_type}), {location_description}\n</LOCATION>',
       event.sentient_sims,

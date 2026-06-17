@@ -1,5 +1,5 @@
 interface Vocabulary {
-  [key: string]: number;
+  [key: string]: number | undefined;
 }
 
 interface Config {
@@ -7,11 +7,11 @@ interface Config {
 }
 
 interface DataEncoder {
-  [key: string]: number;
+  [key: string]: number | undefined;
 }
 
 interface DataDecoder {
-  [key: number]: string;
+  [key: number]: string | undefined;
 }
 
 interface GPTPair {
@@ -101,12 +101,10 @@ export class Encoder {
   constructor(vocab: Vocabulary, merges: string[][], specials: string[], config: Config) {
     this.vocab = vocab;
     this.merges = merges;
-    this.specials = specials
-      .map((special) => [special, vocab[special]])
-      .reduce((obj: Vocabulary, [key, value]) => {
-        obj[key] = value as number;
-        return obj;
-      }, {});
+    this.specials = specials.reduce<Vocabulary>((obj, special) => {
+      obj[special] = vocab[special];
+      return obj;
+    }, {});
     this.config = config;
 
     const { byteDecoder, byteEncoder } = buildByteEncoderDecoder();
@@ -121,6 +119,7 @@ export class Encoder {
     // Read Encoder mappings and also generate reverse mappings.
     this.decoder = {};
     for (const [key, value] of Object.entries(this.encoder)) {
+      if (value === undefined) continue;
       if (key.startsWith('0x')) {
         // Byte rune
         hasByteRunes = true;
@@ -141,7 +140,8 @@ export class Encoder {
 
     const tokenMerges = new Map<string, number>();
     for (const pair of bpeRanks.keys()) {
-      tokenMerges.set(pair, this.encoder[pair]);
+      const encoded = this.encoder[pair];
+      if (encoded !== undefined) tokenMerges.set(pair, encoded);
     }
     this.tokenMerges = tokenMerges;
 
@@ -329,15 +329,17 @@ export class Encoder {
         return cached;
       }
     }
-    let word: string[] = [...text];
+    let word: string[] = Array.from(text);
     let rankedPairs = this.getRankedPairs(word);
     if (rankedPairs.length === 0) {
-      const tokens = [];
-      if (this.encoder[text] !== undefined) {
-        tokens.push(this.encoder[text]);
+      const tokens: number[] = [];
+      const encoded = this.encoder[text];
+      if (encoded !== undefined) {
+        tokens.push(encoded);
       } else if (this.bytesEncoder) {
         for (const char of this.encodeStr(text)) {
-          tokens.push(this.bytesEncoder[char]);
+          const byteEncoded = this.bytesEncoder[char];
+          if (byteEncoded !== undefined) tokens.push(byteEncoded);
         }
       }
       this.cache.set(text, tokens);
@@ -376,13 +378,15 @@ export class Encoder {
         rankedPairs = this.getRankedPairs(word);
       }
     }
-    const tokens = [];
+    const tokens: number[] = [];
     for (const token of word) {
-      if (this.encoder[token] !== undefined) {
-        tokens.push(this.encoder[token]);
+      const encoded = this.encoder[token];
+      if (encoded !== undefined) {
+        tokens.push(encoded);
       } else if (this.bytesEncoder) {
         for (const char of this.encodeStr(token)) {
-          tokens.push(this.bytesEncoder[char]);
+          const byteEncoded = this.bytesEncoder[char];
+          if (byteEncoded !== undefined) tokens.push(byteEncoded);
         }
       }
     }
@@ -396,8 +400,9 @@ export class Encoder {
     const encodedTokens: number[] = [];
     for (const word of words) {
       // Handle special tokens.
-      if (this.specials[word] !== undefined) {
-        encodedTokens.push(this.specials[word]);
+      const special = this.specials[word];
+      if (special !== undefined) {
+        encodedTokens.push(special);
         continue;
       } else {
         // Encode the word.
@@ -413,6 +418,7 @@ export class Encoder {
     let accumulatedBytes: number[] = [];
     for (const token of tokens) {
       const str = this.decoder[token];
+      if (str === undefined) continue;
       // If it starts with 0x, it's a byte token.
       if (str.startsWith('0x')) {
         // Accumulate bytes.
@@ -434,7 +440,7 @@ export class Encoder {
 
     if (!this.bytesEncoder) {
       return this.decodeStr(
-        [...text].flatMap((x) => {
+        Array.from(text).flatMap((x) => {
           const converted = this.charToByte[x] ?? this.encodeStr(x);
           return converted;
         }),
@@ -446,9 +452,10 @@ export class Encoder {
 
   tokensContaining = (str: string): { token: string; id: number }[] => {
     const keys = Object.keys(this.encoder);
-    const arr = [];
+    const arr: { token: string; id: number }[] = [];
     for (const key of keys) {
-      if (key.includes(str)) arr.push({ token: key, id: this.encoder[key] });
+      const id = this.encoder[key];
+      if (id !== undefined && key.includes(str)) arr.push({ token: key, id });
     }
     return arr;
   };
@@ -458,6 +465,7 @@ export class Encoder {
     const unicodeReq: number[] = [];
     for (let i = 0; i < Object.keys(this.encoder).length; i++) {
       const v = this.decoder[i];
+      if (v === undefined) continue;
       let need = 0;
       let min_need = 0;
       // Turn the string into bytes.

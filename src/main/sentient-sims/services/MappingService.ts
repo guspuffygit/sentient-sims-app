@@ -20,15 +20,30 @@ type EAttribute = {
   '$a_n'?: string;
 };
 
+type TInstance = {
+  '#text'?: string;
+  '$a_n'?: string;
+};
+
 export type InstanceXML = {
   $a_c?: string;
   $a_i?: string;
   $a_m?: string;
   $a_n?: string;
   $a_s?: string;
-  V: any;
-  T?: any[];
+  V: unknown;
+  T?: TInstance[];
   E?: EAttribute[];
+};
+
+type StringEntry = {
+  Key: string;
+  Value: string;
+};
+
+type StringsFile = {
+  Entries?: StringEntry[];
+  [key: string]: unknown;
 };
 
 export function toInstance(instanceXML: InstanceXML, xml: string): Instance {
@@ -105,21 +120,24 @@ export type ExportTraitsRequest = {
 };
 
 export class MappingService {
-  async getTraits({ searchClass, extractedPath }: TraitsParameters) {
+  getTraits({ searchClass, extractedPath }: TraitsParameters) {
     log.debug(`extracted path: ${extractedPath}`);
     const traitsPath = path.join(extractedPath);
     const stringsPath = path.join(extractedPath, 'strings.json');
-    const parsedStrings: any = JSON.parse(fs.readFileSync(stringsPath, 'utf-8'));
+    const parsedStrings = JSON.parse(fs.readFileSync(stringsPath, 'utf-8')) as StringsFile;
     const stringMap: Record<string, string> = {};
-    if (parsedStrings?.Entries && Array.isArray(parsedStrings.Entries)) {
-      parsedStrings.Entries.forEach((stringPair: any) => {
-        if (stringPair?.Key && stringPair?.Value) {
+    if (parsedStrings.Entries && Array.isArray(parsedStrings.Entries)) {
+      parsedStrings.Entries.forEach((stringPair) => {
+        if (stringPair.Key && stringPair.Value) {
           stringMap[stringPair.Key] = stringPair.Value;
         }
       });
     } else {
       Object.keys(parsedStrings).forEach((key) => {
-        stringMap[key] = parsedStrings[key];
+        const value = parsedStrings[key];
+        if (typeof value === 'string') {
+          stringMap[key] = value;
+        }
       });
     }
 
@@ -132,8 +150,8 @@ export class MappingService {
       .forEach((xmlFile) => {
         let xml = fs.readFileSync(xmlFile, 'utf-8');
         try {
-          const result: any = xmlParser.parse(xml);
-          if (result?.I) {
+          const result = xmlParser.parse(xml) as { I?: InstanceXML };
+          if (result.I) {
             const instanceXml: InstanceXML = result.I;
             if (
               instanceXml.$a_c &&
@@ -143,13 +161,12 @@ export class MappingService {
               instanceXml.$a_s
             ) {
               if (Array.isArray(instanceXml.T)) {
-                const newT: any[] = [];
+                const newT: TInstance[] = [];
                 instanceXml.T.forEach((tInstance) => {
-                  if (tInstance?.$a_n in textProperties && '#text' in tInstance && tInstance['#text'] in stringMap) {
-                    xml = xml.replace(tInstance['#text'], stringMap[tInstance['#text']]);
-                    if ('#text' in tInstance) {
-                      tInstance['#text'] = stringMap[tInstance['#text']];
-                    }
+                  const text = tInstance['#text'];
+                  if (tInstance.$a_n && tInstance.$a_n in textProperties && text && text in stringMap) {
+                    xml = xml.replace(text, stringMap[text]);
+                    tInstance['#text'] = stringMap[text];
                   }
                   newT.push(tInstance);
                 });
@@ -206,8 +223,8 @@ export class MappingService {
     };
   }
 
-  async getUnmappedTraits(traitsParameters: TraitsParameters) {
-    const result = await this.getTraits(traitsParameters);
+  getUnmappedTraits(traitsParameters: TraitsParameters) {
+    const result = this.getTraits(traitsParameters);
     const unmappedTraits = result.data.filter((mood) => !mood.description);
     log.debug(`Unmapped ${unmappedTraits.length}/${result.data.length}`);
     return {
@@ -215,7 +232,7 @@ export class MappingService {
     };
   }
 
-  async getMoods() {
+  getMoods() {
     const moodsPath = '';
     const xmlFiles = getXmlFilesSync(moodsPath, []);
 
@@ -223,8 +240,8 @@ export class MappingService {
 
     xmlFiles.forEach((xmlFile) => {
       const xml = fs.readFileSync(xmlFile, 'utf-8');
-      const result: any = xmlParser.parse(xml);
-      if (result?.I) {
+      const result = xmlParser.parse(xml) as { I?: InstanceXML };
+      if (result.I) {
         const instanceXml: InstanceXML = result.I;
         if (
           instanceXml.$a_c &&
@@ -263,14 +280,14 @@ export class MappingService {
     };
   }
 
-  async getUnmappedMoods() {
-    const result = await this.getMoods();
+  getUnmappedMoods() {
+    const result = this.getMoods();
     return {
       data: result.data.filter((mood) => !mood.description),
     };
   }
 
-  async exportTraits({ extractedPath, traits, variableName, modDescription }: ExportTraitsRequest) {
+  exportTraits({ extractedPath, traits, variableName, modDescription }: ExportTraitsRequest) {
     const exportedPath = path.join(extractedPath, 'extracted.json');
 
     let theOutput = '';

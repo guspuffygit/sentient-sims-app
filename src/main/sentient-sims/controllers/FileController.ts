@@ -12,12 +12,12 @@ export class FileController {
     this.deleteLastExceptionFiles = this.deleteLastExceptionFiles.bind(this);
   }
 
-  async getLastExceptionFiles(req: Request, res: Response) {
+  getLastExceptionFiles(req: Request, res: Response) {
     res.json(this.ctx.lastException.getParsedLastExceptionFiles());
   }
 
-  async deleteLastExceptionFiles(req: Request, res: Response) {
-    await this.ctx.lastException.deleteLastExceptionFiles();
+  deleteLastExceptionFiles(req: Request, res: Response) {
+    this.ctx.lastException.deleteLastExceptionFiles();
     res.json({ done: 'done' });
   }
 }

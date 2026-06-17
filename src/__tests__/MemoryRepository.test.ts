@@ -4,12 +4,12 @@ import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
 import { mockApiContext } from './util';
 
 describe('MemoryRepository', () => {
-  it('CRUD', async () => {
+  it('CRUD', () => {
     const ctx = mockApiContext();
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
       recursive: true,
     });
-    await ctx.db.loadDatabase({
+    ctx.db.loadDatabase({
       sessionId: '7981723',
       saveId: '2',
     });
@@ -100,12 +100,12 @@ describe('MemoryRepository', () => {
     expect(throwsError).toThrow();
   });
 
-  it('should store interaction_name from normal interactions', async () => {
+  it('should store interaction_name from normal interactions', () => {
     const ctx = mockApiContext();
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
       recursive: true,
     });
-    await ctx.db.loadDatabase({
+    ctx.db.loadDatabase({
       sessionId: '1111111',
       saveId: '1',
     });
@@ -127,12 +127,12 @@ describe('MemoryRepository', () => {
     expect(fetched.interaction_name).toEqual('mixer_social_GossipAbout');
   });
 
-  it('should store interaction_name from wicked whims animation_name', async () => {
+  it('should store interaction_name from wicked whims animation_name', () => {
     const ctx = mockApiContext();
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
       recursive: true,
     });
-    await ctx.db.loadDatabase({
+    ctx.db.loadDatabase({
       sessionId: '2222222',
       saveId: '1',
     });
@@ -154,12 +154,12 @@ describe('MemoryRepository', () => {
     expect(fetched.interaction_name).toEqual('some_animation_name');
   });
 
-  it('should update interaction_name', async () => {
+  it('should update interaction_name', () => {
     const ctx = mockApiContext();
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
       recursive: true,
     });
-    await ctx.db.loadDatabase({
+    ctx.db.loadDatabase({
       sessionId: '3333333',
       saveId: '1',
     });

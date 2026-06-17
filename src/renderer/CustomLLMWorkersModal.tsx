@@ -24,20 +24,25 @@ const columns: GridColDef[] = [
   },
 ];
 
+type WorkerRow = {
+  id: number;
+  name: string;
+  type: string;
+  model: string;
+};
+
 export default function CustomLLMWorkersModal({ open, onClose, workers }: ModalProps) {
-  const rows: any[] = [];
+  const rows: WorkerRow[] = [];
   try {
-    if (workers) {
-      workers.forEach((worker, index) => {
-        rows.push({
-          id: index,
-          name: worker.name,
-          type: worker.type,
-          model: worker.model,
-        });
+    workers.forEach((worker, index) => {
+      rows.push({
+        id: index,
+        name: worker.name,
+        type: worker.type,
+        model: worker.model,
       });
-    }
-  } catch (err: any) {
+    });
+  } catch (err) {
     log.error(`Exception thrown trying to render workers, typeof: ${typeof workers}`, err);
   }
   return (

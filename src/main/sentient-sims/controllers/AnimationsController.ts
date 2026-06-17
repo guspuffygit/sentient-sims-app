@@ -21,15 +21,15 @@ export class AnimationsController {
   }
 
   async setAnimation(req: Request, res: Response) {
-    const animation: Animation = req.body;
+    const animation = req.body as Animation;
     await this.ctx.animations.setAnimation(animation);
     res.json({ text: 'done' });
   }
 
-  async saveAnimationLocally(req: Request, res: Response) {
+  saveAnimationLocally(req: Request, res: Response) {
     try {
-      const animation: Animation = req.body;
-      await this.ctx.animations.saveLocalAnimation(animation);
+      const animation = req.body as Animation;
+      this.ctx.animations.saveLocalAnimation(animation);
       res.json({ status: 'success', message: 'Animation saved locally.' });
     } catch (err) {
       log.error('[Controller] Error saving animation locally:', err);
@@ -47,7 +47,7 @@ export class AnimationsController {
     }
   }
 
-  async isNsfwEnabled(req: Request, res: Response) {
+  isNsfwEnabled(req: Request, res: Response) {
     res.json({ value: this.ctx.animations.isNsfwEnabled() });
   }
 }

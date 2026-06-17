@@ -5,6 +5,10 @@ import { CreateMemoryRequest } from '../models/GetMemoryRequest';
 import { DatabaseNotLoadedError } from '../exceptions/DatabaseNotLoadedError';
 import { ApiContext } from '../services/ApiContext';
 
+function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
 export class MemoriesController {
   private readonly ctx: ApiContext;
 
@@ -19,81 +23,81 @@ export class MemoriesController {
     this.deleteAllMemories = this.deleteAllMemories.bind(this);
   }
 
-  async getMemory(req: Request, res: Response) {
+  getMemory(req: Request, res: Response) {
     try {
       const { memoryId } = req.params;
       const result = this.ctx.memoryRepository.getMemory({
         id: Number(memoryId),
       });
       return res.json(result);
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error getting memory', err);
-      return res.json({ error: err.message });
+      return res.json({ error: errorMessage(err) });
     }
   }
 
-  async getMemories(req: Request, res: Response) {
+  getMemories(req: Request, res: Response) {
     try {
       const result = this.ctx.memoryRepository.getMemories();
       return res.json(result);
-    } catch (err: any) {
+    } catch (err) {
       if (err instanceof DatabaseNotLoadedError) {
         log.debug('Database isnt loaded yet, returning empty list');
         return res.json([]);
       }
 
       log.error('Error getting memories', err);
-      return res.json({ error: err.message });
+      return res.json({ error: errorMessage(err) });
     }
   }
 
-  async updateMemory(req: Request, res: Response) {
+  updateMemory(req: Request, res: Response) {
     try {
       const { memoryId } = req.params;
-      const memory: MemoryEntity = req.body;
+      const memory = req.body as MemoryEntity;
       memory.id = Number(memoryId);
 
       this.ctx.memoryRepository.updateMemory(memory);
       return res.json({
         text: `Updated memory with id ${memory.id}`,
       });
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error updating memory', err);
-      return res.json({ error: err.message });
+      return res.json({ error: errorMessage(err) });
     }
   }
 
-  async createMemory(req: Request, res: Response) {
+  createMemory(req: Request, res: Response) {
     try {
-      const createMemoryRequest: CreateMemoryRequest = req.body;
+      const createMemoryRequest = req.body as CreateMemoryRequest;
 
       const memory = this.ctx.memoryRepository.createMemory(createMemoryRequest);
       return res.json(memory);
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error creating memory', err);
-      return res.json({ error: err.message });
+      return res.json({ error: errorMessage(err) });
     }
   }
 
-  async deleteMemory(req: Request, res: Response) {
+  deleteMemory(req: Request, res: Response) {
     try {
       const { memoryId } = req.params;
 
       this.ctx.memoryRepository.deleteMemory({ id: Number(memoryId) });
       return res.json({ text: `Deleted memory with id: ${memoryId}` });
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error deleting memory', err);
-      return res.json({ error: err.message });
+      return res.json({ error: errorMessage(err) });
     }
   }
 
-  async deleteAllMemories(req: Request, res: Response) {
+  deleteAllMemories(req: Request, res: Response) {
     try {
       this.ctx.memoryRepository.deleteAllMemories();
       return res.json({ text: `Deleted all memories` });
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error deleting memory', err);
-      return res.json({ error: err.message });
+      return res.json({ error: errorMessage(err) });
     }
   }
 }

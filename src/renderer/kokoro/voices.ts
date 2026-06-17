@@ -302,10 +302,11 @@ async function getVoiceFile(id: keyof typeof VOICES): Promise<ArrayBufferLike> {
   return buffer;
 }
 
-const VOICE_CACHE = new Map();
-export async function getVoiceData(voice: keyof typeof VOICES) {
-  if (VOICE_CACHE.has(voice)) {
-    return VOICE_CACHE.get(voice);
+const VOICE_CACHE = new Map<string, Float32Array>();
+export async function getVoiceData(voice: keyof typeof VOICES): Promise<Float32Array> {
+  const cached = VOICE_CACHE.get(voice);
+  if (cached) {
+    return cached;
   }
 
   const buffer = new Float32Array(await getVoiceFile(voice));

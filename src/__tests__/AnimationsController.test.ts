@@ -21,7 +21,7 @@ describe('AnimationsController', () => {
     });
   });
 
-  it('OpenAI Not selected Returns True', async () => {
+  it('OpenAI Not selected Returns True', () => {
     ctx.settings.aiApiType = ApiType.NovelAI;
 
     const req = {} as Request;
@@ -30,12 +30,12 @@ describe('AnimationsController', () => {
       json: vi.fn(),
     } as unknown as Response;
 
-    await ctx.controller.animations.isNsfwEnabled(req, res);
+    ctx.controller.animations.isNsfwEnabled(req, res);
 
     expect(res.json).toHaveBeenCalledWith({ value: true });
   });
 
-  it('OpenAI ApiType NSFW Disabled Returns False', async () => {
+  it('OpenAI ApiType NSFW Disabled Returns False', () => {
     ctx.settings.aiApiType = ApiType.OpenAI;
     ctx.settings.nsfwEnabled = false;
 
@@ -45,12 +45,12 @@ describe('AnimationsController', () => {
       json: vi.fn(),
     } as unknown as Response;
 
-    await ctx.controller.animations.isNsfwEnabled(req, res);
+    ctx.controller.animations.isNsfwEnabled(req, res);
 
     expect(res.json).toHaveBeenCalledWith({ value: false });
   });
 
-  it('Force NSFW Enabled Returns True', async () => {
+  it('Force NSFW Enabled Returns True', () => {
     ctx.settings.aiApiType = ApiType.OpenAI;
     ctx.settings.nsfwEnabled = true;
 
@@ -60,7 +60,7 @@ describe('AnimationsController', () => {
       json: vi.fn(),
     } as unknown as Response;
 
-    await ctx.controller.animations.isNsfwEnabled(req, res);
+    ctx.controller.animations.isNsfwEnabled(req, res);
 
     expect(res.json).toHaveBeenCalledWith({ value: true });
   });

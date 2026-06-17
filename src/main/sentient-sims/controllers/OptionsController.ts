@@ -13,7 +13,7 @@ export class OptionsController {
     this.fixOptions = this.fixOptions.bind(this);
   }
 
-  async getOptionsStatus(_req: Request, res: Response) {
+  getOptionsStatus(_req: Request, res: Response) {
     const optionsPath = path.join(this.ctx.directory.getSims4Folder(), 'Options.ini');
 
     log.debug(`Options path: ${optionsPath}`);
@@ -33,7 +33,7 @@ export class OptionsController {
       scriptModsOn: scriptModsEnabled !== null ? scriptModsEnabled === 1 : null,
     });
   }
-  async fixOptions(_req: Request, res: Response) {
+  fixOptions(_req: Request, res: Response) {
     const optionsPath = path.join(this.ctx.directory.getSims4Folder(), 'Options.ini');
 
     log.debug(`Options path: ${optionsPath}`);

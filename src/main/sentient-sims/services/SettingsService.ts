@@ -209,16 +209,16 @@ export class SettingsService {
     return this.store.get(key);
   }
 
-  setSetting(key: string, value: any) {
+  setSetting(key: string, value: unknown) {
     if (value === undefined) {
       return value;
     }
     this.store.set(key, value);
 
-    if (key !== SettingsEnum.ACCESS_TOKEN) {
-      log.info(`Setting app setting: ${key} to value: ${value}`);
+    if (key !== (SettingsEnum.ACCESS_TOKEN as string)) {
+      log.info(`Setting app setting: ${key} to value: ${JSON.stringify(value)}`);
     }
-    if (key === SettingsEnum.DEBUG_LOGS) {
+    if (key === (SettingsEnum.DEBUG_LOGS as string)) {
       if (value) {
         enableDebugLogging();
       } else {
@@ -232,7 +232,7 @@ export class SettingsService {
   resetSetting(key: string) {
     this.store.reset(key);
     const defaultValue = this.getSetting(key);
-    log.info(`Reset app setting: ${key} to value: ${defaultValue}`);
+    log.info(`Reset app setting: ${key} to value: ${JSON.stringify(defaultValue)}`);
     return defaultValue;
   }
 
@@ -240,7 +240,7 @@ export class SettingsService {
     return this.getSetting(setting);
   }
 
-  set(setting: SettingsEnum, value: any) {
+  set(setting: SettingsEnum, value: unknown) {
     return this.setSetting(setting, value);
   }
 
@@ -520,7 +520,7 @@ export class SettingsService {
     return stringOrUndefined(this.get(SettingsEnum.VLLM_APIKEY));
   }
 
-  set vllmApiKey(value: string) {
+  set vllmApiKey(value: string | undefined) {
     this.set(SettingsEnum.VLLM_APIKEY, value);
   }
 
@@ -537,7 +537,7 @@ export class SettingsService {
     return stringOrUndefined(this.get(SettingsEnum.VLLM_MODEL));
   }
 
-  set vllmModel(value: string) {
+  set vllmModel(value: string | undefined) {
     this.set(SettingsEnum.VLLM_MODEL, value);
   }
 

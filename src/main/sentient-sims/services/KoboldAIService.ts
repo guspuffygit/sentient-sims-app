@@ -10,6 +10,10 @@ type KoboldAIModelResponse = {
   result: string;
 };
 
+type KoboldAIGenerateResponse = {
+  results: { text: string }[];
+};
+
 export class KoboldAIService implements GenerationService {
   private ctx: ApiContext;
 
@@ -41,7 +45,7 @@ export class KoboldAIService implements GenerationService {
       }),
     });
 
-    const result = await response.json();
+    const result = (await response.json()) as KoboldAIGenerateResponse;
 
     return result.results[0].text;
   }
@@ -75,9 +79,9 @@ export class KoboldAIService implements GenerationService {
       return {
         status: 'Kobold AI OK',
       };
-    } catch (e: any) {
+    } catch (e) {
       log.error('Error checking KoboldAI health', e);
-      sendPopUpNotification(e?.message);
+      sendPopUpNotification(e instanceof Error ? e.message : undefined);
       return {
         status: 'Kobold AI Not accessible',
       };
@@ -90,7 +94,7 @@ export class KoboldAIService implements GenerationService {
     log.debug(`Grabbing koboldai model: ${url}`);
     try {
       const response = await fetch(url);
-      const modelResponse: KoboldAIModelResponse = await response.json();
+      const modelResponse = (await response.json()) as KoboldAIModelResponse;
       const currentModel = modelResponse.result.toLowerCase();
       log.debug(`Current KoboldAI Model: ${currentModel}`);
 
@@ -100,7 +104,7 @@ export class KoboldAIService implements GenerationService {
           displayName: modelResponse.result,
         },
       ];
-    } catch (e: any) {
+    } catch (e) {
       log.error('Error getting KoboldAI models', e);
 
       throw e;

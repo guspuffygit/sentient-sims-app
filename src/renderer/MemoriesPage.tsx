@@ -20,6 +20,10 @@ export default function MemoriesPage() {
   const textareaRef = useRef<HTMLDivElement>(null);
   const [memories, setMemories] = useState<MemoryEntity[]>([]);
   const [memoriesFocused, setMemoriesFocused] = useState(false);
+  const memoriesFocusedRef = useRef(memoriesFocused);
+  useEffect(() => {
+    memoriesFocusedRef.current = memoriesFocused;
+  }, [memoriesFocused]);
   const [editedMemory, setEditedMemory] = useState<SelectedMemory | null | undefined>();
   const { status } = useWebsocket();
   const [copiedSnackbar, setCopiedSnackbar] = useState(false);
@@ -59,11 +63,11 @@ export default function MemoriesPage() {
   }, [addMemory]);
 
   useEffect(() => {
-    if (textareaRef.current && !memoriesFocused) {
+    // Scroll new memories into view, but only if the user isn't actively interacting with the list.
+    // Read latest focus state via ref so this effect only re-runs when `memories` change.
+    if (textareaRef.current && !memoriesFocusedRef.current) {
       textareaRef.current.scrollIntoView();
     }
-    // This is needed otherwise when the mouse leaves the box it scrolls to the bottom
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memories]);
 
   function getMemories() {
@@ -71,6 +75,7 @@ export default function MemoriesPage() {
       .getMemories()
       .then((memoriesResponse) => {
         setMemories(memoriesResponse);
+        return memoriesResponse;
       })
       .catch(() => {
         // ignore
@@ -144,9 +149,9 @@ export default function MemoriesPage() {
 
       try {
         await client.memories.updateMemory(editedMemory.memory);
-      } catch (error: any) {
+      } catch (error) {
         log.error('Error saving updated memory', error);
-        if (error.cause) {
+        if (error instanceof Error && error.cause) {
           log.error(error.cause);
         }
       } finally {
@@ -161,9 +166,9 @@ export default function MemoriesPage() {
     if (editedMemory && editedMemory.memory.id) {
       try {
         await client.memories.deleteMemory(editedMemory.memory.id);
-      } catch (error: any) {
+      } catch (error) {
         log.error('Deletion of memory failed', error);
-        if (error.cause) {
+        if (error instanceof Error && error.cause) {
           log.error(error.cause);
         }
       }
@@ -303,10 +308,14 @@ export default function MemoriesPage() {
                 size="small"
                 variant="outlined"
                 onClick={() => {
-                  copyInteractionName(editedMemory.memory.interaction_name!);
+                  if (editedMemory.memory.interaction_name) {
+                    copyInteractionName(editedMemory.memory.interaction_name);
+                  }
                 }}
                 onDelete={() => {
-                  copyInteractionName(editedMemory.memory.interaction_name!);
+                  if (editedMemory.memory.interaction_name) {
+                    copyInteractionName(editedMemory.memory.interaction_name);
+                  }
                 }}
                 deleteIcon={<ContentCopyIcon fontSize="small" />}
                 sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}

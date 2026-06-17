@@ -84,19 +84,19 @@ export class LogSendService {
       if (!response || !response.ok) {
         errors.push(`Failed to post message: ${response?.status} ${response?.statusText}.`);
         if (response) {
-          const responseJson = await response.json();
+          const responseJson = (await response.json()) as unknown;
           log.error(`Response JSON Error:\n${JSON.stringify(responseJson, null, 2)}`);
           errors.push(responseJson);
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       const message = 'Error sending logs';
       log.error(message, err);
       errors.push(message, err);
     }
 
     if (errors.length === 0) {
-      await this.ctx.lastException.deleteLastExceptionFiles();
+      this.ctx.lastException.deleteLastExceptionFiles();
     }
 
     return {
@@ -172,11 +172,11 @@ export class LogSendService {
           errors.push(await response.json());
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       const message = 'Error sending logs';
       log.error(message, err);
       errors.push(message, err);
-      sendPopUpNotification(`Error sending logs: ${err.message}`);
+      sendPopUpNotification(`Error sending logs: ${err instanceof Error ? err.message : String(err)}`);
     }
 
     return { text: logId };
@@ -192,7 +192,7 @@ export class LogSendService {
         if (Object.prototype.toString.call(settingsValue) === '[object Object]') {
           settings.push(`${settingsEnum}: ${JSON.stringify(settingsValue)}`);
         } else {
-          settings.push(`${settingsEnum}: ${settingsValue}`);
+          settings.push(`${settingsEnum}: ${String(settingsValue)}`);
         }
       }
     });
@@ -292,9 +292,9 @@ export class LogSendService {
         method: 'POST',
         body: formData,
       });
-    } catch (err: any) {
+    } catch (err) {
       this.handleAppendError('Error sending log data', err, errors);
-      sendPopUpNotification(`Error sending log data: ${err.message}`);
+      sendPopUpNotification(`Error sending log data: ${err instanceof Error ? err.message : String(err)}`);
       return null;
     }
   }

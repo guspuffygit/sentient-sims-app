@@ -23,20 +23,20 @@ export class AIClient extends ApiClient {
 
     if (!response.ok) {
       try {
-        const errorResponse = await response.json();
+        const errorResponse = (await response.json()) as { error?: string };
         const errorMessage = errorResponse.error || 'Unknown JSON error occurred';
         throw new SentientSimsAIError(`Error getting models: ${errorMessage}`);
-      } catch (e: any) {
+      } catch (e: unknown) {
         if (e instanceof SentientSimsAIError) {
           throw e;
         }
 
         // If JSON parsing fails, fall back to plain text error message
         const textMessage = await response.text();
-        throw new Error(`Error getting models message: ${textMessage}`);
+        throw new Error(`Error getting models message: ${textMessage}`, { cause: e });
       }
     }
 
-    return response.json();
+    return (await response.json()) as AIModel[];
   }
 }

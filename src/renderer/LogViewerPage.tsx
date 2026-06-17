@@ -9,31 +9,41 @@ import { rendererWebsocketPort } from 'main/sentient-sims/constants';
 import AppCard from './AppCard';
 import { useDebounceHook } from './hooks/useDebounceHook';
 
+type LogViewerHandle = { scrollToBottom: () => void };
+
+type ScrollEvent = {
+  scrollDirection: 'forward' | 'backward';
+  scrollOffset: number;
+  scrollOffsetToBottom: number;
+  scrollUpdateWasRequested: boolean;
+};
+
 export default function LogViewerPage() {
   const [logs, setLogs] = useState<string[]>([]);
-  const shouldScrollToBottom = useRef<boolean>(true);
-  const logViewerRef = useRef<any>(null);
-  const scrollToBottomDebounce = useRef(useDebounceHook());
+  const shouldScrollToBottomRef = useRef<boolean>(true);
+  const logViewerRef = useRef<LogViewerHandle | null>(null);
+  const scrollToBottomDebounceRef = useRef(useDebounceHook());
 
   const handleClick = () => {
-    shouldScrollToBottom.current = true;
+    shouldScrollToBottomRef.current = true;
     logViewerRef.current?.scrollToBottom();
   };
 
-  const onScroll = (event: any) => {
+  const onScroll = (event: ScrollEvent) => {
     if (event.scrollOffsetToBottom === 0) {
-      shouldScrollToBottom.current = true;
+      shouldScrollToBottomRef.current = true;
     } else if (event.scrollOffsetToBottom === -1) {
       // continue to scroll until we hit the bottom
-      shouldScrollToBottom.current = true;
+      shouldScrollToBottomRef.current = true;
       logViewerRef.current?.scrollToBottom();
     } else {
-      shouldScrollToBottom.current = false;
+      shouldScrollToBottomRef.current = false;
     }
   };
 
   useEffect(() => {
     const ws = new WebSocket(`ws://localhost:${rendererWebsocketPort}`);
+    let pendingScrollTimeout: ReturnType<typeof setTimeout> | undefined;
     ws.onopen = () => {
       log.debug('Renderer opened connection with app');
     };
@@ -42,29 +52,30 @@ export default function LogViewerPage() {
     };
 
     ws.onmessage = (e) => {
-      const msg: RendererWebsocketMessage = JSON.parse(e.data);
+      const msg = JSON.parse(e.data as string) as RendererWebsocketMessage;
       if (msg.log?.message) {
         const formattedLogMessage = formatLog(msg.log);
         setLogs((prevLogs) => [...prevLogs, formattedLogMessage]);
       } else if (msg.logs) {
-        setLogs((prevLogs) => msg.logs || prevLogs);
+        setLogs((prevLogs) => msg.logs ?? prevLogs);
 
         // Scroll to the bottom after logs are loaded
-        setTimeout(() => {
-          if (shouldScrollToBottom.current) {
+        pendingScrollTimeout = setTimeout(() => {
+          if (shouldScrollToBottomRef.current) {
             logViewerRef.current?.scrollToBottom();
           }
         }, 300);
       }
 
-      scrollToBottomDebounce.current(() => {
-        if (shouldScrollToBottom.current) {
+      scrollToBottomDebounceRef.current(() => {
+        if (shouldScrollToBottomRef.current) {
           logViewerRef.current?.scrollToBottom();
         }
       }, 300);
     };
 
     return () => {
+      if (pendingScrollTimeout !== undefined) clearTimeout(pendingScrollTimeout);
       ws.close();
     };
   }, []);

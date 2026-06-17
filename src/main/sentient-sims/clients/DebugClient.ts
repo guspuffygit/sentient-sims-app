@@ -31,7 +31,7 @@ export class DebugClient extends ApiClient {
    * Sends debug logs to the configured webhook (Discord).
    */
   async sendDebugLogs(request: SendLogsRequest): Promise<SendLogsResponse> {
-    const response = await axiosClient.post(`${this.apiUrl}/debug/send-logs`, request);
+    const response = await axiosClient.post<SendLogsResponse>(`${this.apiUrl}/debug/send-logs`, request);
     return response.data;
   }
 

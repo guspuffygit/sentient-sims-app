@@ -22,15 +22,15 @@ export function useSetupWizard() {
 }
 
 export function SetupWizardProvider({ children }: SetupWizardProviderProps) {
-  const [isOpen, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const contextValue = useMemo(() => {
-    return { isOpen, setOpen };
+    return { isOpen, setOpen: setIsOpen };
   }, [isOpen]);
 
   return (
     <SetupWizardContext value={contextValue}>
-      <SetupWizardModal open={isOpen} setOpen={setOpen} />
+      <SetupWizardModal open={isOpen} setOpen={setIsOpen} />
       {children}
     </SetupWizardContext>
   );

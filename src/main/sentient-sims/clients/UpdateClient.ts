@@ -5,7 +5,7 @@ import { axiosClient } from './AxiosClient';
 
 export class UpdateClient extends ApiClient {
   async updateMod(modUpdate: ModUpdate): Promise<UpdateModResponse> {
-    const response = await axiosClient.post(`${this.apiUrl}/update/mod`, modUpdate);
+    const response = await axiosClient.post<UpdateModResponse>(`${this.apiUrl}/update/mod`, modUpdate);
     return response.data;
   }
 }

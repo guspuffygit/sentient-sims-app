@@ -36,9 +36,9 @@ export class PatreonService {
           if (result !== '{"message":"Updated."}') {
             throw new Error(result);
           }
-        } catch (err: any) {
+        } catch (err) {
           log.error(`Patreon redirect failed`, err);
-          sendPopUpNotification(err?.message);
+          sendPopUpNotification(err instanceof Error ? err.message : undefined);
           throw err;
         }
       } else {

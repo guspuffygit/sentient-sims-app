@@ -1,10 +1,10 @@
 import { DatabaseSession } from './DatabaseSession';
 
 export type CaughtError = {
-  message: any;
+  message: string;
   statusCode: number;
   databaseSession?: DatabaseSession | null;
-  body: any;
+  body: unknown;
   url: string;
   method: string;
 };

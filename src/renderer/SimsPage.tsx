@@ -37,6 +37,7 @@ export default function SimsPage() {
       .getParticipants()
       .then((participants) => {
         setSims(participants);
+        return participants;
       })
       .catch(() => {
         // ignore
@@ -103,9 +104,9 @@ export default function SimsPage() {
 
       try {
         await client.participant.updateParticipant(editedSim.sim);
-      } catch (error: any) {
+      } catch (error) {
         log.error('Error saving updated sim', error);
-        if (error.cause) {
+        if (error instanceof Error && error.cause) {
           log.error(error.cause);
         }
       }
@@ -119,9 +120,9 @@ export default function SimsPage() {
       try {
         log.info(`Deleting Sim: ${editedSim.sim.id}`);
         await client.participant.deleteParticipant(editedSim.sim.id);
-      } catch (error: any) {
+      } catch (error) {
         log.error('Deletion of sim failed', error);
-        if (error.cause) {
+        if (error instanceof Error && error.cause) {
           log.error(error.cause);
         }
       }

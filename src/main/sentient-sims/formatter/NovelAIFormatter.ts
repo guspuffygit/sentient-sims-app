@@ -18,9 +18,6 @@ export class NovelAIFormatter implements InputFormatter {
     }
 
     promptRequest.memories.forEach((memory) => {
-      if (memory.role === 'assistant') {
-        memory.content = memory.content;
-      }
       if (memory.role === 'user') {
         memory.content = `{${memory.content}}`;
       }

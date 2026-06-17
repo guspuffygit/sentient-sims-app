@@ -13,19 +13,19 @@ export class SettingsController {
     this.resetSetting = this.resetSetting.bind(this);
   }
 
-  async updateSetting(req: Request, res: Response) {
+  updateSetting(req: Request, res: Response) {
     const { appSetting } = req.params;
-    const { value } = req.body;
+    const { value } = req.body as { value: unknown };
     res.json({ value: this.ctx.settings.setSetting(appSetting, value) });
     notifySettingChanged(appSetting, value);
   }
 
-  async getSetting(req: Request, res: Response) {
+  getSetting(req: Request, res: Response) {
     const { appSetting } = req.params;
     res.json({ value: this.ctx.settings.getSetting(appSetting) });
   }
 
-  async resetSetting(req: Request, res: Response) {
+  resetSetting(req: Request, res: Response) {
     const { appSetting } = req.params;
     res.json({ value: this.ctx.settings.resetSetting(appSetting) });
   }

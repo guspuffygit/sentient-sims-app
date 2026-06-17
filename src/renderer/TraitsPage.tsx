@@ -1,6 +1,6 @@
 /* eslint-disable promise/always-return */
 
-import { useState, ChangeEvent, useMemo, useCallback, JSX } from 'react';
+import { useState, ChangeEvent, useMemo, useCallback, JSX, KeyboardEvent } from 'react';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import {
   Box,
@@ -14,13 +14,13 @@ import {
   Typography,
 } from '@mui/material';
 import log from 'electron-log';
-import vkbeautify from 'vkbeautify';
+import { xml as vkbeautifyXml } from 'vkbeautify';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { atomOneDarkReasonable } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { TraitMapping } from 'main/sentient-sims/descriptions/traitDescriptions';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ExportTraitsRequest } from 'main/sentient-sims/services/MappingService';
-import { toTraitType } from 'main/sentient-sims/models/TraitType';
+import { toTraitType, TraitType } from 'main/sentient-sims/models/TraitType';
 import AppCard from './AppCard';
 import useSetting from './hooks/useSetting';
 
@@ -28,12 +28,12 @@ type TraitResponse = {
   data: TraitMapping[];
 };
 
-function getFormattedXml(xmlString?: string) {
+function getFormattedXml(xmlString?: string): string {
   if (xmlString) {
-    return vkbeautify.xml(xmlString, 2);
+    return vkbeautifyXml(xmlString, 2);
   }
 
-  return [];
+  return '';
 }
 
 type TraitCount = {
@@ -48,7 +48,7 @@ export default function TraitsPage() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [inputField, setInputField] = useState('');
   const extractedPath = useSetting<string>(SettingsEnum.TRAIT_MAPPING_PATH, '');
-  const [filterTraitType, setFilterTraitType] = useState<string>('');
+  const [filterTraitType, setFilterTraitType] = useState<TraitType | ''>('');
   const [variableName, setVariableName] = useState('');
   const [modDescription, setModDescription] = useState('');
 
@@ -63,39 +63,37 @@ export default function TraitsPage() {
   const traitCounts: Record<string, TraitCount> = useMemo(() => {
     const traitTypeCounts: Record<string, TraitCount> = {};
     traits.forEach((trait) => {
-      if (trait.trait_type) {
-        const unmapped = !trait.description && trait.ignored === undefined;
-        if (trait.trait_type in traitTypeCounts) {
-          traitTypeCounts[trait.trait_type].mapped += 1;
-          if (unmapped) {
-            traitTypeCounts[trait.trait_type].unmapped += 1;
-          }
-        } else {
-          traitTypeCounts[trait.trait_type] = {
-            mapped: 1,
-            unmapped: unmapped ? 1 : 0,
-          };
+      const unmapped = !trait.description && trait.ignored === undefined;
+      if (trait.trait_type in traitTypeCounts) {
+        traitTypeCounts[trait.trait_type].mapped += 1;
+        if (unmapped) {
+          traitTypeCounts[trait.trait_type].unmapped += 1;
         }
+      } else {
+        traitTypeCounts[trait.trait_type] = {
+          mapped: 1,
+          unmapped: unmapped ? 1 : 0,
+        };
       }
     });
     return traitTypeCounts;
   }, [traits]);
 
   let prefix = '';
-  if (filteredTraits[selectedIndex]?.trait_type) {
-    const traitType = filteredTraits[selectedIndex]?.trait_type;
-    const traitClass = filteredTraits[selectedIndex]?.class;
-    if (traitType === 'DISLIKE' && traitClass && traitClass === 'AttractionPreference') {
+  if (filteredTraits[selectedIndex]) {
+    const traitType = filteredTraits[selectedIndex].trait_type;
+    const traitClass = filteredTraits[selectedIndex].class;
+    if (traitType === TraitType.DISLIKE && traitClass === 'AttractionPreference') {
       prefix = 'John Doe is turned off by a partner who';
-    } else if (traitType === 'LIKE' && traitClass && traitClass === 'AttractionPreference') {
+    } else if (traitType === TraitType.LIKE && traitClass === 'AttractionPreference') {
       prefix = 'John Doe is attracted to a partner who';
-    } else if (traitType === 'FEAR') {
+    } else if (traitType === TraitType.FEAR) {
       prefix = 'John Doe fears';
-    } else if (traitType === 'ASPIRATION') {
+    } else if (traitType === TraitType.ASPIRATION) {
       prefix = 'John Doe';
-    } else if (traitType === 'PERSONALITY') {
+    } else if (traitType === TraitType.PERSONALITY) {
       prefix = 'John Doe';
-    } else if (traitType === 'NONE' && traitClass === 'Trait') {
+    } else if (traitType === TraitType.NONE && traitClass === 'Trait') {
       prefix = 'John Doe';
     }
   }
@@ -168,7 +166,7 @@ export default function TraitsPage() {
   };
 
   const handleChangeTraitType = (event: SelectChangeEvent) => {
-    const newFilterType = event.target.value;
+    const newFilterType = event.target.value ? toTraitType(event.target.value) : '';
     setFilterTraitType(newFilterType);
     setSelectedIndex(0);
 
@@ -252,7 +250,7 @@ export default function TraitsPage() {
     setModDescription(event.target.value);
   };
 
-  const handleKeyDown = (event: any) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Enter') {
       event.preventDefault();
       handleForward();

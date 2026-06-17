@@ -1697,15 +1697,11 @@ export const careerDescriptions: CareerDescriptions = {
 };
 
 export function getCareerTrackLevel(sentientSimCareer: SentientSimCareer): CareerTrackLevel | undefined {
-  if (careerDescriptions[sentientSimCareer.name]) {
-    const careerTrack = careerDescriptions[sentientSimCareer.name];
+  if (!Object.hasOwn(careerDescriptions, sentientSimCareer.name)) return undefined;
+  const careerTrack = careerDescriptions[sentientSimCareer.name];
 
-    if (careerTrack[sentientSimCareer.track_name]) {
-      const careerTrackLevel = careerTrack[sentientSimCareer.track_name];
+  if (!Object.hasOwn(careerTrack, sentientSimCareer.track_name)) return undefined;
+  const careerTrackLevel = careerTrack[sentientSimCareer.track_name];
 
-      return careerTrackLevel[sentientSimCareer.level];
-    }
-  }
-
-  return undefined;
+  return careerTrackLevel[sentientSimCareer.level];
 }

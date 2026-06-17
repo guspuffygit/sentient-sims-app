@@ -16,42 +16,43 @@ export class MappingController {
     this.exportTraits = this.exportTraits.bind(this);
   }
 
-  async getTraits(req: Request, res: Response) {
-    log.debug(`params: ${req.query}`);
+  getTraits(req: Request, res: Response) {
+    log.debug(`params: ${JSON.stringify(req.query)}`);
     const searchClass: string | undefined = req.query.searchClass as string | undefined;
     const extractedPath: string = req.query.extractedPath as string;
 
     res.json(
-      await this.ctx.mapping.getTraits({
+      this.ctx.mapping.getTraits({
         searchClass,
         extractedPath,
       }),
     );
   }
 
-  async getUnmappedTraits(req: Request, res: Response) {
+  getUnmappedTraits(req: Request, res: Response) {
     const searchClass: string | undefined = req.query.searchClass as string | undefined;
     const extractedPath: string = req.query.extractedPath as string;
     res.json(
-      await this.ctx.mapping.getUnmappedTraits({
+      this.ctx.mapping.getUnmappedTraits({
         searchClass,
         extractedPath,
       }),
     );
   }
 
-  async getMoods(req: Request, res: Response) {
-    res.json(await this.ctx.mapping.getMoods());
+  getMoods(req: Request, res: Response) {
+    res.json(this.ctx.mapping.getMoods());
   }
 
-  async getUnmappedMoods(req: Request, res: Response) {
-    res.json(await this.ctx.mapping.getUnmappedMoods());
+  getUnmappedMoods(req: Request, res: Response) {
+    res.json(this.ctx.mapping.getUnmappedMoods());
   }
 
-  async exportTraits(req: Request, res: Response) {
-    const exportTraitsRequest: ExportTraitsRequest = req.body;
+  exportTraits(req: Request, res: Response) {
+    const exportTraitsRequest = req.body as ExportTraitsRequest;
     log.debug(`ExtractedPath: ${exportTraitsRequest.extractedPath}`);
     log.debug(`Length of Traits: ${Object.keys(exportTraitsRequest.traits).length}`);
-    res.json(await this.ctx.mapping.exportTraits(req.body));
+    this.ctx.mapping.exportTraits(exportTraitsRequest);
+    res.json({ done: 'done' });
   }
 }

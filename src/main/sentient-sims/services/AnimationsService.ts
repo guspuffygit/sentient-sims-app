@@ -26,7 +26,7 @@ export class AnimationsService {
     }
 
     try {
-      const response = await axiosClient({
+      const response = await axiosClient<Record<string, Animation>>({
         url: '/animations',
         baseURL: this.ctx.settings.sentientSimsAIEndpoint,
         headers: {
@@ -51,7 +51,8 @@ export class AnimationsService {
 
       if (fs.existsSync(localMapPath)) {
         const fileContent = fs.readFileSync(localMapPath, 'utf-8');
-        this.localAnimations = new Map(Object.entries(JSON.parse(fileContent)));
+        const parsed = JSON.parse(fileContent) as Record<string, Animation>;
+        this.localAnimations = new Map(Object.entries(parsed));
         log.info(`[Override] Local Animations-Overrides loaded Successfully.`);
       }
     } catch (err) {
@@ -59,7 +60,7 @@ export class AnimationsService {
     }
   }
 
-  async saveLocalAnimation(animation: Animation) {
+  saveLocalAnimation(animation: Animation) {
     if (!animation.author || !animation.id) {
       log.error(`[Override] Local Animation could not be saved: Author or ID be missing.`);
       return;
@@ -74,7 +75,7 @@ export class AnimationsService {
       let localOverrides: Record<string, Animation> = {};
       if (fs.existsSync(localMapPath)) {
         const fileContent = fs.readFileSync(localMapPath, 'utf-8');
-        localOverrides = JSON.parse(fileContent);
+        localOverrides = JSON.parse(fileContent) as Record<string, Animation>;
       }
 
       localOverrides[animationKey] = animation;
@@ -88,8 +89,8 @@ export class AnimationsService {
     }
   }
 
-  async setAnimation(animation: Animation) {
-    const response = await axiosClient({
+  async setAnimation(animation: Animation): Promise<Record<string, Animation>> {
+    const response = await axiosClient<Record<string, Animation>>({
       url: '/animations',
       method: 'POST',
       data: animation,

@@ -12,7 +12,7 @@ export class LoginController {
     this.handleRedirect = this.handleRedirect.bind(this);
   }
 
-  async handleRedirect(req: Request, res: Response) {
+  handleRedirect(req: Request, res: Response) {
     const { code, state } = req.query;
 
     log.debug(`/login/callback initiated for url: ${req.url}`);
@@ -22,7 +22,7 @@ export class LoginController {
     if (typeof code === 'string' && typeof state === 'string') {
       notifyGoogleAuthComplete(code, state);
     } else {
-      log.error(`Invalid auth callback code: ${code} state: ${state}`);
+      log.error(`Invalid auth callback code: ${JSON.stringify(code)} state: ${JSON.stringify(state)}`);
     }
   }
 }

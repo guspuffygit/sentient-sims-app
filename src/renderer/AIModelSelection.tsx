@@ -139,7 +139,6 @@ export default function AIModelSelection({
           onClick={() => {
             void aiModels.refetch();
           }}
-          disabled={aiModels.isFetching || aiModels.isLoading}
         >
           <SyncIcon />
         </IconButton>

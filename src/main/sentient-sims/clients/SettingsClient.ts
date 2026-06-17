@@ -7,7 +7,7 @@ export type SettingsResponse = {
 };
 
 export class SettingsClient extends ApiClient {
-  async updateSetting(settingsEnum: SettingsEnum | string, value: any) {
+  async updateSetting(settingsEnum: SettingsEnum | string, value: unknown) {
     return axiosClient.post(`${this.apiUrl}/settings/app/${settingsEnum}`, { value });
   }
 

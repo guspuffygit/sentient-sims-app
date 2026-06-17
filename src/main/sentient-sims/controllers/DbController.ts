@@ -15,29 +15,29 @@ export class DbController {
     this.getSaveGames = this.getSaveGames.bind(this);
   }
 
-  async loadDatabase(req: Request, res: Response) {
+  loadDatabase(req: Request, res: Response) {
     try {
-      const databaseSession: DatabaseSession = req.body;
+      const databaseSession = req.body as DatabaseSession;
       log.debug(`Loading database: ${databaseSession.sessionId} : ${databaseSession.saveId}`);
 
-      await this.ctx.db.loadDatabase(databaseSession);
+      this.ctx.db.loadDatabase(databaseSession);
       return res.json({ text: 'Db Loaded' });
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error loading database', err);
-      return res.json({ error: err.message });
+      return res.json({ error: err instanceof Error ? err.message : String(err) });
     }
   }
 
   async saveDatabase(req: Request, res: Response) {
     try {
-      const databaseSession: DatabaseSession = req.body;
+      const databaseSession = req.body as DatabaseSession;
       log.debug(`Saving database: ${databaseSession.sessionId} : ${databaseSession.saveId}`);
 
       await this.ctx.db.saveDatabase(databaseSession);
       return res.json({ text: 'Db Saved' });
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error saving database', err);
-      return res.json({ error: err.message });
+      return res.json({ error: err instanceof Error ? err.message : String(err) });
     }
   }
 
@@ -47,9 +47,9 @@ export class DbController {
 
       this.ctx.db.unloadDatabase();
       return res.json({ text: 'Db unloaded' });
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error saving database', err);
-      return res.json({ error: err.message });
+      return res.json({ error: err instanceof Error ? err.message : String(err) });
     }
   }
 
@@ -58,9 +58,9 @@ export class DbController {
       log.debug(`Getting save games`);
 
       return res.json(this.ctx.db.listSaveGames());
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error saving database', err);
-      return res.json({ error: err.message });
+      return res.json({ error: err instanceof Error ? err.message : String(err) });
     }
   }
 }

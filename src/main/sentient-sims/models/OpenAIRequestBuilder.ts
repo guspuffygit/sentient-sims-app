@@ -145,7 +145,7 @@ export class OpenAIRequestBuilder {
       maxResponseTokens: promptRequest.maxResponseTokens,
       includesAssistantPreResponse:
         [promptRequest.assistantPreResponse, promptRequest.preAssistantPreResponse].some(
-          (s) => s !== null && s !== '',
+          (s) => s !== undefined && s !== '',
         ) || promptRequest.continue,
     };
   }

@@ -6,8 +6,8 @@ import { useDebounceHook } from './hooks/useDebounceHook';
 
 export type ChatBoxComponentProps = {
   message: MessageInputProps;
-  handleMessageTextChange: any;
-  handleDeleteMessage: any;
+  handleMessageTextChange: (index: number, value: string) => void;
+  handleDeleteMessage: (index: number) => void;
   index: number;
 };
 
@@ -24,7 +24,11 @@ export function ChatBoxComponent({
     if (message.message.role === 'user' || message.message.role === 'assistant') {
       return (
         <InputAdornment position="end" sx={{ alignItems: 'flex-end' }}>
-          <IconButton onClick={() => handleDeleteMessage(index)}>
+          <IconButton
+            onClick={() => {
+              handleDeleteMessage(index);
+            }}
+          >
             <RemoveCircleOutlineIcon />
           </IconButton>
         </InputAdornment>
@@ -36,7 +40,9 @@ export function ChatBoxComponent({
   function handleTextChange(value: string) {
     setText(value);
 
-    inputDebounce(() => handleMessageTextChange(index, value), 600);
+    inputDebounce(() => {
+      handleMessageTextChange(index, value);
+    }, 600);
   }
 
   return (

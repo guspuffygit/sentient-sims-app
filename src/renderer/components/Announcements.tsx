@@ -10,7 +10,6 @@ import {
   Paper,
   Toolbar,
   Typography,
-  TypographyVariant,
 } from '@mui/material';
 import axios from 'axios';
 import log from 'electron-log';
@@ -81,15 +80,10 @@ function parseMarkdownLinks(input: string): MarkdownSegment[] {
 }
 
 const AnnouncementContent = ({ content }: AnnouncementContentProps) => {
-  let variant: TypographyVariant = 'body2';
-  let displayedText = content;
-
   if (content.startsWith('## ')) {
-    variant = 'h6';
-    displayedText = content.substring(3, content.length);
     return (
-      <Typography variant={variant} sx={{ color: 'text.primary', marginBottom: 1 }}>
-        {displayedText}
+      <Typography variant="h6" sx={{ color: 'text.primary', marginBottom: 1 }}>
+        {content.substring(3, content.length)}
       </Typography>
     );
   }
@@ -97,13 +91,14 @@ const AnnouncementContent = ({ content }: AnnouncementContentProps) => {
   return (
     <Typography variant="body2" sx={{ color: 'text.primary', marginBottom: 1 }}>
       {parseMarkdownLinks(content).map((segment, index) => {
+        const key = `${index}-${segment.type === 'text' ? segment.content : `${segment.url}-${segment.text}`}`;
         if (segment.type === 'text') {
-          return <span key={index}>{segment.content}</span>;
+          return <span key={key}>{segment.content}</span>;
         }
 
         return (
           <Link
-            key={index}
+            key={key}
             href={segment.url}
             target="_blank"
             rel="noopener noreferrer"
@@ -129,10 +124,11 @@ export const useAnnouncements = () => {
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const response = await axios.get<AnnouncementMessage[]>(`${appApiUrl}/announcements`);
+        type RawAnnouncement = Omit<AnnouncementMessage, 'timestamp'> & { timestamp: string };
+        const response = await axios.get<RawAnnouncement[]>(`${appApiUrl}/announcements`);
         const rawData = response.data;
 
-        const formattedData: AnnouncementMessage[] = rawData.map((announcement: any) => ({
+        const formattedData: AnnouncementMessage[] = rawData.map((announcement) => ({
           ...announcement,
           timestamp: new Date(announcement.timestamp), // Date doesnt parse with JSON.parse(), so it must be converted from a string to Date
         }));

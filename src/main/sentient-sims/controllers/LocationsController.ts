@@ -5,6 +5,10 @@ import { DeleteLocationRequest } from '../models/DeleteLocationRequest';
 import { notifyLocationChanged } from '../util/notifyRenderer';
 import { ApiContext } from '../services/ApiContext';
 
+function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
 export class LocationsController {
   private readonly ctx: ApiContext;
 
@@ -19,50 +23,50 @@ export class LocationsController {
     this.deleteLocation = this.deleteLocation.bind(this);
   }
 
-  async getLocation(req: Request, res: Response) {
+  getLocation(req: Request, res: Response) {
     try {
       const { locationId } = req.params;
       const result = this.ctx.locationRepository.getLocation({
         id: Number(locationId),
       });
       return res.json(result);
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error getting location', err);
-      return res.json({ error: err.message });
+      return res.json({ error: errorMessage(err) });
     }
   }
 
-  async getAllLocations(req: Request, res: Response) {
+  getAllLocations(req: Request, res: Response) {
     try {
       const result = this.ctx.locationRepository.getAllLocations();
       return res.json(result);
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error getting all locations', err);
-      return res.json({ error: err.message });
+      return res.json({ error: errorMessage(err) });
     }
   }
 
-  async getDefaultLocations(req: Request, res: Response) {
+  getDefaultLocations(req: Request, res: Response) {
     try {
       return res.json(this.ctx.locationRepository.getDefaultLocations());
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error getting default locations', err);
-      return res.json({ error: err.message });
+      return res.json({ error: errorMessage(err) });
     }
   }
 
-  async getModifiedLocations(req: Request, res: Response) {
+  getModifiedLocations(req: Request, res: Response) {
     try {
       return res.json(this.ctx.locationRepository.getModifiedLocations());
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error getting default locations', err);
-      return res.json({ error: err.message });
+      return res.json({ error: errorMessage(err) });
     }
   }
 
-  async updateLocation(req: Request, res: Response) {
+  updateLocation(req: Request, res: Response) {
     try {
-      const location: LocationEntity = req.body;
+      const location = req.body as LocationEntity;
       this.ctx.locationRepository.updateLocation(location);
 
       notifyLocationChanged();
@@ -70,13 +74,13 @@ export class LocationsController {
       return res.json({
         text: `Updated location with id ${location.id}`,
       });
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error updating location', err);
-      return res.json({ error: err.message });
+      return res.json({ error: errorMessage(err) });
     }
   }
 
-  async deleteLocation(req: Request, res: Response) {
+  deleteLocation(req: Request, res: Response) {
     try {
       const { locationId } = req.params;
       const deleteLocationRequest: DeleteLocationRequest = {
@@ -88,9 +92,9 @@ export class LocationsController {
       notifyLocationChanged();
 
       return res.json({ text: 'Deleted' });
-    } catch (err: any) {
+    } catch (err) {
       log.error('Error deleting location', err);
-      return res.json({ error: err.message });
+      return res.json({ error: errorMessage(err) });
     }
   }
 }

@@ -25,7 +25,7 @@ export class AIController {
 
   @CatchErrors()
   async sentientSimsGenerate(req: Request, res: Response) {
-    const promptRequest: OpenAICompatibleRequest = req.body;
+    const promptRequest = req.body as OpenAICompatibleRequest;
     const response = await this.ctx.ai.generate(promptRequest);
     log.debug(response);
     res.json({ text: response.text });
@@ -38,7 +38,7 @@ export class AIController {
 
   @CatchErrors()
   async interactionEvent(req: Request, res: Response) {
-    const event: InteractionEvents = req.body;
+    const event = req.body as InteractionEvents;
 
     log.debug(`Interaction event: ${JSON.stringify(req.body)}`);
 
@@ -52,7 +52,7 @@ export class AIController {
 
   @CatchErrors()
   async classificationEvent(req: Request, res: Response) {
-    const event: ClassificationRequest = req.body;
+    const event = req.body as ClassificationRequest;
 
     const result = await this.ctx.ai.runClassification(event);
     res.json(result);
@@ -63,7 +63,7 @@ export class AIController {
 
   @CatchErrors()
   async buffDescription(req: Request, res: Response) {
-    const event: BuffDescriptionRequest = req.body;
+    const event = req.body as BuffDescriptionRequest;
 
     const result = await this.ctx.ai.runBuffDescription(event);
     res.json(result);
@@ -74,7 +74,7 @@ export class AIController {
 
   @CatchErrors()
   async buffEvent(req: Request, res: Response) {
-    const event: BuffEventRequest = req.body;
+    const event = req.body as BuffEventRequest;
 
     res.json({ ok: 'ok' });
     await this.ctx.ai.runBuff(event);
@@ -87,7 +87,7 @@ export class AIController {
   }
 
   @CatchErrors()
-  async tts(req: Request, res: Response) {
+  tts(req: Request, res: Response) {
     const { text } = req.query;
 
     if (!text) {

@@ -12,7 +12,7 @@ export class ParticipantRepository extends Repository {
    * database, it returns a new ParticipantDTO with a description from default
    * sim descriptions if one exists.
    */
-  async getParticipant(participantRequest: GetParticipantRequest): Promise<ParticipantDTO> {
+  getParticipant(participantRequest: GetParticipantRequest): ParticipantDTO {
     const result = this.dbService
       .getDb()
       .prepare('SELECT * FROM participant WHERE id = ?')
@@ -46,12 +46,8 @@ export class ParticipantRepository extends Repository {
     return participant;
   }
 
-  async getParticipants(getParticipantsRequest: GetParticipantsRequest): Promise<ParticipantDTO[]> {
-    const results: Promise<ParticipantDTO>[] = [];
-    getParticipantsRequest.forEach((participantRequest) => {
-      results.push(this.getParticipant(participantRequest));
-    });
-    return Promise.all(results);
+  getParticipants(getParticipantsRequest: GetParticipantsRequest): ParticipantDTO[] {
+    return getParticipantsRequest.map((participantRequest) => this.getParticipant(participantRequest));
   }
 
   getAllParticipants(saveGame?: SaveGame): ParticipantDTO[] {

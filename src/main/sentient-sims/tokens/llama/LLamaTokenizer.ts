@@ -1,13 +1,13 @@
 import log from 'electron-log';
 import { mergesBinary, vocabBase64 } from './vocab';
 
-class PriorityQueue {
-  private comparator: (a: number, b: number) => boolean;
+class PriorityQueue<T> {
+  private comparator: (a: T, b: T) => boolean;
 
-  private heap: any[];
+  private heap: T[];
 
   // PriorityQueue implementation is copied from https://stackoverflow.com/a/42919752 with minor refactoring
-  constructor(comparator = (a: number, b: number) => a > b) {
+  constructor(comparator: (a: T, b: T) => boolean) {
     this.heap = [];
     this.comparator = comparator;
   }
@@ -20,11 +20,11 @@ class PriorityQueue {
     return this.size() === 0;
   }
 
-  peek() {
+  peek(): T {
     return this.heap[0];
   }
 
-  push(...values: any[]) {
+  push(...values: T[]) {
     values.forEach((value) => {
       this.heap.push(value);
       this.siftUp();
@@ -32,7 +32,7 @@ class PriorityQueue {
     return this.size();
   }
 
-  pop() {
+  pop(): T {
     const poppedValue = this.peek();
     const bottom = this.size() - 1;
     if (bottom > 0) {
@@ -95,12 +95,12 @@ function base64decode(encodedString: string) {
   return Buffer.from(encodedString, 'base64').toString('binary');
 }
 
-const vocab = decodeVocabulary(vocabBase64);
-const vocabByString = new Map();
+const vocab: string[] = decodeVocabulary(vocabBase64);
+const vocabByString = new Map<string, number>();
 vocab.forEach((tokenString, tokenId) => {
   vocabByString.set(tokenString, tokenId);
 });
-const merges = decompressMerges(mergesBinary);
+const merges: Map<string, number> = decompressMerges(mergesBinary);
 
 function getMergeIdentifierString(firstTokenId: number, secondTokenId: number) {
   return `${vocab[firstTokenId]} ${vocab[secondTokenId]}`;
@@ -109,7 +109,7 @@ function getMergeIdentifierString(firstTokenId: number, secondTokenId: number) {
 const utf8Encoder = new TextEncoder();
 const utf8Decoder = new TextDecoder('utf-8');
 
-function decompressMerges(binaryMerges: string) {
+function decompressMerges(binaryMerges: string): Map<string, number> {
   // Base64 decode binary.
   const byteArrayString = base64decode(binaryMerges);
 
@@ -121,7 +121,7 @@ function decompressMerges(binaryMerges: string) {
 
   // Each byte-pair represents a tokenId.
   // Convert byte-pairs to tokenIds (integers between 0 and 32000).
-  const tokenIds = [];
+  const tokenIds: number[] = [];
   for (let i = 0; i < byteArray.length; i += 2) {
     const byte1 = byteArray[i];
     const byte2 = byteArray[i + 1];
@@ -130,7 +130,7 @@ function decompressMerges(binaryMerges: string) {
   }
 
   // Each pair of tokenIds represents a merge.
-  const mergedTokenIds = new Map();
+  const mergedTokenIds = new Map<string, number>();
   for (let i = 0; i < tokenIds.length; i += 2) {
     const id1 = tokenIds[i];
     const id2 = tokenIds[i + 1];
@@ -147,7 +147,7 @@ function decodeVocabulary(base64Vocab: string) {
   return textDecoder.decode(byteArray).split('\n');
 }
 
-function utf8ByteToHex(c: any) {
+function utf8ByteToHex(c: number) {
   const hexValue = c.toString(16).toUpperCase().padStart(2, '0');
   return `<0x${hexValue}>`;
 }
@@ -157,8 +157,8 @@ function hexToUtf8Byte(hex: string) {
   return parseInt(strippedHex, 16);
 }
 
-function mapCharactersToTokenIds(prompt: string, addBosToken: boolean, addPrecedingSpace: boolean) {
-  const tokenIds = [];
+function mapCharactersToTokenIds(prompt: string, addBosToken: boolean, addPrecedingSpace: boolean): number[] {
+  const tokenIds: number[] = [];
   // Special "beginning of string" token.
   if (addBosToken) {
     tokenIds.push(1);
@@ -173,21 +173,23 @@ function mapCharactersToTokenIds(prompt: string, addBosToken: boolean, addPreced
   const charArray = Array.from(promptAltered);
   // Transform each character to its corresponding token
   charArray.forEach((character) => {
-    if (vocabByString.has(character)) {
-      tokenIds.push(vocabByString.get(character));
+    const tokenForChar = vocabByString.get(character);
+    if (tokenForChar !== undefined) {
+      tokenIds.push(tokenForChar);
     } else {
       // Special case where token not found and we have to fallback to byte-level tokens.
       const bytes = utf8Encoder.encode(character);
       bytes.forEach((byte) => {
         const hex = vocabByString.get(utf8ByteToHex(byte));
-        tokenIds.push(hex);
-        if (!(hex >= 0)) {
+        if (hex === undefined || !(hex >= 0)) {
           // This is not supposed to happen because the LLaMA vocabulary has a token corresponding to each byte,
           // but if this happens regardless, let's follow the protocol and tokenize to <UNK> token instead of crashing.
           log.error(
             `Encountered unknown character ${character} (partial UTF-8 byte ${byte} + hex + ${utf8ByteToHex(byte)})`,
           );
-          tokenIds[tokenIds.length - 1] = 0;
+          tokenIds.push(0);
+        } else {
+          tokenIds.push(hex);
         }
       });
     }
@@ -198,11 +200,14 @@ function mapCharactersToTokenIds(prompt: string, addBosToken: boolean, addPreced
 type TokenNode = {
   origPos: number;
   tokenId: number;
-  prev: any;
-  next: any;
+  prev: TokenNode | null;
+  next: TokenNode | null;
+  deleted?: boolean;
+  mergePrio?: number;
+  mergeToString?: string;
 };
 
-function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
+function encode(prompt: string, addBosToken = true, addPrecedingSpace = true): number[] {
   if (prompt.length === 0) {
     return [];
   }
@@ -210,23 +215,19 @@ function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
   const tokenIds = mapCharactersToTokenIds(prompt, addBosToken, addPrecedingSpace);
 
   // Set up priority queue to efficiently iterate merge possibilities in priority order
-  const mergeQueue = new PriorityQueue((a: any, b: any) => {
-    return a.mergePrio < b.mergePrio;
+  const mergeQueue = new PriorityQueue<TokenNode>((a, b) => {
+    return (a.mergePrio ?? 0) < (b.mergePrio ?? 0);
   });
 
-  const addToMergeQueue = function (leftNode: {
-    origPos: any;
-    tokenId: any;
-    prev?: any;
-    next: any;
-    mergePrio?: any;
-    mergeToString?: any;
-  }) {
+  const addToMergeQueue = function (leftNode: TokenNode) {
+    if (!leftNode.next) return;
     const mergeIdentifierString = getMergeIdentifierString(leftNode.tokenId, leftNode.next.tokenId);
+    const mergeEntry = merges.get(mergeIdentifierString);
+    if (mergeEntry === undefined) return;
     // Merge priority is primarily determined by the location of the merge in the "merges" data,
     // secondarily determined by the relative position of the node in the linked list
     // (We want to perform equal merges from left to right)
-    const mergePrio = merges.get(mergeIdentifierString) * 100000 + leftNode.origPos;
+    const mergePrio = mergeEntry * 100000 + leftNode.origPos;
     if (mergePrio) {
       // If mergePrio not found in merges, that means this merge is not possible according to vocabulary.
       leftNode.mergePrio = mergePrio;
@@ -244,7 +245,7 @@ function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
   };
   let prevTokenNode = firstTokenNode;
   for (let i = 1; i < tokenIds.length; i++) {
-    const currTokenNode = {
+    const currTokenNode: TokenNode = {
       origPos: i,
       tokenId: tokenIds[i],
       prev: prevTokenNode,
@@ -272,7 +273,7 @@ function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
       // Mark oldPrev as deleted, to avoid erroneous merges later (ref to this node might exist in priorityqueue)
       oldPrev.deleted = true;
       // Replace oldPrev within the linked list with a copy of itself
-      const newPrev = {
+      const newPrev: TokenNode = {
         origPos: oldPrev.origPos,
         tokenId: oldPrev.tokenId,
         prev: oldPrev.prev,
@@ -288,17 +289,17 @@ function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
       }
     }
     // Create node representing merge result
-    const resultOfMerge = {
+    const mergedTokenId = leftOfMerge.mergeToString ? vocabByString.get(leftOfMerge.mergeToString) : undefined;
+    if (mergedTokenId === undefined) continue;
+    const resultOfMerge: TokenNode = {
       origPos: leftOfMerge.origPos,
-      tokenId: vocabByString.get(leftOfMerge.mergeToString),
+      tokenId: mergedTokenId,
       prev: leftOfMerge.prev,
       next: leftOfMerge.next.next,
     };
     // Consider adding to merge queue: prev--resultOfMerge
     if (resultOfMerge.prev) {
       resultOfMerge.prev.next = resultOfMerge;
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      resultOfMerge.prev;
       addToMergeQueue(resultOfMerge.prev);
     } else {
       // If prev does not exist then this is the new firstNode
@@ -312,8 +313,12 @@ function encode(prompt: string, addBosToken = true, addPrecedingSpace = true) {
   }
 
   // Get final tokenIds by traversing the linked list
-  const mergedTokenIds = [];
-  for (let currTokenNode = firstTokenNode; currTokenNode !== null; currTokenNode = currTokenNode.next) {
+  const mergedTokenIds: number[] = [];
+  for (
+    let currTokenNode: TokenNode | null = firstTokenNode;
+    currTokenNode !== null;
+    currTokenNode = currTokenNode.next
+  ) {
     mergedTokenIds.push(currTokenNode.tokenId);
   }
 

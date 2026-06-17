@@ -163,7 +163,7 @@ export class NovelAIService implements GenerationService {
     });
 
     if (response.ok) {
-      const subscription: NovelAISubscription = await response.json();
+      const subscription = (await response.json()) as NovelAISubscription;
       log.info(`data: ${JSON.stringify(subscription, null, 2)}`);
       return {
         status: `Subscription ${subscription.active}, Max Context ${subscription.perks?.contextTokens}, Tier ${subscription.tier}`,
@@ -171,14 +171,13 @@ export class NovelAIService implements GenerationService {
     }
 
     try {
-      const novelAIError: NovelAIError = await response.json();
+      const novelAIError = (await response.json()) as NovelAIError;
       if (novelAIError.message) {
         return {
           status: `NovelAI Error: ${novelAIError.message}`,
         };
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err: any) {
+    } catch {
       // ignore
     }
 
@@ -235,7 +234,7 @@ export class NovelAIService implements GenerationService {
       body: JSON.stringify(novelAIRequest),
     });
 
-    const result: NovelAIGenerateResponse = await response.json();
+    const result = (await response.json()) as NovelAIGenerateResponse;
 
     if (result.output) {
       return {
@@ -251,12 +250,12 @@ export class NovelAIService implements GenerationService {
     };
   }
 
-  async getModels(): Promise<AIModel[]> {
-    return [
+  getModels(): Promise<AIModel[]> {
+    return Promise.resolve([
       {
         name: 'kayra-v1',
         displayName: 'kayra-v1',
       },
-    ];
+    ]);
   }
 }

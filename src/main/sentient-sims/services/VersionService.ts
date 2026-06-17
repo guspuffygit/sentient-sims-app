@@ -20,7 +20,7 @@ export class VersionService {
   getVersion(path: string): Version {
     if (fs.existsSync(path)) {
       log.log(`Version file exists at path: ${path}`);
-      const parsedVersion = JSON.parse(fs.readFileSync(path, { encoding: 'utf-8' }));
+      const parsedVersion = JSON.parse(fs.readFileSync(path, { encoding: 'utf-8' })) as Version;
       log.log(parsedVersion);
       return parsedVersion;
     }
@@ -37,10 +37,12 @@ export class VersionService {
   getAppVerson(): Version {
     try {
       return { version: this.appVersion };
-    } catch (e: any) {
+    } catch (e) {
       return {
         version: 'none',
-        error: filterNullAndUndefined([`Unable to get app version`, e?.message]).join('\n'),
+        error: filterNullAndUndefined([`Unable to get app version`, e instanceof Error ? e.message : undefined]).join(
+          '\n',
+        ),
       };
     }
   }
@@ -50,14 +52,14 @@ export class VersionService {
       const versionText = fs.readFileSync(this.ctx.directory.getGameVersion(), 'utf-8');
 
       return { version: removeNonPrintableCharacters(versionText).trim() };
-    } catch (e: any) {
+    } catch (e) {
       return {
         version: 'none',
         error: filterNullAndUndefined([
           `Unable to get GameVersion.txt, do you have the correct Mods directory selected?`,
           'The directory chosen should be named "Mods"',
           'If you have OneDrive installed, it may have moved your Mods folder into OneDrive.',
-          e?.message,
+          e instanceof Error ? e.message : undefined,
         ]).join('\n'),
       };
     }

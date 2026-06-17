@@ -16,7 +16,7 @@ export class InteractionDescriptionController {
   }
 
   async updateInteraction(req: Request, res: Response) {
-    const interaction: InteractionDTO = req.body;
+    const interaction = req.body as InteractionDTO;
     await this.ctx.interactions.updateUnmappedInteraction(interaction);
     res.json({ done: 'done' });
   }
@@ -25,10 +25,10 @@ export class InteractionDescriptionController {
     res.json(await this.ctx.interactions.getIgnoredInteractions());
   }
 
-  async saveInteractionLocally(req: Request, res: Response) {
+  saveInteractionLocally(req: Request, res: Response) {
     try {
-      const interaction: BasicInteraction = req.body;
-      await this.ctx.interactionRepository.saveLocalInteraction(interaction);
+      const interaction = req.body as BasicInteraction;
+      this.ctx.interactionRepository.saveLocalInteraction(interaction);
       res.json({ status: 'success', message: 'Interaction saved locally.' });
     } catch (err) {
       log.error('[Controller] Error saving interaction locally:', err);

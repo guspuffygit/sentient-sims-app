@@ -26,7 +26,7 @@ function MappingItem({
 
   const handleSave = async () => {
     setLoading(true);
-    let url = '';
+    let url: string;
     let body: BasicInteraction | Animation;
 
     if (mappingType === 'interactions') {
@@ -100,7 +100,7 @@ export default function OnlineMappingBrowser() {
     setMappings([]);
     try {
       const response = await fetch(`${appApiUrl}/${type}/online-all`);
-      const data: Record<string, BasicInteraction | Animation> = await response.json();
+      const data = (await response.json()) as Record<string, BasicInteraction | Animation>;
 
       const mappingList: GenericMapping[] = Object.entries(data).map(([key, value]) => {
         const action = type === 'interactions' ? (value as BasicInteraction).action : (value as Animation).act;
@@ -172,11 +172,11 @@ export default function OnlineMappingBrowser() {
 
       {loading && <CircularProgress sx={{ display: 'block', margin: 'auto' }} />}
 
-      {!loading && (
+      {!loading && mappingType && (
         <>
           <List>
             {paginatedMappings.map((mapping) => (
-              <MappingItem key={mapping.key} mappingKey={mapping.key} mapping={mapping} mappingType={mappingType!} />
+              <MappingItem key={mapping.key} mappingKey={mapping.key} mapping={mapping} mappingType={mappingType} />
             ))}
           </List>
 

@@ -1,5 +1,5 @@
 import { Button, Modal, Box, Divider, Grid, TextField } from '@mui/material';
-import { useState, Dispatch, SetStateAction } from 'react';
+import { useState, Dispatch, SetStateAction, SyntheticEvent } from 'react';
 import { SendLogsRequest } from 'main/sentient-sims/models/SendLogsRequest';
 import LogSendInformationComponent from 'renderer/LogSendInformationComponent';
 import { CaughtError } from 'main/sentient-sims/models/CaughtError';
@@ -23,7 +23,7 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
   const [discordUsername, setDiscordUsername] = useState('');
   const [errorDescription, setErrorDescription] = useState('');
 
-  const handleSendLogs = async (e: any) => {
+  const handleSendLogs = async (e: SyntheticEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -35,7 +35,7 @@ export function SendLogModal({ open, setOpen, caughtError }: SendLogModalParamet
         userAttributes,
       };
 
-      log.debug(`caughtError: ${caughtError}`);
+      log.debug(`caughtError: ${JSON.stringify(caughtError)}`);
 
       const response = await client.debug.sendDebugLogs(sendLogsRequest);
       if (response.errors.length > 0) {

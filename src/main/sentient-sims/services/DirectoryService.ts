@@ -122,11 +122,7 @@ export class DirectoryService {
       return path.join(this.getSentientSimsFolder(), `${saveGame.name}-sentient-sims.db`);
     }
 
-    if (saveGame.type === SaveGameType.UNSAVED) {
-      return path.join(this.getSentientSimsFolder(), `${saveGame.name}-sentient-sims-unsaved.db`);
-    }
-
-    throw Error(`Unknown SaveGameType: ${saveGame.type}`);
+    return path.join(this.getSentientSimsFolder(), `${saveGame.name}-sentient-sims-unsaved.db`);
   }
 
   listSentientSimsDbUnsaved() {
