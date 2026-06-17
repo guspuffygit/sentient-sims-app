@@ -171,7 +171,7 @@ export class PromptRequestBuilderService {
     const locations: Record<number, LocationEntity> = {};
 
     const addMessage = (role: ChatCompletionMessageRole, text: string, locationId: number) => {
-      if (!locations[locationId]) {
+      if (!(locationId in locations)) {
         locations[locationId] = this.ctx.locationRepository.getLocation({
           id: locationId,
         });
