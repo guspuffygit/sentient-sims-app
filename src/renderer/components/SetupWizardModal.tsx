@@ -17,7 +17,8 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import { Dispatch, Fragment, SetStateAction, useEffect, useRef, useState } from 'react';
+import axios from 'axios';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { ModsDirectoryComponent } from 'renderer/ModsDirectoryComponent';
@@ -416,8 +417,8 @@ function EnableModsPage({ setPage }: PageProps) {
       } catch {
         setAutoFixFailed(true);
       }
-    } catch (err: any) {
-      if (err?.response?.status === 404) {
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
         setFileNotFound(true);
       } else {
         setAutoFixFailed(true);
@@ -426,9 +427,9 @@ function EnableModsPage({ setPage }: PageProps) {
     setLoading(false);
   };
 
-  const initialized = useRef<boolean | null>(null);
-  if (initialized.current == null) {
-    initialized.current = true;
+  const initializedRef = useRef<boolean | null>(null);
+  if (initializedRef.current == null) {
+    initializedRef.current = true;
     void checkAndFix();
   }
 
@@ -772,13 +773,17 @@ function AIProviderPage({ setPage }: PageProps) {
                       <Typography variant="h5" component="div" gutterBottom>
                         {card.header}
                       </Typography>
-                      {card.data.map((asdf) => (
-                        <>
-                          {asdf.header && <Typography variant="subtitle1">{asdf.header}</Typography>}
+                      {card.data.map((section) => (
+                        <Fragment key={section.header ?? card.header}>
+                          {section.header && <Typography variant="subtitle1">{section.header}</Typography>}
 
                           <List dense>
-                            {asdf.points.map((point, pointIndex) => (
-                              <ListItem key={pointIndex} disablePadding disableGutters>
+                            {section.points.map((point) => (
+                              <ListItem
+                                key={typeof point === 'string' ? point : point.linkLabel}
+                                disablePadding
+                                disableGutters
+                              >
                                 <ListItemIcon sx={{ minWidth: 24 }}>
                                   <FiberManualRecordIcon
                                     sx={{
@@ -807,7 +812,7 @@ function AIProviderPage({ setPage }: PageProps) {
                               </ListItem>
                             ))}
                           </List>
-                        </>
+                        </Fragment>
                       ))}
                     </CardContent>
                   </Card>
@@ -1297,9 +1302,9 @@ function SelfHostedSetupPage({ setPage }: PageProps) {
 }
 
 export function SetupWizardModal({ open, setOpen }: SetupWizardModalParameters) {
-  const currentWizardPage = useSetting<string>(SettingsEnum.SETUP_WIZARD_PAGE, WizardPage.INIT);
+  const currentWizardPage = useSetting<WizardPage>(SettingsEnum.SETUP_WIZARD_PAGE, WizardPage.INIT);
   const setPage = (wizardPage: WizardPage) => {
-    void currentWizardPage.setSetting(wizardPage.toString());
+    void currentWizardPage.setSetting(wizardPage);
   };
 
   useEffect(() => {

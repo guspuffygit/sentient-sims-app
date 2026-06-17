@@ -23,8 +23,8 @@ const electronHandler = {
 
     return () => ipcRenderer.removeListener('caught-error-popup-notification', callback);
   },
-  selectDirectory: () => {
-    return ipcRenderer.invoke('dialog:selectDirectory');
+  selectDirectory: (): Promise<string | null> => {
+    return ipcRenderer.invoke('dialog:selectDirectory') as Promise<string | null>;
   },
   setSetting: (setting: SettingsEnum, value: any) => {
     ipcRenderer.send('set-setting', setting, value);

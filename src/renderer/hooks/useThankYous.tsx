@@ -27,6 +27,7 @@ export function useThankYous() {
       .getThankYous()
       .then((response) => {
         setThankYous(response);
+        return response;
       })
       .catch((err: unknown) => {
         log.error(`Unable to fetch thank yous`, err);

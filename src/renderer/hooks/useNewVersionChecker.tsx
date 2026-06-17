@@ -50,7 +50,12 @@ export default function useNewVersionChecker({ setIsLoading, releaseType: versio
   }, [setIsLoading, versionType]);
 
   useEffect(() => {
-    void handleCheckForUpdates();
+    const timeoutId = setTimeout(() => {
+      void handleCheckForUpdates();
+    }, 0);
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [handleCheckForUpdates, versionType]);
 
   return { updateState, handleCheckForUpdates };

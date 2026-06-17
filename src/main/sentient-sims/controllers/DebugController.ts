@@ -21,13 +21,11 @@ export class DebugController {
   }
 
   async healthCheckGenerationService(req: Request, res: Response) {
-    let { apiKey } = req.query;
-    if (apiKey !== undefined) {
-      apiKey = apiKey;
-    }
+    const { apiKey } = req.query;
+    const apiKeyString = typeof apiKey === 'string' ? apiKey : undefined;
 
     try {
-      const response = await this.ctx.genai.healthCheck(apiKey);
+      const response = await this.ctx.genai.healthCheck(apiKeyString);
       res.send(response);
     } catch (e: any) {
       if (e instanceof OpenAIKeyNotSetError) {
