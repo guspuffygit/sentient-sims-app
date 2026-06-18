@@ -1,8 +1,3 @@
-// Controller methods are pre-bound to `this` in their constructors, so passing
-// references as Express route handlers is safe even though @typescript-eslint
-// can't see the bindings. Disable the unbound-method rule for this file rather
-// than wrap every route handler in an arrow function.
-/* eslint-disable @typescript-eslint/unbound-method */
 import express, { json } from 'express';
 import log from 'electron-log';
 import { modOutOfDate } from './controllers/VersionController';

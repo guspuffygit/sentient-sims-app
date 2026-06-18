@@ -8,25 +8,19 @@ export class AnimationsController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-
-    this.getAnimations = this.getAnimations.bind(this);
-    this.setAnimation = this.setAnimation.bind(this);
-    this.isNsfwEnabled = this.isNsfwEnabled.bind(this);
-    this.saveAnimationLocally = this.saveAnimationLocally.bind(this);
-    this.getOnlineAnimations = this.getOnlineAnimations.bind(this);
   }
 
-  async getAnimations(req: Request, res: Response) {
+  getAnimations = async (req: Request, res: Response) => {
     res.json(await this.ctx.animations.getAnimations());
-  }
+  };
 
-  async setAnimation(req: Request, res: Response) {
+  setAnimation = async (req: Request, res: Response) => {
     const animation = req.body as Animation;
     await this.ctx.animations.setAnimation(animation);
     res.json({ text: 'done' });
-  }
+  };
 
-  saveAnimationLocally(req: Request, res: Response) {
+  saveAnimationLocally = (req: Request, res: Response) => {
     try {
       const animation = req.body as Animation;
       this.ctx.animations.saveLocalAnimation(animation);
@@ -35,9 +29,9 @@ export class AnimationsController {
       log.error('[Controller] Error saving animation locally:', err);
       res.status(500).json({ error: 'Failed to save animation locally.' });
     }
-  }
+  };
 
-  async getOnlineAnimations(req: Request, res: Response) {
+  getOnlineAnimations = async (req: Request, res: Response) => {
     try {
       const animations = await this.ctx.animations.getAnimations();
       res.json(Object.fromEntries(animations));
@@ -45,9 +39,9 @@ export class AnimationsController {
       log.error('[Controller] Error getting all animations:', err);
       res.status(500).json({ error: 'Failed to get animations.' });
     }
-  }
+  };
 
-  isNsfwEnabled(req: Request, res: Response) {
+  isNsfwEnabled = (req: Request, res: Response) => {
     res.json({ value: this.ctx.animations.isNsfwEnabled() });
-  }
+  };
 }

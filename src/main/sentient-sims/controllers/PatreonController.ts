@@ -11,11 +11,9 @@ export class PatreonController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-
-    this.handleRedirect = this.handleRedirect.bind(this);
   }
 
-  async handleRedirect(req: Request, res: Response) {
+  handleRedirect = async (req: Request, res: Response) => {
     const { code } = req.query;
 
     res.sendFile(this.ctx.getAssetPath('redirect-complete.html'));
@@ -34,5 +32,5 @@ export class PatreonController {
         });
       }
     }
-  }
+  };
 }

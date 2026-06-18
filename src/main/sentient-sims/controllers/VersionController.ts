@@ -22,21 +22,17 @@ export class VersionController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-
-    this.getModVersion = this.getModVersion.bind(this);
-    this.getAppVersion = this.getAppVersion.bind(this);
-    this.getGameVersion = this.getGameVersion.bind(this);
   }
 
-  getModVersion(req: Request, res: Response) {
+  getModVersion = (req: Request, res: Response) => {
     res.json(this.ctx.version.getModVersion());
-  }
+  };
 
-  getAppVersion(req: Request, res: Response) {
+  getAppVersion = (req: Request, res: Response) => {
     res.json(this.ctx.version.getAppVerson());
-  }
+  };
 
-  getGameVersion(req: Request, res: Response) {
+  getGameVersion = (req: Request, res: Response) => {
     res.json(this.ctx.version.getGameVersion());
-  }
+  };
 }

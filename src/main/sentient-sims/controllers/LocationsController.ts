@@ -14,16 +14,9 @@ export class LocationsController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-
-    this.getLocation = this.getLocation.bind(this);
-    this.getAllLocations = this.getAllLocations.bind(this);
-    this.getDefaultLocations = this.getDefaultLocations.bind(this);
-    this.getModifiedLocations = this.getModifiedLocations.bind(this);
-    this.updateLocation = this.updateLocation.bind(this);
-    this.deleteLocation = this.deleteLocation.bind(this);
   }
 
-  getLocation(req: Request, res: Response) {
+  getLocation = (req: Request, res: Response) => {
     try {
       const { locationId } = req.params;
       const result = this.ctx.locationRepository.getLocation({
@@ -34,9 +27,9 @@ export class LocationsController {
       log.error('Error getting location', err);
       return res.json({ error: errorMessage(err) });
     }
-  }
+  };
 
-  getAllLocations(req: Request, res: Response) {
+  getAllLocations = (req: Request, res: Response) => {
     try {
       const result = this.ctx.locationRepository.getAllLocations();
       return res.json(result);
@@ -44,27 +37,27 @@ export class LocationsController {
       log.error('Error getting all locations', err);
       return res.json({ error: errorMessage(err) });
     }
-  }
+  };
 
-  getDefaultLocations(req: Request, res: Response) {
+  getDefaultLocations = (req: Request, res: Response) => {
     try {
       return res.json(this.ctx.locationRepository.getDefaultLocations());
     } catch (err) {
       log.error('Error getting default locations', err);
       return res.json({ error: errorMessage(err) });
     }
-  }
+  };
 
-  getModifiedLocations(req: Request, res: Response) {
+  getModifiedLocations = (req: Request, res: Response) => {
     try {
       return res.json(this.ctx.locationRepository.getModifiedLocations());
     } catch (err) {
       log.error('Error getting default locations', err);
       return res.json({ error: errorMessage(err) });
     }
-  }
+  };
 
-  updateLocation(req: Request, res: Response) {
+  updateLocation = (req: Request, res: Response) => {
     try {
       const location = req.body as LocationEntity;
       this.ctx.locationRepository.updateLocation(location);
@@ -78,9 +71,9 @@ export class LocationsController {
       log.error('Error updating location', err);
       return res.json({ error: errorMessage(err) });
     }
-  }
+  };
 
-  deleteLocation(req: Request, res: Response) {
+  deleteLocation = (req: Request, res: Response) => {
     try {
       const { locationId } = req.params;
       const deleteLocationRequest: DeleteLocationRequest = {
@@ -96,5 +89,5 @@ export class LocationsController {
       log.error('Error deleting location', err);
       return res.json({ error: errorMessage(err) });
     }
-  }
+  };
 }

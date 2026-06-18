@@ -9,11 +9,9 @@ export class OptionsController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-    this.getOptionsStatus = this.getOptionsStatus.bind(this);
-    this.fixOptions = this.fixOptions.bind(this);
   }
 
-  getOptionsStatus(_req: Request, res: Response) {
+  getOptionsStatus = (_req: Request, res: Response) => {
     const optionsPath = path.join(this.ctx.directory.getSims4Folder(), 'Options.ini');
 
     log.debug(`Options path: ${optionsPath}`);
@@ -32,8 +30,9 @@ export class OptionsController {
       modsEnabled: modsDisabled !== null ? modsDisabled === 0 : null,
       scriptModsOn: scriptModsEnabled !== null ? scriptModsEnabled === 1 : null,
     });
-  }
-  fixOptions(_req: Request, res: Response) {
+  };
+
+  fixOptions = (_req: Request, res: Response) => {
     const optionsPath = path.join(this.ctx.directory.getSims4Folder(), 'Options.ini');
 
     log.debug(`Options path: ${optionsPath}`);
@@ -51,7 +50,7 @@ export class OptionsController {
     fs.writeFileSync(optionsPath, content);
 
     res.json({ modsEnabled: true, scriptModsOn: true });
-  }
+  };
 }
 
 function setIniValue(content: string, key: string, value: number): string {

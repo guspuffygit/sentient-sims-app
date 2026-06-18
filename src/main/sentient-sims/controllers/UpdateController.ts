@@ -17,12 +17,9 @@ export class UpdateController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-
-    // Bind the method to the current instance in the constructor
-    this.updateMod = this.updateMod.bind(this);
   }
 
-  async updateMod(req: Request, res: Response) {
+  updateMod = async (req: Request, res: Response) => {
     try {
       log.info('Starting update.');
       const modUpdate = req.body as ModUpdate;
@@ -47,5 +44,5 @@ export class UpdateController {
       sendPopUpNotification(message);
       res.status(200).json(response);
     }
-  }
+  };
 }

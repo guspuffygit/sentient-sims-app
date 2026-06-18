@@ -8,15 +8,9 @@ export class MappingController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-
-    this.getTraits = this.getTraits.bind(this);
-    this.getUnmappedTraits = this.getUnmappedTraits.bind(this);
-    this.getMoods = this.getMoods.bind(this);
-    this.getUnmappedMoods = this.getUnmappedMoods.bind(this);
-    this.exportTraits = this.exportTraits.bind(this);
   }
 
-  getTraits(req: Request, res: Response) {
+  getTraits = (req: Request, res: Response) => {
     log.debug(`params: ${JSON.stringify(req.query)}`);
     const searchClass: string | undefined = req.query.searchClass as string | undefined;
     const extractedPath: string = req.query.extractedPath as string;
@@ -27,9 +21,9 @@ export class MappingController {
         extractedPath,
       }),
     );
-  }
+  };
 
-  getUnmappedTraits(req: Request, res: Response) {
+  getUnmappedTraits = (req: Request, res: Response) => {
     const searchClass: string | undefined = req.query.searchClass as string | undefined;
     const extractedPath: string = req.query.extractedPath as string;
     res.json(
@@ -38,21 +32,21 @@ export class MappingController {
         extractedPath,
       }),
     );
-  }
+  };
 
-  getMoods(req: Request, res: Response) {
+  getMoods = (req: Request, res: Response) => {
     res.json(this.ctx.mapping.getMoods());
-  }
+  };
 
-  getUnmappedMoods(req: Request, res: Response) {
+  getUnmappedMoods = (req: Request, res: Response) => {
     res.json(this.ctx.mapping.getUnmappedMoods());
-  }
+  };
 
-  exportTraits(req: Request, res: Response) {
+  exportTraits = (req: Request, res: Response) => {
     const exportTraitsRequest = req.body as ExportTraitsRequest;
     log.debug(`ExtractedPath: ${exportTraitsRequest.extractedPath}`);
     log.debug(`Length of Traits: ${Object.keys(exportTraitsRequest.traits).length}`);
     this.ctx.mapping.exportTraits(exportTraitsRequest);
     res.json({ done: 'done' });
-  }
+  };
 }

@@ -7,26 +7,22 @@ export class SettingsController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-
-    this.updateSetting = this.updateSetting.bind(this);
-    this.getSetting = this.getSetting.bind(this);
-    this.resetSetting = this.resetSetting.bind(this);
   }
 
-  updateSetting(req: Request<{ appSetting: string }>, res: Response) {
+  updateSetting = (req: Request<{ appSetting: string }>, res: Response) => {
     const { appSetting } = req.params;
     const { value } = req.body as { value: unknown };
     res.json({ value: this.ctx.settings.setSetting(appSetting, value) });
     notifySettingChanged(appSetting, value);
-  }
+  };
 
-  getSetting(req: Request<{ appSetting: string }>, res: Response) {
+  getSetting = (req: Request<{ appSetting: string }>, res: Response) => {
     const { appSetting } = req.params;
     res.json({ value: this.ctx.settings.getSetting(appSetting) });
-  }
+  };
 
-  resetSetting(req: Request<{ appSetting: string }>, res: Response) {
+  resetSetting = (req: Request<{ appSetting: string }>, res: Response) => {
     const { appSetting } = req.params;
     res.json({ value: this.ctx.settings.resetSetting(appSetting) });
-  }
+  };
 }

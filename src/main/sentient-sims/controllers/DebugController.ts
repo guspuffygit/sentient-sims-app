@@ -11,17 +11,13 @@ export class DebugController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-
-    this.healthCheckGenerationService = this.healthCheckGenerationService.bind(this);
-    this.sendDebugLogs = this.sendDebugLogs.bind(this);
-    this.sendBugReport = this.sendBugReport.bind(this);
   }
 
-  static appHealthCheck(req: Request, res: Response) {
+  static appHealthCheck = (req: Request, res: Response) => {
     res.send('OK');
-  }
+  };
 
-  async healthCheckGenerationService(req: Request, res: Response) {
+  healthCheckGenerationService = async (req: Request, res: Response) => {
     const { apiKey } = req.query;
     const apiKeyString = typeof apiKey === 'string' ? apiKey : undefined;
 
@@ -37,15 +33,15 @@ export class DebugController {
         res.status(500).send({ error: String(e) });
       }
     }
-  }
+  };
 
-  async sendDebugLogs(req: Request, res: Response) {
+  sendDebugLogs = async (req: Request, res: Response) => {
     const sendLogsRequest = req.body as SendLogsRequest;
     const response: SendLogsResponse = await this.ctx.logSend.sendLogsToDiscord(webhookUrl, sendLogsRequest);
     res.json(response);
-  }
+  };
 
-  async sendBugReport(req: Request, res: Response) {
+  sendBugReport = async (req: Request, res: Response) => {
     res.json(await this.ctx.logSend.sendBugReport(webhookUrl, req.body as InteractionBugReport));
-  }
+  };
 }

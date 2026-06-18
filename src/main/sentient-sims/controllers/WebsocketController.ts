@@ -3,15 +3,11 @@ import { isWebSocketConnected } from '../websocketServer';
 import { WebsocketStatusResponse } from '../models/WebsocketStatusResponse';
 
 export class WebsocketController {
-  constructor() {
-    this.isConnected = this.isConnected.bind(this);
-  }
-
-  isConnected(req: Request, res: Response) {
+  isConnected = (req: Request, res: Response) => {
     const response: WebsocketStatusResponse = {
       mod: isWebSocketConnected('mod'),
       renderer: isWebSocketConnected('renderer'),
     };
     res.json(response);
-  }
+  };
 }

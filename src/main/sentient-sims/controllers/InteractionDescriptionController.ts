@@ -8,24 +8,19 @@ export class InteractionDescriptionController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-
-    this.updateInteraction = this.updateInteraction.bind(this);
-    this.getIgnoredInteractions = this.getIgnoredInteractions.bind(this);
-    this.saveInteractionLocally = this.saveInteractionLocally.bind(this);
-    this.getOnlineInteractions = this.getOnlineInteractions.bind(this);
   }
 
-  async updateInteraction(req: Request, res: Response) {
+  updateInteraction = async (req: Request, res: Response) => {
     const interaction = req.body as InteractionDTO;
     await this.ctx.interactions.updateUnmappedInteraction(interaction);
     res.json({ done: 'done' });
-  }
+  };
 
-  async getIgnoredInteractions(req: Request, res: Response) {
+  getIgnoredInteractions = async (req: Request, res: Response) => {
     res.json(await this.ctx.interactions.getIgnoredInteractions());
-  }
+  };
 
-  saveInteractionLocally(req: Request, res: Response) {
+  saveInteractionLocally = (req: Request, res: Response) => {
     try {
       const interaction = req.body as BasicInteraction;
       this.ctx.interactionRepository.saveLocalInteraction(interaction);
@@ -34,9 +29,9 @@ export class InteractionDescriptionController {
       log.error('[Controller] Error saving interaction locally:', err);
       res.status(500).json({ error: 'Failed to save interaction locally.' });
     }
-  }
+  };
 
-  async getOnlineInteractions(req: Request, res: Response) {
+  getOnlineInteractions = async (req: Request, res: Response) => {
     try {
       const interactions = await this.ctx.interactionRepository.getInteractions();
 
@@ -45,5 +40,5 @@ export class InteractionDescriptionController {
       log.error('[Controller] Error getting all interactions:', err);
       res.status(500).json({ error: 'Failed to get interactions.' });
     }
-  }
+  };
 }

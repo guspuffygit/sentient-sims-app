@@ -13,18 +13,10 @@ export class AIController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-
-    this.sentientSimsGenerate = this.sentientSimsGenerate.bind(this);
-    this.interactionEvent = this.interactionEvent.bind(this);
-    this.classificationEvent = this.classificationEvent.bind(this);
-    this.buffDescription = this.buffDescription.bind(this);
-    this.buffEvent = this.buffEvent.bind(this);
-    this.getModels = this.getModels.bind(this);
-    this.tts = this.tts.bind(this);
   }
 
   @CatchErrors()
-  async sentientSimsGenerate(req: Request, res: Response) {
+  sentientSimsGenerate = async (req: Request, res: Response) => {
     const promptRequest = req.body as OpenAICompatibleRequest;
     const response = await this.ctx.ai.generate(promptRequest);
     log.debug(response);
@@ -34,10 +26,10 @@ export class AIController {
       status: InteractionEventStatus.GENERATED,
       request: promptRequest,
     });
-  }
+  };
 
   @CatchErrors()
-  async interactionEvent(req: Request, res: Response) {
+  interactionEvent = async (req: Request, res: Response) => {
     const event = req.body as InteractionEvents;
 
     log.debug(`Interaction event: ${JSON.stringify(req.body)}`);
@@ -48,10 +40,10 @@ export class AIController {
     if (result.text) {
       sendChatGeneration(result);
     }
-  }
+  };
 
   @CatchErrors()
-  async classificationEvent(req: Request, res: Response) {
+  classificationEvent = async (req: Request, res: Response) => {
     const event = req.body as ClassificationRequest;
 
     const result = await this.ctx.ai.runClassification(event);
@@ -59,10 +51,10 @@ export class AIController {
     if (result.text) {
       sendChatGeneration(result);
     }
-  }
+  };
 
   @CatchErrors()
-  async buffDescription(req: Request, res: Response) {
+  buffDescription = async (req: Request, res: Response) => {
     const event = req.body as BuffDescriptionRequest;
 
     const result = await this.ctx.ai.runBuffDescription(event);
@@ -70,24 +62,24 @@ export class AIController {
     if (result.text) {
       sendChatGeneration(result);
     }
-  }
+  };
 
   @CatchErrors()
-  async buffEvent(req: Request, res: Response) {
+  buffEvent = async (req: Request, res: Response) => {
     const event = req.body as BuffEventRequest;
 
     res.json({ ok: 'ok' });
     await this.ctx.ai.runBuff(event);
-  }
+  };
 
   @CatchErrors({ statusCode: 500 })
-  async getModels(req: Request, res: Response) {
+  getModels = async (req: Request, res: Response) => {
     const result = await this.ctx.ai.getModels();
     res.json(result);
-  }
+  };
 
   @CatchErrors()
-  tts(req: Request, res: Response) {
+  tts = (req: Request, res: Response) => {
     const { text } = req.query;
 
     if (!text) {
@@ -98,5 +90,5 @@ export class AIController {
     playTTS(text as string);
 
     res.status(200).json({ text });
-  }
+  };
 }

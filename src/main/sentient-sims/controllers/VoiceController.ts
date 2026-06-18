@@ -2,12 +2,8 @@ import { Request, Response } from 'express';
 import { CatchErrors } from './decorators/CatchError';
 
 export class VoiceController {
-  constructor() {
-    this.phonemize = this.phonemize.bind(this);
-  }
-
   @CatchErrors({ statusCode: 400 })
-  phonemize(req: Request, res: Response) {
+  phonemize = (req: Request, res: Response) => {
     const { text, language } = req.query;
 
     if (typeof text !== 'string') {
@@ -20,5 +16,5 @@ export class VoiceController {
     }
 
     res.send('OK');
-  }
+  };
 }

@@ -8,14 +8,9 @@ export class DbController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-
-    this.loadDatabase = this.loadDatabase.bind(this);
-    this.saveDatabase = this.saveDatabase.bind(this);
-    this.unloadDatabase = this.unloadDatabase.bind(this);
-    this.getSaveGames = this.getSaveGames.bind(this);
   }
 
-  loadDatabase(req: Request, res: Response) {
+  loadDatabase = (req: Request, res: Response) => {
     try {
       const databaseSession = req.body as DatabaseSession;
       log.debug(`Loading database: ${databaseSession.sessionId} : ${databaseSession.saveId}`);
@@ -26,9 +21,9 @@ export class DbController {
       log.error('Error loading database', err);
       return res.json({ error: err instanceof Error ? err.message : String(err) });
     }
-  }
+  };
 
-  async saveDatabase(req: Request, res: Response) {
+  saveDatabase = async (req: Request, res: Response) => {
     try {
       const databaseSession = req.body as DatabaseSession;
       log.debug(`Saving database: ${databaseSession.sessionId} : ${databaseSession.saveId}`);
@@ -39,9 +34,9 @@ export class DbController {
       log.error('Error saving database', err);
       return res.json({ error: err instanceof Error ? err.message : String(err) });
     }
-  }
+  };
 
-  unloadDatabase(req: Request, res: Response) {
+  unloadDatabase = (req: Request, res: Response) => {
     try {
       log.debug(`Unloading database`);
 
@@ -51,9 +46,9 @@ export class DbController {
       log.error('Error saving database', err);
       return res.json({ error: err instanceof Error ? err.message : String(err) });
     }
-  }
+  };
 
-  getSaveGames(req: Request, res: Response) {
+  getSaveGames = (req: Request, res: Response) => {
     try {
       log.debug(`Getting save games`);
 
@@ -62,5 +57,5 @@ export class DbController {
       log.error('Error saving database', err);
       return res.json({ error: err instanceof Error ? err.message : String(err) });
     }
-  }
+  };
 }

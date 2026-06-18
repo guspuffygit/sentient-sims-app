@@ -14,16 +14,9 @@ export class MemoriesController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-
-    this.getMemory = this.getMemory.bind(this);
-    this.getMemories = this.getMemories.bind(this);
-    this.updateMemory = this.updateMemory.bind(this);
-    this.createMemory = this.createMemory.bind(this);
-    this.deleteMemory = this.deleteMemory.bind(this);
-    this.deleteAllMemories = this.deleteAllMemories.bind(this);
   }
 
-  getMemory(req: Request, res: Response) {
+  getMemory = (req: Request, res: Response) => {
     try {
       const { memoryId } = req.params;
       const result = this.ctx.memoryRepository.getMemory({
@@ -34,9 +27,9 @@ export class MemoriesController {
       log.error('Error getting memory', err);
       return res.json({ error: errorMessage(err) });
     }
-  }
+  };
 
-  getMemories(req: Request, res: Response) {
+  getMemories = (req: Request, res: Response) => {
     try {
       const result = this.ctx.memoryRepository.getMemories();
       return res.json(result);
@@ -49,9 +42,9 @@ export class MemoriesController {
       log.error('Error getting memories', err);
       return res.json({ error: errorMessage(err) });
     }
-  }
+  };
 
-  updateMemory(req: Request, res: Response) {
+  updateMemory = (req: Request, res: Response) => {
     try {
       const { memoryId } = req.params;
       const memory = req.body as MemoryEntity;
@@ -65,9 +58,9 @@ export class MemoriesController {
       log.error('Error updating memory', err);
       return res.json({ error: errorMessage(err) });
     }
-  }
+  };
 
-  createMemory(req: Request, res: Response) {
+  createMemory = (req: Request, res: Response) => {
     try {
       const createMemoryRequest = req.body as CreateMemoryRequest;
 
@@ -77,9 +70,9 @@ export class MemoriesController {
       log.error('Error creating memory', err);
       return res.json({ error: errorMessage(err) });
     }
-  }
+  };
 
-  deleteMemory(req: Request<{ memoryId: string }>, res: Response) {
+  deleteMemory = (req: Request<{ memoryId: string }>, res: Response) => {
     try {
       const { memoryId } = req.params;
 
@@ -89,9 +82,9 @@ export class MemoriesController {
       log.error('Error deleting memory', err);
       return res.json({ error: errorMessage(err) });
     }
-  }
+  };
 
-  deleteAllMemories(req: Request, res: Response) {
+  deleteAllMemories = (req: Request, res: Response) => {
     try {
       this.ctx.memoryRepository.deleteAllMemories();
       return res.json({ text: `Deleted all memories` });
@@ -99,5 +92,5 @@ export class MemoriesController {
       log.error('Error deleting memory', err);
       return res.json({ error: errorMessage(err) });
     }
-  }
+  };
 }

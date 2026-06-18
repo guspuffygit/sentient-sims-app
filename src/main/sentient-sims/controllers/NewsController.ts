@@ -7,13 +7,11 @@ export class NewsController {
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
-
-    this.getNews = this.getNews.bind(this);
   }
 
-  async getNews(req: Request, res: Response) {
+  getNews = async (req: Request, res: Response) => {
     const response = await axios.get(`https://www.sentientsimulations.com/announcements.json?t=${Date.now()}`);
 
     res.json(response.data);
-  }
+  };
 }
