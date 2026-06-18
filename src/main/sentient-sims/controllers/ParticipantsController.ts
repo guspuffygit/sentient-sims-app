@@ -27,7 +27,7 @@ export class ParticipantsController {
     this.deleteParticipant = this.deleteParticipant.bind(this);
   }
 
-  getParticipant(req: Request, res: Response) {
+  getParticipant(req: Request<{ participantId: string }>, res: Response) {
     try {
       const { participantId } = req.params;
       const fullName = req.query.fullName as string;
@@ -61,7 +61,7 @@ export class ParticipantsController {
     }
   }
 
-  updateParticipant(req: Request, res: Response) {
+  updateParticipant(req: Request<{ participantId: string }>, res: Response) {
     try {
       const { participantId } = req.params;
       const { description, name } = req.body as UpdateParticipantBody;
@@ -82,7 +82,7 @@ export class ParticipantsController {
     }
   }
 
-  deleteParticipant(req: Request, res: Response) {
+  deleteParticipant(req: Request<{ participantId: string }>, res: Response) {
     try {
       const { participantId } = req.params;
       const participant: ParticipantDTO = { id: participantId };

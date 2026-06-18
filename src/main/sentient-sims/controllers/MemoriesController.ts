@@ -79,7 +79,7 @@ export class MemoriesController {
     }
   }
 
-  deleteMemory(req: Request, res: Response) {
+  deleteMemory(req: Request<{ memoryId: string }>, res: Response) {
     try {
       const { memoryId } = req.params;
 
