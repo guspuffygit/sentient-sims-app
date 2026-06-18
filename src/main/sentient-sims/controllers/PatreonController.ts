@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import electron from 'electron';
 import log from 'electron-log';
 import { NotLoggedInError } from '../services/PatreonService';
 import { notifyRefreshUserAttributes } from '../util/notifyRenderer';
+import { getAllBrowserWindows } from '../util/browserWindows';
 import { resolveHtmlPath } from '../../util';
 import { ApiContext } from '../services/ApiContext';
 
@@ -27,7 +27,7 @@ export class PatreonController {
       notifyRefreshUserAttributes();
     } catch (exception: any) {
       if (exception instanceof NotLoggedInError) {
-        electron.BrowserWindow.getAllWindows().forEach((wnd) => {
+        getAllBrowserWindows().forEach((wnd) => {
           if (!wnd.webContents.isDestroyed()) {
             void wnd.webContents.loadURL(resolveHtmlPath('index.html#/login'));
           }

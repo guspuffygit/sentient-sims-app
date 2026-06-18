@@ -1,7 +1,8 @@
-import electron, { IpcMainEvent, clipboard, dialog, ipcMain, shell } from 'electron';
+import { IpcMainEvent, clipboard, dialog, ipcMain, shell } from 'electron';
 import log from 'electron-log';
 import { SettingsEnum } from './models/SettingsEnum';
 import { notifySettingChanged } from './util/notifyRenderer';
+import { getAllBrowserWindows } from './util/browserWindows';
 import { resolveHtmlPath } from '../util';
 import { ApiContext } from './services/ApiContext';
 import { InteractionDTO } from './db/dto/InteractionDTO';
@@ -33,7 +34,7 @@ export default function ipcHandlers(ctx: ApiContext) {
     notifySettingChanged(setting, value);
   });
   ipcMain.on('on-successful-auth', () => {
-    electron.BrowserWindow.getAllWindows().forEach((wnd) => {
+    getAllBrowserWindows().forEach((wnd) => {
       if (!wnd.webContents.isDestroyed()) {
         void wnd.loadURL(resolveHtmlPath('index.html'));
       }
@@ -44,7 +45,7 @@ export default function ipcHandlers(ctx: ApiContext) {
   });
   ipcMain.on('paste-clipboard-to-api-key-button-click', () => {
     const clipboardResults = clipboard.readText();
-    electron.BrowserWindow.getAllWindows().forEach((wnd) => {
+    getAllBrowserWindows().forEach((wnd) => {
       if (!wnd.webContents.isDestroyed()) {
         wnd.webContents.send('on-api-key-paste-from-clipboard', clipboardResults);
       }

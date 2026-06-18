@@ -1,5 +1,4 @@
 /* eslint-disable promise/always-return */
-import electron from 'electron';
 import { WebSocketServer, WebSocket, RawData } from 'ws';
 import log from 'electron-log';
 import { ModLogWebsocketMessage } from './models/ModLogWebsocketMessage';
@@ -10,9 +9,10 @@ import { WebsocketNotification } from './models/ModWebsocketMessage';
 import { modWebsocketPort, rendererWebsocketPort } from './constants';
 import { WebsocketStatusChange } from './models/WebsocketStatusResponse';
 import { ApiContext } from './services/ApiContext';
+import { getAllBrowserWindows } from './util/browserWindows';
 
 function notifyAllWindows(message: string, ...args: unknown[]) {
-  electron.BrowserWindow.getAllWindows().forEach((wnd) => {
+  getAllBrowserWindows().forEach((wnd) => {
     if (!wnd.webContents.isDestroyed()) {
       wnd.webContents.send(message, ...args);
     }

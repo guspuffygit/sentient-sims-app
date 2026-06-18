@@ -1,4 +1,3 @@
-import electron from 'electron';
 import log from 'electron-log';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { InteractionMappingEvent, WWInteractionEvent } from '../models/InteractionEvents';
@@ -8,9 +7,10 @@ import { DeleteMemoryRequest } from '../models/GetMemoryRequest';
 import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { CaughtError } from '../models/CaughtError';
+import { getAllBrowserWindows } from './browserWindows';
 
 function notifyAllWindows(message: string, ...args: unknown[]) {
-  electron.BrowserWindow.getAllWindows().forEach((wnd) => {
+  getAllBrowserWindows().forEach((wnd) => {
     if (!wnd.webContents.isDestroyed()) {
       wnd.webContents.send(message, ...args);
     }

@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import path from 'path';
 import log from 'electron-log';
 import DatabaseConstructor, { Database } from 'better-sqlite3';
-import electron from 'electron';
 import { DirectoryService } from './DirectoryService';
 import { migrate } from '../db/migrations';
 import { DatabaseNotLoadedError } from '../exceptions/DatabaseNotLoadedError';
@@ -10,6 +9,7 @@ import { DatabaseSession } from '../models/DatabaseSession';
 import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { notifyDatabaseLoaded } from '../util/notifyRenderer';
+import { getAllBrowserWindows } from '../util/browserWindows';
 import { SaveGame, SaveGameType } from '../models/SaveGame';
 import { ApiContext } from './ApiContext';
 
@@ -167,7 +167,7 @@ export class DbService {
 
     this.databaseSession = null;
 
-    electron.BrowserWindow.getAllWindows().forEach((wnd) => {
+    getAllBrowserWindows().forEach((wnd) => {
       if (!wnd.webContents.isDestroyed()) {
         log.debug('Sending database unloaded');
         wnd.webContents.send('on-database-unloaded');
