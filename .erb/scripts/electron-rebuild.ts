@@ -10,8 +10,5 @@ if (Object.keys(packageJson.dependencies || {}).length > 0 && fs.existsSync(webp
   execSync(cmd, {
     cwd: webpackPaths.appPath,
     stdio: 'inherit',
-    env: {
-      NODE_OPTIONS: '--import tsx',
-    },
   });
 }

@@ -47,7 +47,7 @@ jobs:
       - name: Setup mac build
         if: matrix.platform.cmd == '--mac'
         run: |
-          npx tsx setupMacBuildArch.ts ${{ matrix.platform.arch }}
+          node setupMacBuildArch.ts ${{ matrix.platform.arch }}
       - name: Install and build
         run: |
           npm cache clean --force
@@ -75,8 +75,8 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           export VERSION=$(jq -r .version release/app/package.json)
-          npx tsx ci-prepare-mac-universal-artifacts.ts
-          npx tsx build-mac-universal.ts
+          node ci-prepare-mac-universal-artifacts.ts
+          node build-mac-universal.ts
 
       - name: Import signing certificate
         if: matrix.platform.arch == 'x64'

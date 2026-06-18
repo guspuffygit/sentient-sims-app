@@ -56,4 +56,4 @@ Code conventions:
   TypeScript strict mode throughout
   Prettier: single quotes, trailing commas, 120 char print width
   Tests in src/__tests__/, named *.test.ts (unit) or *.it.test.ts (integration)
-  ESM modules ("type": "module" in package.json), uses tsx for ts execution
+  ESM modules ("type": "module" in package.json)
