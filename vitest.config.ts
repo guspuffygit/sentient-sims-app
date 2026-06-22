@@ -34,6 +34,7 @@ export default defineConfig({
     coverage: {
       provider: 'istanbul',
       reportsDirectory: 'coverage',
+      reporter: ['text', 'html', 'lcov'],
       // Scope to source files only — a bare 'src/**' makes istanbul try to parse
       // non-code files (index.html, tokenizer .json) as JS and crash.
       include: ['src/**/*.{ts,tsx,js,jsx}'],
