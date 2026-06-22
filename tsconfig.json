@@ -9,6 +9,7 @@
     "sourceMap": true,
     "baseUrl": "./src",
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
