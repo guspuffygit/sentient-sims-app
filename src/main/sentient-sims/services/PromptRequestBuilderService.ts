@@ -6,7 +6,7 @@ import {
   formatSeason,
   formatWeather,
 } from '../formatter/PromptFormatter';
-import { SSEvent, SSRelationships } from '../models/InteractionEvents';
+import { InteractionEvent, SSEvent, SSRelationships } from '../models/InteractionEvents';
 import { getSystemPrompt } from '../systemPrompts';
 import { ApiType } from '../models/ApiType';
 import { FormattedMemoryMessage, PreFormattedMemoryMessage, PromptRequest } from '../models/OpenAIRequestBuilder';
@@ -233,6 +233,54 @@ export class PromptRequestBuilderService {
     return formattedMessages;
   }
 
+  private buildDirectorBlock(event: SSEvent): string {
+    const interactionName = (event as Partial<InteractionEvent>).interaction_name ?? '';
+
+    let sceneTone: string;
+    let sceneObjective: string;
+
+    if (/romantic/i.test(interactionName)) {
+      sceneTone = 'warm and flirtatious';
+      sceneObjective =
+        'Show romantic interest through small gestures and careful word choice — nothing too bold or dramatic.';
+    } else if (/mean|fight|argue/i.test(interactionName)) {
+      sceneTone = 'tense and pointed';
+      sceneObjective =
+        'Let the friction show through clipped words and guarded body language — no screaming, no blowups.';
+    } else if (/funny|joke|humor/i.test(interactionName)) {
+      sceneTone = 'light and playful';
+      sceneObjective = 'Deliver the moment with timing — a dry line, a laugh, a raised eyebrow. Keep it brief.';
+    } else if (/mischief|prank/i.test(interactionName)) {
+      sceneTone = 'mischievous and sly';
+      sceneObjective =
+        'Play up the mischief with a smirk and deliberate phrasing — the other character may not know what hit them.';
+    } else {
+      sceneTone = 'natural and conversational';
+      sceneObjective = 'Let the exchange happen organically — genuine reaction and everyday social texture.';
+    }
+
+    const lines = [
+      `Tone: ${sceneTone}.`,
+      `Scene objective: ${sceneObjective}`,
+      'Delivery notes are optional — use one when it sharpens how a line lands. Pure dialogue is fine when the words carry themselves.',
+      'Delivery notes describe how a character sounds or feels, not what they physically do. Keep them under eight words.',
+      'Do not invent physical actions, furniture, props, or activities unless already established in the scene.',
+      'Length: two to four lines total. Cut anything that does not pull its weight.',
+    ];
+
+    return `<DIRECTOR>\n${lines.join('\n')}\n</DIRECTOR>`;
+  }
+
+  private buildSceneGuidance(): string {
+    const lines = [
+      'Keep this scene grounded in everyday life.',
+      "Avoid sudden major revelations, dramatic escalations, or events that would fundamentally alter the characters' lives.",
+      'Do not invent new facts about characters, locations, or past events not already established.',
+      'Responses should be natural and conversational — not cinematic, not poetic, not melodramatic.',
+    ];
+    return `<SCENE_GUIDANCE>\n${lines.join(' ')}\n</SCENE_GUIDANCE>`;
+  }
+
   buildPromptRequest(event: SSEvent, options: PromptRequestBuilderOptions): PromptRequest {
     const location = this.ctx.locationRepository.getLocation({
       id: event.environment.location_id,
@@ -332,6 +380,8 @@ export class PromptRequestBuilderService {
     );
 
     const sims = this.formatSims(event.sentient_sims, location, event.relationships);
+    sims.push(this.buildDirectorBlock(event));
+    sims.push(this.buildSceneGuidance());
     const memories = this.getMemories(event.sentient_sims);
     const groupedMemories = this.groupMemories(memories);
     const formattedLocation = formatAction(

@@ -25,6 +25,14 @@ describe('Output', () => {
     expect(cleanupAIOutput(actual)).toEqual(expected);
   });
 
+  it('cleanup preserves screenplay format', () => {
+    const screenplay = 'Ricky smirks, leaning back.\nRicky: "Been fishing here for years. You should try it."';
+    const result = cleanupAIOutput(screenplay);
+    expect(result).toContain('Ricky:');
+    expect(result).toContain('"Been fishing here for years.');
+    expect(result).toMatch(/"$/);
+  });
+
   describe('Event Formatter', () => {
     let ctx: ApiContext;
 
@@ -32,7 +40,7 @@ describe('Output', () => {
       ctx = mockApiContext();
     });
 
-    it('test', () => {
+    it('test', async () => {
       const event: InteractionEvent = {
         // TODO: Deprecated
         location_id: 0,
@@ -137,6 +145,8 @@ describe('Output', () => {
         saveId: '2',
       });
 
+      ctx.settings.maxResponseTokens = 300;
+
       const result = ctx.promptBuilder.buildPromptRequest(event, {
         action: '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
         apiType: ApiType.SentientSimsAI,
@@ -158,6 +168,77 @@ describe('Output', () => {
       // System prompt should contain sim names for an interaction
       expect(result.systemPrompt).toContain('Richy Richardson');
       expect(result.systemPrompt).toContain('Ricky Rickerson');
+
+      // Participants block should include director and scene guidance blocks
+      expect(result.participants).toContain('<DIRECTOR>');
+      expect(result.participants).toContain('<SCENE_GUIDANCE>');
+      expect(result.participants).toContain('Write Ricky Rickerson consistently with their traits');
+
+      // If an API key is available, send the prompt and show the AI response
+      const configPath = `${process.env.APPDATA}\\sentient-sims-app\\config.json`;
+      let openaiKey = process.env.OPENAI_KEY;
+      let openaiModel: string | undefined;
+      if (fs.existsSync(configPath)) {
+        const config = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as { openaiKey: string; openaiModel: string };
+        openaiKey = openaiKey ?? config.openaiKey;
+        openaiModel = config.openaiModel;
+      }
+      if (openaiKey) {
+        ctx.settings.openaiKey = openaiKey;
+        ctx.settings.aiApiType = ApiType.OpenAI;
+        if (openaiModel) ctx.settings.openaiModel = openaiModel;
+        const requestBuilder = new OpenAIRequestBuilder(new OpenAITokenCounter());
+
+        const participants = ctx.participantRepository.getParticipants(
+          event.sentient_sims.map((sim) => ({ id: sim.sim_id, fullName: sim.name })),
+        );
+
+        // Memory 0: narrator sets the scene — describes the setting, vibe, and characters; no invented actions
+        ctx.memoryRepository.createMemory({
+          memory: {
+            action: 'Ricky Rickerson and Richy Richardson settle in.',
+            content: 'The house is quiet late at night, warm and lived-in. Ricky and Richy are both relaxed and in good spirits — the easy kind of evening where a conversation just happens.',
+            location_id: event.environment.location_id,
+            event_type: event.event_type,
+          },
+          participants,
+        });
+
+        const promptOptions = {
+          action: '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
+          apiType: ApiType.SentientSimsAI,
+          modelSettings: { temperature: undefined, top_p: undefined, top_k: undefined, repetition_penalty: undefined, max_tokens: 5000 },
+        };
+
+        // Exchange 1 — narrator scene-setter in memory
+        const result1 = ctx.promptBuilder.buildPromptRequest(event, promptOptions);
+        const reviewed1 = await ctx.ai.runDirectorReview(
+          cleanupAIOutput((await ctx.genai.sentientSimsGenerate(requestBuilder.buildOpenAIRequest(result1))).text),
+        );
+        console.log('\n=== EXCHANGE 1 ===');
+        console.log(reviewed1);
+        console.log('=================\n');
+        expect(reviewed1).toBeTruthy();
+
+        ctx.memoryRepository.createMemory({
+          memory: { action: result1.action, content: reviewed1, location_id: event.environment.location_id, event_type: event.event_type },
+          participants,
+        });
+
+        // Exchange 2 — scene-setter + exchange 1 in memory
+        const result2 = ctx.promptBuilder.buildPromptRequest(event, promptOptions);
+        const reviewed2 = await ctx.ai.runDirectorReview(
+          cleanupAIOutput((await ctx.genai.sentientSimsGenerate(requestBuilder.buildOpenAIRequest(result2))).text),
+        );
+        console.log('\n=== EXCHANGE 2 ===');
+        console.log(reviewed2);
+        console.log('=================\n');
+        expect(reviewed2).toBeTruthy();
+      } else {
+        console.log(
+          'No OpenAI key found — skipping generation. Set OPENAI_KEY env var or save the key in app settings.',
+        );
+      }
     });
   });
 
