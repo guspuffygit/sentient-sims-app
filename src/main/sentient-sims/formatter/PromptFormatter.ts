@@ -235,6 +235,12 @@ export function formatSentientSim(sentientSim: SentientSim): string {
     prompt.push(`${sentientSim.name} ${formatListToString(properties)}`);
   }
 
+  if (genericTraits.length > 0 || moods.length > 0 || likes.length > 0 || dislikes.length > 0) {
+    prompt.push(
+      `Write ${sentientSim.name} consistently with their traits and current emotional state as described above.`,
+    );
+  }
+
   return prompt.join(' ');
 }
 
@@ -423,7 +429,9 @@ export function trimIncompleteSentence(text: string): string {
   const lastPunctIndex = Math.max(text.lastIndexOf('.'), text.lastIndexOf('?'), text.lastIndexOf('!'));
 
   if (lastPunctIndex >= 0) {
-    return text.substring(0, lastPunctIndex + 1);
+    const nextChar = text[lastPunctIndex + 1];
+    const endIndex = nextChar === '"' || nextChar === "'" ? lastPunctIndex + 2 : lastPunctIndex + 1;
+    return text.substring(0, endIndex);
   }
 
   return text;
@@ -457,11 +465,11 @@ export function removeStopTokens(text: string, stopTokens?: string[]) {
 export function cleanupAIOutput(text: string, stopTokens?: string[]): string {
   let output: string = text.trim();
 
-  const index = output.indexOf(':');
-  output = index !== -1 ? output.substring(index + 1) : output;
+  // Strip leading XML blocks echoed from the system prompt (e.g. <SCENE>...</SCENE>)
+  // Only strip when non-XML content follows, so we never accidentally empty the whole response
+  output = output.replace(/^(<[A-Z_][A-Z_0-9]*>[\s\S]*?<\/[A-Z_][A-Z_0-9]*>\s*)+(?=\S)/, '').trim();
   output = output.replaceAll('*', '');
   output = removeStopTokens(output, stopTokens);
-  output = removeLastParagraph(output);
   output = trimIncompleteSentence(output);
   output = removeEmojis(output);
 

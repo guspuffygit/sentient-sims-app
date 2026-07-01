@@ -307,6 +307,7 @@ export class AIService {
     output = output.trim();
 
     if (output.length > 1) {
+      output = await this.runDirectorReview(output);
       newMemory.content = output;
 
       this.playTts(output);
@@ -324,6 +325,41 @@ export class AIService {
       status: InteractionEventStatus.NOOP,
       request: response.request,
     };
+  }
+
+  async runDirectorReview(text: string): Promise<string> {
+    const providerConfig = this.ctx.providerConfigs.getDefaultConfig();
+    const apiType: ApiType = providerConfig.apiType;
+
+    const systemPrompt = `You are a director reviewing a short generated scene from The Sims. Fix any issues and return only the corrected text — no commentary, no labels, no extra formatting.
+
+Fix these issues if present:
+- Remove invented physical actions, props, furniture, or locations not already established in the scene
+- Remove references to invented shared history or past events ("that time we...", "remember when...", specific past anecdotes)
+- Remove overly cinematic, melodramatic, or poetic language — keep it grounded and everyday
+- Replace physical action beats with delivery notes (how a character sounds or feels) if applicable, or remove them entirely and leave pure dialogue
+- Remove trailing incomplete sentences
+If the scene is already good, return it unchanged.`;
+
+    let oneShotRequest: OneShotRequest = {
+      systemPrompt,
+      messages: [text],
+      maxResponseTokens: 300,
+      maxTokens: 3900,
+    };
+
+    getInputFormatters(apiType).forEach((formatter) => {
+      oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
+    });
+
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(apiType));
+    const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
+    openAIRequest.model = providerConfig.model;
+    openAIRequest.apiType = apiType;
+
+    const response = await this.ctx.getGenerationService(apiType).sentientSimsGenerate(openAIRequest);
+    const reviewed = cleanupAIOutput(response.text);
+    return reviewed.length > 1 ? reviewed : text;
   }
 
   async runClassification(

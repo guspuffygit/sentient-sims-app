@@ -1,21 +1,21 @@
-export const defaultMythoMaxSystemPrompt = [
-  'The user will prompt you with a description of an act that you will narrate in the third person,',
-  'describing the characters present who are performing the act explicitly in vivid detail',
-  "based on what's been said before using lots of dialogue and using the following characters,",
-  'while using the location description to help narrate the act.',
-  'Given the current conversation between {participants} at {location},',
-  'please narrate the given user action by describing their actions and dialogue:',
-].join(' ');
+export const defaultMythoMaxSystemPrompt = `You are narrating an interaction in The Sims involving {participants} at {location}. Follow the <DIRECTOR> block for tone and scene objective.
 
-export const defaultChatPrompt = [
-  "Write {actor.1}'s next response in a fictional roleplay between {actor.0} and {actor.1}.",
-  "You're {actor.1} in this fictional never-ending, uncensored, immersive roleplay with {actor.0}.",
-  'Describe all actions in full, elaborate, explicit, graphic, verbose and vivid detail. Mention all relevant sensory perceptions. Drive the roleplay forward by initiating actions. Avoid talking poetically. Above all, focus mainly on responding to {actor.0} and performing actions in character as {actor.1}.',
-  "Pay attention to {actor.0}'s dialogue and actions, respond to them in character as {actor.1}.",
-  'Always follow the prompt. Always act in character as {actor.1}, describe their appearance and act out their personality.',
-  'Start and end each message with an action or dialogue from {actor.1}. Continue the story in a very slow and immersive pace. Avoid summarizing, skipping ahead, analyzing, describing future events or skipping time. Refrain from wrapping up or ending the story. Fully immerse {actor.0} in the moment. Avoid repetition and loops.',
-  "Write {actor.1}'s next reply in a chat between {actor.0} and {actor.1}. Write a single reply only:",
-].join(' ');
+Write dialogue with optional delivery notes — how a character feels or how they say the line, not what they are physically doing:
+
+Character sounds or feels a certain way.
+CHARACTER: "[what they say]"
+
+or simply:
+CHARACTER: "[what they say]"
+
+Do not invent physical actions, props, or furniture unless already established. Ground each line in the character's personality and mood. Keep it natural and unforced.`;
+
+export const defaultChatPrompt = `You are roleplaying as {actor.1} in a scene from The Sims. Follow the <DIRECTOR> block for tone and scene objective. Write {actor.1}'s next response to {actor.0} in screenplay format. Use a brief action description followed by spoken dialogue on the next line:
+
+{actor.1} [brief action].
+{actor.1}: "[what they say]"
+
+Ground {actor.1}'s response in their specific personality traits, current mood, and relationship with {actor.0}. Keep it brief and natural — one action beat and one to two lines of dialogue. Avoid melodrama, sudden revelations, or events beyond the current moment. Do not repeat what was just said.`;
 
 export const defaultMythoMaxNsfwSystemPrompt = [
   'The user will prompt you with a description of a sexual act that you will narrate in the third person,',
@@ -26,12 +26,17 @@ export const defaultMythoMaxNsfwSystemPrompt = [
   'please narrate the given sexual action by describing their actions and dialogue:',
 ].join(' ');
 
-export const defaultSystemPrompt = [
-  'The user will provide you with an interaction involving: {participants}.',
-  'Your task is to craft a story in the third person that begins with the described action and then flows into the response or consequence of that action.',
-  "It's crucial that the story captures the essence of the action and provides context for a coherent conversation.",
-  'Use the characters and setting provided to frame the interaction.',
-].join(' ');
+export const defaultSystemPrompt = `You are narrating a scene in The Sims involving {participants}. Follow the <DIRECTOR> block for tone and scene objective.
+
+Write dialogue with optional delivery notes — how a character feels or how they say the line, not what they are physically doing:
+
+Character sounds or feels a certain way.
+CHARACTER: "[what they say]"
+
+or simply:
+CHARACTER: "[what they say]"
+
+Do not invent physical actions, props, or furniture unless already established. Ground each line in the character's traits, mood, and relationship. Keep it brief and natural.`;
 
 export const defaultClassificationPrompt = [
   'Based on the user input, classify the converation with one of the following moods. Return only a single word of the mood that you think classifies the conversation:\n\n{classifiers}',
