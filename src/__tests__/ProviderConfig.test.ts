@@ -34,14 +34,35 @@ describe('Provider Configs', () => {
     expect(configs).toHaveLength(1);
     expect(configs[0].id).toEqual(autoConfigId(ApiType.Gemini));
     expect(configs[0].apiType).toEqual(ApiType.Gemini);
+    expect(configs[0].model).toEqual(ctx.settings.geminiModel);
     expect(ctx.settings.defaultAiProviderConfigId).toEqual(autoConfigId(ApiType.Gemini));
   });
 
-  it('setting the legacy api type creates and selects an auto config', () => {
+  it('runMigrations pins models on unpinned configs but leaves KoboldAI modelless', () => {
+    ctx.settings.openaiModel = 'gpt-4o';
+    ctx.settings.aiProviderConfigs = [
+      { id: 'unpinned-openai', name: 'OpenAI', apiType: ApiType.OpenAI },
+      { id: 'kobold', name: 'Kobold', apiType: ApiType.KoboldAI },
+      { id: 'pinned', name: 'Pinned', apiType: ApiType.OpenAI, model: 'gpt-4.1-2025-04-14' },
+    ];
+
+    ctx.settings.runMigrations();
+
+    const configs = ctx.settings.aiProviderConfigs;
+    expect(configs.find((config) => config.id === 'unpinned-openai')?.model).toEqual('gpt-4o');
+    expect(configs.find((config) => config.id === 'kobold')?.model).toBeUndefined();
+    expect(configs.find((config) => config.id === 'pinned')?.model).toEqual('gpt-4.1-2025-04-14');
+  });
+
+  it('setting the legacy api type creates and selects an auto config pinned to the provider model', () => {
+    ctx.settings.novelAIModel = 'clio-v1';
+
     ctx.settings.aiApiType = ApiType.NovelAI;
 
     expect(ctx.settings.defaultAiProviderConfigId).toEqual(autoConfigId(ApiType.NovelAI));
-    expect(ctx.settings.aiProviderConfigs.some((config) => config.id === autoConfigId(ApiType.NovelAI))).toBeTruthy();
+    const autoConfig = ctx.settings.aiProviderConfigs.find((config) => config.id === autoConfigId(ApiType.NovelAI));
+    expect(autoConfig).toBeDefined();
+    expect(autoConfig?.model).toEqual('clio-v1');
   });
 
   it('setting the default config id syncs the legacy api type', () => {
@@ -81,11 +102,14 @@ describe('Provider Configs', () => {
   });
 
   it('resolves provider model setting when config does not pin a model', () => {
-    ctx.settings.aiApiType = ApiType.OpenAI;
-    ctx.settings.openaiModel = 'gpt-4o-mini';
+    // Configs normally get their model pinned; unpinned ones (predating
+    // pinning or sanitized) must still fall back to the provider model setting
+    ctx.settings.openaiModel = 'gpt-4o';
+    addConfig({ id: 'no-model', name: 'No Model', apiType: ApiType.OpenAI });
+    ctx.settings.defaultAiProviderConfigId = 'no-model';
 
     const resolved = ctx.providerConfigs.getConfigForAction();
-    expect(resolved.model).toEqual('gpt-4o-mini');
+    expect(resolved.model).toEqual('gpt-4o');
   });
 
   it('per-action override routes to the override config', () => {

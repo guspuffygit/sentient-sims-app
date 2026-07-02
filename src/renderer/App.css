@@ -51,10 +51,21 @@
   /* Add any other necessary styles for the overlay element */
 }
 
-html,
+/* Body must be the scroll container, not the viewport: MUI modals (Select
+   menus, dialogs) lock scrolling by setting overflow:hidden on body. When the
+   viewport is the scroller, that value propagates to it and Chromium resets
+   the scroll position to the top, yanking the page out from under the opened
+   menu. A non-root scroller keeps its offset while locked. */
+html {
+  background-color: #2f3136;
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   background-color: #2f3136;
-  min-height: 100vh;
+  height: 100%;
+  overflow-y: auto;
 }
 
 body {

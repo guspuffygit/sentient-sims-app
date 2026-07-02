@@ -1,7 +1,7 @@
-import { Box, Button, Divider, Tab } from '@mui/material';
+import { Box, Button, Divider, FormHelperText, Tab, Typography } from '@mui/material';
 
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { ApiType, ApiTypeFromValue } from 'main/sentient-sims/models/ApiType';
+import { ApiTypeFromValue } from 'main/sentient-sims/models/ApiType';
 import { AIProviderConfig } from 'main/sentient-sims/models/AIProviderConfig';
 import { AIActionOverrides, AIActionType } from 'main/sentient-sims/models/AIActionType';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
@@ -11,13 +11,13 @@ import AppCard from './AppCard';
 import DebugLogsSettingsComponent from './settings/DebugLogsSettingsComponent';
 import { AnimationMappingSettingsComponent } from './settings/AnimationMappingSettingsComponent';
 import { ModsDirectoryComponent } from './ModsDirectoryComponent';
-import { AIStatusComponent } from './AIStatusComponent';
 import { useAISettings } from './providers/AISettingsProvider';
 import VoiceSettingsComponent from './settings/VoiceSettingsComponent';
 import { useSetupWizard } from './providers/SetupWizardProvider';
 import { AiMaxResponseLengthSettingsComponent } from './settings/AiMaxResponseLengthSettingsComponent';
-import { generationApiTypes, ProviderConfigsComponent } from './settings/ProviderConfigsComponent';
+import { ProviderConfigsComponent } from './settings/ProviderConfigsComponent';
 import { ProviderConnectionSettingsComponent } from './settings/ProviderConnectionSettingsComponent';
+import LocalizationSettingsComponent from './settings/LocalizationSettingsComponent';
 import useSetting from './hooks/useSetting';
 
 enum SettingsTabSelectionValue {
@@ -45,21 +45,6 @@ export default function SettingsPage() {
     const config = configs.find((c) => c.id === overrideId) ?? configs.find((c) => c.id === defaultIdSetting.value);
     return config ? ApiTypeFromValue(config.apiType) : aiSettings.aiApiType;
   }, [configsSetting.value, overridesSetting.value, defaultIdSetting.value, aiSettings.aiApiType]);
-
-  const usedApiTypes = useMemo(() => {
-    const types = new Set<ApiType>();
-    configsSetting.value.forEach((config) => {
-      types.add(ApiTypeFromValue(config.apiType));
-    });
-    if (types.size === 0) {
-      types.add(aiSettings.aiApiType);
-    }
-    // CustomAI shares the Sentient Sims AI connection settings
-    if (types.has(ApiType.CustomAI)) {
-      types.add(ApiType.SentientSimsAI);
-    }
-    return generationApiTypes.filter((apiType) => types.has(apiType));
-  }, [configsSetting.value, aiSettings.aiApiType]);
 
   return (
     <AppCard>
@@ -94,27 +79,14 @@ export default function SettingsPage() {
           <ModsDirectoryComponent />
           <DebugLogsSettingsComponent />
           <ProviderConfigsComponent />
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: 3,
-            }}
-          >
-            <Button
-              loading={aiSettings.aiStatus.loading}
-              onClick={() => {
-                void aiSettings.testAI();
-              }}
-              sx={{ marginRight: 2 }}
-              color="primary"
-              variant="outlined"
-            >
-              Test Default
-            </Button>
-            <AIStatusComponent />
-          </Box>
-          <ProviderConnectionSettingsComponent apiTypes={usedApiTypes} />
+          <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+          <ProviderConnectionSettingsComponent />
+          <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+          <Typography variant="h6">Localization</Typography>
+          <FormHelperText sx={{ marginBottom: 1 }}>
+            Translates AI output. Applies when the provider handling an action is OpenAI or Gemini.
+          </FormHelperText>
+          <LocalizationSettingsComponent />
           <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
           <AnimationMappingSettingsComponent apiType={wickedWhimsApiType} />
           <AiMaxResponseLengthSettingsComponent />

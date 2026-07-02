@@ -45,25 +45,9 @@ export class ProviderConfigService {
     };
   }
 
-  // The provider-level model settings double as the model for auto-created
-  // configs so the legacy model selection keeps applying until a config pins
-  // its own model.
+  // Safety net for configs that predate model pinning (or were sanitized):
+  // fall back to the legacy per-provider model setting.
   providerModel(apiType: ApiType): string | undefined {
-    switch (apiType) {
-      case ApiType.OpenAI:
-        return this.ctx.settings.openaiModel;
-      case ApiType.SentientSimsAI:
-      case ApiType.CustomAI:
-        return this.ctx.settings.sentientSimsAIModel;
-      case ApiType.NovelAI:
-        return this.ctx.settings.novelAIModel;
-      case ApiType.Gemini:
-        return this.ctx.settings.geminiModel;
-      case ApiType.VLLM:
-        return this.ctx.settings.vllmModel;
-      default:
-        // KoboldAI runs whatever model is loaded server side
-        return undefined;
-    }
+    return this.ctx.settings.providerModel(apiType);
   }
 }

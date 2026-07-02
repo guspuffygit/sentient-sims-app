@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { ApiTypeFromValue } from '../models/ApiType';
 import { OpenAIKeyNotSetError } from '../services/OpenAIService';
 import { webhookUrl } from '../services/LogSendService';
 import { SendLogsRequest } from '../models/SendLogsRequest';
@@ -18,13 +19,18 @@ export class DebugController {
   };
 
   healthCheckGenerationService = async (req: Request, res: Response) => {
-    const { apiKey, configId } = req.query;
+    const { apiKey, configId, apiType } = req.query;
     const apiKeyString = typeof apiKey === 'string' ? apiKey : undefined;
     const configIdString = typeof configId === 'string' ? configId : undefined;
 
     try {
-      const providerConfig = this.ctx.providerConfigs.getResolvedConfig(configIdString);
-      const response = await this.ctx.getGenerationService(providerConfig.apiType).healthCheck(apiKeyString);
+      // apiType supports draft tests from the config dialog: exercise a
+      // provider connection before any config referencing it is saved
+      const serviceApiType =
+        typeof apiType === 'string' && apiType !== ''
+          ? ApiTypeFromValue(apiType)
+          : this.ctx.providerConfigs.getResolvedConfig(configIdString).apiType;
+      const response = await this.ctx.getGenerationService(serviceApiType).healthCheck(apiKeyString);
       res.send(response);
     } catch (e) {
       if (e instanceof OpenAIKeyNotSetError) {

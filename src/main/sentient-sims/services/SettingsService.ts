@@ -267,6 +267,27 @@ export class SettingsService {
     return value;
   }
 
+  // The model each provider uses when a config doesn't pin one. Kept public so
+  // config resolution and migrations share a single definition.
+  providerModel(apiType: ApiType): string | undefined {
+    switch (apiType) {
+      case ApiType.OpenAI:
+        return this.openaiModel;
+      case ApiType.SentientSimsAI:
+      case ApiType.CustomAI:
+        return this.sentientSimsAIModel;
+      case ApiType.NovelAI:
+        return this.novelAIModel;
+      case ApiType.Gemini:
+        return this.geminiModel;
+      case ApiType.VLLM:
+        return this.vllmModel;
+      default:
+        // KoboldAI runs whatever model is loaded server side
+        return undefined;
+    }
+  }
+
   // Selecting a provider type through the legacy setting (setup wizard, older
   // UI flows) must keep working: guarantee a config for that type exists and
   // becomes the default, unless the default already points at that type.
@@ -278,7 +299,14 @@ export class SettingsService {
     }
 
     if (!configs.some((config) => config.id === autoConfigId(apiType))) {
-      configs.push(newAutoConfig(apiType));
+      const config = newAutoConfig(apiType);
+      // Pin the model so the choice is visible and editable in the config UI
+      // instead of silently tracking the hidden per-provider model setting
+      const model = this.providerModel(apiType);
+      if (model) {
+        config.model = model;
+      }
+      configs.push(config);
       this.set(SettingsEnum.AI_PROVIDER_CONFIGS, configs);
     }
 
@@ -670,6 +698,24 @@ export class SettingsService {
       this.defaultAiProviderConfigId = seeded.id;
     } else if (!this.defaultAiProviderConfigId) {
       this.defaultAiProviderConfigId = this.aiProviderConfigs[0].id;
+    }
+
+    // Pin each config's model to what resolution would fall back to, making
+    // the model visible in the UI instead of hidden legacy state. KoboldAI
+    // (and unset VLLM) stay modelless on purpose.
+    const configsToPin = this.aiProviderConfigs;
+    let pinnedAny = false;
+    for (const config of configsToPin) {
+      if (config.model === undefined) {
+        const model = this.providerModel(config.apiType);
+        if (model) {
+          config.model = model;
+          pinnedAny = true;
+        }
+      }
+    }
+    if (pinnedAny) {
+      this.aiProviderConfigs = configsToPin;
     }
 
     if (this.sentientSimsAITtsSettings.model.toString() === 'kokoro') {

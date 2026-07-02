@@ -75,6 +75,17 @@ describe('Provider Config API', () => {
     expect(result.status).toEqual('OK');
   });
 
+  it('health checks a draft provider by api type, ignoring the default config', async () => {
+    // The config dialog tests a provider connection before its config is
+    // saved; the default points elsewhere to prove apiType drives the routing
+    await settingsClient.updateSetting(SettingsEnum.DEFAULT_AI_PROVIDER_CONFIG_ID, 'gemini-e2e');
+
+    const query = new URLSearchParams({ apiType: ApiType.OpenAI });
+    const response = await fetch(`${apiUrl}/debug/test-ai?${query.toString()}`);
+    const result = (await response.json()) as AIHealthCheckResponse;
+    expect(result.status).toEqual('OK');
+  });
+
   it('routes classification through the per-action override', async () => {
     // Default provider is Sentient Sims AI (auth gated, would fail if used),
     // classification is overridden to OpenAI, proving per-action routing works

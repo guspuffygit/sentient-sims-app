@@ -10,6 +10,18 @@ export enum ApiType {
   ElevenLabs = 'elevenlabs',
 }
 
+// Text generation backends selectable in provider configurations. Excludes
+// TTS-only types (Kokoro, ElevenLabs) and CustomAI, which is a Sentient Sims
+// AI-compatible endpoint sharing that provider's connection settings.
+export const generationApiTypes: ApiType[] = [
+  ApiType.OpenAI,
+  ApiType.SentientSimsAI,
+  ApiType.NovelAI,
+  ApiType.KoboldAI,
+  ApiType.Gemini,
+  ApiType.VLLM,
+];
+
 export function ApiTypeFromValue(value: any): ApiType {
   switch (value) {
     case ApiType.SentientSimsAI:

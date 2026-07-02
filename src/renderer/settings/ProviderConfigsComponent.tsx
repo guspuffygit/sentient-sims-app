@@ -31,7 +31,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SyncIcon from '@mui/icons-material/Sync';
 import { useState } from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { ApiType, ApiTypeFromValue, ApiTypeName } from 'main/sentient-sims/models/ApiType';
+import { ApiType, ApiTypeFromValue, ApiTypeName, generationApiTypes } from 'main/sentient-sims/models/ApiType';
 import { AIProviderConfig } from 'main/sentient-sims/models/AIProviderConfig';
 import {
   AIActionOverrides,
@@ -39,20 +39,36 @@ import {
   AIActionTypeName,
   AllAIActionTypes,
 } from 'main/sentient-sims/models/AIActionType';
-import { appApiUrl } from 'main/sentient-sims/constants';
+import {
+  appApiUrl,
+  defaultGeminiModel,
+  novelaiDefaultModel,
+  openaiDefaultModel,
+  sentientSimsAIDefaultModel,
+} from 'main/sentient-sims/constants';
 import { AIHealthCheckResponse, AITestStatus } from 'main/sentient-sims/models/AIHealthCheckResponse';
 import HelpButton from 'renderer/components/HelpButton';
 import useSetting from '../hooks/useSetting';
 import { useAIModels } from '../hooks/useAIModels';
+import { useProviderConnectionStatus } from '../hooks/useProviderConnectionStatus';
+import { ProviderConnectionPanel } from './ProviderConnectionPanel';
+import { ConnectionStatusChip } from './ProviderConnectionSettingsComponent';
 
-export const generationApiTypes: ApiType[] = [
-  ApiType.OpenAI,
-  ApiType.SentientSimsAI,
-  ApiType.NovelAI,
-  ApiType.KoboldAI,
-  ApiType.Gemini,
-  ApiType.VLLM,
-];
+// Prefill for new configs, mirroring the app's shipping default per provider
+function defaultModelFor(apiType: ApiType): string {
+  switch (apiType) {
+    case ApiType.OpenAI:
+      return openaiDefaultModel;
+    case ApiType.SentientSimsAI:
+      return sentientSimsAIDefaultModel;
+    case ApiType.NovelAI:
+      return novelaiDefaultModel;
+    case ApiType.Gemini:
+      return defaultGeminiModel;
+    default:
+      return '';
+  }
+}
 
 type ProviderConfigDialogProps = {
   initial?: AIProviderConfig;
@@ -64,10 +80,43 @@ type ProviderConfigDialogProps = {
 function ProviderConfigDialog({ initial, onCancel, onSave }: ProviderConfigDialogProps) {
   const [name, setName] = useState(initial?.name ?? '');
   const [apiType, setApiType] = useState<ApiType>(initial?.apiType ?? ApiType.OpenAI);
-  const [model, setModel] = useState(initial?.model ?? '');
+  const [model, setModel] = useState(() => (initial ? (initial.model ?? '') : defaultModelFor(ApiType.OpenAI)));
+  const [testResult, setTestResult] = useState<AITestStatus | undefined>();
 
+  const connection = useProviderConnectionStatus(apiType);
   const modelSelectionSupported = apiType !== ApiType.KoboldAI;
-  const aiModels = useAIModels(apiType, modelSelectionSupported);
+  // VLLM may leave the model empty (server default); KoboldAI never selects one
+  const modelRequired = modelSelectionSupported && apiType !== ApiType.VLLM;
+  const modelsEnabled = modelSelectionSupported && !connection.loading && connection.ready;
+  const aiModels = useAIModels(apiType, modelsEnabled);
+
+  const missingModel = modelRequired && model.trim() === '';
+
+  const handleProviderChange = (value: unknown) => {
+    const type = ApiTypeFromValue(value);
+    setApiType(type);
+    setModel(defaultModelFor(type));
+    setTestResult(undefined);
+  };
+
+  const testConnection = async () => {
+    setTestResult({ status: '', error: '', loading: true });
+
+    let status = '';
+    let error: string;
+    try {
+      // Test by provider type, not config id: the config may not be saved yet
+      const query = new URLSearchParams({ apiType });
+      const response = await fetch(`${appApiUrl}/debug/test-ai?${query.toString()}`);
+      const result = (await response.json()) as AIHealthCheckResponse;
+      status = result.status || '';
+      error = result.error || '';
+    } catch (err) {
+      error = err instanceof Error ? err.message : String(err);
+    }
+
+    setTestResult({ status, error, loading: false });
+  };
 
   const handleSave = () => {
     const trimmedModel = model.trim();
@@ -104,8 +153,7 @@ function ProviderConfigDialog({ initial, onCancel, onSave }: ProviderConfigDialo
           fullWidth
           sx={{ marginBottom: 2 }}
           onChange={(change) => {
-            setApiType(ApiTypeFromValue(change.target.value));
-            setModel('');
+            handleProviderChange(change.target.value);
           }}
         >
           {generationApiTypes.map((type) => (
@@ -114,6 +162,28 @@ function ProviderConfigDialog({ initial, onCancel, onSave }: ProviderConfigDialo
             </MenuItem>
           ))}
         </Select>
+        {/* Keyed and uncontrolled: each provider starts expanded only when its
+            connection still needs setup, and entering a key never yanks the
+            section closed mid-typing */}
+        <Accordion
+          key={apiType}
+          disableGutters
+          defaultExpanded={!connection.loading && !connection.ready}
+          sx={{ marginBottom: 2 }}
+        >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography sx={{ marginRight: 2 }}>{ApiTypeName(apiType)} Connection</Typography>
+              <ConnectionStatusChip apiType={apiType} />
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
+            <FormHelperText sx={{ marginBottom: 2 }}>
+              Shared with every configuration that uses {ApiTypeName(apiType)}.
+            </FormHelperText>
+            <ProviderConnectionPanel apiType={apiType} />
+          </AccordionDetails>
+        </Accordion>
         {modelSelectionSupported ? (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Autocomplete
@@ -130,7 +200,9 @@ function ProviderConfigDialog({ initial, onCancel, onSave }: ProviderConfigDialo
                 <TextField
                   {...params}
                   label="Model"
-                  placeholder="Provider default model"
+                  required={modelRequired}
+                  error={missingModel}
+                  placeholder={modelRequired ? undefined : 'Server default model'}
                   slotProps={{
                     ...params.slotProps,
                     input: {
@@ -147,33 +219,48 @@ function ProviderConfigDialog({ initial, onCancel, onSave }: ProviderConfigDialo
               )}
             />
             <Tooltip title="Refresh Models">
-              <IconButton
-                onClick={() => {
-                  void aiModels.refetch();
-                }}
-              >
-                <SyncIcon />
-              </IconButton>
+              <span>
+                <IconButton
+                  disabled={!modelsEnabled}
+                  onClick={() => {
+                    void aiModels.refetch();
+                  }}
+                >
+                  <SyncIcon />
+                </IconButton>
+              </span>
             </Tooltip>
           </Box>
         ) : (
           <FormHelperText>Kobold AI always uses the model currently loaded on the Kobold AI server.</FormHelperText>
         )}
-        {modelSelectionSupported && aiModels.isError ? (
+        {modelSelectionSupported && !connection.loading && !connection.ready ? (
+          <FormHelperText>Set up the {ApiTypeName(apiType)} connection above to load models.</FormHelperText>
+        ) : null}
+        {modelsEnabled && aiModels.isError ? (
           <FormHelperText error>
             Could not load models ({aiModels.error.message}). Type the model name manually.
           </FormHelperText>
         ) : null}
-        {modelSelectionSupported ? (
-          <FormHelperText>
-            Leave the model empty to use the provider default. API keys and endpoints are configured per provider in the
-            settings below.
-          </FormHelperText>
+        {apiType === ApiType.VLLM ? (
+          <FormHelperText>Leave the model empty to use the VLLM server default.</FormHelperText>
         ) : null}
       </DialogContent>
       <DialogActions>
+        <Button
+          sx={{ marginRight: 'auto' }}
+          loading={testResult?.loading}
+          onClick={() => {
+            void testConnection();
+          }}
+        >
+          Test
+        </Button>
+        {testResult && !testResult.loading ? (
+          <FormHelperText error={Boolean(testResult.error)}>{testResult.error || testResult.status}</FormHelperText>
+        ) : null}
         <Button onClick={onCancel}>Cancel</Button>
-        <Button variant="contained" onClick={handleSave}>
+        <Button variant="contained" disabled={missingModel} onClick={handleSave}>
           Save
         </Button>
       </DialogActions>
