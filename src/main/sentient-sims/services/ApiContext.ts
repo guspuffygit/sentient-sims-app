@@ -43,6 +43,7 @@ import { NovelAIService } from './NovelAIService';
 import { OpenAIService } from './OpenAIService';
 import { PatreonService } from './PatreonService';
 import { PromptRequestBuilderService } from './PromptRequestBuilderService';
+import { ProviderConfigService } from './ProviderConfigService';
 import { SentientSimsAIService } from './SentientSimsAIService';
 import { SettingsService } from './SettingsService';
 import { UpdateService } from './UpdateService';
@@ -211,6 +212,7 @@ export class ApiContext {
   private readonly _vllmAIService: VLLMAIService;
   private readonly _openAIService: OpenAIService;
   private readonly _modelSettingsService: ModelSettingsService;
+  private readonly _providerConfigService: ProviderConfigService;
 
   private readonly _novelAITokenCounter: NovelAITokenCounter;
   private readonly _openAITokenCounter: OpenAITokenCounter;
@@ -245,6 +247,7 @@ export class ApiContext {
     this._patreonService = new PatreonService(this);
     this._animationsService = new AnimationsService(this);
     this._modelSettingsService = new ModelSettingsService(this);
+    this._providerConfigService = new ProviderConfigService(this);
 
     this._locationRepository = new LocationRepository(this._db);
     this._memoryRepository = new MemoryRepository(this._db);
@@ -368,8 +371,11 @@ export class ApiContext {
     return this._openAIService;
   }
 
-  get genai(): GenerationService {
-    const aiType = this.settings.aiApiType;
+  get providerConfigs(): ProviderConfigService {
+    return this._providerConfigService;
+  }
+
+  getGenerationService(aiType: ApiType): GenerationService {
     if (aiType === ApiType.SentientSimsAI || aiType === ApiType.CustomAI) {
       return this.sentientSimsAIService;
     }
@@ -393,6 +399,22 @@ export class ApiContext {
     return this.openAIService;
   }
 
+  get genai(): GenerationService {
+    return this.getGenerationService(this.providerConfigs.getDefaultConfig().apiType);
+  }
+
+  getTokenCounter(aiType: ApiType): TokenCounter {
+    if (aiType === ApiType.NovelAI) {
+      return this.novelAITokenCounter;
+    }
+
+    if (aiType === ApiType.OpenAI) {
+      return this.openAITokenCounter;
+    }
+
+    return this.llamaTokenCounter;
+  }
+
   private get novelAITokenCounter(): NovelAITokenCounter {
     return this._novelAITokenCounter;
   }
@@ -406,35 +428,11 @@ export class ApiContext {
   }
 
   get tokenCounter(): TokenCounter {
-    const aiType = this.settings.aiApiType;
-
-    if (aiType === ApiType.NovelAI) {
-      return this.novelAITokenCounter;
-    }
-
-    if (aiType === ApiType.OpenAI) {
-      return this.openAITokenCounter;
-    }
-
-    return this.llamaTokenCounter;
+    return this.getTokenCounter(this.providerConfigs.getDefaultConfig().apiType);
   }
 
   get aiModel(): string | undefined {
-    const aiType = this.settings.aiApiType;
-
-    if (aiType === ApiType.OpenAI) {
-      return this.settings.openaiModel;
-    } else if (aiType === ApiType.SentientSimsAI) {
-      return this.settings.sentientSimsAIModel;
-    } else if (aiType === ApiType.Gemini) {
-      return this.settings.geminiModel;
-    } else if (aiType === ApiType.VLLM) {
-      return this.settings.vllmModel;
-    } else if (aiType === ApiType.NovelAI) {
-      return this.settings.novelAIModel;
-    }
-
-    return undefined;
+    return this.providerConfigs.resolve(this.providerConfigs.getDefaultConfig()).model;
   }
 
   get controller(): ControllerContext {

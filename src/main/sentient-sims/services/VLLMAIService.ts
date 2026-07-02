@@ -17,6 +17,7 @@ import { truncateMessages } from '../util/tokenTruncate';
 import { TokenizeException } from '../exceptions/TokenizeException';
 import { axiosClient } from '../clients/AxiosClient';
 import { ApiContext } from './ApiContext';
+import { ApiType } from '../models/ApiType';
 
 export class VLLMAIService implements GenerationService {
   protected ctx: ApiContext;
@@ -41,9 +42,18 @@ export class VLLMAIService implements GenerationService {
     return `${this.ctx.settings.vllmModel}`;
   }
 
-  async getBreakStringTokens(model: string): Promise<number[]> {
+  // The provider type used when looking up model settings; SentientSimsAIService
+  // overrides this so remote model settings sync only happens for that provider.
+  protected modelSettingsApiType(): ApiType {
+    return ApiType.VLLM;
+  }
+
+  async getBreakStringTokens(model: string, apiType?: ApiType): Promise<number[]> {
     try {
-      const modelSettings = await this.ctx.modelSettings.getModelSettings();
+      const modelSettings = await this.ctx.modelSettings.getModelSettings(
+        model,
+        apiType ?? this.modelSettingsApiType(),
+      );
 
       if (modelSettings.breakStringTokens) {
         log.debug('returning model settings break string tokens');
@@ -71,12 +81,13 @@ export class VLLMAIService implements GenerationService {
   }
 
   async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
-    const model = this.getModel();
-    const modelSettings = await this.ctx.modelSettings.getModelSettings();
+    const model = request.model ?? this.getModel();
+    const apiType = request.apiType ?? this.modelSettingsApiType();
+    const modelSettings = await this.ctx.modelSettings.getModelSettings(model, apiType);
 
     const [messageTokens, breakTokens] = await Promise.all([
-      this.tokenizeMessages(model, request.messages),
-      this.getBreakStringTokens(model),
+      this.tokenizeMessages(model, request.messages, apiType),
+      this.getBreakStringTokens(model, apiType),
     ]);
 
     const messages = truncateMessages(modelSettings.max_tokens, breakTokens, messageTokens.tokens, request.messages);
@@ -164,8 +175,8 @@ export class VLLMAIService implements GenerationService {
     return response.data;
   }
 
-  async tokenizeMessages(model: string, messages: OpenAIMessage[]): Promise<VLLMRTokenizeResponse> {
-    const modelSettings = await this.ctx.modelSettings.getModelSettings();
+  async tokenizeMessages(model: string, messages: OpenAIMessage[], apiType?: ApiType): Promise<VLLMRTokenizeResponse> {
+    const modelSettings = await this.ctx.modelSettings.getModelSettings(model, apiType ?? this.modelSettingsApiType());
     const breakString = modelSettings.breakTokenString || tokenizerBreakString;
 
     const tokenizeRequest: VLLMTokenizeChatRequest = {

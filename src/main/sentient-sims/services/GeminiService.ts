@@ -65,8 +65,9 @@ export class GeminiService implements GenerationService {
   ];
 
   async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
+    const model = request.model ?? this.getGeminiModel();
     const generateRequest: GenerateContentParameters = {
-      model: this.getGeminiModel(),
+      model,
       config: {
         safetySettings: this.safetySettings,
         systemInstruction: request.messages.find((msg) => msg.role === 'system')?.content,
@@ -90,7 +91,7 @@ export class GeminiService implements GenerationService {
       const language = this.ctx.settings.localizationLanguage;
       if (language) {
         const translationRequest: GenerateContentParameters = {
-          model: this.getGeminiModel(),
+          model,
           contents: `Do not include any additional text like "Here is your translation" or other explanations—just the response itself in ${language}. Translate this text to ${language}: ${text}`,
           config: {
             safetySettings: this.safetySettings,

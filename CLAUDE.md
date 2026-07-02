@@ -29,8 +29,9 @@ Backend (src/main/sentient-sims/):
 
   controllers/ - Express route handlers, registered in api.ts
   services/   - Business logic:
-    AIService                   - Orchestrates AI generation across providers
+    AIService                   - Orchestrates AI generation across providers, resolving a provider config per AIActionType
     GenerationService           - Interface implemented by each AI provider
+    ProviderConfigService       - Resolves named provider configs (AIProviderConfig: provider + model) with a default config and per-action overrides; legacy aiApiType stays two-way synced with the default config via SettingsService hooks
     PromptRequestBuilderService - Builds prompts from game state, memories, interaction context
     SettingsService             - Persists user settings via electron-store
     DirectoryService            - Manages Sims 4 mod/save file paths

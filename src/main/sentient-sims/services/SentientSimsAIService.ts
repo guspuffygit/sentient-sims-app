@@ -3,6 +3,7 @@ import { RawAxiosRequestHeaders } from 'axios';
 import { axiosClient } from '../clients/AxiosClient';
 import { VLLMAIService } from './VLLMAIService';
 import { DecodeToken, isTokenExpired } from '../auth/tokenVerifier';
+import { ApiType } from '../models/ApiType';
 
 export class SentientSimsAIService extends VLLMAIService {
   serviceUrl(): string {
@@ -18,6 +19,10 @@ export class SentientSimsAIService extends VLLMAIService {
 
   getModel(): string {
     return this.ctx.settings.sentientSimsAIModel;
+  }
+
+  protected modelSettingsApiType(): ApiType {
+    return ApiType.SentientSimsAI;
   }
 
   async healthCheck() {

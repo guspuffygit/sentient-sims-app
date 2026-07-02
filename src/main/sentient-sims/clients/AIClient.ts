@@ -1,5 +1,6 @@
 import { SentientSimsAIError } from '../exceptions/SentientSimsAIError';
 import { AIModel } from '../models/AIModel';
+import { ApiType } from '../models/ApiType';
 import { InteractionEventResult } from '../models/InteractionEventResult';
 import { InteractionEvents } from '../models/InteractionEvents';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
@@ -18,8 +19,9 @@ export class AIClient extends ApiClient {
     return response.data;
   }
 
-  async getModels(): Promise<AIModel[]> {
-    const response = await fetch(`${this.apiUrl}/ai/v2/models`);
+  async getModels(apiType?: ApiType): Promise<AIModel[]> {
+    const query = apiType ? `?${new URLSearchParams({ apiType: apiType.toString() }).toString()}` : '';
+    const response = await fetch(`${this.apiUrl}/ai/v2/models${query}`);
 
     if (!response.ok) {
       try {

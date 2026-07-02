@@ -39,6 +39,7 @@ import { PromptHistoryMode } from '../models/PromptHistoryMode';
 import { sendModNotification } from '../websocketServer';
 import { ModAddBuff, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { ApiContext } from './ApiContext';
+import { AIActionType, actionTypeForEvent } from '../models/AIActionType';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
@@ -60,7 +61,12 @@ export class AIService {
   }
 
   async generate(promptRequest: OpenAICompatibleRequest) {
-    return this.ctx.genai.sentientSimsGenerate(promptRequest);
+    const providerConfig = this.ctx.providerConfigs.getConfigForAction(AIActionType.GENERATE);
+    return this.ctx.getGenerationService(providerConfig.apiType).sentientSimsGenerate({
+      ...promptRequest,
+      model: promptRequest.model ?? providerConfig.model,
+      apiType: promptRequest.apiType ?? providerConfig.apiType,
+    });
   }
 
   async interactionEvent(event: InteractionEvents): Promise<InteractionEventResult> {
@@ -212,6 +218,11 @@ export class AIService {
   }
 
   async runGeneration(event: InteractionEvents, options: GenerationOptions = {}): Promise<InteractionEventResult> {
+    const providerConfig = this.ctx.providerConfigs.getConfigForAction(actionTypeForEvent(event.event_type));
+    log.debug(
+      `Using provider config for ${event.event_type}: ${providerConfig.name} (${providerConfig.apiType}${providerConfig.model ? `, ${providerConfig.model}` : ''})`,
+    );
+
     const promptOptions: PromptRequestBuilderOptions = {
       action: options.action,
       sexCategoryType: options.sexCategoryType,
@@ -221,8 +232,8 @@ export class AIService {
       preAction: options.preAction,
       prePreAction: options.prePreAction,
       stopTokens: options.stopTokens,
-      apiType: this.ctx.settings.aiApiType,
-      modelSettings: await this.ctx.modelSettings.getModelSettings(),
+      apiType: providerConfig.apiType,
+      modelSettings: await this.ctx.modelSettings.getModelSettings(providerConfig.model, providerConfig.apiType),
       continue: options.continue,
       promptHistoryMode: options.promptHistoryMode,
     };
@@ -251,10 +262,12 @@ export class AIService {
       promptRequest = formatter.formatInput(promptRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(providerConfig.apiType));
     const openAIRequest = openAIRequestBuilder.buildOpenAIRequest(promptRequest);
+    openAIRequest.model = providerConfig.model;
+    openAIRequest.apiType = providerConfig.apiType;
 
-    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
+    const response = await this.ctx.getGenerationService(providerConfig.apiType).sentientSimsGenerate(openAIRequest);
 
     const stopTokens = [];
     // TODO: model specific OUTPUT formatting cleanup stop tokens
@@ -313,8 +326,12 @@ export class AIService {
     };
   }
 
-  async runClassification(classificationRequest: ClassificationRequest): Promise<InteractionEventResult> {
-    const apiType: ApiType = this.ctx.settings.aiApiType;
+  async runClassification(
+    classificationRequest: ClassificationRequest,
+    actionType: AIActionType = AIActionType.CLASSIFICATION,
+  ): Promise<InteractionEventResult> {
+    const providerConfig = this.ctx.providerConfigs.getConfigForAction(actionType);
+    const apiType: ApiType = providerConfig.apiType;
 
     const systemPrompt = defaultClassificationPrompt.replaceAll(
       '{classifiers}',
@@ -333,10 +350,12 @@ export class AIService {
       oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(apiType));
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
+    openAIRequest.model = providerConfig.model;
+    openAIRequest.apiType = apiType;
 
-    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
+    const response = await this.ctx.getGenerationService(apiType).sentientSimsGenerate(openAIRequest);
 
     const output = cleanAIClassificationOutput(response.text);
 
@@ -354,11 +373,15 @@ export class AIService {
   }
 
   async runBuff(event: BuffEventRequest) {
-    const classificationResult = await this.runClassification({
-      name: event.name,
-      classifiers: event.classifiers,
-      messages: event.messages,
-    });
+    // The whole buff pipeline (classification + description) follows the BUFF override
+    const classificationResult = await this.runClassification(
+      {
+        name: event.name,
+        classifiers: event.classifiers,
+        messages: event.messages,
+      },
+      AIActionType.BUFF,
+    );
 
     if (classificationResult.status !== InteractionEventStatus.CLASSIFIED || !classificationResult.text) {
       return;
@@ -389,7 +412,8 @@ export class AIService {
   }
 
   async runBuffDescription(buffRequest: BuffDescriptionRequest): Promise<InteractionEventResult> {
-    const apiType: ApiType = this.ctx.settings.aiApiType;
+    const providerConfig = this.ctx.providerConfigs.getConfigForAction(AIActionType.BUFF);
+    const apiType: ApiType = providerConfig.apiType;
 
     const systemPrompt = `\
 You will write a game buff description that will be displayed about the character ${buffRequest.name}.
@@ -413,10 +437,12 @@ Write me a buff description based on the conversation so that ${buffRequest.name
       oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(apiType));
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
+    openAIRequest.model = providerConfig.model;
+    openAIRequest.apiType = apiType;
 
-    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
+    const response = await this.ctx.getGenerationService(apiType).sentientSimsGenerate(openAIRequest);
 
     const output = `${buffRequest.name} is feeling ${buffRequest.mood} because ${cleanupAIOutput(response.text)}`;
 
@@ -427,8 +453,9 @@ Write me a buff description based on the conversation so that ${buffRequest.name
     };
   }
 
-  async getModels(): Promise<AIModel[]> {
-    return this.ctx.genai.getModels();
+  async getModels(apiType?: ApiType): Promise<AIModel[]> {
+    const service = apiType ? this.ctx.getGenerationService(apiType) : this.ctx.genai;
+    return service.getModels();
   }
 
   async handleInteractionMapping(event: InteractionMappingEvent) {

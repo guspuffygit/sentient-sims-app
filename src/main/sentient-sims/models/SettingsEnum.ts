@@ -38,6 +38,9 @@ export enum SettingsEnum {
   SETUP_WIZARD_PAGE = 'setupWizardPage',
   PATREON_LINKING = 'patreonLinking',
   MAX_RESPONSE_TOKENS = 'maxResponseTokens',
+  AI_PROVIDER_CONFIGS = 'aiProviderConfigs',
+  DEFAULT_AI_PROVIDER_CONFIG_ID = 'defaultAiProviderConfigId',
+  AI_ACTION_PROVIDER_OVERRIDES = 'aiActionProviderOverrides',
 }
 
 export enum DeprecatedSettingsEnum {

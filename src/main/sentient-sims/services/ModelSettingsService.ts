@@ -18,10 +18,6 @@ export class ModelSettingsService {
   }
 
   async syncModelSettings(): Promise<ModelSettingsType> {
-    if (this.ctx.settings.aiApiType !== ApiType.SentientSimsAI) {
-      return this.modelSettings;
-    }
-
     try {
       const response = await axiosClient<ModelSettingsType>({
         url: '/modelsettings',
@@ -43,18 +39,23 @@ export class ModelSettingsService {
     }
   }
 
-  async getModelSettings(): Promise<ModelSettings> {
-    const isCacheStale = !this.lastSyncTimestamp || Date.now() - this.lastSyncTimestamp > CACHE_DURATION_MS;
+  async getModelSettings(model?: string, apiType?: ApiType): Promise<ModelSettings> {
+    const effectiveApiType = apiType ?? this.ctx.providerConfigs.getDefaultConfig().apiType;
 
-    if (isCacheStale) {
-      log.info('Model settings cache is stale or empty. Syncing now...');
-      await this.syncModelSettings();
+    // Only the Sentient Sims AI endpoint serves remote model settings
+    if (effectiveApiType === ApiType.SentientSimsAI) {
+      const isCacheStale = !this.lastSyncTimestamp || Date.now() - this.lastSyncTimestamp > CACHE_DURATION_MS;
+
+      if (isCacheStale) {
+        log.info('Model settings cache is stale or empty. Syncing now...');
+        await this.syncModelSettings();
+      }
     }
 
-    const model = this.ctx.aiModel;
+    const effectiveModel = model ?? this.ctx.aiModel;
 
-    if (model && model in this.modelSettings) {
-      return this.modelSettings[model];
+    if (effectiveModel && effectiveModel in this.modelSettings) {
+      return this.modelSettings[effectiveModel];
     }
 
     return AllModelSettings.default;

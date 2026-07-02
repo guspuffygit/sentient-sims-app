@@ -1,4 +1,5 @@
 import { Animation } from 'main/sentient-sims/models/Animation';
+import { AIActionType } from '../models/AIActionType';
 import { ApiType } from '../models/ApiType';
 import { axiosClient } from '../clients/AxiosClient';
 import { ApiContext } from './ApiContext';
@@ -124,7 +125,10 @@ export class AnimationsService {
   }
 
   isNsfwEnabled(): boolean {
-    if (this.ctx.settings.aiApiType !== ApiType.OpenAI) {
+    // OpenAI censors nsfw content, gate only applies to the provider that
+    // actually handles Wicked Whims generations
+    const wickedWhimsApiType = this.ctx.providerConfigs.getConfigForAction(AIActionType.WICKED_WHIMS).apiType;
+    if (wickedWhimsApiType !== ApiType.OpenAI) {
       return true;
     }
 
