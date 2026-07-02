@@ -4,6 +4,7 @@ import { ApiType } from '../models/ApiType';
 import { InteractionEventResult } from '../models/InteractionEventResult';
 import { InteractionEvents } from '../models/InteractionEvents';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
+import { DirectedSceneRequest } from '../models/DirectedSceneRequest';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { ApiClient } from './ApiClient';
 import { axiosClient } from './AxiosClient';
@@ -16,6 +17,14 @@ export class AIClient extends ApiClient {
 
   async interactionEvent(event: InteractionEvents): Promise<InteractionEventResult> {
     const response = await axiosClient.post<InteractionEventResult>(`${this.apiUrl}/ai/v2/event/interaction`, event);
+    return response.data;
+  }
+
+  async directedScene(request: DirectedSceneRequest): Promise<InteractionEventResult> {
+    const response = await axiosClient.post<InteractionEventResult>(
+      `${this.apiUrl}/ai/v2/event/directed-scene`,
+      request,
+    );
     return response.data;
   }
 

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
 import { InteractionEvents } from '../models/InteractionEvents';
+import { DirectedSceneRequest } from '../models/DirectedSceneRequest';
 import { playTTS, sendChatGeneration } from '../util/notifyRenderer';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { InteractionEventStatus } from '../models/InteractionEventResult';
@@ -37,6 +38,20 @@ export class AIController {
 
     const result = await this.ctx.ai.interactionEvent(event);
     result.input = event;
+    res.json(result);
+    if (result.text) {
+      sendChatGeneration(result);
+    }
+  };
+
+  @CatchErrors()
+  directedSceneEvent = async (req: Request, res: Response) => {
+    const request = req.body as DirectedSceneRequest;
+
+    log.debug(`Directed scene event: ${JSON.stringify(req.body)}`);
+
+    const result = await this.ctx.ai.runDirectedScene(request);
+    result.input = request.event;
     res.json(result);
     if (result.text) {
       sendChatGeneration(result);

@@ -15,10 +15,17 @@ export enum InteractionEventStatus {
   UNCLASSIFIED = 'unclassified',
 }
 
+export type LLMExchange = {
+  label: string;
+  request: OpenAICompatibleRequest;
+  responseText: string;
+};
+
 export type InteractionEventResult = {
   status: InteractionEventStatus;
   memory?: MemoryEntity;
   text?: string;
   request?: OpenAICompatibleRequest;
+  exchanges?: LLMExchange[];
   input?: any;
 };
