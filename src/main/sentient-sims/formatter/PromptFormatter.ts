@@ -476,6 +476,39 @@ export function cleanupAIOutput(text: string, stopTokens?: string[]): string {
   return output.trim();
 }
 
+export type DialogueLine = { speaker: string; text: string };
+
+const dialogueLineRegex = /^([A-Za-z][A-Za-z'-]*(?:\s[A-Za-z][A-Za-z'-]*){0,2}):\s*(?:\([^)]*\)\s*)?"([^"]+)"\s*$/;
+
+/**
+ * Splits screenplay-format AI output (e.g. `Ricky: "Been fishing here for years."`, optionally
+ * `Ricky: (delivery note) "..."`) into per-speaker dialogue lines, dropping any parenthetical
+ * delivery note. Lines with no quoted dialogue at all (pure stage directions) are dropped
+ * entirely since only quoted dialogue should ever be spoken. Falls back to a single Narrator
+ * line covering the whole text when no dialogue lines are found.
+ */
+export function parseDialogueLines(text: string): DialogueLine[] {
+  const lines = text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  const dialogueLines: DialogueLine[] = [];
+  lines.forEach((line) => {
+    const match = dialogueLineRegex.exec(line);
+    if (match) {
+      dialogueLines.push({ speaker: match[1].trim(), text: match[2].trim() });
+    }
+  });
+
+  if (dialogueLines.length === 0) {
+    const wholeText = text.trim();
+    return wholeText.length === 0 ? [] : [{ speaker: 'Narrator', text: wholeText }];
+  }
+
+  return dialogueLines;
+}
+
 export function cleanAIClassificationOutput(text: string): string {
   let output: string = text.trim();
 

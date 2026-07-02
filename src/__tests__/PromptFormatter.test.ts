@@ -1,5 +1,7 @@
 import { InteractionEvent, SSEventType, SSEnvironment } from 'main/sentient-sims/models/InteractionEvents';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 import {
   BodyState,
   cleanupAIOutput,
@@ -7,13 +9,17 @@ import {
   formatWeather,
   formatWWProperties,
   hasWWProperties,
+  parseDialogueLines,
 } from 'main/sentient-sims/formatter/PromptFormatter';
+import { assignVoicesToSpeakers } from 'main/sentient-sims/formatter/VoiceAssignment';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
 import { OpenAIRequestBuilder, PromptRequest } from 'main/sentient-sims/models/OpenAIRequestBuilder';
 import { SimAge } from 'main/sentient-sims/models/SimAge';
-import { mockApiContext } from './util';
+import { defaultSentientSimsAIHost } from 'main/sentient-sims/constants';
+import { SentientSimsAITTSSettings } from 'main/sentient-sims/models/SentientSimsAITTSSettings';
+import { mockApiContext, randomString } from './util';
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 
 describe('Output', () => {
@@ -31,6 +37,92 @@ describe('Output', () => {
     expect(result).toContain('Ricky:');
     expect(result).toContain('"Been fishing here for years.');
     expect(result).toMatch(/"$/);
+  });
+
+  describe('parseDialogueLines', () => {
+    it('parses a single dialogue line', () => {
+      const result = parseDialogueLines('Ricky: "Been fishing here for years."');
+      expect(result).toEqual([{ speaker: 'Ricky', text: 'Been fishing here for years.' }]);
+    });
+
+    it('drops delivery notes and keeps only quoted dialogue', () => {
+      const screenplay = 'Ricky smirks, leaning back.\nRicky: "Been fishing here for years. You should try it."';
+      const result = parseDialogueLines(screenplay);
+      expect(result).toEqual([{ speaker: 'Ricky', text: 'Been fishing here for years. You should try it.' }]);
+      result.forEach((line) => {
+        expect(line.text).not.toContain('smirks');
+      });
+    });
+
+    it('parses a multi-speaker exchange in order', () => {
+      const screenplay = 'Ricky: "You should try fishing here."\nRichy: "Maybe next weekend."';
+      const result = parseDialogueLines(screenplay);
+      expect(result).toEqual([
+        { speaker: 'Ricky', text: 'You should try fishing here.' },
+        { speaker: 'Richy', text: 'Maybe next weekend.' },
+      ]);
+    });
+
+    it('drops an inline parenthetical delivery note before the quote', () => {
+      const screenplay = 'Richy Richardson: (good-natured) "Only you would discover that."';
+      const result = parseDialogueLines(screenplay);
+      expect(result).toEqual([{ speaker: 'Richy Richardson', text: 'Only you would discover that.' }]);
+    });
+
+    it('parses multi-word speaker names', () => {
+      const result = parseDialogueLines('Ricky Rickerson: "Hello there."');
+      expect(result).toEqual([{ speaker: 'Ricky Rickerson', text: 'Hello there.' }]);
+    });
+
+    it('falls back to a single Narrator line for plain narrator prose', () => {
+      const narration = 'The house is quiet late at night, warm and lived-in.';
+      const result = parseDialogueLines(narration);
+      expect(result).toEqual([{ speaker: 'Narrator', text: narration }]);
+    });
+
+    it('falls back to Narrator when only delivery notes are present (no dialogue lines)', () => {
+      const result = parseDialogueLines('Ricky smirks, leaning back.');
+      expect(result).toEqual([{ speaker: 'Narrator', text: 'Ricky smirks, leaning back.' }]);
+    });
+
+    it('returns an empty array for empty input', () => {
+      expect(parseDialogueLines('')).toEqual([]);
+    });
+
+    it('does not misparse a colon-only line with no quotes', () => {
+      const result = parseDialogueLines('Note: something happened');
+      expect(result).toEqual([{ speaker: 'Narrator', text: 'Note: something happened' }]);
+    });
+  });
+
+  describe('assignVoicesToSpeakers', () => {
+    it('assigns the full pool to a single speaker (legacy blended behavior)', () => {
+      const pool = ['af_heart', 'am_adam', 'bf_emma'];
+      const result = assignVoicesToSpeakers(['Ricky'], pool);
+      expect(result.get('Ricky')).toEqual(pool);
+    });
+
+    it('assigns one distinct voice per speaker deterministically', () => {
+      const pool = ['af_heart', 'am_adam', 'bf_emma'];
+      const first = assignVoicesToSpeakers(['Ricky', 'Richy'], pool);
+      const second = assignVoicesToSpeakers(['Ricky', 'Richy'], pool);
+      expect(first.get('Ricky')).toHaveLength(1);
+      expect(first.get('Richy')).toHaveLength(1);
+      expect(first.get('Ricky')).toEqual(second.get('Ricky'));
+      expect(first.get('Richy')).toEqual(second.get('Richy'));
+    });
+
+    it('degrades to the same single voice for multiple speakers when the pool has only one voice', () => {
+      const result = assignVoicesToSpeakers(['Ricky', 'Richy'], ['af_heart']);
+      expect(result.get('Ricky')).toEqual(['af_heart']);
+      expect(result.get('Richy')).toEqual(['af_heart']);
+    });
+
+    it('returns empty assignments when the pool is empty', () => {
+      const result = assignVoicesToSpeakers(['Ricky', 'Richy'], []);
+      expect(result.get('Ricky')).toEqual([]);
+      expect(result.get('Richy')).toEqual([]);
+    });
   });
 
   describe('Event Formatter', () => {
@@ -175,11 +267,25 @@ describe('Output', () => {
       expect(result.participants).toContain('Write Ricky Rickerson consistently with their traits');
 
       // If an API key is available, send the prompt and show the AI response
+      //
+      // Easy way to try different chat APIs / voice options: this reads credentials straight
+      // from the app's own config store (%APPDATA%\sentient-sims-app\config.json), so swapping
+      // `ctx.settings.aiApiType` below to another ApiType + its matching key field (e.g.
+      // `config.geminiKeys` for Gemini), or editing the voice pool/model further down, is all
+      // that's needed to try a different combination.
       const configPath = `${process.env.APPDATA}\\sentient-sims-app\\config.json`;
       let openaiKey = process.env.OPENAI_KEY;
       let openaiModel: string | undefined;
+      type TestConfig = {
+        openaiKey?: string;
+        openaiModel?: string;
+        accessToken?: string;
+        sentientsimsAIEndpoint?: string;
+        sentientsimsaiTtsSettings?: SentientSimsAITTSSettings;
+      };
+      let config: TestConfig | undefined;
       if (fs.existsSync(configPath)) {
-        const config = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as { openaiKey: string; openaiModel: string };
+        config = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as TestConfig;
         openaiKey = openaiKey ?? config.openaiKey;
         openaiModel = config.openaiModel;
       }
@@ -197,7 +303,8 @@ describe('Output', () => {
         ctx.memoryRepository.createMemory({
           memory: {
             action: 'Ricky Rickerson and Richy Richardson settle in.',
-            content: 'The house is quiet late at night, warm and lived-in. Ricky and Richy are both relaxed and in good spirits — the easy kind of evening where a conversation just happens.',
+            content:
+              'The house is quiet late at night, warm and lived-in. Ricky and Richy are both relaxed and in good spirits — the easy kind of evening where a conversation just happens.',
             location_id: event.environment.location_id,
             event_type: event.event_type,
           },
@@ -207,33 +314,111 @@ describe('Output', () => {
         const promptOptions = {
           action: '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
           apiType: ApiType.SentientSimsAI,
-          modelSettings: { temperature: undefined, top_p: undefined, top_k: undefined, repetition_penalty: undefined, max_tokens: 5000 },
+          modelSettings: {
+            temperature: undefined,
+            top_p: undefined,
+            top_k: undefined,
+            repetition_penalty: undefined,
+            max_tokens: 5000,
+          },
         };
 
         // Exchange 1 — narrator scene-setter in memory
         const result1 = ctx.promptBuilder.buildPromptRequest(event, promptOptions);
-        const reviewed1 = await ctx.ai.runDirectorReview(
-          cleanupAIOutput((await ctx.genai.sentientSimsGenerate(requestBuilder.buildOpenAIRequest(result1))).text),
-        );
+        const genStart1 = Date.now();
+        const genResponse1 = await ctx.genai.sentientSimsGenerate(requestBuilder.buildOpenAIRequest(result1));
+        console.log(`Exchange 1 generation took ${Date.now() - genStart1}ms`);
+        const reviewStart1 = Date.now();
+        const reviewed1 = await ctx.ai.runDirectorReview(cleanupAIOutput(genResponse1.text));
+        console.log(`Exchange 1 director review took ${Date.now() - reviewStart1}ms`);
         console.log('\n=== EXCHANGE 1 ===');
         console.log(reviewed1);
         console.log('=================\n');
         expect(reviewed1).toBeTruthy();
 
         ctx.memoryRepository.createMemory({
-          memory: { action: result1.action, content: reviewed1, location_id: event.environment.location_id, event_type: event.event_type },
+          memory: {
+            action: result1.action,
+            content: reviewed1,
+            location_id: event.environment.location_id,
+            event_type: event.event_type,
+          },
           participants,
         });
 
         // Exchange 2 — scene-setter + exchange 1 in memory
         const result2 = ctx.promptBuilder.buildPromptRequest(event, promptOptions);
-        const reviewed2 = await ctx.ai.runDirectorReview(
-          cleanupAIOutput((await ctx.genai.sentientSimsGenerate(requestBuilder.buildOpenAIRequest(result2))).text),
-        );
+        const genStart2 = Date.now();
+        const genResponse2 = await ctx.genai.sentientSimsGenerate(requestBuilder.buildOpenAIRequest(result2));
+        console.log(`Exchange 2 generation took ${Date.now() - genStart2}ms`);
+        const reviewStart2 = Date.now();
+        const reviewed2 = await ctx.ai.runDirectorReview(cleanupAIOutput(genResponse2.text));
+        console.log(`Exchange 2 director review took ${Date.now() - reviewStart2}ms`);
         console.log('\n=== EXCHANGE 2 ===');
         console.log(reviewed2);
         console.log('=================\n');
         expect(reviewed2).toBeTruthy();
+
+        // Download per-character voice bits for the final reviewed dialogue and save them to
+        // disk (no playback) so a human can listen and confirm dialogue-only, per-character voices.
+        const accessToken = process.env.ACCESS_TOKEN ?? config?.accessToken;
+        if (accessToken) {
+          const endpoint = config?.sentientsimsAIEndpoint ?? defaultSentientSimsAIHost;
+          const ttsSettings = config?.sentientsimsaiTtsSettings;
+          const model = ttsSettings?.model ?? 'kokoro';
+          const responseFormat = ttsSettings?.response_format ?? 'wav';
+          const speed = ttsSettings?.speed ?? 1.0;
+          // Fallback pool demonstrates per-character differentiation even on a machine that has
+          // never configured 2+ voices in Settings — edit this to try other voices/models.
+          const pool: string[] = ttsSettings?.voice.length ? ttsSettings.voice : ['af_heart', 'am_adam'];
+
+          const dialogueLines = parseDialogueLines(reviewed2);
+          const assignments = assignVoicesToSpeakers(
+            dialogueLines.map((line) => line.speaker),
+            pool,
+          );
+
+          const outputDir = path.join(os.tmpdir(), 'sentient-sims-app-test', randomString(), 'voice-output');
+          fs.mkdirSync(outputDir, { recursive: true });
+
+          for (const [index, line] of dialogueLines.entries()) {
+            const voice = assignments.get(line.speaker) ?? pool;
+            const fetchStart = Date.now();
+            const response = await fetch(`${endpoint}/v2/audio/speech`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authentication': accessToken,
+                'sentient-sims-model': model,
+              },
+              body: JSON.stringify({
+                model,
+                input: line.text,
+                voice: voice.join('+'),
+                response_format: responseFormat,
+                speed,
+              }),
+            });
+            const elapsed = Date.now() - fetchStart;
+
+            if (!response.ok) {
+              console.log(`TTS request failed for speaker ${line.speaker}: ${response.status} (${elapsed}ms)`);
+              continue;
+            }
+
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            const filePath = path.join(outputDir, `line-${index}-${line.speaker.replace(/\s+/g, '_')}.wav`);
+            fs.writeFileSync(filePath, buffer);
+            console.log(
+              `Saved TTS audio for "${line.speaker}" (voice: ${voice.join('+')}) -> ${filePath} (${buffer.length} bytes, ${elapsed}ms)`,
+            );
+          }
+        } else {
+          console.log(
+            'No accessToken found — skipping TTS download. Set ACCESS_TOKEN env var or save it in app settings.',
+          );
+        }
       } else {
         console.log(
           'No OpenAI key found — skipping generation. Set OPENAI_KEY env var or save the key in app settings.',

@@ -8,6 +8,7 @@ import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { CaughtError } from '../models/CaughtError';
 import { getAllBrowserWindows } from './browserWindows';
+import { parseDialogueLines } from '../formatter/PromptFormatter';
 
 function notifyAllWindows(message: string, ...args: unknown[]) {
   getAllBrowserWindows().forEach((wnd) => {
@@ -80,7 +81,8 @@ export function sendChatGeneration(response: InteractionEventResult) {
 
 export function playTTS(text: string) {
   log.debug('Sending on-voice');
-  notifyAllWindows('on-voice', text);
+  const lines = parseDialogueLines(text);
+  notifyAllWindows('on-voice', lines);
 }
 
 export function sendPopUpNotification(message?: string) {
