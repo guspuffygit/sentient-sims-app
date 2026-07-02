@@ -4,6 +4,7 @@ import {
   AccordionSummary,
   Autocomplete,
   Box,
+  createFilterOptions,
   Button,
   CircularProgress,
   Dialog,
@@ -70,6 +71,8 @@ function defaultModelFor(apiType: ApiType): string {
   }
 }
 
+const modelFilter = createFilterOptions<string>();
+
 type ProviderConfigDialogProps = {
   initial?: AIProviderConfig;
   onCancel: () => void;
@@ -81,6 +84,10 @@ function ProviderConfigDialog({ initial, onCancel, onSave }: ProviderConfigDialo
   const [name, setName] = useState(initial?.name ?? '');
   const [apiType, setApiType] = useState<ApiType>(initial?.apiType ?? ApiType.OpenAI);
   const [model, setModel] = useState(() => (initial ? (initial.model ?? '') : defaultModelFor(ApiType.OpenAI)));
+  // The model input is prefilled, and Autocomplete's default filtering would
+  // narrow the open dropdown to entries matching that prefill - hiding the
+  // fetched model list. Only filter after the user actually types.
+  const [modelFilterActive, setModelFilterActive] = useState(false);
   const [testResult, setTestResult] = useState<AITestStatus | undefined>();
 
   const connection = useProviderConnectionStatus(apiType);
@@ -191,9 +198,16 @@ function ProviderConfigDialog({ initial, onCancel, onSave }: ProviderConfigDialo
               fullWidth
               size="small"
               options={aiModels.data?.map((aiModel) => aiModel.name) ?? []}
+              filterOptions={(options, state) => (modelFilterActive ? modelFilter(options, state) : options)}
               inputValue={model}
-              onInputChange={(_event, value) => {
+              onOpen={() => {
+                setModelFilterActive(false);
+              }}
+              onInputChange={(_event, value, reason) => {
                 setModel(value);
+                if (reason === 'input') {
+                  setModelFilterActive(true);
+                }
               }}
               loading={aiModels.isFetching}
               renderInput={(params) => (
