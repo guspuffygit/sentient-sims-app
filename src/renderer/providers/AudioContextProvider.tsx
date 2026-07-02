@@ -1,6 +1,7 @@
 import { createContext, ReactNode, use, useCallback, useEffect, useMemo, useState } from 'react';
 import log from 'electron-log';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
+import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
 import { useElevenLabsTTS } from 'renderer/voice/useElevenLabsTTS';
 import { useSentientSimsTTS } from 'renderer/voice/useSentientSimsTTS';
 import { useAISettings } from './AISettingsProvider';
@@ -77,14 +78,30 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
     tts?.stop();
   }, [tts]);
 
+  const speakDialogueLines = useCallback(
+    async (lines: DialogueLine[]) => {
+      if (!aiSettings.ttsEnabled || lines.length === 0) return;
+
+      const uniqueSpeakers = new Set(lines.map((line) => line.speaker));
+
+      if (aiSettings.ttsApiType === ApiType.SentientSimsAI && uniqueSpeakers.size > 1 && sentientSimsTTS.speakLines) {
+        await sentientSimsTTS.speakLines(lines);
+        return;
+      }
+
+      await speak(lines.map((line) => line.text).join(' '));
+    },
+    [aiSettings.ttsEnabled, aiSettings.ttsApiType, sentientSimsTTS, speak],
+  );
+
   useEffect(() => {
-    const removeListener = window.electron.onVoice((_event: any, text: string) => {
-      void speak(text);
+    const removeListener = window.electron.onVoice((_event: any, lines: DialogueLine[]) => {
+      void speakDialogueLines(lines);
     });
     return () => {
       removeListener();
     };
-  }, [speak]);
+  }, [speakDialogueLines]);
 
   const contextValue = useMemo(() => {
     return {

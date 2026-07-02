@@ -13,7 +13,11 @@ import {
 import { axiosClient } from 'main/sentient-sims/clients/AxiosClient';
 import { SentenceTokenizeResponse } from 'main/sentient-sims/models/SentenceTokenizeResponse';
 import { SentenceTokenizeRequest } from 'main/sentient-sims/models/SentenceTokenizerRequest';
+import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
+import { assignVoicesToSpeakers } from 'main/sentient-sims/formatter/VoiceAssignment';
 import { TTSHook } from './TTSHook';
+
+type QueuedSpeech = { text: string; voice: string[] };
 
 export function useSentientSimsTTS(): TTSHook {
   const aiSettings = useAISettings();
@@ -30,7 +34,7 @@ export function useSentientSimsTTS(): TTSHook {
   const [error, setError] = useState<string | undefined>();
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const sentenceQueueRef = useRef<string[]>([]);
+  const sentenceQueueRef = useRef<QueuedSpeech[]>([]);
   const audioUrlQueueRef = useRef<string[]>([]);
 
   const playerRunningRef = useRef(false);
@@ -43,12 +47,13 @@ export function useSentientSimsTTS(): TTSHook {
     fetcherRunningRef.current = true;
 
     while (sentenceQueueRef.current.length > 0) {
-      const text = sentenceQueueRef.current.shift();
-      if (!text) continue;
+      const item = sentenceQueueRef.current.shift();
+      if (!item) continue;
+      const { text, voice } = item;
 
       log.debug(`Sentient Sims TTS Fetcher: Fetching audio for "${text}"`);
 
-      if (sentientSimsAITTSSettings.value.voice.length === 0) {
+      if (voice.length === 0) {
         setError('At least one Sentient Sims Voice must be selected');
         break;
       }
@@ -56,7 +61,7 @@ export function useSentientSimsTTS(): TTSHook {
       const requestBody = {
         model: sentientSimsAITTSSettings.value.model,
         input: text,
-        voice: sentientSimsAITTSSettings.value.voice.join('+'),
+        voice: voice.join('+'),
         response_format: sentientSimsAITTSSettings.value.response_format,
         speed: sentientSimsAITTSSettings.value.speed ?? defaultSentientSimsAITTSSettings.speed,
       };
@@ -167,7 +172,9 @@ export function useSentientSimsTTS(): TTSHook {
         const { sentences } = response.data;
 
         if (sentences.length > 0) {
-          sentences.forEach((sentence) => sentenceQueueRef.current.push(sentence));
+          sentences.forEach((sentence) =>
+            sentenceQueueRef.current.push({ text: sentence, voice: sentientSimsAITTSSettings.value.voice }),
+          );
           log.debug(`Queued ${sentences.length} sentences. Starting fetcher and player.`);
           void fetcherLoop();
           void playerLoop();
@@ -181,7 +188,41 @@ export function useSentientSimsTTS(): TTSHook {
         setError(errorMessage);
       }
     },
-    [sentientSimsAIEndpointSetting.value, sentientSimsAITokenSetting.value, fetcherLoop, playerLoop],
+    [
+      sentientSimsAIEndpointSetting.value,
+      sentientSimsAITokenSetting.value,
+      sentientSimsAITTSSettings.value,
+      fetcherLoop,
+      playerLoop,
+    ],
+  );
+
+  const speakLines = useCallback(
+    (lines: DialogueLine[]): Promise<void> => {
+      if (lines.length === 0) return Promise.resolve();
+
+      const pool = sentientSimsAITTSSettings.value.voice;
+      if (pool.length === 0) {
+        setError('At least one Sentient Sims Voice must be selected');
+        return Promise.resolve();
+      }
+
+      const assignments = assignVoicesToSpeakers(
+        lines.map((line) => line.speaker),
+        pool,
+      );
+
+      lines.forEach((line) => {
+        const voice = assignments.get(line.speaker) ?? pool;
+        sentenceQueueRef.current.push({ text: line.text, voice });
+      });
+
+      log.debug(`Queued ${lines.length} dialogue lines. Starting fetcher and player.`);
+      void fetcherLoop();
+      void playerLoop();
+      return Promise.resolve();
+    },
+    [sentientSimsAITTSSettings.value, fetcherLoop, playerLoop],
   );
 
   const stopTTS = useCallback(() => {
@@ -204,5 +245,5 @@ export function useSentientSimsTTS(): TTSHook {
     };
   }, []);
 
-  return { speak, stop: stopTTS, isPlaying, error };
+  return { speak, speakLines, stop: stopTTS, isPlaying, error };
 }
