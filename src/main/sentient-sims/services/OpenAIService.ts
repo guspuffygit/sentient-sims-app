@@ -95,7 +95,7 @@ export class OpenAIService implements GenerationService {
 
   async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
     const completionRequest: ChatCompletionCreateParams = {
-      model: this.getOpenAIModel(),
+      model: request.model ?? this.getOpenAIModel(),
       max_tokens: request.maxResponseTokens,
       messages: request.messages.map((message) => {
         return {
