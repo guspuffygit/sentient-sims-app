@@ -28,6 +28,7 @@ import {
 } from '../models/OpenAIRequestBuilder';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { DirectedSceneRequest } from '../models/DirectedSceneRequest';
+import { SentientSim } from '../models/SentientSim';
 import { cleanAIClassificationOutput, cleanupAIOutput } from '../formatter/PromptFormatter';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { InputFormatter } from '../formatter/InputOutputFormatting';
@@ -313,7 +314,7 @@ export class AIService {
       output = directorReview.text;
       newMemory.content = output;
 
-      this.playTts(output);
+      this.playTts(output, event.sentient_sims);
 
       const exchanges: LLMExchange[] = [
         { label: 'Scene Generation', request: openAIRequest, responseText: rawSceneText },
@@ -513,7 +514,7 @@ Keep the scene to two to four lines total.`;
     };
     this.ctx.memoryRepository.createMemory({ memory: newMemory, participants });
 
-    this.playTts(finalText);
+    this.playTts(finalText, event.sentient_sims);
 
     return {
       status: InteractionEventStatus.GENERATED,
@@ -682,7 +683,7 @@ Write me a buff description based on the conversation so that ${buffRequest.name
     return { status: InteractionEventStatus.NOOP };
   }
 
-  playTts(text: string) {
-    playTTS(text);
+  playTts(text: string, sims?: SentientSim[]) {
+    playTTS(text, sims);
   }
 }
