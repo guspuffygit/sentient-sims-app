@@ -227,9 +227,11 @@ export default function useChatGeneration(): ChatGeneration {
 
   const continueDirectedScene = async () => {
     if (!lastDirectedScene) return;
-    // Same scenario, fresh event id — memory from the previous scene carries the story forward
+    // Same scenario, fresh event id — memory from the previous scene carries the story forward,
+    // and continueScene tells the pipeline to advance the conversation instead of replaying the action
     await generateDirectedScene({
       ...lastDirectedScene,
+      continueScene: true,
       event: { ...lastDirectedScene.event, event_id: crypto.randomUUID() },
     });
   };

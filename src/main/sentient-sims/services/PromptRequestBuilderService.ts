@@ -259,13 +259,16 @@ export class PromptRequestBuilderService {
       sceneObjective = 'Let the exchange happen organically — genuine reaction and everyday social texture.';
     }
 
+    const multipleCharacters = event.sentient_sims.length >= 2;
     const lines = [
       `Tone: ${sceneTone}.`,
       `Scene objective: ${sceneObjective}`,
       'Delivery notes are optional — use one when it sharpens how a line lands. Pure dialogue is fine when the words carry themselves.',
       'Delivery notes describe how a character sounds or feels, not what they physically do. Keep them under eight words.',
       'Do not invent physical actions, furniture, props, or activities unless already established in the scene.',
-      'Length: two to four lines total. Cut anything that does not pull its weight.',
+      multipleCharacters
+        ? 'Include at least one back-and-forth exchange: each character speaks at least once, and the character who spoke first responds again. Keep it to three to six lines total.'
+        : 'Length: two to four lines total. Cut anything that does not pull its weight.',
     ];
 
     return `<DIRECTOR>\n${lines.join('\n')}\n</DIRECTOR>`;
@@ -277,6 +280,7 @@ export class PromptRequestBuilderService {
       "Avoid sudden major revelations, dramatic escalations, or events that would fundamentally alter the characters' lives.",
       'Do not invent new facts about characters, locations, or past events not already established.',
       'Responses should be natural and conversational — not cinematic, not poetic, not melodramatic.',
+      'If the scene is already in progress, continue it mid-flow — do not re-describe the setting, re-introduce the characters, or restate what has already happened.',
     ];
     return `<SCENE_GUIDANCE>\n${lines.join(' ')}\n</SCENE_GUIDANCE>`;
   }

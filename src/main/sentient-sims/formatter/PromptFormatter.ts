@@ -476,6 +476,18 @@ export function cleanupAIOutput(text: string, stopTokens?: string[]): string {
   return output.trim();
 }
 
+/**
+ * Formats a screenplay scene for the chat window: every non-empty line gets a blank line
+ * before and after it so each character's line stands apart visually.
+ */
+export function formatSceneForChatWindow(text: string): string {
+  return text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .join('\n\n');
+}
+
 export type DialogueLine = {
   speaker: string;
   text: string;

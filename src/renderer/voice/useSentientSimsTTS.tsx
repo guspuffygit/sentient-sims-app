@@ -147,6 +147,21 @@ export function useSentientSimsTTS(): TTSHook {
     log.debug('Player loop finished.');
   }, [aiSettings.ttsVolume]);
 
+  // Resolves once every queued sentence has been fetched and played, so callers can
+  // await full playback and serialize one scene after another
+  const waitForIdle = useCallback(async () => {
+    while (
+      fetcherRunningRef.current ||
+      playerRunningRef.current ||
+      sentenceQueueRef.current.length > 0 ||
+      audioUrlQueueRef.current.length > 0
+    ) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
+    }
+  }, []);
+
   const speak = useCallback(
     async (text: string) => {
       log.debug(`Sentient Sims Voice Speak called: ${text}`);
@@ -171,6 +186,7 @@ export function useSentientSimsTTS(): TTSHook {
           log.debug(`Queued ${sentences.length} sentences. Starting fetcher and player.`);
           void fetcherLoop();
           void playerLoop();
+          await waitForIdle();
         } else {
           log.error('No sentences returned from tokenization.');
         }
@@ -187,17 +203,18 @@ export function useSentientSimsTTS(): TTSHook {
       sentientSimsAITTSSettings.value,
       fetcherLoop,
       playerLoop,
+      waitForIdle,
     ],
   );
 
   const speakLines = useCallback(
-    (lines: DialogueLine[]): Promise<void> => {
-      if (lines.length === 0) return Promise.resolve();
+    async (lines: DialogueLine[]): Promise<void> => {
+      if (lines.length === 0) return;
 
       const pool = sentientSimsAITTSSettings.value.voice;
       if (pool.length === 0) {
         setError('At least one Sentient Sims Voice must be selected');
-        return Promise.resolve();
+        return;
       }
 
       const assignments = assignVoicesToSpeakers(
@@ -213,9 +230,9 @@ export function useSentientSimsTTS(): TTSHook {
       log.debug(`Queued ${lines.length} dialogue lines. Starting fetcher and player.`);
       void fetcherLoop();
       void playerLoop();
-      return Promise.resolve();
+      await waitForIdle();
     },
-    [sentientSimsAITTSSettings.value, fetcherLoop, playerLoop],
+    [sentientSimsAITTSSettings.value, fetcherLoop, playerLoop, waitForIdle],
   );
 
   const stopTTS = useCallback(() => {

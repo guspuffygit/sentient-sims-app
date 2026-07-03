@@ -33,19 +33,23 @@ export type ElevenLabsTTSSettings = {
   model: (string & {}) | ElevenLabsSpeechModel;
   voice: string;
   output_format: ElevenLabsOutputFormat;
-  voice_settings: ElevenLabsVoiceSettings;
+  // Optional because settings stored by older app versions predate this field
+  voice_settings?: ElevenLabsVoiceSettings;
+};
+
+export const defaultElevenLabsVoiceSettings: ElevenLabsVoiceSettings = {
+  similarity_boost: 0,
+  style: 0,
+  use_speaker_boost: true,
+  // 1.2 is the ElevenLabs API maximum — dialogue reads sluggish at 1.0
+  speed: 1.2,
 };
 
 export const defaultElevenLabsTTSSettings: ElevenLabsTTSSettings = {
   model: ElevenLabsSpeechModel.ELEVEN_FLASH_V2_5,
   voice: '21m00Tcm4TlvDq8ikWAM',
   output_format: ElevenLabsOutputFormat.mp3_44100_128,
-  voice_settings: {
-    similarity_boost: 0,
-    style: 0,
-    use_speaker_boost: true,
-    speed: 1.0,
-  },
+  voice_settings: defaultElevenLabsVoiceSettings,
 };
 
 export function toSpeechModel(model?: string): ElevenLabsSpeechModel {
