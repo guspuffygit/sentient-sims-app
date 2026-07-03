@@ -13,7 +13,7 @@ import {
   WantsInteractionEvent,
 } from '../models/InteractionEvents';
 import { getRandomItem } from '../util/getRandomItem';
-import { InteractionEventResult, InteractionEventStatus } from '../models/InteractionEventResult';
+import { InteractionEventResult, InteractionEventStatus, LLMExchange } from '../models/InteractionEventResult';
 import { notifyMapAnimation, notifyMapInteraction, playTTS, sendChatGeneration } from '../util/notifyRenderer';
 import { GenerationOptions, PromptRequestBuilderOptions } from './PromptRequestBuilderService';
 import { containsPlayerSim } from '../util/eventContainsPlayerSim';
@@ -27,6 +27,7 @@ import {
   OpenAIRequestBuilder,
 } from '../models/OpenAIRequestBuilder';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
+import { DirectedSceneRequest } from '../models/DirectedSceneRequest';
 import { cleanAIClassificationOutput, cleanupAIOutput } from '../formatter/PromptFormatter';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { InputFormatter } from '../formatter/InputOutputFormatting';
@@ -307,15 +308,23 @@ export class AIService {
     output = output.trim();
 
     if (output.length > 1) {
-      output = await this.runDirectorReview(output);
+      const rawSceneText = output;
+      const directorReview = await this.runDirectorReview(rawSceneText);
+      output = directorReview.text;
       newMemory.content = output;
 
       this.playTts(output);
+
+      const exchanges: LLMExchange[] = [
+        { label: 'Scene Generation', request: openAIRequest, responseText: rawSceneText },
+        { label: 'Director Review', request: directorReview.request, responseText: directorReview.text },
+      ];
 
       return {
         status: InteractionEventStatus.GENERATED,
         text: output,
         request: response.request,
+        exchanges,
         memory: newMemory,
       };
     }
@@ -327,9 +336,10 @@ export class AIService {
     };
   }
 
-  async runDirectorReview(text: string): Promise<string> {
+  async runDirectorReview(text: string): Promise<{ text: string; request: OpenAICompatibleRequest }> {
     const providerConfig = this.ctx.providerConfigs.getDefaultConfig();
     const apiType: ApiType = providerConfig.apiType;
+
 
     const systemPrompt = `You are a director reviewing a short generated scene from The Sims. Fix any issues and return only the corrected text — no commentary, no labels, no extra formatting.
 
@@ -359,7 +369,159 @@ If the scene is already good, return it unchanged.`;
 
     const response = await this.ctx.getGenerationService(apiType).sentientSimsGenerate(openAIRequest);
     const reviewed = cleanupAIOutput(response.text);
-    return reviewed.length > 1 ? reviewed : text;
+    return { text: reviewed.length > 1 ? reviewed : text, request: openAIRequest };
+  }
+
+  private async runOneShot(
+    label: string,
+    systemPrompt: string,
+    userText: string,
+    maxResponseTokens: number,
+    model?: string,
+  ): Promise<{ exchange: LLMExchange; text: string }> {
+    let oneShotRequest: OneShotRequest = {
+      systemPrompt,
+      messages: [userText],
+      maxResponseTokens,
+      maxTokens: 3900,
+    };
+
+    getInputFormatters(this.ctx.settings.aiApiType).forEach((formatter) => {
+      oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
+    });
+
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
+    const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
+    if (model) {
+      openAIRequest.model = model;
+    }
+    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
+    return { exchange: { label, request: openAIRequest, responseText: response.text }, text: response.text };
+  }
+
+  async runDirectedScene(request: DirectedSceneRequest): Promise<InteractionEventResult> {
+    const { event } = request;
+    const action = event.testing_action;
+    if (!action || event.sentient_sims.length < 2) {
+      log.error('Directed scene requires a testing_action and at least two sims');
+      return { status: InteractionEventStatus.NOOP };
+    }
+
+    const promptOptions: PromptRequestBuilderOptions = {
+      action,
+      apiType: this.ctx.settings.aiApiType,
+      modelSettings: await this.ctx.modelSettings.getModelSettings(),
+    };
+    const promptRequest = this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
+
+    const sceneContext = [`<LOCATION>\n${promptRequest.location}\n</LOCATION>`, promptRequest.participants].join('\n');
+
+    const previously = promptRequest.memories
+      .slice(-6)
+      .map((memory) => memory.content)
+      .join('\n');
+    const previouslyBlock = previously ? `Previously in this scene:\n${previously}\n\n` : '';
+    const sceneAction = promptRequest.action ?? action;
+
+    const simNames = event.sentient_sims.map((sim) => sim.name);
+    const exchanges: LLMExchange[] = [];
+
+    // 1. Director briefing: one short cue per actor
+    const briefingSystemPrompt = `You are the director of a short scene in The Sims. Based on the scene context and characters below, write one short cue for each actor to set up their performance — tone, intent, and what their character wants in this moment. Do not write any dialogue.
+
+${sceneContext}
+
+Respond in exactly this format, one line per actor, nothing else:
+${simNames.map((name) => `CUE ${name}: <one or two sentences of direction>`).join('\n')}`;
+
+    const briefing = await this.runOneShot(
+      'Director Briefing',
+      briefingSystemPrompt,
+      `${previouslyBlock}${sceneAction}`,
+      200,
+      request.directorModel,
+    );
+    exchanges.push(briefing.exchange);
+
+    const cues = new Map<string, string>();
+    simNames.forEach((name) => {
+      const cueMatch = new RegExp(`CUE\\s+${name}\\s*:\\s*([^\\n]+)`, 'i').exec(briefing.text);
+      cues.set(name, cueMatch ? cueMatch[1].trim() : briefing.text.trim());
+    });
+
+    // 2. Each actor performs in order, seeing the lines delivered so far
+    let linesSoFar = '';
+    for (let i = 0; i < event.sentient_sims.length; i += 1) {
+      const sim = event.sentient_sims[i];
+      const actorSystemPrompt = `You are playing ${sim.name} in a scene from The Sims. Stay in character.
+
+${sceneContext}
+
+Director's cue for you: ${cues.get(sim.name)}
+
+Respond only as ${sim.name} in screenplay format — optionally one short delivery note line (how they sound or feel, not what they physically do), then:
+${sim.name}: "[what they say]"
+One to two lines of dialogue. Do not write lines for any other character. Do not invent physical actions, props, or furniture.`;
+
+      const actorUserText = `${previouslyBlock}${sceneAction}${linesSoFar ? `\n\n${linesSoFar}` : ''}`;
+      const performance = await this.runOneShot(
+        `Actor: ${sim.name}`,
+        actorSystemPrompt,
+        actorUserText,
+        150,
+        request.actorModels?.[i],
+      );
+      exchanges.push(performance.exchange);
+
+      const cleanedLines = cleanupAIOutput(performance.text);
+      linesSoFar = linesSoFar ? `${linesSoFar}\n${cleanedLines}` : cleanedLines;
+    }
+
+    // 3. Director compiles and audits the performances into the final scene
+    const compileSystemPrompt = `You are the director compiling your actors' performances into the final version of a short scene from The Sims. Merge their lines into one coherent screenplay scene and fix any issues. Return only the final scene text — no commentary, no labels.
+
+Fix these issues if present:
+- Remove invented physical actions, props, furniture, or locations not already established in the scene
+- Remove references to invented shared history or past events
+- Remove overly cinematic, melodramatic, or poetic language — keep it grounded and everyday
+- Keep delivery notes short (how a character sounds or feels), or cut them for pure dialogue
+- Remove duplicated or contradictory lines and trailing incomplete sentences
+Keep the scene to two to four lines total.`;
+
+    const compiled = await this.runOneShot(
+      'Director Review',
+      compileSystemPrompt,
+      `${sceneAction}\n\n${linesSoFar}`,
+      300,
+      request.directorModel,
+    );
+    exchanges.push(compiled.exchange);
+
+    const compiledText = cleanupAIOutput(compiled.text);
+    const finalText = compiledText.length > 1 ? compiledText : linesSoFar;
+
+    // Save memory so a follow-up directed scene continues the conversation
+    const participants = this.ctx.participantRepository.getParticipants(
+      event.sentient_sims.map((sim) => ({ id: sim.sim_id, fullName: sim.name })),
+    );
+    const newMemory: MemoryEntity = {
+      action: sceneAction,
+      content: finalText,
+      location_id: event.environment.location_id,
+      event_type: event.event_type,
+      interaction_name: event.interaction_name,
+    };
+    this.ctx.memoryRepository.createMemory({ memory: newMemory, participants });
+
+    this.playTts(finalText);
+
+    return {
+      status: InteractionEventStatus.GENERATED,
+      text: finalText,
+      request: compiled.exchange.request,
+      exchanges,
+      memory: newMemory,
+    };
   }
 
   async runClassification(

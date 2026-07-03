@@ -9,6 +9,9 @@ import { OpenAICompatibleRequest } from 'main/sentient-sims/models/OpenAICompati
 import { AIClient } from 'main/sentient-sims/clients/AIClient';
 import { OpenAIMessage } from 'main/sentient-sims/models/OpenAIMessage';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
+import { InteractionEvent } from 'main/sentient-sims/models/InteractionEvents';
+import { DirectedSceneRequest } from 'main/sentient-sims/models/DirectedSceneRequest';
+import { useVoiceTestPlayback, VoiceTestLine } from 'renderer/voice/useVoiceTestPlayback';
 import useSetting from './useSetting';
 
 const aiClient = new AIClient();
@@ -40,6 +43,12 @@ function defaultMessagesForApiType(apiType: ApiType): MessageInputProps[] {
     : defaultMessages(defaultMythoMaxSystemPrompt);
 }
 
+export type ChatExchange = {
+  id: string;
+  label: string;
+  initialMessages: MessageInputProps[];
+};
+
 export interface ChatGeneration {
   messages: MessageInputProps[];
   input?: string | null;
@@ -52,8 +61,15 @@ export interface ChatGeneration {
   deleteMessage: (index: number) => void;
   addNewMessage: (role: ChatCompletionMessageRole) => void;
   generateMultipleChat: (count: number) => Promise<string[]>;
+  generateScenario: (event: InteractionEvent) => Promise<void>;
+  generateDirectedScene: (request: DirectedSceneRequest) => Promise<void>;
+  continueDirectedScene: () => Promise<void>;
+  canContinueScene: boolean;
   handleGenerationLoaded: Dispatch<SetStateAction<() => void>>;
   maxResponseTokensState: [number, Dispatch<SetStateAction<number>>];
+  voiceTestModeState: [boolean, Dispatch<SetStateAction<boolean>>];
+  voiceLinesByMessageId: Record<string, VoiceTestLine[]>;
+  exchanges?: ChatExchange[];
 }
 
 export default function useChatGeneration(): ChatGeneration {
@@ -65,6 +81,11 @@ export default function useChatGeneration(): ChatGeneration {
   const [interactionName, setInteractionName] = useState<string | undefined>();
   const [maxResponseTokens, setMaxResponseTokens] = useState(90);
   const [prevApiType, setPrevApiType] = useState(apiType.value);
+  const [voiceTestMode, setVoiceTestMode] = useState(false);
+  const [voiceLinesByMessageId, setVoiceLinesByMessageId] = useState<Record<string, VoiceTestLine[]>>({});
+  const [exchanges, setExchanges] = useState<ChatExchange[] | undefined>(undefined);
+  const [lastDirectedScene, setLastDirectedScene] = useState<DirectedSceneRequest | undefined>(undefined);
+  const { fetchVoiceLines } = useVoiceTestPlayback();
 
   if (prevApiType !== apiType.value) {
     setPrevApiType(apiType.value);
@@ -103,6 +124,37 @@ export default function useChatGeneration(): ChatGeneration {
         }
 
         setMessages(updatedMessages);
+
+        if (result.exchanges && result.exchanges.length > 0) {
+          setExchanges(
+            result.exchanges.map((exchange) => ({
+              id: crypto.randomUUID(),
+              label: exchange.label,
+              initialMessages: [
+                ...exchange.request.messages.map((message) => ({
+                  id: crypto.randomUUID(),
+                  message,
+                })),
+                {
+                  id: crypto.randomUUID(),
+                  message: { role: 'assistant' as const, content: exchange.responseText, tokens: 0 },
+                },
+              ],
+            })),
+          );
+        }
+
+        const isDirectedScene = Boolean(result.exchanges && result.exchanges.length > 0);
+        if ((voiceTestMode || isDirectedScene) && result.text) {
+          const assistantMessage = updatedMessages[updatedMessages.length - 1];
+          if (assistantMessage.id) {
+            const { id: assistantMessageId } = assistantMessage;
+            void fetchVoiceLines(assistantMessage.message.content, (lines) => {
+              setVoiceLinesByMessageId((prev) => ({ ...prev, [assistantMessageId]: lines }));
+            });
+          }
+        }
+
         if (result.input) {
           try {
             setInput(JSON.stringify(result.input, null, 2));
@@ -120,7 +172,7 @@ export default function useChatGeneration(): ChatGeneration {
     return () => {
       removeListener();
     };
-  }, [apiType.value, generationLoadedCallback]);
+  }, [apiType.value, generationLoadedCallback, voiceTestMode, fetchVoiceLines]);
 
   const addMessage = (message: OpenAIMessage) => {
     setMessages((previousMessages) => [
@@ -148,6 +200,38 @@ export default function useChatGeneration(): ChatGeneration {
 
   const countTokens = () => {
     // TODO: Reimplement this
+  };
+
+  const generateScenario = async (event: InteractionEvent) => {
+    setLoading(true);
+    try {
+      await aiClient.interactionEvent(event);
+    } catch (e: any) {
+      log.error(`Unable to generateScenario`, e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generateDirectedScene = async (request: DirectedSceneRequest) => {
+    setLoading(true);
+    try {
+      setLastDirectedScene(request);
+      await aiClient.directedScene(request);
+    } catch (e: any) {
+      log.error(`Unable to generateDirectedScene`, e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const continueDirectedScene = async () => {
+    if (!lastDirectedScene) return;
+    // Same scenario, fresh event id — memory from the previous scene carries the story forward
+    await generateDirectedScene({
+      ...lastDirectedScene,
+      event: { ...lastDirectedScene.event, event_id: crypto.randomUUID() },
+    });
   };
 
   const generateChat = async () => {
@@ -226,7 +310,14 @@ export default function useChatGeneration(): ChatGeneration {
     addNewMessage,
     countTokens,
     generateMultipleChat,
+    generateScenario,
+    generateDirectedScene,
+    continueDirectedScene,
+    canContinueScene: Boolean(lastDirectedScene),
     handleGenerationLoaded: setGenerationLoadedCallback,
     maxResponseTokensState: [maxResponseTokens, setMaxResponseTokens],
+    voiceTestModeState: [voiceTestMode, setVoiceTestMode],
+    voiceLinesByMessageId,
+    exchanges,
   };
 }

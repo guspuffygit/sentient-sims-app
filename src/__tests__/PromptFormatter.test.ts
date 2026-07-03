@@ -329,7 +329,7 @@ describe('Output', () => {
         const genResponse1 = await ctx.genai.sentientSimsGenerate(requestBuilder.buildOpenAIRequest(result1));
         console.log(`Exchange 1 generation took ${Date.now() - genStart1}ms`);
         const reviewStart1 = Date.now();
-        const reviewed1 = await ctx.ai.runDirectorReview(cleanupAIOutput(genResponse1.text));
+        const reviewed1 = (await ctx.ai.runDirectorReview(cleanupAIOutput(genResponse1.text))).text;
         console.log(`Exchange 1 director review took ${Date.now() - reviewStart1}ms`);
         console.log('\n=== EXCHANGE 1 ===');
         console.log(reviewed1);
@@ -352,7 +352,7 @@ describe('Output', () => {
         const genResponse2 = await ctx.genai.sentientSimsGenerate(requestBuilder.buildOpenAIRequest(result2));
         console.log(`Exchange 2 generation took ${Date.now() - genStart2}ms`);
         const reviewStart2 = Date.now();
-        const reviewed2 = await ctx.ai.runDirectorReview(cleanupAIOutput(genResponse2.text));
+        const reviewed2 = (await ctx.ai.runDirectorReview(cleanupAIOutput(genResponse2.text))).text;
         console.log(`Exchange 2 director review took ${Date.now() - reviewStart2}ms`);
         console.log('\n=== EXCHANGE 2 ===');
         console.log(reviewed2);

@@ -17,6 +17,7 @@ export function runApi(ctx: ApiContext) {
 
   expressApp.post('/ai/v2/generate', ctx.controller.ai.sentientSimsGenerate);
   expressApp.post('/ai/v2/event/interaction', ctx.controller.ai.interactionEvent);
+  expressApp.post('/ai/v2/event/directed-scene', ctx.controller.ai.directedSceneEvent);
   expressApp.post('/ai/v2/event/classification', ctx.controller.ai.classificationEvent);
   expressApp.post('/ai/v2/event/buff', ctx.controller.ai.buffDescription);
   expressApp.post('/ai/v3/event/buff', ctx.controller.ai.buffEvent);
