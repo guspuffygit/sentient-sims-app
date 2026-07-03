@@ -38,7 +38,9 @@ export class AIController {
 
     const result = await this.ctx.ai.interactionEvent(event);
     result.input = event;
-    res.json(result);
+    // Leading newline so each generation stands apart from the previous one in the game window;
+    // memories, TTS, and the app chat UI keep the untouched text
+    res.json({ ...result, text: result.text ? `\n${result.text}` : result.text });
     if (result.text) {
       sendChatGeneration(result);
     }
@@ -52,7 +54,7 @@ export class AIController {
 
     const result = await this.ctx.ai.runDirectedScene(request);
     result.input = request.event;
-    res.json(result);
+    res.json({ ...result, text: result.text ? `\n${result.text}` : result.text });
     if (result.text) {
       sendChatGeneration(result);
     }
