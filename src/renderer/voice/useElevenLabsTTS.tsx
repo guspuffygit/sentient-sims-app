@@ -6,6 +6,7 @@ import { defaultElevenLabsEndpoint } from 'main/sentient-sims/constants';
 import useSetting from 'renderer/hooks/useSetting';
 import {
   defaultElevenLabsTTSSettings,
+  defaultElevenLabsVoiceSettings,
   ElevenLabsSpeechModel,
   ElevenLabsTTSSettings,
 } from 'main/sentient-sims/models/ElevenLabsTTSSettings';
@@ -34,6 +35,8 @@ export function useElevenLabsTTS(): TTSHook {
         voice_settings: {
           stability: 0,
           similarity_boost: 0,
+          // Supported on all models including v3; API range is 0.7-1.2
+          speed: elevenLabsTTSSettings.value.voice_settings?.speed ?? defaultElevenLabsVoiceSettings.speed,
         },
       };
 
@@ -62,7 +65,12 @@ export function useElevenLabsTTS(): TTSHook {
 
       return URL.createObjectURL(await response.blob());
     },
-    [elevenLabsEndpointSetting.value, elevenLabsKeySetting.value, elevenLabsTTSSettings.value.model],
+    [
+      elevenLabsEndpointSetting.value,
+      elevenLabsKeySetting.value,
+      elevenLabsTTSSettings.value.model,
+      elevenLabsTTSSettings.value.voice_settings?.speed,
+    ],
   );
 
   const playUrl = useCallback(

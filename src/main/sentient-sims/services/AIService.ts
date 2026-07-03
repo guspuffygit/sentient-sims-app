@@ -7,6 +7,7 @@ import {
   InteractionEvent,
   InteractionEvents,
   InteractionMappingEvent,
+  SSEvent,
   SSEventType,
   WWEventType,
   WWInteractionEvent,
@@ -29,7 +30,7 @@ import {
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { DirectedSceneRequest } from '../models/DirectedSceneRequest';
 import { SentientSim } from '../models/SentientSim';
-import { cleanAIClassificationOutput, cleanupAIOutput } from '../formatter/PromptFormatter';
+import { cleanAIClassificationOutput, cleanupAIOutput, formatSceneForChatWindow } from '../formatter/PromptFormatter';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { InputFormatter } from '../formatter/InputOutputFormatting';
 import { MythoMaxFormatter } from '../formatter/MythoMaxFormatter';
@@ -42,6 +43,21 @@ import { sendModNotification } from '../websocketServer';
 import { ModAddBuff, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { ApiContext } from './ApiContext';
 import { AIActionType, actionTypeForEvent } from '../models/AIActionType';
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+export type DirectedGenerationOptions = {
+  action?: string;
+  continueScene?: boolean;
+  directorModel?: string;
+  // Parallel to event.sentient_sims order
+  actorModels?: (string | undefined)[];
+  // Real game events return the memory to the mod, which saves it back via POST /memories
+  // when the interaction completes; the scenario tester has no mod, so it saves directly
+  saveMemory?: boolean;
+};
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
@@ -119,6 +135,9 @@ export class AIService {
 
     if (description.pre_actions) {
       const preAction = getRandomItem(description.pre_actions);
+      if (event.sentient_sims.length >= 2) {
+        return this.runDirectedGeneration(event, { action: preAction });
+      }
       return this.runGeneration(event, {
         preAction,
         prePreAction: 'At {location} ({location_type}), {postures},',
@@ -129,6 +148,14 @@ export class AIService {
   }
 
   async handleContinue(event: ContinueInteractionEvent) {
+    if (event.sentient_sims.length >= 2) {
+      // Directed continue needs prior memories to pick up from; fall through when there are none
+      const directed = await this.runDirectedGeneration(event, { continueScene: true });
+      if (directed.status === InteractionEventStatus.GENERATED) {
+        return directed;
+      }
+    }
+
     let result = await this.runGeneration(event, { continue: true });
     if (!result.text) {
       result = await this.runGeneration(event, {
@@ -197,6 +224,9 @@ export class AIService {
   }
 
   async handleDoSomething(doSomethingEvent: DoSomethingInteractionEvent) {
+    if (doSomethingEvent.sentient_sims.length >= 2) {
+      return this.runDirectedGeneration(doSomethingEvent, { action: doSomethingEvent.action });
+    }
     return this.runGeneration(doSomethingEvent, {
       action: doSomethingEvent.action,
       prePreAction: 'At {location} ({location_type}), {postures},',
@@ -323,7 +353,7 @@ export class AIService {
 
       return {
         status: InteractionEventStatus.GENERATED,
-        text: output,
+        text: formatSceneForChatWindow(output),
         request: response.request,
         exchanges,
         memory: newMemory,
@@ -350,6 +380,9 @@ Fix these issues if present:
 - Remove overly cinematic, melodramatic, or poetic language — keep it grounded and everyday
 - Replace physical action beats with delivery notes (how a character sounds or feels) if applicable, or remove them entirely and leave pure dialogue
 - Remove trailing incomplete sentences
+- Put each character's line on its own line
+Never cut the scene down to a single line when multiple characters speak — preserve the back-and-forth between them.
+Only change a line when it violates one of the rules above. Otherwise keep the exact wording and character voice — puns, verbal tics, hesitations, and slang are performance choices, not mistakes.
 If the scene is already good, return it unchanged.`;
 
     let oneShotRequest: OneShotRequest = {
@@ -402,123 +435,192 @@ If the scene is already good, return it unchanged.`;
 
   async runDirectedScene(request: DirectedSceneRequest): Promise<InteractionEventResult> {
     const { event } = request;
-    const action = event.testing_action;
-    if (!action || event.sentient_sims.length < 2) {
+    if ((!event.testing_action && !request.continueScene) || event.sentient_sims.length < 2) {
       log.error('Directed scene requires a testing_action and at least two sims');
       return { status: InteractionEventStatus.NOOP };
     }
+    return this.runDirectedGeneration(event, {
+      action: event.testing_action,
+      continueScene: request.continueScene,
+      directorModel: request.directorModel,
+      actorModels: request.actorModels,
+      // The scenario tester has no game mod to save the memory, so persist it here
+      saveMemory: true,
+    });
+  }
 
+  async runDirectedGeneration(event: SSEvent, options: DirectedGenerationOptions): Promise<InteractionEventResult> {
     const promptOptions: PromptRequestBuilderOptions = {
-      action,
+      action: options.action,
       apiType: this.ctx.settings.aiApiType,
       modelSettings: await this.ctx.modelSettings.getModelSettings(),
     };
     const promptRequest = this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
 
-    const sceneContext = [`<LOCATION>\n${promptRequest.location}\n</LOCATION>`, promptRequest.participants].join('\n');
+    // promptRequest.location is already wrapped in <LOCATION> tags
+    const sceneContext = [
+      promptRequest.location,
+      promptRequest.dateTime,
+      promptRequest.season,
+      promptRequest.weather,
+      promptRequest.postures,
+      promptRequest.participants,
+    ]
+      .filter((part) => part && part.trim().length > 0)
+      .join('\n');
 
     const previously = promptRequest.memories
       .slice(-6)
       .map((memory) => memory.content)
       .join('\n');
     const previouslyBlock = previously ? `Previously in this scene:\n${previously}\n\n` : '';
-    const sceneAction = promptRequest.action ?? action;
+
+    // Continuing a scene re-uses the same event; driving it with the original action again
+    // would just replay the same beat, so swap in a continuation instruction instead
+    const continuingScene = Boolean(options.continueScene) && previously.length > 0;
+    const sceneAction = continuingScene
+      ? 'The scene continues. Pick up the conversation exactly where it left off and move it forward — do not repeat or rephrase anything already said.'
+      : (promptRequest.action ?? options.action);
+
+    if (!sceneAction) {
+      log.error('Directed generation has no action to drive the scene');
+      return { status: InteractionEventStatus.NOOP };
+    }
 
     const simNames = event.sentient_sims.map((sim) => sim.name);
     const exchanges: LLMExchange[] = [];
 
-    // 1. Director briefing: one short cue per actor
-    const briefingSystemPrompt = `You are the director of a short scene in The Sims. Based on the scene context and characters below, write one short cue for each actor to set up their performance — tone, intent, and what their character wants in this moment. Do not write any dialogue.
+    // 1. Director splits the full context into one complete, self-contained prompt per actor
+    const briefingSystemPrompt = `You are the director of a short scene in The Sims between ${simNames.join(' and ')}. You have the FULL scene context below; the user message tells you what is happening right now. Your job is to write one complete, self-contained prompt for each actor. Each actor will see ONLY the prompt you write for them — nothing else — so it must contain everything they need to play the scene.
 
 ${sceneContext}
 
-Respond in exactly this format, one line per actor, nothing else:
-${simNames.map((name) => `CUE ${name}: <one or two sentences of direction>`).join('\n')}`;
+Each actor's prompt must cover, in a few tight sentences:
+- Role: "You are playing <name>." — their personality, current mood, and how it colors this moment
+- Setting: where and when the scene takes place
+- Situation: what is happening right now and what their character wants out of it
+- Relevant context: only the details and past events that matter for this scene — never the character's whole life story
+
+Rules:
+- Keep secrets secret. Anything a character would not know — the other character's private thoughts, feelings, plans, or secrets — must not appear in that actor's prompt.
+- Smooth over wrinkles: if the context is awkward, contradictory, or overloaded, resolve it into a clean, playable scene.
+- If the user message contains "Previously in this scene", the conversation is already underway: tell each actor to pick up mid-flow and build on what has already been said — no greetings, no introductions, no re-describing the setting.
+- Direct them to be BRIEF: real conversation is quick short lines, not speeches. An actor who needs more than one short sentence is overacting.
+- Do not write any dialogue and do not tell the actors specific lines to say.
+
+Respond in exactly this format, nothing else:
+${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the complete prompt for ${name}>`).join('\n')}`;
 
     const briefing = await this.runOneShot(
       'Director Briefing',
       briefingSystemPrompt,
       `${previouslyBlock}${sceneAction}`,
-      200,
-      request.directorModel,
+      700,
+      options.directorModel,
     );
     exchanges.push(briefing.exchange);
 
-    const cues = new Map<string, string>();
+    const actorPrompts = new Map<string, string>();
     simNames.forEach((name) => {
-      const cueMatch = new RegExp(`CUE\\s+${name}\\s*:\\s*([^\\n]+)`, 'i').exec(briefing.text);
-      cues.set(name, cueMatch ? cueMatch[1].trim() : briefing.text.trim());
+      const promptMatch = new RegExp(
+        `===\\s*PROMPT FOR\\s+${escapeRegExp(name)}\\s*===\\s*([\\s\\S]*?)(?=\\n\\s*===\\s*PROMPT FOR|$)`,
+        'i',
+      ).exec(briefing.text);
+      const actorPrompt = promptMatch ? promptMatch[1].trim() : '';
+      // If the director's output couldn't be parsed, fall back to the raw scene context
+      actorPrompts.set(name, actorPrompt.length > 1 ? actorPrompt : `You are playing ${name}.\n\n${sceneContext}`);
     });
 
-    // 2. Each actor performs in order, seeing the lines delivered so far
+    // 2. Actors perform in turns, each seeing the lines delivered so far
+    const turnsPerActor = 1;
     let linesSoFar = '';
-    for (let i = 0; i < event.sentient_sims.length; i += 1) {
-      const sim = event.sentient_sims[i];
-      const actorSystemPrompt = `You are playing ${sim.name} in a scene from The Sims. Stay in character.
+    for (let turn = 0; turn < turnsPerActor; turn += 1) {
+      for (let i = 0; i < event.sentient_sims.length; i += 1) {
+        const sim = event.sentient_sims[i];
+        const actorSystemPrompt = `${actorPrompts.get(sim.name)}
 
-${sceneContext}
-
-Director's cue for you: ${cues.get(sim.name)}
-
-Respond only as ${sim.name} in screenplay format — optionally one short delivery note line (how they sound or feel, not what they physically do), then:
+How to respond:
+- Stay in character as ${sim.name} at all times.
+- Respond only as ${sim.name} in screenplay format — optionally one short delivery note (how they sound or feel, not what they physically do), then:
 ${sim.name}: "[what they say]"
-One to two lines of dialogue. Do not write lines for any other character. Do not invent physical actions, props, or furniture.`;
+- ONE short line of dialogue, the way people actually talk — a quick sentence or a fragment, ten words or so. Never a speech.
+- Do not write lines for any other character.
+- Do not invent physical actions, props, furniture, or locations.
+- If another character has already spoken, respond directly to their most recent line and move the conversation forward — never repeat or rephrase something already said.
+- If the conversation is already underway (anything under "Previously in this scene"), jump straight in mid-flow — no greetings and no re-introductions.`;
 
-      const actorUserText = `${previouslyBlock}${sceneAction}${linesSoFar ? `\n\n${linesSoFar}` : ''}`;
-      const performance = await this.runOneShot(
-        `Actor: ${sim.name}`,
-        actorSystemPrompt,
-        actorUserText,
-        150,
-        request.actorModels?.[i],
-      );
-      exchanges.push(performance.exchange);
+        const actorUserText = `${previouslyBlock}${sceneAction}${linesSoFar ? `\n\nThe scene so far:\n${linesSoFar}` : ''}`;
+        const performance = await this.runOneShot(
+          `Actor: ${sim.name} (turn ${turn + 1})`,
+          actorSystemPrompt,
+          actorUserText,
+          60,
+          options.actorModels?.[i],
+        );
+        exchanges.push(performance.exchange);
 
-      const cleanedLines = cleanupAIOutput(performance.text);
-      linesSoFar = linesSoFar ? `${linesSoFar}\n${cleanedLines}` : cleanedLines;
+        const cleanedLines = cleanupAIOutput(performance.text);
+        if (cleanedLines.length > 1) {
+          linesSoFar = linesSoFar ? `${linesSoFar}\n${cleanedLines}` : cleanedLines;
+        }
+      }
     }
 
-    // 3. Director compiles and audits the performances into the final scene
-    const compileSystemPrompt = `You are the director compiling your actors' performances into the final version of a short scene from The Sims. Merge their lines into one coherent screenplay scene and fix any issues. Return only the final scene text — no commentary, no labels.
+    // 3. Reviewer: the director audits the performances and returns the final scene
+    const compileSystemPrompt = `You are the director reviewing your actors' performance of a short scene from The Sims. The user message contains the scene setup followed by the actors' delivered lines. Return only the final scene text — no commentary, no labels.
 
-Fix these issues if present:
-- Remove invented physical actions, props, furniture, or locations not already established in the scene
-- Remove references to invented shared history or past events
-- Remove overly cinematic, melodramatic, or poetic language — keep it grounded and everyday
-- Keep delivery notes short (how a character sounds or feels), or cut them for pure dialogue
-- Remove duplicated or contradictory lines and trailing incomplete sentences
-Keep the scene to two to four lines total.`;
+Your default is to return the actors' delivered lines EXACTLY as written, in the same order. They are performance choices — puns, verbal tics, hesitations, and slang stay. Only edit a line if it:
+- Invents physical actions, props, furniture, or locations not already established in the scene
+- References invented shared history or past events
+- Is overly cinematic, melodramatic, or poetic instead of grounded and everyday
+- Has a delivery note that is long or describes physical action (delivery notes are a few words about how a character sounds or feels)
+- Duplicates or contradicts another line, repeats something already said earlier in the scene, or trails off mid-sentence
+- Greets or re-introduces a character when the scene is already underway
+- Runs long — spoken lines should be brief and conversational; cut a rambling line down to its punchiest sentence
+
+Requirements for the final scene:
+- Never collapse the scene to a single line — both characters must speak
+- Keep it to two to four dialogue lines total, each one short
+- Put each character's line on its own line
+- Do not include lines from "Previously in this scene" — return only the new lines`;
 
     const compiled = await this.runOneShot(
       'Director Review',
       compileSystemPrompt,
-      `${sceneAction}\n\n${linesSoFar}`,
-      300,
-      request.directorModel,
+      `${previouslyBlock}${sceneAction}\n\nThe actors' delivered lines:\n${linesSoFar}`,
+      400,
+      options.directorModel,
     );
     exchanges.push(compiled.exchange);
 
     const compiledText = cleanupAIOutput(compiled.text);
     const finalText = compiledText.length > 1 ? compiledText : linesSoFar;
 
-    // Save memory so a follow-up directed scene continues the conversation
-    const participants = this.ctx.participantRepository.getParticipants(
-      event.sentient_sims.map((sim) => ({ id: sim.sim_id, fullName: sim.name })),
-    );
     const newMemory: MemoryEntity = {
-      action: sceneAction,
       content: finalText,
       location_id: event.environment.location_id,
       event_type: event.event_type,
-      interaction_name: event.interaction_name,
     };
-    this.ctx.memoryRepository.createMemory({ memory: newMemory, participants });
+    const interactionName = (event as Partial<InteractionEvent>).interaction_name;
+    if (interactionName) {
+      newMemory.interaction_name = interactionName;
+    }
+    if (!continuingScene) {
+      // Don't store the synthetic continuation instruction as if it were a new player action
+      newMemory.action = sceneAction;
+    }
+    if (options.saveMemory) {
+      const participants = this.ctx.participantRepository.getParticipants(
+        event.sentient_sims.map((sim) => ({ id: sim.sim_id, fullName: sim.name })),
+      );
+      this.ctx.memoryRepository.createMemory({ memory: newMemory, participants });
+    }
 
     this.playTts(finalText, event.sentient_sims);
 
     return {
       status: InteractionEventStatus.GENERATED,
-      text: finalText,
+      text: formatSceneForChatWindow(finalText),
       request: compiled.exchange.request,
       exchanges,
       memory: newMemory,

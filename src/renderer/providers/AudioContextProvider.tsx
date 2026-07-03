@@ -1,4 +1,4 @@
-import { createContext, ReactNode, use, useCallback, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import log from 'electron-log';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
@@ -74,7 +74,14 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
     [aiSettings.ttsEnabled, tts],
   );
 
+  // One scene plays at a time; at most one more may wait. Scenes arriving while the
+  // queue is full are dropped outright so audio never piles up behind gameplay.
+  const maxQueuedScenes = 1;
+  const sceneQueueRef = useRef<DialogueLine[][]>([]);
+  const drainingRef = useRef(false);
+
   const stop = useCallback(() => {
+    sceneQueueRef.current = [];
     tts?.stop();
   }, [tts]);
 
@@ -95,14 +102,33 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
     [aiSettings.ttsEnabled, tts, speak],
   );
 
+  const drainSceneQueue = useCallback(async () => {
+    if (drainingRef.current) return;
+    drainingRef.current = true;
+    try {
+      while (sceneQueueRef.current.length > 0) {
+        const lines = sceneQueueRef.current.shift();
+        if (!lines) continue;
+        await speakDialogueLines(lines);
+      }
+    } finally {
+      drainingRef.current = false;
+    }
+  }, [speakDialogueLines]);
+
   useEffect(() => {
     const removeListener = window.electron.onVoice((_event: any, lines: DialogueLine[]) => {
-      void speakDialogueLines(lines);
+      if (sceneQueueRef.current.length >= maxQueuedScenes) {
+        log.debug(`TTS scene queue full (${sceneQueueRef.current.length} waiting) — dropping incoming scene`);
+        return;
+      }
+      sceneQueueRef.current.push(lines);
+      void drainSceneQueue();
     });
     return () => {
       removeListener();
     };
-  }, [speakDialogueLines]);
+  }, [drainSceneQueue]);
 
   const contextValue = useMemo(() => {
     return {

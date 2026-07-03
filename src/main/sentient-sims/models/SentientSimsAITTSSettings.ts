@@ -56,7 +56,8 @@ export const defaultSentientSimsAITTSSettings: SentientSimsAITTSSettings = {
   model: SentientSimsAISpeechModel.KOKORO,
   voice: [SentientSimsAISpeechKokoroVoice.Heart],
   response_format: 'wav',
-  speed: 1.0,
+  // Dialogue reads sluggish at 1.0
+  speed: 1.25,
 };
 
 export function toSpeechModel(model?: string): SentientSimsAISpeechModel {
