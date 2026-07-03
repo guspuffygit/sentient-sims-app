@@ -476,16 +476,24 @@ export function cleanupAIOutput(text: string, stopTokens?: string[]): string {
   return output.trim();
 }
 
-export type DialogueLine = { speaker: string; text: string };
+export type DialogueLine = {
+  speaker: string;
+  text: string;
+  // Inline parenthetical delivery note, e.g. `Ricky: (nervous) "..."` — feeds v3 audio tags
+  deliveryNote?: string;
+  // Provider-specific voice cast for this speaker (currently an ElevenLabs voice id)
+  voiceId?: string;
+};
 
-const dialogueLineRegex = /^([A-Za-z][A-Za-z'-]*(?:\s[A-Za-z][A-Za-z'-]*){0,2}):\s*(?:\([^)]*\)\s*)?"([^"]+)"\s*$/;
+const dialogueLineRegex = /^([A-Za-z][A-Za-z'-]*(?:\s[A-Za-z][A-Za-z'-]*){0,2}):\s*(?:\(([^)]*)\)\s*)?"([^"]+)"\s*$/;
 
 /**
  * Splits screenplay-format AI output (e.g. `Ricky: "Been fishing here for years."`, optionally
- * `Ricky: (delivery note) "..."`) into per-speaker dialogue lines, dropping any parenthetical
- * delivery note. Lines with no quoted dialogue at all (pure stage directions) are dropped
- * entirely since only quoted dialogue should ever be spoken. Falls back to a single Narrator
- * line covering the whole text when no dialogue lines are found.
+ * `Ricky: (delivery note) "..."`) into per-speaker dialogue lines. A parenthetical delivery
+ * note is kept as `deliveryNote` (never spoken as text, but usable as a TTS style hint).
+ * Lines with no quoted dialogue at all (pure stage directions) are dropped entirely since only
+ * quoted dialogue should ever be spoken. Falls back to a single Narrator line covering the
+ * whole text when no dialogue lines are found.
  */
 export function parseDialogueLines(text: string): DialogueLine[] {
   const lines = text
@@ -497,7 +505,13 @@ export function parseDialogueLines(text: string): DialogueLine[] {
   lines.forEach((line) => {
     const match = dialogueLineRegex.exec(line);
     if (match) {
-      dialogueLines.push({ speaker: match[1].trim(), text: match[2].trim() });
+      const dialogueLine: DialogueLine = { speaker: match[1].trim(), text: match[3].trim() };
+      // The parenthetical group is optional, so it can be undefined at runtime
+      const deliveryNote = (match[2] as string | undefined)?.trim();
+      if (deliveryNote) {
+        dialogueLine.deliveryNote = deliveryNote;
+      }
+      dialogueLines.push(dialogueLine);
     }
   });
 

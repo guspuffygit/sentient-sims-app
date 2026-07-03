@@ -12,6 +12,11 @@ import {
   parseDialogueLines,
 } from 'main/sentient-sims/formatter/PromptFormatter';
 import { assignVoicesToSpeakers } from 'main/sentient-sims/formatter/VoiceAssignment';
+import {
+  castElevenLabsVoice,
+  castVoicesForLines,
+  elevenLabsVoiceCatalog,
+} from 'main/sentient-sims/formatter/ElevenLabsVoiceCasting';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
@@ -63,10 +68,12 @@ describe('Output', () => {
       ]);
     });
 
-    it('drops an inline parenthetical delivery note before the quote', () => {
+    it('captures an inline parenthetical delivery note without speaking it', () => {
       const screenplay = 'Richy Richardson: (good-natured) "Only you would discover that."';
       const result = parseDialogueLines(screenplay);
-      expect(result).toEqual([{ speaker: 'Richy Richardson', text: 'Only you would discover that.' }]);
+      expect(result).toEqual([
+        { speaker: 'Richy Richardson', text: 'Only you would discover that.', deliveryNote: 'good-natured' },
+      ]);
     });
 
     it('parses multi-word speaker names', () => {
@@ -122,6 +129,120 @@ describe('Output', () => {
       const result = assignVoicesToSpeakers(['Ricky', 'Richy'], []);
       expect(result.get('Ricky')).toEqual([]);
       expect(result.get('Richy')).toEqual([]);
+    });
+  });
+
+  describe('castElevenLabsVoice', () => {
+    function makeSim(overrides: Partial<SentientSim>): SentientSim {
+      return {
+        careers: [],
+        name: 'Test Sim',
+        age: SimAge.ADULT,
+        sim_id: '1',
+        gender: 'Male',
+        traits: [],
+        moods: [],
+        is_ghost: false,
+        grubby: false,
+        in_pool: false,
+        is_at_home: false,
+        is_dying: false,
+        is_human: true,
+        is_inside_building: false,
+        is_outside: false,
+        is_pet: false,
+        on_fire: false,
+        on_home_lot: false,
+        sleeping: false,
+        is_pregnant: false,
+        is_player_sim: true,
+        ...overrides,
+      };
+    }
+
+    function voiceById(voiceId: string) {
+      const voice = elevenLabsVoiceCatalog.find((v) => v.voiceId === voiceId);
+      if (!voice) {
+        throw new Error(`Voice ${voiceId} not found in catalog`);
+      }
+      return voice;
+    }
+
+    it('is deterministic for the same sim', () => {
+      const sim = makeSim({ name: 'Ricky Rickerson', traits: ['trait_Evil'] });
+      expect(castElevenLabsVoice(sim)).toEqual(castElevenLabsVoice(sim));
+    });
+
+    it('casts a matching gender', () => {
+      const male = makeSim({ name: 'Ricky', gender: 'Male' });
+      const female = makeSim({ name: 'Bella', gender: 'Female' });
+      expect(voiceById(castElevenLabsVoice(male)).gender).toBe('male');
+      expect(voiceById(castElevenLabsVoice(female)).gender).toBe('female');
+    });
+
+    it('never casts a child voice for an adult and vice versa', () => {
+      const adult = makeSim({ name: 'Bella', gender: 'Female', age: SimAge.ADULT });
+      expect(voiceById(castElevenLabsVoice(adult)).age).not.toBe('child');
+
+      const child = makeSim({ name: 'Lily', gender: 'Female', age: SimAge.CHILD });
+      expect(['child', 'young']).toContain(voiceById(castElevenLabsVoice(child)).age);
+    });
+
+    it('leans into personality traits', () => {
+      const villain = makeSim({ name: 'Ricky', traits: ['trait_Evil', 'trait_Mean'], moods: ['Mood_Angry'] });
+      const villainVoice = voiceById(castElevenLabsVoice(villain));
+      expect(villainVoice.tags.some((tag) => ['intense', 'gruff', 'deep'].includes(tag))).toBe(true);
+
+      const sweetheart = makeSim({
+        name: 'Bella',
+        gender: 'Female',
+        traits: ['trait_Romantic'],
+        moods: ['Mood_Flirty'],
+      });
+      const sweetheartVoice = voiceById(castElevenLabsVoice(sweetheart));
+      expect(sweetheartVoice.tags.some((tag) => ['seductive', 'warm'].includes(tag))).toBe(true);
+    });
+  });
+
+  describe('castVoicesForLines', () => {
+    const sims: SentientSim[] = [
+      {
+        careers: [],
+        name: 'Ricky Rickerson',
+        age: SimAge.ADULT,
+        sim_id: '1',
+        gender: 'Male',
+        traits: ['trait_Evil'],
+        moods: [],
+        is_ghost: false,
+        grubby: false,
+        in_pool: false,
+        is_at_home: false,
+        is_dying: false,
+        is_human: true,
+        is_inside_building: false,
+        is_outside: false,
+        is_pet: false,
+        on_fire: false,
+        on_home_lot: false,
+        sleeping: false,
+        is_pregnant: false,
+        is_player_sim: true,
+      },
+    ];
+
+    it('casts by full name, first name, and leaves unknown speakers uncast', () => {
+      const lines = castVoicesForLines(
+        [
+          { speaker: 'Ricky Rickerson', text: 'Full name match.' },
+          { speaker: 'Ricky', text: 'First name match.' },
+          { speaker: 'Narrator', text: 'No match.' },
+        ],
+        sims,
+      );
+      expect(lines[0].voiceId).toBeDefined();
+      expect(lines[1].voiceId).toEqual(lines[0].voiceId);
+      expect(lines[2].voiceId).toBeUndefined();
     });
   });
 

@@ -83,15 +83,16 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
       if (!aiSettings.ttsEnabled || lines.length === 0) return;
 
       const uniqueSpeakers = new Set(lines.map((line) => line.speaker));
+      const hasCastVoices = lines.some((line) => line.voiceId);
 
-      if (aiSettings.ttsApiType === ApiType.SentientSimsAI && uniqueSpeakers.size > 1 && sentientSimsTTS.speakLines) {
-        await sentientSimsTTS.speakLines(lines);
+      if ((uniqueSpeakers.size > 1 || hasCastVoices) && tts?.speakLines) {
+        await tts.speakLines(lines);
         return;
       }
 
       await speak(lines.map((line) => line.text).join(' '));
     },
-    [aiSettings.ttsEnabled, aiSettings.ttsApiType, sentientSimsTTS, speak],
+    [aiSettings.ttsEnabled, tts, speak],
   );
 
   useEffect(() => {

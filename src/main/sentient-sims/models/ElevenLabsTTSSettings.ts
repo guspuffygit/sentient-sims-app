@@ -13,6 +13,7 @@ export enum ElevenLabsOutputFormat {
 }
 
 export enum ElevenLabsSpeechModel {
+  ELEVEN_V3 = 'eleven_v3',
   ELEVEN_MULTILINGUAL_V2 = 'eleven_multilingual_v2',
   ELEVEN_FLASH_V2_5 = 'eleven_flash_v2_5',
   ELEVEN_FLASH_V2 = 'eleven_flash_v2',

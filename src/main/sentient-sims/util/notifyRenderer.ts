@@ -9,6 +9,8 @@ import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { CaughtError } from '../models/CaughtError';
 import { getAllBrowserWindows } from './browserWindows';
 import { parseDialogueLines } from '../formatter/PromptFormatter';
+import { castVoicesForLines } from '../formatter/ElevenLabsVoiceCasting';
+import { SentientSim } from '../models/SentientSim';
 
 function notifyAllWindows(message: string, ...args: unknown[]) {
   getAllBrowserWindows().forEach((wnd) => {
@@ -79,9 +81,12 @@ export function sendChatGeneration(response: InteractionEventResult) {
   notifyAllWindows('on-chat-generation', response);
 }
 
-export function playTTS(text: string) {
+export function playTTS(text: string, sims?: SentientSim[]) {
   log.debug('Sending on-voice');
-  const lines = parseDialogueLines(text);
+  let lines = parseDialogueLines(text);
+  if (sims && sims.length > 0) {
+    lines = castVoicesForLines(lines, sims);
+  }
   notifyAllWindows('on-voice', lines);
 }
 
