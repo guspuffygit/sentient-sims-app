@@ -5,7 +5,9 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import CircularProgress from '@mui/material/CircularProgress';
 import { MessageInputProps } from 'main/sentient-sims/models/MessageInputProps';
 import { useMemo, useState } from 'react';
+import log from 'electron-log';
 import { VoiceTestLine } from 'renderer/voice/useVoiceTestPlayback';
+import { playAudioUrl } from 'renderer/voice/audioPlayback';
 import { useDebounceHook } from './hooks/useDebounceHook';
 
 export type ChatBoxComponentProps = {
@@ -18,8 +20,9 @@ export type ChatBoxComponentProps = {
 
 function playVoiceLine(line: VoiceTestLine) {
   if (!line.audioUrl) return;
-  const audio = new Audio(line.audioUrl);
-  void audio.play();
+  playAudioUrl(line.audioUrl, 1).catch((err: unknown) => {
+    log.error('Failed to play voice line', err);
+  });
 }
 
 export function ChatBoxComponent({

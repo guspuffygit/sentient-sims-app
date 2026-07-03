@@ -15,6 +15,7 @@ import { SentenceTokenizeResponse } from 'main/sentient-sims/models/SentenceToke
 import { SentenceTokenizeRequest } from 'main/sentient-sims/models/SentenceTokenizerRequest';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
 import { assignVoicesToSpeakers } from 'main/sentient-sims/formatter/VoiceAssignment';
+import { AudioPlaybackHandle, playAudioUrl } from './audioPlayback';
 import { TTSHook } from './TTSHook';
 
 type QueuedSpeech = { text: string; voice: string[] };
@@ -40,7 +41,7 @@ export function useSentientSimsTTS(): TTSHook {
   const playerRunningRef = useRef(false);
   const fetcherRunningRef = useRef(false);
 
-  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const currentPlaybackRef = useRef<AudioPlaybackHandle | null>(null);
 
   const fetcherLoop = useCallback(async () => {
     if (fetcherRunningRef.current) return;
@@ -122,26 +123,18 @@ export function useSentientSimsTTS(): TTSHook {
         if (!audioUrl) continue;
 
         log.debug(`Player: Playing audio from URL: ${audioUrl}`);
-        const audio = new Audio(audioUrl);
-        audio.volume = aiSettings.ttsVolume;
-        currentAudioRef.current = audio;
-
-        await new Promise<void>((resolve) => {
-          audio.onended = () => {
-            log.debug('Audio finished playing.');
-            currentAudioRef.current = null;
-            URL.revokeObjectURL(audioUrl);
-            resolve();
-          };
-          audio.onerror = () => {
-            log.error('Error playing audio element.');
-            setError('An error occurred during audio playback.');
-            currentAudioRef.current = null;
-            URL.revokeObjectURL(audioUrl);
-            resolve();
-          };
-          void audio.play();
-        });
+        try {
+          const playback = await playAudioUrl(audioUrl, aiSettings.ttsVolume);
+          currentPlaybackRef.current = playback;
+          await playback.finished;
+          log.debug('Audio finished playing.');
+        } catch (err) {
+          log.error('Error playing audio.', err);
+          setError('An error occurred during audio playback.');
+        } finally {
+          currentPlaybackRef.current = null;
+          URL.revokeObjectURL(audioUrl);
+        }
       } else {
         await new Promise((resolve) => {
           setTimeout(resolve, 10);
@@ -227,9 +220,9 @@ export function useSentientSimsTTS(): TTSHook {
 
   const stopTTS = useCallback(() => {
     log.debug('Stop TTS called.');
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
+    if (currentPlaybackRef.current) {
+      currentPlaybackRef.current.stop();
+      currentPlaybackRef.current = null;
     }
 
     sentenceQueueRef.current = [];
