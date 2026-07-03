@@ -24,6 +24,7 @@ import { useChatGenerationContext } from './providers/ChatGenerationProvider';
 import { useDebugMode } from './providers/DebugModeProvider';
 import { ScenarioTesterComponent } from './scenarioTester/ScenarioTesterComponent';
 import { LLMExchangePanel } from './scenarioTester/LLMExchangePanel';
+import { playAudioUrl } from './voice/audioPlayback';
 
 export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -69,16 +70,12 @@ export default function ChatPage() {
     try {
       for (const line of sceneVoiceLines) {
         if (!line.audioUrl) continue;
-        const audio = new Audio(line.audioUrl);
-        await new Promise<void>((resolve) => {
-          audio.onended = () => {
-            resolve();
-          };
-          audio.onerror = () => {
-            resolve();
-          };
-          void audio.play();
-        });
+        try {
+          const playback = await playAudioUrl(line.audioUrl, 1);
+          await playback.finished;
+        } catch (err) {
+          log.error('Failed to play scene line', err);
+        }
       }
     } finally {
       setIsPlayingScene(false);
