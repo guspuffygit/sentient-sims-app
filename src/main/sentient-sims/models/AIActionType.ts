@@ -14,6 +14,8 @@ export enum AIActionType {
   CLASSIFICATION = 'classification',
   BUFF = 'buff',
   GENERATE = 'generate',
+  DIRECTOR = 'director',
+  ACTOR = 'actor',
 }
 
 export const AllAIActionTypes: AIActionType[] = [
@@ -27,6 +29,8 @@ export const AllAIActionTypes: AIActionType[] = [
   AIActionType.CLASSIFICATION,
   AIActionType.BUFF,
   AIActionType.GENERATE,
+  AIActionType.DIRECTOR,
+  AIActionType.ACTOR,
 ];
 
 // configId per action; missing key means "use the default provider config"
@@ -54,6 +58,10 @@ export function AIActionTypeName(actionType: AIActionType): string {
       return 'Buff';
     case AIActionType.GENERATE:
       return 'Chat Generation';
+    case AIActionType.DIRECTOR:
+      return 'Director';
+    case AIActionType.ACTOR:
+      return 'Actor';
     default:
       return actionType;
   }
@@ -81,6 +89,10 @@ export function AIActionTypeDescription(actionType: AIActionType): string {
       return 'Buff mood classification and description generation';
     case AIActionType.GENERATE:
       return 'Chat tab generation in the app';
+    case AIActionType.DIRECTOR:
+      return 'Director briefing and review for multi-sim directed scenes';
+    case AIActionType.ACTOR:
+      return 'Individual sim performances inside a directed scene';
     default:
       return '';
   }

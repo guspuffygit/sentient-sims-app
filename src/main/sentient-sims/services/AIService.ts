@@ -368,9 +368,8 @@ export class AIService {
   }
 
   async runDirectorReview(text: string): Promise<{ text: string; request: OpenAICompatibleRequest }> {
-    const providerConfig = this.ctx.providerConfigs.getDefaultConfig();
+    const providerConfig = this.ctx.providerConfigs.getConfigForAction(AIActionType.DIRECTOR);
     const apiType: ApiType = providerConfig.apiType;
-
 
     const systemPrompt = `You are a director reviewing a short generated scene from The Sims. Fix any issues and return only the corrected text — no commentary, no labels, no extra formatting.
 
@@ -411,6 +410,7 @@ If the scene is already good, return it unchanged.`;
     systemPrompt: string,
     userText: string,
     maxResponseTokens: number,
+    apiType: ApiType,
     model?: string,
   ): Promise<{ exchange: LLMExchange; text: string }> {
     let oneShotRequest: OneShotRequest = {
@@ -420,16 +420,15 @@ If the scene is already good, return it unchanged.`;
       maxTokens: 3900,
     };
 
-    getInputFormatters(this.ctx.settings.aiApiType).forEach((formatter) => {
+    getInputFormatters(apiType).forEach((formatter) => {
       oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(apiType));
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
-    if (model) {
-      openAIRequest.model = model;
-    }
-    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
+    openAIRequest.model = model;
+    openAIRequest.apiType = apiType;
+    const response = await this.ctx.getGenerationService(apiType).sentientSimsGenerate(openAIRequest);
     return { exchange: { label, request: openAIRequest, responseText: response.text }, text: response.text };
   }
 
@@ -450,10 +449,17 @@ If the scene is already good, return it unchanged.`;
   }
 
   async runDirectedGeneration(event: SSEvent, options: DirectedGenerationOptions): Promise<InteractionEventResult> {
+    const eventConfig = this.ctx.providerConfigs.getConfigForAction(actionTypeForEvent(event.event_type));
+    const directorConfig = this.ctx.providerConfigs.getConfigForAction(AIActionType.DIRECTOR);
+    const actorConfig = this.ctx.providerConfigs.getConfigForAction(AIActionType.ACTOR);
+    log.debug(
+      `Directed ${event.event_type} — prompt: ${eventConfig.name} (${eventConfig.apiType}${eventConfig.model ? `, ${eventConfig.model}` : ''}), director: ${directorConfig.name} (${directorConfig.apiType}${directorConfig.model ? `, ${directorConfig.model}` : ''}), actor: ${actorConfig.name} (${actorConfig.apiType}${actorConfig.model ? `, ${actorConfig.model}` : ''})`,
+    );
+
     const promptOptions: PromptRequestBuilderOptions = {
       action: options.action,
-      apiType: this.ctx.settings.aiApiType,
-      modelSettings: await this.ctx.modelSettings.getModelSettings(),
+      apiType: eventConfig.apiType,
+      modelSettings: await this.ctx.modelSettings.getModelSettings(eventConfig.model, eventConfig.apiType),
     };
     const promptRequest = this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
 
@@ -516,7 +522,8 @@ ${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the complete prompt for $
       briefingSystemPrompt,
       `${previouslyBlock}${sceneAction}`,
       700,
-      options.directorModel,
+      directorConfig.apiType,
+      options.directorModel ?? directorConfig.model,
     );
     exchanges.push(briefing.exchange);
 
@@ -555,7 +562,8 @@ ${sim.name}: "[what they say]"
           actorSystemPrompt,
           actorUserText,
           60,
-          options.actorModels?.[i],
+          actorConfig.apiType,
+          options.actorModels?.[i] ?? actorConfig.model,
         );
         exchanges.push(performance.exchange);
 
@@ -589,7 +597,8 @@ Requirements for the final scene:
       compileSystemPrompt,
       `${previouslyBlock}${sceneAction}\n\nThe actors' delivered lines:\n${linesSoFar}`,
       400,
-      options.directorModel,
+      directorConfig.apiType,
+      options.directorModel ?? directorConfig.model,
     );
     exchanges.push(compiled.exchange);
 
