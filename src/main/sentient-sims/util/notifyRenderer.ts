@@ -11,6 +11,7 @@ import { getAllBrowserWindows } from './browserWindows';
 import { DialogueLine, parseDialogueLines } from '../formatter/PromptFormatter';
 import { castVoicesForLines } from '../formatter/ElevenLabsVoiceCasting';
 import { SentientSim } from '../models/SentientSim';
+import { consumePacedScene } from './pacedScenes';
 
 function notifyAllWindows(message: string, ...args: unknown[]) {
   getAllBrowserWindows().forEach((wnd) => {
@@ -30,6 +31,7 @@ export function notifyNewMemoryAdded(memory: MemoryEntity) {
   sendModNotification({
     type: ModWebsocketMessageType.MEMORY_CREATED,
     memory,
+    paced: consumePacedScene(memory.content),
   });
 }
 
@@ -81,10 +83,23 @@ export function sendChatGeneration(response: InteractionEventResult) {
   notifyAllWindows('on-chat-generation', response);
 }
 
-export function playTTSLines(lines: DialogueLine[], sims?: SentientSim[]) {
+export function playTTSLines(lines: DialogueLine[], sims?: SentientSim[], options?: { paced?: boolean }) {
   log.debug('Sending on-voice');
-  const castLines = sims && sims.length > 0 ? castVoicesForLines(lines, sims) : lines;
-  notifyAllWindows('on-voice', castLines);
+  let castLines = lines;
+  if (sims && sims.length > 0) {
+    castLines = castVoicesForLines(lines, sims);
+  }
+  notifyAllWindows('on-voice', castLines, { paced: options?.paced ?? false });
+}
+
+// Called as each scene line starts playing so the in-game subtitle appears in step
+// with the voice playback
+export function sendSceneLineToMod(line: DialogueLine) {
+  sendModNotification({
+    type: ModWebsocketMessageType.SCENE_LINE,
+    speaker: line.speaker,
+    text: line.text,
+  });
 }
 
 export function playTTS(text: string, sims?: SentientSim[]) {

@@ -509,9 +509,9 @@ const dialogueLineRegex = /^([A-Za-z][A-Za-z'-]*(?:\s[A-Za-z][A-Za-z'-]*){0,2}):
  * note is kept as `deliveryNote` (never spoken as text, but usable as a TTS style hint).
  * Lines with no quoted dialogue at all (pure stage directions) are dropped entirely since only
  * quoted dialogue should ever be spoken. When `knownSpeakers` is provided, bare subtitle lines
- * like `Ricky: Been fishing here for years.` are also accepted for exactly those speakers.
- * Falls back to a single Narrator line covering the whole text when no dialogue lines are found,
- * which is what plain third-person narration produces.
+ * like `Ricky: Been fishing here for years.` are also accepted for exactly those speakers (the
+ * directed-scene pipeline emits this format). Falls back to a single Narrator line covering the
+ * whole text when no dialogue lines are found, which is what plain third-person narration produces.
  */
 export function parseDialogueLines(text: string, knownSpeakers?: string[]): DialogueLine[] {
   const lines = text

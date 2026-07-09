@@ -65,8 +65,8 @@ export function useVoiceTestPlayback() {
   );
 
   const buildVoiceTestLines = useCallback(
-    (text: string): VoiceTestLine[] => {
-      const dialogueLines = parseDialogueLines(text);
+    (text: string, speakers?: string[]): VoiceTestLine[] => {
+      const dialogueLines = parseDialogueLines(text, speakers);
       const pool = sentientSimsAITTSSettings.value.voice;
       const assignments = assignVoicesToSpeakers(
         dialogueLines.map((line) => line.speaker),
@@ -84,8 +84,8 @@ export function useVoiceTestPlayback() {
   );
 
   const fetchVoiceLines = useCallback(
-    async (text: string, onUpdate: (lines: VoiceTestLine[]) => void): Promise<void> => {
-      const lines = buildVoiceTestLines(text);
+    async (text: string, onUpdate: (lines: VoiceTestLine[]) => void, speakers?: string[]): Promise<void> => {
+      const lines = buildVoiceTestLines(text, speakers);
       if (lines.length === 0) return;
 
       if (!sentientSimsAITokenSetting.value) {
