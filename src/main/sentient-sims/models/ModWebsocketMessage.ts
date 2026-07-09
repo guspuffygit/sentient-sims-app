@@ -8,6 +8,7 @@ export enum ModWebsocketMessageType {
   MEMORY_EDITED = 'memory_edited',
   MEMORY_CREATED = 'memory_created',
   ADD_BUFF = 'add_buff',
+  SCENE_LINE = 'scene_line',
 }
 
 export type ModWebsocketMessage = {
@@ -35,6 +36,19 @@ export type ModWebsocketNotificationMemoryEdited = ModWebsocketMessage & {
   memory: MemoryEntity;
 };
 
+// paced means the app will stream the memory's dialogue lines one at a time as
+// SCENE_LINE messages timed to voice playback, so the mod should not display the
+// whole memory as one subtitle block
+export type ModWebsocketNotificationMemoryCreated = ModWebsocketMessage & {
+  memory: MemoryEntity;
+  paced: boolean;
+};
+
+export type ModSceneLine = ModWebsocketMessage & {
+  speaker: string;
+  text: string;
+};
+
 export type ModAddBuff = ModWebsocketMessage & {
   sim_id: string;
   mood: string;
@@ -46,4 +60,6 @@ export type WebsocketNotification =
   | ModWebsocketNotification
   | ModWebsocketNotificationMemoryEdited
   | ModWebsocketNotificationMemoryDeleted
-  | ModAddBuff;
+  | ModWebsocketNotificationMemoryCreated
+  | ModAddBuff
+  | ModSceneLine;

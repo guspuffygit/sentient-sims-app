@@ -1,7 +1,8 @@
 import { IpcMainEvent, clipboard, dialog, ipcMain, shell } from 'electron';
 import log from 'electron-log';
 import { SettingsEnum } from './models/SettingsEnum';
-import { notifySettingChanged } from './util/notifyRenderer';
+import { notifySettingChanged, sendSceneLineToMod } from './util/notifyRenderer';
+import { DialogueLine } from './formatter/PromptFormatter';
 import { getAllBrowserWindows } from './util/browserWindows';
 import { resolveHtmlPath } from '../util';
 import { ApiContext } from './services/ApiContext';
@@ -42,6 +43,11 @@ export default function ipcHandlers(ctx: ApiContext) {
   });
   ipcMain.on('open-browser-link', (_event: IpcMainEvent, link: string) => {
     void shell.openExternal(link);
+  });
+  // The renderer owns playback timing: it reports each scene line as it starts playing
+  // so the in-game subtitle stays in step with the voices
+  ipcMain.on('scene-line-shown', (_event: IpcMainEvent, line: DialogueLine) => {
+    sendSceneLineToMod(line);
   });
   ipcMain.on('paste-clipboard-to-api-key-button-click', () => {
     const clipboardResults = clipboard.readText();

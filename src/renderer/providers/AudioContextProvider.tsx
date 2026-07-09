@@ -2,6 +2,7 @@ import { createContext, ReactNode, use, useCallback, useEffect, useMemo, useRef,
 import log from 'electron-log';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
+import { subtitleLinePacingMs } from 'main/sentient-sims/constants';
 import { useElevenLabsTTS } from 'renderer/voice/useElevenLabsTTS';
 import { useSentientSimsTTS } from 'renderer/voice/useSentientSimsTTS';
 import { useAISettings } from './AISettingsProvider';
@@ -77,7 +78,9 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
   // One scene plays at a time; at most one more may wait. Scenes arriving while the
   // queue is full are dropped outright so audio never piles up behind gameplay.
   const maxQueuedScenes = 1;
-  const sceneQueueRef = useRef<DialogueLine[][]>([]);
+  // paced scenes stream each line to the game as it starts playing (the whole-block
+  // in-game subtitle was suppressed on their behalf)
+  const sceneQueueRef = useRef<{ lines: DialogueLine[]; paced: boolean }[]>([]);
   const drainingRef = useRef(false);
 
   const stop = useCallback(() => {
@@ -86,18 +89,47 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
   }, [tts]);
 
   const speakDialogueLines = useCallback(
-    async (lines: DialogueLine[]) => {
-      if (!aiSettings.ttsEnabled || lines.length === 0) return;
+    async (lines: DialogueLine[], paced: boolean) => {
+      if (lines.length === 0) return;
+
+      const notifyLineShown = paced
+        ? (line: DialogueLine) => {
+            window.electron.notifySceneLineShown({ speaker: line.speaker, text: line.text });
+          }
+        : undefined;
 
       const uniqueSpeakers = new Set(lines.map((line) => line.speaker));
       const hasCastVoices = lines.some((line) => line.voiceId);
 
-      if ((uniqueSpeakers.size > 1 || hasCastVoices) && tts?.speakLines) {
-        await tts.speakLines(lines);
+      if (aiSettings.ttsEnabled && (uniqueSpeakers.size > 1 || hasCastVoices) && tts?.speakLines) {
+        await tts.speakLines(lines, notifyLineShown);
         return;
       }
 
-      await speak(lines.map((line) => line.text).join(' '));
+      if (!notifyLineShown) {
+        if (aiSettings.ttsEnabled) {
+          await speak(lines.map((line) => line.text).join(' '));
+        }
+        return;
+      }
+
+      // Paced scene without a per-line TTS path (TTS disabled or single voice): the
+      // in-game subtitles still arrive one line at a time on the same cadence
+      for (let i = 0; i < lines.length; i += 1) {
+        const lineStartedAt = Date.now();
+        notifyLineShown(lines[i]);
+        if (aiSettings.ttsEnabled) {
+          await speak(lines[i].text);
+        }
+        if (i < lines.length - 1) {
+          const holdMs = subtitleLinePacingMs - (Date.now() - lineStartedAt);
+          if (holdMs > 0) {
+            await new Promise((resolve) => {
+              setTimeout(resolve, holdMs);
+            });
+          }
+        }
+      }
     },
     [aiSettings.ttsEnabled, tts, speak],
   );
@@ -107,9 +139,9 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
     drainingRef.current = true;
     try {
       while (sceneQueueRef.current.length > 0) {
-        const lines = sceneQueueRef.current.shift();
-        if (!lines) continue;
-        await speakDialogueLines(lines);
+        const scene = sceneQueueRef.current.shift();
+        if (!scene) continue;
+        await speakDialogueLines(scene.lines, scene.paced);
       }
     } finally {
       drainingRef.current = false;
@@ -117,14 +149,16 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
   }, [speakDialogueLines]);
 
   useEffect(() => {
-    const removeListener = window.electron.onVoice((_event: any, lines: DialogueLine[]) => {
-      if (sceneQueueRef.current.length >= maxQueuedScenes) {
-        log.debug(`TTS scene queue full (${sceneQueueRef.current.length} waiting) — dropping incoming scene`);
-        return;
-      }
-      sceneQueueRef.current.push(lines);
-      void drainSceneQueue();
-    });
+    const removeListener = window.electron.onVoice(
+      (_event: any, lines: DialogueLine[], options?: { paced?: boolean }) => {
+        if (sceneQueueRef.current.length >= maxQueuedScenes) {
+          log.debug(`TTS scene queue full (${sceneQueueRef.current.length} waiting) — dropping incoming scene`);
+          return;
+        }
+        sceneQueueRef.current.push({ lines, paced: options?.paced ?? false });
+        void drainSceneQueue();
+      },
+    );
     return () => {
       removeListener();
     };

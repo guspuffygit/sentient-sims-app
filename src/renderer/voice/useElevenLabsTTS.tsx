@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import log from 'electron-log';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { defaultElevenLabsEndpoint } from 'main/sentient-sims/constants';
+import { defaultElevenLabsEndpoint, subtitleLinePacingMs } from 'main/sentient-sims/constants';
 import useSetting from 'renderer/hooks/useSetting';
 import {
   defaultElevenLabsTTSSettings,
@@ -106,20 +106,22 @@ export function useElevenLabsTTS(): TTSHook {
   );
 
   const speakLines = useCallback(
-    async (lines: DialogueLine[]): Promise<void> => {
+    async (lines: DialogueLine[], onLineStart?: (line: DialogueLine) => void): Promise<void> => {
       setError(undefined);
       playSessionRef.current += 1;
       const session = playSessionRef.current;
 
       const isV3 = elevenLabsTTSSettings.value.model.toString() === ElevenLabsSpeechModel.ELEVEN_V3.toString();
 
-      for (const line of lines) {
+      for (let i = 0; i < lines.length; i += 1) {
+        const line = lines[i];
         if (playSessionRef.current !== session) break;
         if (!line.text.trim()) continue;
 
         // v3 understands inline audio tags like [nervous] — use the delivery note as one
         const text = isV3 && line.deliveryNote ? `[${line.deliveryNote}] ${line.text}` : line.text;
         const voiceId = line.voiceId ?? elevenLabsTTSSettings.value.voice;
+        const lineStartedAt = Date.now();
 
         try {
           const audioUrl = await fetchAudioUrl(text, voiceId);
@@ -127,11 +129,22 @@ export function useElevenLabsTTS(): TTSHook {
             URL.revokeObjectURL(audioUrl);
             break;
           }
+          onLineStart?.(line);
           await playUrl(audioUrl);
         } catch (err: any) {
           const errorMessage = `TTS request failed: ${err instanceof Error ? err.message : String(err)}`;
           log.error(errorMessage);
           setError(errorMessage);
+        }
+
+        // Subtitle pacing: hold before the next line so line starts stay spaced apart
+        if (i < lines.length - 1 && playSessionRef.current === session) {
+          const holdMs = subtitleLinePacingMs - (Date.now() - lineStartedAt);
+          if (holdMs > 0) {
+            await new Promise((resolve) => {
+              setTimeout(resolve, holdMs);
+            });
+          }
         }
       }
     },

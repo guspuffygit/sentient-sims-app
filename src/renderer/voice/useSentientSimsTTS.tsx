@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting from 'renderer/hooks/useSetting';
-import { defaultSentientSimsAIHost } from 'main/sentient-sims/constants';
+import { defaultSentientSimsAIHost, subtitleLinePacingMs } from 'main/sentient-sims/constants';
 import {
   defaultSentientSimsAITTSSettings,
   SentientSimsAITTSSettings,
@@ -42,6 +42,9 @@ export function useSentientSimsTTS(): TTSHook {
   const fetcherRunningRef = useRef(false);
 
   const currentPlaybackRef = useRef<AudioPlaybackHandle | null>(null);
+
+  // Bumped by stop() and by each new speakLines run so an in-flight paced loop bails out
+  const speakSessionRef = useRef(0);
 
   const fetcherLoop = useCallback(async () => {
     if (fetcherRunningRef.current) return;
@@ -208,7 +211,7 @@ export function useSentientSimsTTS(): TTSHook {
   );
 
   const speakLines = useCallback(
-    async (lines: DialogueLine[]): Promise<void> => {
+    async (lines: DialogueLine[], onLineStart?: (line: DialogueLine) => void): Promise<void> => {
       if (lines.length === 0) return;
 
       const pool = sentientSimsAITTSSettings.value.voice;
@@ -222,21 +225,42 @@ export function useSentientSimsTTS(): TTSHook {
         pool,
       );
 
-      lines.forEach((line) => {
-        const voice = assignments.get(line.speaker) ?? pool;
-        sentenceQueueRef.current.push({ text: line.text, voice });
-      });
+      speakSessionRef.current += 1;
+      const session = speakSessionRef.current;
 
-      log.debug(`Queued ${lines.length} dialogue lines. Starting fetcher and player.`);
-      void fetcherLoop();
-      void playerLoop();
-      await waitForIdle();
+      // One line at a time with subtitle pacing: each line fully plays, then the next
+      // line is held back until the pacing window since this line started has elapsed
+      log.debug(`Playing ${lines.length} dialogue lines with subtitle pacing.`);
+      for (let i = 0; i < lines.length; i += 1) {
+        if (speakSessionRef.current !== session) break;
+        const line = lines[i];
+        const voice = assignments.get(line.speaker) ?? pool;
+        const lineStartedAt = Date.now();
+
+        // Fires at fetch start rather than playback start, so the subtitle leads the
+        // audio by the fetch latency — the way TV subtitles naturally lead speech
+        onLineStart?.(line);
+        sentenceQueueRef.current.push({ text: line.text, voice });
+        void fetcherLoop();
+        void playerLoop();
+        await waitForIdle();
+
+        if (i < lines.length - 1 && speakSessionRef.current === session) {
+          const holdMs = subtitleLinePacingMs - (Date.now() - lineStartedAt);
+          if (holdMs > 0) {
+            await new Promise((resolve) => {
+              setTimeout(resolve, holdMs);
+            });
+          }
+        }
+      }
     },
     [sentientSimsAITTSSettings.value, fetcherLoop, playerLoop, waitForIdle],
   );
 
   const stopTTS = useCallback(() => {
     log.debug('Stop TTS called.');
+    speakSessionRef.current += 1;
     if (currentPlaybackRef.current) {
       currentPlaybackRef.current.stop();
       currentPlaybackRef.current = null;

@@ -149,9 +149,19 @@ export default function useChatGeneration(): ChatGeneration {
           const assistantMessage = updatedMessages[updatedMessages.length - 1];
           if (assistantMessage.id) {
             const { id: assistantMessageId } = assistantMessage;
-            void fetchVoiceLines(assistantMessage.message.content, (lines) => {
-              setVoiceLinesByMessageId((prev) => ({ ...prev, [assistantMessageId]: lines }));
-            });
+            // Directed scenes emit bare `Name: line` subtitles — the parser needs the
+            // participant names to recognize them as dialogue
+            const inputEvent = result.input as { sentient_sims?: { name?: string }[] } | undefined;
+            const speakers = inputEvent?.sentient_sims
+              ?.map((sim) => sim.name)
+              .filter((name): name is string => Boolean(name));
+            void fetchVoiceLines(
+              assistantMessage.message.content,
+              (lines) => {
+                setVoiceLinesByMessageId((prev) => ({ ...prev, [assistantMessageId]: lines }));
+              },
+              speakers,
+            );
           }
         }
 

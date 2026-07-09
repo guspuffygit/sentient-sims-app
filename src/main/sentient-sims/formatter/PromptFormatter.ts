@@ -447,6 +447,10 @@ export function removeNonLetters(input: string): string {
   return input.replace(/[^a-zA-Z]/g, '');
 }
 
+export function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export function removeStopTokens(text: string, stopTokens?: string[]) {
   let output = text;
 
@@ -504,14 +508,23 @@ const dialogueLineRegex = /^([A-Za-z][A-Za-z'-]*(?:\s[A-Za-z][A-Za-z'-]*){0,2}):
  * `Ricky: (delivery note) "..."`) into per-speaker dialogue lines. A parenthetical delivery
  * note is kept as `deliveryNote` (never spoken as text, but usable as a TTS style hint).
  * Lines with no quoted dialogue at all (pure stage directions) are dropped entirely since only
- * quoted dialogue should ever be spoken. Falls back to a single Narrator line covering the
+ * quoted dialogue should ever be spoken. When `knownSpeakers` is provided, bare subtitle lines
+ * like `Ricky: Been fishing here for years.` are also accepted for exactly those speakers (the
+ * directed-scene pipeline emits this format). Falls back to a single Narrator line covering the
  * whole text when no dialogue lines are found.
  */
-export function parseDialogueLines(text: string): DialogueLine[] {
+export function parseDialogueLines(text: string, knownSpeakers?: string[]): DialogueLine[] {
   const lines = text
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
+
+  const speakerPatterns = (knownSpeakers ?? [])
+    .filter((name) => name.trim().length > 0)
+    .map((name) => ({
+      name,
+      regex: new RegExp(`^${escapeRegExp(name)}\\s*:\\s*(?:\\(([^)]*)\\)\\s*)?(.+)$`, 'i'),
+    }));
 
   const dialogueLines: DialogueLine[] = [];
   lines.forEach((line) => {
@@ -524,6 +537,23 @@ export function parseDialogueLines(text: string): DialogueLine[] {
         dialogueLine.deliveryNote = deliveryNote;
       }
       dialogueLines.push(dialogueLine);
+      return;
+    }
+
+    const speakerPattern = speakerPatterns.find((pattern) => pattern.regex.test(line));
+    if (speakerPattern) {
+      const subtitleMatch = speakerPattern.regex.exec(line);
+      if (subtitleMatch) {
+        const spokenText = subtitleMatch[2].replace(/^"(.*)"$/s, '$1').trim();
+        if (spokenText.length > 0) {
+          const dialogueLine: DialogueLine = { speaker: speakerPattern.name, text: spokenText };
+          const deliveryNote = (subtitleMatch[1] as string | undefined)?.trim();
+          if (deliveryNote) {
+            dialogueLine.deliveryNote = deliveryNote;
+          }
+          dialogueLines.push(dialogueLine);
+        }
+      }
     }
   });
 

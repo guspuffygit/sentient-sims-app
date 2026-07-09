@@ -48,6 +48,10 @@ export const defaultWantsSystemPrompt = 'You are the following character in the 
 export const defaultWantsPrompt =
   'If you were the character in the story, what are your wants right now? Respond in the first person';
 
+// Scene dialogue plays like subtitles: consecutive line starts are spaced at least this far
+// apart so one character finishes their moment before the next one speaks
+export const subtitleLinePacingMs = 8000;
+
 export const rendererWebsocketPort = 25146;
 export const modWebsocketPort = 25145;
 export const appApiPort = 25148;

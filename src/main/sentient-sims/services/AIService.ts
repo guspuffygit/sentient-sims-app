@@ -15,7 +15,14 @@ import {
 } from '../models/InteractionEvents';
 import { getRandomItem } from '../util/getRandomItem';
 import { InteractionEventResult, InteractionEventStatus, LLMExchange } from '../models/InteractionEventResult';
-import { notifyMapAnimation, notifyMapInteraction, playTTS, sendChatGeneration } from '../util/notifyRenderer';
+import {
+  notifyMapAnimation,
+  notifyMapInteraction,
+  playTTS,
+  playTTSLines,
+  sendChatGeneration,
+} from '../util/notifyRenderer';
+import { markScenePaced } from '../util/pacedScenes';
 import { GenerationOptions, PromptRequestBuilderOptions } from './PromptRequestBuilderService';
 import { containsPlayerSim } from '../util/eventContainsPlayerSim';
 import { ApiType } from '../models/ApiType';
@@ -30,7 +37,13 @@ import {
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { DirectedSceneRequest } from '../models/DirectedSceneRequest';
 import { SentientSim } from '../models/SentientSim';
-import { cleanAIClassificationOutput, cleanupAIOutput, formatSceneForChatWindow } from '../formatter/PromptFormatter';
+import {
+  cleanAIClassificationOutput,
+  cleanupAIOutput,
+  DialogueLine,
+  escapeRegExp,
+  formatSceneForChatWindow,
+} from '../formatter/PromptFormatter';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { InputFormatter } from '../formatter/InputOutputFormatting';
 import { MythoMaxFormatter } from '../formatter/MythoMaxFormatter';
@@ -43,8 +56,48 @@ import { sendModNotification } from '../websocketServer';
 import { ModAddBuff, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { ApiContext } from './ApiContext';
 
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// Actors are asked for a bare subtitle, but models still sneak in speaker labels,
+// quotation marks, and parenthetical notes — strip everything but the spoken words
+function extractSubtitle(rawText: string, speakerNames: string[]): string {
+  const cleaned = cleanupAIOutput(rawText);
+  let subtitle =
+    cleaned
+      .split('\n')
+      .map((line) => line.trim())
+      .find((line) => line.length > 0) ?? '';
+  speakerNames.forEach((name) => {
+    subtitle = subtitle.replace(new RegExp(`^${escapeRegExp(name)}\\s*:\\s*`, 'i'), '');
+  });
+  subtitle = subtitle.replace(/^\([^)]*\)\s*/, '');
+  const quoted = /^"(.*)"$/s.exec(subtitle);
+  if (quoted) {
+    subtitle = quoted[1];
+  }
+  return subtitle.trim();
+}
+
+// The reviewer returns one `Name: line` per row; rows that don't start with a known
+// speaker (commentary, headers) are discarded
+function parseReviewedLines(rawText: string, speakerNames: string[]): DialogueLine[] {
+  const lines: DialogueLine[] = [];
+  cleanupAIOutput(rawText)
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .forEach((line) => {
+      const name = speakerNames.find((speaker) => new RegExp(`^${escapeRegExp(speaker)}\\s*:`, 'i').test(line));
+      if (name) {
+        const text = extractSubtitle(line, speakerNames);
+        if (text.length > 1) {
+          lines.push({ speaker: name, text });
+        }
+      }
+    });
+  return lines;
+}
+
+function toTranscript(lines: DialogueLine[]): string {
+  return lines.map((line) => `${line.speaker}: ${line.text}`).join('\n');
 }
 
 export type DirectedGenerationOptions = {
@@ -471,7 +524,7 @@ If the scene is already good, return it unchanged.`;
     const exchanges: LLMExchange[] = [];
 
     // 1. Director splits the full context into one complete, self-contained prompt per actor
-    const briefingSystemPrompt = `You are the director of a short scene in The Sims between ${simNames.join(' and ')}. You have the FULL scene context below; the user message tells you what is happening right now. Your job is to write one complete, self-contained prompt for each actor. Each actor will see ONLY the prompt you write for them — nothing else — so it must contain everything they need to play the scene.
+    const briefingSystemPrompt = `You are directing a scene of a sitcom-style reality show starring sentient Sims — this episode features ${simNames.join(' and ')}. The audience tunes in because these characters feel truly alive: entertaining, punchy, endearing, full of personality. You have the FULL scene context below; the user message tells you what is happening right now. Your job is to write one complete, self-contained prompt for each actor. Each actor will see ONLY the prompt you write for them — nothing else — so it must contain everything they need to play the scene.
 
 ${sceneContext}
 
@@ -479,9 +532,11 @@ Each actor's prompt must cover, in a few tight sentences:
 - Role: "You are playing <name>." — their personality, current mood, and how it colors this moment
 - Setting: where and when the scene takes place
 - Situation: what is happening right now and what their character wants out of it
+- Angle: the specific attitude, quirk, or feeling to play in this scene — the thing that makes their lines land
 - Relevant context: only the details and past events that matter for this scene — never the character's whole life story
 
 Rules:
+- Direct for sitcom energy: quick, witty, warm. Every line the actors deliver should entertain — a jab, a joke, a confession, a comeback — never filler.
 - Keep secrets secret. Anything a character would not know — the other character's private thoughts, feelings, plans, or secrets — must not appear in that actor's prompt.
 - Smooth over wrinkles: if the context is awkward, contradictory, or overloaded, resolve it into a clean, playable scene.
 - If the user message contains "Previously in this scene", the conversation is already underway: tell each actor to pick up mid-flow and build on what has already been said — no greetings, no introductions, no re-describing the setting.
@@ -511,70 +566,80 @@ ${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the complete prompt for $
       actorPrompts.set(name, actorPrompt.length > 1 ? actorPrompt : `You are playing ${name}.\n\n${sceneContext}`);
     });
 
-    // 2. Actors perform in turns, each seeing the lines delivered so far
-    const turnsPerActor = 1;
-    let linesSoFar = '';
-    for (let turn = 0; turn < turnsPerActor; turn += 1) {
-      for (let i = 0; i < event.sentient_sims.length; i += 1) {
-        const sim = event.sentient_sims[i];
-        const actorSystemPrompt = `${actorPrompts.get(sim.name)}
+    // 2. Actors perform one turn each. Each actor returns a bare subtitle — only the words
+    //    they speak, no preamble — and the speaker label is added programmatically after.
+    const sceneLines: DialogueLine[] = [];
+    for (let i = 0; i < event.sentient_sims.length; i += 1) {
+      const sim = event.sentient_sims[i];
+      const actorSystemPrompt = `${actorPrompts.get(sim.name)}
 
 How to respond:
 - Stay in character as ${sim.name} at all times.
-- Respond only as ${sim.name} in screenplay format — optionally one short delivery note (how they sound or feel, not what they physically do), then:
-${sim.name}: "[what they say]"
-- ONE short line of dialogue, the way people actually talk — a quick sentence or a fragment, ten words or so. Never a speech.
-- Do not write lines for any other character.
-- Do not invent physical actions, props, furniture, or locations.
-- If another character has already spoken, respond directly to their most recent line and move the conversation forward — never repeat or rephrase something already said.
-- If the conversation is already underway (anything under "Previously in this scene"), jump straight in mid-flow — no greetings and no re-introductions.`;
+- Reply with ONLY the words ${sim.name} says out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no delivery notes, no commentary.
+- ONE short punchy line, ten words or so, the way people actually talk on a sitcom. Never a speech.
+- Be entertaining and full of personality — land the jab, the joke, or the feeling, then stop.
+- React directly to the other character's most recent line and push the conversation forward — never repeat or rephrase anything already said.
+- If the conversation is already underway (anything under "Previously in this scene"), jump straight in mid-flow — no greetings and no re-introductions.
+- Do not mention physical actions, props, furniture, or locations.`;
 
-        const actorUserText = `${previouslyBlock}${sceneAction}${linesSoFar ? `\n\nThe scene so far:\n${linesSoFar}` : ''}`;
-        const performance = await this.runOneShot(
-          `Actor: ${sim.name} (turn ${turn + 1})`,
-          actorSystemPrompt,
-          actorUserText,
-          60,
-          options.actorModels?.[i],
-        );
-        exchanges.push(performance.exchange);
+      const conversationSoFar = toTranscript(sceneLines);
+      const actorUserText = `${previouslyBlock}${sceneAction}${
+        conversationSoFar ? `\n\nThe conversation so far:\n${conversationSoFar}` : ''
+      }`;
+      const performance = await this.runOneShot(
+        `Actor: ${sim.name}`,
+        actorSystemPrompt,
+        actorUserText,
+        60,
+        options.actorModels?.[i],
+      );
+      exchanges.push(performance.exchange);
 
-        const cleanedLines = cleanupAIOutput(performance.text);
-        if (cleanedLines.length > 1) {
-          linesSoFar = linesSoFar ? `${linesSoFar}\n${cleanedLines}` : cleanedLines;
-        }
+      const subtitle = extractSubtitle(performance.text, simNames);
+      if (subtitle.length > 1) {
+        sceneLines.push({ speaker: sim.name, text: subtitle });
       }
     }
 
-    // 3. Reviewer: the director audits the performances and returns the final scene
-    const compileSystemPrompt = `You are the director reviewing your actors' performance of a short scene from The Sims. The user message contains the scene setup followed by the actors' delivered lines. Return only the final scene text — no commentary, no labels.
+    if (sceneLines.length === 0) {
+      log.error('No actor produced a usable line for the directed scene');
+      return { status: InteractionEventStatus.NOOP, exchanges };
+    }
 
-Your default is to return the actors' delivered lines EXACTLY as written, in the same order. They are performance choices — puns, verbal tics, hesitations, and slang stay. Only edit a line if it:
-- Invents physical actions, props, furniture, or locations not already established in the scene
+    // 3. Reviewer: the director reviews the whole conversation and locks the final cut
+    const compileSystemPrompt = `You are the director of a sitcom-style reality show starring sentient Sims. You are reviewing the newest lines of a scene between ${simNames.join(' and ')} before they go to air. The show is entertaining, punchy, and endearing — the characters must feel truly alive.
+
+Your default is to keep the actors' delivered lines EXACTLY as written, in the same order. Jokes, jabs, verbal tics, hesitations, and slang are performance choices — they stay. Only rewrite a line if it:
+- Mentions physical actions, props, furniture, or locations not already established in the scene
 - References invented shared history or past events
-- Is overly cinematic, melodramatic, or poetic instead of grounded and everyday
-- Has a delivery note that is long or describes physical action (delivery notes are a few words about how a character sounds or feels)
-- Duplicates or contradicts another line, repeats something already said earlier in the scene, or trails off mid-sentence
-- Greets or re-introduces a character when the scene is already underway
-- Runs long — spoken lines should be brief and conversational; cut a rambling line down to its punchiest sentence
+- Is flat and lifeless instead of punchy and in character
+- Repeats or rephrases something already said, contradicts another line, or trails off mid-sentence
+- Greets or re-introduces a character when the conversation is already underway
+- Runs long — cut a rambling line down to its punchiest sentence
 
-Requirements for the final scene:
-- Never collapse the scene to a single line — both characters must speak
-- Keep it to two to four dialogue lines total, each one short
-- Put each character's line on its own line
+Respond with the final scene as one line per row in exactly this format, nothing else:
+<character name>: <the words they say>
+
+- Every line is a bare subtitle: no quotation marks, no parentheses, no stage directions, no commentary
+- Both characters must speak — never collapse the scene to a single line
+- Keep it to two to four lines total, each one short
 - Do not include lines from "Previously in this scene" — return only the new lines`;
 
     const compiled = await this.runOneShot(
       'Director Review',
       compileSystemPrompt,
-      `${previouslyBlock}${sceneAction}\n\nThe actors' delivered lines:\n${linesSoFar}`,
+      `${previouslyBlock}${sceneAction}\n\nThe actors' delivered lines:\n${toTranscript(sceneLines)}`,
       400,
       options.directorModel,
     );
     exchanges.push(compiled.exchange);
 
-    const compiledText = cleanupAIOutput(compiled.text);
-    const finalText = compiledText.length > 1 ? compiledText : linesSoFar;
+    const reviewedLines = parseReviewedLines(compiled.text, simNames);
+    // The reviewer must preserve the back-and-forth; if its output lost a speaker or
+    // could not be parsed, air the actors' original performances instead
+    const reviewedSpeakers = new Set(reviewedLines.map((line) => line.speaker));
+    const finalLines = reviewedLines.length >= 2 && reviewedSpeakers.size >= 2 ? reviewedLines : sceneLines;
+    const finalText = toTranscript(finalLines);
 
     const newMemory: MemoryEntity = {
       content: finalText,
@@ -596,7 +661,11 @@ Requirements for the final scene:
       this.ctx.memoryRepository.createMemory({ memory: newMemory, participants });
     }
 
-    this.playTts(finalText, event.sentient_sims);
+    // The scene reaches the game one line at a time: the memory block's subtitle is
+    // suppressed (paced flag on memory_created) and the renderer streams each line to
+    // the mod as it starts playing
+    markScenePaced(finalText);
+    this.playTtsLines(finalLines, event.sentient_sims, { paced: true });
 
     return {
       status: InteractionEventStatus.GENERATED,
@@ -753,5 +822,9 @@ Write me a buff description based on the conversation so that ${buffRequest.name
 
   playTts(text: string, sims?: SentientSim[]) {
     playTTS(text, sims);
+  }
+
+  playTtsLines(lines: DialogueLine[], sims?: SentientSim[], options?: { paced?: boolean }) {
+    playTTSLines(lines, sims, options);
   }
 }
