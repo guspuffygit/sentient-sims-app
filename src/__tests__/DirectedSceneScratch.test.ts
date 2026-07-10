@@ -9,6 +9,10 @@ import { mockApiContext } from './util';
 const transcriptPath =
   'C:\\Users\\scott\\AppData\\Local\\Temp\\claude\\c--Users-scott-Documents-github-sentient-sims-app\\4c0921ac-38ab-40eb-866a-0b85e8988dd1\\scratchpad\\directed-scene-transcript.txt';
 
+// Number of continuation scenes to run after the initial scene. Override via:
+//   SCENE_CONTINUATIONS=5 cross-env NODE_ENV=test ... vitest run DirectedSceneScratch
+const continuationCount = Number(process.env.SCENE_CONTINUATIONS ?? 1);
+
 function buildEvent(testingAction?: string): InteractionEvent {
   return {
     location_id: 0,
@@ -129,24 +133,27 @@ describe('Directed scene scratch (live)', () => {
     expect(result1.text).not.toContain('"');
     expect(result1.text).not.toMatch(/: \(/);
 
-    // Scene 2: continue — must pick up mid-flow, not replay the beat
-    const result2 = await ctx.ai.runDirectedScene({
-      event: buildEvent(undefined),
-      continueScene: true,
-    });
-    transcript.push('=== SCENE 2 (continue) ===');
-    result2.exchanges?.forEach((exchange) => {
-      transcript.push(`--- ${exchange.label} ---`);
-      transcript.push(exchange.responseText);
+    // Scenes 2..N: continue — must pick up mid-flow, not replay the beat
+    for (let scene = 2; scene <= continuationCount + 1; scene += 1) {
+      const result = await ctx.ai.runDirectedScene({
+        event: buildEvent(undefined),
+        continueScene: true,
+      });
+      transcript.push(`=== SCENE ${scene} (continue) ===`);
+      result.exchanges?.forEach((exchange) => {
+        transcript.push(`--- ${exchange.label} ---`);
+        transcript.push(exchange.responseText);
+        transcript.push('');
+      });
+      transcript.push('--- FINAL TEXT SENT TO GAME ---');
+      transcript.push(result.text ?? '(none)');
       transcript.push('');
-    });
-    transcript.push('--- FINAL TEXT SENT TO GAME ---');
-    transcript.push(result2.text ?? '(none)');
+
+      expect(result.status).toEqual(InteractionEventStatus.GENERATED);
+      expect(result.text).toContain('Ricky Rickerson:');
+      expect(result.text).toContain('Richy Richardson:');
+    }
 
     fs.writeFileSync(transcriptPath, transcript.join('\n'));
-
-    expect(result2.status).toEqual(InteractionEventStatus.GENERATED);
-    expect(result2.text).toContain('Ricky Rickerson:');
-    expect(result2.text).toContain('Richy Richardson:');
-  }, 240000);
+  }, 600000);
 });

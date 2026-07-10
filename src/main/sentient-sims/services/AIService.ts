@@ -537,19 +537,23 @@ If the scene is already good, return it unchanged.`;
     const exchanges: LLMExchange[] = [];
 
     // 1. Director splits the full context into one complete, self-contained prompt per actor
-    const briefingSystemPrompt = `You are directing a scene of a sitcom-style reality show starring sentient Sims — this episode features ${simNames.join(' and ')}. The audience tunes in because these characters feel truly alive: entertaining, punchy, endearing, full of personality. You have the FULL scene context below; the user message tells you what is happening right now. Your job is to write one complete, self-contained prompt for each actor. Each actor will see ONLY the prompt you write for them — nothing else — so it must contain everything they need to play the scene.
+    const briefingSystemPrompt = `You are directing a scene of a show starring sentient Sims — this episode features ${simNames.join(' and ')}. The audience tunes in because these characters feel truly alive: vivid, compelling, full of personality. You have the FULL scene context below; the user message tells you what is happening right now. First decide what kind of scene this wants to be, then write one complete, self-contained prompt for each actor. Each actor will see ONLY the prompt you write for them — nothing else — so it must contain everything they need to play the scene.
 
 ${sceneContext}
 
+Choosing the genre: read the characters, their moods, their history, and what is happening, then commit to the genre that fits this moment best — sitcom, rom-com, thriller, tragedy, reality-show drama, farce, noir, slow-burn romance, anything. Do not default to comedy; a heartbreak plays as tragedy, a scheme plays as a caper, a confrontation plays as a thriller. If the conversation is already underway, keep the genre it is already playing in unless the scene has clearly turned.
+
 Each actor's prompt must cover, in a few tight sentences:
 - Role: "You are playing <name>." — their personality, current mood, and how it colors this moment
+- Genre and tone: the genre you chose for this scene and how their delivery should sound inside it
 - Setting: where and when the scene takes place
 - Situation: what is happening right now and what their character wants out of it
-- Angle: the specific attitude, quirk, or feeling to play in this scene — the thing that makes their lines land
+- Angle: the specific attitude or feeling to play in this scene, and how they carry themselves in this conversation
 - Relevant context: only the details and past events that matter for this scene — never the character's whole life story
 
 Rules:
-- Direct for sitcom energy: quick, witty, warm. Every line the actors deliver should entertain — a jab, a joke, a confession, a comeback — never filler.
+- Both actors must be directed into the SAME genre and tone — the scene has one register, not two.
+- Direct for a real conversation, not a highlight reel. Each line should be a natural reply to the one before it, and the exchange should build toward something. A plain, honest line that moves the scene forward beats a clever one that does not connect.
 - Keep secrets secret. Anything a character would not know — the other character's private thoughts, feelings, plans, or secrets — must not appear in that actor's prompt.
 - Smooth over wrinkles: if the context is awkward, contradictory, or overloaded, resolve it into a clean, playable scene.
 - If the user message contains "Previously in this scene", the conversation is already underway: tell each actor to pick up mid-flow and build on what has already been said — no greetings, no introductions, no re-describing the setting.
@@ -589,9 +593,9 @@ ${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the complete prompt for $
 How to respond:
 - Stay in character as ${sim.name} at all times.
 - Reply with ONLY the words ${sim.name} says out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no delivery notes, no commentary.
-- ONE short punchy line, ten words or so, the way people actually talk on a sitcom. Never a speech.
-- Be entertaining and full of personality — land the jab, the joke, or the feeling, then stop.
-- React directly to the other character's most recent line and push the conversation forward — never repeat or rephrase anything already said.
+- ONE short line, ten words or so, the way people actually talk. Never a speech.
+- Talk like a real person in this conversation: your line must be a direct, natural reply to what was just said, in ${sim.name}'s voice and in the tone your director set. Not every line needs to be clever — a plain reply that keeps the conversation flowing beats a quip that does not connect.
+- Move the conversation forward — answer questions that were asked, follow up on what the other person said, never repeat or rephrase anything already said.
 - If the conversation is already underway (anything under "Previously in this scene"), jump straight in mid-flow — no greetings and no re-introductions.
 - Do not mention physical actions, props, furniture, or locations.`;
 
@@ -620,15 +624,17 @@ How to respond:
     }
 
     // 3. Reviewer: the director reviews the whole conversation and locks the final cut
-    const compileSystemPrompt = `You are the director of a sitcom-style reality show starring sentient Sims. You are reviewing the newest lines of a scene between ${simNames.join(' and ')} before they go to air. The show is entertaining, punchy, and endearing — the characters must feel truly alive.
+    const compileSystemPrompt = `You are the director of a show starring sentient Sims. You are reviewing the newest lines of a scene between ${simNames.join(' and ')} before they go to air. The scene was performed in a specific genre and tone — comedy, thriller, tragedy, romance, whatever the delivered lines are playing in. Infer that register from the lines and preserve it. What matters most is that the scene reads as one continuous, coherent conversation: every line follows naturally from the line before it.
 
-Your default is to keep the actors' delivered lines EXACTLY as written, in the same order. Jokes, jabs, verbal tics, hesitations, and slang are performance choices — they stay. Only rewrite a line if it:
+You are an editor, not a writer. Do NOT continue the conversation, do NOT reply to the delivered lines, and do NOT add new lines — your output is the delivered lines themselves, passed through or repaired. Any scene direction in the user message (such as an instruction to continue the scene or move the conversation forward) was addressed to the actors, and they have already performed it — it is context for you, not a task. Your default is to return them EXACTLY as written, in the same order. Jokes, jabs, verbal tics, hesitations, plain replies, and slang are performance choices — they stay. A line does not need to be clever or quotable to be kept. Only rewrite a line if it:
+- Does not connect to the line before it — ignores a direct question, changes the subject for no reason, or is a standalone quip instead of a reply
 - Mentions physical actions, props, furniture, or locations not already established in the scene
 - References invented shared history or past events
-- Is flat and lifeless instead of punchy and in character
+- Breaks the genre and tone the rest of the scene is playing in
 - Repeats or rephrases something already said, contradicts another line, or trails off mid-sentence
 - Greets or re-introduces a character when the conversation is already underway
-- Runs long — cut a rambling line down to its punchiest sentence
+- Runs long — cut a rambling line down to the sentence that carries the conversation
+When you do rewrite, change only what is broken and keep the actor's intent and voice.
 
 Respond with the final scene as one line per row in exactly this format, nothing else:
 <character name>: <the words they say>
@@ -636,12 +642,12 @@ Respond with the final scene as one line per row in exactly this format, nothing
 - Every line is a bare subtitle: no quotation marks, no parentheses, no stage directions, no commentary
 - Both characters must speak — never collapse the scene to a single line
 - Keep it to two to four lines total, each one short
-- Do not include lines from "Previously in this scene" — return only the new lines`;
+- Return exactly the delivered lines, kept or repaired — never lines from "Previously in this scene", and never new lines of your own`;
 
     const compiled = await this.runOneShot(
       'Director Review',
       compileSystemPrompt,
-      `${previouslyBlock}${sceneAction}\n\nThe actors' delivered lines:\n${toTranscript(sceneLines)}`,
+      `${previouslyBlock}The direction the actors were given: ${sceneAction}\n\nThe actors' delivered lines to review — return these lines kept or repaired, do not reply to them:\n${toTranscript(sceneLines)}`,
       400,
       options.directorModel,
     );
@@ -652,7 +658,14 @@ Respond with the final scene as one line per row in exactly this format, nothing
     // could not be parsed, air the actors' original performances instead
     const reviewedSpeakers = new Set(reviewedLines.map((line) => line.speaker));
     const finalLines = reviewedLines.length >= 2 && reviewedSpeakers.size >= 2 ? reviewedLines : sceneLines;
-    const finalText = toTranscript(finalLines);
+    const dialogueText = toTranscript(finalLines);
+
+    // The scene's driving action is shown above the dialogue in the in-game memories window,
+    // but it is never spoken: TTS streams finalLines, which stay pure dialogue, and the paced
+    // subtitle block is suppressed. Continuations reuse the synthetic "scene continues"
+    // instruction rather than a real action, so they show only the dialogue.
+    const preActionLine = continuingScene ? undefined : sceneAction;
+    const finalText = preActionLine ? `${preActionLine}\n${dialogueText}` : dialogueText;
 
     const newMemory: MemoryEntity = {
       content: finalText,
@@ -663,10 +676,6 @@ Respond with the final scene as one line per row in exactly this format, nothing
     if (interactionName) {
       newMemory.interaction_name = interactionName;
     }
-    if (!continuingScene) {
-      // Don't store the synthetic continuation instruction as if it were a new player action
-      newMemory.action = sceneAction;
-    }
     if (options.saveMemory) {
       const participants = this.ctx.participantRepository.getParticipants(
         event.sentient_sims.map((sim) => ({ id: sim.sim_id, fullName: sim.name })),
@@ -676,9 +685,10 @@ Respond with the final scene as one line per row in exactly this format, nothing
 
     // The scene reaches the game one line at a time: the memory block's subtitle is
     // suppressed (paced flag on memory_created) and the renderer streams each line to
-    // the mod as it starts playing
+    // the mod as it starts playing. The preaction streams first as a speakerless line
+    // so the live in-game view matches the stored memory.
     markScenePaced(finalText);
-    this.playTtsLines(finalLines, event.sentient_sims, { paced: true });
+    this.playTtsLines(finalLines, event.sentient_sims, { paced: true, preamble: preActionLine });
 
     return {
       status: InteractionEventStatus.GENERATED,
@@ -851,7 +861,7 @@ Write me a buff description based on the conversation so that ${buffRequest.name
     playTTS(text, sims);
   }
 
-  playTtsLines(lines: DialogueLine[], sims?: SentientSim[], options?: { paced?: boolean }) {
+  playTtsLines(lines: DialogueLine[], sims?: SentientSim[], options?: { paced?: boolean; preamble?: string }) {
     playTTSLines(lines, sims, options);
   }
 }
