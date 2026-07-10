@@ -79,8 +79,9 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
   // queue is full are dropped outright so audio never piles up behind gameplay.
   const maxQueuedScenes = 1;
   // paced scenes stream each line to the game as it starts playing (the whole-block
-  // in-game subtitle was suppressed on their behalf)
-  const sceneQueueRef = useRef<{ lines: DialogueLine[]; paced: boolean }[]>([]);
+  // in-game subtitle was suppressed on their behalf); a preamble (the scene's driving
+  // action) is shown as a speakerless line right before the first dialogue line
+  const sceneQueueRef = useRef<{ lines: DialogueLine[]; paced: boolean; preamble?: string }[]>([]);
   const drainingRef = useRef(false);
 
   const stop = useCallback(() => {
@@ -89,7 +90,7 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
   }, [tts]);
 
   const speakDialogueLines = useCallback(
-    async (lines: DialogueLine[], paced: boolean) => {
+    async (lines: DialogueLine[], paced: boolean, preamble?: string) => {
       if (lines.length === 0) return;
 
       const notifyLineShown = paced
@@ -97,6 +98,11 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
             window.electron.notifySceneLineShown({ speaker: line.speaker, text: line.text });
           }
         : undefined;
+
+      if (notifyLineShown && preamble) {
+        // The mod renders a speakerless scene_line as bare text above the dialogue
+        notifyLineShown({ speaker: '', text: preamble });
+      }
 
       const uniqueSpeakers = new Set(lines.map((line) => line.speaker));
       const hasCastVoices = lines.some((line) => line.voiceId);
@@ -141,7 +147,7 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
       while (sceneQueueRef.current.length > 0) {
         const scene = sceneQueueRef.current.shift();
         if (!scene) continue;
-        await speakDialogueLines(scene.lines, scene.paced);
+        await speakDialogueLines(scene.lines, scene.paced, scene.preamble);
       }
     } finally {
       drainingRef.current = false;
@@ -150,12 +156,12 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
 
   useEffect(() => {
     const removeListener = window.electron.onVoice(
-      (_event: any, lines: DialogueLine[], options?: { paced?: boolean }) => {
+      (_event: any, lines: DialogueLine[], options?: { paced?: boolean; preamble?: string }) => {
         if (sceneQueueRef.current.length >= maxQueuedScenes) {
           log.debug(`TTS scene queue full (${sceneQueueRef.current.length} waiting) — dropping incoming scene`);
           return;
         }
-        sceneQueueRef.current.push({ lines, paced: options?.paced ?? false });
+        sceneQueueRef.current.push({ lines, paced: options?.paced ?? false, preamble: options?.preamble });
         void drainSceneQueue();
       },
     );

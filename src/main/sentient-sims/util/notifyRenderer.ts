@@ -83,13 +83,17 @@ export function sendChatGeneration(response: InteractionEventResult) {
   notifyAllWindows('on-chat-generation', response);
 }
 
-export function playTTSLines(lines: DialogueLine[], sims?: SentientSim[], options?: { paced?: boolean }) {
+export function playTTSLines(
+  lines: DialogueLine[],
+  sims?: SentientSim[],
+  options?: { paced?: boolean; preamble?: string },
+) {
   log.debug('Sending on-voice');
   let castLines = lines;
   if (sims && sims.length > 0) {
     castLines = castVoicesForLines(lines, sims);
   }
-  notifyAllWindows('on-voice', castLines, { paced: options?.paced ?? false });
+  notifyAllWindows('on-voice', castLines, { paced: options?.paced ?? false, preamble: options?.preamble });
 }
 
 // Called as each scene line starts playing so the in-game subtitle appears in step
