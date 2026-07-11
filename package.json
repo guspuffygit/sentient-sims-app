@@ -35,7 +35,7 @@
     "lint": "cross-env NODE_ENV=development eslint --flag unstable_native_nodejs_ts_config .",
     "package": "node ./.erb/scripts/clean.ts dist && npm run build && cross-env electron-builder build --publish never",
     "rebuild": "cross-env electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
-    "start": "cross-env NODE_ENV=development electron-vite dev",
+    "start": "cross-env NODE_ENV=development node --import ./.erb/scripts/clear-electron-env.mjs ./node_modules/electron-vite/bin/electron-vite.js dev",
     "test": "cross-env NODE_ENV=test ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/vitest run --coverage",
     "test:single": "cross-env NODE_ENV=test ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/vitest run Formatter",
     "test:e2e": "cross-env NODE_ENV=test ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ./node_modules/.bin/vitest run ChromeDriver.e2e",
