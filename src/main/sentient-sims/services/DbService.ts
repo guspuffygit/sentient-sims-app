@@ -78,6 +78,14 @@ export class DbService {
 
     this.databaseSession = databaseSession;
 
+    // The mod caches sim descriptions in memory keyed by sim_id and only ever
+    // drops that cache on an explicit CLEAR_SIM_CACHE message. Loading a
+    // different save (or reloading the same one) leaves the mod serving stale
+    // descriptions from the previously loaded database, so clear it here.
+    sendModNotification({
+      type: ModWebsocketMessageType.CLEAR_SIM_CACHE,
+    });
+
     notifyDatabaseLoaded(databaseSession);
   }
 
