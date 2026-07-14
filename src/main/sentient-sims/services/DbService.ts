@@ -61,6 +61,10 @@ export class DbService {
       fs.copyFileSync(savedDb, unsavedDb);
     }
 
+    // Close any previously loaded database first: an open handle keeps the old
+    // session's -wal/-shm files locked on Windows, which makes cleanup fail
+    this.closeDatabase();
+
     try {
       this.db = new DatabaseConstructor(unsavedDb);
     } catch (err) {
@@ -165,8 +169,19 @@ export class DbService {
     return null;
   }
 
+  private closeDatabase() {
+    if (this.db) {
+      try {
+        this.db.close();
+      } catch (err) {
+        log.error('Error closing database', err);
+      }
+      this.db = undefined;
+    }
+  }
+
   unloadDatabase() {
-    this.db = undefined;
+    this.closeDatabase();
 
     // Cleanup unsaved databases
     this.ctx.directory.listSentientSimsDbUnsaved().forEach((unsavedDb) => {

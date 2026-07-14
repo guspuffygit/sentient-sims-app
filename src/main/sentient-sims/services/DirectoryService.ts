@@ -86,7 +86,7 @@ export class DirectoryService {
 
     // Iterate over each item in the folder
     items.forEach((item) => {
-      const fullPath = `${folderPath}/${item}`;
+      const fullPath = path.join(folderPath, item);
 
       // Check if the item is a file
       if (fs.statSync(fullPath).isFile()) {

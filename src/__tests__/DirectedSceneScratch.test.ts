@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import { InteractionEvent, SSEventType } from 'main/sentient-sims/models/InteractionEvents';
 import { InteractionEventStatus } from 'main/sentient-sims/models/InteractionEventResult';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { SimAge } from 'main/sentient-sims/models/SimAge';
 import { mockApiContext } from './util';
 
-const transcriptPath =
-  'C:\\Users\\scott\\AppData\\Local\\Temp\\claude\\c--Users-scott-Documents-github-sentient-sims-app\\4c0921ac-38ab-40eb-866a-0b85e8988dd1\\scratchpad\\directed-scene-transcript.txt';
+const transcriptPath = path.join(os.tmpdir(), 'directed-scene-transcript.txt');
 
 // Number of continuation scenes to run after the initial scene. Override via:
 //   SCENE_CONTINUATIONS=5 cross-env NODE_ENV=test ... vitest run DirectedSceneScratch
