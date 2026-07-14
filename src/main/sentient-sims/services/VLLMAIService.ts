@@ -43,7 +43,7 @@ export class VLLMAIService implements GenerationService {
 
   async getBreakStringTokens(model: string): Promise<number[]> {
     try {
-      const modelSettings = await this.ctx.modelSettings.getModelSettings();
+      const modelSettings = await this.ctx.modelSettings.getModelSettings(model);
 
       if (modelSettings.breakStringTokens) {
         log.debug('returning model settings break string tokens');
@@ -71,8 +71,8 @@ export class VLLMAIService implements GenerationService {
   }
 
   async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
-    const model = this.getModel();
-    const modelSettings = await this.ctx.modelSettings.getModelSettings();
+    const model = request.model ?? this.getModel();
+    const modelSettings = await this.ctx.modelSettings.getModelSettings(model);
 
     const [messageTokens, breakTokens] = await Promise.all([
       this.tokenizeMessages(model, request.messages),
@@ -165,7 +165,7 @@ export class VLLMAIService implements GenerationService {
   }
 
   async tokenizeMessages(model: string, messages: OpenAIMessage[]): Promise<VLLMRTokenizeResponse> {
-    const modelSettings = await this.ctx.modelSettings.getModelSettings();
+    const modelSettings = await this.ctx.modelSettings.getModelSettings(model);
     const breakString = modelSettings.breakTokenString || tokenizerBreakString;
 
     const tokenizeRequest: VLLMTokenizeChatRequest = {

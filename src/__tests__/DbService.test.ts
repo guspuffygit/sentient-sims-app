@@ -28,7 +28,9 @@ describe('DbService', () => {
       sessionId: '718297398',
       saveId: '2',
     });
-    expect(ctx.directory.listSentientSimsDbUnsaved()).toHaveLength(6);
+    // Loading a new session closes the previous db, checkpointing away its -wal/-shm files,
+    // so the old session leaves only its .db behind until cleanup removes it
+    expect(ctx.directory.listSentientSimsDbUnsaved()).toHaveLength(4);
     await ctx.db.saveDatabase({
       sessionId: '718297398',
       saveId: '2',

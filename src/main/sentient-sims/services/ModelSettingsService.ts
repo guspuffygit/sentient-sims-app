@@ -43,7 +43,7 @@ export class ModelSettingsService {
     }
   }
 
-  async getModelSettings(): Promise<ModelSettings> {
+  async getModelSettings(modelOverride?: string): Promise<ModelSettings> {
     const isCacheStale = !this.lastSyncTimestamp || Date.now() - this.lastSyncTimestamp > CACHE_DURATION_MS;
 
     if (isCacheStale) {
@@ -51,7 +51,7 @@ export class ModelSettingsService {
       await this.syncModelSettings();
     }
 
-    const model = this.ctx.aiModel;
+    const model = modelOverride ?? this.ctx.aiModel;
 
     if (model && model in this.modelSettings) {
       return this.modelSettings[model];

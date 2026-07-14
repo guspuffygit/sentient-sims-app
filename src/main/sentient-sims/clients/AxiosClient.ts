@@ -42,6 +42,13 @@ axiosClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
+    if (error.response) {
+      // The AxiosError util.inspect output omits the response body, so log it explicitly
+      const { data } = error.response;
+      const body = typeof data === 'string' ? data : JSON.stringify(data);
+      const url = `${error.config?.baseURL ?? ''}${error.config?.url ?? ''}`;
+      log.error(`HTTP ${error.response.status} from ${url}: ${body.slice(0, 2000)}`);
+    }
     switch (error.status) {
       case SentientSimsHTTPStatusCode.MAINTENANCE_MODE: {
         log.error('AI Server in maintenance mode');

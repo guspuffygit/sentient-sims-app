@@ -524,41 +524,49 @@ If the scene is already good, return it unchanged.`;
     const exchanges: LLMExchange[] = [];
 
     // 1. Director splits the full context into one complete, self-contained prompt per actor
-    const briefingSystemPrompt = `You are directing a scene of a show starring sentient Sims — this episode features ${simNames.join(' and ')}. The audience tunes in because these characters feel truly alive: vivid, compelling, full of personality. You have the FULL scene context below; the user message tells you what is happening right now. First decide what kind of scene this wants to be, then write one complete, self-contained prompt for each actor. Each actor will see ONLY the prompt you write for them — nothing else — so it must contain everything they need to play the scene.
+    const briefingSystemPrompt = `You are directing a scene of a show starring sentient Sims — this episode features ${simNames.join(' and ')}. The audience tunes in because these characters feel truly alive: vivid, compelling, full of personality. You have the FULL scene context below; the user message tells you what is happening right now. First decide what kind of scene this wants to be, then write one shared SCENE briefing plus one private briefing per actor. Each actor will see ONLY the shared briefing and their own private briefing — nothing else — so together they must contain everything that actor needs to play the scene.
 
 ${sceneContext}
 
 Choosing the genre: read the characters, their moods, their history, and what is happening, then commit to the genre that fits this moment best — sitcom, rom-com, thriller, tragedy, reality-show drama, farce, noir, slow-burn romance, anything. Do not default to comedy; a heartbreak plays as tragedy, a scheme plays as a caper, a confrontation plays as a thriller. If the conversation is already underway, keep the genre it is already playing in unless the scene has clearly turned.
 
-Each actor's prompt must cover, in a few tight sentences:
-- Role: "You are playing <name>." — their personality, current mood, and how it colors this moment
-- Genre and tone: the genre you chose for this scene and how their delivery should sound inside it
+The shared SCENE briefing must cover, in under 60 words:
+- Genre and tone: the genre you chose and how the delivery should sound — the scene has one register, and this sets it for every actor
 - Setting: where and when the scene takes place
-- Situation: what is happening right now and what their character wants out of it
-- Angle: the specific attitude or feeling to play in this scene, and how they carry themselves in this conversation
-- Relevant context: only the details and past events that matter for this scene — never the character's whole life story
+- Situation: what is happening right now
+
+Each actor's private briefing must cover, in under 80 words:
+- Role: "You are playing <name>." — their personality, current mood, and how it colors this moment
+- Want: what their character wants out of this scene
+- Angle: the specific attitude or feeling to play, and how they carry themselves in this conversation
+- Relevant context: only the private details and past events that matter for this scene — never the character's whole life story
 
 Rules:
-- Both actors must be directed into the SAME genre and tone — the scene has one register, not two.
+- Be economical: every sentence must earn its place, and the word budgets are hard limits. Tight briefings make sharper performances.
 - Direct for a real conversation, not a highlight reel. Each line should be a natural reply to the one before it, and the exchange should build toward something. A plain, honest line that moves the scene forward beats a clever one that does not connect.
-- Keep secrets secret. Anything a character would not know — the other character's private thoughts, feelings, plans, or secrets — must not appear in that actor's prompt.
+- Keep secrets secret. Anything a character would not know — the other character's private thoughts, feelings, plans, or secrets — belongs only in the other actor's private briefing, never in the shared briefing.
 - Smooth over wrinkles: if the context is awkward, contradictory, or overloaded, resolve it into a clean, playable scene.
 - If the user message contains "Previously in this scene", the conversation is already underway: tell each actor to pick up mid-flow and build on what has already been said — no greetings, no introductions, no re-describing the setting.
 - Direct them to be BRIEF: real conversation is quick short lines, not speeches. An actor who needs more than one short sentence is overacting.
 - Do not write any dialogue and do not tell the actors specific lines to say.
 
 Respond in exactly this format, nothing else:
-${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the complete prompt for ${name}>`).join('\n')}`;
+=== SCENE ===
+<the shared scene briefing>
+${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the private briefing for ${name}>`).join('\n')}`;
 
     const briefing = await this.runOneShot(
       'Director Briefing',
       briefingSystemPrompt,
       `${previouslyBlock}${sceneAction}`,
-      700,
+      500,
       options.directorModel,
     );
     exchanges.push(briefing.exchange);
 
+    // Each actor receives the shared scene briefing followed by their private briefing
+    const sceneMatch = /===\s*SCENE\s*===\s*([\s\S]*?)(?=\n\s*===\s*PROMPT FOR|$)/i.exec(briefing.text);
+    const sharedScene = sceneMatch ? sceneMatch[1].trim() : '';
     const actorPrompts = new Map<string, string>();
     simNames.forEach((name) => {
       const promptMatch = new RegExp(
@@ -566,8 +574,12 @@ ${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the complete prompt for $
         'i',
       ).exec(briefing.text);
       const actorPrompt = promptMatch ? promptMatch[1].trim() : '';
-      // If the director's output couldn't be parsed, fall back to the raw scene context
-      actorPrompts.set(name, actorPrompt.length > 1 ? actorPrompt : `You are playing ${name}.\n\n${sceneContext}`);
+      if (actorPrompt.length > 1) {
+        actorPrompts.set(name, sharedScene ? `${sharedScene}\n\n${actorPrompt}` : actorPrompt);
+      } else {
+        // If the director's output couldn't be parsed, fall back to the raw scene context
+        actorPrompts.set(name, `You are playing ${name}.\n\n${sceneContext}`);
+      }
     });
 
     // 2. Actors perform one turn each. Each actor returns a bare subtitle — only the words
