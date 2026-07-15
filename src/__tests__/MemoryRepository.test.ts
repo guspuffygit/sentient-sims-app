@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
+import { migrate } from 'main/sentient-sims/db/migrations';
 import { mockApiContext } from './util';
 
 describe('MemoryRepository', () => {
@@ -152,6 +153,111 @@ describe('MemoryRepository', () => {
 
     const fetched = ctx.memoryRepository.getMemory({ id: Number(result.id) });
     expect(fetched.interaction_name).toEqual('some_animation_name');
+  });
+
+  it('scopes memories by scene (location + start time) and excludes reflections', () => {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
+    ctx.db.loadDatabase({ sessionId: 'scene-scope', saveId: '1' });
+
+    const participants: ParticipantDTO[] = [{ id: '501' }, { id: '502' }];
+    const sceneStart = '2000-01-01 00:00:00';
+
+    // Scene A memories at location 10
+    ctx.memoryRepository.createMemory({
+      memory: { location_id: 10, content: 'a1' },
+      participants,
+    });
+    ctx.memoryRepository.createMemory({
+      memory: { location_id: 10, content: 'a2' },
+      participants,
+    });
+    // Scene B memory at a different location
+    const b1 = ctx.memoryRepository.createMemory({
+      memory: { location_id: 20, content: 'b1' },
+      participants: [{ id: '501' }],
+    });
+    // A reflection at location 10 — must be excluded from getSceneMemories
+    ctx.memoryRepository.createMemory({
+      memory: { location_id: 10, content: 'reflection of A', event_type: 'reflection' },
+      participants,
+    });
+    // An older memory at location 10 from a previous visit — excluded by the since filter
+    const old = ctx.memoryRepository.createMemory({
+      memory: { location_id: 10, content: 'previous visit' },
+      participants: [{ id: '999' }],
+    });
+    ctx.memoryRepository.updateMemory({ ...old, timestamp: '1999-01-01 00:00:00' });
+
+    const sceneA = ctx.memoryRepository.getSceneMemories(10, sceneStart);
+    expect(sceneA.map((m) => m.content)).toEqual(['a1', 'a2']);
+
+    const sceneB = ctx.memoryRepository.getSceneMemories(20, sceneStart);
+    expect(sceneB.map((m) => m.content)).toEqual(['b1']);
+    expect(b1.location_id).toEqual(20);
+
+    const sceneParticipants = ctx.memoryRepository.getSceneParticipantIds(10, sceneStart);
+    expect(sceneParticipants.sort()).toEqual(['501', '502']);
+  });
+
+  it('returns recent reflections overall, by location, and by participant', () => {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
+    ctx.db.loadDatabase({ sessionId: 'reflections', saveId: '1' });
+
+    // Regular memory should never show up in reflection queries
+    ctx.memoryRepository.createMemory({
+      memory: { location_id: 10, content: 'not a reflection' },
+      participants: [{ id: '700' }],
+    });
+    ctx.memoryRepository.createMemory({
+      memory: { location_id: 10, content: 'reflect gym', event_type: 'reflection' },
+      participants: [{ id: '700' }],
+    });
+    ctx.memoryRepository.createMemory({
+      memory: { location_id: 20, content: 'reflect home', event_type: 'reflection' },
+      participants: [{ id: '800' }],
+    });
+
+    const overall = ctx.memoryRepository.getRecentReflections(10);
+    expect(overall.map((m) => m.content).sort()).toEqual(['reflect gym', 'reflect home']);
+
+    const atGym = ctx.memoryRepository.getRecentReflectionsForLocation(10, 10);
+    expect(atGym.map((m) => m.content)).toEqual(['reflect gym']);
+
+    const for700 = ctx.memoryRepository.getRecentReflectionsForParticipants(['700'], 10);
+    expect(for700.map((m) => m.content)).toEqual(['reflect gym']);
+
+    const for800 = ctx.memoryRepository.getRecentReflectionsForParticipants(['800'], 10);
+    expect(for800.map((m) => m.content)).toEqual(['reflect home']);
+  });
+
+  it('drops a leftover scene_id column from the memory table', () => {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
+    ctx.db.loadDatabase({ sessionId: 'drop-scene-id', saveId: '1' });
+
+    const db = ctx.db.getDb();
+    const hasSceneId = () =>
+      (db.prepare('PRAGMA table_info(memory)').all() as { name: string }[]).some(
+        (column) => column.name === 'scene_id',
+      );
+
+    // Simulate a database that ran the short-lived add-scene-id migration
+    db.prepare('ALTER TABLE memory ADD COLUMN scene_id INTEGER').run();
+    db.prepare("DELETE FROM migrations WHERE name = '011-remove-memory-scene-id'").run();
+    expect(hasSceneId()).toBe(true);
+
+    migrate(db);
+
+    expect(hasSceneId()).toBe(false);
+
+    // Memory rows no longer carry the column that broke the mod's parser
+    const created = ctx.memoryRepository.createMemory({
+      memory: { location_id: 1, content: 'clean row' },
+      participants: [{ id: '900' }],
+    });
+    expect('scene_id' in created).toBe(false);
   });
 
   it('should update interaction_name', () => {

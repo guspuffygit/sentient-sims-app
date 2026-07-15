@@ -109,6 +109,16 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
       ALTER TABLE memory
       ADD COLUMN interaction_name TEXT;
     `,
+    // Scenes are derived from location_id + timestamp instead of a dedicated column: the mod
+    // parses memory rows into a Python class with fixed fields, so any new column breaks it.
+    // This cleans up databases that briefly ran an add-scene-id migration; no-op elsewhere.
+    '011-remove-memory-scene-id': (db: Database) => {
+      const columns = db.prepare('PRAGMA table_info(memory)').all() as { name: string }[];
+      if (columns.some((column) => column.name === 'scene_id')) {
+        log.info('Dropping scene_id column from memory table');
+        db.prepare('ALTER TABLE memory DROP COLUMN scene_id').run();
+      }
+    },
   }),
 );
 

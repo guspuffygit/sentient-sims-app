@@ -78,6 +78,94 @@ export class MemoryRepository extends Repository {
       .all() as MemoryEntity[];
   }
 
+  // The raw, non-reflection memories of a single scene, oldest first. A scene is identified by
+  // its location and start time (no schema support needed): this is the "conversational cache"
+  // that resets each time the player travels to a new location. Timestamps are SQLite
+  // CURRENT_TIMESTAMP strings (UTC, second precision), so `since` must be in the same format.
+  getSceneMemories(locationId: number, since: string): MemoryEntity[] {
+    return this.dbService
+      .getDb()
+      .prepare(
+        `
+          SELECT * FROM memory
+          WHERE location_id = ? AND timestamp >= ? AND (event_type IS NULL OR event_type != 'reflection')
+          ORDER BY timestamp ASC, id ASC;
+        `,
+      )
+      .all([locationId, since]) as MemoryEntity[];
+  }
+
+  // Distinct participant ids that took part in a scene, used to link a scene reflection back to
+  // everyone who was present.
+  getSceneParticipantIds(locationId: number, since: string): string[] {
+    const rows = this.dbService
+      .getDb()
+      .prepare(
+        `
+          SELECT DISTINCT memory_participants.participant_id AS participant_id
+          FROM memory_participants
+          INNER JOIN memory ON memory.id = memory_participants.memory_id
+          WHERE memory.location_id = ? AND memory.timestamp >= ?
+            AND (memory.event_type IS NULL OR memory.event_type != 'reflection');
+        `,
+      )
+      .safeIntegers()
+      .all([locationId, since]) as { participant_id: bigint }[];
+
+    return rows.map((row) => row.participant_id.toString());
+  }
+
+  getRecentReflections(limit: number): MemoryEntity[] {
+    return this.dbService
+      .getDb()
+      .prepare(
+        `
+          SELECT * FROM memory
+          WHERE event_type = 'reflection'
+          ORDER BY timestamp DESC, id DESC
+          LIMIT ?;
+        `,
+      )
+      .all([limit]) as MemoryEntity[];
+  }
+
+  getRecentReflectionsForLocation(locationId: number, limit: number): MemoryEntity[] {
+    return this.dbService
+      .getDb()
+      .prepare(
+        `
+          SELECT * FROM memory
+          WHERE event_type = 'reflection' AND location_id = ?
+          ORDER BY timestamp DESC, id DESC
+          LIMIT ?;
+        `,
+      )
+      .all([locationId, limit]) as MemoryEntity[];
+  }
+
+  getRecentReflectionsForParticipants(participantIds: string[], limit: number): MemoryEntity[] {
+    if (participantIds.length === 0) {
+      return [];
+    }
+
+    const placeholders = participantIds.map(() => '?').join(', ');
+    const query = `
+      SELECT DISTINCT memory.*
+      FROM memory
+      INNER JOIN memory_participants ON memory.id = memory_participants.memory_id
+      WHERE memory.event_type = 'reflection' AND memory_participants.participant_id IN (${placeholders})
+      ORDER BY memory.timestamp DESC, memory.id DESC
+      LIMIT ?;
+    `;
+
+    const bigIntParticipantIds = participantIds.map((participantIdString) => BigInt(participantIdString));
+
+    return this.dbService
+      .getDb()
+      .prepare(query)
+      .all([...bigIntParticipantIds, limit]) as MemoryEntity[];
+  }
+
   updateMemory(memory: MemoryEntity) {
     const result = this.dbService
       .getDb()

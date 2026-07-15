@@ -66,6 +66,22 @@ export class ParticipantRepository extends Repository {
     });
   }
 
+  // Read-only name lookup for a set of ids (no insert-or-replace side effects like getParticipant).
+  getParticipantNames(ids: string[]): string[] {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const placeholders = ids.map(() => '?').join(', ');
+    const rows = this.dbService
+      .getDb()
+      .prepare(`SELECT name FROM participant WHERE id IN (${placeholders})`)
+      .safeIntegers()
+      .all(ids.map((id) => BigInt(id))) as { name: string | null }[];
+
+    return rows.map((row) => row.name).filter((name): name is string => Boolean(name));
+  }
+
   updateParticipant(participant: ParticipantDTO) {
     const result = this.dbService
       .getDb()

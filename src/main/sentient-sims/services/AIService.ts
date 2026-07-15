@@ -54,7 +54,9 @@ import { InteractionDescription } from '../descriptions/interactionDescriptions'
 import { PromptHistoryMode } from '../models/PromptHistoryMode';
 import { sendModNotification } from '../websocketServer';
 import { ModAddBuff, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
+import { ParticipantDTO } from '../db/dto/ParticipantDTO';
 import { ApiContext } from './ApiContext';
+import { SceneState } from './SceneService';
 
 // Actors are asked for a bare subtitle, but models still sneak in speaker labels,
 // quotation marks, and parenthetical notes — strip everything but the spoken words
@@ -134,7 +136,82 @@ export class AIService {
     return this.ctx.genai.sentientSimsGenerate(promptRequest);
   }
 
+  // Logs one LLM stage of a pipeline (prompt + output) to the console/log so the whole
+  // directed pipeline can be followed live in the npm dev console.
+  private logExchange(exchange: LLMExchange) {
+    const prompt = exchange.request.messages.map((message) => `[${message.role}]\n${message.content}`).join('\n\n');
+    log.info(
+      `[Pipeline] === ${exchange.label} ===\n--- PROMPT ---\n${prompt}\n--- OUTPUT ---\n${exchange.responseText}\n=== end ${exchange.label} ===`,
+    );
+  }
+
+  // Detects a location change and, if the player travelled, reflects on the scene that just
+  // ended before the new scene's first generation runs.
+  private async handleSceneBoundary(event: SSEvent) {
+    const { boundary, previousScene } = this.ctx.sceneService.checkSceneBoundary(event);
+    if (boundary && previousScene) {
+      await this.runSceneReflection(previousScene);
+    }
+  }
+
+  // At a scene boundary the AI reflects on the scene that just ended: a sentence or two on what
+  // happened and how it felt, then one sentence per character interacted with. Stored as a normal
+  // memory row tagged event_type='reflection', so it surfaces in the Memories UI and feeds future
+  // prompts via the <PAST_REFLECTIONS> block. Best-effort: any failure is logged and swallowed.
+  async runSceneReflection(previousScene: SceneState) {
+    try {
+      const sceneMemories = this.ctx.memoryRepository.getSceneMemories(
+        previousScene.locationId,
+        previousScene.startedAt,
+      );
+      if (sceneMemories.length === 0) {
+        log.info(`[Reflection] Scene ${previousScene.sceneId} had no memories, skipping reflection`);
+        return;
+      }
+
+      const location = this.ctx.locationRepository.getLocation({ id: previousScene.locationId });
+      const participantIds = this.ctx.memoryRepository.getSceneParticipantIds(
+        previousScene.locationId,
+        previousScene.startedAt,
+      );
+      const names = this.ctx.participantRepository.getParticipantNames(participantIds);
+      const namesList = names.length > 0 ? names.join(', ') : 'the people present';
+
+      const transcript = this.ctx.promptBuilder
+        .groupMemories(sceneMemories)
+        .map((message) => message.content)
+        .join('\n');
+
+      const systemPrompt = `The scene at ${location.name} (${location.lot_type}) has ended. Reflect on it in plain prose — no headers, labels, or lists.
+First, one or two sentences on what happened in the scene and how it felt.
+Then exactly one sentence for each of these characters — ${namesList} — about interacting with them and how it made you feel.
+Keep it concise and grounded. Do not invent events that are not in the scene below.`;
+
+      const reflection = await this.runOneShot('Scene Reflection', systemPrompt, transcript, 250);
+      this.logExchange(reflection.exchange);
+
+      const text = cleanupAIOutput(reflection.text);
+      if (text.length <= 1) {
+        log.error(`[Reflection] Empty reflection produced for scene ${previousScene.sceneId}`);
+        return;
+      }
+
+      const reflectionMemory: MemoryEntity = {
+        content: text,
+        location_id: previousScene.locationId,
+        event_type: 'reflection',
+      };
+      const participants: ParticipantDTO[] = participantIds.map((id) => ({ id }));
+      this.ctx.memoryRepository.createMemory({ memory: reflectionMemory, participants });
+      log.info(`[Reflection] Saved reflection for scene ${previousScene.sceneId}: ${text}`);
+    } catch (err) {
+      log.error(`[Reflection] Failed to generate reflection for scene ${previousScene.sceneId}`, err);
+    }
+  }
+
   async interactionEvent(event: InteractionEvents): Promise<InteractionEventResult> {
+    await this.handleSceneBoundary(event);
+
     switch (event.event_type) {
       case SSEventType.DO_SOMETHING:
         return this.handleDoSomething(event as DoSomethingInteractionEvent);
@@ -341,6 +418,8 @@ export class AIService {
 
     const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
 
+    this.logExchange({ label: 'Scene Generation', request: openAIRequest, responseText: response.text });
+
     const stopTokens = [];
     // TODO: model specific OUTPUT formatting cleanup stop tokens
     if (
@@ -435,6 +514,7 @@ If the scene is already good, return it unchanged.`;
     const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
     const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
+    this.logExchange({ label: 'Director Review', request: openAIRequest, responseText: response.text });
     const reviewed = cleanupAIOutput(response.text);
     return { text: reviewed.length > 1 ? reviewed : text, request: openAIRequest };
   }
@@ -468,6 +548,7 @@ If the scene is already good, return it unchanged.`;
 
   async runDirectedScene(request: DirectedSceneRequest): Promise<InteractionEventResult> {
     const { event } = request;
+    await this.handleSceneBoundary(event);
     if ((!event.testing_action && !request.continueScene) || event.sentient_sims.length < 2) {
       log.error('Directed scene requires a testing_action and at least two sims');
       return { status: InteractionEventStatus.NOOP };
@@ -545,6 +626,7 @@ Rules:
 - Be economical: every sentence must earn its place, and the word budgets are hard limits. Tight briefings make sharper performances.
 - Direct for a real conversation, not a highlight reel. Each line should be a natural reply to the one before it, and the exchange should build toward something. A plain, honest line that moves the scene forward beats a clever one that does not connect.
 - Keep secrets secret. Anything a character would not know — the other character's private thoughts, feelings, plans, or secrets — belongs only in the other actor's private briefing, never in the shared briefing.
+- The <PAST_REFLECTIONS> block, if present, holds the characters' distilled memories of earlier scenes. Mine it for continuity and feelings, but it is not happening now — never stage it as the current scene, and fold in only the details that matter here.
 - Smooth over wrinkles: if the context is awkward, contradictory, or overloaded, resolve it into a clean, playable scene.
 - If the user message contains "Previously in this scene", the conversation is already underway: tell each actor to pick up mid-flow and build on what has already been said — no greetings, no introductions, no re-describing the setting.
 - Direct them to be BRIEF: real conversation is quick short lines, not speeches. An actor who needs more than one short sentence is overacting.
@@ -563,6 +645,7 @@ ${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the private briefing for 
       options.directorModel,
     );
     exchanges.push(briefing.exchange);
+    this.logExchange(briefing.exchange);
 
     // Each actor receives the shared scene briefing followed by their private briefing
     const sceneMatch = /===\s*SCENE\s*===\s*([\s\S]*?)(?=\n\s*===\s*PROMPT FOR|$)/i.exec(briefing.text);
@@ -581,6 +664,11 @@ ${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the private briefing for 
         actorPrompts.set(name, `You are playing ${name}.\n\n${sceneContext}`);
       }
     });
+
+    log.info(
+      `[Pipeline] Director briefing parsed — shared scene: ${sharedScene ? 'yes' : 'MISSING'}, ` +
+        `actor briefings: ${simNames.map((name) => `${name}:${actorPrompts.get(name) ? 'ok' : 'fallback'}`).join(', ')}`,
+    );
 
     // 2. Actors perform one turn each. Each actor returns a bare subtitle — only the words
     //    they speak, no preamble — and the speaker label is added programmatically after.
@@ -610,8 +698,10 @@ How to respond:
         options.actorModels?.[i],
       );
       exchanges.push(performance.exchange);
+      this.logExchange(performance.exchange);
 
       const subtitle = extractSubtitle(performance.text, simNames);
+      log.info(`[Pipeline] Actor ${sim.name} subtitle: ${subtitle || '(none)'}`);
       if (subtitle.length > 1) {
         sceneLines.push({ speaker: sim.name, text: subtitle });
       }
@@ -651,12 +741,15 @@ Respond with the final scene as one line per row in exactly this format, nothing
       options.directorModel,
     );
     exchanges.push(compiled.exchange);
+    this.logExchange(compiled.exchange);
 
     const reviewedLines = parseReviewedLines(compiled.text, simNames);
     // The reviewer must preserve the back-and-forth; if its output lost a speaker or
     // could not be parsed, air the actors' original performances instead
     const reviewedSpeakers = new Set(reviewedLines.map((line) => line.speaker));
-    const finalLines = reviewedLines.length >= 2 && reviewedSpeakers.size >= 2 ? reviewedLines : sceneLines;
+    const useReviewerCut = reviewedLines.length >= 2 && reviewedSpeakers.size >= 2;
+    const finalLines = useReviewerCut ? reviewedLines : sceneLines;
+    log.info(`[Pipeline] Final cut: ${useReviewerCut ? "reviewer's cut" : "actors' original lines"}`);
     const dialogueText = toTranscript(finalLines);
 
     // The scene's driving action is shown above the dialogue in the in-game memories window,

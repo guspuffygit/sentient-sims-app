@@ -153,12 +153,56 @@ export class PromptRequestBuilderService {
     return undefined;
   }
 
-  getMemories(sentientSims: SentientSim[]) {
-    const participantIds = sentientSims.map((sentientSim) => sentientSim.sim_id);
+  // Only the current scene's raw memories are replayed verbatim. Everything from earlier scenes
+  // is represented by the distilled reflections in the <PAST_REFLECTIONS> block instead.
+  getMemories() {
+    const scene = this.ctx.sceneService.getCurrentScene();
+    if (!scene) {
+      return [];
+    }
 
-    return this.ctx.memoryRepository.getParticipantsMemories({
-      participant_ids: participantIds,
+    return this.ctx.memoryRepository.getSceneMemories(scene.locationId, scene.startedAt);
+  }
+
+  // Collects the reflections that matter for this moment, deduped and newest first:
+  // the most recent overall, the most recent at this location, and the most recent involving
+  // the sims currently in the interaction.
+  getReflections(event: SSEvent): MemoryEntity[] {
+    const locationId = event.environment.location_id;
+    const participantIds = event.sentient_sims.map((sentientSim) => sentientSim.sim_id);
+
+    const collected: MemoryEntity[] = [
+      ...this.ctx.memoryRepository.getRecentReflections(3),
+      ...this.ctx.memoryRepository.getRecentReflectionsForLocation(locationId, 2),
+      ...this.ctx.memoryRepository.getRecentReflectionsForParticipants(participantIds, 2),
+    ];
+
+    const byId = new Map<number, MemoryEntity>();
+    collected.forEach((reflection) => {
+      if (reflection.id !== undefined) {
+        byId.set(reflection.id, reflection);
+      }
     });
+
+    return Array.from(byId.values()).sort((a, b) => (b.timestamp ?? '').localeCompare(a.timestamp ?? ''));
+  }
+
+  private buildReflectionsBlock(reflections: MemoryEntity[]): string | undefined {
+    if (reflections.length === 0) {
+      return undefined;
+    }
+
+    const lines = reflections.map((reflection) => {
+      const location = this.ctx.locationRepository.getLocation({ id: reflection.location_id });
+      return `[At ${location.name}] ${reflection.content}`;
+    });
+
+    return [
+      '<PAST_REFLECTIONS>',
+      ...lines,
+      '</PAST_REFLECTIONS>',
+      'These are the characters’ distilled memories of past scenes. Draw on them only when relevant; do not recap them.',
+    ].join('\n');
   }
 
   groupMemories(memories: MemoryEntity[]): FormattedMemoryMessage[] {
@@ -386,8 +430,22 @@ export class PromptRequestBuilderService {
     const sims = this.formatSims(event.sentient_sims, location, event.relationships);
     sims.push(this.buildDirectorBlock(event));
     sims.push(this.buildSceneGuidance());
-    const memories = this.getMemories(event.sentient_sims);
+
+    const reflections = this.getReflections(event);
+    const reflectionsBlock = this.buildReflectionsBlock(reflections);
+    if (reflectionsBlock) {
+      sims.push(reflectionsBlock);
+    }
+
+    const memories = this.getMemories();
     const groupedMemories = this.groupMemories(memories);
+
+    const currentScene = this.ctx.sceneService.getCurrentScene();
+    log.info(
+      `[Memory] Scene ${currentScene ? `${currentScene.sceneId} (location ${currentScene.locationId})` : 'none'}: ` +
+        `${memories.length} scene memories, ${reflections.length} reflections ` +
+        `[${reflections.map((reflection) => reflection.id).join(', ')}]`,
+    );
     const formattedLocation = formatAction(
       '<LOCATION>\n{location} ({location_type}), {location_description}\n</LOCATION>',
       event.sentient_sims,

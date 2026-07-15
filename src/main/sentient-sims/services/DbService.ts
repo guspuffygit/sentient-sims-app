@@ -82,6 +82,9 @@ export class DbService {
 
     this.databaseSession = databaseSession;
 
+    // Loading a save jumps the game state, so any in-progress scene no longer describes reality.
+    this.ctx.sceneService.reset();
+
     // The mod caches sim descriptions in memory keyed by sim_id and only ever
     // drops that cache on an explicit CLEAR_SIM_CACHE message. Loading a
     // different save (or reloading the same one) leaves the mod serving stale
@@ -182,6 +185,8 @@ export class DbService {
 
   unloadDatabase() {
     this.closeDatabase();
+
+    this.ctx.sceneService.reset();
 
     // Cleanup unsaved databases
     this.ctx.directory.listSentientSimsDbUnsaved().forEach((unsavedDb) => {

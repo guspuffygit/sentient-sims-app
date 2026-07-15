@@ -43,6 +43,7 @@ import { NovelAIService } from './NovelAIService';
 import { OpenAIService } from './OpenAIService';
 import { PatreonService } from './PatreonService';
 import { PromptRequestBuilderService } from './PromptRequestBuilderService';
+import { SceneService } from './SceneService';
 import { SentientSimsAIService } from './SentientSimsAIService';
 import { SettingsService } from './SettingsService';
 import { UpdateService } from './UpdateService';
@@ -196,6 +197,7 @@ export class ApiContext {
   private readonly _interactionService: InteractionService;
   private readonly _aiService: AIService;
   private readonly _mappingService: MappingService;
+  private readonly _sceneService: SceneService;
 
   // --- Repositories ---
   private readonly _locationRepository: LocationRepository;
@@ -250,6 +252,8 @@ export class ApiContext {
     this._memoryRepository = new MemoryRepository(this._db);
     this._participantRepository = new ParticipantRepository(this._db);
     this._interactionRepository = new InteractionRepository(this);
+
+    this._sceneService = new SceneService();
 
     this._promptBuilder = new PromptRequestBuilderService(this);
     this._interactionService = new InteractionService(this);
@@ -322,6 +326,10 @@ export class ApiContext {
 
   get mapping(): MappingService {
     return this._mappingService;
+  }
+
+  get sceneService(): SceneService {
+    return this._sceneService;
   }
 
   get modelSettings(): ModelSettingsService {

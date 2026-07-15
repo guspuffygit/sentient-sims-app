@@ -420,6 +420,9 @@ describe('Output', () => {
           event.sentient_sims.map((sim) => ({ id: sim.sim_id, fullName: sim.name })),
         );
 
+        // Memory is scene-scoped now (location + start time), so establish a scene first
+        ctx.sceneService.checkSceneBoundary(event);
+
         // Memory 0: narrator sets the scene — describes the setting, vibe, and characters; no invented actions
         ctx.memoryRepository.createMemory({
           memory: {
