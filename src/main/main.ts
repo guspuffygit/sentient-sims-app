@@ -99,7 +99,9 @@ const createWindow = async () => {
   mainWindow.webContents.on('will-navigate', (event, url) => {
     if (url.startsWith('https://sentientsimulations.auth.us-east-1.amazoncognito.com/oauth2/authorize')) {
       event.preventDefault();
-      void shell.openExternal(url);
+      const authUrl = new URL(url);
+      authUrl.searchParams.set('prompt', 'select_account');
+      void shell.openExternal(authUrl.toString());
     }
   });
 
