@@ -122,22 +122,32 @@ export class InteractionRepository {
 
   async getIgnoredInteractions(): Promise<IgnoredInteractionsResponse> {
     const allInteractions = await this.getInteractions();
-    const ignoredInteractionNames: string[] = [];
+    const ignoredInteractionNames = new Set<string>();
 
     allInteractions.forEach((value, key) => {
       if (value.ignored) {
-        ignoredInteractionNames.push(key);
+        ignoredInteractionNames.add(key);
       }
     });
 
+    // A local override replaces the online interaction entirely, so it can also un-ignore
+    this.localInteractions?.forEach((value, key) => {
+      if (value.ignored) {
+        ignoredInteractionNames.add(key);
+      } else {
+        ignoredInteractionNames.delete(key);
+      }
+    });
+
+    // Built-in descriptions take precedence over everything, matching getInteractionDescription
     interactionDescriptions.forEach((description, name) => {
       if (description.ignored) {
-        ignoredInteractionNames.push(name);
+        ignoredInteractionNames.add(name);
       }
     });
 
     return {
-      ignoredInteractionNames,
+      ignoredInteractionNames: [...ignoredInteractionNames],
     };
   }
 }

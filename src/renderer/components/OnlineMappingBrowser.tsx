@@ -3,11 +3,13 @@ import {
   Button,
   Chip,
   CircularProgress,
+  FormControlLabel,
   IconButton,
   InputAdornment,
   Pagination,
   Paper,
   Stack,
+  Switch,
   TextField,
   Tooltip,
   Typography,
@@ -46,23 +48,26 @@ function MappingItem({
   mappingType: MappingType;
   canSaveOnline: boolean;
 }) {
+  const animation = mappingType === 'animations' ? (mapping.fullObject as Animation) : undefined;
+  const interaction = mappingType === 'interactions' ? (mapping.fullObject as BasicInteraction) : undefined;
+
   const [action, setAction] = useState(mapping.action);
   const [savedAction, setSavedAction] = useState(mapping.action);
+  const [ignored, setIgnored] = useState(interaction?.ignored ?? false);
+  const [savedIgnored, setSavedIgnored] = useState(interaction?.ignored ?? false);
   const [savingLocally, setSavingLocally] = useState(false);
   const [savingOnline, setSavingOnline] = useState(false);
   const { showMessage } = useSnackBar();
 
-  const edited = action !== savedAction;
+  const edited = action !== savedAction || ignored !== savedIgnored;
   const saving = savingLocally || savingOnline;
-  const animation = mappingType === 'animations' ? (mapping.fullObject as Animation) : undefined;
 
   const handleSaveLocally = async () => {
     setSavingLocally(true);
     const url = `${appApiUrl}/${mappingType}/save-locally`;
-    const body =
-      mappingType === 'interactions'
-        ? { ...(mapping.fullObject as BasicInteraction), action }
-        : { ...(mapping.fullObject as Animation), act: action };
+    const body = interaction
+      ? { ...interaction, action, ignored }
+      : { ...(mapping.fullObject as Animation), act: action };
 
     try {
       const response = await fetch(url, {
@@ -74,6 +79,7 @@ function MappingItem({
         throw new Error(`Request failed with status ${response.status}`);
       }
       setSavedAction(action);
+      setSavedIgnored(ignored);
       showMessage(`Saved locally: ${mapping.key}`, 'success');
       log.info(`[MappingBrowser] Saved local mapping: ${mapping.key}`);
     } catch (err) {
@@ -85,10 +91,9 @@ function MappingItem({
 
   const handleSaveOnline = async () => {
     setSavingOnline(true);
-    const body =
-      mappingType === 'interactions'
-        ? { ...(mapping.fullObject as BasicInteraction), action }
-        : { ...(mapping.fullObject as Animation), act: action };
+    const body = interaction
+      ? { ...interaction, action, ignored }
+      : { ...(mapping.fullObject as Animation), act: action };
 
     try {
       const response = await fetch(`${appApiUrl}/${mappingType}`, {
@@ -100,6 +105,7 @@ function MappingItem({
         throw new Error(`Request failed with status ${response.status}`);
       }
       setSavedAction(action);
+      setSavedIgnored(ignored);
       showMessage(`Saved online: ${mapping.key}`, 'success');
       log.info(`[MappingBrowser] Saved online mapping: ${mapping.key}`);
     } catch (err) {
@@ -117,9 +123,8 @@ function MappingItem({
         </Typography>
         {animation?.name && <Chip label={animation.name} size="small" variant="outlined" />}
         {animation?.author && <Chip label={animation.author} size="small" variant="outlined" color="primary" />}
-        {!animation && mapping.fullObject.sub && (
-          <Chip label={mapping.fullObject.sub} size="small" variant="outlined" color="primary" />
-        )}
+        {interaction?.sub && <Chip label={interaction.sub} size="small" variant="outlined" color="primary" />}
+        {ignored && <Chip label="Ignored" size="small" variant="outlined" color="default" />}
         {edited && <Chip label="Unsaved changes" size="small" color="warning" />}
       </Stack>
       <TextField
@@ -128,12 +133,13 @@ function MappingItem({
         variant="outlined"
         size="small"
         value={action}
+        disabled={ignored}
         onChange={(e) => {
           setAction(e.target.value);
         }}
         sx={{ mb: 1.5 }}
       />
-      <Stack direction="row" spacing={1}>
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
         <Button
           loading={savingLocally}
           disabled={saving}
@@ -164,6 +170,26 @@ function MappingItem({
               </Button>
             </span>
           </Tooltip>
+        )}
+        {interaction && (
+          <>
+            <Box sx={{ flexGrow: 1 }} />
+            <Tooltip title="Ignored interactions are skipped — no AI description is generated for them" placement="top">
+              <FormControlLabel
+                control={
+                  <Switch
+                    size="small"
+                    checked={ignored}
+                    onChange={(e) => {
+                      setIgnored(e.target.checked);
+                    }}
+                  />
+                }
+                label="Ignored"
+                slotProps={{ typography: { variant: 'body2' } }}
+              />
+            </Tooltip>
+          </>
         )}
       </Stack>
     </Paper>
