@@ -25,6 +25,7 @@ export class InteractionService {
       name: interaction.name,
       action: interaction.action,
       ignored: interaction.ignored,
+      sub: interaction.sub,
     };
     log.debug(`Updated unmapped interaction: ${JSON.stringify(basicInteration, null, 2)}`);
     await this.ctx.interactionRepository.setInteraction(basicInteration);

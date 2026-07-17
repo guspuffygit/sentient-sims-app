@@ -1,10 +1,33 @@
-import { Box, Button, CircularProgress, List, TextField, Typography, Paper, Pagination } from '@mui/material';
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  IconButton,
+  InputAdornment,
+  Pagination,
+  Paper,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
+import SaveIcon from '@mui/icons-material/Save';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { BasicInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
 import { Animation } from 'main/sentient-sims/models/Animation';
 import log from 'electron-log';
 import { useMemo, useState } from 'react';
 import { useDebounce } from 'renderer/hooks/useDebounce';
+import { useAuth } from 'renderer/providers/AuthProvider';
+import { useSnackBar } from 'renderer/providers/SnackBarProvider';
+
+type MappingType = 'interactions' | 'animations';
 
 type GenericMapping = {
   key: string;
@@ -12,75 +35,137 @@ type GenericMapping = {
   fullObject: BasicInteraction | Animation;
 };
 
+const ITEMS_PER_PAGE = 50;
+
 function MappingItem({
-  mappingKey,
   mapping,
   mappingType,
+  canSaveOnline,
 }: {
-  mappingKey: string;
   mapping: GenericMapping;
-  mappingType: 'interactions' | 'animations';
+  mappingType: MappingType;
+  canSaveOnline: boolean;
 }) {
   const [action, setAction] = useState(mapping.action);
-  const [loading, setLoading] = useState(false);
+  const [savedAction, setSavedAction] = useState(mapping.action);
+  const [savingLocally, setSavingLocally] = useState(false);
+  const [savingOnline, setSavingOnline] = useState(false);
+  const { showMessage } = useSnackBar();
 
-  const handleSave = async () => {
-    setLoading(true);
-    let url: string;
-    let body: BasicInteraction | Animation;
+  const edited = action !== savedAction;
+  const saving = savingLocally || savingOnline;
+  const animation = mappingType === 'animations' ? (mapping.fullObject as Animation) : undefined;
 
-    if (mappingType === 'interactions') {
-      url = `${appApiUrl}/interactions/save-locally`;
-      body = {
-        ...(mapping.fullObject as BasicInteraction),
-        action,
-      };
-    } else {
-      url = `${appApiUrl}/animations/save-locally`;
-      body = {
-        ...(mapping.fullObject as Animation),
-        act: action,
-      };
-    }
+  const handleSaveLocally = async () => {
+    setSavingLocally(true);
+    const url = `${appApiUrl}/${mappingType}/save-locally`;
+    const body =
+      mappingType === 'interactions'
+        ? { ...(mapping.fullObject as BasicInteraction), action }
+        : { ...(mapping.fullObject as Animation), act: action };
 
     try {
-      await fetch(url, {
+      const response = await fetch(url, {
         method: 'POST',
         body: JSON.stringify(body),
         headers: { 'Content-Type': 'application/json' },
       });
-      log.info(`[MappingBrowser] Lokales Mapping gespeichert: ${mappingKey}`);
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      setSavedAction(action);
+      showMessage(`Saved locally: ${mapping.key}`, 'success');
+      log.info(`[MappingBrowser] Saved local mapping: ${mapping.key}`);
     } catch (err) {
-      log.error(`[MappingBrowser] Fehler beim Speichern: ${mappingKey}`, err);
+      showMessage(`Failed to save locally: ${mapping.key}`, 'error');
+      log.error(`[MappingBrowser] Error saving local mapping: ${mapping.key}`, err);
     }
-    setLoading(false);
+    setSavingLocally(false);
+  };
+
+  const handleSaveOnline = async () => {
+    setSavingOnline(true);
+    const body =
+      mappingType === 'interactions'
+        ? { ...(mapping.fullObject as BasicInteraction), action }
+        : { ...(mapping.fullObject as Animation), act: action };
+
+    try {
+      const response = await fetch(`${appApiUrl}/${mappingType}`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      setSavedAction(action);
+      showMessage(`Saved online: ${mapping.key}`, 'success');
+      log.info(`[MappingBrowser] Saved online mapping: ${mapping.key}`);
+    } catch (err) {
+      showMessage(`Failed to save online: ${mapping.key}`, 'error');
+      log.error(`[MappingBrowser] Error saving online mapping: ${mapping.key}`, err);
+    }
+    setSavingOnline(false);
   };
 
   return (
-    <Paper sx={{ mb: 2, p: 2 }}>
-      <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-        {mappingKey}
-      </Typography>
+    <Paper variant="outlined" sx={{ p: 2 }}>
+      <Stack direction="row" spacing={1} useFlexGap sx={{ mb: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Typography variant="subtitle2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
+          {mapping.key}
+        </Typography>
+        {animation?.name && <Chip label={animation.name} size="small" variant="outlined" />}
+        {animation?.author && <Chip label={animation.author} size="small" variant="outlined" color="primary" />}
+        {!animation && mapping.fullObject.sub && (
+          <Chip label={mapping.fullObject.sub} size="small" variant="outlined" color="primary" />
+        )}
+        {edited && <Chip label="Unsaved changes" size="small" color="warning" />}
+      </Stack>
       <TextField
         fullWidth
         multiline
         variant="outlined"
+        size="small"
         value={action}
         onChange={(e) => {
           setAction(e.target.value);
         }}
-        sx={{ mt: 1, mb: 1 }}
+        sx={{ mb: 1.5 }}
       />
-      <Button
-        loading={loading}
-        variant="contained"
-        size="small"
-        onClick={() => {
-          void handleSave();
-        }}
-      >
-        Save Locally
-      </Button>
+      <Stack direction="row" spacing={1}>
+        <Button
+          loading={savingLocally}
+          disabled={saving}
+          variant="contained"
+          size="small"
+          startIcon={<SaveIcon />}
+          onClick={() => {
+            void handleSaveLocally();
+          }}
+        >
+          Save Locally
+        </Button>
+        {canSaveOnline && (
+          <Tooltip title="Overwrites the shared online mapping for everyone" placement="top">
+            <span>
+              <Button
+                loading={savingOnline}
+                disabled={saving}
+                variant="outlined"
+                color="warning"
+                size="small"
+                startIcon={<CloudUploadIcon />}
+                onClick={() => {
+                  void handleSaveOnline();
+                }}
+              >
+                Save Online
+              </Button>
+            </span>
+          </Tooltip>
+        )}
+      </Stack>
     </Paper>
   );
 }
@@ -90,23 +175,30 @@ export default function OnlineMappingBrowser() {
   const [filter, setFilter] = useState('');
   const debouncedFilter = useDebounce(filter, 300);
   const [mappings, setMappings] = useState<GenericMapping[]>([]);
-  const [mappingType, setMappingType] = useState<'interactions' | 'animations' | null>(null);
+  const [mappingType, setMappingType] = useState<MappingType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 50;
+  const { userAttributes } = useAuth();
+  const { showMessage } = useSnackBar();
 
-  const loadMappings = async (type: 'interactions' | 'animations') => {
+  const isDev = userAttributes?.founderStatus === 'dev';
+
+  const loadMappings = async (type: MappingType) => {
     setLoading(true);
     setMappingType(type);
     setMappings([]);
+    setCurrentPage(1);
     try {
       const response = await fetch(`${appApiUrl}/${type}/online-all`);
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
       const data = (await response.json()) as Record<string, BasicInteraction | Animation>;
 
       const mappingList: GenericMapping[] = Object.entries(data).map(([key, value]) => {
         const action = type === 'interactions' ? (value as BasicInteraction).action : (value as Animation).act;
 
         return {
-          key: key,
+          key,
           action: action || '',
           fullObject: value,
         };
@@ -114,6 +206,7 @@ export default function OnlineMappingBrowser() {
 
       setMappings(mappingList);
     } catch (err) {
+      showMessage(`Failed to load online ${type}`, 'error');
       log.error(`[MappingBrowser] Mappings could not be loaded:`, err);
     }
     setLoading(false);
@@ -121,86 +214,155 @@ export default function OnlineMappingBrowser() {
 
   const filteredMappings = useMemo(() => {
     if (!debouncedFilter) return mappings;
-    return mappings.filter((m) => m.key.toLowerCase().includes(debouncedFilter.toLowerCase()));
+    const search = debouncedFilter.toLowerCase();
+    return mappings.filter((m) => {
+      const fields = [m.key, m.fullObject.name, m.action];
+      if ('author' in m.fullObject) {
+        fields.push(m.fullObject.author);
+      }
+      if (m.fullObject.sub) {
+        fields.push(m.fullObject.sub);
+      }
+      return fields.some((field) => field.toLowerCase().includes(search));
+    });
   }, [mappings, debouncedFilter]);
 
-  const paginatedMappings = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredMappings.slice(startIndex, endIndex);
-  }, [filteredMappings, currentPage, itemsPerPage]);
+  const pageCount = Math.ceil(filteredMappings.length / ITEMS_PER_PAGE);
+  const page = Math.min(currentPage, Math.max(pageCount, 1));
 
-  const pageCount = Math.ceil(filteredMappings.length / itemsPerPage);
+  const paginatedMappings = useMemo(() => {
+    const startIndex = (page - 1) * ITEMS_PER_PAGE;
+    return filteredMappings.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredMappings, page]);
+
+  const pagination = pageCount > 1 && (
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Pagination
+        count={pageCount}
+        page={page}
+        onChange={(_event, value) => {
+          setCurrentPage(value);
+        }}
+        color="primary"
+        showFirstButton
+        showLastButton
+      />
+    </Box>
+  );
+
+  let content;
+  if (loading) {
+    content = (
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 8 }}>
+        <CircularProgress />
+        <Typography color="text.secondary">Loading online {mappingType}...</Typography>
+      </Box>
+    );
+  } else if (!mappingType) {
+    content = (
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, py: 8 }}>
+        <TravelExploreIcon sx={{ fontSize: 48, color: 'text.disabled' }} />
+        <Typography color="text.secondary">
+          Load online interactions or animations to browse and edit their mappings.
+        </Typography>
+      </Box>
+    );
+  } else if (filteredMappings.length === 0) {
+    content = (
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, py: 8 }}>
+        <SearchIcon sx={{ fontSize: 48, color: 'text.disabled' }} />
+        <Typography color="text.secondary">
+          {mappings.length === 0 ? `No online ${mappingType} found.` : 'No mappings match your filter.'}
+        </Typography>
+      </Box>
+    );
+  } else {
+    content = (
+      <Stack spacing={2}>
+        <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            Showing {(page - 1) * ITEMS_PER_PAGE + 1}–{Math.min(page * ITEMS_PER_PAGE, filteredMappings.length)} of{' '}
+            {filteredMappings.length} {mappingType}
+            {debouncedFilter && ` (filtered from ${mappings.length})`}
+          </Typography>
+          {pagination}
+        </Stack>
+        {paginatedMappings.map((mapping) => (
+          <MappingItem key={mapping.key} mapping={mapping} mappingType={mappingType} canSaveOnline={isDev} />
+        ))}
+        {pagination}
+      </Stack>
+    );
+  }
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        Online Mapping Browser
+      <Typography variant="h5">Online Mapping Browser</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Browse the shared online mappings and save your own local overrides.
       </Typography>
       <Paper sx={{ p: 2, mb: 2 }}>
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <Button
-            variant="contained"
+            variant={mappingType === 'interactions' ? 'contained' : 'outlined'}
+            startIcon={<CloudDownloadIcon />}
             onClick={() => {
               void loadMappings('interactions');
             }}
             disabled={loading}
+            sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
           >
             Load Online Interactions
           </Button>
           <Button
-            variant="contained"
+            variant={mappingType === 'animations' ? 'contained' : 'outlined'}
+            startIcon={<CloudDownloadIcon />}
             onClick={() => {
               void loadMappings('animations');
             }}
             disabled={loading}
+            sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
           >
             Load Online Animations
           </Button>
-        </Box>
-        <TextField
-          fullWidth
-          label="Filter by name..."
-          variant="outlined"
-          value={filter}
-          onChange={(e) => {
-            setFilter(e.target.value);
-            setCurrentPage(1);
-          }}
-        />
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="Filter by name, author, or text..."
+            variant="outlined"
+            value={filter}
+            onChange={(e) => {
+              setFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+                endAdornment: filter && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      aria-label="Clear filter"
+                      onClick={() => {
+                        setFilter('');
+                        setCurrentPage(1);
+                      }}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+        </Stack>
       </Paper>
 
-      {loading && <CircularProgress sx={{ display: 'block', margin: 'auto' }} />}
-
-      {!loading && mappingType && (
-        <>
-          <List>
-            {paginatedMappings.map((mapping) => (
-              <MappingItem key={mapping.key} mappingKey={mapping.key} mapping={mapping} mappingType={mappingType} />
-            ))}
-          </List>
-
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              mt: 2,
-            }}
-          >
-            <Pagination
-              count={pageCount}
-              page={currentPage}
-              onChange={(event, value) => {
-                setCurrentPage(value);
-              }}
-              color="primary"
-              showFirstButton
-              showLastButton
-            />
-          </Box>
-        </>
-      )}
+      {content}
     </Box>
   );
 }
