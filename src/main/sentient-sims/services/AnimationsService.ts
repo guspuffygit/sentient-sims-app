@@ -109,6 +109,23 @@ export class AnimationsService {
     return result;
   }
 
+  async deleteAnimation(animation: Animation): Promise<void> {
+    await axiosClient({
+      url: '/animations',
+      method: 'DELETE',
+      data: animation,
+      baseURL: this.ctx.settings.sentientSimsAIEndpoint,
+      headers: {
+        Authentication: this.ctx.settings.accessToken,
+        ...this.ctx.version.getVersionHeaders(),
+      },
+    });
+
+    if (animation.author && animation.id) {
+      this.animations?.delete(getAnimationKey(animation.author, animation.id));
+    }
+  }
+
   async getAnimation(animationAuthor: string, animationIdentifier: string) {
     const animationKey = getAnimationKey(animationAuthor, animationIdentifier);
 

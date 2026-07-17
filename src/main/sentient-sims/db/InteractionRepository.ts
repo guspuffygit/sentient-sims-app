@@ -96,6 +96,21 @@ export class InteractionRepository {
     return result;
   }
 
+  async deleteInteraction(interaction: BasicInteraction): Promise<void> {
+    await axiosClient({
+      url: '/interactions',
+      method: 'DELETE',
+      data: interaction,
+      baseURL: this.ctx.settings.sentientSimsAIEndpoint,
+      headers: {
+        Authentication: this.ctx.settings.accessToken,
+        ...this.ctx.version.getVersionHeaders(),
+      },
+    });
+
+    this.interactions?.delete(interaction.name);
+  }
+
   async getInteraction(interactionName: string): Promise<InteractionDescription | undefined> {
     const localOverride = this.localInteractions?.get(interactionName);
     if (localOverride) {

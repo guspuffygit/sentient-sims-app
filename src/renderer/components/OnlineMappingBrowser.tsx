@@ -3,6 +3,11 @@ import {
   Button,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   FormControlLabel,
   IconButton,
   InputAdornment,
@@ -16,11 +21,13 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import { appApiUrl } from 'main/sentient-sims/constants';
+import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import { BasicInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
 import { Animation } from 'main/sentient-sims/models/Animation';
 import log from 'electron-log';
@@ -43,10 +50,12 @@ function MappingItem({
   mapping,
   mappingType,
   canSaveOnline,
+  onDeleted,
 }: {
   mapping: GenericMapping;
   mappingType: MappingType;
   canSaveOnline: boolean;
+  onDeleted: (key: string) => void;
 }) {
   const animation = mappingType === 'animations' ? (mapping.fullObject as Animation) : undefined;
   const interaction = mappingType === 'interactions' ? (mapping.fullObject as BasicInteraction) : undefined;
@@ -57,10 +66,12 @@ function MappingItem({
   const [savedIgnored, setSavedIgnored] = useState(interaction?.ignored ?? false);
   const [savingLocally, setSavingLocally] = useState(false);
   const [savingOnline, setSavingOnline] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const { showMessage } = useSnackBar();
 
   const edited = action !== savedAction || ignored !== savedIgnored;
-  const saving = savingLocally || savingOnline;
+  const saving = savingLocally || savingOnline || deleting;
 
   const handleSaveLocally = async () => {
     setSavingLocally(true);
@@ -113,6 +124,28 @@ function MappingItem({
       log.error(`[MappingBrowser] Error saving online mapping: ${mapping.key}`, err);
     }
     setSavingOnline(false);
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      const response = await fetch(`${appApiUrl}/${mappingType}`, {
+        method: 'DELETE',
+        body: JSON.stringify(mapping.fullObject),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      showMessage(`Deleted online: ${mapping.key}`, 'success');
+      log.info(`[MappingBrowser] Deleted online mapping: ${mapping.key}`);
+      onDeleted(mapping.key);
+    } catch (err) {
+      showMessage(`Failed to delete: ${mapping.key}`, 'error');
+      log.error(`[MappingBrowser] Error deleting online mapping: ${mapping.key}`, err);
+    }
+    setDeleting(false);
+    setConfirmingDelete(false);
   };
 
   return (
@@ -171,6 +204,25 @@ function MappingItem({
             </span>
           </Tooltip>
         )}
+        {canSaveOnline && (
+          <Tooltip title="Deletes the shared online mapping for everyone" placement="top">
+            <span>
+              <Button
+                loading={deleting}
+                disabled={saving}
+                variant="outlined"
+                color="error"
+                size="small"
+                startIcon={<DeleteIcon />}
+                onClick={() => {
+                  setConfirmingDelete(true);
+                }}
+              >
+                Delete Online
+              </Button>
+            </span>
+          </Tooltip>
+        )}
         {interaction && (
           <>
             <Box sx={{ flexGrow: 1 }} />
@@ -192,6 +244,41 @@ function MappingItem({
           </>
         )}
       </Stack>
+      <Dialog
+        open={confirmingDelete}
+        onClose={() => {
+          setConfirmingDelete(false);
+        }}
+      >
+        <DialogTitle>Delete online mapping?</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>{mapping.key}</DialogContentText>
+          <DialogContentText sx={{ mt: 1 }}>
+            This permanently deletes the shared online mapping for everyone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            disabled={deleting}
+            onClick={() => {
+              setConfirmingDelete(false);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            loading={deleting}
+            variant="contained"
+            color="error"
+            startIcon={<DeleteIcon />}
+            onClick={() => {
+              void handleDelete();
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }
@@ -206,7 +293,7 @@ export default function OnlineMappingBrowser() {
   const { userAttributes } = useAuth();
   const { showMessage } = useSnackBar();
 
-  const isDev = userAttributes?.founderStatus === 'dev';
+  const isMapper = new PatreonUser(userAttributes).isMapper();
 
   const loadMappings = async (type: MappingType) => {
     setLoading(true);
@@ -314,7 +401,15 @@ export default function OnlineMappingBrowser() {
           {pagination}
         </Stack>
         {paginatedMappings.map((mapping) => (
-          <MappingItem key={mapping.key} mapping={mapping} mappingType={mappingType} canSaveOnline={isDev} />
+          <MappingItem
+            key={mapping.key}
+            mapping={mapping}
+            mappingType={mappingType}
+            canSaveOnline={isMapper}
+            onDeleted={(key) => {
+              setMappings((prev) => prev.filter((m) => m.key !== key));
+            }}
+          />
         ))}
         {pagination}
       </Stack>

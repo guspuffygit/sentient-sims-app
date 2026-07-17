@@ -72,6 +72,7 @@ export function runApi(ctx: ApiContext) {
   expressApp.get('/animations', ctx.controller.animations.getAnimations);
   expressApp.get('/animations/nsfw-enabled', ctx.controller.animations.isNsfwEnabled);
   expressApp.post('/animations', ctx.controller.animations.setAnimation);
+  expressApp.delete('/animations', ctx.controller.animations.deleteAnimation);
 
   expressApp.post('/animations/save-locally', ctx.controller.animations.saveAnimationLocally);
 
@@ -88,6 +89,7 @@ export function runApi(ctx: ApiContext) {
   expressApp.post('/interactions/save-locally', ctx.controller.interactionDescription.saveInteractionLocally);
 
   expressApp.post('/interactions', ctx.controller.interactionDescription.updateInteraction);
+  expressApp.delete('/interactions', ctx.controller.interactionDescription.deleteInteraction);
   expressApp.get('/voice/phonemize', ctx.controller.voice.phonemize);
   expressApp.get('/websocket/isconnected', new WebsocketController().isConnected);
   expressApp.get('/announcements', ctx.controller.news.getNews);
