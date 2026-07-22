@@ -2,6 +2,7 @@ import { IpcMainEvent, clipboard, dialog, ipcMain, shell } from 'electron';
 import log from 'electron-log';
 import { SettingsEnum } from './models/SettingsEnum';
 import { notifySettingChanged, sendSceneLineToMod } from './util/notifyRenderer';
+import { unmarkScenePaced } from './util/pacedScenes';
 import { DialogueLine } from './formatter/PromptFormatter';
 import { getAllBrowserWindows } from './util/browserWindows';
 import { resolveHtmlPath } from '../util';
@@ -46,8 +47,14 @@ export default function ipcHandlers(ctx: ApiContext) {
   });
   // The renderer owns playback timing: it reports each scene line as it starts playing
   // so the in-game subtitle stays in step with the voices
-  ipcMain.on('scene-line-shown', (_event: IpcMainEvent, line: DialogueLine) => {
+  ipcMain.on('scene-line-shown', (_event: IpcMainEvent, line: DialogueLine & { preamble?: string }) => {
     sendSceneLineToMod(line);
+  });
+  // A paced scene the renderer never played would otherwise display nowhere in-game: its
+  // block subtitle was suppressed on the promise that lines would stream. Un-mark it so the
+  // memory_created broadcast falls back to the normal subtitle block.
+  ipcMain.on('scene-dropped', (_event: IpcMainEvent, pacedText: string) => {
+    unmarkScenePaced(pacedText);
   });
   ipcMain.on('paste-clipboard-to-api-key-button-click', () => {
     const clipboardResults = clipboard.readText();

@@ -28,6 +28,7 @@ import debug from 'electron-debug';
 import electronUpdater from 'electron-updater';
 import { resolveHtmlPath } from './util';
 import { ApiContext } from './sentient-sims/services/ApiContext';
+import { version as releaseAppVersion } from '../../release/app/package.json';
 
 log.initialize({ preload: true });
 
@@ -126,7 +127,10 @@ const createWindow = async () => {
     port: appApiPort,
     settingsService,
     directoryService,
-    appVersion: app.getVersion(),
+    // In dev app.getVersion() is Electron's own version (e.g. 41.x), which the mod's
+    // version check reads as "app far newer than required" and pauses the game with a
+    // mod-out-of-date error on every connect. Report the real app version instead.
+    appVersion: app.isPackaged ? app.getVersion() : releaseAppVersion,
   });
   ipcHandlers(ctx);
 

@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import log from 'electron-log';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { defaultElevenLabsEndpoint, subtitleLinePacingMs } from 'main/sentient-sims/constants';
+import { defaultElevenLabsEndpoint, sceneLineGapMs, sceneLineReadingHoldMs } from 'main/sentient-sims/constants';
 import useSetting from 'renderer/hooks/useSetting';
 import {
   defaultElevenLabsTTSSettings,
@@ -113,40 +113,68 @@ export function useElevenLabsTTS(): TTSHook {
 
       const isV3 = elevenLabsTTSSettings.value.model.toString() === ElevenLabsSpeechModel.ELEVEN_V3.toString();
 
-      for (let i = 0; i < lines.length; i += 1) {
-        const line = lines[i];
-        if (playSessionRef.current !== session) break;
-        if (!line.text.trim()) continue;
+      const speakable = lines.filter((line) => line.text.trim());
 
+      // Conversation pacing: each line runs for exactly its audio's duration, with the
+      // next line's audio prefetched while this one plays so lines flow back-to-back
+      const fetchLine = (line: DialogueLine): Promise<string | null> => {
         // v3 understands inline audio tags like [nervous] — use the delivery note as one
         const text = isV3 && line.deliveryNote ? `[${line.deliveryNote}] ${line.text}` : line.text;
         const voiceId = line.voiceId ?? elevenLabsTTSSettings.value.voice;
-        const lineStartedAt = Date.now();
-
-        try {
-          const audioUrl = await fetchAudioUrl(text, voiceId);
-          if (playSessionRef.current !== session) {
-            URL.revokeObjectURL(audioUrl);
-            break;
-          }
-          onLineStart?.(line);
-          await playUrl(audioUrl);
-        } catch (err: any) {
+        return fetchAudioUrl(text, voiceId).catch((err: unknown) => {
           const errorMessage = `TTS request failed: ${err instanceof Error ? err.message : String(err)}`;
           log.error(errorMessage);
           setError(errorMessage);
+          return null;
+        });
+      };
+      const audioPromises: (Promise<string | null> | undefined)[] = [];
+      const startFetch = (index: number) => {
+        if (index < speakable.length && !audioPromises[index]) {
+          audioPromises[index] = fetchLine(speakable[index]);
+        }
+      };
+      startFetch(0);
+
+      for (let i = 0; i < speakable.length; i += 1) {
+        if (playSessionRef.current !== session) break;
+        startFetch(i + 1);
+        const audioUrl = (await audioPromises[i]) ?? null;
+        if (playSessionRef.current !== session) {
+          if (audioUrl) URL.revokeObjectURL(audioUrl);
+          break;
         }
 
-        // Subtitle pacing: hold before the next line so line starts stay spaced apart
-        if (i < lines.length - 1 && playSessionRef.current === session) {
-          const holdMs = subtitleLinePacingMs - (Date.now() - lineStartedAt);
-          if (holdMs > 0) {
-            await new Promise((resolve) => {
-              setTimeout(resolve, holdMs);
-            });
+        onLineStart?.(speakable[i]);
+        if (audioUrl) {
+          try {
+            await playUrl(audioUrl);
+          } catch (err: any) {
+            const errorMessage = `TTS playback failed: ${err instanceof Error ? err.message : String(err)}`;
+            log.error(errorMessage);
+            setError(errorMessage);
           }
+        } else {
+          // No audio to time the subtitle — hold for its reading time instead
+          await new Promise((resolve) => {
+            setTimeout(resolve, sceneLineReadingHoldMs(speakable[i].text));
+          });
+        }
+
+        if (i < speakable.length - 1 && playSessionRef.current === session) {
+          await new Promise((resolve) => {
+            setTimeout(resolve, sceneLineGapMs);
+          });
         }
       }
+
+      // Release any prefetched audio that never played (cancelled session)
+      const leftovers = await Promise.allSettled(audioPromises.filter(Boolean) as Promise<string | null>[]);
+      leftovers.forEach((settled) => {
+        if (settled.status === 'fulfilled' && settled.value && playSessionRef.current !== session) {
+          URL.revokeObjectURL(settled.value);
+        }
+      });
     },
     [fetchAudioUrl, playUrl, elevenLabsTTSSettings.value.voice, elevenLabsTTSSettings.value.model],
   );

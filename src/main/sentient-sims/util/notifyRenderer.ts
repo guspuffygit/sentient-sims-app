@@ -86,23 +86,29 @@ export function sendChatGeneration(response: InteractionEventResult) {
 export function playTTSLines(
   lines: DialogueLine[],
   sims?: SentientSim[],
-  options?: { paced?: boolean; preamble?: string },
+  options?: { paced?: boolean; preamble?: string; pacedText?: string },
 ) {
   log.debug('Sending on-voice');
   let castLines = lines;
   if (sims && sims.length > 0) {
     castLines = castVoicesForLines(lines, sims);
   }
-  notifyAllWindows('on-voice', castLines, { paced: options?.paced ?? false, preamble: options?.preamble });
+  notifyAllWindows('on-voice', castLines, {
+    paced: options?.paced ?? false,
+    preamble: options?.preamble,
+    pacedText: options?.pacedText,
+  });
 }
 
 // Called as each scene line starts playing so the in-game subtitle appears in step
-// with the voice playback
-export function sendSceneLineToMod(line: DialogueLine) {
+// with the voice playback; the preamble (the scene's driving action) heads each
+// line's subtitle section in-game
+export function sendSceneLineToMod(line: DialogueLine & { preamble?: string }) {
   sendModNotification({
     type: ModWebsocketMessageType.SCENE_LINE,
     speaker: line.speaker,
     text: line.text,
+    preamble: line.preamble,
   });
 }
 

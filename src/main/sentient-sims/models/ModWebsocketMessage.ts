@@ -47,6 +47,8 @@ export type ModWebsocketNotificationMemoryCreated = ModWebsocketMessage & {
 export type ModSceneLine = ModWebsocketMessage & {
   speaker: string;
   text: string;
+  // The scene's driving action, shown above each line's subtitle section in-game
+  preamble?: string;
 };
 
 export type ModAddBuff = ModWebsocketMessage & {
