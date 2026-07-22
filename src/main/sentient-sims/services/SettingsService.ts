@@ -8,7 +8,10 @@ import {
   defaultElevenLabsEndpoint,
   defaultGeminiModel,
   defaultKokoroEndpoint,
+  defaultGenerationConcurrency,
+  defaultGenerationTimeoutSeconds,
   defaultMaxResponseTokens,
+  defaultPrefetchMaxQueueDepth,
   defaultTTSEnabled,
   defaultTTSVolume,
   defaultVLLMEndpoint,
@@ -180,6 +183,18 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.MAX_RESPONSE_TOKENS.toString()]: {
         type: 'number',
         default: defaultMaxResponseTokens,
+      },
+      [SettingsEnum.GENERATION_TIMEOUT_SECONDS.toString()]: {
+        type: 'number',
+        default: defaultGenerationTimeoutSeconds,
+      },
+      [SettingsEnum.GENERATION_CONCURRENCY.toString()]: {
+        type: 'number',
+        default: defaultGenerationConcurrency,
+      },
+      [SettingsEnum.PREFETCH_MAX_QUEUE_DEPTH.toString()]: {
+        type: 'number',
+        default: defaultPrefetchMaxQueueDepth,
       },
     },
     migrations: {
@@ -551,6 +566,39 @@ export class SettingsService {
     }
 
     this.set(SettingsEnum.MAX_RESPONSE_TOKENS, value);
+  }
+
+  get generationTimeoutSeconds(): number {
+    return this.get(SettingsEnum.GENERATION_TIMEOUT_SECONDS) as number;
+  }
+
+  set generationTimeoutSeconds(value: number) {
+    if (value < 1) {
+      throw new Error('generationTimeoutSeconds must be at least 1');
+    }
+    this.set(SettingsEnum.GENERATION_TIMEOUT_SECONDS, value);
+  }
+
+  get generationConcurrency(): number {
+    return this.get(SettingsEnum.GENERATION_CONCURRENCY) as number;
+  }
+
+  set generationConcurrency(value: number) {
+    if (!Number.isInteger(value) || value < 1) {
+      throw new Error('generationConcurrency must be a positive integer');
+    }
+    this.set(SettingsEnum.GENERATION_CONCURRENCY, value);
+  }
+
+  get prefetchMaxQueueDepth(): number {
+    return this.get(SettingsEnum.PREFETCH_MAX_QUEUE_DEPTH) as number;
+  }
+
+  set prefetchMaxQueueDepth(value: number) {
+    if (!Number.isInteger(value) || value < 1) {
+      throw new Error('prefetchMaxQueueDepth must be a positive integer');
+    }
+    this.set(SettingsEnum.PREFETCH_MAX_QUEUE_DEPTH, value);
   }
 
   runMigrations() {

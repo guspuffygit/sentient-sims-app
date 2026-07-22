@@ -17,6 +17,10 @@ export function runApi(ctx: ApiContext) {
 
   expressApp.post('/ai/v2/generate', ctx.controller.ai.sentientSimsGenerate);
   expressApp.post('/ai/v2/event/interaction', ctx.controller.ai.interactionEvent);
+  expressApp.post('/ai/v2/event/interaction/prefetch', ctx.controller.ai.interactionPrefetch);
+  expressApp.post('/ai/v2/event/interaction/claim', ctx.controller.ai.interactionClaim);
+  expressApp.post('/ai/v2/event/interaction/finalize', ctx.controller.ai.interactionFinalize);
+  expressApp.post('/ai/v2/event/interaction/cancel', ctx.controller.ai.interactionCancel);
   expressApp.post('/ai/v2/event/directed-scene', ctx.controller.ai.directedSceneEvent);
   expressApp.post('/ai/v2/event/classification', ctx.controller.ai.classificationEvent);
   expressApp.post('/ai/v2/event/buff', ctx.controller.ai.buffDescription);

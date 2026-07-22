@@ -21,6 +21,8 @@ export class OpenAIService implements GenerationService {
 
   private openAIClient?: OpenAI;
 
+  private openAIClientConfig?: string;
+
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
   }
@@ -53,12 +55,18 @@ export class OpenAIService implements GenerationService {
 
   private getOpenAIClient(apiKey?: string): OpenAI {
     const newApiKey = apiKey ?? this.getOpenAIKey();
-    if (!this.openAIClient || this.openAIClient.apiKey !== newApiKey) {
+    const timeout = this.ctx.settings.generationTimeoutSeconds * 1000;
+    const baseURL = this.serviceUrl();
+    const clientConfig = `${baseURL}:${timeout}`;
+    if (!this.openAIClient || this.openAIClient.apiKey !== newApiKey || this.openAIClientConfig !== clientConfig) {
       this.openAIClient = new OpenAI({
         dangerouslyAllowBrowser: process.env.NODE_ENV === 'test',
         apiKey: newApiKey,
-        baseURL: this.serviceUrl(),
+        baseURL,
+        timeout,
+        maxRetries: 0,
       });
+      this.openAIClientConfig = clientConfig;
     }
 
     return this.openAIClient;

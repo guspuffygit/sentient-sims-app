@@ -31,6 +31,7 @@ import { AnimationsService } from './AnimationsService';
 import { DbService } from './DbService';
 import { DirectoryService } from './DirectoryService';
 import { GeminiService } from './GeminiService';
+import { GenerationQueueService } from './GenerationQueueService';
 import { GenerationService } from './GenerationService';
 import { InteractionService } from './InteractionService';
 import { KoboldAIService } from './KoboldAIService';
@@ -196,6 +197,7 @@ export class ApiContext {
   private readonly _animationsService: AnimationsService;
   private readonly _interactionService: InteractionService;
   private readonly _aiService: AIService;
+  private readonly _generationQueueService: GenerationQueueService;
   private readonly _mappingService: MappingService;
   private readonly _sceneService: SceneService;
 
@@ -259,6 +261,7 @@ export class ApiContext {
     this._interactionService = new InteractionService(this);
 
     this._aiService = new AIService(this);
+    this._generationQueueService = new GenerationQueueService(this);
     this._mappingService = new MappingService();
 
     this._controller = new ControllerContext(this);
@@ -322,6 +325,10 @@ export class ApiContext {
 
   get ai(): AIService {
     return this._aiService;
+  }
+
+  get generationQueue(): GenerationQueueService {
+    return this._generationQueueService;
   }
 
   get mapping(): MappingService {

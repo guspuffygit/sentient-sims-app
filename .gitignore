@@ -1,6 +1,11 @@
 # Logs
 logs
 *.log
+logs*.txt
+logs (*).txt
+
+# Local working notes
+scott-scratch.md
 
 # Runtime data
 pids

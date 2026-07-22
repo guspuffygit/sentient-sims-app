@@ -28,4 +28,5 @@ export type InteractionEventResult = {
   request?: OpenAICompatibleRequest;
   exchanges?: LLMExchange[];
   input?: any;
+  result_source?: 'prefetch' | 'preaction_fallback' | 'synchronous';
 };

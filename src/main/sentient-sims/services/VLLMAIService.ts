@@ -129,6 +129,7 @@ export class VLLMAIService implements GenerationService {
       method: 'POST',
       data: completionRequest,
       baseURL: this.serviceUrl(),
+      timeout: this.ctx.settings.generationTimeoutSeconds * 1000,
       headers: this.getAuthorizationHeaders(),
     });
 

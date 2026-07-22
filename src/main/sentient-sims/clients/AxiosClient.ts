@@ -42,6 +42,9 @@ axiosClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
+    if (error.code === 'ECONNABORTED') {
+      throw error;
+    }
     if (error.response) {
       // The AxiosError util.inspect output omits the response body, so log it explicitly
       const { data } = error.response;

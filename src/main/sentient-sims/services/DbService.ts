@@ -83,6 +83,7 @@ export class DbService {
     this.databaseSession = databaseSession;
 
     // Loading a save jumps the game state, so any in-progress scene no longer describes reality.
+    this.ctx.generationQueue.flushToFallback();
     this.ctx.sceneService.reset();
 
     // The mod caches sim descriptions in memory keyed by sim_id and only ever
@@ -186,6 +187,7 @@ export class DbService {
   unloadDatabase() {
     this.closeDatabase();
 
+    this.ctx.generationQueue.flushToFallback();
     this.ctx.sceneService.reset();
 
     // Cleanup unsaved databases

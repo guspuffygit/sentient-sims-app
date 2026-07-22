@@ -48,9 +48,14 @@ export const defaultWantsSystemPrompt = 'You are the following character in the 
 export const defaultWantsPrompt =
   'If you were the character in the story, what are your wants right now? Respond in the first person';
 
-// Scene dialogue plays like subtitles: consecutive line starts are spaced at least this far
-// apart so one character finishes their moment before the next one speaks
-export const subtitleLinePacingMs = 8000;
+// Scene dialogue paces like a real conversation: each line runs for its audio's duration
+// (or a reading-time estimate when there is no audio), then the next follows after a beat
+export const sceneLineGapMs = 700;
+
+// How long a subtitle line needs on screen when no audio is timing it
+export function sceneLineReadingHoldMs(text: string): number {
+  return Math.min(8000, Math.max(2500, 1500 + 55 * text.length));
+}
 
 export const rendererWebsocketPort = 25146;
 export const modWebsocketPort = 25145;
@@ -70,6 +75,18 @@ export const geminiDefaultEndpoint = 'https://generativelanguage.googleapis.com/
 export const defaultTTSEnabled = false;
 export const defaultTTSVolume = 0.75;
 export const defaultMaxResponseTokens = 90;
+export const defaultGenerationTimeoutSeconds = 60;
+export const defaultGenerationConcurrency = 1;
+export const defaultPrefetchMaxQueueDepth = 2;
+// How long a claimed generation may keep cooking after the animation ends before the
+// result is abandoned for the pre-action fallback. Scenes queue and play in order, so a
+// late-arriving generation still lands well; a full minute of leeway means dialogue is
+// only dropped when the model is truly stuck.
+export const postAnimationGraceMs = 60000;
+// Safety cap on a claim wait if finalize never arrives; must stay under the mod's 80s
+// claim HTTP timeout.
+export const claimMaxWaitMs = 75000;
+export const prefetchTtlMs = 180000;
 export const defaultElevenLabsEndpoint = 'https://api.elevenlabs.io/v1';
 export const defaultKokoroEndpoint = 'https://api.kokorotts.com';
 export const defaultVLLMEndpoint = 'http://localhost:8000/v1';

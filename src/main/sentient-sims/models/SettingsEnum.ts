@@ -38,6 +38,9 @@ export enum SettingsEnum {
   SETUP_WIZARD_PAGE = 'setupWizardPage',
   PATREON_LINKING = 'patreonLinking',
   MAX_RESPONSE_TOKENS = 'maxResponseTokens',
+  GENERATION_TIMEOUT_SECONDS = 'generationTimeoutSeconds',
+  GENERATION_CONCURRENCY = 'generationConcurrency',
+  PREFETCH_MAX_QUEUE_DEPTH = 'prefetchMaxQueueDepth',
 }
 
 export enum DeprecatedSettingsEnum {
