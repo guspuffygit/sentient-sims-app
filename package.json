@@ -94,7 +94,6 @@
     "@aws-sdk/client-cognito-identity-provider": "^3.693.0",
     "@electron/notarize": "^3.1.1",
     "@electron/rebuild": "^4.0.4",
-    "@electron/universal": "^3.0.4",
     "@eslint-react/eslint-plugin": "^5.8.17",
     "@eslint/js": "^10.0.1",
     "@testing-library/react": "^16.3.0",
@@ -170,12 +169,10 @@
       "target": {
         "target": "default",
         "arch": [
-          "arm64",
-          "x64"
+          "universal"
         ]
       },
       "type": "distribution",
-      "mergeASARs": false,
       "hardenedRuntime": true,
       "entitlements": "assets/entitlements.mac.plist",
       "entitlementsInherit": "assets/entitlements.mac.plist",

@@ -1,3 +1,4 @@
+import { execSync } from 'child_process';
 import { notarize } from '@electron/notarize';
 
 export default async function notarizeMacos(context: any) {
@@ -28,4 +29,6 @@ export default async function notarizeMacos(context: any) {
     appleIdPassword: process.env.APPLE_ID_PASS,
     teamId: process.env.APPLE_TEAM_ID,
   });
+
+  execSync(`xcrun stapler staple "${appOutDir}/${appName}.app"`, { stdio: 'inherit' });
 }
