@@ -92,7 +92,6 @@
   },
   "devDependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.693.0",
-    "@electron/notarize": "^3.1.1",
     "@electron/rebuild": "^4.0.4",
     "@eslint-react/eslint-plugin": "^5.8.17",
     "@eslint/js": "^10.0.1",
@@ -164,7 +163,6 @@
       "node_modules",
       "package.json"
     ],
-    "afterSign": ".erb/scripts/notarize.ts",
     "mac": {
       "target": {
         "target": "default",
