@@ -43,6 +43,7 @@ import {
   DialogueLine,
   escapeRegExp,
   formatSceneForChatWindow,
+  formatAction,
 } from '../formatter/PromptFormatter';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { InputFormatter } from '../formatter/InputOutputFormatting';
@@ -113,6 +114,50 @@ export type DirectedGenerationOptions = {
   saveMemory?: boolean;
 };
 
+export type DeferredInteractionResult = {
+  result: InteractionEventResult;
+  play: () => void;
+};
+
+type PlaybackOptions = {
+  deferPlayback?: boolean;
+  onPlaybackReady?: (play: () => void) => void;
+};
+
+export type ResolvedInteractionPreAction =
+  | { preAction: string; result?: never }
+  | { preAction?: never; result: InteractionEventResult };
+
+function once(callback: () => void): () => void {
+  let called = false;
+  return () => {
+    if (!called) {
+      called = true;
+      callback();
+    }
+  };
+}
+
+export function toPrimaryInteractionEvent(event: InteractionEvent): InteractionEvent {
+  if (event.sentient_sims.length <= 2) {
+    return event;
+  }
+  return {
+    ...event,
+    sentient_sims: event.sentient_sims.slice(0, 2),
+  };
+}
+
+export function formatPreviouslyInScene(memories: Array<{ role: string; content: string }>): string {
+  return memories
+    .map((memory, index) => {
+      const previous = memories[index - 1];
+      const separator = index > 0 && previous.role === 'assistant' && memory.role === 'user' ? '\n' : '';
+      return `${separator}${memory.content}`;
+    })
+    .join('\n');
+}
+
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
     return [new MythoMaxFormatter()];
@@ -150,6 +195,9 @@ export class AIService {
   private async handleSceneBoundary(event: SSEvent) {
     const { boundary, previousScene } = this.ctx.sceneService.checkSceneBoundary(event);
     if (boundary && previousScene) {
+      // The event driving this boundary belongs to the NEW location — as do any other prefetches
+      // already queued there — so only pending work from other (old) locations is flushed.
+      this.ctx.generationQueue.flushToFallback(event.environment.location_id);
       await this.runSceneReflection(previousScene);
     }
   }
@@ -234,7 +282,7 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
     }
   }
 
-  async handleInteraction(event: InteractionEvent) {
+  async resolveInteractionPreAction(event: InteractionEvent): Promise<ResolvedInteractionPreAction> {
     let description: InteractionDescription | undefined;
     if (event.testing_action) {
       description = {
@@ -245,30 +293,89 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
     }
 
     if (description?.ignored === true) {
-      return { status: InteractionEventStatus.IGNORED };
+      return { result: { status: InteractionEventStatus.IGNORED } };
     }
 
     const hasPlayerSim = containsPlayerSim(event);
     if (!hasPlayerSim && !description?.always_run) {
-      return { status: InteractionEventStatus.NOT_PLAYER_SIM };
+      return { result: { status: InteractionEventStatus.NOT_PLAYER_SIM } };
     }
 
     if (!description) {
-      return { status: InteractionEventStatus.UNMAPPED_INTERACTION };
+      return { result: { status: InteractionEventStatus.UNMAPPED_INTERACTION } };
     }
 
     if (description.pre_actions) {
       const preAction = getRandomItem(description.pre_actions);
-      if (event.sentient_sims.length >= 2) {
-        return this.runDirectedGeneration(event, { action: preAction });
-      }
-      return this.runGeneration(event, {
-        preAction,
-        prePreAction: 'At {location} ({location_type}), {postures},',
-      });
+      const location = this.ctx.locationRepository.getLocation({ id: event.environment.location_id });
+      return { preAction: formatAction(preAction, event.sentient_sims, location) };
     }
 
-    return { status: InteractionEventStatus.NOOP };
+    return { result: { status: InteractionEventStatus.NOOP } };
+  }
+
+  createInteractionPreActionFallback(event: InteractionEvent, preAction: string): InteractionEventResult {
+    const memory: MemoryEntity = {
+      location_id: event.environment.location_id,
+      event_type: event.event_type,
+      interaction_name: event.interaction_name,
+      pre_action: preAction,
+    };
+    return {
+      status: InteractionEventStatus.GENERATED,
+      text: preAction,
+      memory,
+    };
+  }
+
+  async handleInteraction(event: InteractionEvent) {
+    const primaryEvent = toPrimaryInteractionEvent(event);
+    const resolved = await this.resolveInteractionPreAction(primaryEvent);
+    if (resolved.result) {
+      return resolved.result;
+    }
+    if (primaryEvent.sentient_sims.length >= 2) {
+      return this.runDirectedGeneration(primaryEvent, { action: resolved.preAction });
+    }
+    return this.runGeneration(primaryEvent, {
+      preAction: resolved.preAction,
+      prePreAction: 'At {location} ({location_type}), {postures},',
+    });
+  }
+
+  async interactionEventDeferred(
+    event: InteractionEvent,
+    options: { preAction: string },
+  ): Promise<DeferredInteractionResult> {
+    const primaryEvent = toPrimaryInteractionEvent(event);
+    // Boundary detection intentionally still happens at generation start. A prefetch cancelled
+    // later may already have reflected on the previous scene, which is harmless and keeps scene
+    // state coherent.
+    await this.handleSceneBoundary(primaryEvent);
+    let play = () => {};
+    const playbackOptions: PlaybackOptions = {
+      deferPlayback: true,
+      onPlaybackReady: (ready) => {
+        play = ready;
+      },
+    };
+    const result =
+      primaryEvent.sentient_sims.length >= 2
+        ? await this.runDirectedGeneration(primaryEvent, { action: options.preAction }, playbackOptions)
+        : await this.runGeneration(
+            primaryEvent,
+            {
+              preAction: options.preAction,
+              prePreAction: 'At {location} ({location_type}), {postures},',
+            },
+            playbackOptions,
+          );
+    return {
+      result,
+      play: once(() => {
+        play();
+      }),
+    };
   }
 
   async handleContinue(event: ContinueInteractionEvent) {
@@ -373,7 +480,11 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
     });
   }
 
-  async runGeneration(event: InteractionEvents, options: GenerationOptions = {}): Promise<InteractionEventResult> {
+  async runGeneration(
+    event: InteractionEvents,
+    options: GenerationOptions = {},
+    playbackOptions: PlaybackOptions = {},
+  ): Promise<InteractionEventResult> {
     const promptOptions: PromptRequestBuilderOptions = {
       action: options.action,
       sexCategoryType: options.sexCategoryType,
@@ -463,7 +574,14 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
       output = directorReview.text;
       newMemory.content = output;
 
-      this.playTts(output, event.sentient_sims);
+      const play = once(() => {
+        this.playTts(output, event.sentient_sims);
+      });
+      if (playbackOptions.deferPlayback) {
+        playbackOptions.onPlaybackReady?.(play);
+      } else {
+        play();
+      }
 
       const exchanges: LLMExchange[] = [
         { label: 'Scene Generation', request: openAIRequest, responseText: rawSceneText },
@@ -563,7 +681,11 @@ If the scene is already good, return it unchanged.`;
     });
   }
 
-  async runDirectedGeneration(event: SSEvent, options: DirectedGenerationOptions): Promise<InteractionEventResult> {
+  async runDirectedGeneration(
+    event: SSEvent,
+    options: DirectedGenerationOptions,
+    playbackOptions: PlaybackOptions = {},
+  ): Promise<InteractionEventResult> {
     const promptOptions: PromptRequestBuilderOptions = {
       action: options.action,
       apiType: this.ctx.settings.aiApiType,
@@ -583,10 +705,8 @@ If the scene is already good, return it unchanged.`;
       .filter((part) => part && part.trim().length > 0)
       .join('\n');
 
-    const previously = promptRequest.memories
-      .slice(-6)
-      .map((memory) => memory.content)
-      .join('\n');
+    const recentMemories = promptRequest.memories.slice(-6);
+    const previously = formatPreviouslyInScene(recentMemories);
     const previouslyBlock = previously ? `Previously in this scene:\n${previously}\n\n` : '';
 
     // Continuing a scene re-uses the same event; driving it with the original action again
@@ -777,10 +897,20 @@ Respond with the final scene as one line per row in exactly this format, nothing
 
     // The scene reaches the game one line at a time: the memory block's subtitle is
     // suppressed (paced flag on memory_created) and the renderer streams each line to
-    // the mod as it starts playing. The preaction streams first as a speakerless line
-    // so the live in-game view matches the stored memory.
-    markScenePaced(finalText);
-    this.playTtsLines(finalLines, event.sentient_sims, { paced: true, preamble: preActionLine });
+    // the mod as it starts playing, with the preaction heading each line's section.
+    const play = once(() => {
+      markScenePaced(finalText);
+      this.playTtsLines(finalLines, event.sentient_sims, {
+        paced: true,
+        preamble: preActionLine ? `(${preActionLine})` : undefined,
+        pacedText: finalText,
+      });
+    });
+    if (playbackOptions.deferPlayback) {
+      playbackOptions.onPlaybackReady?.(play);
+    } else {
+      play();
+    }
 
     return {
       status: InteractionEventStatus.GENERATED,
@@ -939,7 +1069,11 @@ Write me a buff description based on the conversation so that ${buffRequest.name
     playTTS(text, sims);
   }
 
-  playTtsLines(lines: DialogueLine[], sims?: SentientSim[], options?: { paced?: boolean; preamble?: string }) {
+  playTtsLines(
+    lines: DialogueLine[],
+    sims?: SentientSim[],
+    options?: { paced?: boolean; preamble?: string; pacedText?: string },
+  ) {
     playTTSLines(lines, sims, options);
   }
 }

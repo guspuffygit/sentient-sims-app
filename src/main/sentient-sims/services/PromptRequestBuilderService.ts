@@ -210,7 +210,7 @@ export class PromptRequestBuilderService {
 
     const locations: Record<number, LocationEntity> = {};
 
-    const addMessage = (role: ChatCompletionMessageRole, text: string, locationId: number) => {
+    const addMessage = (role: ChatCompletionMessageRole, text: string, locationId: number, includeLocation = true) => {
       if (!(locationId in locations)) {
         locations[locationId] = this.ctx.locationRepository.getLocation({
           id: locationId,
@@ -223,7 +223,8 @@ export class PromptRequestBuilderService {
       if (messages.length > 0 && messages[messages.length - 1].role === role) {
         if (
           messages[messages.length - 1].content.length < maxGroupSizeLength &&
-          location.id === messages[messages.length - 1].location
+          location.id === messages[messages.length - 1].location &&
+          includeLocation === messages[messages.length - 1].includeLocation
         ) {
           messages[messages.length - 1].content += ` ${text.trim()}`;
           return;
@@ -235,6 +236,7 @@ export class PromptRequestBuilderService {
             content: 'Continue talking and interacting',
             role: 'user',
             location: locationId,
+            includeLocation: false,
           });
         }
       }
@@ -244,19 +246,21 @@ export class PromptRequestBuilderService {
           content: text,
           role,
           location: locationId,
+          includeLocation,
         });
       } else {
         messages.push({
-          content: `At ${location.name} (${location.lot_type}), ${text}`,
+          content: includeLocation ? `At ${location.name} (${location.lot_type}), ${text}` : text,
           role,
           location: locationId,
+          includeLocation,
         });
       }
     };
 
     memories.forEach((memory) => {
       if (memory.pre_action && memory.pre_action.trim()) {
-        addMessage('user', memory.pre_action, memory.location_id);
+        addMessage('user', `(${memory.pre_action})`, memory.location_id, false);
       }
 
       if (memory.action && memory.action.trim()) {

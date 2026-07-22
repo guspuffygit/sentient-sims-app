@@ -6480,15 +6480,11 @@ export const interactionDescriptions: Map<string, InteractionDescription> = new 
       // #     InitiatorIsActiveSim(),
       // # ],
     },
+    // The generic "keep talking" mixer sims run constantly mid-conversation. Accepted
+    // occasionally (the mod damps its frequency) it continues the current scene like a
+    // real back-and-forth instead of only reacting to named socials.
     'Idle_Chatting_STC': {
-      ignored: true,
-      // # "observations": [
-      // #     "{actor.0} idly chats with {actor.1}.",
-      // # ],
-      // # "filters": [
-      // #     HasNotHappened({ memoryDepth:8 }),
-      // #     InitiatorIsActiveSim(),
-      // # ],
+      pre_actions: ['{actor.0} continues chatting with {actor.1}.'],
     },
     'Emotion_Idle': {
       ignored: true,
@@ -6523,24 +6519,10 @@ export const interactionDescriptions: Map<string, InteractionDescription> = new 
       // # ],
     },
     'sim_Chat': {
-      ignored: true,
-      // # "observations": [
-      // #     "{actor.0} chats with {actor.1}.",
-      // # ],
-      // # "filters": [
-      // #     HasNotHappened({ memoryDepth:5 }),
-      // #     InitiatorIsActiveSim(),
-      // # ],
+      pre_actions: ['{actor.0} strikes up a conversation with {actor.1}.'],
     },
     'idle_Chatting_ListenWithPhone_STC': {
-      ignored: true,
-      // # "observations": [
-      // #     "{actor.0} messes with their phone while idly chatting with {actor.1}.",
-      // # ],
-      // # "filters": [
-      // #     HasNotHappened({ memoryDepth:5 }),
-      // #     InitiatorIsActiveSim(),
-      // # ],
+      pre_actions: ['{actor.0} glances at their phone while continuing to chat with {actor.1}.'],
     },
     'sim_doStretching': {
       ignored: true,
