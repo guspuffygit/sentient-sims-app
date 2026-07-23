@@ -12,7 +12,8 @@ const LABEL_OVERRIDES: Record<string, string> = { sit: 'seat' };
 function objectLabel(object: PerceivedObject): string {
   const cleaned = (object.name ?? '').replace(/^object_/, '').replace(/_?\d+$/, '');
   const word = /^[a-z]+/.exec(cleaned)?.[0];
-  if (word && word.length > 2) {
+  // 'tv' is the one legitimate two-letter tuning noun ('tvSurfaceLOW1x1' -> 'tv')
+  if (word && (word.length > 2 || word === 'tv')) {
     return LABEL_OVERRIDES[word] ?? word;
   }
   return cleaned ? pretty(cleaned) : 'an object';
