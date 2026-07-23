@@ -119,6 +119,18 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
         db.prepare('ALTER TABLE memory DROP COLUMN scene_id').run();
       }
     },
+    // Retrieval metadata lives in a sidecar table instead of new memory columns: the mod
+    // parses memory rows into a Python class with fixed fields (see migration 011).
+    // embedding is a Float32Array serialized to raw little-endian bytes.
+    '012-create-memory-index': `
+      CREATE TABLE memory_index (
+        memory_id            INTEGER NOT NULL  PRIMARY KEY  ,
+        importance           INTEGER  ,
+        embedding            BLOB     ,
+        embedding_model      TEXT     ,
+        FOREIGN KEY ( memory_id ) REFERENCES memory( id ) ON DELETE CASCADE ON UPDATE CASCADE
+      );
+    `,
   }),
 );
 

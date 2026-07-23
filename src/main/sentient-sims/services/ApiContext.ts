@@ -20,6 +20,7 @@ import { VersionController } from '../controllers/VersionController';
 import { VoiceController } from '../controllers/VoiceController';
 import { InteractionRepository } from '../db/InteractionRepository';
 import { LocationRepository } from '../db/LocationRepository';
+import { MemoryIndexRepository } from '../db/MemoryIndexRepository';
 import { MemoryRepository } from '../db/MemoryRepository';
 import { ParticipantRepository } from '../db/ParticipantRepository';
 import { ApiType } from '../models/ApiType';
@@ -32,6 +33,7 @@ import { AIService } from './AIService';
 import { AnimationsService } from './AnimationsService';
 import { DbService } from './DbService';
 import { DirectoryService } from './DirectoryService';
+import { EmbeddingService, NoopEmbeddingService, OpenAIEmbeddingService } from './EmbeddingService';
 import { GeminiService } from './GeminiService';
 import { GenerationQueueService } from './GenerationQueueService';
 import { GenerationService } from './GenerationService';
@@ -41,6 +43,7 @@ import { LastExceptionService } from './LastExceptionService';
 import { LogSendService } from './LogSendService';
 import { LogsService } from './LogsService';
 import { MappingService } from './MappingService';
+import { MemoryAnnotationService } from './MemoryAnnotationService';
 import { ModelSettingsService } from './ModelSettingsService';
 import { NovelAIService } from './NovelAIService';
 import { OpenAIService } from './OpenAIService';
@@ -209,10 +212,14 @@ export class ApiContext {
   private readonly _mappingService: MappingService;
   private readonly _sceneService: SceneService;
   private readonly _actionDispatcherService: ActionDispatcherService;
+  private readonly _openAIEmbeddingService: OpenAIEmbeddingService;
+  private readonly _noopEmbeddingService: NoopEmbeddingService;
+  private readonly _memoryAnnotationService: MemoryAnnotationService;
 
   // --- Repositories ---
   private readonly _locationRepository: LocationRepository;
   private readonly _memoryRepository: MemoryRepository;
+  private readonly _memoryIndexRepository: MemoryIndexRepository;
   private readonly _participantRepository: ParticipantRepository;
   private readonly _interactionRepository: InteractionRepository;
 
@@ -261,11 +268,14 @@ export class ApiContext {
 
     this._locationRepository = new LocationRepository(this._db);
     this._memoryRepository = new MemoryRepository(this._db);
+    this._memoryIndexRepository = new MemoryIndexRepository(this._db);
     this._participantRepository = new ParticipantRepository(this._db);
     this._interactionRepository = new InteractionRepository(this);
 
     this._sceneService = new SceneService();
     this._actionDispatcherService = new ActionDispatcherService();
+    this._openAIEmbeddingService = new OpenAIEmbeddingService(this);
+    this._noopEmbeddingService = new NoopEmbeddingService();
 
     this._promptBuilder = new PromptRequestBuilderService(this);
     this._interactionService = new InteractionService(this);
@@ -273,6 +283,11 @@ export class ApiContext {
     this._aiService = new AIService(this);
     this._generationQueueService = new GenerationQueueService(this);
     this._mappingService = new MappingService();
+
+    this._memoryAnnotationService = new MemoryAnnotationService(this);
+    this._memoryRepository.setOnMemoryUpserted((memory) => {
+      this._memoryAnnotationService.annotateInBackground(memory);
+    });
 
     this._controller = new ControllerContext(this);
   }
@@ -353,6 +368,15 @@ export class ApiContext {
     return this._actionDispatcherService;
   }
 
+  // Evaluated per access so setting an OpenAI key at runtime upgrades from Noop
+  get embedding(): EmbeddingService {
+    return this._openAIEmbeddingService.isAvailable() ? this._openAIEmbeddingService : this._noopEmbeddingService;
+  }
+
+  get memoryAnnotation(): MemoryAnnotationService {
+    return this._memoryAnnotationService;
+  }
+
   get modelSettings(): ModelSettingsService {
     return this._modelSettingsService;
   }
@@ -363,6 +387,10 @@ export class ApiContext {
 
   get memoryRepository(): MemoryRepository {
     return this._memoryRepository;
+  }
+
+  get memoryIndexRepository(): MemoryIndexRepository {
+    return this._memoryIndexRepository;
   }
 
   get participantRepository(): ParticipantRepository {

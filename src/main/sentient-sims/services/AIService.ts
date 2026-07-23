@@ -637,7 +637,7 @@ If the scene is already good, return it unchanged.`;
     return { text: reviewed.length > 1 ? reviewed : text, request: openAIRequest };
   }
 
-  private async runOneShot(
+  async runOneShot(
     label: string,
     systemPrompt: string,
     userText: string,

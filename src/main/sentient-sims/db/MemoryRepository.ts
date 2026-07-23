@@ -13,6 +13,14 @@ import { notifyMemoryDeleted, notifyMemoryEdited, notifyNewMemoryAdded } from '.
 import { MemoryParticipantDTO } from './dto/MemoryParticipantDTO';
 
 export class MemoryRepository extends Repository {
+  // The db layer can't depend on services, so annotation (importance/embedding into
+  // memory_index) hooks in via this callback, wired up by ApiContext. Must never throw.
+  private onMemoryUpserted?: (memory: MemoryEntity) => void;
+
+  setOnMemoryUpserted(callback: (memory: MemoryEntity) => void) {
+    this.onMemoryUpserted = callback;
+  }
+
   getMemory(getMemoryRequest: GetMemoryRequest): MemoryEntity {
     const results = this.dbService
       .getDb()
@@ -186,6 +194,8 @@ export class MemoryRepository extends Repository {
 
     notifyMemoryEdited(memory);
 
+    this.onMemoryUpserted?.(memory);
+
     return result;
   }
 
@@ -232,6 +242,8 @@ export class MemoryRepository extends Repository {
     notifyNewMemoryAdded(memory, options);
 
     log.info(`Memory added:\n${JSON.stringify(memory, null, 2)}`);
+
+    this.onMemoryUpserted?.(memory);
 
     return memory;
   }
