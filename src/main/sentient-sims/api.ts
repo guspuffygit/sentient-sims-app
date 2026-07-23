@@ -101,7 +101,9 @@ export function runApi(ctx: ApiContext) {
   expressApp.post('/options/fix', ctx.controller.options.fixOptions);
 
   expressApp.post('/cognition/outcome', ctx.controller.cognition.postOutcome);
+  expressApp.post('/cognition/perception', ctx.controller.cognition.postPerception);
   expressApp.post('/cognition/debug/enqueue', ctx.controller.cognition.debugEnqueue);
+  expressApp.post('/cognition/debug/perception', ctx.controller.cognition.debugRequestPerception);
 
   return expressApp.listen(ctx.port, () => {
     log.debug(`Server is running on port ${ctx.port}`);

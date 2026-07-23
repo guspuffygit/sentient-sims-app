@@ -2,7 +2,7 @@ import { Server } from 'http';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { runApi } from 'main/sentient-sims/api';
 import { CreateMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
-import { ModEnqueueInteraction } from 'main/sentient-sims/models/ModWebsocketMessage';
+import { WebsocketNotification } from 'main/sentient-sims/models/ModWebsocketMessage';
 import { mockApiContext } from './util';
 
 describe('cognition routes', () => {
@@ -10,7 +10,7 @@ describe('cognition routes', () => {
   const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server;
 
-  const sentToMod: ModEnqueueInteraction[] = [];
+  const sentToMod: WebsocketNotification[] = [];
   const createdMemories: CreateMemoryRequest[] = [];
 
   async function post(path: string, body: unknown) {
@@ -118,12 +118,52 @@ describe('cognition routes', () => {
     expect(createdMemories[0].memory.pre_action).toBeUndefined();
   });
 
+  it('requests a perception snapshot and formats the reply', async () => {
+    sentToMod.length = 0;
+
+    const request = await post('/cognition/debug/perception', { sim_id: '123' });
+    const requestId = request.request_id as string;
+    expect(requestId).toBeTruthy();
+    expect(sentToMod).toHaveLength(1);
+    expect(sentToMod[0]).toMatchObject({
+      type: 'request_perception',
+      request_id: requestId,
+      sim_id: '123',
+    });
+
+    const reply = await post('/cognition/perception', {
+      type: 'perception_snapshot',
+      request_id: requestId,
+      sim_id: '123',
+      sim_name: 'Marisol Rocca',
+      room_id: 5,
+      location: { zone_id: 9, outdoors: false },
+      sims: [{ sim_id: '456', tier: 'same_room', distance: 3.0, name: 'Peyton Puckett', doing: 'chat' }],
+      objects: [
+        { object_id: '100', action_keys: ['grab_snack'], name: 'object_fridge_01', tier: 'same_room', distance: 4.0 },
+      ],
+      ambient: { sim_mood: 'Happy' },
+    });
+
+    expect(reply.ok).toBe(true);
+    expect(reply.formatted).toContain(
+      'You can see: Peyton Puckett (chat, 3m away); a fridge (could grab snack, 4m away).',
+    );
+    expect(ctx.controller.cognition.getPerception('123')).toMatchObject({ request_id: requestId, sim_id: '123' });
+  });
+
   it('rejects invalid requests', async () => {
     expect(await post('/cognition/debug/enqueue', { sim_id: '123' })).toMatchObject({
       error: 'sim_id and action are required',
     });
     expect(await post('/cognition/outcome', { outcome: 'success' })).toMatchObject({
       error: 'sim_id and outcome are required',
+    });
+    expect(await post('/cognition/perception', { sims: [] })).toMatchObject({
+      error: 'sim_id is required',
+    });
+    expect(await post('/cognition/debug/perception', {})).toMatchObject({
+      error: 'sim_id is required',
     });
   });
 });

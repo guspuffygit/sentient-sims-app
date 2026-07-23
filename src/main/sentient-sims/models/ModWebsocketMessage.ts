@@ -10,6 +10,7 @@ export enum ModWebsocketMessageType {
   ADD_BUFF = 'add_buff',
   SCENE_LINE = 'scene_line',
   ENQUEUE_INTERACTION = 'enqueue_interaction',
+  REQUEST_PERCEPTION = 'request_perception',
 }
 
 export type ModWebsocketMessage = {
@@ -73,6 +74,13 @@ export type ModEnqueueInteraction = ModWebsocketMessage & {
   source: string;
 };
 
+// Asks the mod for one sim's perception snapshot; the mod replies by POSTing the
+// snapshot to /cognition/perception with the same request_id
+export type ModRequestPerception = ModWebsocketMessage & {
+  request_id: string;
+  sim_id: string;
+};
+
 export type WebsocketNotification =
   | ModWebsocketMessage
   | ModWebsocketNotification
@@ -81,4 +89,5 @@ export type WebsocketNotification =
   | ModWebsocketNotificationMemoryCreated
   | ModAddBuff
   | ModSceneLine
-  | ModEnqueueInteraction;
+  | ModEnqueueInteraction
+  | ModRequestPerception;

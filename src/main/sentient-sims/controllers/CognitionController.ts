@@ -1,8 +1,12 @@
 import { Request, Response } from 'express';
+import { randomUUID } from 'crypto';
 import log from 'electron-log';
 import { ApiContext } from '../services/ApiContext';
 import { ActionIntent, InteractionOutcomeEvent } from '../models/ActionIntent';
+import { ModRequestPerception, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
+import { PerceptionSnapshot } from '../models/PerceptionSnapshot';
 import { ParticipantDTO } from '../db/dto/ParticipantDTO';
+import { formatPerception } from '../util/formatPerception';
 
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
@@ -21,8 +25,16 @@ function outcomeVerb(outcome: InteractionOutcomeEvent['outcome']): string {
 export class CognitionController {
   private readonly ctx: ApiContext;
 
+  // Latest snapshot per sim, kept ephemeral (never persisted as memories). Block 8's
+  // SimStateCache supersedes this once snapshots arrive with every state report.
+  private readonly latestPerception = new Map<string, PerceptionSnapshot>();
+
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
+  }
+
+  getPerception(simId: string): PerceptionSnapshot | undefined {
+    return this.latestPerception.get(simId);
   }
 
   // The mod reports what actually happened to a dispatched interaction. The result becomes an
@@ -70,6 +82,46 @@ export class CognitionController {
       return res.json({ ok: true, correlated: pending !== undefined, memory_id: memory.id });
     } catch (err) {
       log.error('Error handling cognition outcome', err);
+      return res.status(500).json({ error: errorMessage(err) });
+    }
+  };
+
+  // The mod's reply to a REQUEST_PERCEPTION message: one sim's scene snapshot. Ephemeral
+  // by design — cached for the next cognition tick, never written as a memory.
+  postPerception = (req: Request, res: Response) => {
+    try {
+      const snapshot = req.body as Partial<PerceptionSnapshot>;
+      if (!snapshot.sim_id) {
+        return res.status(400).json({ error: 'sim_id is required' });
+      }
+      const full: PerceptionSnapshot = { sims: [], objects: [], ...snapshot, sim_id: snapshot.sim_id };
+      this.latestPerception.set(full.sim_id, full);
+      const formatted = formatPerception(full);
+      log.info(`[Cognition] perception ${full.request_id ?? ''} for sim ${full.sim_id}:\n${formatted}`);
+      return res.json({ ok: true, formatted });
+    } catch (err) {
+      log.error('Error handling perception snapshot', err);
+      return res.status(500).json({ error: errorMessage(err) });
+    }
+  };
+
+  // Dev seam: ask the mod for a sim's perception snapshot; the mod replies by POSTing
+  // it back to /cognition/perception with the same request_id
+  debugRequestPerception = (req: Request, res: Response) => {
+    try {
+      const { sim_id: simId } = req.body as { sim_id?: string };
+      if (!simId) {
+        return res.status(400).json({ error: 'sim_id is required' });
+      }
+      const message: ModRequestPerception = {
+        type: ModWebsocketMessageType.REQUEST_PERCEPTION,
+        request_id: randomUUID(),
+        sim_id: simId,
+      };
+      this.ctx.actionDispatcher.sendToMod(message);
+      return res.json({ request_id: message.request_id });
+    } catch (err) {
+      log.error('Error dispatching perception request', err);
       return res.status(500).json({ error: errorMessage(err) });
     }
   };

@@ -1,7 +1,7 @@
 import log from 'electron-log';
 import { randomUUID } from 'crypto';
 import { ActionIntent } from '../models/ActionIntent';
-import { ModEnqueueInteraction, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
+import { ModEnqueueInteraction, ModWebsocketMessageType, WebsocketNotification } from '../models/ModWebsocketMessage';
 import { sendModNotification } from '../websocketServer';
 
 export type PendingDispatch = {
@@ -38,8 +38,9 @@ export class ActionDispatcherService {
     return requestId;
   }
 
-  // Seam for tests; production sends over the mod websocket
-  sendToMod(message: ModEnqueueInteraction) {
+  // Seam for tests; production sends over the mod websocket. Also used by other
+  // cognition traffic (e.g. perception requests) so tests can intercept one place.
+  sendToMod(message: WebsocketNotification) {
     sendModNotification(message);
   }
 
