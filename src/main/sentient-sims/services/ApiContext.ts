@@ -1,6 +1,7 @@
 import { AIController } from '../controllers/AIController';
 import { AnimationsController } from '../controllers/AnimationsController';
 import { AssetsController } from '../controllers/AssetsController';
+import { CognitionController } from '../controllers/CognitionController';
 import { DbController } from '../controllers/DbController';
 import { DebugController } from '../controllers/DebugController';
 import { FileController } from '../controllers/FileController';
@@ -26,6 +27,7 @@ import { LLaMaTokenCounter } from '../tokens/LLaMaTokenCounter';
 import { NovelAITokenCounter } from '../tokens/NovelAITokenCounter';
 import { OpenAITokenCounter } from '../tokens/OpenAITokenCounter';
 import { TokenCounter } from '../tokens/TokenCounter';
+import { ActionDispatcherService } from './ActionDispatcherService';
 import { AIService } from './AIService';
 import { AnimationsService } from './AnimationsService';
 import { DbService } from './DbService';
@@ -79,6 +81,7 @@ class ControllerContext {
   private readonly _mappingController: MappingController;
   private readonly _newsController: NewsController;
   private readonly _optionsController: OptionsController;
+  private readonly _cognitionController: CognitionController;
 
   constructor(ctx: ApiContext) {
     this._versionController = new VersionController(ctx);
@@ -100,6 +103,7 @@ class ControllerContext {
     this._mappingController = new MappingController(ctx);
     this._newsController = new NewsController(ctx);
     this._optionsController = new OptionsController(ctx);
+    this._cognitionController = new CognitionController(ctx);
   }
 
   get version(): VersionController {
@@ -177,6 +181,10 @@ class ControllerContext {
   get options(): OptionsController {
     return this._optionsController;
   }
+
+  get cognition(): CognitionController {
+    return this._cognitionController;
+  }
 }
 
 export class ApiContext {
@@ -200,6 +208,7 @@ export class ApiContext {
   private readonly _generationQueueService: GenerationQueueService;
   private readonly _mappingService: MappingService;
   private readonly _sceneService: SceneService;
+  private readonly _actionDispatcherService: ActionDispatcherService;
 
   // --- Repositories ---
   private readonly _locationRepository: LocationRepository;
@@ -256,6 +265,7 @@ export class ApiContext {
     this._interactionRepository = new InteractionRepository(this);
 
     this._sceneService = new SceneService();
+    this._actionDispatcherService = new ActionDispatcherService();
 
     this._promptBuilder = new PromptRequestBuilderService(this);
     this._interactionService = new InteractionService(this);
@@ -337,6 +347,10 @@ export class ApiContext {
 
   get sceneService(): SceneService {
     return this._sceneService;
+  }
+
+  get actionDispatcher(): ActionDispatcherService {
+    return this._actionDispatcherService;
   }
 
   get modelSettings(): ModelSettingsService {

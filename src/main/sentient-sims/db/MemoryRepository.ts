@@ -197,7 +197,7 @@ export class MemoryRepository extends Repository {
       .run([memoryParticipant.id, BigInt(memoryParticipant.participant_id), memoryParticipant.memory_id]);
   }
 
-  createMemory(createMemoryRequest: CreateMemoryRequest) {
+  createMemory(createMemoryRequest: CreateMemoryRequest, options?: { notifyMod?: boolean }) {
     const createMemoryTransaction = this.dbService.getDb().transaction(() => {
       const updateMemoryResult = this.dbService
         .getDb()
@@ -229,7 +229,7 @@ export class MemoryRepository extends Repository {
 
     const memory = this.getMemory({ id: Number(createdMemoryId) });
 
-    notifyNewMemoryAdded(memory);
+    notifyNewMemoryAdded(memory, options);
 
     log.info(`Memory added:\n${JSON.stringify(memory, null, 2)}`);
 

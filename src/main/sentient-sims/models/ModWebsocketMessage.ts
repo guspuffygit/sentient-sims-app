@@ -9,6 +9,7 @@ export enum ModWebsocketMessageType {
   MEMORY_CREATED = 'memory_created',
   ADD_BUFF = 'add_buff',
   SCENE_LINE = 'scene_line',
+  ENQUEUE_INTERACTION = 'enqueue_interaction',
 }
 
 export type ModWebsocketMessage = {
@@ -57,6 +58,21 @@ export type ModAddBuff = ModWebsocketMessage & {
   buff_description: string;
 };
 
+// Pushes a whitelisted action into a sim's interaction queue. The mod resolves the action key
+// via its affordance whitelist (ss_affordance_whitelist.py) and reports what happened back to
+// POST /cognition/outcome with the same request_id.
+export type ModEnqueueInteraction = ModWebsocketMessage & {
+  request_id: string;
+  sim_id: string;
+  action: string;
+  target_sim_id?: string;
+  target_object_id?: string;
+  priority?: 'high' | 'low';
+  insert_strategy?: 'next' | 'last';
+  clear_queue?: boolean;
+  source: string;
+};
+
 export type WebsocketNotification =
   | ModWebsocketMessage
   | ModWebsocketNotification
@@ -64,4 +80,5 @@ export type WebsocketNotification =
   | ModWebsocketNotificationMemoryDeleted
   | ModWebsocketNotificationMemoryCreated
   | ModAddBuff
-  | ModSceneLine;
+  | ModSceneLine
+  | ModEnqueueInteraction;

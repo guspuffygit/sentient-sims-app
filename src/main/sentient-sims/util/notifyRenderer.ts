@@ -25,9 +25,14 @@ export function notifySettingChanged(setting: string, value: unknown) {
   notifyAllWindows('setting-changed', setting, value);
 }
 
-export function notifyNewMemoryAdded(memory: MemoryEntity) {
+export function notifyNewMemoryAdded(memory: MemoryEntity, options?: { notifyMod?: boolean }) {
   log.debug('Sending new memory added to renderer');
   notifyAllWindows('on-new-memory-added', memory);
+  // Bookkeeping rows (e.g. outcome memories) skip the mod: memory_created triggers subtitle
+  // display and pauses the game clock, which only dialogue memories should do
+  if (options?.notifyMod === false) {
+    return;
+  }
   sendModNotification({
     type: ModWebsocketMessageType.MEMORY_CREATED,
     memory,
