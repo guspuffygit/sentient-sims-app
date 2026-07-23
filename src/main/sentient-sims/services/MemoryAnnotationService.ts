@@ -76,6 +76,70 @@ export class MemoryAnnotationService {
     log.debug(`[Annotation] memory ${memory.id} importance=${importance} embedded=${Boolean(embedding)}`);
   }
 
+  backfillInBackground(): void {
+    this.backfill().catch((error: unknown) => {
+      log.error('[Annotation] Backfill failed', error);
+    });
+  }
+
+  // Fills in embeddings for memories from before the index existed, or written while no
+  // embedder was configured. Batched so a large backlog costs few API calls. Importance on
+  // never-indexed rows uses the cheap event-type heuristic — no LLM call per historical
+  // memory — while rows the live path already rated keep their rating.
+  async backfill(batchSize = 50): Promise<number> {
+    if (!this.ctx.embedding.isAvailable()) {
+      return 0;
+    }
+
+    let total = 0;
+    for (;;) {
+      const batch = this.ctx.memoryIndexRepository.getUnindexedMemories(batchSize);
+      if (batch.length === 0) {
+        break;
+      }
+      const embedded = await this.backfillBatch(batch);
+      total += embedded;
+      // Rows that can't make progress (no text, failing embedder) must not spin forever
+      if (embedded === 0) {
+        break;
+      }
+    }
+
+    if (total > 0) {
+      log.info(`[Annotation] Backfilled embeddings for ${total} memories`);
+    }
+    return total;
+  }
+
+  private async backfillBatch(batch: MemoryEntity[]): Promise<number> {
+    const textable = batch.filter((memory) => memory.observation || memory.content);
+    if (textable.length === 0) {
+      return 0;
+    }
+
+    const vectors = await this.ctx.embedding.embed(
+      textable.map((memory) => memory.observation || memory.content || ''),
+    );
+    const { model } = this.ctx.embedding;
+
+    let embedded = 0;
+    textable.forEach((memory, index) => {
+      const vector = vectors[index];
+      if (memory.id === undefined || !vector) {
+        return;
+      }
+      const existing = this.ctx.memoryIndexRepository.getIndex(memory.id);
+      this.ctx.memoryIndexRepository.upsertIndex({
+        memory_id: memory.id,
+        importance: existing?.importance ?? heuristicImportance(memory.event_type),
+        embedding: embeddingToBuffer(vector),
+        embedding_model: model,
+      });
+      embedded += 1;
+    });
+    return embedded;
+  }
+
   private async rateImportance(text: string, eventType?: string): Promise<number> {
     try {
       const result = await this.ctx.ai.runOneShot('Memory Importance', IMPORTANCE_SYSTEM_PROMPT, text, 5);

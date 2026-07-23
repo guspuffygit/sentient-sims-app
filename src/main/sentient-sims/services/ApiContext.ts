@@ -44,6 +44,7 @@ import { LogSendService } from './LogSendService';
 import { LogsService } from './LogsService';
 import { MappingService } from './MappingService';
 import { MemoryAnnotationService } from './MemoryAnnotationService';
+import { MemoryRetrievalService } from './MemoryRetrievalService';
 import { ModelSettingsService } from './ModelSettingsService';
 import { NovelAIService } from './NovelAIService';
 import { OpenAIService } from './OpenAIService';
@@ -215,6 +216,7 @@ export class ApiContext {
   private readonly _openAIEmbeddingService: OpenAIEmbeddingService;
   private readonly _noopEmbeddingService: NoopEmbeddingService;
   private readonly _memoryAnnotationService: MemoryAnnotationService;
+  private readonly _memoryRetrievalService: MemoryRetrievalService;
 
   // --- Repositories ---
   private readonly _locationRepository: LocationRepository;
@@ -285,6 +287,7 @@ export class ApiContext {
     this._mappingService = new MappingService();
 
     this._memoryAnnotationService = new MemoryAnnotationService(this);
+    this._memoryRetrievalService = new MemoryRetrievalService(this);
     this._memoryRepository.setOnMemoryUpserted((memory) => {
       this._memoryAnnotationService.annotateInBackground(memory);
     });
@@ -375,6 +378,10 @@ export class ApiContext {
 
   get memoryAnnotation(): MemoryAnnotationService {
     return this._memoryAnnotationService;
+  }
+
+  get memoryRetrieval(): MemoryRetrievalService {
+    return this._memoryRetrievalService;
   }
 
   get modelSettings(): ModelSettingsService {

@@ -95,6 +95,10 @@ export class DbService {
     });
 
     notifyDatabaseLoaded(databaseSession);
+
+    // Saves from before the memory_index existed (or played without an embedder) get
+    // their retrieval metadata filled in here, off the request path. No-op without a key.
+    this.ctx.memoryAnnotation.backfillInBackground();
   }
 
   getDatabaseTemp(saveGame: SaveGame): Database {
