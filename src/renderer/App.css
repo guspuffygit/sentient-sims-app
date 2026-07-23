@@ -57,13 +57,13 @@
    the scroll position to the top, yanking the page out from under the opened
    menu. A non-root scroller keeps its offset while locked. */
 html {
-  background-color: #2f3136;
+  background-color: #232428;
   height: 100%;
   overflow: hidden;
 }
 
 body {
-  background-color: #2f3136;
+  background-color: #232428;
   height: 100%;
   overflow-y: auto;
 }
@@ -86,16 +86,18 @@ code {
   padding: 20px;
 }
 
-::-webkit-scrollbar {
-  display: none;
-}
-
 .hoverHighlightTypography {
   display: inline-block;
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin-left: -6px;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
 }
 
 .hoverHighlightTypography:hover {
-  color: #fff8ac;
+  background-color: rgba(124, 138, 236, 0.12);
+  color: #a5b3ff;
 }
 
 .code-window {

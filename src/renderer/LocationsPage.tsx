@@ -3,7 +3,10 @@ import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import log from 'electron-log';
 import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import SportsEsportsOutlinedIcon from '@mui/icons-material/SportsEsportsOutlined';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import AppCard from './AppCard';
+import { EmptyState } from './components/EmptyState';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
 import { useOnDatabaseLoaded } from './hooks/useOnDatabaseLoaded';
@@ -176,7 +179,13 @@ export default function LocationsPage() {
   }, []);
 
   if (!status.mod || locations.length === 0) {
-    return <AppCard>Not connected to The Sims 4. Start a Sims 4 game to connect.</AppCard>;
+    return (
+      <EmptyState
+        icon={<SportsEsportsOutlinedIcon />}
+        title="Not connected to The Sims 4"
+        description="Start a Sims 4 game to connect and manage locations here."
+      />
+    );
   }
 
   let editLocationBox;
@@ -184,6 +193,8 @@ export default function LocationsPage() {
   if (editedLocation) {
     editLocationBox = (
       <AppCard
+        title="Edit Location"
+        icon={<EditNoteIcon fontSize="small" />}
         cardActions={
           <CardActions
             sx={{
@@ -196,8 +207,7 @@ export default function LocationsPage() {
             <div>
               <Button
                 sx={{ marginRight: 1 }}
-                color="secondary"
-                variant="outlined"
+                variant="contained"
                 onClick={() => {
                   void handleSave();
                 }}

@@ -1,7 +1,8 @@
-import { Box, IconButton, Modal, TextField, Tooltip, Typography, styled, Button } from '@mui/material';
+import { Box, IconButton, Modal, TextField, Tooltip, Typography, Button } from '@mui/material';
 import AppCard from 'renderer/AppCard';
 import EditIcon from '@mui/icons-material/Edit';
 import ClearIcon from '@mui/icons-material/Clear';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import { useMappingLeaderboardStats } from 'renderer/hooks/useMappingLeaderboardStats';
 import { ChangeEvent, useState } from 'react';
 import log from 'electron-log';
@@ -15,18 +16,43 @@ type LeaderboardRowProperties = {
   index: number;
 };
 
-const HighlightedTypography = styled(Typography)({
-  color: '#ff6363',
-});
-
 function LeaderboardRow({ isMe, name, count, index }: LeaderboardRowProperties) {
-  const what = `#${index + 1} ${name}`;
-
   return (
-    <SpaceBetweenDiv>
-      <div>{isMe ? <HighlightedTypography>{what}</HighlightedTypography> : <Typography>{what}</Typography>}</div>
-      <div>{isMe ? <HighlightedTypography>{count}</HighlightedTypography> : <Typography>{count}</Typography>}</div>
-    </SpaceBetweenDiv>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingX: 1.25,
+        paddingY: 0.5,
+        borderRadius: 2,
+        backgroundColor: isMe ? (theme) => `${theme.palette.primary.main}1f` : 'transparent',
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            width: 24,
+            flexShrink: 0,
+            fontWeight: 700,
+            color: index < 3 ? 'warning.main' : 'text.disabled',
+          }}
+        >
+          #{index + 1}
+        </Typography>
+        <Typography
+          noWrap
+          sx={{
+            fontWeight: isMe ? 600 : 400,
+            color: isMe ? 'primary.light' : 'text.primary',
+          }}
+        >
+          {name}
+        </Typography>
+      </Box>
+      <Typography sx={{ fontWeight: 600, color: isMe ? 'primary.light' : 'text.secondary' }}>{count}</Typography>
+    </Box>
   );
 }
 
@@ -97,49 +123,39 @@ export function MappingLeaderboardComponent() {
 
   return (
     <Box>
-      <AppCard>
-        <SpaceBetweenDiv>
-          <div>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <Typography sx={{ marginRight: 1 }}>{me.data?.displayName ?? 'Anonymous'}</Typography>
-              <Tooltip title="Edit your username on the leaderboard" placement="top">
+      <AppCard
+        title="Mapping Leaderboard"
+        icon={<LeaderboardIcon fontSize="small" />}
+        headerAction={
+          <>
+            <Typography variant="body2" sx={{ color: 'text.secondary', marginRight: 0.5 }}>
+              {me.data?.displayName ?? 'Anonymous'}
+            </Typography>
+            <Tooltip title="Edit your username on the leaderboard" placement="top">
+              <IconButton
+                size="small"
+                onClick={() => {
+                  handleOpen();
+                }}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            {me.data?.displayName && (
+              <Tooltip title="Delete your username on the leaderboard" placement="top">
                 <IconButton
                   size="small"
                   onClick={() => {
-                    handleOpen();
+                    void deleteDisplayName();
                   }}
                 >
-                  <EditIcon />
+                  <ClearIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
-              {me.data?.displayName && (
-                <Tooltip title="Delete your username on the leaderboard" placement="top">
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      void deleteDisplayName();
-                    }}
-                  >
-                    <ClearIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </Box>
-          </div>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            <Typography>Mapping Leaderboard</Typography>
-          </Box>
-        </SpaceBetweenDiv>
+            )}
+          </>
+        }
+      >
         {rows}
       </AppCard>
       <Modal
@@ -156,6 +172,9 @@ export function MappingLeaderboardComponent() {
             transform: 'translate(-50%, -50%)',
             width: 400,
             bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 3.5,
             boxShadow: 24,
             p: 4,
           }}

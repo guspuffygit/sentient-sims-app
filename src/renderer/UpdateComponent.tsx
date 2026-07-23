@@ -1,8 +1,9 @@
 /* eslint no-alert: off, consistent-return: off, no-useless-return: off */
 import { useState } from 'react';
-import { Box, CardActions, IconButton, Tooltip, Typography, Button } from '@mui/material';
+import { Box, CardActions, Chip, IconButton, Tooltip, Typography, Button } from '@mui/material';
 import CachedIcon from '@mui/icons-material/Cached';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { ModUpdate } from 'main/sentient-sims/services/UpdateService';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
@@ -51,32 +52,60 @@ export default function UpdateComponent() {
   };
 
   let updateText = 'Update now';
-  let headerText = (
-    <Typography
-      sx={{
-        color: 'text.secondary',
-      }}
-    >
-      Status: Up to date
-    </Typography>
+  let statusChip = (
+    <Chip
+      size="small"
+      variant="outlined"
+      label="Up to date"
+      sx={{ color: 'success.light', borderColor: (theme) => `${theme.palette.success.main}66` }}
+    />
   );
   if (versions.mod.version === 'none') {
     updateText = 'Install';
-    headerText = (
-      <Typography
-        sx={{
-          color: 'text.secondary',
-        }}
-      >
-        Ready to install
-      </Typography>
+    statusChip = (
+      <Chip
+        size="small"
+        variant="outlined"
+        label="Ready to install"
+        sx={{ color: 'info.main', borderColor: (theme) => `${theme.palette.info.main}66` }}
+      />
     );
   } else if (updateState.newVersionAvailable) {
-    headerText = <Typography variant="h6">New Version Ready</Typography>;
+    statusChip = (
+      <Chip
+        size="small"
+        icon={<CheckCircleIcon />}
+        label="New version ready"
+        color="success"
+        sx={{ fontWeight: 600 }}
+      />
+    );
   }
 
   return (
     <AppCard
+      title="Mod Update"
+      icon={<SystemUpdateAltIcon fontSize="small" />}
+      headerAction={
+        <>
+          {versions.mod.version !== 'none' ? (
+            <Tooltip title="Refresh">
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    void handleCheckForUpdates();
+                  }}
+                  disabled={versions.loading || isLoading}
+                >
+                  <CachedIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          ) : null}
+          <ReleaseTypeSelector />
+        </>
+      }
       cardActions={
         <CardActions sx={{ margin: 1, display: 'flex', justifyContent: 'space-between' }}>
           <div>
@@ -89,8 +118,7 @@ export default function UpdateComponent() {
               color="success"
               variant="contained"
             >
-              {updateText}{' '}
-              {updateState.newVersionAvailable && <CheckCircleIcon sx={{ marginLeft: 2, color: 'white' }} />}
+              {updateText}
             </Button>
           </div>
           <div>
@@ -112,53 +140,17 @@ export default function UpdateComponent() {
         </CardActions>
       }
     >
-      <div style={{ margin: 1, display: 'flex', justifyContent: 'space-between' }}>
-        <div>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: 1,
-            }}
-          >
-            <Typography variant="h6" sx={{ marginBottom: 0 }}>
-              Mod Update
-            </Typography>
-            {versions.mod.version !== 'none' ? (
-              <Tooltip title="Refresh">
-                <IconButton
-                  style={{
-                    maxWidth: '30px',
-                    maxHeight: '30px',
-                    minWidth: '30px',
-                    minHeight: '30px',
-                  }}
-                  sx={{ marginLeft: 1 }}
-                  onClick={() => {
-                    void handleCheckForUpdates();
-                  }}
-                  disabled={versions.loading || isLoading}
-                >
-                  <CachedIcon />
-                </IconButton>
-              </Tooltip>
-            ) : null}
-          </Box>
-          {headerText}
-
-          <Typography
-            sx={{
-              color: 'text.secondary',
-              fontSize: 14,
-            }}
-          >
-            Last Checked: {updateState.lastChecked}
-          </Typography>
-        </div>
-        <div>
-          <ReleaseTypeSelector />
-        </div>
-      </div>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        {statusChip}
+        <Typography
+          sx={{
+            color: 'text.secondary',
+            fontSize: 13,
+          }}
+        >
+          Last checked: {updateState.lastChecked}
+        </Typography>
+      </Box>
     </AppCard>
   );
 }

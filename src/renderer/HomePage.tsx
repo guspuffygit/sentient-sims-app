@@ -1,12 +1,78 @@
-import { Grid } from '@mui/material';
+import { Box, Chip, Grid, Typography } from '@mui/material';
 import UpdateComponent from './UpdateComponent';
 import DebugCard from './DebugCard';
 import { ThankYouCardPatreon } from './ThankYouCard';
 import { MappingLeaderboardComponent } from './components/MappingLeaderboardComponent';
+import { useWebsocket } from './providers/WebsocketProvider';
+
+function ConnectionChip() {
+  const { status } = useWebsocket();
+  const connected = status.mod;
+
+  return (
+    <Chip
+      size="small"
+      variant="outlined"
+      label={connected ? 'Game connected' : 'Game not connected'}
+      icon={
+        <Box
+          sx={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            marginLeft: 1,
+            backgroundColor: connected ? 'success.main' : 'text.disabled',
+            boxShadow: connected ? (theme) => `0 0 6px ${theme.palette.success.main}` : 'none',
+          }}
+        />
+      }
+      sx={{
+        color: connected ? 'success.light' : 'text.secondary',
+        borderColor: connected ? (theme) => `${theme.palette.success.main}66` : 'divider',
+      }}
+    />
+  );
+}
+
+function HomeHero() {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: 1,
+        marginBottom: 3,
+        paddingX: 0.5,
+      }}
+    >
+      <div>
+        <Typography
+          variant="h4"
+          sx={{
+            background: (theme) =>
+              `linear-gradient(90deg, ${theme.palette.text.primary}, ${theme.palette.primary.light})`,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          Sentient Sims
+        </Typography>
+        <Typography variant="body1" sx={{ color: 'text.secondary', marginTop: 0.5 }}>
+          Your AI companion for The Sims 4
+        </Typography>
+      </div>
+      <ConnectionChip />
+    </Box>
+  );
+}
 
 export default function HomePage() {
   return (
     <div>
+      <HomeHero />
       <Grid container spacing={2}>
         <Grid size={6}>
           <UpdateComponent />

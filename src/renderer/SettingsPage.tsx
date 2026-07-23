@@ -48,55 +48,63 @@ export default function SettingsPage() {
   }, [configsSetting.value, overridesSetting.value, defaultIdSetting.value, aiSettings.aiApiType]);
 
   return (
-    <AppCard>
-      <TabContext value={tabSelectedValue}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderBottom: 1,
-            borderColor: 'divider',
-          }}
-        >
-          <TabList onChange={handleChange} aria-label="lab API tabs example">
-            {Object.entries(SettingsTabSelectionValue).map((selectionvalue) => (
-              <Tab key={selectionvalue[0]} label={selectionvalue[0]} value={selectionvalue[1]} />
-            ))}
-          </TabList>
-
-          <Button
-            endIcon={<ConstructionIcon />}
-            variant="outlined"
-            sx={{ mr: 2 }}
-            onClick={() => {
-              setupWizard.setOpen(true);
+    <div>
+      <Box sx={{ marginBottom: 3, paddingX: 0.5 }}>
+        <Typography variant="h4">Settings</Typography>
+        <Typography variant="body1" sx={{ color: 'text.secondary', marginTop: 0.5 }}>
+          Configure your AI providers, mod options, and voice
+        </Typography>
+      </Box>
+      <AppCard>
+        <TabContext value={tabSelectedValue}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              borderBottom: 1,
+              borderColor: 'divider',
             }}
           >
-            Setup Wizard
-          </Button>
-        </Box>
-        <TabPanel value={SettingsTabSelectionValue.Settings}>
-          <ModsDirectoryComponent />
-          <DirectedScenesSettingsComponent />
-          <DebugLogsSettingsComponent />
-          <ProviderConfigsComponent />
-          <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-          <ProviderConnectionSettingsComponent />
-          <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-          <Typography variant="h6">Localization</Typography>
-          <FormHelperText sx={{ marginBottom: 1 }}>
-            Translates AI output. Applies when the provider handling an action is OpenAI or Gemini.
-          </FormHelperText>
-          <LocalizationSettingsComponent />
-          <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-          <AnimationMappingSettingsComponent apiType={wickedWhimsApiType} />
-          <AiMaxResponseLengthSettingsComponent />
-        </TabPanel>
-        <TabPanel value={SettingsTabSelectionValue.Voice}>
-          <VoiceSettingsComponent />
-        </TabPanel>
-      </TabContext>
-    </AppCard>
+            <TabList onChange={handleChange} aria-label="lab API tabs example">
+              {Object.entries(SettingsTabSelectionValue).map((selectionvalue) => (
+                <Tab key={selectionvalue[0]} label={selectionvalue[0]} value={selectionvalue[1]} />
+              ))}
+            </TabList>
+
+            <Button
+              endIcon={<ConstructionIcon />}
+              variant="outlined"
+              sx={{ mr: 2 }}
+              onClick={() => {
+                setupWizard.setOpen(true);
+              }}
+            >
+              Setup Wizard
+            </Button>
+          </Box>
+          <TabPanel value={SettingsTabSelectionValue.Settings}>
+            <ModsDirectoryComponent />
+            <DirectedScenesSettingsComponent />
+            <DebugLogsSettingsComponent />
+            <ProviderConfigsComponent />
+            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+            <ProviderConnectionSettingsComponent />
+            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+            <Typography variant="h6">Localization</Typography>
+            <FormHelperText sx={{ marginBottom: 1 }}>
+              Translates AI output. Applies when the provider handling an action is OpenAI or Gemini.
+            </FormHelperText>
+            <LocalizationSettingsComponent />
+            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+            <AnimationMappingSettingsComponent apiType={wickedWhimsApiType} />
+            <AiMaxResponseLengthSettingsComponent />
+          </TabPanel>
+          <TabPanel value={SettingsTabSelectionValue.Voice}>
+            <VoiceSettingsComponent />
+          </TabPanel>
+        </TabContext>
+      </AppCard>
+    </div>
   );
 }

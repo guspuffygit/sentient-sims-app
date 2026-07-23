@@ -174,13 +174,16 @@ export const Announcements = () => {
     const theCards: JSX.Element[] = [];
     announcements.forEach((announcement) => {
       theCards.push(
-        <Box sx={{ marginBottom: 1 }}>
+        <Box sx={{ marginBottom: 1.5 }}>
           <Card sx={{ maxWidth: 345 }}>
             <CardHeader
-              avatar={<Avatar aria-label="recipe" src={announcement.authorAvatar} />}
+              avatar={<Avatar aria-label="author avatar" src={announcement.authorAvatar} />}
               sx={{ paddingBottom: 0 }}
               titleTypographyProps={{
-                sx: { color: '#ff0000' },
+                sx: { color: 'primary.light', fontWeight: 600 },
+              }}
+              subheaderTypographyProps={{
+                sx: { fontSize: '0.75rem' },
               }}
               title={announcement.authorDisplayName}
               subheader={`${announcement.timestamp.toLocaleTimeString()} ${announcement.timestamp.toDateString()}`}
@@ -199,9 +202,23 @@ export const Announcements = () => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
-        <Toolbar sx={{ backgroundColor: '#313339' }}>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}>
+      <AppBar
+        position="static"
+        color="transparent"
+        sx={{
+          backgroundColor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 3,
+        }}
+      >
+        <Toolbar variant="dense" sx={{ minHeight: 56 }}>
+          <Typography
+            variant="subtitle1"
+            noWrap
+            component="div"
+            sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
+          >
             Announcements
           </Typography>
           <IconButton
@@ -213,13 +230,14 @@ export const Announcements = () => {
         </Toolbar>
       </AppBar>
       <Paper
+        elevation={0}
         sx={{
           marginTop: 2,
           flexGrow: 1,
-          height: 'calc(100vh - 120px)',
+          height: 'calc(100vh - 130px)',
           boxSizing: 'border-box',
-          p: 2,
-          backgroundColor: '#313339',
+          p: 1.5,
+          backgroundColor: 'transparent',
           overflowY: 'auto',
         }}
       >

@@ -1,4 +1,5 @@
 import { Avatar, Stack, Typography } from '@mui/material';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useMemo } from 'react';
 import AppCard from './AppCard';
 import { useThankYous } from './hooks/useThankYous';
@@ -89,10 +90,11 @@ export function ThankYouCardPatreon() {
   const tier1Exists = thankYous.tier1.length > 0;
 
   return (
-    <AppCard>
-      <Typography align="center" sx={{ marginBottom: 2 }}>
-        Special Thank you to Devs and Patrons!
-      </Typography>
+    <AppCard
+      title="Thank You"
+      subtitle="To the Devs and Patrons who make Sentient Sims possible"
+      icon={<FavoriteIcon fontSize="small" />}
+    >
       <Stack
         direction="row"
         spacing={{ xs: 1, sm: 1 }}
