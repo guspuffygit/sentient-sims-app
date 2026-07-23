@@ -36,6 +36,7 @@ import {
 } from '../models/OpenAIRequestBuilder';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { DirectedSceneRequest } from '../models/DirectedSceneRequest';
+import { SentientSim } from '../models/SentientSim';
 import {
   cleanAIClassificationOutput,
   cleanupAIOutput,
@@ -55,7 +56,6 @@ import { sendModNotification } from '../websocketServer';
 import { ModAddBuff, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { ApiContext } from './ApiContext';
 import { AIActionType, actionTypeForEvent } from '../models/AIActionType';
-import { SentientSim } from '../models/SentientSim';
 
 // Actors are asked for a bare subtitle, but models still sneak in speaker labels,
 // quotation marks, and parenthetical notes — strip everything but the spoken words
@@ -188,7 +188,7 @@ export class AIService {
 
     if (description.pre_actions) {
       const preAction = getRandomItem(description.pre_actions);
-      if (event.sentient_sims.length >= 2) {
+      if (this.ctx.settings.directedScenesEnabled && event.sentient_sims.length >= 2) {
         return this.runDirectedGeneration(event, { action: preAction });
       }
       return this.runGeneration(event, {
@@ -201,7 +201,7 @@ export class AIService {
   }
 
   async handleContinue(event: ContinueInteractionEvent) {
-    if (event.sentient_sims.length >= 2) {
+    if (this.ctx.settings.directedScenesEnabled && event.sentient_sims.length >= 2) {
       // Directed continue needs prior memories to pick up from; fall through when there are none
       const directed = await this.runDirectedGeneration(event, { continueScene: true });
       if (directed.status === InteractionEventStatus.GENERATED) {
@@ -277,7 +277,7 @@ export class AIService {
   }
 
   async handleDoSomething(doSomethingEvent: DoSomethingInteractionEvent) {
-    if (doSomethingEvent.sentient_sims.length >= 2) {
+    if (this.ctx.settings.directedScenesEnabled && doSomethingEvent.sentient_sims.length >= 2) {
       return this.runDirectedGeneration(doSomethingEvent, { action: doSomethingEvent.action });
     }
     return this.runGeneration(doSomethingEvent, {
@@ -371,8 +371,10 @@ export class AIService {
 
     log.debug(`stop tokens: ${JSON.stringify(stopTokens, null, 2)}`);
 
+    const directedScenes = this.ctx.settings.directedScenesEnabled;
+
     // TODO: Add an options for formatted stop tokens that aren't necessarily in the prompt
-    let output = cleanupAIOutput(response.text, stopTokens);
+    let output = cleanupAIOutput(response.text, stopTokens, { classic: !directedScenes });
 
     // Remove preAssistantPreResponse from output
     if (promptRequest.preAssistantPreResponse && output.startsWith(promptRequest.preAssistantPreResponse.trim())) {
@@ -392,6 +394,18 @@ export class AIService {
     output = output.trim();
 
     if (output.length > 1) {
+      if (!directedScenes) {
+        newMemory.content = output;
+        // Classic playback: one narrator utterance, no per-speaker parsing or voice casting
+        this.playTtsLines([{ speaker: 'Narrator', text: output }]);
+        return {
+          status: InteractionEventStatus.GENERATED,
+          text: output,
+          request: response.request,
+          memory: newMemory,
+        };
+      }
+
       const rawSceneText = output;
       const directorReview = await this.runDirectorReview(rawSceneText);
       output = directorReview.text;
@@ -434,6 +448,8 @@ Never cut the scene down to a single line when multiple characters speak — pre
 Only change a line when it violates one of the rules above. Otherwise keep the exact wording and character voice — puns, verbal tics, hesitations, and slang are performance choices, not mistakes.
 If the scene is already good, return it unchanged.`;
 
+    const providerConfig = this.ctx.providerConfigs.getConfigForAction(AIActionType.GENERATE);
+
     let oneShotRequest: OneShotRequest = {
       systemPrompt,
       messages: [text],
@@ -441,13 +457,15 @@ If the scene is already good, return it unchanged.`;
       maxTokens: 3900,
     };
 
-    getInputFormatters(this.ctx.settings.aiApiType).forEach((formatter) => {
+    getInputFormatters(providerConfig.apiType).forEach((formatter) => {
       oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(providerConfig.apiType));
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
-    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
+    openAIRequest.model = providerConfig.model;
+    openAIRequest.apiType = providerConfig.apiType;
+    const response = await this.ctx.getGenerationService(providerConfig.apiType).sentientSimsGenerate(openAIRequest);
     const reviewed = cleanupAIOutput(response.text);
     return { text: reviewed.length > 1 ? reviewed : text, request: openAIRequest };
   }
@@ -459,6 +477,8 @@ If the scene is already good, return it unchanged.`;
     maxResponseTokens: number,
     model?: string,
   ): Promise<{ exchange: LLMExchange; text: string }> {
+    const providerConfig = this.ctx.providerConfigs.getConfigForAction(AIActionType.GENERATE);
+
     let oneShotRequest: OneShotRequest = {
       systemPrompt,
       messages: [userText],
@@ -466,16 +486,15 @@ If the scene is already good, return it unchanged.`;
       maxTokens: 3900,
     };
 
-    getInputFormatters(this.ctx.settings.aiApiType).forEach((formatter) => {
+    getInputFormatters(providerConfig.apiType).forEach((formatter) => {
       oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(providerConfig.apiType));
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
-    if (model) {
-      openAIRequest.model = model;
-    }
-    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
+    openAIRequest.model = model ?? providerConfig.model;
+    openAIRequest.apiType = providerConfig.apiType;
+    const response = await this.ctx.getGenerationService(providerConfig.apiType).sentientSimsGenerate(openAIRequest);
     return { exchange: { label, request: openAIRequest, responseText: response.text }, text: response.text };
   }
 
@@ -496,10 +515,11 @@ If the scene is already good, return it unchanged.`;
   }
 
   async runDirectedGeneration(event: SSEvent, options: DirectedGenerationOptions): Promise<InteractionEventResult> {
+    const providerConfig = this.ctx.providerConfigs.getConfigForAction(actionTypeForEvent(event.event_type));
     const promptOptions: PromptRequestBuilderOptions = {
       action: options.action,
-      apiType: this.ctx.settings.aiApiType,
-      modelSettings: await this.ctx.modelSettings.getModelSettings(),
+      apiType: providerConfig.apiType,
+      modelSettings: await this.ctx.modelSettings.getModelSettings(providerConfig.model, providerConfig.apiType),
     };
     const promptRequest = this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
 

@@ -12,6 +12,7 @@ export enum SettingsEnum {
   LOCALIZATION_LANGUAGE = 'localizationLanguage',
   DEBUG_LOGS = 'debugLogs',
   NSFW_ENABLED = 'nsfwEnabled',
+  DIRECTED_SCENES_ENABLED = 'directedScenesEnabled',
   MAPPING_NOTIFICATION_ENABLED = 'mappingNotificationEnabled',
   OPENAI_ENDPOINT = 'openaiEndpoint',
   VLLM_ENDPOINT = 'vllmEndpoint',

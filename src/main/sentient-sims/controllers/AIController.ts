@@ -39,8 +39,9 @@ export class AIController {
     const result = await this.ctx.ai.interactionEvent(event);
     result.input = event;
     // Leading newline so each generation stands apart from the previous one in the game window;
-    // memories, TTS, and the app chat UI keep the untouched text
-    res.json({ ...result, text: result.text ? `\n${result.text}` : result.text });
+    // memories, TTS, and the app chat UI keep the untouched text. Classic mode sends it verbatim.
+    const spacedText = this.ctx.settings.directedScenesEnabled && result.text ? `\n${result.text}` : result.text;
+    res.json({ ...result, text: spacedText });
     if (result.text) {
       sendChatGeneration(result);
     }

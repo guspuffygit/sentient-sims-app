@@ -91,6 +91,10 @@ export function defaultStore(cwd?: string) {
         type: 'boolean',
         default: false,
       },
+      [SettingsEnum.DIRECTED_SCENES_ENABLED.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
       [SettingsEnum.MAPPING_NOTIFICATION_ENABLED.toString()]: {
         type: 'boolean',
         default: true,
@@ -446,6 +450,14 @@ export class SettingsService {
 
   set nsfwEnabled(value: boolean) {
     this.set(SettingsEnum.NSFW_ENABLED, value);
+  }
+
+  get directedScenesEnabled(): boolean {
+    return this.get(SettingsEnum.DIRECTED_SCENES_ENABLED) as boolean;
+  }
+
+  set directedScenesEnabled(value: boolean) {
+    this.set(SettingsEnum.DIRECTED_SCENES_ENABLED, value);
   }
 
   get mappingNotificationEnabled(): boolean {

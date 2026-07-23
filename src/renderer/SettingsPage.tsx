@@ -9,6 +9,7 @@ import { SyntheticEvent, useMemo, useState } from 'react';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import AppCard from './AppCard';
 import DebugLogsSettingsComponent from './settings/DebugLogsSettingsComponent';
+import DirectedScenesSettingsComponent from './settings/DirectedScenesSettingsComponent';
 import { AnimationMappingSettingsComponent } from './settings/AnimationMappingSettingsComponent';
 import { ModsDirectoryComponent } from './ModsDirectoryComponent';
 import { useAISettings } from './providers/AISettingsProvider';
@@ -77,6 +78,7 @@ export default function SettingsPage() {
         </Box>
         <TabPanel value={SettingsTabSelectionValue.Settings}>
           <ModsDirectoryComponent />
+          <DirectedScenesSettingsComponent />
           <DebugLogsSettingsComponent />
           <ProviderConfigsComponent />
           <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
