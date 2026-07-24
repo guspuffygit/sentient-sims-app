@@ -144,8 +144,11 @@ export default function useChatGeneration(): ChatGeneration {
           );
         }
 
-        const isDirectedScene = Boolean(result.exchanges && result.exchanges.length > 0);
-        if ((voiceTestMode || isDirectedScene) && result.text) {
+        // Only fetch per-line test audio when the user explicitly enabled voice test
+        // mode. Fetching for every directed scene doubled the TTS load of normal
+        // gameplay (the scene already speaks through the real playback path) and
+        // spammed errors whenever the TTS server hiccuped.
+        if (voiceTestMode && result.text) {
           const assistantMessage = updatedMessages[updatedMessages.length - 1];
           if (assistantMessage.id) {
             const { id: assistantMessageId } = assistantMessage;

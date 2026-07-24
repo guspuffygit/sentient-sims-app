@@ -67,15 +67,27 @@ export function useSentientSimsTTS(): TTSHook {
       const url = `${sentientSimsAIEndpointSetting.value}/v2/audio/speech`;
 
       try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authentication': sentientSimsAITokenSetting.value,
-            'sentient-sims-model': requestBody.model,
-          },
-          body: JSON.stringify(requestBody),
-        });
+        const doFetch = () =>
+          fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authentication': sentientSimsAITokenSetting.value,
+              'sentient-sims-model': requestBody.model,
+            },
+            body: JSON.stringify(requestBody),
+          });
+
+        let response = await doFetch();
+        // Gateway hiccups (502/503 from a worker restart) are usually momentary —
+        // one retry saves the line instead of dropping it to a silent subtitle
+        if (response.status >= 500) {
+          log.debug(`TTS returned ${response.status}, retrying once`);
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
+          response = await doFetch();
+        }
 
         if (!response.ok) {
           const errorMessage = `Unable to fetch audio: ${response.status}`;
@@ -88,6 +100,16 @@ export function useSentientSimsTTS(): TTSHook {
           } catch (err: any) {
             setError(errorMessage);
           }
+          return null;
+        }
+
+        // A half-dead gateway can 200 with an HTML error page, which then blows up
+        // audio decoding — treat anything that isn't audio bytes as a failed fetch
+        const contentType = response.headers.get('content-type') ?? '';
+        if (contentType.includes('text/html') || contentType.includes('application/json')) {
+          const bodyText = await response.text();
+          log.error(`TTS returned non-audio response (${contentType}): ${bodyText.slice(0, 200)}`);
+          setError('TTS server returned a non-audio response');
           return null;
         }
 
@@ -140,7 +162,8 @@ export function useSentientSimsTTS(): TTSHook {
           await playback.finished;
           log.debug('Audio finished playing.');
         } catch (err) {
-          log.error('Error playing audio.', err);
+          // DOMExceptions don't survive electron-log's IPC serialization — stringify here
+          log.error(`Error playing audio: ${err instanceof Error ? `${err.name}: ${err.message}` : String(err)}`);
           setError('An error occurred during audio playback.');
         } finally {
           currentPlaybackRef.current = null;
@@ -267,7 +290,7 @@ export function useSentientSimsTTS(): TTSHook {
               currentPlaybackRef.current = playback;
               await playback.finished;
             } catch (err) {
-              log.error('Error playing audio.', err);
+              log.error(`Error playing audio: ${err instanceof Error ? `${err.name}: ${err.message}` : String(err)}`);
               setError('An error occurred during audio playback.');
             } finally {
               currentPlaybackRef.current = null;

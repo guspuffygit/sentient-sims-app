@@ -34,6 +34,17 @@ function fakeEmbedder(vector: number[]): EmbeddingService {
 }
 
 describe('MemoryIndexRepository', () => {
+  it('ignores index upserts for memories that no longer exist', () => {
+    const ctx = loadedContext('memory-index-stale');
+    ctx.memoryRepository.setOnMemoryUpserted(() => {});
+
+    // Annotation is fire-and-forget: by the time it lands the memory can be gone
+    // (deleted, or the db swapped). It must no-op, not throw a FOREIGN KEY error.
+    const result = ctx.memoryIndexRepository.upsertIndex({ memory_id: 9999, importance: 5 });
+    expect(result.changes).toEqual(0);
+    expect(ctx.memoryIndexRepository.getIndex(9999)).toBeUndefined();
+  });
+
   it('roundtrips index rows and cascades deletes with the memory', () => {
     const ctx = loadedContext('memory-index-crud');
     // Manual index management below must not race the automatic background annotation

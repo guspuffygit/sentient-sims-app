@@ -9,13 +9,24 @@ export class MemoryIndexRepository extends Repository {
       | undefined;
   }
 
+  // Annotation is fire-and-forget, so by the time it lands the memory may have been
+  // deleted (or the db reloaded). The WHERE EXISTS guard makes a stale upsert a
+  // silent no-op instead of a FOREIGN KEY error.
   upsertIndex(index: MemoryIndexEntity) {
     return this.dbService
       .getDb()
       .prepare(
-        'INSERT OR REPLACE INTO memory_index(memory_id, importance, embedding, embedding_model) VALUES(?, ?, ?, ?)',
+        `INSERT OR REPLACE INTO memory_index(memory_id, importance, embedding, embedding_model)
+         SELECT ?, ?, ?, ?
+         WHERE EXISTS (SELECT 1 FROM memory WHERE id = ?)`,
       )
-      .run([index.memory_id, index.importance ?? null, index.embedding ?? null, index.embedding_model ?? null]);
+      .run([
+        index.memory_id,
+        index.importance ?? null,
+        index.embedding ?? null,
+        index.embedding_model ?? null,
+        index.memory_id,
+      ]);
   }
 
   // Recent memories involving any of the given participants, joined with their retrieval

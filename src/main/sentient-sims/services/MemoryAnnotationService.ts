@@ -52,6 +52,7 @@ export class MemoryAnnotationService {
       return;
     }
 
+    const session = this.ctx.db.sessionKey;
     const text = memory.observation || memory.content || '';
     const importance = text
       ? await this.rateImportance(text, memory.event_type)
@@ -65,6 +66,13 @@ export class MemoryAnnotationService {
         embedding = embeddingToBuffer(vector);
         embeddingModel = this.ctx.embedding.model;
       }
+    }
+
+    // A different database may have been loaded while we awaited the AI calls —
+    // this memory id would then point at another save's memory, so drop the result.
+    if (this.ctx.db.sessionKey !== session) {
+      log.debug(`[Annotation] database changed while annotating memory ${memory.id}, dropping result`);
+      return;
     }
 
     this.ctx.memoryIndexRepository.upsertIndex({
@@ -91,13 +99,18 @@ export class MemoryAnnotationService {
       return 0;
     }
 
+    const session = this.ctx.db.sessionKey;
     let total = 0;
     for (;;) {
+      if (this.ctx.db.sessionKey !== session) {
+        log.debug('[Annotation] database changed during backfill, stopping');
+        break;
+      }
       const batch = this.ctx.memoryIndexRepository.getUnindexedMemories(batchSize);
       if (batch.length === 0) {
         break;
       }
-      const embedded = await this.backfillBatch(batch);
+      const embedded = await this.backfillBatch(batch, session);
       total += embedded;
       // Rows that can't make progress (no text, failing embedder) must not spin forever
       if (embedded === 0) {
@@ -111,7 +124,7 @@ export class MemoryAnnotationService {
     return total;
   }
 
-  private async backfillBatch(batch: MemoryEntity[]): Promise<number> {
+  private async backfillBatch(batch: MemoryEntity[], session: string | undefined): Promise<number> {
     const textable = batch.filter((memory) => memory.observation || memory.content);
     if (textable.length === 0) {
       return 0;
@@ -120,6 +133,10 @@ export class MemoryAnnotationService {
     const vectors = await this.ctx.embedding.embed(
       textable.map((memory) => memory.observation || memory.content || ''),
     );
+    if (this.ctx.db.sessionKey !== session) {
+      log.debug('[Annotation] database changed during backfill batch, dropping results');
+      return 0;
+    }
     const { model } = this.ctx.embedding;
 
     let embedded = 0;
