@@ -36,6 +36,22 @@ export type GenerationOptions = {
 
 const maxGroupSizeLength = 1700;
 
+// How many retrieved memories ride along in the prompt, and how long each is allowed to
+// be — six short lines of history, never a second transcript.
+const relevantMemoryCount = 6;
+const maxRelevantMemoryLength = 280;
+
+// A memory row can hold several kinds of text; pick the most factual one and keep it short.
+export function summarizeMemory(memory: MemoryEntity): string {
+  const text = (memory.observation || memory.content || memory.action || memory.pre_action || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (text.length <= maxRelevantMemoryLength) {
+    return text;
+  }
+  return `${text.slice(0, maxRelevantMemoryLength).trimEnd()}…`;
+}
+
 export type PromptRequestBuilderOptions = GenerationOptions & {
   apiType: ApiType;
   modelSettings: ModelSettings;
@@ -205,6 +221,46 @@ export class PromptRequestBuilderService {
     ].join('\n');
   }
 
+  // Older memories that score as relevant to this moment (Block 5 retrieval). The current
+  // scene's rows and the reflections already shown are excluded so this block only ever
+  // adds information the prompt doesn't have yet.
+  async getRelevantMemories(event: SSEvent, queryText: string, excludeMemoryIds: number[]): Promise<MemoryEntity[]> {
+    if (!this.ctx.settings.memoryRetrievalEnabled) {
+      return [];
+    }
+
+    try {
+      const retrieved = await this.ctx.memoryRetrieval.retrieve({
+        participantIds: event.sentient_sims.map((sentientSim) => sentientSim.sim_id),
+        queryText,
+        k: relevantMemoryCount,
+        excludeMemoryIds,
+      });
+      return retrieved.map((result) => result.memory);
+    } catch (error) {
+      log.error('[Memory] Retrieval failed, continuing without relevant memories', error);
+      return [];
+    }
+  }
+
+  private buildRelevantMemoriesBlock(memories: MemoryEntity[]): string | undefined {
+    if (memories.length === 0) {
+      return undefined;
+    }
+
+    const lines = memories.map((memory) => {
+      const location = this.ctx.locationRepository.getLocation({ id: memory.location_id });
+      return `[At ${location.name}] ${summarizeMemory(memory)}`;
+    });
+
+    return [
+      '<RELEVANT_MEMORIES>',
+      ...lines,
+      '</RELEVANT_MEMORIES>',
+      'These are past moments the characters genuinely remember. Draw on them only when relevant; do not recap them.',
+    ].join('\n');
+  }
+
   groupMemories(memories: MemoryEntity[]): FormattedMemoryMessage[] {
     const messages: PreFormattedMemoryMessage[] = [];
 
@@ -333,7 +389,7 @@ export class PromptRequestBuilderService {
     return `<SCENE_GUIDANCE>\n${lines.join(' ')}\n</SCENE_GUIDANCE>`;
   }
 
-  buildPromptRequest(event: SSEvent, options: PromptRequestBuilderOptions): PromptRequest {
+  async buildPromptRequest(event: SSEvent, options: PromptRequestBuilderOptions): Promise<PromptRequest> {
     const location = this.ctx.locationRepository.getLocation({
       id: event.environment.location_id,
     });
@@ -444,11 +500,26 @@ export class PromptRequestBuilderService {
     const memories = this.getMemories();
     const groupedMemories = this.groupMemories(memories);
 
+    // Retrieval query: what is about to happen plus who is involved. Scene rows and shown
+    // reflections are already in the prompt, so they are excluded from retrieval.
+    const queryText = [formattedPreAction ?? formattedAction ?? '', ...event.sentient_sims.map((sim) => sim.name)]
+      .join(' ')
+      .trim();
+    const excludeMemoryIds = [...memories, ...reflections]
+      .map((memory) => memory.id)
+      .filter((id): id is number => id !== undefined);
+    const relevantMemories = await this.getRelevantMemories(event, queryText, excludeMemoryIds);
+    const relevantMemoriesBlock = this.buildRelevantMemoriesBlock(relevantMemories);
+    if (relevantMemoriesBlock) {
+      sims.push(relevantMemoriesBlock);
+    }
+
     const currentScene = this.ctx.sceneService.getCurrentScene();
     log.info(
       `[Memory] Scene ${currentScene ? `${currentScene.sceneId} (location ${currentScene.locationId})` : 'none'}: ` +
         `${memories.length} scene memories, ${reflections.length} reflections ` +
-        `[${reflections.map((reflection) => reflection.id).join(', ')}]`,
+        `[${reflections.map((reflection) => reflection.id).join(', ')}], ` +
+        `${relevantMemories.length} retrieved [${relevantMemories.map((memory) => memory.id).join(', ')}]`,
     );
     const formattedLocation = formatAction(
       '<LOCATION>\n{location} ({location_type}), {location_description}\n</LOCATION>',

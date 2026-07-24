@@ -360,7 +360,7 @@ describe('Output', () => {
 
       ctx.settings.maxResponseTokens = 300;
 
-      const result = ctx.promptBuilder.buildPromptRequest(event, {
+      const result = await ctx.promptBuilder.buildPromptRequest(event, {
         action: '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
         apiType: ApiType.SentientSimsAI,
         modelSettings: {
@@ -448,7 +448,7 @@ describe('Output', () => {
         };
 
         // Exchange 1 — narrator scene-setter in memory
-        const result1 = ctx.promptBuilder.buildPromptRequest(event, promptOptions);
+        const result1 = await ctx.promptBuilder.buildPromptRequest(event, promptOptions);
         const genStart1 = Date.now();
         const genResponse1 = await ctx.genai.sentientSimsGenerate(requestBuilder.buildOpenAIRequest(result1));
         console.log(`Exchange 1 generation took ${Date.now() - genStart1}ms`);
@@ -471,7 +471,7 @@ describe('Output', () => {
         });
 
         // Exchange 2 — scene-setter + exchange 1 in memory
-        const result2 = ctx.promptBuilder.buildPromptRequest(event, promptOptions);
+        const result2 = await ctx.promptBuilder.buildPromptRequest(event, promptOptions);
         const genStart2 = Date.now();
         const genResponse2 = await ctx.genai.sentientSimsGenerate(requestBuilder.buildOpenAIRequest(result2));
         console.log(`Exchange 2 generation took ${Date.now() - genStart2}ms`);

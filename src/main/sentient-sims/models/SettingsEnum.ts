@@ -41,6 +41,7 @@ export enum SettingsEnum {
   GENERATION_TIMEOUT_SECONDS = 'generationTimeoutSeconds',
   GENERATION_CONCURRENCY = 'generationConcurrency',
   PREFETCH_MAX_QUEUE_DEPTH = 'prefetchMaxQueueDepth',
+  MEMORY_RETRIEVAL_ENABLED = 'memoryRetrievalEnabled',
 }
 
 export enum DeprecatedSettingsEnum {

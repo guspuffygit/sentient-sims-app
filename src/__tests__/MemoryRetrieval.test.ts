@@ -7,6 +7,11 @@ import {
   embeddingToBuffer,
 } from 'main/sentient-sims/services/EmbeddingService';
 import { recencyScore, scoreCandidate } from 'main/sentient-sims/services/MemoryRetrievalService';
+import { summarizeMemory, PromptRequestBuilderOptions } from 'main/sentient-sims/services/PromptRequestBuilderService';
+import { SSEvent, SSEventType } from 'main/sentient-sims/models/InteractionEvents';
+import { SentientSim } from 'main/sentient-sims/models/SentientSim';
+import { SimAge } from 'main/sentient-sims/models/SimAge';
+import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { mockApiContext } from './util';
 
 function loadedContext(sessionId: string): ApiContext {
@@ -179,5 +184,104 @@ describe('backfill', () => {
 
     expect(await ctx.memoryAnnotation.backfill()).toEqual(0);
     expect(ctx.memoryIndexRepository.getIndex(Number(memory.id))).toBeUndefined();
+  });
+});
+
+describe('prompt wiring', () => {
+  function makeSim(): SentientSim {
+    return {
+      careers: [],
+      name: 'Testy Tester',
+      age: SimAge.ADULT,
+      sim_id: '100',
+      gender: 'Male',
+      traits: [],
+      moods: [],
+      is_ghost: false,
+      grubby: false,
+      in_pool: false,
+      is_at_home: false,
+      is_dying: false,
+      is_human: true,
+      is_inside_building: false,
+      is_outside: false,
+      is_pet: false,
+      on_fire: false,
+      on_home_lot: false,
+      sleeping: false,
+      is_pregnant: false,
+      is_player_sim: true,
+    };
+  }
+
+  function testEvent(): SSEvent {
+    return {
+      event_id: 'test-event',
+      event_type: SSEventType.INTERACTION,
+      location_id: 0,
+      environment: {
+        location_id: 1,
+        world_id: 0,
+        time: { second: 0, minute: 0, hour: 0, day: 0, week: 0 },
+      },
+      sentient_sims: [makeSim()],
+    };
+  }
+
+  function promptOptions(): PromptRequestBuilderOptions {
+    return {
+      action: '{actor.0} chats about weekend plans.',
+      apiType: ApiType.OpenAI,
+      modelSettings: {
+        temperature: undefined,
+        top_p: undefined,
+        top_k: undefined,
+        repetition_penalty: undefined,
+        max_tokens: 5000,
+      },
+    };
+  }
+
+  it('summarizes memory text preferring observation and truncating long content', () => {
+    expect(summarizeMemory({ location_id: 1, observation: 'saw it happen', content: 'a long transcript' })).toEqual(
+      'saw it happen',
+    );
+    const long = 'word '.repeat(100);
+    const summarized = summarizeMemory({ location_id: 1, content: long });
+    expect(summarized.length).toBeLessThanOrEqual(281);
+    expect(summarized.endsWith('…')).toBe(true);
+  });
+
+  it('adds a <RELEVANT_MEMORIES> block and honors the settings toggle', async () => {
+    const ctx = loadedContext('prompt-relevant-memories');
+    vi.spyOn(ctx, 'embedding', 'get').mockReturnValue(new NoopEmbeddingService());
+
+    const past = createMemory(ctx, { content: 'won the neighborhood chess tournament' });
+    indexMemory(ctx, past, 9);
+
+    const result = await ctx.promptBuilder.buildPromptRequest(testEvent(), promptOptions());
+    expect(result.participants).toContain('<RELEVANT_MEMORIES>');
+    expect(result.participants).toContain('won the neighborhood chess tournament');
+
+    ctx.settings.memoryRetrievalEnabled = false;
+    const disabled = await ctx.promptBuilder.buildPromptRequest(testEvent(), promptOptions());
+    expect(disabled.participants).not.toContain('<RELEVANT_MEMORIES>');
+  });
+
+  it('excludes current-scene memories from retrieval', async () => {
+    const ctx = loadedContext('prompt-scene-exclusion');
+    vi.spyOn(ctx, 'embedding', 'get').mockReturnValue(new NoopEmbeddingService());
+
+    const older = createMemory(ctx, { content: 'burned the anniversary dinner', location_id: 2 });
+    indexMemory(ctx, older, 9);
+
+    const event = testEvent();
+    ctx.sceneService.checkSceneBoundary(event);
+    const inScene = createMemory(ctx, { content: 'is chatting about the weather right now', location_id: 1 });
+    indexMemory(ctx, inScene, 9);
+
+    const result = await ctx.promptBuilder.buildPromptRequest(event, promptOptions());
+    expect(result.participants).toContain('burned the anniversary dinner');
+    expect(result.participants).not.toContain('is chatting about the weather right now');
   });
 });

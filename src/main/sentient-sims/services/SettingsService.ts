@@ -196,6 +196,10 @@ export function defaultStore(cwd?: string) {
         type: 'number',
         default: defaultPrefetchMaxQueueDepth,
       },
+      [SettingsEnum.MEMORY_RETRIEVAL_ENABLED.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
     },
     migrations: {
       '3.1.0': (store) => {
@@ -588,6 +592,14 @@ export class SettingsService {
       throw new Error('generationConcurrency must be a positive integer');
     }
     this.set(SettingsEnum.GENERATION_CONCURRENCY, value);
+  }
+
+  get memoryRetrievalEnabled(): boolean {
+    return this.get(SettingsEnum.MEMORY_RETRIEVAL_ENABLED) as boolean;
+  }
+
+  set memoryRetrievalEnabled(value: boolean) {
+    this.set(SettingsEnum.MEMORY_RETRIEVAL_ENABLED, value);
   }
 
   get prefetchMaxQueueDepth(): number {

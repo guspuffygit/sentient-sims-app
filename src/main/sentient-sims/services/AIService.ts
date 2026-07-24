@@ -500,7 +500,7 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
       promptHistoryMode: options.promptHistoryMode,
     };
 
-    let promptRequest = this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
+    let promptRequest = await this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
 
     // save memory before any model specific formatting
     const newMemory: MemoryEntity = {
@@ -691,7 +691,7 @@ If the scene is already good, return it unchanged.`;
       apiType: this.ctx.settings.aiApiType,
       modelSettings: await this.ctx.modelSettings.getModelSettings(),
     };
-    const promptRequest = this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
+    const promptRequest = await this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
 
     // promptRequest.location is already wrapped in <LOCATION> tags
     const sceneContext = [

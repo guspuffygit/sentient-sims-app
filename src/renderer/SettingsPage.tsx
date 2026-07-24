@@ -15,6 +15,7 @@ import { SyntheticEvent, useState } from 'react';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import AppCard from './AppCard';
 import DebugLogsSettingsComponent from './settings/DebugLogsSettingsComponent';
+import MemoryRetrievalSettingsComponent from './settings/MemoryRetrievalSettingsComponent';
 import LocalizationSettingsComponent from './settings/LocalizationSettingsComponent';
 import OpenAICompatibleSettingsComponent from './settings/OpenAISettingsComponent';
 import { AISelectionComponent } from './settings/AISelectionComponent';
@@ -79,6 +80,7 @@ export default function SettingsPage() {
         <TabPanel value={SettingsTabSelectionValue.Settings}>
           <ModsDirectoryComponent />
           <DebugLogsSettingsComponent />
+          <MemoryRetrievalSettingsComponent />
           <AISelectionComponent />
           <Box
             sx={{
