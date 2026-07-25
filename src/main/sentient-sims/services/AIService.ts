@@ -57,6 +57,7 @@ import { sendModNotification } from '../websocketServer';
 import { ModAddBuff, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { ParticipantDTO } from '../db/dto/ParticipantDTO';
 import { ApiContext } from './ApiContext';
+import { AIActionType, actionTypeForEvent } from '../models/AIActionType';
 import { SceneState } from './SceneService';
 
 // Actors are asked for a bare subtitle, but models still sneak in speaker labels,
@@ -178,7 +179,12 @@ export class AIService {
   }
 
   async generate(promptRequest: OpenAICompatibleRequest) {
-    return this.ctx.genai.sentientSimsGenerate(promptRequest);
+    const providerConfig = this.ctx.providerConfigs.getConfigForAction(AIActionType.GENERATE);
+    return this.ctx.getGenerationService(providerConfig.apiType).sentientSimsGenerate({
+      ...promptRequest,
+      model: promptRequest.model ?? providerConfig.model,
+      apiType: promptRequest.apiType ?? providerConfig.apiType,
+    });
   }
 
   // Logs one LLM stage of a pipeline (prompt + output) to the console/log so the whole
@@ -235,7 +241,14 @@ First, one or two sentences on what happened in the scene and how it felt.
 Then exactly one sentence for each of these characters — ${namesList} — about interacting with them and how it made you feel.
 Keep it concise and grounded. Do not invent events that are not in the scene below.`;
 
-      const reflection = await this.runOneShot('Scene Reflection', systemPrompt, transcript, 250);
+      const reflection = await this.runOneShot(
+        'Scene Reflection',
+        systemPrompt,
+        transcript,
+        250,
+        undefined,
+        AIActionType.REFLECTION,
+      );
       this.logExchange(reflection.exchange);
 
       const text = cleanupAIOutput(reflection.text);
@@ -485,6 +498,11 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
     options: GenerationOptions = {},
     playbackOptions: PlaybackOptions = {},
   ): Promise<InteractionEventResult> {
+    const providerConfig = this.ctx.providerConfigs.getConfigForAction(actionTypeForEvent(event.event_type));
+    log.debug(
+      `Using provider config for ${event.event_type}: ${providerConfig.name} (${providerConfig.apiType}${providerConfig.model ? `, ${providerConfig.model}` : ''})`,
+    );
+
     const promptOptions: PromptRequestBuilderOptions = {
       action: options.action,
       sexCategoryType: options.sexCategoryType,
@@ -494,8 +512,8 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
       preAction: options.preAction,
       prePreAction: options.prePreAction,
       stopTokens: options.stopTokens,
-      apiType: this.ctx.settings.aiApiType,
-      modelSettings: await this.ctx.modelSettings.getModelSettings(),
+      apiType: providerConfig.apiType,
+      modelSettings: await this.ctx.modelSettings.getModelSettings(providerConfig.model, providerConfig.apiType),
       continue: options.continue,
       promptHistoryMode: options.promptHistoryMode,
     };
@@ -524,10 +542,12 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
       promptRequest = formatter.formatInput(promptRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(providerConfig.apiType));
     const openAIRequest = openAIRequestBuilder.buildOpenAIRequest(promptRequest);
+    openAIRequest.model = providerConfig.model;
+    openAIRequest.apiType = providerConfig.apiType;
 
-    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
+    const response = await this.ctx.getGenerationService(providerConfig.apiType).sentientSimsGenerate(openAIRequest);
 
     this.logExchange({ label: 'Scene Generation', request: openAIRequest, responseText: response.text });
 
@@ -570,7 +590,7 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
 
     if (output.length > 1) {
       const rawSceneText = output;
-      const directorReview = await this.runDirectorReview(rawSceneText);
+      const directorReview = await this.runDirectorReview(rawSceneText, actionTypeForEvent(event.event_type));
       output = directorReview.text;
       newMemory.content = output;
 
@@ -604,7 +624,10 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
     };
   }
 
-  async runDirectorReview(text: string): Promise<{ text: string; request: OpenAICompatibleRequest }> {
+  async runDirectorReview(
+    text: string,
+    actionType: AIActionType = AIActionType.DIRECTED_SCENE_REVIEWER,
+  ): Promise<{ text: string; request: OpenAICompatibleRequest }> {
     const systemPrompt = `You are a director reviewing a short generated scene from The Sims. Fix any issues and return only the corrected text — no commentary, no labels, no extra formatting.
 
 Fix these issues if present:
@@ -618,23 +641,10 @@ Never cut the scene down to a single line when multiple characters speak — pre
 Only change a line when it violates one of the rules above. Otherwise keep the exact wording and character voice — puns, verbal tics, hesitations, and slang are performance choices, not mistakes.
 If the scene is already good, return it unchanged.`;
 
-    let oneShotRequest: OneShotRequest = {
-      systemPrompt,
-      messages: [text],
-      maxResponseTokens: 300,
-      maxTokens: 3900,
-    };
-
-    getInputFormatters(this.ctx.settings.aiApiType).forEach((formatter) => {
-      oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
-    });
-
-    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
-    const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
-    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
-    this.logExchange({ label: 'Director Review', request: openAIRequest, responseText: response.text });
-    const reviewed = cleanupAIOutput(response.text);
-    return { text: reviewed.length > 1 ? reviewed : text, request: openAIRequest };
+    const oneShot = await this.runOneShot('Director Review', systemPrompt, text, 300, undefined, actionType);
+    this.logExchange(oneShot.exchange);
+    const reviewed = cleanupAIOutput(oneShot.text);
+    return { text: reviewed.length > 1 ? reviewed : text, request: oneShot.exchange.request };
   }
 
   async runOneShot(
@@ -643,7 +653,9 @@ If the scene is already good, return it unchanged.`;
     userText: string,
     maxResponseTokens: number,
     model?: string,
+    actionType: AIActionType = AIActionType.GENERATE,
   ): Promise<{ exchange: LLMExchange; text: string }> {
+    const providerConfig = this.ctx.providerConfigs.getConfigForAction(actionType);
     let oneShotRequest: OneShotRequest = {
       systemPrompt,
       messages: [userText],
@@ -651,16 +663,16 @@ If the scene is already good, return it unchanged.`;
       maxTokens: 3900,
     };
 
-    getInputFormatters(this.ctx.settings.aiApiType).forEach((formatter) => {
+    getInputFormatters(providerConfig.apiType).forEach((formatter) => {
       oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(providerConfig.apiType));
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
-    if (model) {
-      openAIRequest.model = model;
-    }
-    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
+    // An explicit model (scenario tester's per-stage picks) wins over the action's provider config
+    openAIRequest.model = model ?? providerConfig.model;
+    openAIRequest.apiType = providerConfig.apiType;
+    const response = await this.ctx.getGenerationService(providerConfig.apiType).sentientSimsGenerate(openAIRequest);
     return { exchange: { label, request: openAIRequest, responseText: response.text }, text: response.text };
   }
 
@@ -686,10 +698,11 @@ If the scene is already good, return it unchanged.`;
     options: DirectedGenerationOptions,
     playbackOptions: PlaybackOptions = {},
   ): Promise<InteractionEventResult> {
+    const directorConfig = this.ctx.providerConfigs.getConfigForAction(AIActionType.DIRECTED_SCENE_DIRECTOR);
     const promptOptions: PromptRequestBuilderOptions = {
       action: options.action,
-      apiType: this.ctx.settings.aiApiType,
-      modelSettings: await this.ctx.modelSettings.getModelSettings(),
+      apiType: directorConfig.apiType,
+      modelSettings: await this.ctx.modelSettings.getModelSettings(directorConfig.model, directorConfig.apiType),
     };
     const promptRequest = await this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
 
@@ -763,6 +776,7 @@ ${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the private briefing for 
       `${previouslyBlock}${sceneAction}`,
       500,
       options.directorModel,
+      AIActionType.DIRECTED_SCENE_DIRECTOR,
     );
     exchanges.push(briefing.exchange);
     this.logExchange(briefing.exchange);
@@ -816,6 +830,7 @@ How to respond:
         actorUserText,
         60,
         options.actorModels?.[i],
+        AIActionType.DIRECTED_SCENE_ACTOR,
       );
       exchanges.push(performance.exchange);
       this.logExchange(performance.exchange);
@@ -859,6 +874,7 @@ Respond with the final scene as one line per row in exactly this format, nothing
       `${previouslyBlock}The direction the actors were given: ${sceneAction}\n\nThe actors' delivered lines to review — return these lines kept or repaired, do not reply to them:\n${toTranscript(sceneLines)}`,
       400,
       options.directorModel,
+      AIActionType.DIRECTED_SCENE_REVIEWER,
     );
     exchanges.push(compiled.exchange);
     this.logExchange(compiled.exchange);
@@ -921,8 +937,12 @@ Respond with the final scene as one line per row in exactly this format, nothing
     };
   }
 
-  async runClassification(classificationRequest: ClassificationRequest): Promise<InteractionEventResult> {
-    const apiType: ApiType = this.ctx.settings.aiApiType;
+  async runClassification(
+    classificationRequest: ClassificationRequest,
+    actionType: AIActionType = AIActionType.CLASSIFICATION,
+  ): Promise<InteractionEventResult> {
+    const providerConfig = this.ctx.providerConfigs.getConfigForAction(actionType);
+    const apiType: ApiType = providerConfig.apiType;
 
     const systemPrompt = defaultClassificationPrompt.replaceAll(
       '{classifiers}',
@@ -941,10 +961,12 @@ Respond with the final scene as one line per row in exactly this format, nothing
       oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(apiType));
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
+    openAIRequest.model = providerConfig.model;
+    openAIRequest.apiType = apiType;
 
-    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
+    const response = await this.ctx.getGenerationService(apiType).sentientSimsGenerate(openAIRequest);
 
     const output = cleanAIClassificationOutput(response.text);
 
@@ -962,11 +984,15 @@ Respond with the final scene as one line per row in exactly this format, nothing
   }
 
   async runBuff(event: BuffEventRequest) {
-    const classificationResult = await this.runClassification({
-      name: event.name,
-      classifiers: event.classifiers,
-      messages: event.messages,
-    });
+    // The whole buff pipeline (classification + description) follows the BUFF override
+    const classificationResult = await this.runClassification(
+      {
+        name: event.name,
+        classifiers: event.classifiers,
+        messages: event.messages,
+      },
+      AIActionType.BUFF,
+    );
 
     if (classificationResult.status !== InteractionEventStatus.CLASSIFIED || !classificationResult.text) {
       return;
@@ -997,7 +1023,8 @@ Respond with the final scene as one line per row in exactly this format, nothing
   }
 
   async runBuffDescription(buffRequest: BuffDescriptionRequest): Promise<InteractionEventResult> {
-    const apiType: ApiType = this.ctx.settings.aiApiType;
+    const providerConfig = this.ctx.providerConfigs.getConfigForAction(AIActionType.BUFF);
+    const apiType: ApiType = providerConfig.apiType;
 
     const systemPrompt = `\
 You will write a game buff description that will be displayed about the character ${buffRequest.name}.
@@ -1021,10 +1048,12 @@ Write me a buff description based on the conversation so that ${buffRequest.name
       oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.tokenCounter);
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(apiType));
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
+    openAIRequest.model = providerConfig.model;
+    openAIRequest.apiType = apiType;
 
-    const response = await this.ctx.genai.sentientSimsGenerate(openAIRequest);
+    const response = await this.ctx.getGenerationService(apiType).sentientSimsGenerate(openAIRequest);
 
     const output = `${buffRequest.name} is feeling ${buffRequest.mood} because ${cleanupAIOutput(response.text)}`;
 
@@ -1035,8 +1064,9 @@ Write me a buff description based on the conversation so that ${buffRequest.name
     };
   }
 
-  async getModels(): Promise<AIModel[]> {
-    return this.ctx.genai.getModels();
+  async getModels(apiType?: ApiType): Promise<AIModel[]> {
+    const service = apiType ? this.ctx.getGenerationService(apiType) : this.ctx.genai;
+    return service.getModels();
   }
 
   async handleInteractionMapping(event: InteractionMappingEvent) {

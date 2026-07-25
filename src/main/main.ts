@@ -21,6 +21,7 @@ import { DirectoryService } from './sentient-sims/services/DirectoryService';
 import { appApiPort } from './sentient-sims/constants';
 import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { disableDebugLogging, enableDebugLogging } from './sentient-sims/util/debugLog';
+import { notifySettingChanged } from './sentient-sims/util/notifyRenderer';
 import debug from 'electron-debug';
 // electron-updater is CommonJS; import the default (whole module) and destructure
 // locally. A bare dynamic import() would be left external by the bundler and break
@@ -99,7 +100,9 @@ const createWindow = async () => {
   mainWindow.webContents.on('will-navigate', (event, url) => {
     if (url.startsWith('https://sentientsimulations.auth.us-east-1.amazoncognito.com/oauth2/authorize')) {
       event.preventDefault();
-      void shell.openExternal(url);
+      const authUrl = new URL(url);
+      authUrl.searchParams.set('prompt', 'select_account');
+      void shell.openExternal(authUrl.toString());
     }
   });
 
@@ -120,6 +123,7 @@ const createWindow = async () => {
 
   const settingsService = new SettingsService();
   settingsService.runMigrations();
+  settingsService.onSettingChanged(notifySettingChanged);
 
   const directoryService = new DirectoryService(settingsService);
   const ctx = new ApiContext({

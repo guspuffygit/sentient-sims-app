@@ -4,6 +4,8 @@ import path from 'path';
 import { DeprecatedSettingsEnum, SettingsEnum } from '../models/SettingsEnum';
 import { defaultOpenAITTSSettings, OpenAITTSSettings } from '../models/OpenAITTSSettings';
 import { ApiType, ApiTypeFromValue } from '../models/ApiType';
+import { AIProviderConfig, autoConfigId, newAutoConfig, sanitizeProviderConfigs } from '../models/AIProviderConfig';
+import { AIActionOverrides } from '../models/AIActionType';
 import {
   defaultElevenLabsEndpoint,
   defaultGeminiModel,
@@ -214,6 +216,23 @@ export function defaultStore(cwd?: string) {
         type: 'boolean',
         default: true,
       },
+      // Items validated by sanitizeProviderConfigs on read/write so malformed
+      // entries degrade gracefully instead of throwing out of electron-store
+      [SettingsEnum.AI_PROVIDER_CONFIGS.toString()]: {
+        type: 'array',
+        default: [],
+        items: {
+          type: 'object',
+        },
+      },
+      [SettingsEnum.DEFAULT_AI_PROVIDER_CONFIG_ID.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES.toString()]: {
+        type: 'object',
+        default: {},
+      },
     },
     migrations: {
       '3.1.0': (store) => {
@@ -234,8 +253,16 @@ export function defaultStore(cwd?: string) {
 export class SettingsService {
   private readonly store;
 
+  // Lets the app propagate every write (including the internal provider config
+  // sync writes) to the renderer, keeping its settings cache coherent
+  private changeListener?: (key: string, value: unknown) => void;
+
   constructor(store?: Store) {
     this.store = store ?? defaultStore();
+  }
+
+  onSettingChanged(listener: (key: string, value: unknown) => void) {
+    this.changeListener = listener;
   }
 
   getSetting(key: string) {
@@ -258,8 +285,91 @@ export class SettingsService {
         disableDebugLogging();
       }
     }
+    if (key === (SettingsEnum.AI_API_TYPE as string)) {
+      this.syncDefaultConfigToApiType(ApiTypeFromValue(value));
+    }
+    if (key === (SettingsEnum.DEFAULT_AI_PROVIDER_CONFIG_ID as string)) {
+      this.syncApiTypeToDefaultConfig();
+    }
+    if (key === (SettingsEnum.AI_PROVIDER_CONFIGS as string)) {
+      this.pruneProviderConfigReferences();
+    }
+
+    this.changeListener?.(key, value);
 
     return value;
+  }
+
+  // The model each provider uses when a config doesn't pin one. Kept public so
+  // config resolution and migrations share a single definition.
+  providerModel(apiType: ApiType): string | undefined {
+    switch (apiType) {
+      case ApiType.OpenAI:
+        return this.openaiModel;
+      case ApiType.SentientSimsAI:
+      case ApiType.CustomAI:
+        return this.sentientSimsAIModel;
+      case ApiType.NovelAI:
+        return this.novelAIModel;
+      case ApiType.Gemini:
+        return this.geminiModel;
+      case ApiType.VLLM:
+        return this.vllmModel;
+      case ApiType.OpenRouter:
+        return this.openrouterModel;
+      default:
+        // KoboldAI runs whatever model is loaded server side
+        return undefined;
+    }
+  }
+
+  // Selecting a provider type through the legacy setting (setup wizard, older
+  // UI flows) must keep working: guarantee a config for that type exists and
+  // becomes the default, unless the default already points at that type.
+  private syncDefaultConfigToApiType(apiType: ApiType) {
+    const configs = this.aiProviderConfigs;
+    const defaultConfig = configs.find((config) => config.id === this.defaultAiProviderConfigId);
+    if (defaultConfig && defaultConfig.apiType === apiType) {
+      return;
+    }
+
+    if (!configs.some((config) => config.id === autoConfigId(apiType))) {
+      const config = newAutoConfig(apiType);
+      // Pin the model so the choice is visible and editable in the config UI
+      // instead of silently tracking the hidden per-provider model setting
+      const model = this.providerModel(apiType);
+      if (model) {
+        config.model = model;
+      }
+      configs.push(config);
+      this.set(SettingsEnum.AI_PROVIDER_CONFIGS, configs);
+    }
+
+    this.set(SettingsEnum.DEFAULT_AI_PROVIDER_CONFIG_ID, autoConfigId(apiType));
+  }
+
+  private syncApiTypeToDefaultConfig() {
+    const defaultConfig = this.aiProviderConfigs.find((config) => config.id === this.defaultAiProviderConfigId);
+    if (defaultConfig && this.aiApiType !== defaultConfig.apiType) {
+      this.set(SettingsEnum.AI_API_TYPE, defaultConfig.apiType.toString());
+    }
+  }
+
+  private pruneProviderConfigReferences() {
+    const configs = this.aiProviderConfigs;
+    const ids = new Set(configs.map((config) => config.id));
+
+    const defaultId = this.defaultAiProviderConfigId;
+    if (defaultId && !ids.has(defaultId)) {
+      const fallback = configs.find((config) => config.apiType === this.aiApiType) ?? configs.at(0);
+      this.set(SettingsEnum.DEFAULT_AI_PROVIDER_CONFIG_ID, fallback ? fallback.id : '');
+    }
+
+    const overrides = this.aiActionProviderOverrides;
+    const prunedEntries = Object.entries(overrides).filter(([, configId]) => configId && ids.has(configId));
+    if (prunedEntries.length !== Object.keys(overrides).length) {
+      this.set(SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES, Object.fromEntries(prunedEntries));
+    }
   }
 
   resetSetting(key: string) {
@@ -598,6 +708,35 @@ export class SettingsService {
     this.set(SettingsEnum.VLLM_MODEL, value);
   }
 
+  get aiProviderConfigs(): AIProviderConfig[] {
+    return sanitizeProviderConfigs(this.get(SettingsEnum.AI_PROVIDER_CONFIGS));
+  }
+
+  set aiProviderConfigs(value: AIProviderConfig[]) {
+    this.set(SettingsEnum.AI_PROVIDER_CONFIGS, sanitizeProviderConfigs(value));
+  }
+
+  get defaultAiProviderConfigId(): string {
+    const value = this.get(SettingsEnum.DEFAULT_AI_PROVIDER_CONFIG_ID);
+    return typeof value === 'string' ? value : '';
+  }
+
+  set defaultAiProviderConfigId(value: string) {
+    this.set(SettingsEnum.DEFAULT_AI_PROVIDER_CONFIG_ID, value);
+  }
+
+  get aiActionProviderOverrides(): AIActionOverrides {
+    const value = this.get(SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES);
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return value;
+    }
+    return {};
+  }
+
+  set aiActionProviderOverrides(value: AIActionOverrides) {
+    this.set(SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES, value);
+  }
+
   get maxResponseTokens(): number {
     return this.get(SettingsEnum.MAX_RESPONSE_TOKENS) as number;
   }
@@ -652,6 +791,33 @@ export class SettingsService {
   }
 
   runMigrations() {
+    // Seed the multi-provider configs from the legacy single-provider selection
+    if (this.aiProviderConfigs.length === 0) {
+      const seeded = newAutoConfig(this.aiApiType);
+      this.aiProviderConfigs = [seeded];
+      this.defaultAiProviderConfigId = seeded.id;
+    } else if (!this.defaultAiProviderConfigId) {
+      this.defaultAiProviderConfigId = this.aiProviderConfigs[0].id;
+    }
+
+    // Pin each config's model to what resolution would fall back to, making
+    // the model visible in the UI instead of hidden legacy state. KoboldAI
+    // (and unset VLLM) stay modelless on purpose.
+    const configsToPin = this.aiProviderConfigs;
+    let pinnedAny = false;
+    for (const config of configsToPin) {
+      if (config.model === undefined) {
+        const model = this.providerModel(config.apiType);
+        if (model) {
+          config.model = model;
+          pinnedAny = true;
+        }
+      }
+    }
+    if (pinnedAny) {
+      this.aiProviderConfigs = configsToPin;
+    }
+
     if (this.sentientSimsAITtsSettings.model.toString() === 'kokoro') {
       log.info(`Updating kokoro model name to hexgrad/Kokoro-82M`);
       const aiTTSSettings = this.sentientSimsAITtsSettings;

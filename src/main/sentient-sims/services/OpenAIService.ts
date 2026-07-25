@@ -158,7 +158,7 @@ export class OpenAIService implements GenerationService {
     }
 
     if (this.ctx.settings.localizationEnabled) {
-      text = await this.translate(text, this.ctx.settings.localizationLanguage);
+      text = await this.translate(text, this.ctx.settings.localizationLanguage, completionRequest.model);
     }
 
     return {
@@ -178,9 +178,9 @@ export class OpenAIService implements GenerationService {
     throw new Error(`Output wasnt truthy from OpenAI API ${output}`);
   }
 
-  async translate(text: string, language: string) {
+  async translate(text: string, language: string, model?: string) {
     const request: ChatCompletionCreateParams = {
-      model: this.getOpenAIModel(),
+      model: model ?? this.getOpenAIModel(),
       messages: [
         {
           role: 'system',

@@ -11,5 +11,6 @@ export function GetPatreonDebugText(userAttributes: AuthUserAttributes): string[
     `Patreon ID: ${patreonUser.getPatreonId()}`,
     `custom:subscription_level: ${patreonUser.getSubscriptionLevel()}`,
     `custom:founderstatus: ${patreonUser.getFounderStatus()}`,
+    `cognito:groups: ${patreonUser.getGroups().join(', ') || 'None'}`,
   ];
 }

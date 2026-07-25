@@ -13,6 +13,7 @@ import {
   InteractionFinalizeRequest,
   InteractionPrefetchRequest,
 } from '../services/GenerationQueueService';
+import { ApiTypeFromValue } from '../models/ApiType';
 
 export class AIController {
   private readonly ctx: ApiContext;
@@ -128,7 +129,10 @@ export class AIController {
 
   @CatchErrors({ statusCode: 500 })
   getModels = async (req: Request, res: Response) => {
-    const result = await this.ctx.ai.getModels();
+    const { apiType } = req.query;
+    const result = await this.ctx.ai.getModels(
+      typeof apiType === 'string' && apiType !== '' ? ApiTypeFromValue(apiType) : undefined,
+    );
     res.json(result);
   };
 

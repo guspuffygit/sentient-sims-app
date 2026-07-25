@@ -1,3 +1,4 @@
+import { ApiType } from './ApiType';
 import { OpenAIMessage } from './OpenAIMessage';
 
 export type OpenAICompatibleRequest = {
@@ -5,7 +6,9 @@ export type OpenAICompatibleRequest = {
   maxResponseTokens: number;
   guidedChoice?: string[];
   includesAssistantPreResponse?: boolean;
-  // Overrides the configured model for this request only (used by the directed-scene tester
-  // to run the director and each actor on different models)
+  // Provider config resolved for this action; when undefined the generation
+  // service falls back to its provider-level settings. apiType matters when
+  // one service class handles several provider types (SentientSimsAI/CustomAI).
   model?: string;
+  apiType?: ApiType;
 };

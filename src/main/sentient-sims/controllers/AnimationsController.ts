@@ -20,6 +20,17 @@ export class AnimationsController {
     res.json({ text: 'done' });
   };
 
+  deleteAnimation = async (req: Request, res: Response) => {
+    try {
+      const animation = req.body as Animation;
+      await this.ctx.animations.deleteAnimation(animation);
+      res.json({ text: 'done' });
+    } catch (err) {
+      log.error('[Controller] Error deleting animation:', err);
+      res.status(500).json({ error: 'Failed to delete animation.' });
+    }
+  };
+
   saveAnimationLocally = (req: Request, res: Response) => {
     try {
       const animation = req.body as Animation;

@@ -11,6 +11,8 @@ import {
   ListItemIcon,
   ListItemText,
   Link,
+  MenuItem,
+  Select,
   Stepper,
   Step,
   StepLabel,
@@ -25,10 +27,10 @@ import { ModsDirectoryComponent } from 'renderer/ModsDirectoryComponent';
 import { useVersions } from 'renderer/providers/VersionsProvider';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import ApiKeyAIComponent from 'renderer/ApiKeyAIComponent';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { AIStatusComponent } from 'renderer/AIStatusComponent';
-import { ApiType } from 'main/sentient-sims/models/ApiType';
+import { ApiType, ApiTypeFromValue } from 'main/sentient-sims/models/ApiType';
+import { ProviderConnectionPanel } from 'renderer/settings/ProviderConnectionPanel';
 import UpdateComponent from 'renderer/UpdateComponent';
 import { useWebsocket } from 'renderer/providers/WebsocketProvider';
 import useSetting from 'renderer/hooks/useSetting';
@@ -1102,7 +1104,7 @@ function OpenAISetupPage({ setPage }: PageProps) {
             <ListItem sx={{ display: 'list-item', mb: 2 }}>
               <ListItemText primary="Click Copy to copy the API key, then paste it in the box here:" />
             </ListItem>
-            <ApiKeyAIComponent setting={SettingsEnum.OPENAI_KEY} aiName="OpenAI" />
+            <ProviderConnectionPanel apiType={ApiType.OpenAI} />
           </List>
           <Box
             sx={{
@@ -1171,6 +1173,12 @@ function OpenAISetupPage({ setPage }: PageProps) {
 }
 
 function GeminiSetupPage({ setPage }: PageProps) {
+  const { testAI, aiStatus, aiApiTypeSetting } = useAISettings();
+
+  useEffect(() => {
+    void aiApiTypeSetting.setSetting(ApiType.Gemini);
+  }, [aiApiTypeSetting]);
+
   return (
     <>
       <Typography
@@ -1197,10 +1205,60 @@ function GeminiSetupPage({ setPage }: PageProps) {
             width: '70%',
           }}
         >
-          <Typography variant="body1" align="center" sx={{ mt: 2 }}>
-            Wizard under construction. If you want to setup Gemini, use the Settings page and enter your API key from
-            Gemini
+          <Typography align="center" sx={{ mb: 2 }}>
+            You must create a Google AI Studio API key to use Gemini.
           </Typography>
+          <List sx={{ listStyle: 'decimal', pl: 2 }} dense>
+            <ListItem sx={{ display: 'list-item' }}>
+              <ListItemText>
+                Open Google AI Studio here{' '}
+                <Link
+                  href="https://aistudio.google.com/apikey"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  color="primary"
+                  sx={{ fontWeight: '500' }}
+                >
+                  https://aistudio.google.com/apikey
+                </Link>
+              </ListItemText>
+            </ListItem>
+            <ListItem sx={{ display: 'list-item' }}>
+              <ListItemText primary="Click Create API key" />
+            </ListItem>
+            <ListItem sx={{ display: 'list-item', mb: 2 }}>
+              <ListItemText primary="Copy the API key, then paste it in the box here:" />
+            </ListItem>
+            <ProviderConnectionPanel apiType={ApiType.Gemini} />
+          </List>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexDirection: 'column',
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: 1,
+              }}
+            >
+              <AIStatusComponent />
+            </Box>
+            <Button
+              loading={aiStatus.loading}
+              onClick={() => {
+                void testAI();
+              }}
+              color="primary"
+              variant="outlined"
+            >
+              Test
+            </Button>
+          </Box>
         </Box>
       </Box>
       <Box
@@ -1237,6 +1295,18 @@ function GeminiSetupPage({ setPage }: PageProps) {
 }
 
 function SelfHostedSetupPage({ setPage }: PageProps) {
+  const { testAI, aiStatus, aiApiTypeSetting } = useAISettings();
+  const selected = ApiTypeFromValue(aiApiTypeSetting.value);
+  const selfHostedType = selected === ApiType.VLLM ? ApiType.VLLM : ApiType.KoboldAI;
+
+  // Visiting this page selects a self hosted provider, mirroring how the
+  // other provider setup pages select theirs on mount
+  useEffect(() => {
+    if (selected !== ApiType.KoboldAI && selected !== ApiType.VLLM) {
+      void aiApiTypeSetting.setSetting(ApiType.KoboldAI);
+    }
+  }, [aiApiTypeSetting, selected]);
+
   return (
     <>
       <Typography
@@ -1263,9 +1333,70 @@ function SelfHostedSetupPage({ setPage }: PageProps) {
             width: '70%',
           }}
         >
-          <Typography variant="body1" align="center" sx={{ mt: 2 }}>
-            Wizard under construction for self hosted setup, check the Wiki.
+          <Typography align="center" sx={{ mb: 2 }}>
+            Run an AI server on your own GPU with{' '}
+            <Link
+              href="https://github.com/LostRuins/koboldcpp"
+              target="_blank"
+              rel="noopener noreferrer"
+              color="primary"
+              sx={{ fontWeight: '500' }}
+            >
+              koboldcpp
+            </Link>{' '}
+            or{' '}
+            <Link
+              href="https://docs.vllm.ai/en/latest/"
+              target="_blank"
+              rel="noopener noreferrer"
+              color="primary"
+              sx={{ fontWeight: '500' }}
+            >
+              vLLM
+            </Link>
+            , then point the app at its endpoint.
           </Typography>
+          <Select
+            size="small"
+            fullWidth
+            value={selfHostedType}
+            sx={{ marginBottom: 2 }}
+            onChange={(change) => {
+              void aiApiTypeSetting.setSetting(ApiTypeFromValue(change.target.value));
+            }}
+          >
+            <MenuItem value={ApiType.KoboldAI}>Kobold AI (koboldcpp)</MenuItem>
+            <MenuItem value={ApiType.VLLM}>VLLM</MenuItem>
+          </Select>
+          <ProviderConnectionPanel apiType={selfHostedType} />
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexDirection: 'column',
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: 1,
+              }}
+            >
+              <AIStatusComponent />
+            </Box>
+            <Button
+              loading={aiStatus.loading}
+              onClick={() => {
+                void testAI();
+              }}
+              color="primary"
+              variant="outlined"
+            >
+              Test
+            </Button>
+          </Box>
         </Box>
       </Box>
       <Box

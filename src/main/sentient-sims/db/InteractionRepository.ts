@@ -68,7 +68,7 @@ export class InteractionRepository {
   async getInteractions(): Promise<Map<string, BasicInteraction>> {
     if (!this.interactions) {
       try {
-        this.interactions = new Map(Object.entries(await this.fetchInteractions()));
+        this.interactions = await this.fetchInteractions();
       } catch (err) {
         log.error(`Unable to fetch interactions from Sentient Sims API`, err);
       }
@@ -96,6 +96,21 @@ export class InteractionRepository {
     return result;
   }
 
+  async deleteInteraction(interaction: BasicInteraction): Promise<void> {
+    await axiosClient({
+      url: '/interactions',
+      method: 'DELETE',
+      data: interaction,
+      baseURL: this.ctx.settings.sentientSimsAIEndpoint,
+      headers: {
+        Authentication: this.ctx.settings.accessToken,
+        ...this.ctx.version.getVersionHeaders(),
+      },
+    });
+
+    this.interactions?.delete(interaction.name);
+  }
+
   async getInteraction(interactionName: string): Promise<InteractionDescription | undefined> {
     const localOverride = this.localInteractions?.get(interactionName);
     if (localOverride) {
@@ -107,7 +122,7 @@ export class InteractionRepository {
     }
 
     if (!this.interactions) {
-      this.interactions = new Map(Object.entries(await this.getInteractions()));
+      this.interactions = await this.getInteractions();
     }
     const basicInteraction = this.interactions.get(interactionName);
     if (basicInteraction) {
@@ -122,22 +137,32 @@ export class InteractionRepository {
 
   async getIgnoredInteractions(): Promise<IgnoredInteractionsResponse> {
     const allInteractions = await this.getInteractions();
-    const ignoredInteractionNames: string[] = [];
+    const ignoredInteractionNames = new Set<string>();
 
     allInteractions.forEach((value, key) => {
       if (value.ignored) {
-        ignoredInteractionNames.push(key);
+        ignoredInteractionNames.add(key);
       }
     });
 
+    // A local override replaces the online interaction entirely, so it can also un-ignore
+    this.localInteractions?.forEach((value, key) => {
+      if (value.ignored) {
+        ignoredInteractionNames.add(key);
+      } else {
+        ignoredInteractionNames.delete(key);
+      }
+    });
+
+    // Built-in descriptions take precedence over everything, matching getInteractionDescription
     interactionDescriptions.forEach((description, name) => {
       if (description.ignored) {
-        ignoredInteractionNames.push(name);
+        ignoredInteractionNames.add(name);
       }
     });
 
     return {
-      ignoredInteractionNames,
+      ignoredInteractionNames: [...ignoredInteractionNames],
     };
   }
 }

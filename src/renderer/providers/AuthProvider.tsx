@@ -1,6 +1,6 @@
 import { AuthEventData, AuthStatus } from '@aws-amplify/ui';
 import { useAuthenticator } from '@aws-amplify/ui-react';
-import { fetchUserAttributes } from '@aws-amplify/auth';
+import { fetchAuthSession, fetchUserAttributes } from '@aws-amplify/auth';
 import { createContext, ReactNode, use, useCallback, useEffect, useMemo } from 'react';
 import log from 'electron-log';
 import { AuthUser } from 'aws-amplify/auth';
@@ -13,6 +13,7 @@ export type AuthUserAttributes = {
   emailVerified: boolean;
   patreonId?: string;
   email?: string;
+  groups?: string[];
 };
 
 interface AuthContextType {
@@ -51,6 +52,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     queryFn: async () => {
       const attributes = await fetchUserAttributes();
       log.debug(`User attributes: ${JSON.stringify(attributes, null, 2)}`);
+      const session = await fetchAuthSession();
+      const rawGroups = session.tokens?.accessToken.payload['cognito:groups'];
+      const groups = Array.isArray(rawGroups) ? rawGroups.filter((group) => typeof group === 'string') : [];
       return {
         email: attributes.email,
         subscriptionLevel: attributes['custom:subscription_level'],
@@ -58,6 +62,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         sub: attributes.sub ?? user.userId,
         emailVerified: attributes.email_verified === 'true',
         patreonId: attributes.preferred_username,
+        groups,
       };
     },
   });

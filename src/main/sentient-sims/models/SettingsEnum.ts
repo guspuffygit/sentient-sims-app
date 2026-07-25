@@ -45,6 +45,9 @@ export enum SettingsEnum {
   GENERATION_CONCURRENCY = 'generationConcurrency',
   PREFETCH_MAX_QUEUE_DEPTH = 'prefetchMaxQueueDepth',
   MEMORY_RETRIEVAL_ENABLED = 'memoryRetrievalEnabled',
+  AI_PROVIDER_CONFIGS = 'aiProviderConfigs',
+  DEFAULT_AI_PROVIDER_CONFIG_ID = 'defaultAiProviderConfigId',
+  AI_ACTION_PROVIDER_OVERRIDES = 'aiActionProviderOverrides',
 }
 
 export enum DeprecatedSettingsEnum {

@@ -16,6 +16,17 @@ export class InteractionDescriptionController {
     res.json({ done: 'done' });
   };
 
+  deleteInteraction = async (req: Request, res: Response) => {
+    try {
+      const interaction = req.body as BasicInteraction;
+      await this.ctx.interactionRepository.deleteInteraction(interaction);
+      res.json({ text: 'done' });
+    } catch (err) {
+      log.error('[Controller] Error deleting interaction:', err);
+      res.status(500).json({ error: 'Failed to delete interaction.' });
+    }
+  };
+
   getIgnoredInteractions = async (req: Request, res: Response) => {
     res.json(await this.ctx.interactions.getIgnoredInteractions());
   };

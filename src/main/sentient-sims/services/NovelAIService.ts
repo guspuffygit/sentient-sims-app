@@ -4,6 +4,7 @@ import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel } from '../models/AIModel';
 import { ApiContext } from './ApiContext';
+import { ApiType } from '../models/ApiType';
 
 export class NovelAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -187,8 +188,8 @@ export class NovelAIService implements GenerationService {
   }
 
   async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
-    const model = this.getModel();
-    const modelSettings = await this.ctx.modelSettings.getModelSettings();
+    const model = request.model ?? this.getModel();
+    const modelSettings = await this.ctx.modelSettings.getModelSettings(model, request.apiType ?? ApiType.NovelAI);
 
     const prompt = request.messages.map((m) => m.content).join('\n');
 

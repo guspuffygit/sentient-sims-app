@@ -1,40 +1,25 @@
-import { Box, Button, Divider, Tab } from '@mui/material';
+import { Box, Button, Divider, FormHelperText, Tab, Typography } from '@mui/material';
 
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { ApiType } from 'main/sentient-sims/models/ApiType';
-import {
-  defaultGeminiModel,
-  geminiDefaultEndpoint,
-  novelaiDefaultEndpoint,
-  novelaiDefaultModel,
-  openaiDefaultEndpoint,
-  openaiDefaultModel,
-  openrouterDefaultEndpoint,
-  openrouterDefaultModel,
-} from 'main/sentient-sims/constants';
+import { ApiTypeFromValue } from 'main/sentient-sims/models/ApiType';
+import { AIProviderConfig } from 'main/sentient-sims/models/AIProviderConfig';
+import { AIActionOverrides, AIActionType } from 'main/sentient-sims/models/AIActionType';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
-import { SyntheticEvent, useState } from 'react';
+import { SyntheticEvent, useMemo, useState } from 'react';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import AppCard from './AppCard';
 import DebugLogsSettingsComponent from './settings/DebugLogsSettingsComponent';
 import MemoryRetrievalSettingsComponent from './settings/MemoryRetrievalSettingsComponent';
-import LocalizationSettingsComponent from './settings/LocalizationSettingsComponent';
-import OpenAICompatibleSettingsComponent from './settings/OpenAISettingsComponent';
-import { AISelectionComponent } from './settings/AISelectionComponent';
 import { AnimationMappingSettingsComponent } from './settings/AnimationMappingSettingsComponent';
-import { KoboldAISettingsComponent } from './settings/KoboldAISettingsComponent';
-import { SentientSimsSettingsComponent } from './settings/SentientSimsSettingsComponent';
-import ApiKeyAIComponent from './ApiKeyAIComponent';
-import { AIEndpointComponent } from './settings/AIEndpointComponent';
-import AIModelSelection from './AIModelSelection';
 import { ModsDirectoryComponent } from './ModsDirectoryComponent';
-import { AIStatusComponent } from './AIStatusComponent';
 import { useAISettings } from './providers/AISettingsProvider';
-import NovelAISettingsComponent from './settings/NovelAISettingsComponent';
-import GeminiSettingsComponent from './settings/GeminiSettingsComponent';
 import VoiceSettingsComponent from './settings/VoiceSettingsComponent';
 import { useSetupWizard } from './providers/SetupWizardProvider';
 import { AiMaxResponseLengthSettingsComponent } from './settings/AiMaxResponseLengthSettingsComponent';
+import { ProviderConfigsComponent } from './settings/ProviderConfigsComponent';
+import { ProviderConnectionSettingsComponent } from './settings/ProviderConnectionSettingsComponent';
+import LocalizationSettingsComponent from './settings/LocalizationSettingsComponent';
+import useSetting from './hooks/useSetting';
 
 enum SettingsTabSelectionValue {
   Settings = 'settings',
@@ -45,10 +30,22 @@ export default function SettingsPage() {
   const aiSettings = useAISettings();
   const setupWizard = useSetupWizard();
   const [tabSelectedValue, setTabSelectedValue] = useState('settings');
+  const configsSetting = useSetting<AIProviderConfig[]>(SettingsEnum.AI_PROVIDER_CONFIGS, []);
+  const defaultIdSetting = useSetting<string>(SettingsEnum.DEFAULT_AI_PROVIDER_CONFIG_ID, '');
+  const overridesSetting = useSetting<AIActionOverrides>(SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES, {});
 
   const handleChange = (event: SyntheticEvent, newValue: string) => {
     setTabSelectedValue(newValue);
   };
+
+  // The provider that actually handles Wicked Whims generations decides
+  // whether animation mapping settings are relevant
+  const wickedWhimsApiType = useMemo(() => {
+    const configs = configsSetting.value;
+    const overrideId = overridesSetting.value[AIActionType.WICKED_WHIMS];
+    const config = configs.find((c) => c.id === overrideId) ?? configs.find((c) => c.id === defaultIdSetting.value);
+    return config ? ApiTypeFromValue(config.apiType) : aiSettings.aiApiType;
+  }, [configsSetting.value, overridesSetting.value, defaultIdSetting.value, aiSettings.aiApiType]);
 
   return (
     <AppCard>
@@ -83,108 +80,17 @@ export default function SettingsPage() {
           <ModsDirectoryComponent />
           <DebugLogsSettingsComponent />
           <MemoryRetrievalSettingsComponent />
-          <AISelectionComponent />
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: 3,
-            }}
-          >
-            <Button
-              loading={aiSettings.aiStatus.loading}
-              onClick={() => {
-                void aiSettings.testAI();
-              }}
-              sx={{ marginRight: 2 }}
-              color="primary"
-              variant="outlined"
-            >
-              Test
-            </Button>
-            <AIStatusComponent />
-          </Box>
+          <ProviderConfigsComponent />
           <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-          <OpenAICompatibleSettingsComponent apiType={ApiType.OpenAI} selectedApiType={aiSettings.aiApiType}>
-            <ApiKeyAIComponent setting={SettingsEnum.OPENAI_KEY} aiName="OpenAI" />
-            <AIEndpointComponent
-              type={ApiType.OpenAI}
-              selectedApiType={aiSettings.aiApiType}
-              settingsEnum={SettingsEnum.OPENAI_ENDPOINT}
-            />
-            <AIModelSelection
-              apiType={aiSettings.aiApiType}
-              defaultModel={openaiDefaultModel}
-              defaultEndpoint={openaiDefaultEndpoint}
-              modelSetting={SettingsEnum.OPENAI_MODEL}
-              endpointSetting={SettingsEnum.OPENAI_ENDPOINT}
-            />
-            <LocalizationSettingsComponent />
-          </OpenAICompatibleSettingsComponent>
-          <OpenAICompatibleSettingsComponent apiType={ApiType.OpenRouter} selectedApiType={aiSettings.aiApiType}>
-            <ApiKeyAIComponent setting={SettingsEnum.OPENROUTER_KEY} aiName="OpenRouter" />
-            <AIEndpointComponent
-              type={ApiType.OpenRouter}
-              selectedApiType={aiSettings.aiApiType}
-              settingsEnum={SettingsEnum.OPENROUTER_ENDPOINT}
-            />
-            <AIModelSelection
-              apiType={aiSettings.aiApiType}
-              defaultModel={openrouterDefaultModel}
-              defaultEndpoint={openrouterDefaultEndpoint}
-              modelSetting={SettingsEnum.OPENROUTER_MODEL}
-              endpointSetting={SettingsEnum.OPENROUTER_ENDPOINT}
-            />
-            <LocalizationSettingsComponent />
-          </OpenAICompatibleSettingsComponent>
-          <OpenAICompatibleSettingsComponent apiType={ApiType.VLLM} selectedApiType={aiSettings.aiApiType}>
-            <ApiKeyAIComponent setting={SettingsEnum.VLLM_APIKEY} optional aiName="VLLM" />
-            <AIEndpointComponent
-              type={ApiType.VLLM}
-              selectedApiType={aiSettings.aiApiType}
-              settingsEnum={SettingsEnum.VLLM_ENDPOINT}
-            />
-            <AIModelSelection
-              apiType={aiSettings.aiApiType}
-              defaultModel={openaiDefaultModel}
-              defaultEndpoint={openaiDefaultEndpoint}
-              modelSetting={SettingsEnum.VLLM_MODEL}
-              endpointSetting={SettingsEnum.VLLM_ENDPOINT}
-            />
-          </OpenAICompatibleSettingsComponent>
-          <NovelAISettingsComponent apiType={aiSettings.aiApiType}>
-            <ApiKeyAIComponent setting={SettingsEnum.NOVELAI_KEY} aiName="NovelAI" />
-            <AIEndpointComponent
-              type={ApiType.NovelAI}
-              selectedApiType={ApiType.NovelAI}
-              settingsEnum={SettingsEnum.NOVELAI_ENDPOINT}
-            />
-            <AIModelSelection
-              apiType={aiSettings.aiApiType}
-              defaultModel={novelaiDefaultModel}
-              defaultEndpoint={novelaiDefaultEndpoint}
-              modelSetting={SettingsEnum.NOVELAI_MODEL}
-              endpointSetting={SettingsEnum.NOVELAI_ENDPOINT}
-            />
-          </NovelAISettingsComponent>
-          <KoboldAISettingsComponent apiType={aiSettings.aiApiType} />
-          <SentientSimsSettingsComponent apiType={aiSettings.aiApiType} />
-          <GeminiSettingsComponent apiType={aiSettings.aiApiType}>
-            <ApiKeyAIComponent setting={SettingsEnum.GEMINI_KEYS} aiName="Gemini" />
-            <AIEndpointComponent
-              type={ApiType.Gemini}
-              selectedApiType={ApiType.Gemini}
-              settingsEnum={SettingsEnum.GEMINI_ENDPOINT}
-            />
-            <AIModelSelection
-              apiType={aiSettings.aiApiType}
-              defaultModel={defaultGeminiModel}
-              defaultEndpoint={geminiDefaultEndpoint}
-              modelSetting={SettingsEnum.GEMINI_MODEL}
-              endpointSetting={SettingsEnum.GEMINI_ENDPOINT}
-            />
-          </GeminiSettingsComponent>
-          <AnimationMappingSettingsComponent apiType={aiSettings.aiApiType} />
+          <ProviderConnectionSettingsComponent />
+          <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+          <Typography variant="h6">Localization</Typography>
+          <FormHelperText sx={{ marginBottom: 1 }}>
+            Translates AI output. Applies when the provider handling an action is OpenAI or Gemini.
+          </FormHelperText>
+          <LocalizationSettingsComponent />
+          <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+          <AnimationMappingSettingsComponent apiType={wickedWhimsApiType} />
           <AiMaxResponseLengthSettingsComponent />
         </TabPanel>
         <TabPanel value={SettingsTabSelectionValue.Voice}>

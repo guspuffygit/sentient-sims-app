@@ -1,5 +1,9 @@
 import { AuthUserAttributes } from 'renderer/providers/AuthProvider';
 
+export enum CognitoGroup {
+  Mappers = 'mappers',
+}
+
 export class PatreonUser {
   private readonly userAttributes?: AuthUserAttributes;
 
@@ -34,6 +38,18 @@ export class PatreonUser {
   isDev() {
     const founderStatus = this.getFounderStatus();
     return founderStatus === 'dev';
+  }
+
+  getGroups(): string[] {
+    return this.userAttributes?.groups ?? [];
+  }
+
+  isInGroup(group: CognitoGroup) {
+    return this.getGroups().includes(group);
+  }
+
+  isMapper() {
+    return this.isInGroup(CognitoGroup.Mappers);
   }
 
   isSubscriber() {
