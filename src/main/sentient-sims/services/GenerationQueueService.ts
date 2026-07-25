@@ -1,5 +1,5 @@
 import log from 'electron-log';
-import { claimMaxWaitMs, postAnimationGraceMs, prefetchTtlMs } from '../constants';
+import { backgroundIdleDelayMs, claimMaxWaitMs, postAnimationGraceMs, prefetchTtlMs } from '../constants';
 import { InteractionEvent } from '../models/InteractionEvents';
 import { InteractionEventResult, InteractionEventStatus } from '../models/InteractionEventResult';
 import { ApiContext } from './ApiContext';
@@ -59,6 +59,10 @@ export class GenerationQueueService {
   private readonly entries = new Map<string, PrefetchEntry>();
 
   private readonly jobs: Array<() => Promise<void>> = [];
+
+  private readonly backgroundJobs: Array<() => Promise<void>> = [];
+
+  private idleTimer?: ReturnType<typeof setTimeout>;
 
   private activeCount = 0;
 
@@ -186,6 +190,24 @@ export class GenerationQueueService {
     return this.enqueue(task);
   }
 
+  // Idle lane for low-priority work (memory annotation, embedding backfill): tasks start
+  // only after the queue has been fully quiet for backgroundIdleDelayMs, and run one at a
+  // time under the same concurrency gate — so an interaction arriving mid-task waits behind
+  // at most that one task, and provider access stays serialized. Once the queue is quiet,
+  // pending idle tasks chain back-to-back without re-waiting the delay.
+  runWhenIdle<T>(task: () => Promise<T>): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      this.backgroundJobs.push(async () => {
+        try {
+          resolve(await task());
+        } catch (error) {
+          reject(error instanceof Error ? error : new Error(String(error)));
+        }
+      });
+      this.scheduleBackground();
+    });
+  }
+
   private async generatePrefetch(entry: PrefetchEntry): Promise<void> {
     if (entry.state !== 'queued') {
       return;
@@ -302,6 +324,45 @@ export class GenerationQueueService {
         this.drain();
       });
     }
+    this.scheduleBackground();
+  }
+
+  // (Re)starts the idle countdown. Called on every drain, so any foreground activity pushes
+  // pending background work another full quiet period out. A timer that fires while the
+  // queue turned busy again is a no-op; the drain after that work reschedules it.
+  private scheduleBackground() {
+    if (this.backgroundJobs.length === 0 || this.activeCount > 0 || this.jobs.length > 0) {
+      return;
+    }
+    if (this.idleTimer) {
+      clearTimeout(this.idleTimer);
+    }
+    this.idleTimer = setTimeout(() => {
+      this.idleTimer = undefined;
+      this.startBackground();
+    }, backgroundIdleDelayMs);
+    this.idleTimer.unref();
+  }
+
+  private startBackground() {
+    if (this.activeCount > 0 || this.jobs.length > 0) {
+      return;
+    }
+    const job = this.backgroundJobs.shift();
+    if (!job) {
+      return;
+    }
+    this.activeCount += 1;
+    void job().finally(() => {
+      this.activeCount -= 1;
+      if (this.jobs.length > 0) {
+        // Foreground work arrived while this task ran — it goes first; its drain
+        // restarts the idle countdown for whatever background work remains
+        this.drain();
+      } else {
+        this.startBackground();
+      }
+    });
   }
 
   private hasState(entry: PrefetchEntry, state: EntryState): boolean {

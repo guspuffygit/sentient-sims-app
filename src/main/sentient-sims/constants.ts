@@ -91,6 +91,10 @@ export const postAnimationGraceMs = 60000;
 // claim HTTP timeout.
 export const claimMaxWaitMs = 75000;
 export const prefetchTtlMs = 180000;
+// Quiet period before idle-lane work (memory annotation, embedding backfill) may start.
+// Interactions arrive in bursts, so an instantaneously empty queue is a poor idle signal;
+// annotation results only need to be ready by the next scene, never during this one.
+export const backgroundIdleDelayMs = 10000;
 export const defaultElevenLabsEndpoint = 'https://api.elevenlabs.io/v1';
 export const defaultKokoroEndpoint = 'https://api.kokorotts.com';
 export const defaultVLLMEndpoint = 'http://localhost:8000/v1';

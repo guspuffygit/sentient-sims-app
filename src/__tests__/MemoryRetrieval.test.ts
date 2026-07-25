@@ -154,6 +154,9 @@ describe('MemoryRetrievalService', () => {
 describe('backfill', () => {
   it('embeds un-indexed memories in batches and preserves existing ratings', async () => {
     const ctx = loadedContext('backfill-batches');
+    // Batches ride the queue's idle lane in production; run them inline so the test
+    // exercises batching, not the quiet-period wait
+    vi.spyOn(ctx.generationQueue, 'runWhenIdle').mockImplementation((task) => task());
     const embed = vi.fn((texts: string[]) => Promise.resolve(texts.map(() => Float32Array.from([1, 2]))));
     vi.spyOn(ctx, 'embedding', 'get').mockReturnValue({ model: 'fake-model', isAvailable: () => true, embed });
 

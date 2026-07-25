@@ -33,7 +33,9 @@ export function parseImportance(text: string): number | undefined {
 }
 
 // Annotates memories with retrieval metadata (importance + embedding) into the
-// memory_index sidecar table. Fire-and-forget: gameplay never waits on it.
+// memory_index sidecar table. Fire-and-forget AND deferred: the work rides the generation
+// queue's idle lane, so it never competes with live scene generation — a rating only needs
+// to be ready by the next scene, not during this one.
 export class MemoryAnnotationService {
   private readonly ctx: ApiContext;
 
@@ -42,9 +44,11 @@ export class MemoryAnnotationService {
   }
 
   annotateInBackground(memory: MemoryEntity): void {
-    this.annotate(memory).catch((error: unknown) => {
-      log.error(`[Annotation] Failed to annotate memory ${memory.id}`, error);
-    });
+    this.ctx.generationQueue
+      .runWhenIdle(() => this.annotate(memory))
+      .catch((error: unknown) => {
+        log.error(`[Annotation] Failed to annotate memory ${memory.id}`, error);
+      });
   }
 
   async annotate(memory: MemoryEntity): Promise<void> {
@@ -110,7 +114,9 @@ export class MemoryAnnotationService {
       if (batch.length === 0) {
         break;
       }
-      const embedded = await this.backfillBatch(batch, session);
+      // Each batch claims its own idle slot, so a live interaction arriving mid-backfill
+      // only ever waits out one batch, not the whole backlog
+      const embedded = await this.ctx.generationQueue.runWhenIdle(() => this.backfillBatch(batch, session));
       total += embedded;
       // Rows that can't make progress (no text, failing embedder) must not spin forever
       if (embedded === 0) {

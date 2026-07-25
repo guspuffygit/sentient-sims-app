@@ -3,7 +3,7 @@ import { GenerationQueueService } from 'main/sentient-sims/services/GenerationQu
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 import { InteractionEvent, SSEventType } from 'main/sentient-sims/models/InteractionEvents';
 import { InteractionEventResult, InteractionEventStatus } from 'main/sentient-sims/models/InteractionEventResult';
-import { postAnimationGraceMs, prefetchTtlMs } from 'main/sentient-sims/constants';
+import { backgroundIdleDelayMs, postAnimationGraceMs, prefetchTtlMs } from 'main/sentient-sims/constants';
 
 function event(id: string): InteractionEvent {
   return {
@@ -210,6 +210,113 @@ describe('GenerationQueueService', () => {
 
     expect(queue.cancel(request.correlation_id)).toBe(true);
     expect(play).not.toHaveBeenCalled();
+  });
+
+  it('starts idle work only after a full quiet period', async () => {
+    vi.useFakeTimers();
+    const { ctx } = makeContext();
+    const queue = new GenerationQueueService(ctx);
+    const task = vi.fn(() => Promise.resolve('rated'));
+
+    const result = queue.runWhenIdle(task);
+    await vi.advanceTimersByTimeAsync(backgroundIdleDelayMs - 1);
+    expect(task).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(1);
+    expect(task).toHaveBeenCalledOnce();
+    expect(await result).toBe('rated');
+  });
+
+  it('holds idle work while foreground generation runs, then resumes after quiet', async () => {
+    vi.useFakeTimers();
+    let finish!: (value: { result: InteractionEventResult; play: () => void }) => void;
+    const pending = new Promise<{ result: InteractionEventResult; play: () => void }>((resolve) => {
+      finish = (value) => {
+        resolve(value);
+      };
+    });
+    const { ctx } = makeContext({ interactionEventDeferred: vi.fn(() => pending) });
+    const queue = new GenerationQueueService(ctx);
+    const task = vi.fn(() => Promise.resolve());
+
+    void queue.runWhenIdle(task);
+    await queue.prefetch({ correlation_id: 'sim:1', event: event('one') });
+    await vi.advanceTimersByTimeAsync(backgroundIdleDelayMs * 3);
+    expect(task).not.toHaveBeenCalled();
+
+    finish({ result: generated(), play: () => {} });
+    await vi.advanceTimersByTimeAsync(backgroundIdleDelayMs);
+    expect(task).toHaveBeenCalledOnce();
+  });
+
+  it('restarts the quiet period when foreground work interrupts the countdown', async () => {
+    vi.useFakeTimers();
+    const { ctx } = makeContext();
+    const queue = new GenerationQueueService(ctx);
+    const task = vi.fn(() => Promise.resolve());
+
+    void queue.runWhenIdle(task);
+    await vi.advanceTimersByTimeAsync(backgroundIdleDelayMs - 1);
+    await queue.runExclusive(() => Promise.resolve());
+    await vi.advanceTimersByTimeAsync(1);
+    expect(task).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(backgroundIdleDelayMs);
+    expect(task).toHaveBeenCalledOnce();
+  });
+
+  it('chains queued idle work without re-waiting, and lets foreground work cut in', async () => {
+    vi.useFakeTimers();
+    const { ctx } = makeContext();
+    const queue = new GenerationQueueService(ctx);
+    const order: string[] = [];
+    let finishFirst!: () => void;
+    const firstGate = new Promise<void>((resolve) => {
+      finishFirst = resolve;
+    });
+
+    void queue.runWhenIdle(async () => {
+      order.push('idle1');
+      await firstGate;
+    });
+    void queue.runWhenIdle(() => {
+      order.push('idle2');
+      return Promise.resolve();
+    });
+    await vi.advanceTimersByTimeAsync(backgroundIdleDelayMs);
+    expect(order).toEqual(['idle1']);
+
+    // Foreground arrives mid-task: it waits behind only the in-flight idle task, then runs
+    // before any further idle work
+    const foreground = queue.runExclusive(() => {
+      order.push('foreground');
+      return Promise.resolve();
+    });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(order).toEqual(['idle1']);
+
+    finishFirst();
+    await foreground;
+    expect(order).toEqual(['idle1', 'foreground']);
+
+    await vi.advanceTimersByTimeAsync(backgroundIdleDelayMs);
+    expect(order).toEqual(['idle1', 'foreground', 'idle2']);
+  });
+
+  it('rejects the idle caller when its task fails without disturbing later idle work', async () => {
+    vi.useFakeTimers();
+    const { ctx } = makeContext();
+    const queue = new GenerationQueueService(ctx);
+
+    // The rejection lands mid-timer-advance, so the handler must be attached up front
+    const failed = expect(queue.runWhenIdle(() => Promise.reject(new Error('rating failed')))).rejects.toThrow(
+      'rating failed',
+    );
+    const succeeded = queue.runWhenIdle(() => Promise.resolve('ok'));
+    await vi.advanceTimersByTimeAsync(backgroundIdleDelayMs);
+
+    await failed;
+    expect(await succeeded).toBe('ok');
   });
 
   it('evicts stale entries and uses synchronous compatibility on a later claim', async () => {
