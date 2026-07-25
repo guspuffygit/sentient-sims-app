@@ -21,6 +21,8 @@ import {
   novelaiGenerationDefaultEndpoint,
   openaiDefaultEndpoint,
   openaiDefaultModel,
+  openrouterDefaultEndpoint,
+  openrouterDefaultModel,
   sentientSimsAIDefaultModel,
   defaultSentientSimsAIHost,
 } from '../constants';
@@ -99,6 +101,18 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.OPENAI_ENDPOINT.toString()]: {
         type: 'string',
         default: openaiDefaultEndpoint,
+      },
+      [SettingsEnum.OPENROUTER_KEY.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.OPENROUTER_ENDPOINT.toString()]: {
+        type: 'string',
+        default: openrouterDefaultEndpoint,
+      },
+      [SettingsEnum.OPENROUTER_MODEL.toString()]: {
+        type: 'string',
+        default: openrouterDefaultModel,
       },
       [SettingsEnum.SENTIENTSIMSAI_ENDPOINT.toString()]: {
         type: 'string',
@@ -277,6 +291,30 @@ export class SettingsService {
 
   set openaiModel(value: string) {
     this.set(SettingsEnum.OPENAI_MODEL, value);
+  }
+
+  get openrouterModel(): string {
+    return this.get(SettingsEnum.OPENROUTER_MODEL) as string;
+  }
+
+  set openrouterModel(value: string) {
+    this.set(SettingsEnum.OPENROUTER_MODEL, value);
+  }
+
+  get openrouterKey(): string {
+    return this.get(SettingsEnum.OPENROUTER_KEY) as string;
+  }
+
+  set openrouterKey(value: string) {
+    this.set(SettingsEnum.OPENROUTER_KEY, value);
+  }
+
+  get openrouterEndpoint(): string {
+    return this.get(SettingsEnum.OPENROUTER_ENDPOINT) as string;
+  }
+
+  set openrouterEndpoint(value: string) {
+    this.set(SettingsEnum.OPENROUTER_ENDPOINT, value);
   }
 
   get sentientSimsAIModel(): string {

@@ -97,52 +97,63 @@ export default function AIModelSelection({
     );
   }
 
+  // Switching endpoints (OpenAI to OpenRouter, say) leaves a model selected that the new
+  // endpoint does not serve. Blanking the Select keeps MUI from warning about an
+  // out-of-range value and makes it obvious a new pick is needed.
+  const modelMissing = !selectChildren.currentSelectedModelAvailable && selectChildren.models.length > 0;
+
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: 1,
-      }}
-    >
-      {aiModels.isError ? (
-        <FormHelperText sx={{ m: 1 }} error>
-          Error: {aiModels.error.message}
-        </FormHelperText>
-      ) : (
-        <Select
-          size="small"
-          labelId="openai-model-label"
-          id="openai-model"
-          label="Model"
-          value={aiModel.value}
-          onChange={handleChange}
-        >
-          {selectChildren.menuItems}
-        </Select>
-      )}
-      {aiEndpoint.value === defaultEndpoint ? (
-        <Tooltip title="Reset to Default">
+    <Box sx={{ marginBottom: 1 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        {aiModels.isError ? (
+          <FormHelperText sx={{ m: 1 }} error>
+            Error: {aiModels.error.message}
+          </FormHelperText>
+        ) : (
+          <Select
+            size="small"
+            labelId="openai-model-label"
+            id="openai-model"
+            label="Model"
+            value={modelMissing ? '' : aiModel.value}
+            onChange={handleChange}
+          >
+            {selectChildren.menuItems}
+          </Select>
+        )}
+        {aiEndpoint.value === defaultEndpoint ? (
+          <Tooltip title="Reset to Default">
+            <IconButton
+              sx={{ marginLeft: 1 }}
+              onClick={() => {
+                void aiModel.resetSetting();
+              }}
+            >
+              <UndoIcon />
+            </IconButton>
+          </Tooltip>
+        ) : null}
+        <Tooltip title="Refresh Models">
           <IconButton
             sx={{ marginLeft: 1 }}
             onClick={() => {
-              void aiModel.resetSetting();
+              void aiModels.refetch();
             }}
           >
-            <UndoIcon />
+            <SyncIcon />
           </IconButton>
         </Tooltip>
+      </Box>
+      {modelMissing ? (
+        <FormHelperText sx={{ mx: 1 }} error>
+          &quot;{aiModel.value}&quot; isn&apos;t available at this endpoint. Choose a model above.
+        </FormHelperText>
       ) : null}
-      <Tooltip title="Refresh Models">
-        <IconButton
-          sx={{ marginLeft: 1 }}
-          onClick={() => {
-            void aiModels.refetch();
-          }}
-        >
-          <SyncIcon />
-        </IconButton>
-      </Tooltip>
     </Box>
   );
 }

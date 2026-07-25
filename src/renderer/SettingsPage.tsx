@@ -9,6 +9,8 @@ import {
   novelaiDefaultModel,
   openaiDefaultEndpoint,
   openaiDefaultModel,
+  openrouterDefaultEndpoint,
+  openrouterDefaultModel,
 } from 'main/sentient-sims/constants';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { SyntheticEvent, useState } from 'react';
@@ -116,6 +118,22 @@ export default function SettingsPage() {
               defaultEndpoint={openaiDefaultEndpoint}
               modelSetting={SettingsEnum.OPENAI_MODEL}
               endpointSetting={SettingsEnum.OPENAI_ENDPOINT}
+            />
+            <LocalizationSettingsComponent />
+          </OpenAICompatibleSettingsComponent>
+          <OpenAICompatibleSettingsComponent apiType={ApiType.OpenRouter} selectedApiType={aiSettings.aiApiType}>
+            <ApiKeyAIComponent setting={SettingsEnum.OPENROUTER_KEY} aiName="OpenRouter" />
+            <AIEndpointComponent
+              type={ApiType.OpenRouter}
+              selectedApiType={aiSettings.aiApiType}
+              settingsEnum={SettingsEnum.OPENROUTER_ENDPOINT}
+            />
+            <AIModelSelection
+              apiType={aiSettings.aiApiType}
+              defaultModel={openrouterDefaultModel}
+              defaultEndpoint={openrouterDefaultEndpoint}
+              modelSetting={SettingsEnum.OPENROUTER_MODEL}
+              endpointSetting={SettingsEnum.OPENROUTER_ENDPOINT}
             />
             <LocalizationSettingsComponent />
           </OpenAICompatibleSettingsComponent>

@@ -7,6 +7,9 @@ export function getAIHelperText(apiType: ApiType) {
   if (apiType === ApiType.OpenAI) {
     return 'OpenAI AI using the same API as ChatGPT and your personal API key.';
   }
+  if (apiType === ApiType.OpenRouter) {
+    return 'Uncensored models from many providers through one OpenRouter API key.';
+  }
   if (apiType === ApiType.SentientSimsAI) {
     return 'Sentient Sims uncensored AI hosted on the Sentient Sims servers.';
   }
@@ -42,6 +45,7 @@ export function AISelectionComponent() {
         }}
       >
         <MenuItem value={ApiType.OpenAI}>OpenAI</MenuItem>
+        <MenuItem value={ApiType.OpenRouter}>OpenRouter</MenuItem>
         <MenuItem value={ApiType.SentientSimsAI}>Sentient Sims Uncensored AI (Founder/Patreon)</MenuItem>
         <MenuItem value={ApiType.NovelAI}>NovelAI</MenuItem>
         <MenuItem value={ApiType.KoboldAI}>Kobold AI</MenuItem>

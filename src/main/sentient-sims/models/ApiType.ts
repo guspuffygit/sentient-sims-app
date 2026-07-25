@@ -1,5 +1,6 @@
 export enum ApiType {
   OpenAI = 'openai',
+  OpenRouter = 'openrouter',
   VLLM = 'vllm',
   SentientSimsAI = 'sentientsimsai',
   CustomAI = 'customai',
@@ -28,6 +29,8 @@ export function ApiTypeFromValue(value: any): ApiType {
       return ApiType.ElevenLabs;
     case ApiType.VLLM:
       return ApiType.VLLM;
+    case ApiType.OpenRouter:
+      return ApiType.OpenRouter;
     default:
       return ApiType.OpenAI;
   }
@@ -43,6 +46,8 @@ export function ApiTypeName(apiType: ApiType): string {
       return 'Novel AI';
     case ApiType.OpenAI:
       return 'OpenAI';
+    case ApiType.OpenRouter:
+      return 'OpenRouter';
     case ApiType.VLLM:
       return 'VLLM';
     case ApiType.Gemini:

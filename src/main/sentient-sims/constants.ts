@@ -62,10 +62,14 @@ export const modWebsocketPort = 25145;
 export const appApiPort = 25148;
 export const appApiUrl = `http://localhost:${appApiPort}`;
 export const openaiDefaultEndpoint = 'https://api.openai.com/v1';
+// Must stay the API root: the OpenAI SDK appends /chat/completions and /models itself.
+export const openrouterDefaultEndpoint = 'https://openrouter.ai/api/v1';
 export const koboldaiDefaultEndpoint = 'http://localhost:5000';
 export const novelaiDefaultEndpoint = 'https://api.novelai.net';
 export const novelaiGenerationDefaultEndpoint = 'https://text.novelai.net';
 export const openaiDefaultModel = 'gpt-4o-mini';
+// Cheap, fast, uncensored, and a 131k context window - see openrouterRecommendedModels.
+export const openrouterDefaultModel = 'mistralai/mistral-nemo';
 export const novelaiDefaultModel = 'kayra-v1';
 export const sentientSimsAIDefaultModel = 'Gryphe/MythoMax-L2-13b';
 export const tokenizerBreakString = '<<BREAK>>';

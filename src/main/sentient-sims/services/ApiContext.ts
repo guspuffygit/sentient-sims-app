@@ -48,6 +48,7 @@ import { MemoryRetrievalService } from './MemoryRetrievalService';
 import { ModelSettingsService } from './ModelSettingsService';
 import { NovelAIService } from './NovelAIService';
 import { OpenAIService } from './OpenAIService';
+import { OpenRouterService } from './OpenRouterService';
 import { PatreonService } from './PatreonService';
 import { PromptRequestBuilderService } from './PromptRequestBuilderService';
 import { SceneService } from './SceneService';
@@ -232,6 +233,8 @@ export class ApiContext {
   private readonly _geminiService: GeminiService;
   private readonly _vllmAIService: VLLMAIService;
   private readonly _openAIService: OpenAIService;
+
+  private readonly _openRouterService: OpenRouterService;
   private readonly _modelSettingsService: ModelSettingsService;
 
   private readonly _novelAITokenCounter: NovelAITokenCounter;
@@ -252,6 +255,7 @@ export class ApiContext {
     this._geminiService = new GeminiService(this);
     this._vllmAIService = new VLLMAIService(this);
     this._openAIService = new OpenAIService(this);
+    this._openRouterService = new OpenRouterService(this);
 
     this._novelAITokenCounter = new NovelAITokenCounter();
     this._openAITokenCounter = new OpenAITokenCounter();
@@ -432,6 +436,10 @@ export class ApiContext {
     return this._openAIService;
   }
 
+  private get openRouterService(): OpenRouterService {
+    return this._openRouterService;
+  }
+
   get genai(): GenerationService {
     const aiType = this.settings.aiApiType;
     if (aiType === ApiType.SentientSimsAI || aiType === ApiType.CustomAI) {
@@ -452,6 +460,10 @@ export class ApiContext {
 
     if (aiType === ApiType.VLLM) {
       return this.vllmAIService;
+    }
+
+    if (aiType === ApiType.OpenRouter) {
+      return this.openRouterService;
     }
 
     return this.openAIService;
@@ -488,6 +500,8 @@ export class ApiContext {
 
     if (aiType === ApiType.OpenAI) {
       return this.settings.openaiModel;
+    } else if (aiType === ApiType.OpenRouter) {
+      return this.settings.openrouterModel;
     } else if (aiType === ApiType.SentientSimsAI) {
       return this.settings.sentientSimsAIModel;
     } else if (aiType === ApiType.Gemini) {
