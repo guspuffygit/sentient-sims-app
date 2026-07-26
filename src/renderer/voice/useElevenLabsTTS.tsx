@@ -41,7 +41,8 @@ export function useElevenLabsTTS(): TTSHook {
       };
 
       const url = `${elevenLabsEndpointSetting.value}/text-to-speech/${voiceId}`;
-      log.debug(`URL: ${url} Body: ${JSON.stringify(requestBody, null, 2)}`);
+      const startedAt = Date.now();
+      log.info(`[TTS] ElevenLabs request voice=${voiceId} model=${requestBody.model_id} chars=${text.length}`);
 
       const response = await fetch(url, {
         method: 'POST',
@@ -51,6 +52,7 @@ export function useElevenLabsTTS(): TTSHook {
         },
         body: JSON.stringify(requestBody),
       });
+      log.info(`[TTS] ElevenLabs response voice=${voiceId} status=${response.status} in ${Date.now() - startedAt}ms`);
 
       if (!response.ok) {
         let errorMessage = `Unable to stream audio: ${response.status}`;
@@ -121,6 +123,8 @@ export function useElevenLabsTTS(): TTSHook {
         // v3 understands inline audio tags like [nervous] — use the delivery note as one
         const text = isV3 && line.deliveryNote ? `[${line.deliveryNote}] ${line.text}` : line.text;
         const voiceId = line.voiceId ?? elevenLabsTTSSettings.value.voice;
+        // Voice inconsistencies are only debuggable if the cast is visible in the log
+        log.info(`[TTS] Line for ${line.speaker}: voice=${voiceId}${line.voiceId ? '' : ' (default, no cast voice)'}`);
         return fetchAudioUrl(text, voiceId).catch((err: unknown) => {
           const errorMessage = `TTS request failed: ${err instanceof Error ? err.message : String(err)}`;
           log.error(errorMessage);

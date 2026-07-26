@@ -22,6 +22,9 @@ export type PerceivedObject = {
 export type PerceptionSnapshot = {
   type?: string;
   request_id?: string;
+  // Set when the mod failed to build the snapshot (sim not instantiated, etc.) —
+  // the reply still arrives so a cognition tick awaiting perception never hangs
+  error?: string;
   sim_id: string;
   sim_name?: string;
   room_id?: number;

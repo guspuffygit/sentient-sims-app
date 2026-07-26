@@ -1,5 +1,9 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
+// Bridges renderer electron-log calls into the main process transports (main.log). With a
+// custom preload script this import is required — without it renderer logs (TTS/voice
+// activity especially) silently go nowhere, which made voice bugs undebuggable from logs.
+import 'electron-log/preload';
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 import { SettingsEnum } from './sentient-sims/models/SettingsEnum';
 import { CaughtError } from './sentient-sims/models/CaughtError';

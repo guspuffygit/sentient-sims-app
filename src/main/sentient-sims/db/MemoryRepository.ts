@@ -208,6 +208,25 @@ export class MemoryRepository extends Repository {
   }
 
   createMemory(createMemoryRequest: CreateMemoryRequest, options?: { notifyMod?: boolean }) {
+    // A scene transcript can be POSTed back once per completing interaction (live, a hug
+    // SI and the chat SI it rode on both completed and stored the same dialogue twice —
+    // both then get embedded, retrieved, and fed to "Previously in this scene"). Exact
+    // content duplicates at the same location within the paced-scene window are dropped.
+    if (createMemoryRequest.memory.id === undefined && createMemoryRequest.memory.content) {
+      const duplicate = this.dbService
+        .getDb()
+        .prepare(
+          "SELECT id FROM memory WHERE content = ? AND location_id = ? AND timestamp >= datetime('now', '-5 minutes') ORDER BY id DESC LIMIT 1",
+        )
+        .get([createMemoryRequest.memory.content, createMemoryRequest.memory.location_id]) as
+        | { id: number }
+        | undefined;
+      if (duplicate) {
+        log.info(`Memory create skipped: identical recent content already stored as memory ${duplicate.id}`);
+        return this.getMemory({ id: duplicate.id });
+      }
+    }
+
     const createMemoryTransaction = this.dbService.getDb().transaction(() => {
       const updateMemoryResult = this.dbService
         .getDb()

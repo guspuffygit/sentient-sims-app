@@ -33,6 +33,7 @@ export async function playAudioUrl(audioUrl: string, volume: number): Promise<Au
 
   const response = await fetch(audioUrl);
   const audioBuffer = await context.decodeAudioData(await response.arrayBuffer());
+  log.info(`[TTS] Playing audio: duration=${audioBuffer.duration.toFixed(2)}s volume=${volume}`);
 
   const gain = context.createGain();
   gain.gain.value = volume;

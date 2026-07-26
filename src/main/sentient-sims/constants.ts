@@ -91,6 +91,11 @@ export const postAnimationGraceMs = 60000;
 // claim HTTP timeout.
 export const claimMaxWaitMs = 75000;
 export const prefetchTtlMs = 180000;
+// A prefetch that dies on a transient provider error (429 rate limit, network blip) retries
+// with backoff instead of silently falling back — live, one 429 at app start left the
+// prefetch lane dead-looking for a whole session. Retries stay within prefetchTtlMs.
+export const prefetchRetryBaseMs = 15000;
+export const prefetchMaxAttempts = 3;
 // Quiet period before idle-lane work (memory annotation, embedding backfill) may start.
 // Interactions arrive in bursts, so an instantaneously empty queue is a poor idle signal;
 // annotation results only need to be ready by the next scene, never during this one.

@@ -1,5 +1,12 @@
 import log from 'electron-log';
-import { backgroundIdleDelayMs, claimMaxWaitMs, postAnimationGraceMs, prefetchTtlMs } from '../constants';
+import {
+  backgroundIdleDelayMs,
+  claimMaxWaitMs,
+  postAnimationGraceMs,
+  prefetchMaxAttempts,
+  prefetchRetryBaseMs,
+  prefetchTtlMs,
+} from '../constants';
 import { InteractionEvent } from '../models/InteractionEvents';
 import { InteractionEventResult, InteractionEventStatus } from '../models/InteractionEventResult';
 import { ApiContext } from './ApiContext';
@@ -208,7 +215,7 @@ export class GenerationQueueService {
     });
   }
 
-  private async generatePrefetch(entry: PrefetchEntry): Promise<void> {
+  private async generatePrefetch(entry: PrefetchEntry, attempt = 0): Promise<void> {
     if (entry.state !== 'queued') {
       return;
     }
@@ -228,7 +235,30 @@ export class GenerationQueueService {
         entry.state = 'fallback';
       }
     } catch (error) {
-      log.error(`Interaction prefetch failed for ${entry.correlationId}`, error);
+      // Transient provider errors (429, network blip) get retried with backoff while the
+      // entry is still unclaimed; a claim arriving mid-backoff resolves via the normal
+      // abandon path, so waiting on a retry never blocks the game longer than usual.
+      if (this.hasState(entry, 'running') && attempt + 1 < prefetchMaxAttempts) {
+        const delay = prefetchRetryBaseMs * 2 ** attempt;
+        log.warn(
+          `Interaction prefetch attempt ${attempt + 1}/${prefetchMaxAttempts} failed for ${entry.correlationId}, retrying in ${delay}ms`,
+          error,
+        );
+        entry.state = 'queued';
+        const timer = setTimeout(() => {
+          if (this.entries.get(entry.correlationId) === entry) {
+            void this.enqueue(() => this.generatePrefetch(entry, attempt + 1)).catch((retryError: unknown) => {
+              log.error(`Prefetch retry queue failure for ${entry.correlationId}`, retryError);
+            });
+          }
+        }, delay);
+        timer.unref();
+        return;
+      }
+      log.error(
+        `Interaction prefetch failed for ${entry.correlationId} after ${attempt + 1} attempt(s), falling back to pre-action`,
+        error,
+      );
       if (this.hasState(entry, 'running')) {
         entry.state = 'fallback';
       }

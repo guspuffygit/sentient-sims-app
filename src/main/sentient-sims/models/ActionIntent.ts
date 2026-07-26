@@ -25,5 +25,9 @@ export type InteractionOutcomeEvent = {
   action?: string;
   interaction_name?: string;
   outcome: 'success' | 'failure' | 'canceled';
+  // The game's actual failure reason ("Missing relationship bit has_met between X and Y",
+  // "Object is not in an active zone") — this is what teaches cognition not to retry
+  // impossible actions
+  reason?: string;
   location_id?: number;
 };

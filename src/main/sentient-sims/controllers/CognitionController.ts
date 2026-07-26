@@ -37,6 +37,18 @@ export class CognitionController {
     return this.latestPerception.get(simId);
   }
 
+  private lookupParticipantName(simId?: string): string | undefined {
+    if (!simId) {
+      return undefined;
+    }
+    try {
+      return this.ctx.participantRepository.getParticipantNames([simId])[0];
+    } catch {
+      // No DB loaded (or unknown id) — caller falls back to the raw id
+      return undefined;
+    }
+  }
+
   // The mod reports what actually happened to a dispatched interaction. The result becomes an
   // 'outcome' memory row so retrieval and future cognition ticks can see the consequences of
   // acting — this closes the act -> observe loop.
@@ -49,10 +61,16 @@ export class CognitionController {
 
       const pending = this.ctx.actionDispatcher.resolve(event.request_id);
       const action = pending?.intent.action ?? event.action ?? event.interaction_name ?? 'an interaction';
-      const actor = event.sim_name || `Sim ${event.sim_id}`;
-      const target = event.target_sim_name || (event.target_sim_id ? `Sim ${event.target_sim_id}` : undefined);
+      // The mod can't always resolve names (the sim may already be gone); fall back to the
+      // participant DB before writing a raw id into a permanent memory row
+      const actor = event.sim_name || this.lookupParticipantName(event.sim_id) || `Sim ${event.sim_id}`;
+      const target =
+        event.target_sim_name ||
+        this.lookupParticipantName(event.target_sim_id) ||
+        (event.target_sim_id ? `Sim ${event.target_sim_id}` : undefined);
       const attempt = target ? `${actor} tried '${action}' with ${target}` : `${actor} tried '${action}'`;
-      const observation = `${attempt} and it ${outcomeVerb(event.outcome)}.`;
+      const because = event.reason ? ` (${event.reason})` : '';
+      const observation = `${attempt} and it ${outcomeVerb(event.outcome)}${because}.`;
 
       const participants: ParticipantDTO[] = [{ id: event.sim_id }];
       if (event.target_sim_id) {
@@ -93,6 +111,13 @@ export class CognitionController {
       const snapshot = req.body as Partial<PerceptionSnapshot>;
       if (!snapshot.sim_id) {
         return res.status(400).json({ error: 'sim_id is required' });
+      }
+      if (snapshot.error) {
+        // The mod couldn't build the snapshot; don't cache a hollow one over real data
+        log.warn(
+          `[Cognition] perception ${snapshot.request_id ?? ''} failed for sim ${snapshot.sim_id}: ${snapshot.error}`,
+        );
+        return res.json({ ok: false, error: snapshot.error });
       }
       const full: PerceptionSnapshot = { sims: [], objects: [], ...snapshot, sim_id: snapshot.sim_id };
       this.latestPerception.set(full.sim_id, full);

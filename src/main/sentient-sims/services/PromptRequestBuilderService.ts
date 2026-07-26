@@ -41,6 +41,12 @@ const maxGroupSizeLength = 1700;
 const relevantMemoryCount = 6;
 const maxRelevantMemoryLength = 280;
 
+// How long a canceled-outcome row stays in the verbatim scene transcript. Recent enough to
+// stop a sim retrying an impossible action; short enough that failed bookkeeping doesn't
+// ride along in every later prompt (live, "grab_snack was canceled" followed the story for
+// the rest of the session). The rows stay in the DB for retrieval either way.
+const canceledOutcomeSceneWindowMs = 10 * 60 * 1000;
+
 // A memory row can hold several kinds of text; pick the most factual one and keep it short.
 export function summarizeMemory(memory: MemoryEntity): string {
   const text = (memory.observation || memory.content || memory.action || memory.pre_action || '')
@@ -177,7 +183,23 @@ export class PromptRequestBuilderService {
       return [];
     }
 
-    return this.ctx.memoryRepository.getSceneMemories(scene.locationId, scene.startedAt);
+    const rows = this.ctx.memoryRepository.getSceneMemories(scene.locationId, scene.startedAt);
+    const cutoff = Date.now() - canceledOutcomeSceneWindowMs;
+    return rows.filter((memory) => {
+      if (memory.event_type !== 'outcome') {
+        return true;
+      }
+      // 'was canceled' matches CognitionController's outcomeVerb() exactly; success and
+      // failure outcomes keep flowing into scene context — they read naturally
+      if (!memory.observation || !memory.observation.includes('was canceled')) {
+        return true;
+      }
+      if (!memory.timestamp) {
+        return false;
+      }
+      const storedAt = Date.parse(`${memory.timestamp.replace(' ', 'T')}Z`);
+      return !Number.isNaN(storedAt) && storedAt >= cutoff;
+    });
   }
 
   // Collects the reflections that matter for this moment, deduped and newest first:

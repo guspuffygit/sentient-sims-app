@@ -14,6 +14,7 @@ import {
   WantsInteractionEvent,
 } from '../models/InteractionEvents';
 import { getRandomItem } from '../util/getRandomItem';
+import { isDegeneratePreAction } from '../util/degeneratePreAction';
 import { InteractionEventResult, InteractionEventStatus, LLMExchange } from '../models/InteractionEventResult';
 import {
   notifyMapAnimation,
@@ -321,7 +322,17 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
     if (description.pre_actions) {
       const preAction = getRandomItem(description.pre_actions);
       const location = this.ctx.locationRepository.getLocation({ id: event.environment.location_id });
-      return { preAction: formatAction(preAction, event.sentient_sims, location) };
+      const rendered = formatAction(preAction, event.sentient_sims, location);
+      if (isDegeneratePreAction(rendered)) {
+        // A truncated fragment as the user turn makes the model improvise ("looks like
+        // your message got cut off") and that improvisation becomes a permanent memory —
+        // safer to skip generation entirely and surface the broken mapping in the log
+        log.warn(
+          `[PreAction] Degenerate pre_action for '${event.interaction_name}': "${rendered}" — treating as unmapped`,
+        );
+        return { result: { status: InteractionEventStatus.UNMAPPED_INTERACTION } };
+      }
+      return { preAction: rendered };
     }
 
     return { result: { status: InteractionEventStatus.NOOP } };
