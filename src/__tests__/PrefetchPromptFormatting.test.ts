@@ -70,6 +70,30 @@ describe('prefetch prompt formatting', () => {
     expect(partners).toEqual(new Set(['Target', 'Bystander']));
   });
 
+  it('favors the player sim as partner when an NPC initiates a group beat', () => {
+    const event = {
+      sentient_sims: [
+        { sim_id: '1', name: 'NpcActor' },
+        { sim_id: '2', name: 'OtherNpc' },
+        { sim_id: '3', name: 'Player', is_player_sim: true },
+      ],
+    } as unknown as InteractionEvent;
+
+    let playerPicks = 0;
+    let npcPicks = 0;
+    for (let i = 0; i < 400; i += 1) {
+      const partner = toPrimaryInteractionEvent(event).sentient_sims[1];
+      if (partner.name === 'Player') {
+        playerPicks += 1;
+      } else {
+        npcPicks += 1;
+      }
+    }
+    // Weighted pick lands on the player ~80% of the time; NPC-NPC still occurs
+    expect(playerPicks).toBeGreaterThan(npcPicks);
+    expect(npcPicks).toBeGreaterThan(0);
+  });
+
   it('trims relationship bits to the narrowed pair', () => {
     const event = {
       sentient_sims: [

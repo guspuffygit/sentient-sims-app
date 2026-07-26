@@ -151,7 +151,12 @@ export function toPrimaryInteractionEvent<T extends SSEvent>(event: T): T {
     return event;
   }
   const [actor, ...others] = event.sentient_sims;
-  const partner = others[Math.floor(Math.random() * others.length)];
+  // When an NPC initiates a group beat, the player's sim joins as the partner more often
+  // than not — the main character carries the conversation — while still leaving room
+  // for NPC-NPC exchanges; player-initiated beats rotate uniformly through the group
+  const playerPartner = actor.is_player_sim ? undefined : others.find((sim) => sim.is_player_sim);
+  const partner =
+    playerPartner && Math.random() < 0.6 ? playerPartner : others[Math.floor(Math.random() * others.length)];
   const pair = [actor, partner];
   const pairIds = new Set(pair.map((sim) => sim.sim_id));
   return {
