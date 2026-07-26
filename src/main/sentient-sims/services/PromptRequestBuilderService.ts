@@ -107,13 +107,14 @@ export class PromptRequestBuilderService {
         if (defaultRelationshipBitDescriptions.has(bit.name)) {
           const bitDescription = defaultRelationshipBitDescriptions.get(bit.name);
           if (!bitDescription?.ignored && bitDescription?.description) {
-            relationshipDescriptions.push(
-              formatAction(
-                bitDescription.description,
-                [sims.get(bit.sim_one_id) as SentientSim, sims.get(bit.sim_two_id) as SentientSim],
-                location,
-              ),
-            );
+            const simOne = sims.get(bit.sim_one_id);
+            const simTwo = sims.get(bit.sim_two_id);
+            // Group events carry pairwise bits for the whole conversation; a bit whose
+            // sims aren't both in this (possibly narrowed) event can't be described
+            if (!simOne || !simTwo) {
+              return;
+            }
+            relationshipDescriptions.push(formatAction(bitDescription.description, [simOne, simTwo], location));
           }
         }
       });

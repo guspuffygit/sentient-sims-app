@@ -140,13 +140,29 @@ function once(callback: () => void): () => void {
   };
 }
 
-export function toPrimaryInteractionEvent(event: InteractionEvent): InteractionEvent {
+// A group social arrives with every member of the conversation, but the scene plays as a
+// pair: the in-game actor keeps the first slot (pre-actions attribute the interaction to
+// them) and a random other member takes the second, so a long group conversation rotates
+// through partners instead of replaying the same two sims. Relationships are trimmed to
+// the chosen pair — the event carries pairwise bits for the whole group, and bits
+// referencing sims outside the narrowed event crash formatSims' lookup.
+export function toPrimaryInteractionEvent<T extends SSEvent>(event: T): T {
   if (event.sentient_sims.length <= 2) {
     return event;
   }
+  const [actor, ...others] = event.sentient_sims;
+  const partner = others[Math.floor(Math.random() * others.length)];
+  const pair = [actor, partner];
+  const pairIds = new Set(pair.map((sim) => sim.sim_id));
   return {
     ...event,
-    sentient_sims: event.sentient_sims.slice(0, 2),
+    sentient_sims: pair,
+    relationships: {
+      ...event.relationships,
+      relationship_bits: (event.relationships?.relationship_bits ?? []).filter(
+        (bit) => pairIds.has(bit.sim_one_id) && pairIds.has(bit.sim_two_id),
+      ),
+    },
   };
 }
 
@@ -296,7 +312,12 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
     }
   }
 
-  async resolveInteractionPreAction(event: InteractionEvent): Promise<ResolvedInteractionPreAction> {
+  // gateEvent is the un-narrowed event: a group social narrowed to an NPC-NPC pair still
+  // belongs to the player's conversation, so player-sim eligibility is judged on the group
+  async resolveInteractionPreAction(
+    event: InteractionEvent,
+    gateEvent: SSEvent = event,
+  ): Promise<ResolvedInteractionPreAction> {
     let description: InteractionDescription | undefined;
     if (event.testing_action) {
       description = {
@@ -310,7 +331,7 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
       return { result: { status: InteractionEventStatus.IGNORED } };
     }
 
-    const hasPlayerSim = containsPlayerSim(event);
+    const hasPlayerSim = containsPlayerSim(gateEvent);
     if (!hasPlayerSim && !description?.always_run) {
       return { result: { status: InteractionEventStatus.NOT_PLAYER_SIM } };
     }
@@ -354,7 +375,7 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
 
   async handleInteraction(event: InteractionEvent) {
     const primaryEvent = toPrimaryInteractionEvent(event);
-    const resolved = await this.resolveInteractionPreAction(primaryEvent);
+    const resolved = await this.resolveInteractionPreAction(primaryEvent, event);
     if (resolved.result) {
       return resolved.result;
     }
@@ -403,17 +424,20 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
   }
 
   async handleContinue(event: ContinueInteractionEvent) {
-    if (event.sentient_sims.length >= 2) {
+    // Group continues narrow to a pair like fresh interactions do (a 7-sim continue would
+    // otherwise run 7 actor turns); the random partner keeps the group convo rotating
+    const primaryEvent = toPrimaryInteractionEvent(event);
+    if (primaryEvent.sentient_sims.length >= 2) {
       // Directed continue needs prior memories to pick up from; fall through when there are none
-      const directed = await this.runDirectedGeneration(event, { continueScene: true });
+      const directed = await this.runDirectedGeneration(primaryEvent, { continueScene: true });
       if (directed.status === InteractionEventStatus.GENERATED) {
         return directed;
       }
     }
 
-    let result = await this.runGeneration(event, { continue: true });
+    let result = await this.runGeneration(primaryEvent, { continue: true });
     if (!result.text) {
-      result = await this.runGeneration(event, {
+      result = await this.runGeneration(primaryEvent, {
         continue: true,
         preAssistantPreResponse: ' ',
       });
