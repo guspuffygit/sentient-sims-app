@@ -45,6 +45,7 @@ import {
   escapeRegExp,
   formatSceneForChatWindow,
   formatAction,
+  formatListToString,
 } from '../formatter/PromptFormatter';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { InputFormatter } from '../formatter/InputOutputFormatting';
@@ -108,6 +109,10 @@ function toTranscript(lines: DialogueLine[]): string {
 export type DirectedGenerationOptions = {
   action?: string;
   continueScene?: boolean;
+  // A chat beat opens with a line the player already typed: it drives the scene and seeds the
+  // transcript the actors reply to, the sim who said it takes no actor turn, and it stays out
+  // of the aired scene (the mod already showed it, and it rides along as the memory's action)
+  playerLine?: DialogueLine;
   directorModel?: string;
   // Parallel to event.sentient_sims order
   actorModels?: (string | undefined)[];
@@ -518,6 +523,15 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
   }
 
   async handleChat(chatEvent: ChatInteractionEvent) {
+    const primaryEvent = toPrimaryInteractionEvent(chatEvent);
+    // sentient_sims[0] is the sim the player typed as — the legacy completion prompt encoded
+    // the same assumption as '{actor.0}:' speaking and '{actor.1}:' replying
+    const spoken = chatEvent.action.trim();
+    if (primaryEvent.sentient_sims.length >= 2 && spoken.length > 0) {
+      return this.runDirectedGeneration(primaryEvent, {
+        playerLine: { speaker: primaryEvent.sentient_sims[0].name, text: spoken },
+      });
+    }
     return this.runGeneration(chatEvent, {
       action: chatEvent.action,
       prePreAction: '{actor.0}:',
@@ -527,6 +541,14 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
   }
 
   async handleChatContinue(chatContinueEvent: ChatContinueInteractionEvent) {
+    const primaryEvent = toPrimaryInteractionEvent(chatContinueEvent);
+    if (primaryEvent.sentient_sims.length >= 2) {
+      // Directed continue needs prior memories to pick up from; fall through when there are none
+      const directed = await this.runDirectedGeneration(primaryEvent, { continueScene: true });
+      if (directed.status === InteractionEventStatus.GENERATED) {
+        return directed;
+      }
+    }
     return this.runGeneration(chatContinueEvent, {
       preAssistantPreResponse: '{actor.1}:',
       stopTokens: ['{actor.0}:', '{actor.1}:'],
@@ -765,16 +787,28 @@ If the scene is already good, return it unchanged.`;
     // Continuing a scene re-uses the same event; driving it with the original action again
     // would just replay the same beat, so swap in a continuation instruction instead
     const continuingScene = Boolean(options.continueScene) && previously.length > 0;
-    const sceneAction = continuingScene
-      ? 'The scene continues. Pick up the conversation exactly where it left off and move it forward — do not repeat or rephrase anything already said.'
-      : (promptRequest.action ?? options.action);
+    const { playerLine } = options;
+    const simNames = event.sentient_sims.map((sim) => sim.name);
+    // The player's line is already spoken, so that sim takes no turn — everyone else replies to it
+    const performers = event.sentient_sims.filter((sim) => !playerLine || sim.name !== playerLine.speaker);
+    const performerNames = performers.map((sim) => sim.name);
 
-    if (!sceneAction) {
+    let sceneAction: string | undefined;
+    if (continuingScene) {
+      sceneAction =
+        'The scene continues. Pick up the conversation exactly where it left off and move it forward — do not repeat or rephrase anything already said.';
+    } else if (playerLine) {
+      const audience = performerNames.length > 0 ? ` to ${formatListToString(performerNames)}` : '';
+      sceneAction = `${playerLine.speaker} just said${audience}: "${playerLine.text}" — play the reply. Answer what was actually said, in the flow of the conversation already underway.`;
+    } else {
+      sceneAction = promptRequest.action ?? options.action;
+    }
+
+    if (!sceneAction || performers.length === 0) {
       log.error('Directed generation has no action to drive the scene');
       return { status: InteractionEventStatus.NOOP };
     }
 
-    const simNames = event.sentient_sims.map((sim) => sim.name);
     const exchanges: LLMExchange[] = [];
 
     // 1. Director splits the full context into one complete, self-contained prompt per actor
@@ -808,7 +842,7 @@ Rules:
 Respond in exactly this format, nothing else:
 === SCENE ===
 <the shared scene briefing>
-${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the private briefing for ${name}>`).join('\n')}`;
+${performerNames.map((name) => `=== PROMPT FOR ${name} ===\n<the private briefing for ${name}>`).join('\n')}`;
 
     const briefing = await this.runOneShot(
       'Director Briefing',
@@ -825,7 +859,7 @@ ${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the private briefing for 
     const sceneMatch = /===\s*SCENE\s*===\s*([\s\S]*?)(?=\n\s*===\s*PROMPT FOR|$)/i.exec(briefing.text);
     const sharedScene = sceneMatch ? sceneMatch[1].trim() : '';
     const actorPrompts = new Map<string, string>();
-    simNames.forEach((name) => {
+    performerNames.forEach((name) => {
       const promptMatch = new RegExp(
         `===\\s*PROMPT FOR\\s+${escapeRegExp(name)}\\s*===\\s*([\\s\\S]*?)(?=\\n\\s*===\\s*PROMPT FOR|$)`,
         'i',
@@ -841,14 +875,16 @@ ${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the private briefing for 
 
     log.info(
       `[Pipeline] Director briefing parsed — shared scene: ${sharedScene ? 'yes' : 'MISSING'}, ` +
-        `actor briefings: ${simNames.map((name) => `${name}:${actorPrompts.get(name) ? 'ok' : 'fallback'}`).join(', ')}`,
+        `actor briefings: ${performerNames.map((name) => `${name}:${actorPrompts.get(name) ? 'ok' : 'fallback'}`).join(', ')}`,
     );
 
     // 2. Actors perform one turn each. Each actor returns a bare subtitle — only the words
     //    they speak, no preamble — and the speaker label is added programmatically after.
-    const sceneLines: DialogueLine[] = [];
-    for (let i = 0; i < event.sentient_sims.length; i += 1) {
-      const sim = event.sentient_sims[i];
+    //    A chat beat seeds the transcript with the player's line so the reply answers it.
+    const sceneLines: DialogueLine[] = playerLine ? [playerLine] : [];
+    const performedLines: DialogueLine[] = [];
+    for (let i = 0; i < performers.length; i += 1) {
+      const sim = performers[i];
       const actorSystemPrompt = `${actorPrompts.get(sim.name)}
 
 How to respond:
@@ -869,7 +905,8 @@ How to respond:
         actorSystemPrompt,
         actorUserText,
         60,
-        options.actorModels?.[i],
+        // actorModels is parallel to the full sim list, not the performers subset
+        options.actorModels?.[event.sentient_sims.indexOf(sim)],
         AIActionType.DIRECTED_SCENE_ACTOR,
       );
       exchanges.push(performance.exchange);
@@ -878,11 +915,13 @@ How to respond:
       const subtitle = extractSubtitle(performance.text, simNames);
       log.info(`[Pipeline] Actor ${sim.name} subtitle: ${subtitle || '(none)'}`);
       if (subtitle.length > 1) {
-        sceneLines.push({ speaker: sim.name, text: subtitle });
+        const line = { speaker: sim.name, text: subtitle };
+        sceneLines.push(line);
+        performedLines.push(line);
       }
     }
 
-    if (sceneLines.length === 0) {
+    if (performedLines.length === 0) {
       log.error('No actor produced a usable line for the directed scene');
       return { status: InteractionEventStatus.NOOP, exchanges };
     }
@@ -904,14 +943,19 @@ Respond with the final scene as one line per row in exactly this format, nothing
 <character name>: <the words they say>
 
 - Every line is a bare subtitle: no quotation marks, no parentheses, no stage directions, no commentary
-- Both characters must speak — never collapse the scene to a single line
-- Keep it to two to four lines total, each one short
+${
+  playerLine
+    ? `- ${playerLine.speaker}'s line was already spoken and is there only as the line being replied to — never return it\n- Return only ${formatListToString(performerNames)}'s delivered lines, each one short`
+    : '- Both characters must speak — never collapse the scene to a single line\n- Keep it to two to four lines total, each one short'
+}
 - Return exactly the delivered lines, kept or repaired — never lines from "Previously in this scene", and never new lines of your own`;
 
     const compiled = await this.runOneShot(
       'Director Review',
       compileSystemPrompt,
-      `${previouslyBlock}The direction the actors were given: ${sceneAction}\n\nThe actors' delivered lines to review — return these lines kept or repaired, do not reply to them:\n${toTranscript(sceneLines)}`,
+      `${previouslyBlock}The direction the actors were given: ${sceneAction}\n\n${
+        playerLine ? `The line being replied to:\n${toTranscript([playerLine])}\n\n` : ''
+      }The actors' delivered lines to review — return these lines kept or repaired, do not reply to them:\n${toTranscript(performedLines)}`,
       400,
       options.directorModel,
       AIActionType.DIRECTED_SCENE_REVIEWER,
@@ -919,20 +963,28 @@ Respond with the final scene as one line per row in exactly this format, nothing
     exchanges.push(compiled.exchange);
     this.logExchange(compiled.exchange);
 
-    const reviewedLines = parseReviewedLines(compiled.text, simNames);
-    // The reviewer must preserve the back-and-forth; if its output lost a speaker or
+    // A chat reply is the answer to a line the player already spoke; if the reviewer echoes
+    // that line back it would air (and be remembered) twice
+    const reviewedLines = parseReviewedLines(compiled.text, simNames).filter(
+      (line) => !playerLine || line.speaker !== playerLine.speaker,
+    );
+    // The reviewer must preserve every performer's turn; if its output lost a speaker or
     // could not be parsed, air the actors' original performances instead
     const reviewedSpeakers = new Set(reviewedLines.map((line) => line.speaker));
-    const useReviewerCut = reviewedLines.length >= 2 && reviewedSpeakers.size >= 2;
-    const finalLines = useReviewerCut ? reviewedLines : sceneLines;
+    const performedSpeakers = new Set(performedLines.map((line) => line.speaker));
+    const useReviewerCut =
+      reviewedLines.length >= performedLines.length && reviewedSpeakers.size >= performedSpeakers.size;
+    const finalLines = useReviewerCut ? reviewedLines : performedLines;
     log.info(`[Pipeline] Final cut: ${useReviewerCut ? "reviewer's cut" : "actors' original lines"}`);
     const dialogueText = toTranscript(finalLines);
 
     // The scene's driving action is shown above the dialogue in the in-game memories window,
     // but it is never spoken: TTS streams finalLines, which stay pure dialogue, and the paced
     // subtitle block is suppressed. Continuations reuse the synthetic "scene continues"
-    // instruction rather than a real action, so they show only the dialogue.
-    const preActionLine = continuingScene ? undefined : sceneAction;
+    // instruction rather than a real action, so they show only the dialogue. A chat beat's
+    // action is a direction written for the actors, and the player's line already showed in
+    // the game's chat box — neither belongs above the reply.
+    const preActionLine = continuingScene || playerLine ? undefined : sceneAction;
     const finalText = preActionLine ? `${preActionLine}\n${dialogueText}` : dialogueText;
 
     const newMemory: MemoryEntity = {
@@ -940,6 +992,11 @@ Respond with the final scene as one line per row in exactly this format, nothing
       location_id: event.environment.location_id,
       event_type: event.event_type,
     };
+    if (playerLine) {
+      // Stored attributed so the next scene's history reads as dialogue rather than
+      // an anonymous line of narration
+      newMemory.action = toTranscript([playerLine]);
+    }
     const interactionName = (event as Partial<InteractionEvent>).interaction_name;
     if (interactionName) {
       newMemory.interaction_name = interactionName;
@@ -1136,7 +1193,7 @@ Write me a buff description based on the conversation so that ${buffRequest.name
   }
 
   playTts(text: string, sims?: SentientSim[]) {
-    playTTS(text, sims);
+    playTTS(text, sims, this.simVoiceOverrides(sims));
   }
 
   playTtsLines(
@@ -1144,6 +1201,21 @@ Write me a buff description based on the conversation so that ${buffRequest.name
     sims?: SentientSim[],
     options?: { paced?: boolean; preamble?: string; pacedText?: string },
   ) {
-    playTTSLines(lines, sims, options);
+    playTTSLines(lines, sims, { ...options, voiceOverrides: this.simVoiceOverrides(sims) });
+  }
+
+  // Voices the user pinned to these sims in the Sims tab. Best effort: TTS should still
+  // play with automatically cast voices if the save database isn't loaded.
+  private simVoiceOverrides(sims?: SentientSim[]): Map<string, string> | undefined {
+    if (!sims || sims.length === 0) {
+      return undefined;
+    }
+
+    try {
+      return this.ctx.participantRepository.getParticipantVoices(sims.map((sim) => sim.sim_id));
+    } catch (err) {
+      log.warn('Unable to look up per-sim voice overrides', err);
+      return undefined;
+    }
   }
 }
