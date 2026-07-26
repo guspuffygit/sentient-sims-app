@@ -171,13 +171,21 @@ function findSimForSpeaker(speaker: string, sims: SentientSim[]): SentientSim | 
 }
 
 /**
- * Attaches a personality-cast ElevenLabs voice id to each dialogue line whose speaker matches
- * one of the sims in the scene. Lines with no matching sim (e.g. Narrator) are left uncast and
- * fall back to the user's configured voice.
+ * Attaches an ElevenLabs voice id to each dialogue line whose speaker matches one of the sims
+ * in the scene: the voice the user pinned to that sim in the Sims tab if there is one, otherwise
+ * a personality cast one. Lines with no matching sim (e.g. Narrator) are left uncast and fall
+ * back to the user's configured voice.
  */
-export function castVoicesForLines(lines: DialogueLine[], sims: SentientSim[]): DialogueLine[] {
+export function castVoicesForLines(
+  lines: DialogueLine[],
+  sims: SentientSim[],
+  voiceOverrides?: Map<string, string>,
+): DialogueLine[] {
   return lines.map((line) => {
     const sim = findSimForSpeaker(line.speaker, sims);
-    return sim ? { ...line, voiceId: castElevenLabsVoice(sim) } : line;
+    if (!sim) {
+      return line;
+    }
+    return { ...line, voiceId: voiceOverrides?.get(sim.sim_id) ?? castElevenLabsVoice(sim) };
   });
 }

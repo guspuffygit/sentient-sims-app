@@ -5,6 +5,7 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
 import AppCard from './AppCard';
 import { MemoryEditInput } from './components/MemoryEditInput';
+import { SimVoiceSelect, SimVoiceSelection } from './components/SimVoiceSelect';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
 import { useOnDatabaseLoaded } from './hooks/useOnDatabaseLoaded';
 import { useWebsocket } from './providers/WebsocketProvider';
@@ -15,9 +16,18 @@ type SelectedSim = {
   index: number;
 };
 
-const columns: GridColDef[] = [
+const columns: GridColDef<ParticipantDTO>[] = [
   { field: 'id', headerName: 'ID', width: 150, hideable: true },
   { field: 'name', headerName: 'Name', width: 250 },
+  {
+    field: 'voiceId',
+    headerName: 'Voice',
+    width: 180,
+    valueGetter: (value: string | undefined, row: ParticipantDTO) => {
+      if (!value) return 'Default';
+      return row.voiceName ?? value;
+    },
+  },
   {
     field: 'description',
     headerName: 'Description',
@@ -103,7 +113,11 @@ export default function SimsPage() {
       log.debug(`Edited Sim: ${JSON.stringify(editedSim.sim)}`);
 
       try {
-        await client.participant.updateParticipant(editedSim.sim);
+        await client.participant.updateParticipant({
+          ...editedSim.sim,
+          // Always sent so picking "Default" clears a previously pinned voice
+          voiceId: editedSim.sim.voiceId ?? '',
+        });
       } catch (error) {
         log.error('Error saving updated sim', error);
         if (error instanceof Error && error.cause) {
@@ -136,9 +150,23 @@ export default function SimsPage() {
     setEditedSim((previousSim) => ({
       index: Number(previousSim?.index),
       sim: {
+        ...previousSim?.sim,
         id: previousSim?.sim.id || '',
         name: previousSim?.sim.name || '',
         description: event.target.value,
+      },
+    }));
+  }, []);
+
+  const handleVoiceEdit = useCallback((voice: SimVoiceSelection) => {
+    setEditedSim((previousSim) => ({
+      index: Number(previousSim?.index),
+      sim: {
+        ...previousSim?.sim,
+        id: previousSim?.sim.id || '',
+        name: previousSim?.sim.name || '',
+        voiceId: voice.voiceId,
+        voiceName: voice.voiceName,
       },
     }));
   }, []);
@@ -198,6 +226,11 @@ export default function SimsPage() {
           }
         >
           <Typography sx={{ marginBottom: 2 }}>Name: {editedSim.sim.name}</Typography>
+          <SimVoiceSelect
+            voiceId={editedSim.sim.voiceId}
+            voiceName={editedSim.sim.voiceName}
+            onChange={handleVoiceEdit}
+          />
           <MemoryEditInput
             label="Description"
             handleEdit={handleDescriptionEdit}

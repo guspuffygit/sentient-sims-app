@@ -91,12 +91,18 @@ export function sendChatGeneration(response: InteractionEventResult) {
 export function playTTSLines(
   lines: DialogueLine[],
   sims?: SentientSim[],
-  options?: { paced?: boolean; preamble?: string; pacedText?: string },
+  options?: {
+    paced?: boolean;
+    preamble?: string;
+    pacedText?: string;
+    // Voice ids the user pinned to specific sims, keyed by sim id
+    voiceOverrides?: Map<string, string>;
+  },
 ) {
   log.debug('Sending on-voice');
   let castLines = lines;
   if (sims && sims.length > 0) {
-    castLines = castVoicesForLines(lines, sims);
+    castLines = castVoicesForLines(lines, sims, options?.voiceOverrides);
   }
   notifyAllWindows('on-voice', castLines, {
     paced: options?.paced ?? false,
@@ -117,13 +123,14 @@ export function sendSceneLineToMod(line: DialogueLine & { preamble?: string }) {
   });
 }
 
-export function playTTS(text: string, sims?: SentientSim[]) {
+export function playTTS(text: string, sims?: SentientSim[], voiceOverrides?: Map<string, string>) {
   playTTSLines(
     parseDialogueLines(
       text,
       sims?.map((sim) => sim.name),
     ),
     sims,
+    { voiceOverrides },
   );
 }
 

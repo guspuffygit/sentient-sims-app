@@ -13,6 +13,8 @@ function errorMessage(err: unknown): string {
 type UpdateParticipantBody = {
   description?: string;
   name?: string;
+  voiceId?: string;
+  voiceName?: string;
 };
 
 export class ParticipantsController {
@@ -59,7 +61,8 @@ export class ParticipantsController {
   updateParticipant = (req: Request<{ participantId: string }>, res: Response) => {
     try {
       const { participantId } = req.params;
-      const { description, name } = req.body as UpdateParticipantBody;
+      const body = req.body as UpdateParticipantBody;
+      const { description, name } = body;
       const participant: ParticipantDTO = {
         id: participantId,
         description,
@@ -67,6 +70,14 @@ export class ParticipantsController {
       };
 
       this.ctx.participantRepository.updateParticipant(participant);
+      // The mod's participant updates never carry voice fields, so only the app's
+      // Sims tab (which always sends voiceId) can change or clear a voice pin
+      if ('voiceId' in body) {
+        this.ctx.participantRepository.setParticipantVoice(participantId, {
+          voiceId: body.voiceId,
+          voiceName: body.voiceName,
+        });
+      }
       res.json({
         text: `Updated participant with id ${participant.id}`,
       });

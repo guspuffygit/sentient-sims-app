@@ -96,6 +96,8 @@ export function runApi(ctx: ApiContext) {
   expressApp.post('/interactions', ctx.controller.interactionDescription.updateInteraction);
   expressApp.delete('/interactions', ctx.controller.interactionDescription.deleteInteraction);
   expressApp.get('/voice/phonemize', ctx.controller.voice.phonemize);
+  expressApp.get('/voice/elevenlabs/voices', ctx.controller.voice.getElevenLabsVoices);
+  expressApp.post('/voice/elevenlabs/voices/refresh', ctx.controller.voice.refreshElevenLabsVoices);
   expressApp.get('/websocket/isconnected', new WebsocketController().isConnected);
   expressApp.get('/announcements', ctx.controller.news.getNews);
 

@@ -32,6 +32,11 @@ import { disableDebugLogging, enableDebugLogging } from '../util/debugLog';
 import { defaultSentientSimsAITTSSettings, SentientSimsAITTSSettings } from '../models/SentientSimsAITTSSettings';
 import { defaultKokoroAITTSSettings, KokoroAITTSSettings } from '../models/KokoroAITTSSettings';
 import { defaultElevenLabsTTSSettings, ElevenLabsTTSSettings } from '../models/ElevenLabsTTSSettings';
+import {
+  ElevenLabsVoicesCache,
+  emptyElevenLabsVoicesCache,
+  sanitizeElevenLabsVoicesCache,
+} from '../models/ElevenLabsVoice';
 import { WizardPage } from '../models/WizardPage';
 
 export function defaultStore(cwd?: string) {
@@ -183,6 +188,11 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.ELEVENLABS_TTS_SETTINGS.toString()]: {
         type: 'object',
         default: defaultElevenLabsTTSSettings,
+      },
+      // Cached "My Voices" listing, refreshed on demand from the ElevenLabs API
+      [SettingsEnum.ELEVENLABS_VOICES.toString()]: {
+        type: 'object',
+        default: emptyElevenLabsVoicesCache,
       },
       [SettingsEnum.VLLM_ENDPOINT.toString()]: {
         type: 'string',
@@ -657,6 +667,14 @@ export class SettingsService {
 
   set elevenLabsTtsSettings(value: ElevenLabsTTSSettings) {
     this.set(SettingsEnum.ELEVENLABS_TTS_SETTINGS, value);
+  }
+
+  get elevenLabsVoices(): ElevenLabsVoicesCache {
+    return sanitizeElevenLabsVoicesCache(this.get(SettingsEnum.ELEVENLABS_VOICES));
+  }
+
+  set elevenLabsVoices(value: ElevenLabsVoicesCache) {
+    this.set(SettingsEnum.ELEVENLABS_VOICES, sanitizeElevenLabsVoicesCache(value));
   }
 
   get vllmEndpoint(): string {

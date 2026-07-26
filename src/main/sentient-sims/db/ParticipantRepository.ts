@@ -2,6 +2,7 @@ import { GetParticipantRequest, GetParticipantsRequest } from '../models/GetPart
 import { defaultSimDescriptions } from '../descriptions/simDescriptions';
 import { Repository } from './Repository';
 import { ParticipantEntity } from './entities/ParticipantEntity';
+import { ParticipantVoiceEntity } from './entities/ParticipantVoiceEntity';
 import { ParticipantDTO } from './dto/ParticipantDTO';
 import { notifySimsChanged } from '../util/notifyRenderer';
 import { SaveGame } from '../models/SaveGame';
@@ -53,15 +54,21 @@ export class ParticipantRepository extends Repository {
   getAllParticipants(saveGame?: SaveGame): ParticipantDTO[] {
     const participants = this.dbService
       .getDb(saveGame)
-      .prepare('SELECT * FROM participant')
+      .prepare(
+        `SELECT participant.*, participant_voice.voice_id, participant_voice.voice_name
+         FROM participant
+         LEFT JOIN participant_voice ON participant_voice.participant_id = participant.id`,
+      )
       .safeIntegers()
-      .all() as ParticipantEntity[];
+      .all() as (ParticipantEntity & Pick<ParticipantVoiceEntity, 'voice_id' | 'voice_name'>)[];
 
     return participants.map((participantEntity) => {
       return {
         id: participantEntity.id.toString(),
         description: participantEntity.description,
         name: participantEntity.name,
+        voiceId: participantEntity.voice_id ?? undefined,
+        voiceName: participantEntity.voice_name ?? undefined,
       };
     });
   }
@@ -98,7 +105,60 @@ export class ParticipantRepository extends Repository {
       .prepare('DELETE FROM participant WHERE id = ?')
       .safeIntegers()
       .run([BigInt(participant.id)]);
+    this.clearParticipantVoice(participant.id);
     notifySimsChanged();
     return result;
+  }
+
+  /**
+   * Pins a sim to a specific ElevenLabs voice, or clears the pin so the sim goes back
+   * to automatic voice casting. Stored separately from the participant row, see
+   * migration 013.
+   */
+  setParticipantVoice(participantId: string, voice?: { voiceId?: string; voiceName?: string }) {
+    if (!voice?.voiceId) {
+      const cleared = this.clearParticipantVoice(participantId);
+      notifySimsChanged();
+      return cleared;
+    }
+
+    const result = this.dbService
+      .getDb()
+      .prepare('INSERT OR REPLACE INTO participant_voice(participant_id, voice_id, voice_name) VALUES(?, ?, ?)')
+      .safeIntegers()
+      .run([BigInt(participantId), voice.voiceId, voice.voiceName ?? null]);
+    notifySimsChanged();
+    return result;
+  }
+
+  // Voice ids keyed by participant id, for the sims that have an override set
+  getParticipantVoices(participantIds: string[]): Map<string, string> {
+    const voices = new Map<string, string>();
+    if (participantIds.length === 0) {
+      return voices;
+    }
+
+    const placeholders = participantIds.map(() => '?').join(', ');
+    const rows = this.dbService
+      .getDb()
+      .prepare(`SELECT participant_id, voice_id FROM participant_voice WHERE participant_id IN (${placeholders})`)
+      .safeIntegers()
+      .all(participantIds.map((id) => BigInt(id))) as ParticipantVoiceEntity[];
+
+    rows.forEach((row) => {
+      if (row.voice_id) {
+        voices.set(row.participant_id.toString(), row.voice_id);
+      }
+    });
+
+    return voices;
+  }
+
+  private clearParticipantVoice(participantId: string) {
+    return this.dbService
+      .getDb()
+      .prepare('DELETE FROM participant_voice WHERE participant_id = ?')
+      .safeIntegers()
+      .run([BigInt(participantId)]);
   }
 }

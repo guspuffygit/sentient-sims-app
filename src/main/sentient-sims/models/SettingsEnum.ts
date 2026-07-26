@@ -38,6 +38,7 @@ export enum SettingsEnum {
   ELEVENLABS_KEY = 'elevenlabsKey',
   ELEVENLABS_ENDPOINT = 'elevenlabsEndpoint',
   ELEVENLABS_TTS_SETTINGS = 'elevenlabsTtsSettings',
+  ELEVENLABS_VOICES = 'elevenlabsVoices',
   SETUP_WIZARD_PAGE = 'setupWizardPage',
   PATREON_LINKING = 'patreonLinking',
   MAX_RESPONSE_TOKENS = 'maxResponseTokens',

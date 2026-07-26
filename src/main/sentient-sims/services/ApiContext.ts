@@ -33,6 +33,7 @@ import { AIService } from './AIService';
 import { AnimationsService } from './AnimationsService';
 import { DbService } from './DbService';
 import { DirectoryService } from './DirectoryService';
+import { ElevenLabsVoicesService } from './ElevenLabsVoicesService';
 import { EmbeddingService, NoopEmbeddingService, OpenAIEmbeddingService } from './EmbeddingService';
 import { GeminiService } from './GeminiService';
 import { GenerationQueueService } from './GenerationQueueService';
@@ -102,7 +103,7 @@ class ControllerContext {
     this._loginController = new LoginController(ctx);
     this._debugController = new DebugController(ctx);
     this._interactionDescriptionController = new InteractionDescriptionController(ctx);
-    this._voiceController = new VoiceController();
+    this._voiceController = new VoiceController(ctx);
     this._aiController = new AIController(ctx);
     this._animationsController = new AnimationsController(ctx);
     this._assetsController = new AssetsController(ctx);
@@ -219,6 +220,7 @@ export class ApiContext {
   private readonly _noopEmbeddingService: NoopEmbeddingService;
   private readonly _memoryAnnotationService: MemoryAnnotationService;
   private readonly _memoryRetrievalService: MemoryRetrievalService;
+  private readonly _elevenLabsVoicesService: ElevenLabsVoicesService;
 
   // --- Repositories ---
   private readonly _locationRepository: LocationRepository;
@@ -295,6 +297,7 @@ export class ApiContext {
 
     this._memoryAnnotationService = new MemoryAnnotationService(this);
     this._memoryRetrievalService = new MemoryRetrievalService(this);
+    this._elevenLabsVoicesService = new ElevenLabsVoicesService(this);
     this._memoryRepository.setOnMemoryUpserted((memory) => {
       this._memoryAnnotationService.annotateInBackground(memory);
     });
@@ -389,6 +392,10 @@ export class ApiContext {
 
   get memoryRetrieval(): MemoryRetrievalService {
     return this._memoryRetrievalService;
+  }
+
+  get elevenLabsVoices(): ElevenLabsVoicesService {
+    return this._elevenLabsVoicesService;
   }
 
   get modelSettings(): ModelSettingsService {

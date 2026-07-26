@@ -244,6 +244,19 @@ describe('Output', () => {
       expect(lines[1].voiceId).toEqual(lines[0].voiceId);
       expect(lines[2].voiceId).toBeUndefined();
     });
+
+    it('prefers a user pinned voice over the automatic cast', () => {
+      const lines = castVoicesForLines(
+        [
+          { speaker: 'Ricky Rickerson', text: 'Pinned voice.' },
+          { speaker: 'Narrator', text: 'No match.' },
+        ],
+        sims,
+        new Map([['1', 'pinned-voice-id']]),
+      );
+      expect(lines[0].voiceId).toEqual('pinned-voice-id');
+      expect(lines[1].voiceId).toBeUndefined();
+    });
   });
 
   describe('Event Formatter', () => {

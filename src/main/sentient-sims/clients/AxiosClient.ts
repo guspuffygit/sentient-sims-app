@@ -76,7 +76,7 @@ axiosClient.interceptors.response.use(
         throw new Error('Must be a Founder or Patron to use the Sentient Sims Uncensored AI Server.');
       }
       default: {
-        return retryElseThrow(error, 1, error.config);
+        return retryElseThrow(error, 3, error.config);
       }
     }
   },

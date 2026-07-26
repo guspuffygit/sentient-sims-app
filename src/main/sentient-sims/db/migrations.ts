@@ -131,6 +131,17 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
         FOREIGN KEY ( memory_id ) REFERENCES memory( id ) ON DELETE CASCADE ON UPDATE CASCADE
       );
     `,
+    // Per-sim ElevenLabs voice overrides live in a sidecar table so the mod-facing
+    // participant row keeps its shape. Deliberately no foreign key: updateParticipant
+    // uses INSERT OR REPLACE, and a REPLACE-delete fires ON DELETE CASCADE, so an FK
+    // here would wipe a sim's voice every time the mod refreshed their description.
+    '013-create-participant-voice': `
+      CREATE TABLE participant_voice (
+        participant_id       INTEGER NOT NULL  PRIMARY KEY  ,
+        voice_id             TEXT     ,
+        voice_name           TEXT
+      );
+    `,
   }),
 );
 
