@@ -237,7 +237,11 @@ export default function MemoriesPage() {
           }}
           className="hoverHighlightTypography"
         >
-          {[memory.observation, memory.action, memory.content].filter((m) => m).join('\n')}
+          {/* A content-less memory is served with its observation/pre_action as content so the
+              in-game window can render it, so drop the repeat instead of printing it twice */}
+          {[memory.observation, memory.action, memory.content]
+            .filter((m, i, all) => m && all.indexOf(m) === i)
+            .join('\n')}
         </Typography>,
       );
       renderText.push(<Typography> </Typography>);

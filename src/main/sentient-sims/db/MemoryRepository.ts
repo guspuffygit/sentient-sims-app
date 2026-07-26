@@ -7,7 +7,7 @@ import {
   GetParticipantsMemoriesRequest,
 } from '../models/GetMemoryRequest';
 import { Repository } from './Repository';
-import { MemoryEntity } from './entities/MemoryEntity';
+import { MemoryEntity, withDisplayContent } from './entities/MemoryEntity';
 import { MemoryParticipantEntity } from './entities/MemoryParticipantEntity';
 import { notifyMemoryDeleted, notifyMemoryEdited, notifyNewMemoryAdded } from '../util/notifyRenderer';
 import { MemoryParticipantDTO } from './dto/MemoryParticipantDTO';
@@ -70,8 +70,10 @@ export class MemoryRepository extends Repository {
     return this.dbService.getDb().prepare(query).all(bigIntParticipantIds) as MemoryEntity[];
   }
 
+  // This list feeds the in-game memories window, which can't render a null content
+  // (see withDisplayContent) — every row it hands out gets a string content.
   getMemories(): MemoryEntity[] {
-    return this.dbService
+    const memories = this.dbService
       .getDb()
       .prepare(
         `
@@ -84,6 +86,8 @@ export class MemoryRepository extends Repository {
         `,
       )
       .all() as MemoryEntity[];
+
+    return memories.map((memory) => withDisplayContent(memory));
   }
 
   // The raw, non-reflection memories of a single scene, oldest first. A scene is identified by

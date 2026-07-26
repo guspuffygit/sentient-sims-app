@@ -101,6 +101,62 @@ describe('MemoryRepository', () => {
     expect(throwsError).toThrow();
   });
 
+  it('should never hand out a content-less memory in the memories list', () => {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
+      recursive: true,
+    });
+    ctx.db.loadDatabase({
+      sessionId: '3333333',
+      saveId: '1',
+    });
+
+    // An outcome row: bookkeeping text lives in observation. The raw game repr in the reason
+    // must come out markup-safe — a single '<' swallows the rest of the Flash window's list.
+    ctx.memoryRepository.createMemory({
+      memory: {
+        location_id: 1,
+        observation:
+          "Marisol Vega tried 'take_shower' and it was canceled (<EnqueueResult: Bills: utility is shut off.>).",
+        pre_action: 'invites Julio to add one last overheard detail',
+        action: 'take_shower',
+        event_type: 'outcome',
+      },
+      participants: [],
+    });
+    // A pre-action fallback row: nothing was generated, so only the pre_action has text
+    ctx.memoryRepository.createMemory({
+      memory: {
+        location_id: 1,
+        pre_action: 'Marisol Vega is asking Julio Brewer about their career.',
+        event_type: 'interaction',
+      },
+      participants: [],
+    });
+    // Nothing renderable at all
+    ctx.memoryRepository.createMemory({
+      memory: { location_id: 1, event_type: 'interaction' },
+      participants: [],
+    });
+
+    const memories = ctx.memoryRepository.getMemories();
+    expect(memories).toHaveLength(3);
+    memories.forEach((memory) => {
+      expect(typeof memory.content).toEqual('string');
+      expect(memory.content).not.toMatch(/[<>]/);
+    });
+    expect(memories[0].content).toEqual(
+      "Marisol Vega tried 'take_shower' and it was canceled (‹EnqueueResult: Bills: utility is shut off.›).",
+    );
+    // observation is neutralized identically so consumers comparing the fields see equal strings
+    expect(memories[0].observation).toEqual(memories[0].content);
+    expect(memories[1].content).toEqual('Marisol Vega is asking Julio Brewer about their career.');
+    expect(memories[2].content).toEqual('');
+
+    // The stored rows keep their own shape
+    expect(ctx.memoryRepository.getMemory({ id: Number(memories[1].id) }).content).toBeNull();
+  });
+
   it('should store interaction_name from normal interactions', () => {
     const ctx = mockApiContext();
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
