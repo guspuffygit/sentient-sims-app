@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting from 'renderer/hooks/useSetting';
-import { defaultSentientSimsAIHost } from 'main/sentient-sims/constants';
+import { defaultSentientSimsAIHost, subtitleLinePacingMs } from 'main/sentient-sims/constants';
 import {
   defaultSentientSimsAITTSSettings,
   SentientSimsAITTSSettings,
@@ -13,7 +13,12 @@ import {
 import { axiosClient } from 'main/sentient-sims/clients/AxiosClient';
 import { SentenceTokenizeResponse } from 'main/sentient-sims/models/SentenceTokenizeResponse';
 import { SentenceTokenizeRequest } from 'main/sentient-sims/models/SentenceTokenizerRequest';
+import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
+import { assignVoicesToSpeakers } from 'main/sentient-sims/formatter/VoiceAssignment';
+import { AudioPlaybackHandle, playAudioUrl } from './audioPlayback';
 import { TTSHook } from './TTSHook';
+
+type QueuedSpeech = { text: string; voice: string[] };
 
 export function useSentientSimsTTS(): TTSHook {
   const aiSettings = useAISettings();
@@ -30,25 +35,29 @@ export function useSentientSimsTTS(): TTSHook {
   const [error, setError] = useState<string | undefined>();
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const sentenceQueueRef = useRef<string[]>([]);
+  const sentenceQueueRef = useRef<QueuedSpeech[]>([]);
   const audioUrlQueueRef = useRef<string[]>([]);
 
   const playerRunningRef = useRef(false);
   const fetcherRunningRef = useRef(false);
 
-  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const currentPlaybackRef = useRef<AudioPlaybackHandle | null>(null);
+
+  // Bumped by stop() and by each new speakLines run so an in-flight paced loop bails out
+  const speakSessionRef = useRef(0);
 
   const fetcherLoop = useCallback(async () => {
     if (fetcherRunningRef.current) return;
     fetcherRunningRef.current = true;
 
     while (sentenceQueueRef.current.length > 0) {
-      const text = sentenceQueueRef.current.shift();
-      if (!text) continue;
+      const item = sentenceQueueRef.current.shift();
+      if (!item) continue;
+      const { text, voice } = item;
 
       log.debug(`Sentient Sims TTS Fetcher: Fetching audio for "${text}"`);
 
-      if (sentientSimsAITTSSettings.value.voice.length === 0) {
+      if (voice.length === 0) {
         setError('At least one Sentient Sims Voice must be selected');
         break;
       }
@@ -56,7 +65,7 @@ export function useSentientSimsTTS(): TTSHook {
       const requestBody = {
         model: sentientSimsAITTSSettings.value.model,
         input: text,
-        voice: sentientSimsAITTSSettings.value.voice.join('+'),
+        voice: voice.join('+'),
         response_format: sentientSimsAITTSSettings.value.response_format,
         speed: sentientSimsAITTSSettings.value.speed ?? defaultSentientSimsAITTSSettings.speed,
       };
@@ -117,26 +126,18 @@ export function useSentientSimsTTS(): TTSHook {
         if (!audioUrl) continue;
 
         log.debug(`Player: Playing audio from URL: ${audioUrl}`);
-        const audio = new Audio(audioUrl);
-        audio.volume = aiSettings.ttsVolume;
-        currentAudioRef.current = audio;
-
-        await new Promise<void>((resolve) => {
-          audio.onended = () => {
-            log.debug('Audio finished playing.');
-            currentAudioRef.current = null;
-            URL.revokeObjectURL(audioUrl);
-            resolve();
-          };
-          audio.onerror = () => {
-            log.error('Error playing audio element.');
-            setError('An error occurred during audio playback.');
-            currentAudioRef.current = null;
-            URL.revokeObjectURL(audioUrl);
-            resolve();
-          };
-          void audio.play();
-        });
+        try {
+          const playback = await playAudioUrl(audioUrl, aiSettings.ttsVolume);
+          currentPlaybackRef.current = playback;
+          await playback.finished;
+          log.debug('Audio finished playing.');
+        } catch (err) {
+          log.error('Error playing audio.', err);
+          setError('An error occurred during audio playback.');
+        } finally {
+          currentPlaybackRef.current = null;
+          URL.revokeObjectURL(audioUrl);
+        }
       } else {
         await new Promise((resolve) => {
           setTimeout(resolve, 10);
@@ -148,6 +149,21 @@ export function useSentientSimsTTS(): TTSHook {
     setIsPlaying(false);
     log.debug('Player loop finished.');
   }, [aiSettings.ttsVolume]);
+
+  // Resolves once every queued sentence has been fetched and played, so callers can
+  // await full playback and serialize one scene after another
+  const waitForIdle = useCallback(async () => {
+    while (
+      fetcherRunningRef.current ||
+      playerRunningRef.current ||
+      sentenceQueueRef.current.length > 0 ||
+      audioUrlQueueRef.current.length > 0
+    ) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
+    }
+  }, []);
 
   const speak = useCallback(
     async (text: string) => {
@@ -167,10 +183,13 @@ export function useSentientSimsTTS(): TTSHook {
         const { sentences } = response.data;
 
         if (sentences.length > 0) {
-          sentences.forEach((sentence) => sentenceQueueRef.current.push(sentence));
+          sentences.forEach((sentence) =>
+            sentenceQueueRef.current.push({ text: sentence, voice: sentientSimsAITTSSettings.value.voice }),
+          );
           log.debug(`Queued ${sentences.length} sentences. Starting fetcher and player.`);
           void fetcherLoop();
           void playerLoop();
+          await waitForIdle();
         } else {
           log.error('No sentences returned from tokenization.');
         }
@@ -181,14 +200,70 @@ export function useSentientSimsTTS(): TTSHook {
         setError(errorMessage);
       }
     },
-    [sentientSimsAIEndpointSetting.value, sentientSimsAITokenSetting.value, fetcherLoop, playerLoop],
+    [
+      sentientSimsAIEndpointSetting.value,
+      sentientSimsAITokenSetting.value,
+      sentientSimsAITTSSettings.value,
+      fetcherLoop,
+      playerLoop,
+      waitForIdle,
+    ],
+  );
+
+  const speakLines = useCallback(
+    async (lines: DialogueLine[], onLineStart?: (line: DialogueLine) => void): Promise<void> => {
+      if (lines.length === 0) return;
+
+      const pool = sentientSimsAITTSSettings.value.voice;
+      if (pool.length === 0) {
+        setError('At least one Sentient Sims Voice must be selected');
+        return;
+      }
+
+      const assignments = assignVoicesToSpeakers(
+        lines.map((line) => line.speaker),
+        pool,
+      );
+
+      speakSessionRef.current += 1;
+      const session = speakSessionRef.current;
+
+      // One line at a time with subtitle pacing: each line fully plays, then the next
+      // line is held back until the pacing window since this line started has elapsed
+      log.debug(`Playing ${lines.length} dialogue lines with subtitle pacing.`);
+      for (let i = 0; i < lines.length; i += 1) {
+        if (speakSessionRef.current !== session) break;
+        const line = lines[i];
+        const voice = assignments.get(line.speaker) ?? pool;
+        const lineStartedAt = Date.now();
+
+        // Fires at fetch start rather than playback start, so the subtitle leads the
+        // audio by the fetch latency — the way TV subtitles naturally lead speech
+        onLineStart?.(line);
+        sentenceQueueRef.current.push({ text: line.text, voice });
+        void fetcherLoop();
+        void playerLoop();
+        await waitForIdle();
+
+        if (i < lines.length - 1 && speakSessionRef.current === session) {
+          const holdMs = subtitleLinePacingMs - (Date.now() - lineStartedAt);
+          if (holdMs > 0) {
+            await new Promise((resolve) => {
+              setTimeout(resolve, holdMs);
+            });
+          }
+        }
+      }
+    },
+    [sentientSimsAITTSSettings.value, fetcherLoop, playerLoop, waitForIdle],
   );
 
   const stopTTS = useCallback(() => {
     log.debug('Stop TTS called.');
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
+    speakSessionRef.current += 1;
+    if (currentPlaybackRef.current) {
+      currentPlaybackRef.current.stop();
+      currentPlaybackRef.current = null;
     }
 
     sentenceQueueRef.current = [];
@@ -204,5 +279,5 @@ export function useSentientSimsTTS(): TTSHook {
     };
   }, []);
 
-  return { speak, stop: stopTTS, isPlaying, error };
+  return { speak, speakLines, stop: stopTTS, isPlaying, error };
 }

@@ -8,6 +8,9 @@ import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { CaughtError } from '../models/CaughtError';
 import { getAllBrowserWindows } from './browserWindows';
+import { DialogueLine, parseDialogueLines } from '../formatter/PromptFormatter';
+import { castVoicesForLines } from '../formatter/ElevenLabsVoiceCasting';
+import { SentientSim } from '../models/SentientSim';
 
 function notifyAllWindows(message: string, ...args: unknown[]) {
   getAllBrowserWindows().forEach((wnd) => {
@@ -78,9 +81,28 @@ export function sendChatGeneration(response: InteractionEventResult) {
   notifyAllWindows('on-chat-generation', response);
 }
 
-export function playTTS(text: string) {
+export function playTTSLines(lines: DialogueLine[], sims?: SentientSim[]) {
   log.debug('Sending on-voice');
-  notifyAllWindows('on-voice', text);
+  const castLines = sims && sims.length > 0 ? castVoicesForLines(lines, sims) : lines;
+  notifyAllWindows('on-voice', castLines);
+}
+
+export function playTTS(text: string, sims?: SentientSim[]) {
+  const lines = parseDialogueLines(
+    text,
+    sims?.map((sim) => sim.name),
+  );
+
+  // parseDialogueLines drops anything that isn't attributed dialogue, which is right for
+  // screenplay-format output but would swallow half of a prose response. Only speak line by
+  // line when every line of the response was accounted for; otherwise read the whole thing.
+  const nonEmptyLineCount = text.split('\n').filter((line) => line.trim().length > 0).length;
+  if (lines.length < nonEmptyLineCount) {
+    playTTSLines([{ speaker: 'Narrator', text: text.trim() }]);
+    return;
+  }
+
+  playTTSLines(lines, sims);
 }
 
 export function sendPopUpNotification(message?: string) {

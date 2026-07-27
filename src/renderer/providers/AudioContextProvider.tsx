@@ -1,6 +1,7 @@
-import { createContext, ReactNode, use, useCallback, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import log from 'electron-log';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
+import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
 import { useElevenLabsTTS } from 'renderer/voice/useElevenLabsTTS';
 import { useSentientSimsTTS } from 'renderer/voice/useSentientSimsTTS';
 import { useAISettings } from './AISettingsProvider';
@@ -73,18 +74,61 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
     [aiSettings.ttsEnabled, tts],
   );
 
+  // One scene plays at a time; at most one more may wait. Scenes arriving while the
+  // queue is full are dropped outright so audio never piles up behind gameplay.
+  const maxQueuedScenes = 1;
+  const sceneQueueRef = useRef<DialogueLine[][]>([]);
+  const drainingRef = useRef(false);
+
   const stop = useCallback(() => {
+    sceneQueueRef.current = [];
     tts?.stop();
   }, [tts]);
 
+  const speakDialogueLines = useCallback(
+    async (lines: DialogueLine[]) => {
+      if (lines.length === 0 || !aiSettings.ttsEnabled) return;
+
+      const uniqueSpeakers = new Set(lines.map((line) => line.speaker));
+      const hasCastVoices = lines.some((line) => line.voiceId);
+
+      if ((uniqueSpeakers.size > 1 || hasCastVoices) && tts?.speakLines) {
+        await tts.speakLines(lines);
+        return;
+      }
+
+      await speak(lines.map((line) => line.text).join(' '));
+    },
+    [aiSettings.ttsEnabled, tts, speak],
+  );
+
+  const drainSceneQueue = useCallback(async () => {
+    if (drainingRef.current) return;
+    drainingRef.current = true;
+    try {
+      while (sceneQueueRef.current.length > 0) {
+        const scene = sceneQueueRef.current.shift();
+        if (!scene) continue;
+        await speakDialogueLines(scene);
+      }
+    } finally {
+      drainingRef.current = false;
+    }
+  }, [speakDialogueLines]);
+
   useEffect(() => {
-    const removeListener = window.electron.onVoice((_event: any, text: string) => {
-      void speak(text);
+    const removeListener = window.electron.onVoice((_event: any, lines: DialogueLine[]) => {
+      if (sceneQueueRef.current.length >= maxQueuedScenes) {
+        log.debug(`TTS scene queue full (${sceneQueueRef.current.length} waiting) — dropping incoming scene`);
+        return;
+      }
+      sceneQueueRef.current.push(lines);
+      void drainSceneQueue();
     });
     return () => {
       removeListener();
     };
-  }, [speak]);
+  }, [drainSceneQueue]);
 
   const contextValue = useMemo(() => {
     return {

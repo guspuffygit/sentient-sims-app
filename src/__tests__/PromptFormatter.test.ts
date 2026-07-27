@@ -7,7 +7,14 @@ import {
   formatWeather,
   formatWWProperties,
   hasWWProperties,
+  parseDialogueLines,
 } from 'main/sentient-sims/formatter/PromptFormatter';
+import { assignVoicesToSpeakers } from 'main/sentient-sims/formatter/VoiceAssignment';
+import {
+  castElevenLabsVoice,
+  castVoicesForLines,
+  elevenLabsVoiceCatalog,
+} from 'main/sentient-sims/formatter/ElevenLabsVoiceCasting';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
@@ -23,6 +30,213 @@ describe('Output', () => {
     const actual = 'This is a sentence. Here is another';
     const expected = 'This is a sentence.';
     expect(cleanupAIOutput(actual)).toEqual(expected);
+  });
+
+  describe('parseDialogueLines', () => {
+    it('parses a single dialogue line', () => {
+      const result = parseDialogueLines('Ricky: "Been fishing here for years."');
+      expect(result).toEqual([{ speaker: 'Ricky', text: 'Been fishing here for years.' }]);
+    });
+
+    it('drops stage directions and keeps only quoted dialogue', () => {
+      const screenplay = 'Ricky smirks, leaning back.\nRicky: "Been fishing here for years. You should try it."';
+      const result = parseDialogueLines(screenplay);
+      expect(result).toEqual([{ speaker: 'Ricky', text: 'Been fishing here for years. You should try it.' }]);
+      result.forEach((line) => {
+        expect(line.text).not.toContain('smirks');
+      });
+    });
+
+    it('parses a multi-speaker exchange in order', () => {
+      const screenplay = 'Ricky: "You should try fishing here."\nRichy: "Maybe next weekend."';
+      const result = parseDialogueLines(screenplay);
+      expect(result).toEqual([
+        { speaker: 'Ricky', text: 'You should try fishing here.' },
+        { speaker: 'Richy', text: 'Maybe next weekend.' },
+      ]);
+    });
+
+    it('captures an inline parenthetical delivery note without speaking it', () => {
+      const screenplay = 'Richy Richardson: (good-natured) "Only you would discover that."';
+      const result = parseDialogueLines(screenplay);
+      expect(result).toEqual([
+        { speaker: 'Richy Richardson', text: 'Only you would discover that.', deliveryNote: 'good-natured' },
+      ]);
+    });
+
+    it('parses multi-word speaker names', () => {
+      const result = parseDialogueLines('Ricky Rickerson: "Hello there."');
+      expect(result).toEqual([{ speaker: 'Ricky Rickerson', text: 'Hello there.' }]);
+    });
+
+    it('accepts unquoted lines only for known speakers', () => {
+      const result = parseDialogueLines('Ricky Rickerson: Been fishing here for years.', ['Ricky Rickerson']);
+      expect(result).toEqual([{ speaker: 'Ricky Rickerson', text: 'Been fishing here for years.' }]);
+    });
+
+    it('falls back to a single Narrator line for plain narrator prose', () => {
+      const narration = 'The house is quiet late at night, warm and lived-in.';
+      const result = parseDialogueLines(narration);
+      expect(result).toEqual([{ speaker: 'Narrator', text: narration }]);
+    });
+
+    it('falls back to Narrator when only stage directions are present (no dialogue lines)', () => {
+      const result = parseDialogueLines('Ricky smirks, leaning back.');
+      expect(result).toEqual([{ speaker: 'Narrator', text: 'Ricky smirks, leaning back.' }]);
+    });
+
+    it('returns an empty array for empty input', () => {
+      expect(parseDialogueLines('')).toEqual([]);
+    });
+
+    it('does not misparse a colon-only line with no quotes', () => {
+      const result = parseDialogueLines('Note: something happened');
+      expect(result).toEqual([{ speaker: 'Narrator', text: 'Note: something happened' }]);
+    });
+  });
+
+  describe('assignVoicesToSpeakers', () => {
+    it('assigns the full pool to a single speaker (legacy blended behavior)', () => {
+      const pool = ['af_heart', 'am_adam', 'bf_emma'];
+      const result = assignVoicesToSpeakers(['Ricky'], pool);
+      expect(result.get('Ricky')).toEqual(pool);
+    });
+
+    it('assigns one distinct voice per speaker deterministically', () => {
+      const pool = ['af_heart', 'am_adam', 'bf_emma'];
+      const first = assignVoicesToSpeakers(['Ricky', 'Richy'], pool);
+      const second = assignVoicesToSpeakers(['Ricky', 'Richy'], pool);
+      expect(first.get('Ricky')).toHaveLength(1);
+      expect(first.get('Richy')).toHaveLength(1);
+      expect(first.get('Ricky')).toEqual(second.get('Ricky'));
+      expect(first.get('Richy')).toEqual(second.get('Richy'));
+    });
+
+    it('degrades to the same single voice for multiple speakers when the pool has only one voice', () => {
+      const result = assignVoicesToSpeakers(['Ricky', 'Richy'], ['af_heart']);
+      expect(result.get('Ricky')).toEqual(['af_heart']);
+      expect(result.get('Richy')).toEqual(['af_heart']);
+    });
+
+    it('returns empty assignments when the pool is empty', () => {
+      const result = assignVoicesToSpeakers(['Ricky', 'Richy'], []);
+      expect(result.get('Ricky')).toEqual([]);
+      expect(result.get('Richy')).toEqual([]);
+    });
+  });
+
+  describe('castElevenLabsVoice', () => {
+    function makeSim(overrides: Partial<SentientSim>): SentientSim {
+      return {
+        careers: [],
+        name: 'Test Sim',
+        age: SimAge.ADULT,
+        sim_id: '1',
+        gender: 'Male',
+        traits: [],
+        moods: [],
+        is_ghost: false,
+        grubby: false,
+        in_pool: false,
+        is_at_home: false,
+        is_dying: false,
+        is_human: true,
+        is_inside_building: false,
+        is_outside: false,
+        is_pet: false,
+        on_fire: false,
+        on_home_lot: false,
+        sleeping: false,
+        is_pregnant: false,
+        is_player_sim: true,
+        ...overrides,
+      };
+    }
+
+    function voiceById(voiceId: string) {
+      const voice = elevenLabsVoiceCatalog.find((v) => v.voiceId === voiceId);
+      if (!voice) {
+        throw new Error(`Voice ${voiceId} not found in catalog`);
+      }
+      return voice;
+    }
+
+    it('is deterministic for the same sim', () => {
+      const sim = makeSim({ name: 'Ricky Rickerson', traits: ['trait_Evil'] });
+      expect(castElevenLabsVoice(sim)).toEqual(castElevenLabsVoice(sim));
+    });
+
+    it('casts a matching gender', () => {
+      const male = makeSim({ name: 'Ricky', gender: 'Male' });
+      const female = makeSim({ name: 'Bella', gender: 'Female' });
+      expect(voiceById(castElevenLabsVoice(male)).gender).toBe('male');
+      expect(voiceById(castElevenLabsVoice(female)).gender).toBe('female');
+    });
+
+    it('never casts a child voice for an adult and vice versa', () => {
+      const adult = makeSim({ name: 'Bella', gender: 'Female', age: SimAge.ADULT });
+      expect(voiceById(castElevenLabsVoice(adult)).age).not.toBe('child');
+
+      const child = makeSim({ name: 'Lily', gender: 'Female', age: SimAge.CHILD });
+      expect(['child', 'young']).toContain(voiceById(castElevenLabsVoice(child)).age);
+    });
+
+    it('leans into personality traits', () => {
+      const villain = makeSim({ name: 'Ricky', traits: ['trait_Evil', 'trait_Mean'], moods: ['Mood_Angry'] });
+      const villainVoice = voiceById(castElevenLabsVoice(villain));
+      expect(villainVoice.tags.some((tag) => ['intense', 'gruff', 'deep'].includes(tag))).toBe(true);
+
+      const sweetheart = makeSim({
+        name: 'Bella',
+        gender: 'Female',
+        traits: ['trait_Romantic'],
+        moods: ['Mood_Flirty'],
+      });
+      const sweetheartVoice = voiceById(castElevenLabsVoice(sweetheart));
+      expect(sweetheartVoice.tags.some((tag) => ['seductive', 'warm'].includes(tag))).toBe(true);
+    });
+  });
+
+  describe('castVoicesForLines', () => {
+    const sims: SentientSim[] = [
+      {
+        careers: [],
+        name: 'Ricky Rickerson',
+        age: SimAge.ADULT,
+        sim_id: '1',
+        gender: 'Male',
+        traits: ['trait_Evil'],
+        moods: [],
+        is_ghost: false,
+        grubby: false,
+        in_pool: false,
+        is_at_home: false,
+        is_dying: false,
+        is_human: true,
+        is_inside_building: false,
+        is_outside: false,
+        is_pet: false,
+        on_fire: false,
+        on_home_lot: false,
+        sleeping: false,
+        is_pregnant: false,
+        is_player_sim: true,
+      },
+    ];
+
+    it('casts by full name, first name, and leaves unknown speakers uncast', () => {
+      const lines = castVoicesForLines(
+        [
+          { speaker: 'Ricky Rickerson', text: 'Full name match.' },
+          { speaker: 'Ricky', text: 'First name match.' },
+          { speaker: 'Narrator', text: 'No match.' },
+        ],
+        sims,
+      );
+      expect(lines[0].voiceId).toBeDefined();
+      expect(lines[1].voiceId).toEqual(lines[0].voiceId);
+      expect(lines[2].voiceId).toBeUndefined();
+    });
   });
 
   describe('Event Formatter', () => {

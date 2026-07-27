@@ -423,7 +423,9 @@ export function trimIncompleteSentence(text: string): string {
   const lastPunctIndex = Math.max(text.lastIndexOf('.'), text.lastIndexOf('?'), text.lastIndexOf('!'));
 
   if (lastPunctIndex >= 0) {
-    return text.substring(0, lastPunctIndex + 1);
+    const nextChar = text[lastPunctIndex + 1];
+    const endIndex = nextChar === '"' || nextChar === "'" ? lastPunctIndex + 2 : lastPunctIndex + 1;
+    return text.substring(0, endIndex);
   }
 
   return text;
@@ -437,6 +439,10 @@ export function getFirstWord(sentence: string): string {
 
 export function removeNonLetters(input: string): string {
   return input.replace(/[^a-zA-Z]/g, '');
+}
+
+export function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 export function removeStopTokens(text: string, stopTokens?: string[]) {
@@ -466,6 +472,79 @@ export function cleanupAIOutput(text: string, stopTokens?: string[]): string {
   output = removeEmojis(output);
 
   return output.trim();
+}
+
+export type DialogueLine = {
+  speaker: string;
+  text: string;
+  // Inline parenthetical delivery note, e.g. `Ricky: (nervous) "..."` — feeds v3 audio tags
+  deliveryNote?: string;
+  // Provider-specific voice cast for this speaker (currently an ElevenLabs voice id)
+  voiceId?: string;
+};
+
+const dialogueLineRegex = /^([A-Za-z][A-Za-z'-]*(?:\s[A-Za-z][A-Za-z'-]*){0,2}):\s*(?:\(([^)]*)\)\s*)?"([^"]+)"\s*$/;
+
+/**
+ * Splits screenplay-format AI output (e.g. `Ricky: "Been fishing here for years."`, optionally
+ * `Ricky: (delivery note) "..."`) into per-speaker dialogue lines. A parenthetical delivery
+ * note is kept as `deliveryNote` (never spoken as text, but usable as a TTS style hint).
+ * Lines with no quoted dialogue at all (pure stage directions) are dropped entirely since only
+ * quoted dialogue should ever be spoken. When `knownSpeakers` is provided, bare subtitle lines
+ * like `Ricky: Been fishing here for years.` are also accepted for exactly those speakers.
+ * Falls back to a single Narrator line covering the whole text when no dialogue lines are found,
+ * which is what plain third-person narration produces.
+ */
+export function parseDialogueLines(text: string, knownSpeakers?: string[]): DialogueLine[] {
+  const lines = text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  const speakerPatterns = (knownSpeakers ?? [])
+    .filter((name) => name.trim().length > 0)
+    .map((name) => ({
+      name,
+      regex: new RegExp(`^${escapeRegExp(name)}\\s*:\\s*(?:\\(([^)]*)\\)\\s*)?(.+)$`, 'i'),
+    }));
+
+  const dialogueLines: DialogueLine[] = [];
+  lines.forEach((line) => {
+    const match = dialogueLineRegex.exec(line);
+    if (match) {
+      const dialogueLine: DialogueLine = { speaker: match[1].trim(), text: match[3].trim() };
+      // The parenthetical group is optional, so it can be undefined at runtime
+      const deliveryNote = (match[2] as string | undefined)?.trim();
+      if (deliveryNote) {
+        dialogueLine.deliveryNote = deliveryNote;
+      }
+      dialogueLines.push(dialogueLine);
+      return;
+    }
+
+    const speakerPattern = speakerPatterns.find((pattern) => pattern.regex.test(line));
+    if (speakerPattern) {
+      const subtitleMatch = speakerPattern.regex.exec(line);
+      if (subtitleMatch) {
+        const spokenText = subtitleMatch[2].replace(/^"(.*)"$/s, '$1').trim();
+        if (spokenText.length > 0) {
+          const dialogueLine: DialogueLine = { speaker: speakerPattern.name, text: spokenText };
+          const deliveryNote = (subtitleMatch[1] as string | undefined)?.trim();
+          if (deliveryNote) {
+            dialogueLine.deliveryNote = deliveryNote;
+          }
+          dialogueLines.push(dialogueLine);
+        }
+      }
+    }
+  });
+
+  if (dialogueLines.length === 0) {
+    const wholeText = text.trim();
+    return wholeText.length === 0 ? [] : [{ speaker: 'Narrator', text: wholeText }];
+  }
+
+  return dialogueLines;
 }
 
 export function cleanAIClassificationOutput(text: string): string {

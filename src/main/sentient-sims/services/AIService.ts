@@ -40,6 +40,7 @@ import { sendModNotification } from '../websocketServer';
 import { ModAddBuff, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { ApiContext } from './ApiContext';
 import { AIActionType, actionTypeForEvent } from '../models/AIActionType';
+import { SentientSim } from '../models/SentientSim';
 
 function getInputFormatters(apiType: ApiType): InputFormatter[] {
   if (apiType === ApiType.CustomAI || apiType === ApiType.KoboldAI) {
@@ -309,7 +310,7 @@ export class AIService {
     if (output.length > 1) {
       newMemory.content = output;
 
-      this.playTts(output);
+      this.playTts(output, event.sentient_sims);
 
       return {
         status: InteractionEventStatus.GENERATED,
@@ -484,7 +485,7 @@ Write me a buff description based on the conversation so that ${buffRequest.name
     return { status: InteractionEventStatus.NOOP };
   }
 
-  playTts(text: string) {
-    playTTS(text);
+  playTts(text: string, sims?: SentientSim[]) {
+    playTTS(text, sims);
   }
 }
