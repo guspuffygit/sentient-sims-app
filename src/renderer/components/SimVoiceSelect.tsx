@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import { useElevenLabsVoices } from 'renderer/hooks/useElevenLabsVoices';
+import { TestVoiceButton } from './VoiceTestButton';
 
 export type SimVoiceSelection = {
   voiceId: string;
@@ -88,6 +89,10 @@ export function SimVoiceSelect({ voiceId, voiceName, onChange }: SimVoiceSelectP
           </IconButton>
         </span>
       </Tooltip>
+      {/* Default selection tests the settings-default voice (automatic casting varies per sim) */}
+      <Box sx={{ marginLeft: 1 }}>
+        <TestVoiceButton voiceId={selected || undefined} />
+      </Box>
     </Box>
   );
 }

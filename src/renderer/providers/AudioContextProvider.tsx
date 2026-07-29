@@ -8,7 +8,9 @@ import { useSentientSimsTTS } from 'renderer/voice/useSentientSimsTTS';
 import { useAISettings } from './AISettingsProvider';
 
 interface TTSAudioContextType {
-  speak: (text: string) => Promise<void>;
+  // voiceId pins a specific cast voice (currently an ElevenLabs voice id) instead
+  // of the settings default — used by per-sim voice test buttons
+  speak: (text: string, voiceId?: string) => Promise<void>;
   stop: () => void;
   isWebGPUSupported: boolean | null;
   isPlaying: boolean | undefined;
@@ -65,12 +67,18 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
   }, []);
 
   const speak = useCallback(
-    async (text: string) => {
+    async (text: string, voiceId?: string) => {
       if (!text.trim()) return;
 
-      if (aiSettings.ttsEnabled) {
-        await tts?.speak(text);
+      if (!aiSettings.ttsEnabled) return;
+
+      // A pinned voice has to go through the per-line path; plain speak() always
+      // uses the settings default voice
+      if (voiceId && tts?.speakLines) {
+        await tts.speakLines([{ speaker: 'Voice test', text, voiceId }]);
+        return;
       }
+      await tts?.speak(text);
     },
     [aiSettings.ttsEnabled, tts],
   );

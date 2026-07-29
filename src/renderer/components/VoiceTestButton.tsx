@@ -4,9 +4,11 @@ import { useTTS } from 'renderer/providers/AudioContextProvider';
 
 export type TestVoiceButtonProperties = {
   disabled?: boolean;
+  // Pins the test to a specific cast voice instead of the settings default
+  voiceId?: string;
 };
 
-export function TestVoiceButton({ disabled }: TestVoiceButtonProperties) {
+export function TestVoiceButton({ disabled, voiceId }: TestVoiceButtonProperties) {
   const tts = useTTS();
 
   return (
@@ -14,7 +16,7 @@ export function TestVoiceButton({ disabled }: TestVoiceButtonProperties) {
       color="primary"
       variant="outlined"
       onClick={() => {
-        void tts.speak('Hello, this is a demo of my voice.');
+        void tts.speak('Hello, this is a demo of my voice.', voiceId);
         log.debug(`Test Voice Button clicked`);
       }}
       loading={tts.isPlaying}
