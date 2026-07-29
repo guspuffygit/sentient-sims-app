@@ -9,7 +9,9 @@ import {
   formatWeather,
   formatWWProperties,
   hasWWProperties,
+  isDegenerateOutput,
   parseDialogueLines,
+  splitLinesForPacing,
 } from 'main/sentient-sims/formatter/PromptFormatter';
 import { assignVoicesToSpeakers } from 'main/sentient-sims/formatter/VoiceAssignment';
 import {
@@ -42,6 +44,27 @@ describe('Output', () => {
     expect(result).toContain('Ricky:');
     expect(result).toContain('"Been fishing here for years.');
     expect(result).toMatch(/"$/);
+  });
+
+  describe('isDegenerateOutput', () => {
+    it('accepts ordinary prose and screenplay dialogue', () => {
+      expect(isDegenerateOutput('Jonah kneels in the dirt, pressing a seed into the soil with quiet care.')).toBe(
+        false,
+      );
+      expect(isDegenerateOutput('Ricky: (grinning) "Been fishing here for years — you should try it!"')).toBe(false);
+      expect(isDegenerateOutput('short')).toBe(false);
+    });
+
+    it('rejects sampler-blowup token soup', () => {
+      // Trimmed from a real degenerate generation captured in playtest logs
+      const tokenSoup =
+        'для.Tposes //452 are.ca berries$$.),)\\\\查看{acleIndHe115aug\\\\https committees覆 IX恶 ' +
+        '`​覆 kW.pdf_creation\tünd reviewed ONLY/in \\}}182\\ Bill Texans\\ вели\\276 art\\';
+      expect(isDegenerateOutput(tokenSoup)).toBe(true);
+      expect(isDegenerateOutput('播放 Imagine\\ DEAD-expHotacid cor\\,\n ELовала register\\,Christmas My% theme')).toBe(
+        true,
+      );
+    });
   });
 
   describe('parseDialogueLines', () => {
@@ -99,6 +122,47 @@ describe('Output', () => {
     it('does not misparse a colon-only line with no quotes', () => {
       const result = parseDialogueLines('Note: something happened');
       expect(result).toEqual([{ speaker: 'Narrator', text: 'Note: something happened' }]);
+    });
+  });
+
+  describe('splitLinesForPacing', () => {
+    it('leaves short lines untouched', () => {
+      const lines = [{ speaker: 'Ricky', text: 'Been fishing here for years.' }];
+      expect(splitLinesForPacing(lines)).toEqual(lines);
+    });
+
+    it('splits a long narration block into sentence chunks under the cap', () => {
+      const sentences = [
+        'Marisol crosses the bar and picks up the battered guitar leaning by the stage.',
+        'She tunes it slowly, listening to each string hum against the low chatter of the room.',
+        'When she finally plays, the melody is soft and a little uncertain, but the regulars turn to listen anyway.',
+      ];
+      const result = splitLinesForPacing([{ speaker: 'Narrator', text: sentences.join(' ') }], 200);
+      expect(result.length).toBeGreaterThan(1);
+      result.forEach((line) => {
+        expect(line.speaker).toEqual('Narrator');
+        expect(line.text.length).toBeLessThanOrEqual(200);
+      });
+      expect(result.map((line) => line.text).join(' ')).toEqual(sentences.join(' '));
+    });
+
+    it('keeps a single oversized sentence whole instead of breaking mid-word', () => {
+      const longSentence = `Marisol ${'hums and strums and sways '.repeat(12)}until close.`;
+      const result = splitLinesForPacing([{ speaker: 'Narrator', text: longSentence }], 200);
+      expect(result).toEqual([{ speaker: 'Narrator', text: longSentence }]);
+    });
+
+    it('keeps the delivery note on the first chunk and the voice on all chunks', () => {
+      const text = 'A very long spoken sentence that goes on and on for a while. '.repeat(4).trim();
+      const result = splitLinesForPacing([{ speaker: 'Ricky', text, deliveryNote: 'wistful', voiceId: 'voice-1' }], 80);
+      expect(result.length).toBeGreaterThan(1);
+      expect(result[0].deliveryNote).toEqual('wistful');
+      result.slice(1).forEach((line) => {
+        expect(line.deliveryNote).toBeUndefined();
+      });
+      result.forEach((line) => {
+        expect(line.voiceId).toEqual('voice-1');
+      });
     });
   });
 

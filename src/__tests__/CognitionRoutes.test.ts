@@ -118,6 +118,25 @@ describe('cognition routes', () => {
     expect(createdMemories[0].memory.pre_action).toBeUndefined();
   });
 
+  it('humanizes a raw game repr in the outcome reason', async () => {
+    createdMemories.length = 0;
+
+    const outcome = await post('/cognition/outcome', {
+      sim_id: '123',
+      sim_name: 'Marisol Rocca',
+      action: 'take_shower',
+      interaction_name: 'shower_TakeShower',
+      outcome: 'canceled',
+      reason: '<EnqueueResult: Bills: Interaction requires a utility that is shut off. <ExecuteResult: False: (None)>>',
+      location_id: 5,
+    });
+
+    expect(outcome).toMatchObject({ ok: true, correlated: false });
+    expect(createdMemories[0].memory.observation).toBe(
+      "Marisol Rocca tried 'take_shower' and it was canceled (Bills: Interaction requires a utility that is shut off.).",
+    );
+  });
+
   it('requests a perception snapshot and formats the reply', async () => {
     sentToMod.length = 0;
 
@@ -150,6 +169,37 @@ describe('cognition routes', () => {
       'You can see: Peyton Puckett (chat, 3m away); a fridge (could grab snack, 4m away).',
     );
     expect(ctx.controller.cognition.getPerception('123')).toMatchObject({ request_id: requestId, sim_id: '123' });
+  });
+
+  it('sleep boundary reflects on the current scene and starts a new one', async () => {
+    // No active scene yet: nothing to reflect on
+    expect(await post('/cognition/sleep-boundary', { sim_id: '123' })).toMatchObject({
+      ok: true,
+      reflected: false,
+    });
+
+    const reflectedScenes: unknown[] = [];
+    vi.spyOn(ctx.ai, 'runSceneReflection').mockImplementation((scene) => {
+      reflectedScenes.push(scene);
+      return Promise.resolve();
+    });
+
+    ctx.sceneService.checkSceneBoundary({ environment: { location_id: 42 } } as never);
+    const scene = ctx.sceneService.getCurrentScene();
+    expect(scene).toBeTruthy();
+
+    const result = await post('/cognition/sleep-boundary', { sim_id: '123', sim_name: 'Marisol Rocca' });
+    expect(result).toMatchObject({ ok: true, reflected: true, scene_id: scene?.sceneId });
+    expect(reflectedScenes).toHaveLength(1);
+    expect(reflectedScenes[0]).toMatchObject({ sceneId: scene?.sceneId, locationId: 42 });
+
+    // The old scene ended and a fresh one started at the same location, so the next
+    // travel boundary only covers what happens after the nap
+    const nextScene = ctx.sceneService.getCurrentScene();
+    expect(nextScene?.sceneId).not.toBe(scene?.sceneId);
+    expect(nextScene?.locationId).toBe(42);
+
+    expect(await post('/cognition/sleep-boundary', {})).toMatchObject({ error: 'sim_id is required' });
   });
 
   it('rejects invalid requests', async () => {

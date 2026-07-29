@@ -22,6 +22,7 @@ import {
   playTTS,
   playTTSLines,
   sendChatGeneration,
+  sendSceneLineToMod,
 } from '../util/notifyRenderer';
 import { markScenePaced } from '../util/pacedScenes';
 import { GenerationOptions, PromptRequestBuilderOptions } from './PromptRequestBuilderService';
@@ -46,6 +47,9 @@ import {
   formatSceneForChatWindow,
   formatAction,
   formatListToString,
+  isDegenerateOutput,
+  parseDialogueLines,
+  splitLinesForPacing,
 } from '../formatter/PromptFormatter';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 import { InputFormatter } from '../formatter/InputOutputFormatting';
@@ -129,6 +133,14 @@ export type DeferredInteractionResult = {
 type PlaybackOptions = {
   deferPlayback?: boolean;
   onPlaybackReady?: (play: () => void) => void;
+  // Speak the whole output as this speaker. First-person generations (wants) have no
+  // `Name:` prefix, so without this the dialogue parser falls back to Narrator and TTS
+  // loses the sim's cast/pinned voice.
+  ttsSpeaker?: string;
+  // Stream the output to the game as paced scene lines (subtitle per line, timed to
+  // playback) instead of suppressing it with the unpaced memory block — for solo
+  // player-directed generations that should still show on screen.
+  pacedSubtitles?: boolean;
 };
 
 export type ResolvedInteractionPreAction =
@@ -245,8 +257,12 @@ export class AIService {
         previousScene.locationId,
         previousScene.startedAt,
       );
-      if (sceneMemories.length === 0) {
-        log.info(`[Reflection] Scene ${previousScene.sceneId} had no memories, skipping reflection`);
+      // A quick hop through a lot (or a nap right after arriving) isn't a scene worth
+      // reflecting on — travel-heavy play was firing reflections back to back
+      if (sceneMemories.length < 2) {
+        log.info(
+          `[Reflection] Scene ${previousScene.sceneId} had ${sceneMemories.length} memories, skipping reflection`,
+        );
         return;
       }
 
@@ -290,7 +306,9 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
         event_type: 'reflection',
       };
       const participants: ParticipantDTO[] = participantIds.map((id) => ({ id }));
-      this.ctx.memoryRepository.createMemory({ memory: reflectionMemory, participants });
+      // Reflections are internal monologue for retrieval/prompting; notifyMod false keeps
+      // the whole reflection prose from being pushed to the mod as one giant subtitle block
+      this.ctx.memoryRepository.createMemory({ memory: reflectionMemory, participants }, { notifyMod: false });
       log.info(`[Reflection] Saved reflection for scene ${previousScene.sceneId}: ${text}`);
     } catch (err) {
       log.error(`[Reflection] Failed to generate reflection for scene ${previousScene.sceneId}`, err);
@@ -457,12 +475,20 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
 
   async handleWants(event: WantsInteractionEvent) {
     const randomAction = defaultWantsPrefixes[Math.floor(Math.random() * defaultWantsPrefixes.length)];
-    return this.runGeneration(event, {
-      preAction: defaultWantsPrompt,
-      preAssistantPreResponse: `{actor.0}:`,
-      assistantPreResponse: randomAction,
-      promptHistoryMode: PromptHistoryMode.NO_USER_HISTORY,
-    });
+    return this.runGeneration(
+      event,
+      {
+        preAction: defaultWantsPrompt,
+        preAssistantPreResponse: `{actor.0}:`,
+        assistantPreResponse: randomAction,
+        promptHistoryMode: PromptHistoryMode.NO_USER_HISTORY,
+      },
+      {
+        // Wants are the actor's own first-person voice — speak them as the actor so the
+        // sim's cast/pinned ElevenLabs voice is used instead of the global default
+        ttsSpeaker: event.sentient_sims[0]?.name,
+      },
+    );
   }
 
   async handleWickedWhims(event: WWInteractionEvent) {
@@ -516,10 +542,18 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
     if (doSomethingEvent.sentient_sims.length >= 2) {
       return this.runDirectedGeneration(doSomethingEvent, { action: doSomethingEvent.action });
     }
-    return this.runGeneration(doSomethingEvent, {
-      action: doSomethingEvent.action,
-      prePreAction: 'At {location} ({location_type}), {postures},',
-    });
+    return this.runGeneration(
+      doSomethingEvent,
+      {
+        action: doSomethingEvent.action,
+        prePreAction: 'At {location} ({location_type}), {postures},',
+      },
+      {
+        // The player asked for this on their own sim and is watching for the result —
+        // stream it as paced subtitles rather than a suppressed memory block
+        pacedSubtitles: true,
+      },
+    );
   }
 
   async handleChat(chatEvent: ChatInteractionEvent) {
@@ -613,7 +647,7 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
 
     this.logExchange({ label: 'Scene Generation', request: openAIRequest, responseText: response.text });
 
-    const stopTokens = [];
+    const stopTokens: string[] = [];
     // TODO: model specific OUTPUT formatting cleanup stop tokens
     if (
       promptOptions.apiType === ApiType.SentientSimsAI ||
@@ -631,24 +665,47 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
     log.debug(`stop tokens: ${JSON.stringify(stopTokens, null, 2)}`);
 
     // TODO: Add an options for formatted stop tokens that aren't necessarily in the prompt
-    let output = cleanupAIOutput(response.text, stopTokens);
+    const postProcessOutput = (rawText: string): string => {
+      let processed = cleanupAIOutput(rawText, stopTokens);
 
-    // Remove preAssistantPreResponse from output
-    if (promptRequest.preAssistantPreResponse && output.startsWith(promptRequest.preAssistantPreResponse.trim())) {
-      output = output.substring(promptRequest.preAssistantPreResponse.trim().length).trim();
+      // Remove preAssistantPreResponse from output
+      if (promptRequest.preAssistantPreResponse && processed.startsWith(promptRequest.preAssistantPreResponse.trim())) {
+        processed = processed.substring(promptRequest.preAssistantPreResponse.trim().length).trim();
+      }
+
+      if (promptRequest.assistantPreResponse && !processed.startsWith(promptRequest.assistantPreResponse)) {
+        processed = [promptRequest.assistantPreResponse, processed].join(' ').trim();
+      }
+
+      const lastMessage = openAIRequest.messages[openAIRequest.messages.length - 1];
+
+      if (lastMessage.role === 'assistant' && processed.startsWith(lastMessage.content)) {
+        processed = processed.replace(lastMessage.content, '').trim();
+      }
+
+      return processed.trim();
+    };
+
+    let output = postProcessOutput(response.text);
+
+    // A sampler blowup produces token soup; without this check it gets stored as a
+    // memory and displayed to the player verbatim. Retry once, then discard.
+    if (output.length > 1 && isDegenerateOutput(output)) {
+      log.error(`[Generation] Degenerate output detected, retrying once: ${output.slice(0, 200)}`);
+      const retryResponse = await this.ctx
+        .getGenerationService(providerConfig.apiType)
+        .sentientSimsGenerate(openAIRequest);
+      this.logExchange({
+        label: 'Scene Generation (degenerate retry)',
+        request: openAIRequest,
+        responseText: retryResponse.text,
+      });
+      output = postProcessOutput(retryResponse.text);
+      if (isDegenerateOutput(output)) {
+        log.error(`[Generation] Output still degenerate after retry, discarding`);
+        output = '';
+      }
     }
-
-    if (promptRequest.assistantPreResponse && !output.startsWith(promptRequest.assistantPreResponse)) {
-      output = [promptRequest.assistantPreResponse, output].join(' ').trim();
-    }
-
-    const lastMessage = openAIRequest.messages[openAIRequest.messages.length - 1];
-
-    if (lastMessage.role === 'assistant' && output.startsWith(lastMessage.content)) {
-      output = output.replace(lastMessage.content, '').trim();
-    }
-
-    output = output.trim();
 
     if (output.length > 1) {
       const rawSceneText = output;
@@ -657,7 +714,23 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
       newMemory.content = output;
 
       const play = once(() => {
-        this.playTts(output, event.sentient_sims);
+        if (playbackOptions.pacedSubtitles) {
+          // Same paced pipeline as directed scenes: the memory block's subtitle is
+          // suppressed (paced flag on memory_created) and each line reaches the mod
+          // as it starts playing
+          markScenePaced(output);
+          const lines = splitLinesForPacing(
+            parseDialogueLines(
+              output,
+              event.sentient_sims.map((sim) => sim.name),
+            ),
+          );
+          this.playTtsLines(lines, event.sentient_sims, { paced: true, pacedText: output });
+        } else if (playbackOptions.ttsSpeaker) {
+          this.playTtsLines([{ speaker: playbackOptions.ttsSpeaker, text: output }], event.sentient_sims);
+        } else {
+          this.playTts(output, event.sentient_sims);
+        }
       });
       if (playbackOptions.deferPlayback) {
         playbackOptions.onPlaybackReady?.(play);
@@ -1013,6 +1086,14 @@ ${
     // the mod as it starts playing, with the preaction heading each line's section.
     const play = once(() => {
       markScenePaced(finalText);
+      // The paced memory block is suppressed in-game, so the player's line — which lives on
+      // the memory as `action`, not in the streamed reply — would never reach the in-game
+      // memories window live (it only shows up on re-hydrate). Send it as the opening scene
+      // line: the Flash side appends it to the window, and suppresses the subtitle while the
+      // chat window is open. It is not TTS-voiced — the player already said it.
+      if (playerLine) {
+        sendSceneLineToMod({ speaker: playerLine.speaker, text: playerLine.text });
+      }
       this.playTtsLines(finalLines, event.sentient_sims, {
         paced: true,
         preamble: preActionLine ? `(${preActionLine})` : undefined,

@@ -1,5 +1,5 @@
 import log from 'electron-log';
-import { MemoryEntity } from '../db/entities/MemoryEntity';
+import { MemoryEntity, neutralizeMarkup, withDisplayContent } from '../db/entities/MemoryEntity';
 import { InteractionMappingEvent, WWInteractionEvent } from '../models/InteractionEvents';
 import { InteractionEventResult } from '../models/InteractionEventResult';
 import { DatabaseSession } from '../models/DatabaseSession';
@@ -35,7 +35,9 @@ export function notifyNewMemoryAdded(memory: MemoryEntity, options?: { notifyMod
   }
   sendModNotification({
     type: ModWebsocketMessageType.MEMORY_CREATED,
-    memory,
+    // The Flash memories window can't render a null content, and one bad row in its
+    // list blanks the whole window on every redraw (see withDisplayContent)
+    memory: withDisplayContent(memory),
     paced: consumePacedScene(memory.content),
   });
 }
@@ -45,7 +47,9 @@ export function notifyMemoryDeleted(deleteMemoryRequest: DeleteMemoryRequest) {
   notifyAllWindows('on-memory-deleted', deleteMemoryRequest);
   sendModNotification({
     type: ModWebsocketMessageType.MEMORY_DELETED,
-    memory_id: deleteMemoryRequest.id,
+    // Real DB rows have small autoincrement ids; Number() keeps the message JSON-safe
+    // (JSON.stringify throws on bigint)
+    memory_id: Number(deleteMemoryRequest.id),
   });
 }
 
@@ -59,7 +63,7 @@ export function notifyMemoryEdited(memory: MemoryEntity) {
   notifyAllWindows('on-memory-edited', memory);
   sendModNotification({
     type: ModWebsocketMessageType.MEMORY_EDITED,
-    memory,
+    memory: withDisplayContent(memory),
   });
 }
 
@@ -118,8 +122,9 @@ export function sendSceneLineToMod(line: DialogueLine & { preamble?: string }) {
   sendModNotification({
     type: ModWebsocketMessageType.SCENE_LINE,
     speaker: line.speaker,
-    text: line.text,
-    preamble: line.preamble,
+    // Scene lines land in the same Flash htmlText list as memories — see neutralizeMarkup
+    text: neutralizeMarkup(line.text),
+    preamble: line.preamble ? neutralizeMarkup(line.preamble) : line.preamble,
   });
 }
 

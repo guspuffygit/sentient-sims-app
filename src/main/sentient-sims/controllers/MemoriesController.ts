@@ -9,6 +9,20 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
+// Memory ids originating from the game are 64-bit; Number() silently rounds anything past
+// 2^53 (…580259 became …580000). Fall back to BigInt so the sqlite lookup sees the real id.
+function parseMemoryId(memoryId: string): number | bigint {
+  const asNumber = Number(memoryId);
+  if (Number.isSafeInteger(asNumber)) {
+    return asNumber;
+  }
+  try {
+    return BigInt(memoryId);
+  } catch {
+    return asNumber;
+  }
+}
+
 export class MemoriesController {
   private readonly ctx: ApiContext;
 
@@ -16,11 +30,11 @@ export class MemoriesController {
     this.ctx = ctx;
   }
 
-  getMemory = (req: Request, res: Response) => {
+  getMemory = (req: Request<{ memoryId: string }>, res: Response) => {
     try {
       const { memoryId } = req.params;
       const result = this.ctx.memoryRepository.getMemory({
-        id: Number(memoryId),
+        id: parseMemoryId(memoryId),
       });
       return res.json(result);
     } catch (err) {
@@ -76,7 +90,7 @@ export class MemoriesController {
     try {
       const { memoryId } = req.params;
 
-      this.ctx.memoryRepository.deleteMemory({ id: Number(memoryId) });
+      this.ctx.memoryRepository.deleteMemory({ id: parseMemoryId(memoryId) });
       return res.json({ text: `Deleted memory with id: ${memoryId}` });
     } catch (err) {
       log.error('Error deleting memory', err);

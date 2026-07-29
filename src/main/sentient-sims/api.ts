@@ -106,6 +106,7 @@ export function runApi(ctx: ApiContext) {
 
   expressApp.post('/cognition/outcome', ctx.controller.cognition.postOutcome);
   expressApp.post('/cognition/perception', ctx.controller.cognition.postPerception);
+  expressApp.post('/cognition/sleep-boundary', ctx.controller.cognition.postSleepBoundary);
   expressApp.post('/cognition/debug/enqueue', ctx.controller.cognition.debugEnqueue);
   expressApp.post('/cognition/debug/perception', ctx.controller.cognition.debugRequestPerception);
 

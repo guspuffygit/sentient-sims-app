@@ -65,6 +65,19 @@ export class SceneService {
     return { boundary: true, previousScene };
   }
 
+  // Ends the current scene without a location change (e.g. a sim going to sleep) and starts a
+  // fresh one at the same location, so the next boundary only covers what happens afterwards.
+  // Returns the scene that just ended, or undefined if none was active.
+  endCurrentScene(reason: string): SceneState | undefined {
+    if (!this.currentScene) {
+      return undefined;
+    }
+    const previousScene = this.currentScene;
+    log.info(`[Scene] Ended scene ${previousScene.sceneId} at location ${previousScene.locationId} (${reason})`);
+    this.startScene(previousScene.locationId);
+    return previousScene;
+  }
+
   // Loading/unloading a database jumps the game state; there is no coherent scene to reflect on.
   reset() {
     if (this.currentScene) {

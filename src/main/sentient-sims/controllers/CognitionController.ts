@@ -22,6 +22,29 @@ function outcomeVerb(outcome: InteractionOutcomeEvent['outcome']): string {
   return 'was canceled';
 }
 
+// The mod forwards cancel reasons as raw game reprs like
+// "<EnqueueResult: Bills: Interaction requires a utility that is shut off. <ExecuteResult: False: (None)>>".
+// Keep the human sentence, drop the machine wrappers — this text lands in a permanent memory
+// row, and raw angle brackets also read as tags in the mod's Flash memories window.
+function humanizeOutcomeReason(reason: string): string {
+  let text = reason.trim();
+  // Unwrap outer <Label: ...> repr shells (possibly nested)
+  for (;;) {
+    const unwrapped = /^<\w+:\s*([\s\S]*)>$/.exec(text);
+    if (!unwrapped) {
+      break;
+    }
+    text = unwrapped[1].trim();
+  }
+  // Drop any leftover embedded reprs like <ExecuteResult: False: (None)>
+  let previous;
+  do {
+    previous = text;
+    text = text.replace(/<[^<>]*>/g, '');
+  } while (text !== previous);
+  return text.replace(/\s{2,}/g, ' ').trim();
+}
+
 export class CognitionController {
   private readonly ctx: ApiContext;
 
@@ -69,7 +92,8 @@ export class CognitionController {
         this.lookupParticipantName(event.target_sim_id) ||
         (event.target_sim_id ? `Sim ${event.target_sim_id}` : undefined);
       const attempt = target ? `${actor} tried '${action}' with ${target}` : `${actor} tried '${action}'`;
-      const because = event.reason ? ` (${event.reason})` : '';
+      const reason = event.reason ? humanizeOutcomeReason(event.reason) : '';
+      const because = reason ? ` (${reason})` : '';
       const observation = `${attempt} and it ${outcomeVerb(event.outcome)}${because}.`;
 
       const participants: ParticipantDTO[] = [{ id: event.sim_id }];
@@ -100,6 +124,32 @@ export class CognitionController {
       return res.json({ ok: true, correlated: pending !== undefined, memory_id: memory.id });
     } catch (err) {
       log.error('Error handling cognition outcome', err);
+      return res.status(500).json({ error: errorMessage(err) });
+    }
+  };
+
+  // The mod reports a household sim falling asleep. Sleep closes out the sim's stretch of
+  // activity the way travel does: reflect on the current scene, then start a fresh scene at
+  // the same location so the next boundary only covers what happens after the nap.
+  postSleepBoundary = async (req: Request, res: Response) => {
+    try {
+      const { sim_id: simId, sim_name: simName } = req.body as {
+        sim_id?: string;
+        sim_name?: string;
+      };
+      if (!simId) {
+        return res.status(400).json({ error: 'sim_id is required' });
+      }
+      const who = simName || this.lookupParticipantName(simId) || `Sim ${simId}`;
+      const previousScene = this.ctx.sceneService.endCurrentScene(`${who} fell asleep`);
+      if (!previousScene) {
+        return res.json({ ok: true, reflected: false, reason: 'no active scene' });
+      }
+      log.info(`[Cognition] sleep boundary for ${who}: reflecting on scene ${previousScene.sceneId}`);
+      await this.ctx.ai.runSceneReflection(previousScene);
+      return res.json({ ok: true, reflected: true, scene_id: previousScene.sceneId });
+    } catch (err) {
+      log.error('Error handling sleep boundary', err);
       return res.status(500).json({ error: errorMessage(err) });
     }
   };
