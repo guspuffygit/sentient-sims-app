@@ -52,12 +52,12 @@ export function LoginComponent() {
   return (
     <Box
       sx={{
-        minWidth: 400,
-        minHeight: 400,
+        width: '100%',
         justifyContent: 'center',
         alignItems: 'center',
         display: 'flex',
         flexDirection: 'column',
+        gap: 2,
       }}
     >
       {authInProgress ? cancelGoogleAuthProgress : loginAuthenticator}

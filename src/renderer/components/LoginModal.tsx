@@ -39,9 +39,15 @@ export function LoginModal({ open, setOpen }: LoginModalParameters) {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
+          width: 464,
+          maxWidth: '92vw',
           bgcolor: 'background.paper',
-          boxShadow: 24,
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 3.5,
+          boxShadow: '0 12px 48px rgba(0, 0, 0, 0.5)',
           p: 4,
+          outline: 'none',
         }}
       >
         <LoginComponent />

@@ -1,5 +1,5 @@
 import './App.css';
-import { Container, Grid } from '@mui/material';
+import { Box, Container, Grid } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import { useState } from 'react';
 import MenuBar from './MenuBar';
@@ -21,8 +21,12 @@ export default function App() {
       <Container maxWidth={false} className="root">
         <Grid container spacing={3}>
           <Grid size={mainWindowWidth}>
-            <MenuBar hideSideBar={hideSideBar} setHideSideBar={setHideSideBar} />
-            <Outlet />
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 40px)', minHeight: 280 }}>
+              <MenuBar hideSideBar={hideSideBar} setHideSideBar={setHideSideBar} />
+              <Box id="page-scroll" sx={{ flexGrow: 1, minHeight: 0, overflowY: 'auto', scrollbarGutter: 'stable' }}>
+                <Outlet />
+              </Box>
+            </Box>
           </Grid>
           {hideSideBar ? null : (
             <Grid size={3.5}>

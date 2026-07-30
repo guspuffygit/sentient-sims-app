@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Card,
   Chip,
   CircularProgress,
   Dialog,
@@ -21,11 +22,11 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
-import TravelExploreIcon from '@mui/icons-material/TravelExplore';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
+import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
+import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
+import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined';
+import TravelExploreOutlinedIcon from '@mui/icons-material/TravelExploreOutlined';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import { BasicInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
@@ -35,6 +36,8 @@ import { useMemo, useState } from 'react';
 import { useDebounce } from 'renderer/hooks/useDebounce';
 import { useAuth } from 'renderer/providers/AuthProvider';
 import { useSnackBar } from 'renderer/providers/SnackBarProvider';
+import AppCard from 'renderer/AppCard';
+import { EmptyState } from './EmptyState';
 
 type MappingType = 'interactions' | 'animations';
 
@@ -149,9 +152,12 @@ function MappingItem({
   };
 
   return (
-    <Paper variant="outlined" sx={{ p: 2 }}>
+    <Paper variant="outlined" sx={{ p: 2, borderColor: 'divider' }}>
       <Stack direction="row" spacing={1} useFlexGap sx={{ mb: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
-        <Typography variant="subtitle2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
+        <Typography
+          variant="subtitle2"
+          sx={{ fontFamily: "'Courier New', Courier, monospace", wordBreak: 'break-all' }}
+        >
           {mapping.key}
         </Typography>
         {animation?.name && <Chip label={animation.name} size="small" variant="outlined" />}
@@ -178,7 +184,7 @@ function MappingItem({
           disabled={saving}
           variant="contained"
           size="small"
-          startIcon={<SaveIcon />}
+          startIcon={<SaveOutlinedIcon sx={{ fontSize: 16 }} />}
           onClick={() => {
             void handleSaveLocally();
           }}
@@ -194,7 +200,7 @@ function MappingItem({
                 variant="outlined"
                 color="warning"
                 size="small"
-                startIcon={<CloudUploadIcon />}
+                startIcon={<CloudUploadOutlinedIcon sx={{ fontSize: 16 }} />}
                 onClick={() => {
                   void handleSaveOnline();
                 }}
@@ -213,7 +219,7 @@ function MappingItem({
                 variant="outlined"
                 color="error"
                 size="small"
-                startIcon={<DeleteIcon />}
+                startIcon={<DeleteOutlineIcon sx={{ fontSize: 16 }} />}
                 onClick={() => {
                   setConfirmingDelete(true);
                 }}
@@ -252,13 +258,16 @@ function MappingItem({
       >
         <DialogTitle>Delete online mapping?</DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>{mapping.key}</DialogContentText>
+          <DialogContentText sx={{ fontFamily: "'Courier New', Courier, monospace", wordBreak: 'break-all' }}>
+            {mapping.key}
+          </DialogContentText>
           <DialogContentText sx={{ mt: 1 }}>
             This permanently deletes the shared online mapping for everyone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button
+            color="secondary"
             disabled={deleting}
             onClick={() => {
               setConfirmingDelete(false);
@@ -270,7 +279,7 @@ function MappingItem({
             loading={deleting}
             variant="contained"
             color="error"
-            startIcon={<DeleteIcon />}
+            startIcon={<DeleteOutlineIcon sx={{ fontSize: 16 }} />}
             onClick={() => {
               void handleDelete();
             }}
@@ -366,67 +375,108 @@ export default function OnlineMappingBrowser() {
   let content;
   if (loading) {
     content = (
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 8 }}>
-        <CircularProgress />
-        <Typography color="text.secondary">Loading online {mappingType}...</Typography>
-      </Box>
+      <Card sx={{ marginBottom: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, paddingY: 8 }}>
+          <CircularProgress />
+          <Typography color="text.secondary">Loading online {mappingType}...</Typography>
+        </Box>
+      </Card>
     );
   } else if (!mappingType) {
     content = (
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, py: 8 }}>
-        <TravelExploreIcon sx={{ fontSize: 48, color: 'text.disabled' }} />
-        <Typography color="text.secondary">
-          Load online interactions or animations to browse and edit their mappings.
-        </Typography>
-      </Box>
+      <EmptyState
+        icon={<TravelExploreOutlinedIcon />}
+        title="Nothing loaded yet"
+        description="Load online interactions or animations to browse and edit their mappings."
+      />
     );
   } else if (filteredMappings.length === 0) {
     content = (
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, py: 8 }}>
-        <SearchIcon sx={{ fontSize: 48, color: 'text.disabled' }} />
-        <Typography color="text.secondary">
-          {mappings.length === 0 ? `No online ${mappingType} found.` : 'No mappings match your filter.'}
-        </Typography>
-      </Box>
+      <EmptyState
+        icon={<SearchIcon />}
+        title={mappings.length === 0 ? 'No mappings found' : 'No matches'}
+        description={mappings.length === 0 ? `No online ${mappingType} found.` : 'No mappings match your filter.'}
+      />
     );
   } else {
+    const rangeStart = (page - 1) * ITEMS_PER_PAGE + 1;
+    const rangeEnd = Math.min(page * ITEMS_PER_PAGE, filteredMappings.length);
+    const filteredSuffix = debouncedFilter ? ` (filtered from ${mappings.length})` : '';
     content = (
-      <Stack spacing={2}>
-        <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="body2" color="text.secondary">
-            Showing {(page - 1) * ITEMS_PER_PAGE + 1}–{Math.min(page * ITEMS_PER_PAGE, filteredMappings.length)} of{' '}
-            {filteredMappings.length} {mappingType}
-            {debouncedFilter && ` (filtered from ${mappings.length})`}
-          </Typography>
+      <AppCard
+        title={mappingType === 'interactions' ? 'Online interactions' : 'Online animations'}
+        subtitle={`Showing ${rangeStart}–${rangeEnd} of ${filteredMappings.length} ${mappingType}${filteredSuffix}`}
+        icon={<CloudDownloadOutlinedIcon sx={{ fontSize: 18 }} />}
+      >
+        <Stack spacing={2}>
+          {pagination}
+          {paginatedMappings.map((mapping) => (
+            <MappingItem
+              key={mapping.key}
+              mapping={mapping}
+              mappingType={mappingType}
+              canSaveOnline={isMapper}
+              onDeleted={(key) => {
+                setMappings((prev) => prev.filter((m) => m.key !== key));
+              }}
+            />
+          ))}
           {pagination}
         </Stack>
-        {paginatedMappings.map((mapping) => (
-          <MappingItem
-            key={mapping.key}
-            mapping={mapping}
-            mappingType={mappingType}
-            canSaveOnline={isMapper}
-            onDeleted={(key) => {
-              setMappings((prev) => prev.filter((m) => m.key !== key));
-            }}
-          />
-        ))}
-        {pagination}
-      </Stack>
+      </AppCard>
     );
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h5">Online Mapping Browser</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Browse the shared online mappings and save your own local overrides.
-      </Typography>
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+    <>
+      <AppCard
+        title="Browse mappings"
+        subtitle="Load a mapping type from the cloud, then filter the results"
+        icon={<TravelExploreOutlinedIcon sx={{ fontSize: 18 }} />}
+        headerAction={
+          <Box sx={{ width: { xs: 200, md: 300 } }}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Filter by name, author, or text..."
+              variant="outlined"
+              value={filter}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: filter && (
+                    <InputAdornment position="end">
+                      <IconButton
+                        size="small"
+                        aria-label="Clear filter"
+                        onClick={() => {
+                          setFilter('');
+                          setCurrentPage(1);
+                        }}
+                      >
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+          </Box>
+        }
+      >
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
           <Button
             variant={mappingType === 'interactions' ? 'contained' : 'outlined'}
-            startIcon={<CloudDownloadIcon />}
+            color={mappingType === 'interactions' ? 'primary' : 'secondary'}
+            startIcon={<CloudDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
             onClick={() => {
               void loadMappings('interactions');
             }}
@@ -437,7 +487,8 @@ export default function OnlineMappingBrowser() {
           </Button>
           <Button
             variant={mappingType === 'animations' ? 'contained' : 'outlined'}
-            startIcon={<CloudDownloadIcon />}
+            color={mappingType === 'animations' ? 'primary' : 'secondary'}
+            startIcon={<CloudDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
             onClick={() => {
               void loadMappings('animations');
             }}
@@ -446,44 +497,10 @@ export default function OnlineMappingBrowser() {
           >
             Load Online Animations
           </Button>
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Filter by name, author, or text..."
-            variant="outlined"
-            value={filter}
-            onChange={(e) => {
-              setFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-                endAdornment: filter && (
-                  <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      aria-label="Clear filter"
-                      onClick={() => {
-                        setFilter('');
-                        setCurrentPage(1);
-                      }}
-                    >
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
         </Stack>
-      </Paper>
+      </AppCard>
 
       {content}
-    </Box>
+    </>
   );
 }

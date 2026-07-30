@@ -1,23 +1,26 @@
 import {
   Box,
   Button,
-  CardActions,
   Checkbox,
   Chip,
+  Divider,
   FormControlLabel,
-  Grid,
   Modal,
   Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import SendIcon from '@mui/icons-material/Send';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
+import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
+import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import log from 'electron-log';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { ChatBoxComponent } from './ChatBoxComponent';
 import ChatResultsModal from './ChatResultsModal';
 import { useChatGenerationContext } from './providers/ChatGenerationProvider';
@@ -25,6 +28,8 @@ import { useDebugMode } from './providers/DebugModeProvider';
 import { ScenarioTesterComponent } from './scenarioTester/ScenarioTesterComponent';
 import { LLMExchangePanel } from './scenarioTester/LLMExchangePanel';
 import { playAudioUrl } from './voice/audioPlayback';
+import AppCard from './AppCard';
+import { EmptyState } from './components/EmptyState';
 
 export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -135,7 +140,7 @@ export default function ChatPage() {
         />
       )}
       {debugMode.isEnabled && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, marginBottom: 2 }}>
           <Button
             variant="contained"
             startIcon={<PlayArrowIcon />}
@@ -148,6 +153,7 @@ export default function ChatPage() {
           </Button>
           <Button
             variant="outlined"
+            color="secondary"
             onClick={() => {
               void continueDirectedScene();
             }}
@@ -157,8 +163,10 @@ export default function ChatPage() {
           </Button>
           <FormControlLabel
             label="Voice Test Mode (per-character TTS on responses)"
+            slotProps={{ typography: { variant: 'body2', sx: { color: 'text.secondary' } } }}
             control={
               <Checkbox
+                size="small"
                 checked={voiceTestMode}
                 onChange={(change) => {
                   setVoiceTestMode(change.target.checked);
@@ -168,29 +176,158 @@ export default function ChatPage() {
           />
         </Box>
       )}
-      <Box
-        sx={{
-          height: 650,
-          overflow: 'auto',
-        }}
+      <AppCard
+        title="Conversation"
+        subtitle={`${messages.length} message${messages.length === 1 ? '' : 's'}`}
+        icon={<ForumOutlinedIcon sx={{ fontSize: 18 }} />}
+        headerAction={
+          interactionName ? (
+            <>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                Interaction:
+              </Typography>
+              <Chip
+                label={interactionName}
+                size="small"
+                variant="outlined"
+                onClick={copyInteractionName}
+                onDelete={copyInteractionName}
+                deleteIcon={<ContentCopyIcon fontSize="small" />}
+                sx={{ fontFamily: 'monospace', fontSize: '0.75rem', maxWidth: 320 }}
+              />
+            </>
+          ) : undefined
+        }
       >
-        {messages.map((message, index) => (
-          <ChatBoxComponent
-            index={index}
-            key={message.id}
-            message={message}
-            handleMessageTextChange={handleMessageTextChange}
-            handleDeleteMessage={deleteMessage}
-            voiceLines={message.id ? voiceLinesByMessageId[message.id] : undefined}
-          />
-        ))}
-        <div ref={messagesEndRef} />
-      </Box>
+        <Box sx={{ height: 650, overflow: 'auto', paddingRight: 0.5 }}>
+          {messages.length === 0 ? (
+            <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <EmptyState
+                icon={<ChatBubbleOutlineOutlinedIcon />}
+                title="No messages yet"
+                description="Add a user message below, or trigger an interaction in-game to see its conversation here."
+              />
+            </Box>
+          ) : (
+            messages.map((message, index) => (
+              <ChatBoxComponent
+                index={index}
+                key={message.id}
+                message={message}
+                handleMessageTextChange={handleMessageTextChange}
+                handleDeleteMessage={deleteMessage}
+                voiceLines={message.id ? voiceLinesByMessageId[message.id] : undefined}
+              />
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </Box>
+        <Divider sx={{ marginX: -2, marginY: 2 }} />
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', paddingY: 1.5 }}>
+            <CircularProgress disableShrink />
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 1.5,
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                onClick={() => {
+                  void generateChat();
+                }}
+                color="primary"
+                endIcon={<SendIcon />}
+              >
+                Send
+              </Button>
+              <Button
+                type="submit"
+                variant="outlined"
+                onClick={() => {
+                  void onGenerateMultiple();
+                }}
+                color="primary"
+                endIcon={<SendIcon />}
+              >
+                Send 10
+              </Button>
+              <Button
+                variant="text"
+                color="secondary"
+                startIcon={<AddCircleOutlinedIcon sx={{ fontSize: 16 }} />}
+                onClick={() => {
+                  addNewMessage('user');
+                }}
+              >
+                Add User
+              </Button>
+              <Button
+                variant="text"
+                color="secondary"
+                startIcon={<AddCircleOutlinedIcon sx={{ fontSize: 16 }} />}
+                onClick={() => {
+                  addNewMessage('assistant');
+                }}
+              >
+                Add Assistant
+              </Button>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+              {input ? (
+                <Button
+                  variant="text"
+                  color="secondary"
+                  startIcon={<DataObjectOutlinedIcon sx={{ fontSize: 16 }} />}
+                  onClick={() => {
+                    onOpenInputView();
+                  }}
+                >
+                  Event JSON
+                </Button>
+              ) : null}
+              <Button variant="text" color="secondary" onClick={countTokens}>
+                Count
+              </Button>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                Tokens: {0}
+              </Typography>
+              <Button
+                variant="text"
+                color="error"
+                startIcon={<RestartAltOutlinedIcon sx={{ fontSize: 16 }} />}
+                onClick={resetMessages}
+              >
+                Reset
+              </Button>
+              <TextField
+                label="Max Output"
+                variant="outlined"
+                size="small"
+                value={maxResponseTokensState[0]}
+                onChange={(change) => {
+                  maxResponseTokensState[1](Number(change.target.value));
+                }}
+                sx={{ width: 110 }}
+              />
+            </Box>
+          </Box>
+        )}
+      </AppCard>
       {debugMode.isEnabled && exchanges && exchanges.length > 0 && (
-        <Box sx={{ px: 2, py: 1 }}>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Full LLM Interaction (editable, re-runnable per step)
-          </Typography>
+        <AppCard
+          title="Full LLM Interaction"
+          subtitle="Editable, re-runnable per step"
+          icon={<DataObjectOutlinedIcon sx={{ fontSize: 18 }} />}
+        >
           {exchanges.map((exchange) => (
             <LLMExchangePanel
               key={exchange.id}
@@ -199,129 +336,8 @@ export default function ChatPage() {
               maxResponseTokens={maxResponseTokensState[0]}
             />
           ))}
-        </Box>
+        </AppCard>
       )}
-      {interactionName && (
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 2, py: 0.5 }}>
-          <Typography
-            variant="caption"
-            sx={{
-              color: 'text.secondary',
-              mr: 1,
-            }}
-          >
-            Interaction:
-          </Typography>
-          <Chip
-            label={interactionName}
-            size="small"
-            variant="outlined"
-            onClick={copyInteractionName}
-            onDelete={copyInteractionName}
-            deleteIcon={<ContentCopyIcon fontSize="small" />}
-            sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}
-          />
-        </Box>
-      )}
-      <CardActions sx={{ flexDirection: 'column', alignItems: 'stretch' }}>
-        {loading ? (
-          <CircularProgress disableShrink />
-        ) : (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <div>
-                <Button
-                  type="submit"
-                  onClick={() => {
-                    void generateChat();
-                  }}
-                  color="primary"
-                  endIcon={<SendIcon />}
-                >
-                  Send
-                </Button>
-                <Button
-                  type="submit"
-                  onClick={() => {
-                    void onGenerateMultiple();
-                  }}
-                  color="primary"
-                  endIcon={<SendIcon />}
-                >
-                  Send 10
-                </Button>
-                <Button
-                  onClick={() => {
-                    addNewMessage('user');
-                  }}
-                  color="primary"
-                  endIcon={<AddCircleIcon />}
-                >
-                  Add User
-                </Button>
-                <Button
-                  onClick={() => {
-                    addNewMessage('assistant');
-                  }}
-                  color="primary"
-                  endIcon={<AddCircleIcon />}
-                >
-                  Add Assistant
-                </Button>
-              </div>
-              <div>
-                <Grid
-                  container
-                  sx={{
-                    alignItems: 'center',
-                  }}
-                >
-                  <Grid>
-                    {input ? (
-                      <Button
-                        onClick={() => {
-                          onOpenInputView();
-                        }}
-                        color="secondary"
-                      >
-                        Event JSON
-                      </Button>
-                    ) : null}
-                    <Button onClick={countTokens} color="primary">
-                      Count
-                    </Button>
-                  </Grid>
-                  <Grid>
-                    <Typography sx={{ marginRight: 2, marginLeft: 2 }}>Tokens: {0}</Typography>
-                  </Grid>
-                  <Grid>
-                    <Button onClick={resetMessages} color="primary">
-                      Reset
-                    </Button>
-                  </Grid>
-                </Grid>
-              </div>
-            </div>
-            <div
-              style={{
-                marginTop: 8,
-                display: 'flex',
-                justifyContent: 'flex-start',
-              }}
-            >
-              <TextField
-                label="Max Output"
-                variant="outlined"
-                value={maxResponseTokensState[0]}
-                onChange={(change) => {
-                  maxResponseTokensState[1](Number(change.target.value));
-                }}
-                sx={{ width: '100px' }}
-              />
-            </div>
-          </>
-        )}
-      </CardActions>
       {resultsModal.resultsModal}
       <Modal
         open={openInputView}
@@ -331,33 +347,47 @@ export default function ChatPage() {
       >
         <Box
           sx={{
-            height: 650,
-            overflow: 'auto',
             position: 'absolute',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 1000,
+            width: 'min(1000px, 92vw)',
+            height: 650,
+            display: 'flex',
+            flexDirection: 'column',
             bgcolor: 'background.paper',
-            boxShadow: 24,
-            p: 4,
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: '14px',
+            boxShadow: '0 12px 48px rgba(0, 0, 0, 0.5)',
+            padding: 3,
           }}
         >
-          <div
-            style={{
-              backgroundColor: '#151515',
-              border: '1px solid #ddd',
-              borderRadius: '5px',
-              padding: '15px',
-              overflowX: 'auto', // Allows horizontal scrolling if the code is too wide
+          <Box sx={{ marginBottom: 2 }}>
+            <Typography variant="h6">Event JSON</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Raw interaction event used to build this conversation
+            </Typography>
+          </Box>
+          <Box
+            component="pre"
+            sx={{
+              flex: 1,
+              overflow: 'auto',
+              margin: 0,
+              backgroundColor: 'background.default',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 2,
+              padding: 2,
               fontFamily: "'Courier New', Courier, monospace",
-              fontSize: '14px',
-              lineHeight: '1.5',
-              whiteSpace: 'pre-wrap', // Maintains line breaks
+              fontSize: '13px',
+              lineHeight: 1.6,
+              whiteSpace: 'pre-wrap',
             }}
           >
             {input}
-          </div>
+          </Box>
         </Box>
       </Modal>
       <Snackbar

@@ -1,9 +1,9 @@
-import { AppBar, Box, Button, IconButton, Toolbar, Tooltip, Typography } from '@mui/material';
+import { AppBar, Box, Button, IconButton, Toolbar, Tooltip } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Dispatch, SetStateAction, useState } from 'react';
 import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import useAuthCredentials from './hooks/useAuthCredentials';
 import { useDebugMode } from './providers/DebugModeProvider';
@@ -36,7 +36,8 @@ function NavButton({ id, label, path }: NavButtonProps) {
       }}
       sx={{
         'borderRadius': 99,
-        'paddingX': 1.75,
+        'paddingX': 1.5,
+        'whiteSpace': 'nowrap',
         'color': active ? 'primary.light' : 'text.secondary',
         'backgroundColor': active ? (theme) => `${theme.palette.primary.main}24` : 'transparent',
         '&:hover': {
@@ -68,6 +69,8 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
   const { authStatus, signOut } = useAuth();
   const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const onHomePage = location.pathname === '/';
   const debugMode = useDebugMode();
   useAuthCredentials();
 
@@ -82,7 +85,7 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
   const handleOpenWiki = handleOpenExternalLink('https://github.com/guspuffygit/sentient-sims-app/wiki');
 
   return (
-    <Box sx={{ flexGrow: 1, marginBottom: 2 }}>
+    <Box sx={{ flexShrink: 0, marginBottom: 2 }}>
       <AppBar
         position="static"
         color="transparent"
@@ -93,7 +96,17 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
           borderRadius: 3,
         }}
       >
-        <Toolbar variant="dense" sx={{ justifyContent: 'space-between', minHeight: 56, paddingX: 1.5 }}>
+        <Toolbar
+          variant="dense"
+          sx={{
+            justifyContent: 'space-between',
+            minHeight: 56,
+            paddingX: 1.5,
+            paddingY: 0.5,
+            flexWrap: 'wrap',
+            rowGap: 0.5,
+          }}
+        >
           <Box
             sx={{
               display: 'flex',
@@ -101,35 +114,27 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
               gap: 0.5,
             }}
           >
-            <Button
-              id="homebutton"
-              onClick={() => {
-                void navigate('/');
-              }}
-              sx={{
-                borderRadius: 99,
-                paddingX: 1.5,
-                gap: 1,
-                color: 'text.primary',
-              }}
-            >
-              <Box
+            <Tooltip title="Home">
+              <IconButton
+                id="homebutton"
+                aria-label="Home"
+                onClick={() => {
+                  void navigate('/');
+                }}
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 28,
-                  height: 28,
-                  borderRadius: '8px',
-                  background: (theme) =>
-                    `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-                  color: '#ffffff',
+                  'color': onHomePage ? 'primary.light' : 'text.secondary',
+                  'backgroundColor': onHomePage ? (theme) => `${theme.palette.primary.main}24` : 'transparent',
+                  '&:hover': {
+                    color: onHomePage ? 'primary.light' : 'text.primary',
+                    backgroundColor: onHomePage
+                      ? (theme) => `${theme.palette.primary.main}33`
+                      : 'rgba(255, 255, 255, 0.06)',
+                  },
                 }}
               >
-                <AutoAwesomeIcon sx={{ fontSize: 16 }} />
-              </Box>
-              <Typography sx={{ fontWeight: 700, letterSpacing: '-0.01em' }}>Sentient Sims</Typography>
-            </Button>
+                <HomeOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="Open the wiki in your browser">
               <Button
                 onClick={handleOpenWiki}
@@ -145,7 +150,7 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
               </Button>
             </Tooltip>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', rowGap: 0.5 }}>
             {debugMode.isEnabled ? DEBUG_NAV_ITEMS.map((item) => <NavButton key={item.id} {...item} />) : null}
             {NAV_ITEMS.map((item) => (
               <NavButton key={item.id} {...item} />

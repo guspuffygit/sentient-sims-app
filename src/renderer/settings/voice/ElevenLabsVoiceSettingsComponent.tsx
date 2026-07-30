@@ -4,8 +4,8 @@ import {
   Button,
   Chip,
   CircularProgress,
+  Divider,
   FormHelperText,
-  Grid,
   MenuItem,
   Paper,
   Select,
@@ -41,8 +41,10 @@ function ElevenLabsVoiceCard({ voice }: { voice: ElevenLabsVoiceInfo }) {
         display: 'flex',
         alignItems: 'center',
         gap: 2,
-        padding: 1.5,
+        padding: 2,
         marginBottom: 2,
+        borderColor: 'divider',
+        backgroundColor: 'background.default',
       }}
     >
       <Avatar src={voice.imageUrl} alt={voice.name} sx={{ width: 56, height: 56 }}>
@@ -115,61 +117,43 @@ export function ElevenLabsVoiceSettingsComponent() {
   }
 
   return (
-    <Grid size={{ xs: 12, sm: 8 }}>
-      <Box>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: 1,
+    <Box sx={{ maxWidth: 560 }}>
+      <Typography variant="subtitle1">ElevenLabs</Typography>
+      <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 2 }}>
+        Speech generated with voices from your ElevenLabs account.
+      </Typography>
+      <Box sx={{ marginBottom: 2 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 0.75 }}>
+          Speech model
+        </Typography>
+        <Select
+          size="small"
+          labelId="tts-models"
+          id="tts-models"
+          label="TTS Model"
+          value={elevenLabsTTSSettings.value.model}
+          sx={{ width: '100%' }}
+          onChange={(change) => {
+            handleModelChange(change.target.value);
           }}
         >
-          <Stack
-            direction="row"
-            sx={{
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              mb: 1,
-              width: '100%',
-            }}
-          >
-            <Typography>Speech Model:</Typography>
-            <Select
-              size="small"
-              labelId="tts-models"
-              id="tts-models"
-              label="TTS Model"
-              value={elevenLabsTTSSettings.value.model}
-              onChange={(change) => {
-                handleModelChange(change.target.value);
-              }}
-            >
-              {modelMenuItems}
-            </Select>
-          </Stack>
+          {modelMenuItems}
+        </Select>
+      </Box>
+      {tts.error ? (
+        <Box sx={{ marginBottom: 2 }}>
+          <FormHelperText error>Error: {tts.error}</FormHelperText>
         </Box>
-        {tts.error ? (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: 2,
-            }}
-          >
-            <FormHelperText error>Error: {tts.error}</FormHelperText>
-          </Box>
-        ) : null}
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{
-            alignItems: 'center',
-            marginBottom: 1,
-          }}
-        >
+      ) : null}
+      <Box sx={{ marginBottom: 1 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 0.75 }}>
+          Voice
+        </Typography>
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
           <TextField
             label="Default Voice ID"
             variant="outlined"
+            size="small"
             fullWidth
             value={elevenLabsTTSSettings.value.voice}
             onChange={(change) => {
@@ -178,44 +162,40 @@ export function ElevenLabsVoiceSettingsComponent() {
           />
           <TestVoiceButton onTest={() => void voiceInfo.loadVoice(elevenLabsTTSSettings.value.voice)} />
         </Stack>
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            marginBottom: 2,
-          }}
-        >
-          <Button
-            size="small"
-            startIcon={<OpenInNewIcon />}
-            onClick={handleOpenExternalLink(voiceLibraryUrl)}
-            sx={{ textTransform: 'none' }}
-          >
-            Voice Library
-          </Button>
-          <FormHelperText sx={{ margin: 0 }}>
-            Pick a voice, click its <MoreVertIcon sx={{ fontSize: 'inherit', verticalAlign: 'middle' }} /> menu, choose
-            &quot;Copy voice ID&quot;, then paste it above.
-          </FormHelperText>
-        </Stack>
-        {voiceInfo.isLoading ? (
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', marginBottom: 2 }}>
-            <CircularProgress size={16} />
-            <Typography variant="body2" color="text.secondary">
-              Looking up voice...
-            </Typography>
-          </Stack>
-        ) : null}
-        {voiceInfo.error ? (
-          <Box sx={{ marginBottom: 2 }}>
-            <FormHelperText error>{voiceInfo.error}</FormHelperText>
-          </Box>
-        ) : null}
-        {loadedVoice ? <ElevenLabsVoiceCard voice={loadedVoice} /> : null}
-        <APIKeyInput setting={elevenlabsKeySetting} aiName="ElevenLabs" />
       </Box>
-    </Grid>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          marginBottom: 2,
+        }}
+      >
+        <Button size="small" startIcon={<OpenInNewIcon />} onClick={handleOpenExternalLink(voiceLibraryUrl)}>
+          Voice Library
+        </Button>
+        <FormHelperText sx={{ margin: 0 }}>
+          Pick a voice, click its <MoreVertIcon sx={{ fontSize: 'inherit', verticalAlign: 'middle' }} /> menu, choose
+          &quot;Copy voice ID&quot;, then paste it above.
+        </FormHelperText>
+      </Stack>
+      {voiceInfo.isLoading ? (
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', marginBottom: 2 }}>
+          <CircularProgress size={16} />
+          <Typography variant="body2" color="text.secondary">
+            Looking up voice...
+          </Typography>
+        </Stack>
+      ) : null}
+      {voiceInfo.error ? (
+        <Box sx={{ marginBottom: 2 }}>
+          <FormHelperText error>{voiceInfo.error}</FormHelperText>
+        </Box>
+      ) : null}
+      {loadedVoice ? <ElevenLabsVoiceCard voice={loadedVoice} /> : null}
+      <Divider sx={{ marginBottom: 2.5 }} />
+      <APIKeyInput setting={elevenlabsKeySetting} aiName="ElevenLabs" />
+    </Box>
   );
 }

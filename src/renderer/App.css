@@ -113,6 +113,86 @@ code {
   background-color: #141414;
 }
 
+/* Dark-theme the AWS Amplify Authenticator so the login matches the app.
+   Amplify UI styles itself via CSS custom properties; overriding them scoped
+   to the authenticator keeps the rest of Amplify (if ever used) untouched. */
+[data-amplify-authenticator] {
+  --amplify-components-authenticator-router-background-color: transparent;
+  --amplify-components-authenticator-router-border-width: 0;
+  --amplify-components-authenticator-router-box-shadow: none;
+  --amplify-components-authenticator-container-width-max: 100%;
+  --amplify-components-authenticator-form-padding: 20px 4px 4px 4px;
+  --amplify-components-authenticator-footer-padding-bottom: 0;
+
+  --amplify-colors-background-primary: transparent;
+  --amplify-colors-background-secondary: #33353d;
+  --amplify-colors-font-primary: #f2f3f7;
+  --amplify-colors-font-secondary: #a6adc8;
+  --amplify-colors-font-tertiary: #a6adc8;
+  --amplify-colors-font-interactive: #a5b3ff;
+  --amplify-colors-border-primary: rgba(255, 255, 255, 0.14);
+  --amplify-colors-border-secondary: rgba(255, 255, 255, 0.08);
+  --amplify-colors-border-tertiary: rgba(255, 255, 255, 0.08);
+  --amplify-colors-border-focus: #7c8aec;
+
+  --amplify-fonts-default-variable: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    sans-serif;
+  --amplify-fonts-default-static: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --amplify-radii-small: 8px;
+  --amplify-radii-medium: 8px;
+
+  --amplify-components-tabs-border-color: rgba(255, 255, 255, 0.08);
+  --amplify-components-tabs-item-color: #a6adc8;
+  --amplify-components-tabs-item-hover-color: #f2f3f7;
+  --amplify-components-tabs-item-focus-color: #a5b3ff;
+  --amplify-components-tabs-item-active-color: #a5b3ff;
+  --amplify-components-tabs-item-active-border-color: #7c8aec;
+
+  --amplify-components-button-color: #f2f3f7;
+  --amplify-components-button-font-weight: 600;
+  --amplify-components-button-border-color: rgba(255, 255, 255, 0.14);
+  --amplify-components-button-hover-background-color: rgba(255, 255, 255, 0.06);
+  --amplify-components-button-hover-border-color: rgba(255, 255, 255, 0.28);
+  --amplify-components-button-hover-color: #f2f3f7;
+  --amplify-components-button-active-background-color: rgba(255, 255, 255, 0.1);
+  --amplify-components-button-active-color: #f2f3f7;
+  --amplify-components-button-focus-color: #f2f3f7;
+  --amplify-components-button-focus-border-color: #7c8aec;
+  --amplify-components-button-focus-box-shadow: 0 0 0 2px rgba(124, 138, 236, 0.35);
+  --amplify-components-button-disabled-background-color: rgba(255, 255, 255, 0.08);
+  --amplify-components-button-disabled-color: #72767d;
+  --amplify-components-button-disabled-border-color: transparent;
+
+  --amplify-components-button-primary-background-color: #7c8aec;
+  --amplify-components-button-primary-color: #ffffff;
+  --amplify-components-button-primary-hover-background-color: #a5b3ff;
+  --amplify-components-button-primary-hover-color: #ffffff;
+  --amplify-components-button-primary-active-background-color: #5a6ccf;
+  --amplify-components-button-primary-active-color: #ffffff;
+  --amplify-components-button-primary-focus-background-color: #a5b3ff;
+  --amplify-components-button-primary-focus-color: #ffffff;
+
+  --amplify-components-button-link-color: #a5b3ff;
+  --amplify-components-button-link-hover-color: #c3ccff;
+  --amplify-components-button-link-hover-background-color: rgba(124, 138, 236, 0.08);
+  --amplify-components-button-link-active-background-color: rgba(124, 138, 236, 0.12);
+  --amplify-components-button-link-active-color: #c3ccff;
+  --amplify-components-button-link-focus-background-color: rgba(124, 138, 236, 0.12);
+  --amplify-components-button-link-focus-color: #c3ccff;
+
+  --amplify-components-fieldcontrol-color: #f2f3f7;
+  --amplify-components-fieldcontrol-border-color: rgba(255, 255, 255, 0.14);
+  --amplify-components-fieldcontrol-focus-border-color: #7c8aec;
+  --amplify-components-fieldcontrol-focus-box-shadow: 0 0 0 1px #7c8aec;
+  --amplify-components-field-label-color: #a6adc8;
+
+  --amplify-components-heading-color: #f2f3f7;
+  --amplify-components-text-color: #a6adc8;
+  --amplify-components-text-error-color: #f57373;
+  --amplify-components-alert-error-background-color: rgba(240, 71, 71, 0.14);
+  --amplify-components-alert-error-color: #f57373;
+}
+
 .gsi-material-button {
   -moz-user-select: none;
   -webkit-user-select: none;

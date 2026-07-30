@@ -1,4 +1,5 @@
 import { Button } from '@mui/material';
+import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
 import log from 'electron-log';
 import { useTTS } from 'renderer/providers/AudioContextProvider';
 
@@ -13,7 +14,9 @@ export function TestVoiceButton({ disabled, onTest }: TestVoiceButtonProperties)
   return (
     <Button
       color="primary"
-      variant="outlined"
+      variant="contained"
+      startIcon={<PlayArrowRoundedIcon />}
+      sx={{ flexShrink: 0 }}
       onClick={() => {
         onTest?.();
         void tts.speak('Hello, this is a demo of my voice.');
@@ -23,7 +26,7 @@ export function TestVoiceButton({ disabled, onTest }: TestVoiceButtonProperties)
       disabled={disabled}
       disableElevation={disabled}
     >
-      Test
+      Test voice
     </Button>
   );
 }

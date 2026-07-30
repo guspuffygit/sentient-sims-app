@@ -1,6 +1,12 @@
 import { alpha, createTheme } from '@mui/material/styles';
 import type {} from '@mui/x-data-grid/themeAugmentation';
 
+declare module '@mui/material/styles' {
+  interface TypeBackground {
+    elevated: string;
+  }
+}
+
 // Design tokens for the Sentient Sims dark theme.
 // The look keeps the original Discord-adjacent blurple identity,
 // with layered surfaces, soft borders, and no default MUI chrome.
@@ -69,6 +75,7 @@ const theme = createTheme({
     background: {
       default: colors.bgDefault,
       paper: colors.bgPaper,
+      elevated: colors.bgElevated,
     },
     action: {
       active: colors.textPrimary,

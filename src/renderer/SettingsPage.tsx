@@ -49,12 +49,6 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <Box sx={{ marginBottom: 3, paddingX: 0.5 }}>
-        <Typography variant="h4">Settings</Typography>
-        <Typography variant="body1" sx={{ color: 'text.secondary', marginTop: 0.5 }}>
-          Configure your AI providers, mod options, and voice
-        </Typography>
-      </Box>
       <AppCard>
         <TabContext value={tabSelectedValue}>
           <Box

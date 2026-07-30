@@ -11,10 +11,11 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import axios from 'axios';
 import log from 'electron-log';
 import { appApiUrl } from 'main/sentient-sims/constants';
-import { JSX, useEffect, useMemo, useRef, useState } from 'react';
+import { JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type AnnouncementMessage = {
   id: string;
@@ -158,7 +159,35 @@ export const useAnnouncements = () => {
 
 export const Announcements = () => {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const [canScrollDown, setCanScrollDown] = useState(false);
   const announcements = useAnnouncements();
+
+  const updateScrollCues = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) {
+      return;
+    }
+    setCanScrollUp(el.scrollTop > 4);
+    setCanScrollDown(el.scrollTop + el.clientHeight < el.scrollHeight - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    const content = contentRef.current;
+    if (!el || !content) {
+      return undefined;
+    }
+    // Observing content as well as the viewport catches announcements arriving, which grow scrollHeight without resizing the viewport
+    const observer = new ResizeObserver(updateScrollCues);
+    observer.observe(el);
+    observer.observe(content);
+    return () => {
+      observer.disconnect();
+    };
+  }, [updateScrollCues]);
 
   useEffect(() => {
     const scrollTimeout = setTimeout(() => {
@@ -174,8 +203,8 @@ export const Announcements = () => {
     const theCards: JSX.Element[] = [];
     announcements.forEach((announcement) => {
       theCards.push(
-        <Box sx={{ marginBottom: 1.5 }}>
-          <Card sx={{ maxWidth: 345 }}>
+        <Box key={announcement.id} sx={{ marginBottom: 1.5 }}>
+          <Card sx={{ backgroundColor: 'background.elevated' }}>
             <CardHeader
               avatar={<Avatar aria-label="author avatar" src={announcement.authorAvatar} />}
               sx={{ paddingBottom: 0 }}
@@ -201,11 +230,21 @@ export const Announcements = () => {
   }, [announcements]);
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: 'calc(100vh - 40px)',
+        minHeight: 280,
+        position: 'sticky',
+        top: 20,
+      }}
+    >
       <AppBar
         position="static"
         color="transparent"
         sx={{
+          flexShrink: 0,
           backgroundColor: 'background.paper',
           border: '1px solid',
           borderColor: 'divider',
@@ -234,16 +273,62 @@ export const Announcements = () => {
         sx={{
           marginTop: 2,
           flexGrow: 1,
-          height: 'calc(100vh - 130px)',
+          minHeight: 0,
           boxSizing: 'border-box',
-          p: 1.5,
-          backgroundColor: 'transparent',
-          overflowY: 'auto',
+          backgroundColor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 3,
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        {cards}
+        <Box
+          id="announcements-scroll"
+          ref={scrollRef}
+          onScroll={updateScrollCues}
+          sx={{
+            height: '100%',
+            overflowY: 'auto',
+            p: 1.5,
+            scrollbarGutter: 'stable',
+            scrollbarColor: 'rgba(255, 255, 255, 0.28) rgba(255, 255, 255, 0.06)',
+          }}
+        >
+          <div ref={contentRef}>
+            {cards}
 
-        <div ref={bottomRef} />
+            <div ref={bottomRef} />
+          </div>
+        </Box>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 48,
+            pointerEvents: 'none',
+            opacity: canScrollUp ? 1 : 0,
+            transition: 'opacity 150ms ease',
+            background: (theme) =>
+              `linear-gradient(180deg, ${theme.palette.background.paper}, ${alpha(theme.palette.background.paper, 0)})`,
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 48,
+            pointerEvents: 'none',
+            opacity: canScrollDown ? 1 : 0,
+            transition: 'opacity 150ms ease',
+            background: (theme) =>
+              `linear-gradient(0deg, ${theme.palette.background.paper}, ${alpha(theme.palette.background.paper, 0)})`,
+          }}
+        />
       </Paper>
     </Box>
   );

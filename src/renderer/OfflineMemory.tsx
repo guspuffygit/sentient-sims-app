@@ -2,10 +2,7 @@
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Modal,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -14,11 +11,16 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
+import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 import { ReactNode, useEffect, useState } from 'react';
 import log from 'electron-log';
 import { SaveGame } from 'main/sentient-sims/models/SaveGame';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
+import AppCard from './AppCard';
+import { EmptyState } from './components/EmptyState';
 
 const client = new SentientSimsAppClient();
 
@@ -65,7 +67,7 @@ export default function OfflineMemory() {
     saveGames[selectedSaveGame].participants?.forEach((sim) => {
       tableRows.push(
         <TableRow key={sim.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-          <TableCell component="th" scope="row">
+          <TableCell component="th" scope="row" sx={{ fontWeight: 600, verticalAlign: 'top' }}>
             {sim.name}
           </TableCell>
           <TableCell align="left">{sim.description}</TableCell>
@@ -74,54 +76,68 @@ export default function OfflineMemory() {
     });
   }
 
+  const saveGameCount = Object.keys(saveGames).length;
+  const selectedSaveGameParticipants = selectedSaveGame in saveGames ? saveGames[selectedSaveGame] : undefined;
+
   return (
-    <Card
-      sx={{
-        minWidth: 275,
-        maxHeight: 700,
-        marginBottom: 2,
-        overflow: 'auto',
-      }}
-    >
-      <CardContent>
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell align="left">Save Game</TableCell>
-                <TableCell align="left">Type</TableCell>
-                <TableCell align="left">Sims</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {Object.values(saveGames).map((saveGameParticipants) => (
-                <TableRow
-                  key={saveGameParticipants.saveGame.name}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    {saveGameParticipants.saveGame.name}
-                  </TableCell>
-                  <TableCell align="left">{saveGameParticipants.saveGame.type}</TableCell>
-                  <TableCell align="left">
-                    {saveGameParticipants.participants !== undefined ? (
-                      <Button
-                        onClick={() => {
-                          void viewSims(saveGameParticipants.saveGame);
-                        }}
-                      >
-                        View Sims
-                      </Button>
-                    ) : (
-                      <Typography>-</Typography>
-                    )}
-                  </TableCell>
+    <>
+      {saveGameCount === 0 ? (
+        <EmptyState
+          icon={<StorageOutlinedIcon />}
+          title="No save games found"
+          description="Save games recorded by the mod in the local database will show up here."
+        />
+      ) : (
+        <AppCard
+          title="Save games"
+          subtitle={`${saveGameCount} save game${saveGameCount === 1 ? '' : 's'} in the local database`}
+          icon={<SaveOutlinedIcon sx={{ fontSize: 18 }} />}
+        >
+          <TableContainer sx={{ maxHeight: 560, overflow: 'auto' }}>
+            <Table sx={{ 'minWidth': 650, '& td, & th': { borderColor: 'divider' } }} aria-label="simple table">
+              <TableHead sx={{ '& th': { color: 'text.secondary', fontWeight: 600 } }}>
+                <TableRow>
+                  <TableCell align="left">Save Game</TableCell>
+                  <TableCell align="left">Type</TableCell>
+                  <TableCell align="left">Sims</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </CardContent>
+              </TableHead>
+              <TableBody>
+                {Object.values(saveGames).map((saveGameParticipants) => (
+                  <TableRow
+                    key={saveGameParticipants.saveGame.name}
+                    hover
+                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell component="th" scope="row" sx={{ fontWeight: 600 }}>
+                      {saveGameParticipants.saveGame.name}
+                    </TableCell>
+                    <TableCell align="left" sx={{ color: 'text.secondary' }}>
+                      {saveGameParticipants.saveGame.type}
+                    </TableCell>
+                    <TableCell align="left">
+                      {saveGameParticipants.participants !== undefined ? (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="secondary"
+                          onClick={() => {
+                            void viewSims(saveGameParticipants.saveGame);
+                          }}
+                        >
+                          View Sims
+                        </Button>
+                      ) : (
+                        <Typography sx={{ color: 'text.disabled' }}>-</Typography>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </AppCard>
+      )}
       <Modal
         open={simsViewOpen}
         onClose={() => {
@@ -130,21 +146,50 @@ export default function OfflineMemory() {
       >
         <Box
           sx={{
-            height: 700,
-            overflow: 'auto',
             position: 'absolute',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
             width: 1000,
+            maxWidth: 'calc(100vw - 48px)',
+            maxHeight: 700,
+            overflow: 'auto',
             bgcolor: 'background.paper',
-            boxShadow: 24,
-            p: 4,
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: '14px',
+            boxShadow: '0 12px 48px rgba(0, 0, 0, 0.5)',
+            padding: 3,
           }}
         >
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 800 }} aria-label="simple table">
-              <TableHead>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, marginBottom: 1.5 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 34,
+                height: 34,
+                borderRadius: '10px',
+                backgroundColor: (theme) => `${theme.palette.primary.main}1f`,
+                color: 'primary.light',
+                flexShrink: 0,
+              }}
+            >
+              <PeopleAltOutlinedIcon sx={{ fontSize: 18 }} />
+            </Box>
+            <div>
+              <Typography variant="h6">Sims</Typography>
+              {selectedSaveGameParticipants ? (
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  {selectedSaveGameParticipants.saveGame.name}
+                </Typography>
+              ) : null}
+            </div>
+          </Box>
+          <TableContainer>
+            <Table sx={{ 'minWidth': 800, '& td, & th': { borderColor: 'divider' } }} aria-label="simple table">
+              <TableHead sx={{ '& th': { color: 'text.secondary', fontWeight: 600 } }}>
                 <TableRow>
                   <TableCell align="left">Sim Name</TableCell>
                   <TableCell align="left">Description</TableCell>
@@ -155,6 +200,6 @@ export default function OfflineMemory() {
           </TableContainer>
         </Box>
       </Modal>
-    </Card>
+    </>
   );
 }

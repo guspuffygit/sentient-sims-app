@@ -1,4 +1,4 @@
-import { Box, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Box, MenuItem, Select, Typography } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import {
   defaultOpenAITTSSettings,
@@ -36,68 +36,46 @@ export function OpenAIVoiceSettingsComponent() {
   }
 
   return (
-    <Box>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          marginBottom: 1,
-        }}
-      >
-        <Stack
-          direction="row"
-          sx={{
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 1,
-            width: '100%',
+    <Box sx={{ maxWidth: 560 }}>
+      <Typography variant="subtitle1">OpenAI</Typography>
+      <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 2 }}>
+        Speech generated with the OpenAI text to speech API.
+      </Typography>
+      <Box sx={{ marginBottom: 2 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 0.75 }}>
+          Speech model
+        </Typography>
+        <Select
+          size="small"
+          labelId="tts-models"
+          id="tts-models"
+          label="TTS Model"
+          value={openaiTtsSettings.value.model}
+          sx={{ width: '100%' }}
+          onChange={(change) => {
+            void handleModelChange(change.target.value);
           }}
         >
-          <Typography>Speech Model:</Typography>
-          <Select
-            size="small"
-            labelId="tts-models"
-            id="tts-models"
-            label="TTS Model"
-            value={openaiTtsSettings.value.model}
-            onChange={(change) => {
-              void handleModelChange(change.target.value);
-            }}
-          >
-            {modelMenuItems}
-          </Select>
-        </Stack>
+          {modelMenuItems}
+        </Select>
       </Box>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          marginBottom: 1,
-        }}
-      >
-        <Stack
-          direction="row"
-          sx={{
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 1,
-            width: '100%',
+      <Box sx={{ marginBottom: 2 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 0.75 }}>
+          Speech voice
+        </Typography>
+        <Select
+          size="small"
+          labelId="voice"
+          id="voice"
+          label="Voice"
+          value={openaiTtsSettings.value.voice}
+          sx={{ width: '100%' }}
+          onChange={(change) => {
+            void handleVoiceChange(change.target.value);
           }}
         >
-          <Typography>Speech Voice:</Typography>
-          <Select
-            size="small"
-            labelId="voice"
-            id="voice"
-            label="Voice"
-            value={openaiTtsSettings.value.voice}
-            onChange={(change) => {
-              void handleVoiceChange(change.target.value);
-            }}
-          >
-            {voiceMenuItems}
-          </Select>
-        </Stack>
+          {voiceMenuItems}
+        </Select>
       </Box>
     </Box>
   );

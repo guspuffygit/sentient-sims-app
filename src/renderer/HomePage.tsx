@@ -39,17 +39,17 @@ function HomeHero() {
     <Box
       sx={{
         display: 'flex',
-        alignItems: 'flex-end',
+        alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         gap: 1,
-        marginBottom: 3,
+        marginBottom: 1.5,
         paddingX: 0.5,
       }}
     >
-      <div>
+      <Box sx={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', columnGap: 1.5 }}>
         <Typography
-          variant="h4"
+          variant="h6"
           sx={{
             background: (theme) =>
               `linear-gradient(90deg, ${theme.palette.text.primary}, ${theme.palette.primary.light})`,
@@ -60,10 +60,10 @@ function HomeHero() {
         >
           Sentient Sims
         </Typography>
-        <Typography variant="body1" sx={{ color: 'text.secondary', marginTop: 0.5 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           Your AI companion for The Sims 4
         </Typography>
-      </div>
+      </Box>
       <ConnectionChip />
     </Box>
   );

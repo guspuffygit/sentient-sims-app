@@ -1,4 +1,4 @@
-import { Card, CardContent, Chip, IconButton, InputAdornment, Stack, TextField } from '@mui/material';
+import { alpha, Box, Chip, IconButton, InputAdornment, Stack, TextField, Typography } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutlined';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlineOutlined';
@@ -17,6 +17,12 @@ export type ChatBoxComponentProps = {
   index: number;
   voiceLines?: VoiceTestLine[];
 };
+
+const roleLabelColors = {
+  system: 'text.disabled',
+  user: 'secondary.main',
+  assistant: 'primary.light',
+} as const;
 
 function playVoiceLine(line: VoiceTestLine) {
   if (!line.audioUrl) return;
@@ -40,11 +46,13 @@ export function ChatBoxComponent({
       return (
         <InputAdornment position="end" sx={{ alignItems: 'flex-end' }}>
           <IconButton
+            size="small"
+            sx={{ 'color': 'text.disabled', '&:hover': { color: 'error.light' } }}
             onClick={() => {
               handleDeleteMessage(index);
             }}
           >
-            <RemoveCircleOutlineIcon />
+            <RemoveCircleOutlineIcon fontSize="small" />
           </IconButton>
         </InputAdornment>
       );
@@ -60,68 +68,104 @@ export function ChatBoxComponent({
     }, 600);
   }
 
+  const { role } = message.message;
+  const isAssistant = role === 'assistant';
+  const isSystem = role === 'system';
+  const railColor = isAssistant ? 'primary.main' : 'rgba(255, 255, 255, 0.16)';
+  const flatBackground = isSystem ? 'transparent' : 'rgba(255, 255, 255, 0.03)';
+
   return (
-    <Card key={message.id} style={{ marginBottom: 16, backgroundColor: 'transparent' }}>
-      <CardContent style={{ padding: 0, paddingTop: 0 }}>
-        <TextField
-          id="outlined-textarea"
-          label={message.message.role}
-          fullWidth
-          onChange={(event) => {
-            handleTextChange(event.target.value);
-          }}
-          variant="filled"
-          multiline
-          value={text}
-          style={{ height: '100%', margin: 0 }}
-          slotProps={{
-            input: {
-              endAdornment,
-            },
-          }}
-        />
-        {voiceLines && voiceLines.length > 0 && (
-          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1, mt: 1 }}>
-            {voiceLines.map((line) => {
-              const key = `${line.speaker}-${line.text}`;
-              if (line.error) {
-                return (
-                  <Chip
-                    key={key}
-                    size="small"
-                    color="error"
-                    icon={<ErrorOutlineIcon />}
-                    label={`${line.speaker}: ${line.error}`}
-                  />
-                );
-              }
-              if (line.loading) {
-                return (
-                  <Chip
-                    key={key}
-                    size="small"
-                    icon={<CircularProgress size={14} />}
-                    label={`${line.speaker}: loading voice...`}
-                  />
-                );
-              }
+    <Box
+      key={message.id}
+      sx={{
+        'marginBottom': 1.5,
+        'paddingX': 1.75,
+        'paddingY': 1.25,
+        'borderRadius': 2.5,
+        'border': isSystem ? '1px dashed' : '1px solid',
+        'borderColor': isAssistant ? (theme) => alpha(theme.palette.primary.main, 0.24) : 'divider',
+        'borderLeft': isSystem ? undefined : '3px solid',
+        'borderLeftColor': isSystem ? undefined : railColor,
+        'backgroundColor': isAssistant ? (theme) => alpha(theme.palette.primary.main, 0.07) : flatBackground,
+        'transition': 'border-color 120ms ease',
+        '&:focus-within': { borderColor: 'primary.main' },
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, marginBottom: 0.25 }}>
+        <Box sx={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: roleLabelColors[role] }} />
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: roleLabelColors[role] }}
+        >
+          {role}
+        </Typography>
+      </Box>
+      <TextField
+        id="outlined-textarea"
+        fullWidth
+        onChange={(event) => {
+          handleTextChange(event.target.value);
+        }}
+        variant="standard"
+        multiline
+        placeholder="Type a message"
+        value={text}
+        sx={{
+          '& .MuiInputBase-root': {
+            'padding': 0,
+            'fontSize': '0.92rem',
+            'lineHeight': 1.65,
+            'backgroundColor': 'transparent',
+            '&::before, &::after': { display: 'none' },
+          },
+        }}
+        slotProps={{
+          input: {
+            endAdornment,
+          },
+        }}
+      />
+      {voiceLines && voiceLines.length > 0 && (
+        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1, mt: 1 }}>
+          {voiceLines.map((line) => {
+            const key = `${line.speaker}-${line.text}`;
+            if (line.error) {
               return (
                 <Chip
                   key={key}
                   size="small"
-                  color="primary"
-                  variant="outlined"
-                  icon={<PlayArrowIcon />}
-                  label={line.speaker}
-                  onClick={() => {
-                    playVoiceLine(line);
-                  }}
+                  color="error"
+                  icon={<ErrorOutlineIcon />}
+                  label={`${line.speaker}: ${line.error}`}
                 />
               );
-            })}
-          </Stack>
-        )}
-      </CardContent>
-    </Card>
+            }
+            if (line.loading) {
+              return (
+                <Chip
+                  key={key}
+                  size="small"
+                  icon={<CircularProgress size={14} />}
+                  label={`${line.speaker}: loading voice...`}
+                />
+              );
+            }
+            return (
+              <Chip
+                key={key}
+                size="small"
+                color="primary"
+                variant="outlined"
+                icon={<PlayArrowIcon />}
+                label={line.speaker}
+                onClick={() => {
+                  playVoiceLine(line);
+                }}
+              />
+            );
+          })}
+        </Stack>
+      )}
+    </Box>
   );
 }

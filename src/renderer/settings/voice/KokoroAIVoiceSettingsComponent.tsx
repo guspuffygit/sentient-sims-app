@@ -1,4 +1,4 @@
-import { Box, Chip, FormHelperText, Grid, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Box, Chip, FormHelperText, MenuItem, Select, Typography } from '@mui/material';
 import {
   defaultKokoroAITTSSettings,
   KokoroAISpeechModel,
@@ -81,171 +81,104 @@ export function KokoroAIVoiceSettingsComponent() {
   }
 
   return (
-    <Grid size={{ xs: 12, sm: 8 }}>
-      <Box>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: 1,
+    <Box sx={{ maxWidth: 560 }}>
+      <Typography variant="subtitle1">Kokoro</Typography>
+      <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 2 }}>
+        Kokoro speech generation, run locally in the app or through a remote endpoint.
+      </Typography>
+      <Box sx={{ marginBottom: 2 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 0.75 }}>
+          Speech model
+        </Typography>
+        <Select
+          size="small"
+          labelId="tts-models"
+          id="tts-models"
+          label="TTS Model"
+          value={kokoroaiTtsSettings.value.model}
+          sx={{ width: '100%' }}
+          onChange={(change) => {
+            void handleModelChange(change.target.value);
           }}
         >
-          <Stack
-            direction="row"
-            sx={{
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              mb: 1,
-              width: '100%',
-            }}
-          >
-            <Typography>Speech Model:</Typography>
-            <Select
-              size="small"
-              labelId="tts-models"
-              id="tts-models"
-              label="TTS Model"
-              value={kokoroaiTtsSettings.value.model}
-              onChange={(change) => {
-                void handleModelChange(change.target.value);
-              }}
-            >
-              {modelMenuItems}
-            </Select>
-          </Stack>
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: 1,
-          }}
-        >
-          <Stack
-            direction="row"
-            sx={{
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              mb: 1,
-              width: '100%',
-            }}
-          >
-            <Typography>Speech Voice:</Typography>
-            <Select
-              size="small"
-              labelId="voice"
-              id="voice"
-              label="Voice"
-              multiple
-              value={kokoroaiTtsSettings.value.voice}
-              onChange={(change) => {
-                void handleVoiceChange(change.target.value);
-              }}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip key={value} label={VOICES[value].name} />
-                  ))}
-                </Box>
-              )}
-            >
-              {voiceMenuItems}
-            </Select>
-          </Stack>
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: 1,
-          }}
-        >
-          <Stack
-            direction="row"
-            sx={{
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              mb: 1,
-              width: '100%',
-            }}
-          >
-            <Typography>Local/Remote</Typography>
-            <Select
-              size="small"
-              labelId="local-remote"
-              id="local-remote"
-              label="Local/Remote"
-              value={kokoroaiTtsSettings.value.type}
-              onChange={(change) => {
-                void handleTypeChange(toKokoroType(change.target.value));
-              }}
-            >
-              {typeMenuItems}
-            </Select>
-          </Stack>
-        </Box>
-        {kokoroaiTtsSettings.value.type === KokoroType.Remote ? (
-          <AIEndpointComponent
-            type={ApiType.Kokoro}
-            selectedApiType={aiSettings.ttsApiType}
-            settingsEnum={SettingsEnum.KOKOROAI_ENDPOINT}
-          />
-        ) : null}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            marginBottom: 2,
-          }}
-        >
-          <TestVoiceButton />
-        </Box>
-        {tts.error ? (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: 2,
-            }}
-          >
-            <FormHelperText error>Error: {tts.error}</FormHelperText>
-          </Box>
-        ) : null}
-        {kokoroaiTtsSettings.value.type === KokoroType.WebGPU ? (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: 2,
-            }}
-          >
-            <FormHelperText>
-              WebGPU is Experimental. Kokoro runs completely locally using the power of your graphics card. Depending on
-              the specs and configuration of your computer it may run too slow.
-            </FormHelperText>
-          </Box>
-        ) : null}
-        {kokoroaiTtsSettings.value.type === KokoroType.WebGPU && kokoroaiTtsSettings.value.voice.length > 1 ? (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: 2,
-            }}
-          >
-            <FormHelperText error>Only one Kokoro Voice can be selected when using WebGPU</FormHelperText>
-          </Box>
-        ) : null}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: 2,
-          }}
-        >
-          <WebGpuDebug />
-        </Box>
+          {modelMenuItems}
+        </Select>
       </Box>
-    </Grid>
+      <Box sx={{ marginBottom: 2 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 0.75 }}>
+          Speech voice
+        </Typography>
+        <Select
+          size="small"
+          labelId="voice"
+          id="voice"
+          label="Voice"
+          multiple
+          value={kokoroaiTtsSettings.value.voice}
+          sx={{ width: '100%' }}
+          onChange={(change) => {
+            void handleVoiceChange(change.target.value);
+          }}
+          renderValue={(selected) => (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {selected.map((value) => (
+                <Chip key={value} label={VOICES[value].name} />
+              ))}
+            </Box>
+          )}
+        >
+          {voiceMenuItems}
+        </Select>
+      </Box>
+      <Box sx={{ marginBottom: 2 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 0.75 }}>
+          Local/Remote
+        </Typography>
+        <Select
+          size="small"
+          labelId="local-remote"
+          id="local-remote"
+          label="Local/Remote"
+          value={kokoroaiTtsSettings.value.type}
+          sx={{ minWidth: 240 }}
+          onChange={(change) => {
+            void handleTypeChange(toKokoroType(change.target.value));
+          }}
+        >
+          {typeMenuItems}
+        </Select>
+      </Box>
+      {kokoroaiTtsSettings.value.type === KokoroType.Remote ? (
+        <AIEndpointComponent
+          type={ApiType.Kokoro}
+          selectedApiType={aiSettings.ttsApiType}
+          settingsEnum={SettingsEnum.KOKOROAI_ENDPOINT}
+        />
+      ) : null}
+      <Box sx={{ marginTop: 2.5, marginBottom: 2 }}>
+        <TestVoiceButton />
+      </Box>
+      {tts.error ? (
+        <Box sx={{ marginBottom: 2 }}>
+          <FormHelperText error>Error: {tts.error}</FormHelperText>
+        </Box>
+      ) : null}
+      {kokoroaiTtsSettings.value.type === KokoroType.WebGPU ? (
+        <Box sx={{ marginBottom: 2 }}>
+          <FormHelperText>
+            WebGPU is Experimental. Kokoro runs completely locally using the power of your graphics card. Depending on
+            the specs and configuration of your computer it may run too slow.
+          </FormHelperText>
+        </Box>
+      ) : null}
+      {kokoroaiTtsSettings.value.type === KokoroType.WebGPU && kokoroaiTtsSettings.value.voice.length > 1 ? (
+        <Box sx={{ marginBottom: 2 }}>
+          <FormHelperText error>Only one Kokoro Voice can be selected when using WebGPU</FormHelperText>
+        </Box>
+      ) : null}
+      <Box sx={{ marginBottom: 2 }}>
+        <WebGpuDebug />
+      </Box>
+    </Box>
   );
 }
