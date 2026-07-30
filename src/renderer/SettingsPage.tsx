@@ -19,6 +19,7 @@ import { useAISettings } from './providers/AISettingsProvider';
 import VoiceSettingsComponent from './settings/VoiceSettingsComponent';
 import { useSetupWizard } from './providers/SetupWizardProvider';
 import { AiMaxResponseLengthSettingsComponent } from './settings/AiMaxResponseLengthSettingsComponent';
+import { ImageProviderConfigsComponent } from './settings/ImageProviderConfigsComponent';
 import { ProviderConfigsComponent } from './settings/ProviderConfigsComponent';
 import { ProviderConnectionSettingsComponent } from './settings/ProviderConnectionSettingsComponent';
 import LocalizationSettingsComponent from './settings/LocalizationSettingsComponent';
@@ -88,6 +89,8 @@ export default function SettingsPage() {
             <MemoryRetrievalSettingsComponent />
             <EmbeddingSettingsComponent />
             <ProviderConfigsComponent />
+            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+            <ImageProviderConfigsComponent />
             <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
             <ProviderConnectionSettingsComponent />
             <Divider sx={{ marginTop: 2, marginBottom: 2 }} />

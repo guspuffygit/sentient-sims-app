@@ -262,6 +262,17 @@ export function defaultStore(cwd?: string) {
         type: 'string',
         default: defaultGameAppPath,
       },
+      [SettingsEnum.IMAGE_PROVIDER_CONFIGS.toString()]: {
+        type: 'array',
+        default: [],
+        items: {
+          type: 'object',
+        },
+      },
+      [SettingsEnum.DEFAULT_IMAGE_PROVIDER_CONFIG_ID.toString()]: {
+        type: 'string',
+        default: '',
+      },
     },
     migrations: {
       '3.1.0': (store) => {
@@ -322,6 +333,9 @@ export class SettingsService {
     }
     if (key === (SettingsEnum.AI_PROVIDER_CONFIGS as string)) {
       this.pruneProviderConfigReferences();
+    }
+    if (key === (SettingsEnum.IMAGE_PROVIDER_CONFIGS as string)) {
+      this.pruneImageProviderConfigReferences();
     }
 
     this.changeListener?.(key, value);
@@ -398,6 +412,14 @@ export class SettingsService {
     const prunedEntries = Object.entries(overrides).filter(([, configId]) => configId && ids.has(configId));
     if (prunedEntries.length !== Object.keys(overrides).length) {
       this.set(SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES, Object.fromEntries(prunedEntries));
+    }
+  }
+
+  private pruneImageProviderConfigReferences() {
+    const configs = this.imageProviderConfigs;
+    const defaultId = this.defaultImageProviderConfigId;
+    if (defaultId && !configs.some((config) => config.id === defaultId)) {
+      this.set(SettingsEnum.DEFAULT_IMAGE_PROVIDER_CONFIG_ID, configs.at(0)?.id ?? '');
     }
   }
 
@@ -788,6 +810,23 @@ export class SettingsService {
 
   set gameAppPath(value: string) {
     this.set(SettingsEnum.GAME_APP_PATH, value);
+  }
+
+  get imageProviderConfigs(): AIProviderConfig[] {
+    return sanitizeProviderConfigs(this.get(SettingsEnum.IMAGE_PROVIDER_CONFIGS));
+  }
+
+  set imageProviderConfigs(value: AIProviderConfig[]) {
+    this.set(SettingsEnum.IMAGE_PROVIDER_CONFIGS, sanitizeProviderConfigs(value));
+  }
+
+  get defaultImageProviderConfigId(): string {
+    const value = this.get(SettingsEnum.DEFAULT_IMAGE_PROVIDER_CONFIG_ID);
+    return typeof value === 'string' ? value : '';
+  }
+
+  set defaultImageProviderConfigId(value: string) {
+    this.set(SettingsEnum.DEFAULT_IMAGE_PROVIDER_CONFIG_ID, value);
   }
 
   get maxResponseTokens(): number {

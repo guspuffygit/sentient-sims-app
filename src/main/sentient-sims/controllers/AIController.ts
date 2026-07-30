@@ -14,6 +14,7 @@ import {
   InteractionPrefetchRequest,
 } from '../services/GenerationQueueService';
 import { ApiTypeFromValue } from '../models/ApiType';
+import { ImageGenerationRequest } from '../models/ImageGeneration';
 
 export class AIController {
   private readonly ctx: ApiContext;
@@ -33,6 +34,18 @@ export class AIController {
       status: InteractionEventStatus.GENERATED,
       request: promptRequest,
     });
+  };
+
+  @CatchErrors()
+  generateImage = async (req: Request, res: Response) => {
+    const request = req.body as ImageGenerationRequest;
+    if (!request.prompt) {
+      res.status(400).json({ error: 'Must include prompt in request body' });
+      return;
+    }
+
+    const response = await this.ctx.ai.generateImage(request);
+    res.json(response);
   };
 
   @CatchErrors()

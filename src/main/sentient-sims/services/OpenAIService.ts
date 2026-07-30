@@ -60,7 +60,9 @@ export class OpenAIService implements GenerationService {
     throw new OpenAIKeyNotSetError('No OpenAI Key set, Edit OpenAI Key to set it');
   }
 
-  protected getOpenAIClient(apiKey?: string): OpenAI {
+  // Shared with OpenAIImageGenerationService so text and image generation
+  // reuse the same key resolution and cached client
+  getOpenAIClient(apiKey?: string): OpenAI {
     const newApiKey = apiKey ?? this.getOpenAIKey();
     const timeout = this.ctx.settings.generationTimeoutSeconds * 1000;
     const baseURL = this.serviceUrl();

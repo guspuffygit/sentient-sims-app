@@ -103,6 +103,8 @@ export const novelaiGenerationDefaultEndpoint = 'https://text.novelai.net';
 export const openaiDefaultModel = 'gpt-4o-mini';
 // Cheap, fast, uncensored, and a 131k context window - see openrouterRecommendedModels.
 export const openrouterDefaultModel = 'mistralai/mistral-nemo';
+export const openaiDefaultImageModel = 'gpt-image-1';
+export const openaiImageModels = ['gpt-image-1', 'dall-e-3', 'dall-e-2'];
 export const novelaiDefaultModel = 'kayra-v1';
 export const sentientSimsAIDefaultModel = 'Gryphe/MythoMax-L2-13b';
 // Embedding model served by the Sentient Sims AI /v1/embeddings endpoint (passed through

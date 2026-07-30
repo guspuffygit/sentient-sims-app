@@ -26,6 +26,7 @@ export function runApi(ctx: ApiContext) {
   expressApp.post('/ai/v2/event/classification', ctx.controller.ai.classificationEvent);
   expressApp.post('/ai/v2/event/buff', ctx.controller.ai.buffDescription);
   expressApp.post('/ai/v3/event/buff', ctx.controller.ai.buffEvent);
+  expressApp.post('/ai/v2/image/generate', ctx.controller.ai.generateImage);
   expressApp.get('/ai/v2/models', ctx.controller.ai.getModels);
   expressApp.get('/ai/v2/tts', ctx.controller.ai.tts);
 
@@ -54,6 +55,9 @@ export function runApi(ctx: ApiContext) {
   expressApp.get('/locations/:locationId', ctx.controller.locations.getLocation);
   expressApp.post('/locations', ctx.controller.locations.updateLocation);
   expressApp.delete('/locations/:locationId', ctx.controller.locations.deleteLocation);
+
+  expressApp.get('/paintings', ctx.controller.paintings.getPaintingsManifest);
+  expressApp.get('/paintings/:instanceId/texture', ctx.controller.paintings.getPaintingTexture);
 
   expressApp.get('/memories/:memoryId', ctx.controller.memories.getMemory);
   expressApp.get('/memories', ctx.controller.memories.getMemories);

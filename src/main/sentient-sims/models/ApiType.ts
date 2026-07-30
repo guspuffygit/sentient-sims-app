@@ -27,6 +27,10 @@ export const generationApiTypes: ApiType[] = [
 // Backends that can generate embeddings for memory retrieval and semantic search.
 export const embeddingApiTypes: ApiType[] = [ApiType.OpenAI, ApiType.SentientSimsAI, ApiType.Gemini];
 
+// Image generation backends selectable in image provider configurations.
+// Grows as ImageGenerationService implementations are added (Gemini, etc.)
+export const imageGenerationApiTypes: ApiType[] = [ApiType.OpenAI];
+
 export function ApiTypeFromValue(value: any): ApiType {
   switch (value) {
     case ApiType.SentientSimsAI:

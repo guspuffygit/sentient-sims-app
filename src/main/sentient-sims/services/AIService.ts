@@ -70,6 +70,8 @@ import { ParticipantDTO } from '../db/dto/ParticipantDTO';
 import { ApiContext } from './ApiContext';
 import { AIActionType, actionTypeForEvent } from '../models/AIActionType';
 import { SceneState } from './SceneService';
+import { pngToPaintingDds } from '../image/paintingDds';
+import { ImageGenerationRequest, ImageGenerationResponse } from '../models/ImageGeneration';
 
 // Actors are asked for a bare subtitle, but models still sneak in speaker labels,
 // quotation marks, and parenthetical notes — strip everything but the spoken words
@@ -317,6 +319,43 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
       log.info(`[Reflection] Saved reflection for scene ${previousScene.sceneId}: ${text}`);
     } catch (err) {
       log.error(`[Reflection] Failed to generate reflection for scene ${previousScene.sceneId}`, err);
+    }
+  }
+
+  async generateImage(request: ImageGenerationRequest): Promise<ImageGenerationResponse> {
+    const providerConfig = this.ctx.imageProviderConfigs.getResolvedConfig(request.configId);
+    log.debug(
+      `Using image provider config: ${providerConfig.name} (${providerConfig.apiType}${providerConfig.model ? `, ${providerConfig.model}` : ''})`,
+    );
+    const response = await this.ctx.getImageGenerationService(providerConfig.apiType).generateImage({
+      ...request,
+      model: request.model ?? providerConfig.model,
+    });
+    if (request.format !== 'dds') {
+      return response;
+    }
+    const png = Buffer.from(response.imageBase64, 'base64');
+    const textureInstanceId = this.storePaintingRecord(request, png);
+    const dds = await pngToPaintingDds(png);
+    return { ...response, imageBase64: dds.toString('base64'), textureInstanceId };
+  }
+
+  // The painting row is the master copy of the artwork; the mod's loose DDS
+  // file is only a cache rebuilt from it. Failing to store the record (no
+  // save database loaded) downgrades to the old session-only texture instead
+  // of failing the generation: without an id the mod allocates a random one.
+  private storePaintingRecord(request: ImageGenerationRequest, png: Buffer): string | undefined {
+    try {
+      const painting = this.ctx.paintingRepository.createPainting({
+        prompt: request.prompt,
+        image: png,
+        metadata: request.metadata === undefined ? undefined : JSON.stringify(request.metadata),
+      });
+      log.debug(`Stored painting ${painting.uuid} with texture instance id ${painting.instance_id}`);
+      return painting.instance_id;
+    } catch (err) {
+      log.error('Unable to store painting record, texture will be session-only', err);
+      return undefined;
     }
   }
 

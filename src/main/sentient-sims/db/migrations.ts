@@ -109,6 +109,16 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
       ALTER TABLE memory
       ADD COLUMN interaction_name TEXT;
     `,
+    '010-create-painting-table': `
+      CREATE TABLE painting (
+        uuid                 TEXT NOT NULL  PRIMARY KEY  ,
+        instance_id          TEXT NOT NULL  UNIQUE  ,
+        prompt               TEXT     ,
+        image                BLOB     ,
+        metadata             TEXT     ,
+        created_at           DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `,
     // Scenes are derived from location_id + timestamp instead of a dedicated column: the mod
     // parses memory rows into a Python class with fixed fields, so any new column breaks it.
     // This cleans up databases that briefly ran an add-scene-id migration; no-op elsewhere.
