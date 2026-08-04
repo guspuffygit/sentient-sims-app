@@ -15,6 +15,7 @@ import {
 } from '../models/InteractionEvents';
 import { getRandomItem } from '../util/getRandomItem';
 import { InteractionEventResult, InteractionEventStatus, LLMExchange } from '../models/InteractionEventResult';
+import { ResolvedProviderConfig } from '../models/AIProviderConfig';
 import {
   notifyMapAnimation,
   notifyMapInteraction,
@@ -26,7 +27,12 @@ import { markScenePaced } from '../util/pacedScenes';
 import { GenerationOptions, PromptRequestBuilderOptions } from './PromptRequestBuilderService';
 import { containsPlayerSim } from '../util/eventContainsPlayerSim';
 import { ApiType } from '../models/ApiType';
-import { defaultClassificationPrompt, defaultWantsPrefixes, defaultWantsPrompt } from '../constants';
+import {
+  defaultClassificationPrompt,
+  defaultWantsPrefixes,
+  defaultWantsPrompt,
+  directedSceneBudgetMs,
+} from '../constants';
 import {
   BuffEventRequest,
   BuffDescriptionRequest,
@@ -189,7 +195,10 @@ export class AIService {
     if (description.pre_actions) {
       const preAction = getRandomItem(description.pre_actions);
       if (this.ctx.settings.directedScenesEnabled && event.sentient_sims.length >= 2) {
-        return this.runDirectedGeneration(event, { action: preAction });
+        const directed = await this.tryDirectedGeneration(event, { action: preAction });
+        if (directed?.status === InteractionEventStatus.GENERATED) {
+          return directed;
+        }
       }
       return this.runGeneration(event, {
         preAction,
@@ -200,11 +209,25 @@ export class AIService {
     return { status: InteractionEventStatus.NOOP };
   }
 
+  // A directed scene needs several AI round trips, so it has more ways to fail than the
+  // single-call classic path; callers treat any failure as "fall back to classic"
+  private async tryDirectedGeneration(
+    event: SSEvent,
+    options: DirectedGenerationOptions,
+  ): Promise<InteractionEventResult | undefined> {
+    try {
+      return await this.runDirectedGeneration(event, options);
+    } catch (err) {
+      log.error('Directed scene generation failed, falling back to classic generation', err);
+      return undefined;
+    }
+  }
+
   async handleContinue(event: ContinueInteractionEvent) {
     if (this.ctx.settings.directedScenesEnabled && event.sentient_sims.length >= 2) {
       // Directed continue needs prior memories to pick up from; fall through when there are none
-      const directed = await this.runDirectedGeneration(event, { continueScene: true });
-      if (directed.status === InteractionEventStatus.GENERATED) {
+      const directed = await this.tryDirectedGeneration(event, { continueScene: true });
+      if (directed?.status === InteractionEventStatus.GENERATED) {
         return directed;
       }
     }
@@ -278,7 +301,10 @@ export class AIService {
 
   async handleDoSomething(doSomethingEvent: DoSomethingInteractionEvent) {
     if (this.ctx.settings.directedScenesEnabled && doSomethingEvent.sentient_sims.length >= 2) {
-      return this.runDirectedGeneration(doSomethingEvent, { action: doSomethingEvent.action });
+      const directed = await this.tryDirectedGeneration(doSomethingEvent, { action: doSomethingEvent.action });
+      if (directed?.status === InteractionEventStatus.GENERATED) {
+        return directed;
+      }
     }
     return this.runGeneration(doSomethingEvent, {
       action: doSomethingEvent.action,
@@ -407,16 +433,23 @@ export class AIService {
       }
 
       const rawSceneText = output;
-      const directorReview = await this.runDirectorReview(rawSceneText);
-      output = directorReview.text;
+      const exchanges: LLMExchange[] = [
+        { label: 'Scene Generation', request: openAIRequest, responseText: rawSceneText },
+      ];
+      try {
+        const directorReview = await this.runDirectorReview(rawSceneText, providerConfig);
+        output = directorReview.text;
+        exchanges.push({
+          label: 'Director Review',
+          request: directorReview.request,
+          responseText: directorReview.text,
+        });
+      } catch (err) {
+        log.error('Director review failed, using the scene as generated', err);
+      }
       newMemory.content = output;
 
       this.playTts(output, event.sentient_sims);
-
-      const exchanges: LLMExchange[] = [
-        { label: 'Scene Generation', request: openAIRequest, responseText: rawSceneText },
-        { label: 'Director Review', request: directorReview.request, responseText: directorReview.text },
-      ];
 
       return {
         status: InteractionEventStatus.GENERATED,
@@ -434,7 +467,10 @@ export class AIService {
     };
   }
 
-  async runDirectorReview(text: string): Promise<{ text: string; request: OpenAICompatibleRequest }> {
+  async runDirectorReview(
+    text: string,
+    providerConfig?: ResolvedProviderConfig,
+  ): Promise<{ text: string; request: OpenAICompatibleRequest }> {
     const systemPrompt = `You are a director reviewing a short generated scene from The Sims. Fix any issues and return only the corrected text — no commentary, no labels, no extra formatting.
 
 Fix these issues if present:
@@ -448,7 +484,7 @@ Never cut the scene down to a single line when multiple characters speak — pre
 Only change a line when it violates one of the rules above. Otherwise keep the exact wording and character voice — puns, verbal tics, hesitations, and slang are performance choices, not mistakes.
 If the scene is already good, return it unchanged.`;
 
-    const providerConfig = this.ctx.providerConfigs.getConfigForAction(AIActionType.GENERATE);
+    const config = providerConfig ?? this.ctx.providerConfigs.getConfigForAction(AIActionType.GENERATE);
 
     let oneShotRequest: OneShotRequest = {
       systemPrompt,
@@ -457,15 +493,15 @@ If the scene is already good, return it unchanged.`;
       maxTokens: 3900,
     };
 
-    getInputFormatters(providerConfig.apiType).forEach((formatter) => {
+    getInputFormatters(config.apiType).forEach((formatter) => {
       oneShotRequest = formatter.formatOneShotRequest(oneShotRequest);
     });
 
-    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(providerConfig.apiType));
+    const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(config.apiType));
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
-    openAIRequest.model = providerConfig.model;
-    openAIRequest.apiType = providerConfig.apiType;
-    const response = await this.ctx.getGenerationService(providerConfig.apiType).sentientSimsGenerate(openAIRequest);
+    openAIRequest.model = config.model;
+    openAIRequest.apiType = config.apiType;
+    const response = await this.ctx.getGenerationService(config.apiType).sentientSimsGenerate(openAIRequest);
     const reviewed = cleanupAIOutput(response.text);
     return { text: reviewed.length > 1 ? reviewed : text, request: openAIRequest };
   }
@@ -475,9 +511,10 @@ If the scene is already good, return it unchanged.`;
     systemPrompt: string,
     userText: string,
     maxResponseTokens: number,
-    model?: string,
+    options?: { model?: string; providerConfig?: ResolvedProviderConfig },
   ): Promise<{ exchange: LLMExchange; text: string }> {
-    const providerConfig = this.ctx.providerConfigs.getConfigForAction(AIActionType.GENERATE);
+    const providerConfig =
+      options?.providerConfig ?? this.ctx.providerConfigs.getConfigForAction(AIActionType.GENERATE);
 
     let oneShotRequest: OneShotRequest = {
       systemPrompt,
@@ -492,7 +529,7 @@ If the scene is already good, return it unchanged.`;
 
     const openAIRequestBuilder = new OpenAIRequestBuilder(this.ctx.getTokenCounter(providerConfig.apiType));
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
-    openAIRequest.model = model ?? providerConfig.model;
+    openAIRequest.model = options?.model ?? providerConfig.model;
     openAIRequest.apiType = providerConfig.apiType;
     const response = await this.ctx.getGenerationService(providerConfig.apiType).sentientSimsGenerate(openAIRequest);
     return { exchange: { label, request: openAIRequest, responseText: response.text }, text: response.text };
@@ -555,6 +592,8 @@ If the scene is already good, return it unchanged.`;
 
     const simNames = event.sentient_sims.map((sim) => sim.name);
     const exchanges: LLMExchange[] = [];
+    const startedAt = Date.now();
+    const overBudget = () => Date.now() - startedAt > directedSceneBudgetMs;
 
     // 1. Director splits the full context into one complete, self-contained prompt per actor
     const briefingSystemPrompt = `You are directing a scene of a show starring sentient Sims — this episode features ${simNames.join(' and ')}. The audience tunes in because these characters feel truly alive: vivid, compelling, full of personality. You have the FULL scene context below; the user message tells you what is happening right now. First decide what kind of scene this wants to be, then write one shared SCENE briefing plus one private briefing per actor. Each actor will see ONLY the shared briefing and their own private briefing — nothing else — so together they must contain everything that actor needs to play the scene.
@@ -588,24 +627,36 @@ Respond in exactly this format, nothing else:
 <the shared scene briefing>
 ${simNames.map((name) => `=== PROMPT FOR ${name} ===\n<the private briefing for ${name}>`).join('\n')}`;
 
-    const briefing = await this.runOneShot(
-      'Director Briefing',
-      briefingSystemPrompt,
-      `${previouslyBlock}${sceneAction}`,
-      500,
-      options.directorModel,
-    );
-    exchanges.push(briefing.exchange);
+    // A failed briefing is recoverable — actors fall back to the raw scene context below
+    let briefingText = '';
+    try {
+      const briefing = await this.runOneShot(
+        'Director Briefing',
+        briefingSystemPrompt,
+        `${previouslyBlock}${sceneAction}`,
+        500,
+        { model: options.directorModel, providerConfig },
+      );
+      exchanges.push(briefing.exchange);
+      briefingText = briefing.text;
+    } catch (err) {
+      log.error('Director briefing failed, actors will use the raw scene context', err);
+    }
+
+    if (overBudget()) {
+      log.error('Directed scene ran out of time during the director briefing');
+      return { status: InteractionEventStatus.NOOP, exchanges };
+    }
 
     // Each actor receives the shared scene briefing followed by their private briefing
-    const sceneMatch = /===\s*SCENE\s*===\s*([\s\S]*?)(?=\n\s*===\s*PROMPT FOR|$)/i.exec(briefing.text);
+    const sceneMatch = /===\s*SCENE\s*===\s*([\s\S]*?)(?=\n\s*===\s*PROMPT FOR|$)/i.exec(briefingText);
     const sharedScene = sceneMatch ? sceneMatch[1].trim() : '';
     const actorPrompts = new Map<string, string>();
     simNames.forEach((name) => {
       const promptMatch = new RegExp(
         `===\\s*PROMPT FOR\\s+${escapeRegExp(name)}\\s*===\\s*([\\s\\S]*?)(?=\\n\\s*===\\s*PROMPT FOR|$)`,
         'i',
-      ).exec(briefing.text);
+      ).exec(briefingText);
       const actorPrompt = promptMatch ? promptMatch[1].trim() : '';
       if (actorPrompt.length > 1) {
         actorPrompts.set(name, sharedScene ? `${sharedScene}\n\n${actorPrompt}` : actorPrompt);
@@ -631,22 +682,29 @@ How to respond:
 - If the conversation is already underway (anything under "Previously in this scene"), jump straight in mid-flow — no greetings and no re-introductions.
 - Do not mention physical actions, props, furniture, or locations.`;
 
+      if (sceneLines.length > 0 && overBudget()) {
+        log.error('Directed scene ran out of time mid-performance, airing the lines delivered so far');
+        break;
+      }
+
       const conversationSoFar = toTranscript(sceneLines);
       const actorUserText = `${previouslyBlock}${sceneAction}${
         conversationSoFar ? `\n\nThe conversation so far:\n${conversationSoFar}` : ''
       }`;
-      const performance = await this.runOneShot(
-        `Actor: ${sim.name}`,
-        actorSystemPrompt,
-        actorUserText,
-        60,
-        options.actorModels?.[i],
-      );
-      exchanges.push(performance.exchange);
+      try {
+        const performance = await this.runOneShot(`Actor: ${sim.name}`, actorSystemPrompt, actorUserText, 60, {
+          model: options.actorModels?.[i],
+          providerConfig,
+        });
+        exchanges.push(performance.exchange);
 
-      const subtitle = extractSubtitle(performance.text, simNames);
-      if (subtitle.length > 1) {
-        sceneLines.push({ speaker: sim.name, text: subtitle });
+        const subtitle = extractSubtitle(performance.text, simNames);
+        if (subtitle.length > 1) {
+          sceneLines.push({ speaker: sim.name, text: subtitle });
+        }
+      } catch (err) {
+        // A failed actor loses their line, not the scene
+        log.error(`Actor generation failed for ${sim.name}`, err);
       }
     }
 
@@ -676,16 +734,25 @@ Respond with the final scene as one line per row in exactly this format, nothing
 - Keep it to two to four lines total, each one short
 - Return exactly the delivered lines, kept or repaired — never lines from "Previously in this scene", and never new lines of your own`;
 
-    const compiled = await this.runOneShot(
-      'Director Review',
-      compileSystemPrompt,
-      `${previouslyBlock}The direction the actors were given: ${sceneAction}\n\nThe actors' delivered lines to review — return these lines kept or repaired, do not reply to them:\n${toTranscript(sceneLines)}`,
-      400,
-      options.directorModel,
-    );
-    exchanges.push(compiled.exchange);
-
-    const reviewedLines = parseReviewedLines(compiled.text, simNames);
+    // The review pass is a polish step: without time or on failure, the actors' lines air as delivered
+    let reviewedLines: DialogueLine[] = [];
+    if (overBudget()) {
+      log.error('Directed scene ran out of time before the director review, airing the lines as performed');
+    } else {
+      try {
+        const compiled = await this.runOneShot(
+          'Director Review',
+          compileSystemPrompt,
+          `${previouslyBlock}The direction the actors were given: ${sceneAction}\n\nThe actors' delivered lines to review — return these lines kept or repaired, do not reply to them:\n${toTranscript(sceneLines)}`,
+          400,
+          { model: options.directorModel, providerConfig },
+        );
+        exchanges.push(compiled.exchange);
+        reviewedLines = parseReviewedLines(compiled.text, simNames);
+      } catch (err) {
+        log.error('Director review failed, airing the lines as performed', err);
+      }
+    }
     // The reviewer must preserve the back-and-forth; if its output lost a speaker or
     // could not be parsed, air the actors' original performances instead
     const reviewedSpeakers = new Set(reviewedLines.map((line) => line.speaker));
@@ -725,7 +792,7 @@ Respond with the final scene as one line per row in exactly this format, nothing
     return {
       status: InteractionEventStatus.GENERATED,
       text: formatSceneForChatWindow(finalText),
-      request: compiled.exchange.request,
+      request: exchanges.at(-1)?.request,
       exchanges,
       memory: newMemory,
     };

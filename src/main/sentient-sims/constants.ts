@@ -79,6 +79,10 @@ export const defaultWantsPrompt =
 // apart so one character finishes their moment before the next one speaks
 export const subtitleLinePacingMs = 8000;
 
+// The mod abandons an interaction request after 80 seconds. The directed pipeline stops
+// starting new AI calls past this point so a classic single-call fallback still fits.
+export const directedSceneBudgetMs = 50_000;
+
 export const rendererWebsocketPort = 25146;
 export const modWebsocketPort = 25145;
 export const appApiPort = 25148;
