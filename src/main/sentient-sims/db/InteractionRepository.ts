@@ -1,16 +1,20 @@
 import log from 'electron-log';
 import { InteractionDescription, interactionDescriptions } from '../descriptions/interactionDescriptions';
 import { IgnoredInteractionsResponse } from '../models/IgnoredInteractionsResponse';
-import { BasicInteraction } from './dto/InteractionDTO';
+import { BasicInteraction, BrowsableInteraction } from './dto/InteractionDTO';
 import { axiosClient } from '../clients/AxiosClient';
 import { ApiContext } from '../services/ApiContext';
 import fs from 'fs';
 import path from 'path';
 
+const FETCH_RETRY_COOLDOWN_MS = 60_000;
+const FETCH_TIMEOUT_MS = 15_000;
+
 export class InteractionRepository {
   private ctx: ApiContext;
   private localInteractions?: Map<string, BasicInteraction>;
   private interactions?: Map<string, BasicInteraction>;
+  private lastFetchFailure?: number;
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
@@ -21,6 +25,7 @@ export class InteractionRepository {
     const response = await axiosClient<Record<string, BasicInteraction>>({
       url: '/interactions',
       baseURL: this.ctx.settings.sentientSimsAIEndpoint,
+      timeout: FETCH_TIMEOUT_MS,
       headers: {
         Authentication: this.ctx.settings.accessToken,
         ...this.ctx.version.getVersionHeaders(),
@@ -30,10 +35,13 @@ export class InteractionRepository {
     return new Map(Object.entries(response.data));
   }
 
+  private getLocalOverridesPath(): string {
+    return path.join(this.ctx.directory.getSentientSimsFolder(), 'user_interaction_overrides.json');
+  }
+
   private loadLocalInteractions() {
     try {
-      const sentientSimsFolder = this.ctx.directory.getSentientSimsFolder();
-      const localMapPath = path.join(sentientSimsFolder, 'user_interaction_overrides.json');
+      const localMapPath = this.getLocalOverridesPath();
 
       if (fs.existsSync(localMapPath)) {
         const fileContent = fs.readFileSync(localMapPath, 'utf-8');
@@ -46,35 +54,97 @@ export class InteractionRepository {
     }
   }
 
-  saveLocalInteraction(interaction: BasicInteraction) {
-    try {
-      const sentientSimsFolder = this.ctx.directory.getSentientSimsFolder();
-      const localMapPath = path.join(sentientSimsFolder, 'user_interaction_overrides.json');
-      let localOverrides: Record<string, BasicInteraction> = {};
-      if (fs.existsSync(localMapPath)) {
-        const fileContent = fs.readFileSync(localMapPath, 'utf-8');
-        localOverrides = JSON.parse(fileContent) as Record<string, BasicInteraction>;
-      }
-      localOverrides[interaction.name] = interaction;
-      this.localInteractions = new Map(Object.entries(localOverrides));
+  private writeLocalInteractions(localOverrides: Record<string, BasicInteraction>) {
+    this.localInteractions = new Map(Object.entries(localOverrides));
+    fs.writeFileSync(this.getLocalOverridesPath(), JSON.stringify(localOverrides, null, 2));
+  }
 
-      fs.writeFileSync(localMapPath, JSON.stringify(localOverrides, null, 2));
+  private readLocalInteractions(): Record<string, BasicInteraction> {
+    const localMapPath = this.getLocalOverridesPath();
+    if (fs.existsSync(localMapPath)) {
+      const fileContent = fs.readFileSync(localMapPath, 'utf-8');
+      return JSON.parse(fileContent) as Record<string, BasicInteraction>;
+    }
+    return {};
+  }
+
+  saveLocalInteraction(interaction: BasicInteraction) {
+    if (!interaction.name) {
+      throw new Error('Interaction is missing a name, unable to save local override.');
+    }
+
+    try {
+      const localOverrides = this.readLocalInteractions();
+      localOverrides[interaction.name] = interaction;
+      this.writeLocalInteractions(localOverrides);
       log.info(`[Override] Local interaction '${interaction.name}' saved.`);
     } catch (err) {
       log.error(`[Override] Local Interaction could not be saved`, err);
+      throw err;
+    }
+  }
+
+  deleteLocalInteraction(interactionName: string) {
+    if (!interactionName) {
+      throw new Error('Interaction is missing a name, unable to delete local override.');
+    }
+
+    try {
+      const localOverrides = this.readLocalInteractions();
+      const remaining = Object.fromEntries(Object.entries(localOverrides).filter(([name]) => name !== interactionName));
+      this.writeLocalInteractions(remaining);
+      log.info(`[Override] Local interaction '${interactionName}' deleted.`);
+    } catch (err) {
+      log.error(`[Override] Local Interaction could not be deleted`, err);
+      throw err;
     }
   }
 
   async getInteractions(): Promise<Map<string, BasicInteraction>> {
-    if (!this.interactions) {
-      try {
-        this.interactions = await this.fetchInteractions();
-      } catch (err) {
-        log.error(`Unable to fetch interactions from Sentient Sims API`, err);
-      }
+    if (this.interactions) {
+      return this.interactions;
+    }
+
+    if (this.lastFetchFailure && Date.now() - this.lastFetchFailure < FETCH_RETRY_COOLDOWN_MS) {
+      return new Map<string, BasicInteraction>();
+    }
+
+    try {
+      this.interactions = await this.fetchInteractions();
+      this.lastFetchFailure = undefined;
+    } catch (err) {
+      this.lastFetchFailure = Date.now();
+      log.error(`Unable to fetch interactions from Sentient Sims API`, err);
     }
 
     return this.interactions || new Map<string, BasicInteraction>();
+  }
+
+  /**
+   * Every interaction the user can browse and edit, merged from all sources.
+   * Precedence matches in-game resolution: local override > online > built-in.
+   */
+  async getBrowsableInteractions(): Promise<Map<string, BrowsableInteraction>> {
+    const browsable = new Map<string, BrowsableInteraction>();
+
+    interactionDescriptions.forEach((description, name) => {
+      browsable.set(name, {
+        name,
+        action: description.pre_actions?.join('\n'),
+        ignored: description.ignored,
+        source: 'built-in',
+      });
+    });
+
+    (await this.getInteractions()).forEach((interaction, name) => {
+      browsable.set(name, { ...interaction, name, source: 'online' });
+    });
+
+    this.localInteractions?.forEach((interaction, name) => {
+      browsable.set(name, { ...interaction, name, source: 'local' });
+    });
+
+    return browsable;
   }
 
   async setInteraction(interaction: BasicInteraction) {
@@ -121,10 +191,8 @@ export class InteractionRepository {
       return interactionDescription;
     }
 
-    if (!this.interactions) {
-      this.interactions = await this.getInteractions();
-    }
-    const basicInteraction = this.interactions.get(interactionName);
+    const interactions = await this.getInteractions();
+    const basicInteraction = interactions.get(interactionName);
     if (basicInteraction) {
       log.debug(`[Online] Load '${interactionName}' from Sentient Sims API`);
       const interactionDescription: InteractionDescription = {};
@@ -136,33 +204,31 @@ export class InteractionRepository {
   }
 
   async getIgnoredInteractions(): Promise<IgnoredInteractionsResponse> {
-    const allInteractions = await this.getInteractions();
-    const ignoredInteractionNames = new Set<string>();
+    // An override replaces the lower-precedence interaction entirely, so it can
+    // also un-ignore: local override > online > built-in
+    const ignoredByName = new Map<string, boolean>();
 
-    allInteractions.forEach((value, key) => {
-      if (value.ignored) {
-        ignoredInteractionNames.add(key);
-      }
-    });
-
-    // A local override replaces the online interaction entirely, so it can also un-ignore
-    this.localInteractions?.forEach((value, key) => {
-      if (value.ignored) {
-        ignoredInteractionNames.add(key);
-      } else {
-        ignoredInteractionNames.delete(key);
-      }
-    });
-
-    // Built-in descriptions take precedence over everything, matching getInteractionDescription
     interactionDescriptions.forEach((description, name) => {
-      if (description.ignored) {
-        ignoredInteractionNames.add(name);
+      ignoredByName.set(name, description.ignored === true);
+    });
+
+    (await this.getInteractions()).forEach((interaction, name) => {
+      ignoredByName.set(name, interaction.ignored === true);
+    });
+
+    this.localInteractions?.forEach((interaction, name) => {
+      ignoredByName.set(name, interaction.ignored === true);
+    });
+
+    const ignoredInteractionNames: string[] = [];
+    ignoredByName.forEach((ignored, name) => {
+      if (ignored) {
+        ignoredInteractionNames.push(name);
       }
     });
 
     return {
-      ignoredInteractionNames: [...ignoredInteractionNames],
+      ignoredInteractionNames,
     };
   }
 }

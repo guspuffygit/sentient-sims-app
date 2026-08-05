@@ -68,7 +68,7 @@ export function runApi(ctx: ApiContext) {
   expressApp.get('/db/unload', ctx.controller.db.unloadDatabase);
   expressApp.get('/db/list', ctx.controller.db.getSaveGames);
 
-  expressApp.get('/animations/online-all', ctx.controller.animations.getOnlineAnimations);
+  expressApp.get('/animations/all', ctx.controller.animations.getAllAnimations);
 
   expressApp.get('/animations', ctx.controller.animations.getAnimations);
   expressApp.get('/animations/nsfw-enabled', ctx.controller.animations.isNsfwEnabled);
@@ -76,10 +76,11 @@ export function runApi(ctx: ApiContext) {
   expressApp.delete('/animations', ctx.controller.animations.deleteAnimation);
 
   expressApp.post('/animations/save-locally', ctx.controller.animations.saveAnimationLocally);
+  expressApp.delete('/animations/local', ctx.controller.animations.deleteLocalAnimation);
 
   expressApp.get('/interactions/ignored', ctx.controller.interactionDescription.getIgnoredInteractions);
 
-  expressApp.get('/interactions/online-all', ctx.controller.interactionDescription.getOnlineInteractions);
+  expressApp.get('/interactions/all', ctx.controller.interactionDescription.getAllInteractions);
 
   expressApp.get('/traits', ctx.controller.mapping.getTraits);
   expressApp.get('/traits/unmapped', ctx.controller.mapping.getUnmappedTraits);
@@ -88,6 +89,7 @@ export function runApi(ctx: ApiContext) {
   expressApp.get('/moods/unmapped', ctx.controller.mapping.getUnmappedMoods);
 
   expressApp.post('/interactions/save-locally', ctx.controller.interactionDescription.saveInteractionLocally);
+  expressApp.delete('/interactions/local', ctx.controller.interactionDescription.deleteLocalInteraction);
 
   expressApp.post('/interactions', ctx.controller.interactionDescription.updateInteraction);
   expressApp.delete('/interactions', ctx.controller.interactionDescription.deleteInteraction);
