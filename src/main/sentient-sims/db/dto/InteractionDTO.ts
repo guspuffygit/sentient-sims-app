@@ -1,4 +1,5 @@
 import { InteractionEvent } from 'main/sentient-sims/models/InteractionEvents';
+import { MappingSource } from 'main/sentient-sims/models/MappingSource';
 
 export type InteractionDTO = {
   name: string;
@@ -13,4 +14,8 @@ export type BasicInteraction = {
   action?: string;
   ignored?: boolean;
   sub?: string;
+};
+
+export type BrowsableInteraction = BasicInteraction & {
+  source: MappingSource;
 };

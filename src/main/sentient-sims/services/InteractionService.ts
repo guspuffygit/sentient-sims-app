@@ -12,12 +12,11 @@ export class InteractionService {
   }
 
   async getInteractionDescription(interactionName: string): Promise<InteractionDescription | undefined> {
-    let description = interactionDescriptions.get(interactionName);
-    if (!description) {
-      description = await this.ctx.interactionRepository.getInteraction(interactionName);
-    }
+    // Local and online overrides win over the built-in descriptions so that
+    // edits made in the mapping browser actually take effect in-game
+    const description = await this.ctx.interactionRepository.getInteraction(interactionName);
 
-    return description;
+    return description ?? interactionDescriptions.get(interactionName);
   }
 
   async updateUnmappedInteraction(interaction: InteractionDTO) {

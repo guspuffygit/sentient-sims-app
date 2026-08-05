@@ -22,16 +22,18 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import DeleteIcon from '@mui/icons-material/Delete';
+import RestoreOutlinedIcon from '@mui/icons-material/RestoreOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
-import { BasicInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
-import { Animation } from 'main/sentient-sims/models/Animation';
+import { BasicInteraction, BrowsableInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
+import { Animation, BrowsableAnimation } from 'main/sentient-sims/models/Animation';
+import { MappingSource } from 'main/sentient-sims/models/MappingSource';
 import log from 'electron-log';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebounce } from 'renderer/hooks/useDebounce';
 import { useAuth } from 'renderer/providers/AuthProvider';
 import { useSnackBar } from 'renderer/providers/SnackBarProvider';
@@ -41,21 +43,34 @@ type MappingType = 'interactions' | 'animations';
 type GenericMapping = {
   key: string;
   action: string;
+  source: MappingSource;
   fullObject: BasicInteraction | Animation;
 };
 
 const ITEMS_PER_PAGE = 50;
 
+const SOURCE_LABELS: Record<MappingSource, string> = {
+  'built-in': 'Built-in',
+  'online': 'Online',
+  'local': 'Local override',
+};
+
+const SOURCE_COLORS: Record<MappingSource, 'default' | 'info' | 'success'> = {
+  'built-in': 'default',
+  'online': 'info',
+  'local': 'success',
+};
+
 function MappingItem({
   mapping,
   mappingType,
   canSaveOnline,
-  onDeleted,
+  onReloadNeeded,
 }: {
   mapping: GenericMapping;
   mappingType: MappingType;
   canSaveOnline: boolean;
-  onDeleted: (key: string) => void;
+  onReloadNeeded: () => void;
 }) {
   const animation = mappingType === 'animations' ? (mapping.fullObject as Animation) : undefined;
   const interaction = mappingType === 'interactions' ? (mapping.fullObject as BasicInteraction) : undefined;
@@ -64,14 +79,16 @@ function MappingItem({
   const [savedAction, setSavedAction] = useState(mapping.action);
   const [ignored, setIgnored] = useState(interaction?.ignored ?? false);
   const [savedIgnored, setSavedIgnored] = useState(interaction?.ignored ?? false);
+  const [source, setSource] = useState(mapping.source);
   const [savingLocally, setSavingLocally] = useState(false);
   const [savingOnline, setSavingOnline] = useState(false);
+  const [removingOverride, setRemovingOverride] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const { showMessage } = useSnackBar();
 
   const edited = action !== savedAction || ignored !== savedIgnored;
-  const saving = savingLocally || savingOnline || deleting;
+  const saving = savingLocally || savingOnline || removingOverride || deleting;
 
   const handleSaveLocally = async () => {
     setSavingLocally(true);
@@ -91,6 +108,7 @@ function MappingItem({
       }
       setSavedAction(action);
       setSavedIgnored(ignored);
+      setSource('local');
       showMessage(`Saved locally: ${mapping.key}`, 'success');
       log.info(`[MappingBrowser] Saved local mapping: ${mapping.key}`);
     } catch (err) {
@@ -126,6 +144,27 @@ function MappingItem({
     setSavingOnline(false);
   };
 
+  const handleRemoveLocalOverride = async () => {
+    setRemovingOverride(true);
+    try {
+      const response = await fetch(`${appApiUrl}/${mappingType}/local`, {
+        method: 'DELETE',
+        body: JSON.stringify(mapping.fullObject),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      showMessage(`Removed local override: ${mapping.key}`, 'success');
+      log.info(`[MappingBrowser] Removed local override: ${mapping.key}`);
+      onReloadNeeded();
+    } catch (err) {
+      showMessage(`Failed to remove local override: ${mapping.key}`, 'error');
+      log.error(`[MappingBrowser] Error removing local override: ${mapping.key}`, err);
+    }
+    setRemovingOverride(false);
+  };
+
   const handleDelete = async () => {
     setDeleting(true);
     try {
@@ -139,7 +178,7 @@ function MappingItem({
       }
       showMessage(`Deleted online: ${mapping.key}`, 'success');
       log.info(`[MappingBrowser] Deleted online mapping: ${mapping.key}`);
-      onDeleted(mapping.key);
+      onReloadNeeded();
     } catch (err) {
       showMessage(`Failed to delete: ${mapping.key}`, 'error');
       log.error(`[MappingBrowser] Error deleting online mapping: ${mapping.key}`, err);
@@ -154,6 +193,7 @@ function MappingItem({
         <Typography variant="subtitle2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
           {mapping.key}
         </Typography>
+        <Chip label={SOURCE_LABELS[source]} size="small" variant="outlined" color={SOURCE_COLORS[source]} />
         {animation?.name && <Chip label={animation.name} size="small" variant="outlined" />}
         {animation?.author && <Chip label={animation.author} size="small" variant="outlined" color="primary" />}
         {interaction?.sub && <Chip label={interaction.sub} size="small" variant="outlined" color="primary" />}
@@ -172,7 +212,7 @@ function MappingItem({
         }}
         sx={{ mb: 1.5 }}
       />
-      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+      <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
         <Button
           loading={savingLocally}
           disabled={saving}
@@ -185,6 +225,28 @@ function MappingItem({
         >
           Save Locally
         </Button>
+        {source === 'local' && (
+          <Tooltip
+            title="Removes your local override so the built-in or online description applies again"
+            placement="top"
+          >
+            <span>
+              <Button
+                loading={removingOverride}
+                disabled={saving}
+                variant="outlined"
+                color="secondary"
+                size="small"
+                startIcon={<RestoreOutlinedIcon sx={{ fontSize: 16 }} />}
+                onClick={() => {
+                  void handleRemoveLocalOverride();
+                }}
+              >
+                Remove Local Override
+              </Button>
+            </span>
+          </Tooltip>
+        )}
         {canSaveOnline && (
           <Tooltip title="Overwrites the shared online mapping for everyone" placement="top">
             <span>
@@ -204,7 +266,7 @@ function MappingItem({
             </span>
           </Tooltip>
         )}
-        {canSaveOnline && (
+        {canSaveOnline && source === 'online' && (
           <Tooltip title="Deletes the shared online mapping for everyone" placement="top">
             <span>
               <Button
@@ -283,10 +345,56 @@ function MappingItem({
   );
 }
 
+// Holds the keystroke state locally so typing only re-renders this small field,
+// not the parent with its full page of MappingItem cards
+function MappingFilterField({ onFilterChange }: { onFilterChange: (filter: string) => void }) {
+  const [text, setText] = useState('');
+  const debouncedText = useDebounce(text, 300);
+
+  useEffect(() => {
+    onFilterChange(debouncedText);
+  }, [debouncedText, onFilterChange]);
+
+  return (
+    <TextField
+      fullWidth
+      size="small"
+      placeholder="Filter by name, text, author, or source..."
+      variant="outlined"
+      value={text}
+      onChange={(e) => {
+        setText(e.target.value);
+      }}
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon fontSize="small" />
+            </InputAdornment>
+          ),
+          endAdornment: text && (
+            <InputAdornment position="end">
+              <IconButton
+                size="small"
+                aria-label="Clear filter"
+                onClick={() => {
+                  setText('');
+                  onFilterChange('');
+                }}
+              >
+                <ClearIcon fontSize="small" />
+              </IconButton>
+            </InputAdornment>
+          ),
+        },
+      }}
+    />
+  );
+}
+
 export default function OnlineMappingBrowser() {
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState('');
-  const debouncedFilter = useDebounce(filter, 300);
+  const [debouncedFilter, setDebouncedFilter] = useState('');
   const [mappings, setMappings] = useState<GenericMapping[]>([]);
   const [mappingType, setMappingType] = useState<MappingType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -295,31 +403,40 @@ export default function OnlineMappingBrowser() {
 
   const isMapper = new PatreonUser(userAttributes).isMapper();
 
+  const handleFilterChange = useCallback((filter: string) => {
+    setDebouncedFilter(filter);
+    setCurrentPage(1);
+  }, []);
+
   const loadMappings = async (type: MappingType) => {
     setLoading(true);
     setMappingType(type);
     setMappings([]);
     setCurrentPage(1);
     try {
-      const response = await fetch(`${appApiUrl}/${type}/online-all`);
+      const response = await fetch(`${appApiUrl}/${type}/all`);
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
       }
-      const data = (await response.json()) as Record<string, BasicInteraction | Animation>;
+      const data = (await response.json()) as Record<string, BrowsableInteraction | BrowsableAnimation>;
 
       const mappingList: GenericMapping[] = Object.entries(data).map(([key, value]) => {
-        const action = type === 'interactions' ? (value as BasicInteraction).action : (value as Animation).act;
+        const { source, ...fullObject } = value;
+        const action =
+          type === 'interactions' ? (fullObject as BasicInteraction).action : (fullObject as Animation).act;
 
         return {
           key,
           action: action || '',
-          fullObject: value,
+          source,
+          fullObject,
         };
       });
+      mappingList.sort((a, b) => a.key.localeCompare(b.key));
 
       setMappings(mappingList);
     } catch (err) {
-      showMessage(`Failed to load online ${type}`, 'error');
+      showMessage(`Failed to load ${type}`, 'error');
       log.error(`[MappingBrowser] Mappings could not be loaded:`, err);
     }
     setLoading(false);
@@ -328,16 +445,25 @@ export default function OnlineMappingBrowser() {
   const filteredMappings = useMemo(() => {
     if (!debouncedFilter) return mappings;
     const search = debouncedFilter.toLowerCase();
-    return mappings.filter((m) => {
-      const fields = [m.key, m.fullObject.name, m.action];
-      if ('author' in m.fullObject) {
-        fields.push(m.fullObject.author);
+    const matches = (field?: string) => !!field && field.toLowerCase().includes(search);
+
+    // Matches on the interaction/animation name rank above matches that are
+    // only in the description text or metadata, so the expected result is on top
+    const nameMatches: GenericMapping[] = [];
+    const textMatches: GenericMapping[] = [];
+    mappings.forEach((m) => {
+      if (matches(m.key) || matches(m.fullObject.name)) {
+        nameMatches.push(m);
+      } else if (
+        matches(m.action) ||
+        matches(m.source) ||
+        matches(m.fullObject.sub) ||
+        ('author' in m.fullObject && matches(m.fullObject.author))
+      ) {
+        textMatches.push(m);
       }
-      if (m.fullObject.sub) {
-        fields.push(m.fullObject.sub);
-      }
-      return fields.some((field) => field.toLowerCase().includes(search));
     });
+    return [...nameMatches, ...textMatches];
   }, [mappings, debouncedFilter]);
 
   const pageCount = Math.ceil(filteredMappings.length / ITEMS_PER_PAGE);
@@ -368,7 +494,7 @@ export default function OnlineMappingBrowser() {
     content = (
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 8 }}>
         <CircularProgress />
-        <Typography color="text.secondary">Loading online {mappingType}...</Typography>
+        <Typography color="text.secondary">Loading {mappingType}...</Typography>
       </Box>
     );
   } else if (!mappingType) {
@@ -376,7 +502,7 @@ export default function OnlineMappingBrowser() {
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, py: 8 }}>
         <TravelExploreIcon sx={{ fontSize: 48, color: 'text.disabled' }} />
         <Typography color="text.secondary">
-          Load online interactions or animations to browse and edit their mappings.
+          Load interactions or animations to browse and edit their descriptions.
         </Typography>
       </Box>
     );
@@ -385,7 +511,7 @@ export default function OnlineMappingBrowser() {
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, py: 8 }}>
         <SearchIcon sx={{ fontSize: 48, color: 'text.disabled' }} />
         <Typography color="text.secondary">
-          {mappings.length === 0 ? `No online ${mappingType} found.` : 'No mappings match your filter.'}
+          {mappings.length === 0 ? `No ${mappingType} found.` : 'No mappings match your filter.'}
         </Typography>
       </Box>
     );
@@ -402,12 +528,12 @@ export default function OnlineMappingBrowser() {
         </Stack>
         {paginatedMappings.map((mapping) => (
           <MappingItem
-            key={mapping.key}
+            key={`${mapping.key}:${mapping.source}`}
             mapping={mapping}
             mappingType={mappingType}
             canSaveOnline={isMapper}
-            onDeleted={(key) => {
-              setMappings((prev) => prev.filter((m) => m.key !== key));
+            onReloadNeeded={() => {
+              void loadMappings(mappingType);
             }}
           />
         ))}
@@ -418,9 +544,9 @@ export default function OnlineMappingBrowser() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h5">Online Mapping Browser</Typography>
+      <Typography variant="h5">Mapping Browser</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Browse the shared online mappings and save your own local overrides.
+        Browse built-in, online, and your local mappings, and save your own local overrides.
       </Typography>
       <Paper sx={{ p: 2, mb: 2 }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
@@ -433,7 +559,7 @@ export default function OnlineMappingBrowser() {
             disabled={loading}
             sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
           >
-            Load Online Interactions
+            Load Interactions
           </Button>
           <Button
             variant={mappingType === 'animations' ? 'contained' : 'outlined'}
@@ -444,42 +570,9 @@ export default function OnlineMappingBrowser() {
             disabled={loading}
             sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
           >
-            Load Online Animations
+            Load Animations
           </Button>
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="Filter by name, author, or text..."
-            variant="outlined"
-            value={filter}
-            onChange={(e) => {
-              setFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-                endAdornment: filter && (
-                  <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      aria-label="Clear filter"
-                      onClick={() => {
-                        setFilter('');
-                        setCurrentPage(1);
-                      }}
-                    >
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
+          <MappingFilterField onFilterChange={handleFilterChange} />
         </Stack>
       </Paper>
 

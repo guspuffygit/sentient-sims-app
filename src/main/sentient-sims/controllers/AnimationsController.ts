@@ -15,9 +15,14 @@ export class AnimationsController {
   };
 
   setAnimation = async (req: Request, res: Response) => {
-    const animation = req.body as Animation;
-    await this.ctx.animations.setAnimation(animation);
-    res.json({ text: 'done' });
+    try {
+      const animation = req.body as Animation;
+      await this.ctx.animations.setAnimation(animation);
+      res.json({ text: 'done' });
+    } catch (err) {
+      log.error('[Controller] Error saving animation online:', err);
+      res.status(500).json({ error: 'Failed to save animation online.' });
+    }
   };
 
   deleteAnimation = async (req: Request, res: Response) => {
@@ -42,9 +47,20 @@ export class AnimationsController {
     }
   };
 
-  getOnlineAnimations = async (req: Request, res: Response) => {
+  deleteLocalAnimation = (req: Request, res: Response) => {
     try {
-      const animations = await this.ctx.animations.getAnimations();
+      const animation = req.body as Animation;
+      this.ctx.animations.deleteLocalAnimation(animation);
+      res.json({ status: 'success', message: 'Local animation override deleted.' });
+    } catch (err) {
+      log.error('[Controller] Error deleting local animation override:', err);
+      res.status(500).json({ error: 'Failed to delete local animation override.' });
+    }
+  };
+
+  getAllAnimations = async (req: Request, res: Response) => {
+    try {
+      const animations = await this.ctx.animations.getBrowsableAnimations();
       res.json(Object.fromEntries(animations));
     } catch (err) {
       log.error('[Controller] Error getting all animations:', err);

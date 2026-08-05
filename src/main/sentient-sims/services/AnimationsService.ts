@@ -1,4 +1,4 @@
-import { Animation } from 'main/sentient-sims/models/Animation';
+import { Animation, BrowsableAnimation } from 'main/sentient-sims/models/Animation';
 import { AIActionType } from '../models/AIActionType';
 import { ApiType } from '../models/ApiType';
 import { axiosClient } from '../clients/AxiosClient';
@@ -6,6 +6,9 @@ import { ApiContext } from './ApiContext';
 import fs from 'fs';
 import path from 'path';
 import log from 'electron-log';
+
+const FETCH_RETRY_COOLDOWN_MS = 60_000;
+const FETCH_TIMEOUT_MS = 15_000;
 
 export function getAnimationKey(animationAuthor: string, animationIdentifier: string) {
   return `${animationAuthor}:${animationIdentifier}`;
@@ -15,6 +18,7 @@ export class AnimationsService {
   private ctx: ApiContext;
   private localAnimations?: Map<string, Animation>;
   private animations?: Map<string, Animation>;
+  private lastFetchFailure?: number;
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
@@ -26,10 +30,15 @@ export class AnimationsService {
       return this.animations;
     }
 
+    if (this.lastFetchFailure && Date.now() - this.lastFetchFailure < FETCH_RETRY_COOLDOWN_MS) {
+      return new Map<string, Animation>();
+    }
+
     try {
       const response = await axiosClient<Record<string, Animation>>({
         url: '/animations',
         baseURL: this.ctx.settings.sentientSimsAIEndpoint,
+        timeout: FETCH_TIMEOUT_MS,
         headers: {
           Authentication: this.ctx.settings.accessToken,
           ...this.ctx.version.getVersionHeaders(),
@@ -37,12 +46,31 @@ export class AnimationsService {
       });
 
       this.animations = new Map(Object.entries(response.data));
+      this.lastFetchFailure = undefined;
     } catch (err) {
+      this.lastFetchFailure = Date.now();
       log.error(`[AnimationService] Unable to fetch animations from API`, err);
-      this.animations = new Map<string, Animation>();
     }
 
-    return this.animations;
+    return this.animations || new Map<string, Animation>();
+  }
+
+  /**
+   * Every animation the user can browse and edit, merged from all sources.
+   * Precedence matches in-game resolution: local override > online.
+   */
+  async getBrowsableAnimations(): Promise<Map<string, BrowsableAnimation>> {
+    const browsable = new Map<string, BrowsableAnimation>();
+
+    (await this.getAnimations()).forEach((animation, key) => {
+      browsable.set(key, { ...animation, source: 'online' });
+    });
+
+    this.localAnimations?.forEach((animation, key) => {
+      browsable.set(key, { ...animation, source: 'local' });
+    });
+
+    return browsable;
   }
 
   private loadLocalAnimations() {
@@ -63,8 +91,7 @@ export class AnimationsService {
 
   saveLocalAnimation(animation: Animation) {
     if (!animation.author || !animation.id) {
-      log.error(`[Override] Local Animation could not be saved: Author or ID be missing.`);
-      return;
+      throw new Error('Animation is missing an author or id, unable to save local override.');
     }
 
     const animationKey = getAnimationKey(animation.author, animation.id);
@@ -87,6 +114,36 @@ export class AnimationsService {
       log.info(`[Override] Local animation '${animationKey}' saved.`);
     } catch (err) {
       log.error(`[Override] local animation could not be saved`, err);
+      throw err;
+    }
+  }
+
+  deleteLocalAnimation(animation: Animation) {
+    if (!animation.author || !animation.id) {
+      throw new Error('Animation is missing an author or id, unable to delete local override.');
+    }
+
+    const animationKey = getAnimationKey(animation.author, animation.id);
+
+    try {
+      const sentientSimsFolder = this.ctx.directory.getSentientSimsFolder();
+      const localMapPath = path.join(sentientSimsFolder, 'user_animation_overrides.json');
+
+      let localOverrides: Record<string, Animation> = {};
+      if (fs.existsSync(localMapPath)) {
+        const fileContent = fs.readFileSync(localMapPath, 'utf-8');
+        localOverrides = JSON.parse(fileContent) as Record<string, Animation>;
+      }
+
+      const remaining = Object.fromEntries(Object.entries(localOverrides).filter(([key]) => key !== animationKey));
+
+      this.localAnimations = new Map(Object.entries(remaining));
+
+      fs.writeFileSync(localMapPath, JSON.stringify(remaining, null, 2));
+      log.info(`[Override] Local animation '${animationKey}' deleted.`);
+    } catch (err) {
+      log.error(`[Override] local animation could not be deleted`, err);
+      throw err;
     }
   }
 
