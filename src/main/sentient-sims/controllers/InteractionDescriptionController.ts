@@ -58,6 +58,16 @@ export class InteractionDescriptionController {
     }
   };
 
+  semanticSearchInteractions = async (req: Request, res: Response) => {
+    try {
+      const query = (req.query.q as string) ?? '';
+      res.json(await this.ctx.interactionSemanticSearch.search(query));
+    } catch (err) {
+      log.error('[Controller] Error semantically searching interactions:', err);
+      res.status(500).json({ error: 'Failed to search interactions.' });
+    }
+  };
+
   getAllInteractions = async (req: Request, res: Response) => {
     try {
       const interactions = await this.ctx.interactionRepository.getBrowsableInteractions();
