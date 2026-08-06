@@ -11,6 +11,7 @@ import {
   FormControlLabel,
   IconButton,
   InputAdornment,
+  LinearProgress,
   Pagination,
   Paper,
   Stack,
@@ -32,6 +33,8 @@ import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import { BasicInteraction, BrowsableInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
 import { Animation, BrowsableAnimation } from 'main/sentient-sims/models/Animation';
 import { MappingSource } from 'main/sentient-sims/models/MappingSource';
+import type { SemanticSearchResponse } from 'main/sentient-sims/services/InteractionSemanticSearchService';
+import { interactionDisplayName } from 'main/sentient-sims/util/interactionDisplayName';
 import log from 'electron-log';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebounce } from 'renderer/hooks/useDebounce';
@@ -42,6 +45,9 @@ type MappingType = 'interactions' | 'animations';
 
 type GenericMapping = {
   key: string;
+  // Human-readable name derived from the tuning key (interactions only), shown
+  // as the card title so mappings are findable by their in-game pie menu wording
+  displayName?: string;
   action: string;
   source: MappingSource;
   fullObject: BasicInteraction | Animation;
@@ -189,8 +195,17 @@ function MappingItem({
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
+      {mapping.displayName && (
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
+          {mapping.displayName}
+        </Typography>
+      )}
       <Stack direction="row" spacing={1} useFlexGap sx={{ mb: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
-        <Typography variant="subtitle2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
+        <Typography
+          variant={mapping.displayName ? 'caption' : 'subtitle2'}
+          color={mapping.displayName ? 'text.secondary' : 'text.primary'}
+          sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}
+        >
           {mapping.key}
         </Typography>
         <Chip label={SOURCE_LABELS[source]} size="small" variant="outlined" color={SOURCE_COLORS[source]} />
@@ -398,15 +413,62 @@ export default function OnlineMappingBrowser() {
   const [mappings, setMappings] = useState<GenericMapping[]>([]);
   const [mappingType, setMappingType] = useState<MappingType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [semanticEnabled, setSemanticEnabled] = useState(false);
+  // Results are keyed by the query that produced them so loading and staleness
+  // are derived rather than tracked with extra setState calls in the effect.
+  // names: null marks a failed search, falling back to plain text filtering
+  const [semanticSearch, setSemanticSearch] = useState<{ query: string; names: string[] | null } | null>(null);
   const { userAttributes } = useAuth();
   const { showMessage } = useSnackBar();
 
   const isMapper = new PatreonUser(userAttributes).isMapper();
 
+  const semanticActive = semanticEnabled && mappingType === 'interactions' && Boolean(debouncedFilter);
+  const semanticLoading = semanticActive && semanticSearch?.query !== debouncedFilter;
+  const semanticResults = semanticActive && semanticSearch?.query === debouncedFilter ? semanticSearch.names : null;
+
   const handleFilterChange = useCallback((filter: string) => {
     setDebouncedFilter(filter);
     setCurrentPage(1);
   }, []);
+
+  useEffect(() => {
+    if (!semanticActive) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const search = async () => {
+      try {
+        const response = await fetch(
+          `${appApiUrl}/interactions/semantic-search?q=${encodeURIComponent(debouncedFilter)}`,
+          { signal: controller.signal },
+        );
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+        const data = (await response.json()) as SemanticSearchResponse;
+        if (!data.available) {
+          showMessage('Semantic search needs an OpenAI API key, using text filtering instead', 'error');
+          setSemanticEnabled(false);
+        } else {
+          setSemanticSearch({ query: debouncedFilter, names: data.results.map((result) => result.name) });
+          setCurrentPage(1);
+        }
+      } catch (err) {
+        if (controller.signal.aborted) {
+          return;
+        }
+        showMessage('Semantic search failed, using text filtering instead', 'error');
+        setSemanticSearch({ query: debouncedFilter, names: null });
+        log.error('[MappingBrowser] Semantic search failed:', err);
+      }
+    };
+    void search();
+    return () => {
+      controller.abort();
+    };
+  }, [semanticActive, debouncedFilter, showMessage]);
 
   const loadMappings = async (type: MappingType) => {
     setLoading(true);
@@ -427,6 +489,7 @@ export default function OnlineMappingBrowser() {
 
         return {
           key,
+          displayName: type === 'interactions' ? interactionDisplayName(key) : undefined,
           action: action || '',
           source,
           fullObject,
@@ -444,6 +507,13 @@ export default function OnlineMappingBrowser() {
 
   const filteredMappings = useMemo(() => {
     if (!debouncedFilter) return mappings;
+
+    // Semantic mode: order by similarity as returned from the search endpoint
+    if (semanticResults) {
+      const byKey = new Map(mappings.map((m) => [m.key, m]));
+      return semanticResults.map((name) => byKey.get(name)).filter((m): m is GenericMapping => m !== undefined);
+    }
+
     const search = debouncedFilter.toLowerCase();
     const matches = (field?: string) => !!field && field.toLowerCase().includes(search);
 
@@ -452,7 +522,7 @@ export default function OnlineMappingBrowser() {
     const nameMatches: GenericMapping[] = [];
     const textMatches: GenericMapping[] = [];
     mappings.forEach((m) => {
-      if (matches(m.key) || matches(m.fullObject.name)) {
+      if (matches(m.key) || matches(m.displayName) || matches(m.fullObject.name)) {
         nameMatches.push(m);
       } else if (
         matches(m.action) ||
@@ -464,7 +534,7 @@ export default function OnlineMappingBrowser() {
       }
     });
     return [...nameMatches, ...textMatches];
-  }, [mappings, debouncedFilter]);
+  }, [mappings, debouncedFilter, semanticResults]);
 
   const pageCount = Math.ceil(filteredMappings.length / ITEMS_PER_PAGE);
   const page = Math.min(currentPage, Math.max(pageCount, 1));
@@ -573,7 +643,29 @@ export default function OnlineMappingBrowser() {
             Load Animations
           </Button>
           <MappingFilterField onFilterChange={handleFilterChange} />
+          {mappingType === 'interactions' && (
+            <Tooltip
+              title="Rank results by meaning instead of exact text. The first search builds an index and can take a minute."
+              placement="top"
+            >
+              <FormControlLabel
+                sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+                control={
+                  <Switch
+                    size="small"
+                    checked={semanticEnabled}
+                    onChange={(e) => {
+                      setSemanticEnabled(e.target.checked);
+                    }}
+                  />
+                }
+                label="Semantic search"
+                slotProps={{ typography: { variant: 'body2' } }}
+              />
+            </Tooltip>
+          )}
         </Stack>
+        {semanticLoading && <LinearProgress sx={{ mt: 1.5 }} />}
       </Paper>
 
       {content}

@@ -86,6 +86,8 @@ export function runApi(ctx: ApiContext) {
 
   expressApp.get('/interactions/all', ctx.controller.interactionDescription.getAllInteractions);
 
+  expressApp.get('/interactions/semantic-search', ctx.controller.interactionDescription.semanticSearchInteractions);
+
   expressApp.get('/traits', ctx.controller.mapping.getTraits);
   expressApp.get('/traits/unmapped', ctx.controller.mapping.getUnmappedTraits);
   expressApp.post('/traits/export', ctx.controller.mapping.exportTraits);
