@@ -137,7 +137,20 @@ function MappingItem({
   const [deleting, setDeleting] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [comparing, setComparing] = useState(false);
+  // Set when the mapping was deleted and nothing shadows it, so the card can
+  // stay in place (preserving search/page position) instead of forcing a reload
+  const [removed, setRemoved] = useState(false);
   const { showMessage } = useSnackBar();
+
+  // Morph this card into the version that takes over after a local override or
+  // online mapping is deleted, keeping the browse position intact
+  const fallBackTo = (fallbackSource: MappingSource, fallback: ShadowedVersion) => {
+    setSource(fallbackSource);
+    setAction(fallback.action ?? '');
+    setSavedAction(fallback.action ?? '');
+    setIgnored(Boolean(fallback.ignored));
+    setSavedIgnored(Boolean(fallback.ignored));
+  };
 
   // The versions this card's text shadows, so an override can be compared with
   // the original before deciding which one deserves to go online
@@ -157,7 +170,7 @@ function MappingItem({
   // For a local override, show how it relates to the shared online mapping so
   // it's obvious whether everyone else sees this same text
   let onlineStatusChip = null;
-  if (interaction && source === 'local') {
+  if (interaction && source === 'local' && !removed) {
     if (!onlineVersion) {
       onlineStatusChip = (
         <Tooltip
@@ -204,6 +217,7 @@ function MappingItem({
       setSavedAction(action);
       setSavedIgnored(ignored);
       setSource('local');
+      setRemoved(false);
       showMessage(`Saved locally: ${mapping.key}`, 'success');
       log.info(`[MappingBrowser] Saved local mapping: ${mapping.key}`);
     } catch (err) {
@@ -253,9 +267,22 @@ function MappingItem({
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
       }
-      showMessage(`Removed local override: ${mapping.key}`, 'success');
       log.info(`[MappingBrowser] Removed local override: ${mapping.key}`);
-      onReloadNeeded();
+      // Update the card in place so the current search, filters, and page
+      // survive; animations lack the shadowed-version data, so they still reload
+      if (!interaction) {
+        showMessage(`Removed local override: ${mapping.key}`, 'success');
+        onReloadNeeded();
+      } else if (onlineVersion) {
+        fallBackTo('online', onlineVersion);
+        showMessage(`Removed local override: ${mapping.key} — showing the online version`, 'success');
+      } else if (mapping.builtInVersion) {
+        fallBackTo('built-in', mapping.builtInVersion);
+        showMessage(`Removed local override: ${mapping.key} — showing the built-in version`, 'success');
+      } else {
+        setRemoved(true);
+        showMessage(`Removed local override: ${mapping.key} — no other version exists`, 'success');
+      }
     } catch (err) {
       showMessage(`Failed to remove local override: ${mapping.key}`, 'error');
       log.error(`[MappingBrowser] Error removing local override: ${mapping.key}`, err);
@@ -274,9 +301,20 @@ function MappingItem({
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
       }
-      showMessage(`Deleted online: ${mapping.key}`, 'success');
       log.info(`[MappingBrowser] Deleted online mapping: ${mapping.key}`);
-      onReloadNeeded();
+      if (!interaction) {
+        showMessage(`Deleted online: ${mapping.key}`, 'success');
+        onReloadNeeded();
+      } else {
+        setOnlineVersion(undefined);
+        if (mapping.builtInVersion) {
+          fallBackTo('built-in', mapping.builtInVersion);
+          showMessage(`Deleted online: ${mapping.key} — showing the built-in version`, 'success');
+        } else {
+          setRemoved(true);
+          showMessage(`Deleted online: ${mapping.key} — no other version exists`, 'success');
+        }
+      }
     } catch (err) {
       showMessage(`Failed to delete: ${mapping.key}`, 'error');
       log.error(`[MappingBrowser] Error deleting online mapping: ${mapping.key}`, err);
@@ -300,7 +338,13 @@ function MappingItem({
         >
           {mapping.key}
         </Typography>
-        <Chip label={SOURCE_LABELS[source]} size="small" variant="outlined" color={SOURCE_COLORS[source]} />
+        {removed ? (
+          <Tooltip title="This mapping no longer exists anywhere. Save Locally to recreate it." placement="top">
+            <Chip label="Removed" size="small" variant="outlined" color="error" />
+          </Tooltip>
+        ) : (
+          <Chip label={SOURCE_LABELS[source]} size="small" variant="outlined" color={SOURCE_COLORS[source]} />
+        )}
         {onlineStatusChip}
         {animation?.name && <Chip label={animation.name} size="small" variant="outlined" />}
         {animation?.author && <Chip label={animation.author} size="small" variant="outlined" color="primary" />}
@@ -387,7 +431,7 @@ function MappingItem({
         >
           Save Locally
         </Button>
-        {source === 'local' && (
+        {source === 'local' && !removed && (
           <Tooltip
             title="Removes your local override so the built-in or online description applies again"
             placement="top"
@@ -428,7 +472,7 @@ function MappingItem({
             </span>
           </Tooltip>
         )}
-        {canSaveOnline && source === 'online' && (
+        {canSaveOnline && source === 'online' && !removed && (
           <Tooltip title="Deletes the shared online mapping for everyone" placement="top">
             <span>
               <Button
