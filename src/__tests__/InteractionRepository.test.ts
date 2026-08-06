@@ -89,6 +89,7 @@ describe('InteractionRepository', () => {
       name: 'mixer_Baby_ShowOff',
       action: 'online baby action',
       source: 'online',
+      builtIn: { action: '{actor.0} is excitingly showing their new baby to {actor.1}.', ignored: undefined },
     });
     expect(browsable.get('Some_Mod_Interaction')).toEqual({
       name: 'Some_Mod_Interaction',
@@ -99,6 +100,10 @@ describe('InteractionRepository', () => {
       name: 'mixer_ScienceTable_Empty',
       action: 'local science action',
       source: 'local',
+      builtIn: {
+        action: '{actor.0} is preparing a scientific experiment with {actor.1} using an empty flask.',
+        ignored: undefined,
+      },
     });
     // The whole built-in catalog is browsable, not just the online mappings
     expect(browsable.size).toBeGreaterThan(1000);
@@ -125,6 +130,23 @@ describe('InteractionRepository', () => {
 
     const description = await ctx.interactions.getInteractionDescription('mixer_Baby_ShowOff');
     expect(description?.pre_actions).toEqual(['online baby action']);
+  });
+
+  it('a local override that shadows other sources exposes the shadowed versions', async () => {
+    ctx.interactionRepository.saveLocalInteraction({
+      name: 'mixer_Baby_ShowOff',
+      action: 'local baby action',
+    });
+
+    const browsable = await ctx.interactionRepository.getBrowsableInteractions();
+
+    expect(browsable.get('mixer_Baby_ShowOff')).toEqual({
+      name: 'mixer_Baby_ShowOff',
+      action: 'local baby action',
+      source: 'local',
+      online: { action: 'online baby action', ignored: undefined },
+      builtIn: { action: '{actor.0} is excitingly showing their new baby to {actor.1}.', ignored: undefined },
+    });
   });
 
   it('ignored status follows override precedence: local > online > built-in', async () => {

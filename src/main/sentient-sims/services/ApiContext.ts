@@ -38,6 +38,8 @@ import { LastExceptionService } from './LastExceptionService';
 import { LogSendService } from './LogSendService';
 import { LogsService } from './LogsService';
 import { MappingService } from './MappingService';
+import { EmbeddingService, NoopEmbeddingService, OpenAIEmbeddingService } from './EmbeddingService';
+import { InteractionSemanticSearchService } from './InteractionSemanticSearchService';
 import { ModelSettingsService } from './ModelSettingsService';
 import { NovelAIService } from './NovelAIService';
 import { OpenAIService } from './OpenAIService';
@@ -197,6 +199,9 @@ export class ApiContext {
   private readonly _interactionService: InteractionService;
   private readonly _aiService: AIService;
   private readonly _mappingService: MappingService;
+  private readonly _openAIEmbeddingService: OpenAIEmbeddingService;
+  private readonly _noopEmbeddingService: NoopEmbeddingService;
+  private readonly _interactionSemanticSearchService: InteractionSemanticSearchService;
 
   // --- Repositories ---
   private readonly _locationRepository: LocationRepository;
@@ -259,6 +264,10 @@ export class ApiContext {
 
     this._aiService = new AIService(this);
     this._mappingService = new MappingService();
+
+    this._openAIEmbeddingService = new OpenAIEmbeddingService(this);
+    this._noopEmbeddingService = new NoopEmbeddingService();
+    this._interactionSemanticSearchService = new InteractionSemanticSearchService(this);
 
     this._controller = new ControllerContext(this);
   }
@@ -325,6 +334,15 @@ export class ApiContext {
 
   get mapping(): MappingService {
     return this._mappingService;
+  }
+
+  // Evaluated per access so setting an OpenAI key at runtime upgrades from Noop
+  get embedding(): EmbeddingService {
+    return this._openAIEmbeddingService.isAvailable() ? this._openAIEmbeddingService : this._noopEmbeddingService;
+  }
+
+  get interactionSemanticSearch(): InteractionSemanticSearchService {
+    return this._interactionSemanticSearchService;
   }
 
   get modelSettings(): ModelSettingsService {

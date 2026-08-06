@@ -4,6 +4,7 @@ import {
   Card,
   Chip,
   CircularProgress,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
@@ -12,6 +13,7 @@ import {
   FormControlLabel,
   IconButton,
   InputAdornment,
+  LinearProgress,
   Pagination,
   Paper,
   Stack,
@@ -22,7 +24,10 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import RestoreOutlinedIcon from '@mui/icons-material/RestoreOutlined';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
@@ -30,9 +35,11 @@ import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined
 import TravelExploreOutlinedIcon from '@mui/icons-material/TravelExploreOutlined';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
-import { BasicInteraction, BrowsableInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
+import { BasicInteraction, BrowsableInteraction, ShadowedVersion } from 'main/sentient-sims/db/dto/InteractionDTO';
 import { Animation, BrowsableAnimation } from 'main/sentient-sims/models/Animation';
 import { MappingSource, OnlineMappingType } from 'main/sentient-sims/models/MappingSource';
+import type { SemanticSearchResponse } from 'main/sentient-sims/services/InteractionSemanticSearchService';
+import { interactionDisplayName } from 'main/sentient-sims/util/interactionDisplayName';
 import log from 'electron-log';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebounce } from 'renderer/hooks/useDebounce';
@@ -45,8 +52,14 @@ type MappingType = OnlineMappingType;
 
 type GenericMapping = {
   key: string;
+  // Human-readable name derived from the tuning key (interactions only), shown
+  // as the card title so mappings are findable by their in-game pie menu wording
+  displayName?: string;
   action: string;
   source: MappingSource;
+  // The versions this entry shadows, when they exist (interactions only)
+  onlineVersion?: ShadowedVersion;
+  builtInVersion?: ShadowedVersion;
   fullObject: BasicInteraction | Animation;
 };
 
@@ -63,6 +76,43 @@ const SOURCE_COLORS: Record<MappingSource, 'default' | 'info' | 'success'> = {
   'online': 'info',
   'local': 'success',
 };
+
+// Tag filters shown as toggleable chips. Tags within a group are mutually
+// exclusive; tags across groups combine with AND.
+const TAG_GROUPS: Record<string, string[]> = {
+  source: ['Built-in', 'Online', 'Local override'],
+  onlineStatus: ['Matches online', 'Differs from online', 'Not online'],
+  flags: ['Ignored'],
+};
+const INTERACTION_ONLY_TAGS = new Set([...TAG_GROUPS.onlineStatus, ...TAG_GROUPS.flags]);
+
+function onlineStatusTag(mapping: GenericMapping): string | undefined {
+  if (mapping.source !== 'local') {
+    return undefined;
+  }
+  if (!mapping.onlineVersion) {
+    return 'Not online';
+  }
+  const ignored = Boolean((mapping.fullObject as BasicInteraction).ignored);
+  if ((mapping.onlineVersion.action ?? '') === mapping.action && Boolean(mapping.onlineVersion.ignored) === ignored) {
+    return 'Matches online';
+  }
+  return 'Differs from online';
+}
+
+function mappingTags(mapping: GenericMapping, mappingType: MappingType): string[] {
+  const tags: string[] = [SOURCE_LABELS[mapping.source]];
+  if (mappingType === 'interactions') {
+    const status = onlineStatusTag(mapping);
+    if (status) {
+      tags.push(status);
+    }
+    if ((mapping.fullObject as BasicInteraction).ignored) {
+      tags.push('Ignored');
+    }
+  }
+  return tags;
+}
 
 function MappingItem({
   mapping,
@@ -83,12 +133,39 @@ function MappingItem({
   const [ignored, setIgnored] = useState(interaction?.ignored ?? false);
   const [savedIgnored, setSavedIgnored] = useState(interaction?.ignored ?? false);
   const [source, setSource] = useState(mapping.source);
+  const [onlineVersion, setOnlineVersion] = useState(mapping.onlineVersion);
   const [savingLocally, setSavingLocally] = useState(false);
   const [savingOnline, setSavingOnline] = useState(false);
   const [removingOverride, setRemovingOverride] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [comparing, setComparing] = useState(false);
+  // Set when the mapping was deleted and nothing shadows it, so the card can
+  // stay in place (preserving search/page position) instead of forcing a reload
+  const [removed, setRemoved] = useState(false);
   const { showMessage } = useSnackBar();
+
+  // Morph this card into the version that takes over after a local override or
+  // online mapping is deleted, keeping the browse position intact
+  const fallBackTo = (fallbackSource: MappingSource, fallback: ShadowedVersion) => {
+    setSource(fallbackSource);
+    setAction(fallback.action ?? '');
+    setSavedAction(fallback.action ?? '');
+    setIgnored(Boolean(fallback.ignored));
+    setSavedIgnored(Boolean(fallback.ignored));
+  };
+
+  // The versions this card's text shadows, so an override can be compared with
+  // the original before deciding which one deserves to go online
+  const shadowedVersions: { label: string; version: ShadowedVersion }[] = [];
+  if (interaction) {
+    if (source === 'local' && onlineVersion) {
+      shadowedVersions.push({ label: 'Online', version: onlineVersion });
+    }
+    if (source !== 'built-in' && mapping.builtInVersion) {
+      shadowedVersions.push({ label: 'Built-in', version: mapping.builtInVersion });
+    }
+  }
 
   const edited = action !== savedAction || ignored !== savedIgnored;
   const saving = savingLocally || savingOnline || removingOverride || deleting;
@@ -104,9 +181,42 @@ function MappingItem({
     setSource(mapping.source);
     setSavedAction(mapping.action);
     setSavedIgnored(nextIgnored);
+    setOnlineVersion(mapping.onlineVersion);
+    setRemoved(false);
     if (!hasUnsavedEdits) {
       setAction(mapping.action);
       setIgnored(nextIgnored);
+    }
+  }
+
+  // For a local override, show how it relates to the shared online mapping so
+  // it's obvious whether everyone else sees this same text
+  let onlineStatusChip = null;
+  if (interaction && source === 'local' && !removed) {
+    if (!onlineVersion) {
+      onlineStatusChip = (
+        <Tooltip
+          title="No shared online mapping exists for this interaction — only you have this description"
+          placement="top"
+        >
+          <Chip label="Not online" size="small" variant="outlined" color="default" />
+        </Tooltip>
+      );
+    } else if ((onlineVersion.action ?? '') === savedAction && Boolean(onlineVersion.ignored) === savedIgnored) {
+      onlineStatusChip = (
+        <Tooltip title="The shared online mapping is identical — everyone sees this same description" placement="top">
+          <Chip label="Matches online" size="small" variant="outlined" color="success" />
+        </Tooltip>
+      );
+    } else {
+      onlineStatusChip = (
+        <Tooltip
+          title={`Everyone else sees the online version instead: "${onlineVersion.action ?? '(no text)'}"`}
+          placement="top"
+        >
+          <Chip label="Differs from online" size="small" variant="outlined" color="warning" />
+        </Tooltip>
+      );
     }
   }
 
@@ -129,6 +239,7 @@ function MappingItem({
       setSavedAction(action);
       setSavedIgnored(ignored);
       setSource('local');
+      setRemoved(false);
       showMessage(`Saved locally: ${mapping.key}`, 'success');
       log.info(`[MappingBrowser] Saved local mapping: ${mapping.key}`);
     } catch (err) {
@@ -155,6 +266,9 @@ function MappingItem({
       }
       setSavedAction(action);
       setSavedIgnored(ignored);
+      if (interaction) {
+        setOnlineVersion({ action, ignored });
+      }
       showMessage(`Saved online: ${mapping.key}`, 'success');
       log.info(`[MappingBrowser] Saved online mapping: ${mapping.key}`);
     } catch (err) {
@@ -175,9 +289,22 @@ function MappingItem({
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
       }
-      showMessage(`Removed local override: ${mapping.key}`, 'success');
       log.info(`[MappingBrowser] Removed local override: ${mapping.key}`);
-      onReloadNeeded();
+      // Update the card in place so the current search, filters, and page
+      // survive; animations lack the shadowed-version data, so they still reload
+      if (!interaction) {
+        showMessage(`Removed local override: ${mapping.key}`, 'success');
+        onReloadNeeded();
+      } else if (onlineVersion) {
+        fallBackTo('online', onlineVersion);
+        showMessage(`Removed local override: ${mapping.key} — showing the online version`, 'success');
+      } else if (mapping.builtInVersion) {
+        fallBackTo('built-in', mapping.builtInVersion);
+        showMessage(`Removed local override: ${mapping.key} — showing the built-in version`, 'success');
+      } else {
+        setRemoved(true);
+        showMessage(`Removed local override: ${mapping.key} — no other version exists`, 'success');
+      }
     } catch (err) {
       showMessage(`Failed to remove local override: ${mapping.key}`, 'error');
       log.error(`[MappingBrowser] Error removing local override: ${mapping.key}`, err);
@@ -196,9 +323,20 @@ function MappingItem({
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
       }
-      showMessage(`Deleted online: ${mapping.key}`, 'success');
       log.info(`[MappingBrowser] Deleted online mapping: ${mapping.key}`);
-      onReloadNeeded();
+      if (!interaction) {
+        showMessage(`Deleted online: ${mapping.key}`, 'success');
+        onReloadNeeded();
+      } else {
+        setOnlineVersion(undefined);
+        if (mapping.builtInVersion) {
+          fallBackTo('built-in', mapping.builtInVersion);
+          showMessage(`Deleted online: ${mapping.key} — showing the built-in version`, 'success');
+        } else {
+          setRemoved(true);
+          showMessage(`Deleted online: ${mapping.key} — no other version exists`, 'success');
+        }
+      }
     } catch (err) {
       showMessage(`Failed to delete: ${mapping.key}`, 'error');
       log.error(`[MappingBrowser] Error deleting online mapping: ${mapping.key}`, err);
@@ -209,14 +347,27 @@ function MappingItem({
 
   return (
     <Paper variant="outlined" sx={{ p: 2, borderColor: 'divider' }}>
+      {mapping.displayName && (
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
+          {mapping.displayName}
+        </Typography>
+      )}
       <Stack direction="row" spacing={1} useFlexGap sx={{ mb: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
         <Typography
-          variant="subtitle2"
+          variant={mapping.displayName ? 'caption' : 'subtitle2'}
+          color={mapping.displayName ? 'text.secondary' : 'text.primary'}
           sx={{ fontFamily: "'Courier New', Courier, monospace", wordBreak: 'break-all' }}
         >
           {mapping.key}
         </Typography>
-        <Chip label={SOURCE_LABELS[source]} size="small" variant="outlined" color={SOURCE_COLORS[source]} />
+        {removed ? (
+          <Tooltip title="This mapping no longer exists anywhere. Save Locally to recreate it." placement="top">
+            <Chip label="Removed" size="small" variant="outlined" color="error" />
+          </Tooltip>
+        ) : (
+          <Chip label={SOURCE_LABELS[source]} size="small" variant="outlined" color={SOURCE_COLORS[source]} />
+        )}
+        {onlineStatusChip}
         {animation?.name && <Chip label={animation.name} size="small" variant="outlined" />}
         {animation?.author && <Chip label={animation.author} size="small" variant="outlined" color="primary" />}
         {interaction?.sub && <Chip label={interaction.sub} size="small" variant="outlined" color="primary" />}
@@ -235,6 +386,60 @@ function MappingItem({
         }}
         sx={{ mb: 1.5 }}
       />
+      {shadowedVersions.length > 0 && (
+        <>
+          <Button
+            size="small"
+            color="secondary"
+            startIcon={<CompareArrowsIcon />}
+            endIcon={comparing ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            onClick={() => {
+              setComparing(!comparing);
+            }}
+            sx={{ mb: 1.5 }}
+          >
+            Compare with {shadowedVersions.map((v) => v.label.toLowerCase()).join(' and ')} version
+            {shadowedVersions.length > 1 ? 's' : ''}
+          </Button>
+          <Collapse in={comparing}>
+            <Stack spacing={1} sx={{ mb: 1.5 }}>
+              {shadowedVersions.map(({ label, version }) => (
+                <Paper key={label} variant="outlined" sx={{ p: 1.5, bgcolor: 'action.hover' }}>
+                  <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+                    <Chip
+                      label={label}
+                      size="small"
+                      variant="outlined"
+                      color={label === 'Online' ? 'info' : 'default'}
+                    />
+                    {version.ignored && <Chip label="Ignored" size="small" variant="outlined" />}
+                    {(version.action ?? '') === action ? (
+                      <Chip label="Same as editor" size="small" variant="outlined" color="success" />
+                    ) : (
+                      <Tooltip
+                        title="Copies this version's text into the editor above so you can save it locally or online"
+                        placement="top"
+                      >
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            setAction(version.action ?? '');
+                          }}
+                        >
+                          Copy into editor
+                        </Button>
+                      </Tooltip>
+                    )}
+                  </Stack>
+                  <Typography variant="body2" sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>
+                    {version.action || '(no description text)'}
+                  </Typography>
+                </Paper>
+              ))}
+            </Stack>
+          </Collapse>
+        </>
+      )}
       <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
         <Button
           loading={savingLocally}
@@ -248,7 +453,7 @@ function MappingItem({
         >
           Save Locally
         </Button>
-        {source === 'local' && (
+        {source === 'local' && !removed && (
           <Tooltip
             title="Removes your local override so the built-in or online description applies again"
             placement="top"
@@ -289,7 +494,7 @@ function MappingItem({
             </span>
           </Tooltip>
         )}
-        {canSaveOnline && source === 'online' && (
+        {canSaveOnline && source === 'online' && !removed && (
           <Tooltip title="Deletes the shared online mapping for everyone" placement="top">
             <span>
               <Button
@@ -424,15 +629,74 @@ export default function OnlineMappingBrowser() {
   const [mappings, setMappings] = useState<GenericMapping[]>([]);
   const [mappingType, setMappingType] = useState<MappingType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [semanticEnabled, setSemanticEnabled] = useState(false);
+  // Results are keyed by the query that produced them so loading and staleness
+  // are derived rather than tracked with extra setState calls in the effect.
+  // names: null marks a failed search, falling back to plain text filtering
+  const [semanticSearch, setSemanticSearch] = useState<{ query: string; names: string[] | null } | null>(null);
+  const [activeTags, setActiveTags] = useState<string[]>([]);
   const { userAttributes } = useAuth();
   const { showMessage } = useSnackBar();
 
+  const toggleTag = (tag: string) => {
+    setActiveTags((prev) => {
+      if (prev.includes(tag)) {
+        return prev.filter((t) => t !== tag);
+      }
+      const group = Object.values(TAG_GROUPS).find((tags) => tags.includes(tag)) ?? [];
+      return [...prev.filter((t) => !group.includes(t)), tag];
+    });
+    setCurrentPage(1);
+  };
+
   const isMapper = new PatreonUser(userAttributes).isMapper();
+
+  const semanticActive = semanticEnabled && mappingType === 'interactions' && Boolean(debouncedFilter);
+  const semanticLoading = semanticActive && semanticSearch?.query !== debouncedFilter;
+  const semanticResults = semanticActive && semanticSearch?.query === debouncedFilter ? semanticSearch.names : null;
 
   const handleFilterChange = useCallback((filter: string) => {
     setDebouncedFilter(filter);
     setCurrentPage(1);
   }, []);
+
+  useEffect(() => {
+    if (!semanticActive) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const search = async () => {
+      try {
+        const response = await fetch(
+          `${appApiUrl}/interactions/semantic-search?q=${encodeURIComponent(debouncedFilter)}`,
+          { signal: controller.signal },
+        );
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+        const data = (await response.json()) as SemanticSearchResponse;
+        if (!data.available) {
+          showMessage('Semantic search needs an OpenAI API key, using text filtering instead', 'error');
+          setSemanticEnabled(false);
+        } else {
+          setSemanticSearch({ query: debouncedFilter, names: data.results.map((result) => result.name) });
+          setCurrentPage(1);
+        }
+      } catch (err) {
+        if (controller.signal.aborted) {
+          return;
+        }
+        showMessage('Semantic search failed, using text filtering instead', 'error');
+        setSemanticSearch({ query: debouncedFilter, names: null });
+        log.error('[MappingBrowser] Semantic search failed:', err);
+      }
+    };
+    void search();
+    return () => {
+      controller.abort();
+    };
+  }, [semanticActive, debouncedFilter, showMessage]);
 
   const loadMappings = useCallback(
     async (type: MappingType, { quiet = false }: { quiet?: boolean } = {}) => {
@@ -440,6 +704,7 @@ export default function OnlineMappingBrowser() {
         setLoading(true);
         setMappings([]);
         setCurrentPage(1);
+        setActiveTags([]);
       }
       setMappingType(type);
       try {
@@ -450,14 +715,22 @@ export default function OnlineMappingBrowser() {
         const data = (await response.json()) as Record<string, BrowsableInteraction | BrowsableAnimation>;
 
         const mappingList: GenericMapping[] = Object.entries(data).map(([key, value]) => {
-          const { source, ...fullObject } = value;
+          const { source, ...rest } = value;
+          const onlineVersion = 'online' in rest ? rest.online : undefined;
+          const builtInVersion = 'builtIn' in rest ? rest.builtIn : undefined;
+          delete (rest as BrowsableInteraction).online;
+          delete (rest as BrowsableInteraction).builtIn;
+          const fullObject = rest;
           const action =
             type === 'interactions' ? (fullObject as BasicInteraction).action : (fullObject as Animation).act;
 
           return {
             key,
+            displayName: type === 'interactions' ? interactionDisplayName(key) : undefined,
             action: action || '',
             source,
+            onlineVersion,
+            builtInVersion,
             fullObject,
           };
         });
@@ -492,7 +765,22 @@ export default function OnlineMappingBrowser() {
   }, [mappingType, loadMappings]);
 
   const filteredMappings = useMemo(() => {
-    if (!debouncedFilter) return mappings;
+    let candidates = mappings;
+    if (activeTags.length > 0 && mappingType) {
+      candidates = candidates.filter((m) => {
+        const tags = mappingTags(m, mappingType);
+        return activeTags.every((tag) => tags.includes(tag));
+      });
+    }
+
+    if (!debouncedFilter) return candidates;
+
+    // Semantic mode: order by similarity as returned from the search endpoint
+    if (semanticResults) {
+      const byKey = new Map(candidates.map((m) => [m.key, m]));
+      return semanticResults.map((name) => byKey.get(name)).filter((m): m is GenericMapping => m !== undefined);
+    }
+
     const search = debouncedFilter.toLowerCase();
     const matches = (field?: string) => !!field && field.toLowerCase().includes(search);
 
@@ -500,8 +788,8 @@ export default function OnlineMappingBrowser() {
     // only in the description text or metadata, so the expected result is on top
     const nameMatches: GenericMapping[] = [];
     const textMatches: GenericMapping[] = [];
-    mappings.forEach((m) => {
-      if (matches(m.key) || matches(m.fullObject.name)) {
+    candidates.forEach((m) => {
+      if (matches(m.key) || matches(m.displayName) || matches(m.fullObject.name)) {
         nameMatches.push(m);
       } else if (
         matches(m.action) ||
@@ -513,7 +801,7 @@ export default function OnlineMappingBrowser() {
       }
     });
     return [...nameMatches, ...textMatches];
-  }, [mappings, debouncedFilter]);
+  }, [mappings, mappingType, debouncedFilter, semanticResults, activeTags]);
 
   const pageCount = Math.ceil(filteredMappings.length / ITEMS_PER_PAGE);
   const page = Math.min(currentPage, Math.max(pageCount, 1));
@@ -567,7 +855,7 @@ export default function OnlineMappingBrowser() {
   } else {
     const rangeStart = (page - 1) * ITEMS_PER_PAGE + 1;
     const rangeEnd = Math.min(page * ITEMS_PER_PAGE, filteredMappings.length);
-    const filteredSuffix = debouncedFilter ? ` (filtered from ${mappings.length})` : '';
+    const filteredSuffix = debouncedFilter || activeTags.length > 0 ? ` (filtered from ${mappings.length})` : '';
     content = (
       <AppCard
         title={mappingType === 'interactions' ? 'Interactions' : 'Animations'}
@@ -630,7 +918,55 @@ export default function OnlineMappingBrowser() {
           >
             Load Animations
           </Button>
+          {mappingType === 'interactions' && (
+            <Tooltip
+              title="Rank results by meaning instead of exact text. The first search builds an index and can take a minute."
+              placement="top"
+            >
+              <FormControlLabel
+                sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+                control={
+                  <Switch
+                    size="small"
+                    checked={semanticEnabled}
+                    onChange={(e) => {
+                      setSemanticEnabled(e.target.checked);
+                    }}
+                  />
+                }
+                label="Semantic search"
+                slotProps={{ typography: { variant: 'body2' } }}
+              />
+            </Tooltip>
+          )}
         </Stack>
+        {mappingType && (
+          <Stack direction="row" spacing={1} useFlexGap sx={{ mt: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
+            <Typography variant="body2" color="text.secondary">
+              Filter by tag:
+            </Typography>
+            {Object.values(TAG_GROUPS)
+              .flat()
+              .filter((tag) => mappingType === 'interactions' || !INTERACTION_ONLY_TAGS.has(tag))
+              .map((tag) => {
+                const active = activeTags.includes(tag);
+                return (
+                  <Chip
+                    key={tag}
+                    label={tag}
+                    size="small"
+                    clickable
+                    color={active ? 'primary' : 'default'}
+                    variant={active ? 'filled' : 'outlined'}
+                    onClick={() => {
+                      toggleTag(tag);
+                    }}
+                  />
+                );
+              })}
+          </Stack>
+        )}
+        {semanticLoading && <LinearProgress sx={{ mt: 1.5 }} />}
       </AppCard>
 
       {content}
