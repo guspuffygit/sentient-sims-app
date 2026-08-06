@@ -60,7 +60,7 @@ export class InteractionDescriptionController {
 
   semanticSearchInteractions = async (req: Request, res: Response) => {
     try {
-      const query = (req.query.q as string) ?? '';
+      const query = typeof req.query.q === 'string' ? req.query.q : '';
       res.json(await this.ctx.interactionSemanticSearch.search(query));
     } catch (err) {
       log.error('[Controller] Error semantically searching interactions:', err);

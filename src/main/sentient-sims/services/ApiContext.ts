@@ -269,7 +269,6 @@ export class ApiContext {
     this._noopEmbeddingService = new NoopEmbeddingService();
     this._interactionSemanticSearchService = new InteractionSemanticSearchService(this);
 
-
     this._controller = new ControllerContext(this);
   }
 
@@ -345,7 +344,6 @@ export class ApiContext {
   get interactionSemanticSearch(): InteractionSemanticSearchService {
     return this._interactionSemanticSearchService;
   }
-
 
   get modelSettings(): ModelSettingsService {
     return this._modelSettingsService;
