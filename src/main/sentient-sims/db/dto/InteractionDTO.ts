@@ -16,6 +16,15 @@ export type BasicInteraction = {
   sub?: string;
 };
 
+export type ShadowedVersion = {
+  action?: string;
+  ignored?: boolean;
+};
+
 export type BrowsableInteraction = BasicInteraction & {
   source: MappingSource;
+  // The versions this entry shadows, when they exist, so the UI can show whether
+  // the displayed text matches what everyone else gets and what the original was
+  online?: ShadowedVersion;
+  builtIn?: ShadowedVersion;
 };
