@@ -2,6 +2,8 @@ import { Animation, BrowsableAnimation } from 'main/sentient-sims/models/Animati
 import { AIActionType } from '../models/AIActionType';
 import { ApiType } from '../models/ApiType';
 import { axiosClient } from '../clients/AxiosClient';
+import { notifyOnlineMappingsChanged } from '../util/notifyRenderer';
+import { ONLINE_MAPPING_SYNC_INTERVAL_MS, onlineMappingsEqual } from '../util/onlineMappingSync';
 import { ApiContext } from './ApiContext';
 import fs from 'fs';
 import path from 'path';
@@ -19,6 +21,7 @@ export class AnimationsService {
   private localAnimations?: Map<string, Animation>;
   private animations?: Map<string, Animation>;
   private lastFetchFailure?: number;
+  private syncTimer?: ReturnType<typeof setInterval>;
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
@@ -35,24 +38,54 @@ export class AnimationsService {
     }
 
     try {
-      const response = await axiosClient<Record<string, Animation>>({
-        url: '/animations',
-        baseURL: this.ctx.settings.sentientSimsAIEndpoint,
-        timeout: FETCH_TIMEOUT_MS,
-        headers: {
-          Authentication: this.ctx.settings.accessToken,
-          ...this.ctx.version.getVersionHeaders(),
-        },
-      });
-
-      this.animations = new Map(Object.entries(response.data));
+      this.animations = await this.fetchAnimations();
       this.lastFetchFailure = undefined;
+      this.scheduleOnlineSync();
     } catch (err) {
       this.lastFetchFailure = Date.now();
       log.error(`[AnimationService] Unable to fetch animations from API`, err);
     }
 
     return this.animations || new Map<string, Animation>();
+  }
+
+  async fetchAnimations(): Promise<Map<string, Animation>> {
+    const response = await axiosClient<Record<string, Animation>>({
+      url: '/animations',
+      baseURL: this.ctx.settings.sentientSimsAIEndpoint,
+      timeout: FETCH_TIMEOUT_MS,
+      headers: {
+        Authentication: this.ctx.settings.accessToken,
+        ...this.ctx.version.getVersionHeaders(),
+      },
+    });
+
+    return new Map(Object.entries(response.data));
+  }
+
+  // Online mappings are shared: when a mapper edits one, every running app should pick
+  // it up without a restart, so the cache re-syncs in the background once it is in use
+  private scheduleOnlineSync() {
+    if (this.syncTimer) {
+      return;
+    }
+    this.syncTimer = setInterval(() => {
+      void this.syncOnlineAnimations();
+    }, ONLINE_MAPPING_SYNC_INTERVAL_MS);
+    this.syncTimer.unref();
+  }
+
+  async syncOnlineAnimations() {
+    try {
+      const latest = await this.fetchAnimations();
+      if (!this.animations || !onlineMappingsEqual(this.animations, latest)) {
+        this.animations = latest;
+        notifyOnlineMappingsChanged('animations');
+      }
+    } catch (err) {
+      // Being offline is normal for a background sync; error-level would nag every interval
+      log.debug('[Sync] Unable to refresh online animations', err);
+    }
   }
 
   /**
@@ -162,6 +195,8 @@ export class AnimationsService {
     const result = response.data;
 
     this.animations = new Map(Object.entries(result));
+    this.scheduleOnlineSync();
+    notifyOnlineMappingsChanged('animations');
 
     return result;
   }
@@ -181,6 +216,7 @@ export class AnimationsService {
     if (animation.author && animation.id) {
       this.animations?.delete(getAnimationKey(animation.author, animation.id));
     }
+    notifyOnlineMappingsChanged('animations');
   }
 
   async getAnimation(animationAuthor: string, animationIdentifier: string) {

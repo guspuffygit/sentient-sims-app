@@ -7,6 +7,7 @@ import { DeleteMemoryRequest } from '../models/GetMemoryRequest';
 import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { CaughtError } from '../models/CaughtError';
+import { OnlineMappingType } from '../models/MappingSource';
 import { getAllBrowserWindows } from './browserWindows';
 import { DialogueLine, parseDialogueLines } from '../formatter/PromptFormatter';
 import { castVoicesForLines } from '../formatter/ElevenLabsVoiceCasting';
@@ -142,6 +143,11 @@ export function notifyMapAnimation(event: WWInteractionEvent) {
 export function notifySimsChanged() {
   log.debug('Notifying renderer sims changed');
   notifyAllWindows('on-sims-changed');
+}
+
+export function notifyOnlineMappingsChanged(mappingType: OnlineMappingType) {
+  log.debug(`Notifying renderer online ${mappingType} changed`);
+  notifyAllWindows('on-online-mappings-changed', mappingType);
 }
 
 export function notifyUnmappedInteractionChanged() {

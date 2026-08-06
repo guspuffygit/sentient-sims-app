@@ -104,6 +104,29 @@ describe('InteractionRepository', () => {
     expect(browsable.size).toBeGreaterThan(1000);
   });
 
+  it('background sync picks up online changes without a restart', async () => {
+    await ctx.interactionRepository.getInteractions();
+
+    const updated = new Map(onlineInteractions);
+    updated.set('mixer_Baby_ShowOff', { name: 'mixer_Baby_ShowOff', action: 'updated online action' });
+    vi.spyOn(ctx.interactionRepository, 'fetchInteractions').mockResolvedValue(updated);
+
+    await ctx.interactionRepository.syncOnlineInteractions();
+
+    const description = await ctx.interactions.getInteractionDescription('mixer_Baby_ShowOff');
+    expect(description?.pre_actions).toEqual(['updated online action']);
+  });
+
+  it('background sync keeps the cache when the fetch fails', async () => {
+    await ctx.interactionRepository.getInteractions();
+    vi.spyOn(ctx.interactionRepository, 'fetchInteractions').mockRejectedValue(new Error('offline'));
+
+    await ctx.interactionRepository.syncOnlineInteractions();
+
+    const description = await ctx.interactions.getInteractionDescription('mixer_Baby_ShowOff');
+    expect(description?.pre_actions).toEqual(['online baby action']);
+  });
+
   it('ignored status follows override precedence: local > online > built-in', async () => {
     // Built-in ignores it, but the online mapping replaces the built-in entirely
     let ignored = (await ctx.interactionRepository.getIgnoredInteractions()).ignoredInteractionNames;

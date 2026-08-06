@@ -32,7 +32,7 @@ import { appApiUrl } from 'main/sentient-sims/constants';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import { BasicInteraction, BrowsableInteraction } from 'main/sentient-sims/db/dto/InteractionDTO';
 import { Animation, BrowsableAnimation } from 'main/sentient-sims/models/Animation';
-import { MappingSource } from 'main/sentient-sims/models/MappingSource';
+import { MappingSource, OnlineMappingType } from 'main/sentient-sims/models/MappingSource';
 import log from 'electron-log';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebounce } from 'renderer/hooks/useDebounce';
@@ -41,7 +41,7 @@ import { useSnackBar } from 'renderer/providers/SnackBarProvider';
 import AppCard from 'renderer/AppCard';
 import { EmptyState } from './EmptyState';
 
-type MappingType = 'interactions' | 'animations';
+type MappingType = OnlineMappingType;
 
 type GenericMapping = {
   key: string;
@@ -92,6 +92,23 @@ function MappingItem({
 
   const edited = action !== savedAction || ignored !== savedIgnored;
   const saving = savingLocally || savingOnline || removingOverride || deleting;
+
+  // A background sync can replace the mapping prop while this card is mounted. Adopt the
+  // fresh values, but never clobber an unsaved draft — it stays, measured against the new
+  // baseline. Render-time adjustment per react.dev "adjusting state when a prop changes".
+  const [prevMapping, setPrevMapping] = useState(mapping);
+  if (prevMapping !== mapping) {
+    setPrevMapping(mapping);
+    const hasUnsavedEdits = action !== savedAction || ignored !== savedIgnored;
+    const nextIgnored = (mapping.fullObject as BasicInteraction).ignored ?? false;
+    setSource(mapping.source);
+    setSavedAction(mapping.action);
+    setSavedIgnored(nextIgnored);
+    if (!hasUnsavedEdits) {
+      setAction(mapping.action);
+      setIgnored(nextIgnored);
+    }
+  }
 
   const handleSaveLocally = async () => {
     setSavingLocally(true);
@@ -417,39 +434,62 @@ export default function OnlineMappingBrowser() {
     setCurrentPage(1);
   }, []);
 
-  const loadMappings = async (type: MappingType) => {
-    setLoading(true);
-    setMappingType(type);
-    setMappings([]);
-    setCurrentPage(1);
-    try {
-      const response = await fetch(`${appApiUrl}/${type}/all`);
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
+  const loadMappings = useCallback(
+    async (type: MappingType, { quiet = false }: { quiet?: boolean } = {}) => {
+      if (!quiet) {
+        setLoading(true);
+        setMappings([]);
+        setCurrentPage(1);
       }
-      const data = (await response.json()) as Record<string, BrowsableInteraction | BrowsableAnimation>;
+      setMappingType(type);
+      try {
+        const response = await fetch(`${appApiUrl}/${type}/all`);
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+        const data = (await response.json()) as Record<string, BrowsableInteraction | BrowsableAnimation>;
 
-      const mappingList: GenericMapping[] = Object.entries(data).map(([key, value]) => {
-        const { source, ...fullObject } = value;
-        const action =
-          type === 'interactions' ? (fullObject as BasicInteraction).action : (fullObject as Animation).act;
+        const mappingList: GenericMapping[] = Object.entries(data).map(([key, value]) => {
+          const { source, ...fullObject } = value;
+          const action =
+            type === 'interactions' ? (fullObject as BasicInteraction).action : (fullObject as Animation).act;
 
-        return {
-          key,
-          action: action || '',
-          source,
-          fullObject,
-        };
-      });
-      mappingList.sort((a, b) => a.key.localeCompare(b.key));
+          return {
+            key,
+            action: action || '',
+            source,
+            fullObject,
+          };
+        });
+        mappingList.sort((a, b) => a.key.localeCompare(b.key));
 
-      setMappings(mappingList);
-    } catch (err) {
-      showMessage(`Failed to load ${type}`, 'error');
-      log.error(`[MappingBrowser] Mappings could not be loaded:`, err);
-    }
-    setLoading(false);
-  };
+        setMappings(mappingList);
+      } catch (err) {
+        if (!quiet) {
+          showMessage(`Failed to load ${type}`, 'error');
+        }
+        log.error(`[MappingBrowser] Mappings could not be loaded:`, err);
+      }
+      if (!quiet) {
+        setLoading(false);
+      }
+    },
+    [showMessage],
+  );
+
+  // When anyone (this window or another mapper, picked up by the background sync) changes
+  // the online mappings, refresh the loaded list in place
+  useEffect(() => {
+    const removeListener = window.electron.onOnlineMappingsChanged((_event: any, changedType: MappingType) => {
+      if (changedType === mappingType) {
+        void loadMappings(changedType, { quiet: true });
+      }
+    });
+
+    return () => {
+      removeListener();
+    };
+  }, [mappingType, loadMappings]);
 
   const filteredMappings = useMemo(() => {
     if (!debouncedFilter) return mappings;
