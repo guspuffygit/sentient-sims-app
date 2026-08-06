@@ -43,3 +43,6 @@ certificate.p12
 
 # Keys
 .env
+
+# Interaction cleanup reports (working data, not code)
+interaction-cleanup-report*.csv
