@@ -1,7 +1,7 @@
 import log from 'electron-log';
 import { InteractionDescription, interactionDescriptions } from '../descriptions/interactionDescriptions';
 import { IgnoredInteractionsResponse } from '../models/IgnoredInteractionsResponse';
-import { BasicInteraction, BrowsableInteraction } from './dto/InteractionDTO';
+import { BasicInteraction, BrowsableInteraction, ShadowedVersion } from './dto/InteractionDTO';
 import { axiosClient } from '../clients/AxiosClient';
 import { ApiContext } from '../services/ApiContext';
 import fs from 'fs';
@@ -127,21 +127,31 @@ export class InteractionRepository {
   async getBrowsableInteractions(): Promise<Map<string, BrowsableInteraction>> {
     const browsable = new Map<string, BrowsableInteraction>();
 
+    const builtIns = new Map<string, ShadowedVersion>();
     interactionDescriptions.forEach((description, name) => {
-      browsable.set(name, {
-        name,
-        action: description.pre_actions?.join('\n'),
-        ignored: description.ignored,
-        source: 'built-in',
-      });
+      builtIns.set(name, { action: description.pre_actions?.join('\n'), ignored: description.ignored });
     });
 
-    (await this.getInteractions()).forEach((interaction, name) => {
-      browsable.set(name, { ...interaction, name, source: 'online' });
+    builtIns.forEach((builtIn, name) => {
+      browsable.set(name, { name, action: builtIn.action, ignored: builtIn.ignored, source: 'built-in' });
+    });
+
+    const onlineInteractions = await this.getInteractions();
+    onlineInteractions.forEach((interaction, name) => {
+      const builtIn = builtIns.get(name);
+      browsable.set(name, { ...interaction, name, source: 'online', ...(builtIn ? { builtIn } : {}) });
     });
 
     this.localInteractions?.forEach((interaction, name) => {
-      browsable.set(name, { ...interaction, name, source: 'local' });
+      const onlineVersion = onlineInteractions.get(name);
+      const builtIn = builtIns.get(name);
+      browsable.set(name, {
+        ...interaction,
+        name,
+        source: 'local',
+        ...(onlineVersion ? { online: { action: onlineVersion.action, ignored: onlineVersion.ignored } } : {}),
+        ...(builtIn ? { builtIn } : {}),
+      });
     });
 
     return browsable;
