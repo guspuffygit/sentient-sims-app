@@ -96,7 +96,28 @@ export const novelaiDefaultModel = 'kayra-v1';
 export const sentientSimsAIDefaultModel = 'Gryphe/MythoMax-L2-13b';
 export const tokenizerBreakString = '<<BREAK>>';
 export const defaultWantsPrefixes = ['I want to', 'I would like', 'I feel'];
-export const defaultGeminiModel = 'gemini-2.0-flash-exp';
+export const defaultGeminiModel = 'gemini-flash-latest';
+// Model IDs Google has removed from the Gemini API. Anyone still pinned to
+// one of these gets a 404 on every call; runMigrations rewrites them to
+// defaultGeminiModel on next launch. Values are bare model names, matched
+// with and without the "models/" prefix.
+export const retiredGeminiModels = new Set(
+  [
+    'gemini-2.0-flash-exp',
+    'gemini-2.0-flash-exp-image-generation',
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-latest',
+    'gemini-1.5-flash-002',
+    'gemini-1.5-flash-8b',
+    'gemini-1.5-flash-8b-latest',
+    'gemini-1.5-pro',
+    'gemini-1.5-pro-latest',
+    'gemini-1.5-pro-002',
+    'gemini-1.0-pro',
+    'gemini-1.0-pro-latest',
+    'gemini-pro',
+  ].flatMap((name) => [name, `models/${name}`]),
+);
 export const geminiDefaultEndpoint = 'https://generativelanguage.googleapis.com/v1beta';
 export const defaultTTSEnabled = false;
 export const defaultTTSVolume = 0.75;

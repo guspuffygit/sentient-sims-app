@@ -218,7 +218,7 @@ describe('Provider Configs', () => {
   });
 
   it('AIService generate uses the default config when no override exists', async () => {
-    addConfig({ id: 'gemini-default', name: 'Gemini', apiType: ApiType.Gemini, model: 'gemini-2.0-flash-exp' });
+    addConfig({ id: 'gemini-default', name: 'Gemini', apiType: ApiType.Gemini, model: 'gemini-flash-latest' });
     ctx.settings.defaultAiProviderConfigId = 'gemini-default';
 
     const geminiService = ctx.getGenerationService(ApiType.Gemini);
@@ -230,7 +230,7 @@ describe('Provider Configs', () => {
 
     expect(geminiSpy).toHaveBeenCalledOnce();
     const request = geminiSpy.mock.calls[0][0];
-    expect(request.model).toEqual('gemini-2.0-flash-exp');
+    expect(request.model).toEqual('gemini-flash-latest');
     expect(request.apiType).toEqual(ApiType.Gemini);
     expect(response.text).toEqual('generated');
   });

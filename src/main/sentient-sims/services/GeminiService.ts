@@ -158,22 +158,35 @@ export class GeminiService implements GenerationService {
         .filter((model) => {
           // Exclude these models
           return ![
-            'models/gemini-2.0-flash-exp-image-generation',
             'models/gemini-2.5-flash-preview-tts',
             'models/gemini-2.5-pro-preview-tts',
-            'models/gemini-2.5-flash-image-preview',
+            'models/gemini-3.1-flash-tts-preview',
             'models/gemini-2.5-flash-image',
             'models/gemini-3-pro-image-preview',
+            'models/gemini-3-pro-image',
             'models/nano-banana-pro-preview',
+            'models/gemini-3.1-flash-image-preview',
+            'models/gemini-3.1-flash-image',
+            'models/gemini-3.1-flash-lite-image',
+            'models/gemini-3.1-pro-preview-customtools',
             'models/gemini-robotics-er-1.5-preview',
+            'models/gemini-robotics-er-1.6-preview',
+            'models/gemini-robotics-er-2-preview',
             'models/gemini-2.5-computer-use-preview-10-2025',
             'models/deep-research-pro-preview-12-2025',
+            'models/deep-research-preview-04-2026',
+            'models/deep-research-max-preview-04-2026',
+            'models/antigravity-preview-05-2026',
+            'models/lyria-3-clip-preview',
+            'models/lyria-3-pro-preview',
             'models/gemma-3-1b-it',
             'models/gemma-3-4b-it',
             'models/gemma-3-12b-it',
             'models/gemma-3-27b-it',
             'models/gemma-3n-e4b-it',
             'models/gemma-3n-e2b-it',
+            'models/gemma-4-26b-a4b-it',
+            'models/gemma-4-31b-it',
           ].includes(model.name ?? 'Unknown');
         });
 
