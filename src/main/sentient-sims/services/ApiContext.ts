@@ -384,8 +384,12 @@ export class ApiContext {
     return this._actionDispatcherService;
   }
 
-  // Evaluated per access so setting an OpenAI key at runtime upgrades from Noop
+  // Evaluated per access so setting an OpenAI key at runtime upgrades from Noop.
+  // Gated behind memoryRetrievalEnabled; off by default.
   get embedding(): EmbeddingService {
+    if (!this._settings.memoryRetrievalEnabled) {
+      return this._noopEmbeddingService;
+    }
     return this._openAIEmbeddingService.isAvailable() ? this._openAIEmbeddingService : this._noopEmbeddingService;
   }
 

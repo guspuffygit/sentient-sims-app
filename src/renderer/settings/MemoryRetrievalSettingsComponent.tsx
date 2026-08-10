@@ -1,9 +1,15 @@
 import { Box, FormControlLabel, Checkbox } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting from '../hooks/useSetting';
+import { useDebugMode } from '../providers/DebugModeProvider';
 
 export default function MemoryRetrievalSettingsComponent() {
-  const memoryRetrievalEnabled = useSetting(SettingsEnum.MEMORY_RETRIEVAL_ENABLED, true);
+  const memoryRetrievalEnabled = useSetting(SettingsEnum.MEMORY_RETRIEVAL_ENABLED, false);
+  const debugMode = useDebugMode();
+
+  if (!debugMode.isEnabled) {
+    return null;
+  }
 
   return (
     <Box

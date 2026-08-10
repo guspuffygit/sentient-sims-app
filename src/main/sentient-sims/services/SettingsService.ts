@@ -229,7 +229,7 @@ export function defaultStore(cwd?: string) {
       },
       [SettingsEnum.MEMORY_RETRIEVAL_ENABLED.toString()]: {
         type: 'boolean',
-        default: true,
+        default: false,
       },
       // Items validated by sanitizeProviderConfigs on read/write so malformed
       // entries degrade gracefully instead of throwing out of electron-store
