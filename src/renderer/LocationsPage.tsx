@@ -268,6 +268,14 @@ export default function LocationsPage() {
             <DataGrid
               rows={locations}
               columns={columns}
+              showToolbar
+              // The footer (and with it the pagination controls) is hidden, so anything past the
+              // grid's default 100-row page would be unreachable. -1 renders every row instead.
+              pageSizeOptions={[{ value: -1, label: 'All' }]}
+              initialState={{
+                pagination: { paginationModel: { page: 0, pageSize: -1 } },
+                sorting: { sortModel: [{ field: 'name', sort: 'asc' }] },
+              }}
               slots={{
                 footer: BlankDataGridFooterComponent,
               }}
