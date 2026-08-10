@@ -1,5 +1,7 @@
 import log from 'electron-log';
 import os from 'os';
+import fs from 'fs';
+import path from 'path';
 import AdmZip from 'adm-zip';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { InteractionBugReport } from '../models/InteractionBugReport';
@@ -24,6 +26,8 @@ export const webhookUrl = [
   'eA5x_XDyyt6MTK36i',
   '1Ee5jO7kVJkyo',
 ].join('');
+
+const MAX_LOG_BYTES = 3 * 1024 * 1024;
 
 export class LogSendService {
   private ctx: ApiContext;
@@ -220,7 +224,7 @@ export class LogSendService {
   private appendLogsFileToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
       const logFile = this.ctx.directory.getLogsFile();
-      zipFile.addLocalFile(logFile);
+      this.addTailToZip(zipFile, logFile, MAX_LOG_BYTES);
     } catch (err: any) {
       this.handleAppendError('Error attaching mod log file', err, errors);
     }
@@ -262,9 +266,28 @@ export class LogSendService {
   private appendAppLogsToZipFile(zipFile: AdmZip, errors: any[]) {
     try {
       const appLogFile = log.transports.file.getFile();
-      zipFile.addLocalFile(appLogFile.path);
+      this.addTailToZip(zipFile, appLogFile.path, MAX_LOG_BYTES);
     } catch (err: any) {
       this.handleAppendError('Error attaching app log file', err, errors);
+    }
+  }
+
+  private addTailToZip(zipFile: AdmZip, filePath: string, maxBytes: number) {
+    const stat = fs.statSync(filePath);
+    const entryName = path.basename(filePath);
+    if (stat.size <= maxBytes) {
+      zipFile.addLocalFile(filePath);
+      return;
+    }
+
+    const fd = fs.openSync(filePath, 'r');
+    try {
+      const buffer = Buffer.alloc(maxBytes);
+      const position = stat.size - maxBytes;
+      fs.readSync(fd, buffer, 0, maxBytes, position);
+      zipFile.addFile(entryName, buffer);
+    } finally {
+      fs.closeSync(fd);
     }
   }
 
