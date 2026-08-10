@@ -4,6 +4,8 @@ import { IgnoredInteractionsResponse } from '../models/IgnoredInteractionsRespon
 import { BasicInteraction, BrowsableInteraction, ShadowedVersion } from './dto/InteractionDTO';
 import { axiosClient } from '../clients/AxiosClient';
 import { ApiContext } from '../services/ApiContext';
+import { notifyOnlineMappingsChanged } from '../util/notifyRenderer';
+import { ONLINE_MAPPING_SYNC_INTERVAL_MS, onlineMappingsEqual } from '../util/onlineMappingSync';
 import fs from 'fs';
 import path from 'path';
 
@@ -15,6 +17,7 @@ export class InteractionRepository {
   private localInteractions?: Map<string, BasicInteraction>;
   private interactions?: Map<string, BasicInteraction>;
   private lastFetchFailure?: number;
+  private syncTimer?: ReturnType<typeof setInterval>;
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
@@ -112,12 +115,38 @@ export class InteractionRepository {
     try {
       this.interactions = await this.fetchInteractions();
       this.lastFetchFailure = undefined;
+      this.scheduleOnlineSync();
     } catch (err) {
       this.lastFetchFailure = Date.now();
       log.error(`Unable to fetch interactions from Sentient Sims API`, err);
     }
 
     return this.interactions || new Map<string, BasicInteraction>();
+  }
+
+  // Online mappings are shared: when a mapper edits one, every running app should pick
+  // it up without a restart, so the cache re-syncs in the background once it is in use
+  private scheduleOnlineSync() {
+    if (this.syncTimer) {
+      return;
+    }
+    this.syncTimer = setInterval(() => {
+      void this.syncOnlineInteractions();
+    }, ONLINE_MAPPING_SYNC_INTERVAL_MS);
+    this.syncTimer.unref();
+  }
+
+  async syncOnlineInteractions() {
+    try {
+      const latest = await this.fetchInteractions();
+      if (!this.interactions || !onlineMappingsEqual(this.interactions, latest)) {
+        this.interactions = latest;
+        notifyOnlineMappingsChanged('interactions');
+      }
+    } catch (err) {
+      // Being offline is normal for a background sync; error-level would nag every interval
+      log.debug('[Sync] Unable to refresh online interactions', err);
+    }
   }
 
   /**
@@ -172,6 +201,8 @@ export class InteractionRepository {
     const result = response.data;
 
     this.interactions = new Map(Object.entries(result));
+    this.scheduleOnlineSync();
+    notifyOnlineMappingsChanged('interactions');
 
     return result;
   }
@@ -189,6 +220,7 @@ export class InteractionRepository {
     });
 
     this.interactions?.delete(interaction.name);
+    notifyOnlineMappingsChanged('interactions');
   }
 
   async getInteraction(interactionName: string): Promise<InteractionDescription | undefined> {

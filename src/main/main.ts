@@ -32,6 +32,8 @@ import { ApiContext } from './sentient-sims/services/ApiContext';
 import { version as releaseAppVersion } from '../../release/app/package.json';
 
 log.initialize({ preload: true });
+// Get uncaught main-process errors into main.log so they show up in player log bundles.
+log.errorHandler.startCatching({ showDialog: false });
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -49,14 +51,18 @@ const installExtensions = async () => {
   return installExtension([REACT_DEVELOPER_TOOLS]).catch(console.log);
 };
 
+let RESOURCES_PATH = path.join(process.cwd(), 'assets');
+if (app.isPackaged) {
+  RESOURCES_PATH = path.join(process.resourcesPath, 'assets');
+}
+
+const getAssetPath = (...paths: string[]): string => {
+  return path.join(RESOURCES_PATH, ...paths);
+};
+
 const createWindow = async () => {
   if (isDebug) {
     await installExtensions();
-  }
-
-  let RESOURCES_PATH = path.join(process.cwd(), 'assets');
-  if (app.isPackaged) {
-    RESOURCES_PATH = path.join(process.resourcesPath, 'assets');
   }
 
   // main bundle lives at dist/main/main.js, preload at dist/preload/preload.js.
@@ -65,9 +71,6 @@ const createWindow = async () => {
 
   log.info(`RESOURCES_PATH: ${RESOURCES_PATH}`);
   log.info(`PRELOAD: ${preloadPath}`);
-  const getAssetPath = (...paths: string[]): string => {
-    return path.join(RESOURCES_PATH, ...paths);
-  };
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -113,14 +116,16 @@ const createWindow = async () => {
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
-  registerDebugToggleHotkey();
-
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
     void shell.openExternal(edata.url);
     return { action: 'deny' };
   });
+};
 
+// Everything here binds ports or registers global handlers, so it must run exactly
+// once per process, not once per window.
+const startServices = () => {
   const settingsService = new SettingsService();
   settingsService.runMigrations();
   settingsService.onSettingChanged(notifySettingChanged);
@@ -144,6 +149,7 @@ const createWindow = async () => {
     disableDebugLogging();
   }
 
+  registerDebugToggleHotkey();
   runWebSocketServer(ctx);
   runApi(ctx);
 
@@ -199,16 +205,41 @@ app.on('window-all-closed', () => {
   }
 });
 
-app
-  .whenReady()
-  .then(() => {
-    void createWindow();
-    app.on('activate', () => {
-      // On macOS it's common to re-create a window in the app when the
-      // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) void createWindow();
-    });
-  })
-  .catch((err: unknown) => {
-    log.error(err);
+// Concurrent copies fight over ports 25145/25146/25148 and every one of them ends up
+// broken, so only the first copy runs; relaunches surface its window instead.
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+
+if (!gotSingleInstanceLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (!app.isReady()) {
+      return;
+    }
+    // A windowless copy can hold the lock (e.g. quit hung); relaunching recovers it.
+    if (mainWindow === null) {
+      void createWindow();
+      return;
+    }
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore();
+    }
+    mainWindow.show();
+    mainWindow.focus();
   });
+
+  app
+    .whenReady()
+    .then(() => {
+      startServices();
+      void createWindow();
+      app.on('activate', () => {
+        // On macOS it's common to re-create a window in the app when the
+        // dock icon is clicked and there are no other windows open.
+        if (mainWindow === null) void createWindow();
+      });
+    })
+    .catch((err: unknown) => {
+      log.error(err);
+    });
+}

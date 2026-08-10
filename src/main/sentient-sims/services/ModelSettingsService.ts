@@ -48,7 +48,12 @@ export class ModelSettingsService {
 
       if (isCacheStale) {
         log.info('Model settings cache is stale or empty. Syncing now...');
-        await this.syncModelSettings();
+        try {
+          await this.syncModelSettings();
+        } catch (error) {
+          // A generation with slightly stale sampling settings beats no generation at all
+          log.error('Continuing with cached model settings', error);
+        }
       }
     }
 

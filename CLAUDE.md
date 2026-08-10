@@ -19,7 +19,7 @@ Integration tests (.it.test.ts) require OPENAI_KEY env var; the AWS-backed tests
 
 Architecture:
 
-  Main process (src/main/main.ts) creates the BrowserWindow, starts an Express HTTP server on port 25198, and sets up a WebSocket server. The Sims 4 mod communicates with this Express API.
+  Main process (src/main/main.ts) creates the BrowserWindow, starts an Express HTTP server on port 25148 (tests use 25198), and sets up WebSocket servers (mod 25145, renderer 25146). The Sims 4 mod communicates with this Express API.
   Renderer process (src/renderer/) is a React 19 UI with MUI components, React Router, and TanStack Query. Communicates with main via IPC and the local Express API.
   Preload (src/main/preload.ts) bridges renderer to main process via contextBridge.
 

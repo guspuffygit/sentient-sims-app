@@ -101,15 +101,17 @@ export class InteractionSemanticSearchService {
     let embeddedAny = false;
     for (let start = 0; start < missing.length; start += EMBED_BATCH_SIZE) {
       const batch = missing.slice(start, start + EMBED_BATCH_SIZE);
-      // eslint-disable-next-line no-await-in-loop
       const vectors = await this.ctx.embedding.embed(batch.map(([, text]) => text));
-      batch.forEach(([name, text], index) => {
+      // A plain loop, not forEach: TypeScript does not track assignments made inside a
+      // callback, so `embeddedAny` would stay narrowed to false for the check below
+      for (let index = 0; index < batch.length; index += 1) {
+        const [name, text] = batch[index];
         const embedding = vectors[index];
         if (embedding) {
           cache.set(name, { text, embedding });
           embeddedAny = true;
         }
-      });
+      }
     }
 
     if (embeddedAny) {

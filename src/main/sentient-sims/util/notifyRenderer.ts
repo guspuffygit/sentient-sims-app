@@ -7,6 +7,7 @@ import { DeleteMemoryRequest } from '../models/GetMemoryRequest';
 import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { CaughtError } from '../models/CaughtError';
+import { OnlineMappingType } from '../models/MappingSource';
 import { getAllBrowserWindows } from './browserWindows';
 import { DialogueLine, parseDialogueLines } from '../formatter/PromptFormatter';
 import { castVoicesForLines } from '../formatter/ElevenLabsVoiceCasting';
@@ -129,14 +130,21 @@ export function sendSceneLineToMod(line: DialogueLine & { preamble?: string }) {
 }
 
 export function playTTS(text: string, sims?: SentientSim[], voiceOverrides?: Map<string, string>) {
-  playTTSLines(
-    parseDialogueLines(
-      text,
-      sims?.map((sim) => sim.name),
-    ),
-    sims,
-    { voiceOverrides },
+  const lines = parseDialogueLines(
+    text,
+    sims?.map((sim) => sim.name),
   );
+
+  // parseDialogueLines drops anything that isn't attributed dialogue, which is right for
+  // screenplay-format output but would swallow half of a prose response. Only speak line by
+  // line when every line of the response was accounted for; otherwise read the whole thing.
+  const nonEmptyLineCount = text.split('\n').filter((line) => line.trim().length > 0).length;
+  if (lines.length < nonEmptyLineCount) {
+    playTTSLines([{ speaker: 'Narrator', text: text.trim() }], sims, { voiceOverrides });
+    return;
+  }
+
+  playTTSLines(lines, sims, { voiceOverrides });
 }
 
 export function sendPopUpNotification(message?: string) {
@@ -157,6 +165,11 @@ export function notifyMapAnimation(event: WWInteractionEvent) {
 export function notifySimsChanged() {
   log.debug('Notifying renderer sims changed');
   notifyAllWindows('on-sims-changed');
+}
+
+export function notifyOnlineMappingsChanged(mappingType: OnlineMappingType) {
+  log.debug(`Notifying renderer online ${mappingType} changed`);
+  notifyAllWindows('on-online-mappings-changed', mappingType);
 }
 
 export function notifyUnmappedInteractionChanged() {

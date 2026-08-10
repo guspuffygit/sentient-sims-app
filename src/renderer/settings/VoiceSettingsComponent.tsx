@@ -1,4 +1,4 @@
-import { Box, FormControlLabel, Checkbox, MenuItem, Select, Grid, Slider, Stack, Typography } from '@mui/material';
+import { Box, Checkbox, Divider, FormControlLabel, MenuItem, Select, Slider, Stack, Typography } from '@mui/material';
 import HelpButton from 'renderer/components/HelpButton';
 import { ApiType, ApiTypeFromValue } from 'main/sentient-sims/models/ApiType';
 import { JSX } from 'react';
@@ -25,13 +25,16 @@ export default function VoiceSettingsComponent() {
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          marginBottom: 2,
-        }}
-      >
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1 }}>
+        <Box>
+          <Typography variant="h6">Text to Speech</Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary', marginTop: 0.25 }}>
+            Sims speak their generated dialogue out loud through an AI voice provider.
+          </Typography>
+        </Box>
+        <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/Voice#tts" />
+      </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 1, marginBottom: 2 }}>
         <FormControlLabel
           label="Enable Text to Speech"
           control={
@@ -41,48 +44,39 @@ export default function VoiceSettingsComponent() {
             />
           }
         />
-        <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/Voice#tts" />
       </Box>
       {aiSettings.ttsEnabled ? (
-        <Grid
-          container
-          spacing={3}
-          sx={{
-            alignItems: 'center',
-          }}
-        >
-          <Grid size={{ xs: 12, sm: 8 }}>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                marginBottom: 2,
-              }}
-            >
-              <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
-                <Typography>AI:</Typography>
-                <Select
-                  size="small"
-                  labelId="release-type-select-label"
-                  id="release-type-select"
-                  value={aiSettings.ttsApiType}
-                  sx={{ minWidth: 100, marginRight: 2 }}
-                  onChange={(change) =>
-                    void aiSettings.ttsApiTypeSetting.setSetting(ApiTypeFromValue(change.target.value))
-                  }
-                >
-                  <MenuItem value={ApiType.SentientSimsAI}>Sentient Sims AI TTS</MenuItem>
-                  <MenuItem value={ApiType.ElevenLabs}>ElevenLabs</MenuItem>
-                </Select>
-              </Stack>
+        <>
+          <Divider sx={{ marginBottom: 2.5 }} />
+          <Typography variant="subtitle1">Playback</Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 2 }}>
+            Choose which service generates speech and how loud voices play.
+          </Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 2.5, sm: 5 }} sx={{ marginBottom: 3 }}>
+            <Box>
+              <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 0.75 }}>
+                Provider
+              </Typography>
+              <Select
+                size="small"
+                labelId="release-type-select-label"
+                id="release-type-select"
+                value={aiSettings.ttsApiType}
+                sx={{ minWidth: 240 }}
+                onChange={(change) =>
+                  void aiSettings.ttsApiTypeSetting.setSetting(ApiTypeFromValue(change.target.value))
+                }
+              >
+                <MenuItem value={ApiType.SentientSimsAI}>Sentient Sims AI TTS</MenuItem>
+                <MenuItem value={ApiType.ElevenLabs}>ElevenLabs</MenuItem>
+              </Select>
             </Box>
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 4 }} container spacing={2}>
-            <Box sx={{ width: 300 }}>
-              <Stack spacing={2} direction="row" sx={{ alignItems: 'center', mb: 1 }}>
-                <Typography>Volume:</Typography>
-                <VolumeDown />
+            <Box sx={{ width: 280 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 0.75 }}>
+                Volume
+              </Typography>
+              <Stack spacing={1.5} direction="row" sx={{ alignItems: 'center' }}>
+                <VolumeDown sx={{ color: 'text.secondary', fontSize: 20 }} />
                 <Slider
                   aria-label="Volume"
                   value={aiSettings.ttsVolume}
@@ -96,12 +90,13 @@ export default function VoiceSettingsComponent() {
                     { value: 1.0, label: '1' },
                   ]}
                 />
-                <VolumeUp />
+                <VolumeUp sx={{ color: 'text.secondary', fontSize: 20 }} />
               </Stack>
             </Box>
-          </Grid>
+          </Stack>
+          <Divider sx={{ marginBottom: 2.5 }} />
           {voiceSettingsComponent}
-        </Grid>
+        </>
       ) : null}
     </>
   );

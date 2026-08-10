@@ -2,17 +2,14 @@
 
 import { useState, ChangeEvent, useMemo, useCallback, JSX, KeyboardEvent } from 'react';
 import { appApiUrl } from 'main/sentient-sims/constants';
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Grid, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
+import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined';
+import PsychologyOutlinedIcon from '@mui/icons-material/PsychologyOutlined';
+import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import log from 'electron-log';
 import { xml as vkbeautifyXml } from 'vkbeautify';
 import SyntaxHighlighter from 'react-syntax-highlighter';
@@ -23,6 +20,7 @@ import { ExportTraitsRequest } from 'main/sentient-sims/services/MappingService'
 import { toTraitType, TraitType } from 'main/sentient-sims/models/TraitType';
 import AppCard from './AppCard';
 import useSetting from './hooks/useSetting';
+import { EmptyState } from './components/EmptyState';
 
 type TraitResponse = {
   data: TraitMapping[];
@@ -40,6 +38,41 @@ type TraitCount = {
   unmapped: number;
   mapped: number;
 };
+
+type TraitMetaItemProps = {
+  label: string;
+  value?: string;
+  mono?: boolean;
+};
+
+function TraitMetaItem({ label, value, mono }: TraitMetaItemProps) {
+  return (
+    <Box sx={{ minWidth: 0 }}>
+      <Typography
+        variant="caption"
+        sx={{
+          display: 'block',
+          color: 'text.secondary',
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.06em',
+        }}
+      >
+        {label}
+      </Typography>
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 500,
+          overflowWrap: 'anywhere',
+          ...(mono ? { fontFamily: "'Courier New', Courier, monospace" } : {}),
+        }}
+      >
+        {value || '—'}
+      </Typography>
+    </Box>
+  );
+}
 
 export default function TraitsPage() {
   const [loadingTraits, setLoadingTraits] = useState(false);
@@ -312,65 +345,36 @@ export default function TraitsPage() {
   });
 
   return (
-    <AppCard>
-      <Box sx={{ p: 3 }}>
-        <Grid
-          container
-          spacing={3}
-          sx={{
-            alignItems: 'center',
-          }}
-        >
-          {/* Trait Information */}
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: 'bold',
-              }}
+    <>
+      <AppCard
+        title="Trait source"
+        subtitle="Point at an S4tk extraction, then load traits and export the finished mapping"
+        icon={<FolderOpenOutlinedIcon sx={{ fontSize: 18 }} />}
+        headerAction={
+          <>
+            <Button
+              variant="outlined"
+              color="secondary"
+              loading={loadingTraits}
+              startIcon={<RefreshOutlinedIcon sx={{ fontSize: 16 }} />}
+              onClick={loadItems}
             >
-              Trait Details - {selectedIndex + 1} / {filteredTraits.length} - Unmapped: {unmapped}
-            </Typography>
-            <FormHelperText>Name: {filteredTraits[selectedIndex]?.name}</FormHelperText>
-            <FormHelperText>Class: {filteredTraits[selectedIndex]?.class}</FormHelperText>
-            <FormHelperText>Trait Type: {filteredTraits[selectedIndex]?.trait_type}</FormHelperText>
-          </Grid>
-
-          {/* Select Menus */}
-          <Grid size={{ xs: 12, sm: 4 }} container spacing={2}>
-            <Grid size={6}>
-              <Select value={ignored} onChange={handleChangeIgnored} fullWidth displayEmpty>
-                <MenuItem value={0}>Ignored?</MenuItem>
-                <MenuItem value={1}>Ignored = True</MenuItem>
-                <MenuItem value={2}>Ignored = False</MenuItem>
-              </Select>
-            </Grid>
-            <Grid size={6}>
-              <Select value={filterTraitType} onChange={handleChangeTraitType} fullWidth displayEmpty>
-                <MenuItem value="">No Filter</MenuItem>
-                {selectMenuItems}
-              </Select>
-            </Grid>
-          </Grid>
-
-          {/* Miscellaneous Information */}
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <TextField
-              label="Variable Name (for Export)"
-              variant="outlined"
-              fullWidth
-              value={variableName}
-              onChange={handleVariableNameChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              label="Mod Description (for Export)"
-              variant="outlined"
-              fullWidth
-              value={modDescription}
-              onChange={handleModDescriptionChange}
-              sx={{ mb: 2 }}
-            />
+              Load
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              loading={loadingExport}
+              startIcon={<FileUploadOutlinedIcon sx={{ fontSize: 16 }} />}
+              onClick={exportResults}
+            >
+              Export
+            </Button>
+          </>
+        }
+      >
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               label="S4tk Extracted Path"
               variant="outlined"
@@ -379,37 +383,102 @@ export default function TraitsPage() {
               onChange={handleExtractedPathChange}
             />
           </Grid>
-
-          {/* Input Field */}
           <Grid size={{ xs: 12, sm: 6 }}>
-            <Typography variant="body2">{prefix}</Typography>
             <TextField
-              label="Description"
+              label="Variable Name (for Export)"
               variant="outlined"
               fullWidth
-              value={inputField}
-              onKeyDown={handleKeyDown}
-              onChange={handleDescriptionChange}
+              value={variableName}
+              onChange={handleVariableNameChange}
             />
           </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              label="Mod Description (for Export)"
+              variant="outlined"
+              fullWidth
+              value={modDescription}
+              onChange={handleModDescriptionChange}
+            />
+          </Grid>
+        </Grid>
+      </AppCard>
 
-          {/* Action Buttons */}
-          <Grid
-            size={{ xs: 12, sm: 6 }}
-            container
-            spacing={2}
-            sx={{
-              justifyContent: 'center',
-            }}
+      {traits.length === 0 ? (
+        <EmptyState
+          icon={<PsychologyOutlinedIcon />}
+          title="No traits loaded"
+          description="Set the S4tk extracted path above, then press Load to start mapping trait descriptions."
+        />
+      ) : (
+        <>
+          <AppCard
+            title="Trait editor"
+            subtitle={`Trait ${selectedIndex + 1} of ${filteredTraits.length} · ${unmapped} unmapped`}
+            icon={<PsychologyOutlinedIcon sx={{ fontSize: 18 }} />}
+            headerAction={
+              <Box sx={{ minWidth: 200 }}>
+                <Select size="small" value={filterTraitType} onChange={handleChangeTraitType} fullWidth displayEmpty>
+                  <MenuItem value="">No Filter</MenuItem>
+                  {selectMenuItems}
+                </Select>
+              </Box>
+            }
           >
-            <Grid>
-              <Button variant="contained" color="secondary" onClick={handleBack}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                columnGap: 4,
+                rowGap: 1.5,
+                paddingBottom: 2,
+                marginBottom: 2.5,
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+              }}
+            >
+              <TraitMetaItem label="Name" value={filteredTraits[selectedIndex]?.name} mono />
+              <TraitMetaItem label="Class" value={filteredTraits[selectedIndex]?.class} />
+              <TraitMetaItem label="Trait Type" value={filteredTraits[selectedIndex]?.trait_type} />
+            </Box>
+
+            {prefix ? (
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic', marginBottom: 1 }}>
+                {prefix}
+              </Typography>
+            ) : null}
+
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 8, md: 9 }}>
+                <TextField
+                  label="Description"
+                  variant="outlined"
+                  fullWidth
+                  value={inputField}
+                  onKeyDown={handleKeyDown}
+                  onChange={handleDescriptionChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4, md: 3 }}>
+                <Select value={ignored} onChange={handleChangeIgnored} fullWidth displayEmpty>
+                  <MenuItem value={0}>Ignored?</MenuItem>
+                  <MenuItem value={1}>Ignored = True</MenuItem>
+                  <MenuItem value={2}>Ignored = False</MenuItem>
+                </Select>
+              </Grid>
+            </Grid>
+
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, marginTop: 2.5 }}>
+              <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<ArrowBackIcon sx={{ fontSize: 16 }} />}
+                onClick={handleBack}
+              >
                 Back
               </Button>
-            </Grid>
-            <Grid>
               <Button
-                variant="contained"
+                variant="outlined"
                 color="error"
                 onClick={() => {
                   updateIgnored(1);
@@ -418,37 +487,45 @@ export default function TraitsPage() {
               >
                 Next (Ignore)
               </Button>
-            </Grid>
-            <Grid>
-              <Button variant="contained" color="primary" onClick={handleForward}>
+              <Button
+                variant="contained"
+                color="primary"
+                endIcon={<ArrowForwardIcon sx={{ fontSize: 16 }} />}
+                onClick={handleForward}
+              >
                 Next
               </Button>
-            </Grid>
-            <Grid>
-              <Button variant="outlined" onClick={handleSkip}>
+              <Button variant="text" color="secondary" onClick={handleSkip}>
                 Skip
               </Button>
-            </Grid>
-            <Grid>
-              <Button variant="contained" loading={loadingExport} onClick={exportResults}>
-                Export
-              </Button>
-            </Grid>
-            <Grid>
-              <Button variant="contained" loading={loadingTraits} onClick={loadItems}>
-                Load
-              </Button>
-            </Grid>
-          </Grid>
-        </Grid>
+            </Box>
+          </AppCard>
 
-        {/* XML Code Display */}
-        <Box sx={{ mt: 3 }}>
-          <SyntaxHighlighter language="xml" style={atomOneDarkReasonable}>
-            {xml}
-          </SyntaxHighlighter>
-        </Box>
-      </Box>
-    </AppCard>
+          {xml ? (
+            <AppCard
+              title="Tuning XML"
+              subtitle="Raw tuning for the selected trait"
+              icon={<CodeOutlinedIcon sx={{ fontSize: 18 }} />}
+            >
+              <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
+                <SyntaxHighlighter
+                  language="xml"
+                  style={atomOneDarkReasonable}
+                  customStyle={{
+                    margin: 0,
+                    padding: '14px 16px',
+                    fontSize: '0.8rem',
+                    lineHeight: 1.6,
+                    background: 'rgba(0, 0, 0, 0.25)',
+                  }}
+                >
+                  {xml}
+                </SyntaxHighlighter>
+              </Box>
+            </AppCard>
+          ) : null}
+        </>
+      )}
+    </>
   );
 }

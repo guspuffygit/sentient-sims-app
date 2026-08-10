@@ -42,6 +42,10 @@ let rendererConnected = false;
 
 export const startWebSocketServer = (ctx: ApiContext) => {
   const rendererServer = new WebSocketServer({ port: rendererWebsocketPort });
+  // A failed bind emits 'error'; unhandled it would crash the main process.
+  rendererServer.on('error', (err) => {
+    log.error(`Renderer websocket server error on port ${rendererWebsocketPort}`, err);
+  });
   rendererServer.on('connection', function handleRenderer(ws: WebSocket) {
     rendererWs = ws;
 
@@ -84,6 +88,9 @@ export const startWebSocketServer = (ctx: ApiContext) => {
   });
 
   const modServer = new WebSocketServer({ port: modWebsocketPort });
+  modServer.on('error', (err) => {
+    log.error(`Mod websocket server error on port ${modWebsocketPort}`, err);
+  });
   modServer.on('connection', function handleMod(ws: WebSocket) {
     modWs = ws;
 

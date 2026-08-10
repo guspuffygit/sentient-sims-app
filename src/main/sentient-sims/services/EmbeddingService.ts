@@ -5,7 +5,7 @@ import { ApiContext } from './ApiContext';
 
 export const OPENAI_EMBEDDING_MODEL = 'text-embedding-3-small';
 
-// Memory retrieval degrades gracefully without an OpenAI key: callers get undefined
+// Memory retrieval and semantic search degrade gracefully without an OpenAI key: callers get undefined
 // embeddings back and skip similarity scoring rather than erroring.
 export interface EmbeddingService {
   readonly model: string;

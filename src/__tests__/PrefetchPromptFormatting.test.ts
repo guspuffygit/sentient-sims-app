@@ -124,6 +124,7 @@ describe('prefetch prompt formatting', () => {
       participantRepository: {
         getParticipants: () => [],
       },
+      settings: { directedScenesEnabled: true },
     } as unknown as ApiContext;
     const builder = new PromptRequestBuilderService(ctx);
 

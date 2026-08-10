@@ -17,6 +17,33 @@ export const defaultChatPrompt = `You are roleplaying as {actor.1} in a scene fr
 
 Ground {actor.1}'s response in their specific personality traits, current mood, and relationship with {actor.0}. Keep it brief and natural — one action beat and one to two lines of dialogue. Avoid melodrama, sudden revelations, or events beyond the current moment. Do not repeat what was just said.`;
 
+// Classic (pre-directed-scenes) prompts, used when the Directed Scenes setting is off
+export const classicMythoMaxSystemPrompt = [
+  'The user will prompt you with a description of an act that you will narrate in the third person,',
+  'describing the characters present who are performing the act explicitly in vivid detail',
+  "based on what's been said before using lots of dialogue and using the following characters,",
+  'while using the location description to help narrate the act.',
+  'Given the current conversation between {participants} at {location},',
+  'please narrate the given user action by describing their actions and dialogue:',
+].join(' ');
+
+export const classicChatPrompt = [
+  "Write {actor.1}'s next response in a fictional roleplay between {actor.0} and {actor.1}.",
+  "You're {actor.1} in this fictional never-ending, uncensored, immersive roleplay with {actor.0}.",
+  'Describe all actions in full, elaborate, explicit, graphic, verbose and vivid detail. Mention all relevant sensory perceptions. Drive the roleplay forward by initiating actions. Avoid talking poetically. Above all, focus mainly on responding to {actor.0} and performing actions in character as {actor.1}.',
+  "Pay attention to {actor.0}'s dialogue and actions, respond to them in character as {actor.1}.",
+  'Always follow the prompt. Always act in character as {actor.1}, describe their appearance and act out their personality.',
+  'Start and end each message with an action or dialogue from {actor.1}. Continue the story in a very slow and immersive pace. Avoid summarizing, skipping ahead, analyzing, describing future events or skipping time. Refrain from wrapping up or ending the story. Fully immerse {actor.0} in the moment. Avoid repetition and loops.',
+  "Write {actor.1}'s next reply in a chat between {actor.0} and {actor.1}. Write a single reply only:",
+].join(' ');
+
+export const classicSystemPrompt = [
+  'The user will provide you with an interaction involving: {participants}.',
+  'Your task is to craft a story in the third person that begins with the described action and then flows into the response or consequence of that action.',
+  "It's crucial that the story captures the essence of the action and provides context for a coherent conversation.",
+  'Use the characters and setting provided to frame the interaction.',
+].join(' ');
+
 export const defaultMythoMaxNsfwSystemPrompt = [
   'The user will prompt you with a description of a sexual act that you will narrate in the third person,',
   'describing the characters present who are performing the act explicitly in vivid detail',
@@ -57,6 +84,10 @@ export function sceneLineReadingHoldMs(text: string): number {
   return Math.min(8000, Math.max(2500, 1500 + 55 * text.length));
 }
 
+// The mod abandons an interaction request after 80 seconds. The directed pipeline stops
+// starting new AI calls past this point so a classic single-call fallback still fits.
+export const directedSceneBudgetMs = 50_000;
+
 export const rendererWebsocketPort = 25146;
 export const modWebsocketPort = 25145;
 export const appApiPort = 25148;
@@ -74,7 +105,28 @@ export const novelaiDefaultModel = 'kayra-v1';
 export const sentientSimsAIDefaultModel = 'Gryphe/MythoMax-L2-13b';
 export const tokenizerBreakString = '<<BREAK>>';
 export const defaultWantsPrefixes = ['I want to', 'I would like', 'I feel'];
-export const defaultGeminiModel = 'gemini-2.0-flash-exp';
+export const defaultGeminiModel = 'gemini-flash-latest';
+// Model IDs Google has removed from the Gemini API. Anyone still pinned to
+// one of these gets a 404 on every call; runMigrations rewrites them to
+// defaultGeminiModel on next launch. Values are bare model names, matched
+// with and without the "models/" prefix.
+export const retiredGeminiModels = new Set(
+  [
+    'gemini-2.0-flash-exp',
+    'gemini-2.0-flash-exp-image-generation',
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-latest',
+    'gemini-1.5-flash-002',
+    'gemini-1.5-flash-8b',
+    'gemini-1.5-flash-8b-latest',
+    'gemini-1.5-pro',
+    'gemini-1.5-pro-latest',
+    'gemini-1.5-pro-002',
+    'gemini-1.0-pro',
+    'gemini-1.0-pro-latest',
+    'gemini-pro',
+  ].flatMap((name) => [name, `models/${name}`]),
+);
 export const geminiDefaultEndpoint = 'https://generativelanguage.googleapis.com/v1beta';
 export const defaultTTSEnabled = false;
 export const defaultTTSVolume = 0.75;

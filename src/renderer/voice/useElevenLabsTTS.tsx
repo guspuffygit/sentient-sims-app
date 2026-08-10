@@ -4,12 +4,9 @@ import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { defaultElevenLabsEndpoint, sceneLineGapMs, sceneLineReadingHoldMs } from 'main/sentient-sims/constants';
 import useSetting from 'renderer/hooks/useSetting';
-import {
-  defaultElevenLabsTTSSettings,
-  defaultElevenLabsVoiceSettings,
-  ElevenLabsSpeechModel,
-  ElevenLabsTTSSettings,
-} from 'main/sentient-sims/models/ElevenLabsTTSSettings';
+import { defaultElevenLabsTTSSettings, ElevenLabsTTSSettings } from 'main/sentient-sims/models/ElevenLabsTTSSettings';
+import { buildElevenLabsSpeechRequest, elevenLabsLineText } from 'main/sentient-sims/clients/ElevenLabsTTSRequest';
+import { elevenLabsErrorMessage } from 'main/sentient-sims/clients/ElevenLabsError';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
 import { AudioPlaybackHandle, playAudioStream, playAudioUrl } from './audioPlayback';
 import { TTSHook } from './TTSHook';
@@ -27,91 +24,60 @@ export function useElevenLabsTTS(): TTSHook {
   // Bumped by stop() and by each new speakLines run so an in-flight loop knows to bail out
   const playSessionRef = useRef(0);
 
-  const buildRequestBody = useCallback(
-    (text: string) =>
-      JSON.stringify({
+  const buildRequest = useCallback(
+    (text: string, voiceId: string) =>
+      buildElevenLabsSpeechRequest({
         text,
-        model_id: elevenLabsTTSSettings.value.model,
-        voice_settings: {
-          stability: 0,
-          similarity_boost: 0,
-          // Supported on all models including v3; API range is 0.7-1.2
-          speed: elevenLabsTTSSettings.value.voice_settings?.speed ?? defaultElevenLabsVoiceSettings.speed,
-        },
+        voiceId,
+        endpoint: elevenLabsEndpointSetting.value,
+        apiKey: elevenLabsKeySetting.value,
+        settings: elevenLabsTTSSettings.value,
       }),
-    [elevenLabsTTSSettings.value.model, elevenLabsTTSSettings.value.voice_settings?.speed],
+    [elevenLabsEndpointSetting.value, elevenLabsKeySetting.value, elevenLabsTTSSettings.value],
   );
 
   const fetchAudioUrl = useCallback(
     async (text: string, voiceId: string): Promise<string> => {
-      const url = `${elevenLabsEndpointSetting.value}/text-to-speech/${voiceId}`;
+      const { url, headers, body } = buildRequest(text, voiceId);
       const startedAt = Date.now();
       log.info(
         `[TTS] ElevenLabs request voice=${voiceId} model=${elevenLabsTTSSettings.value.model} chars=${text.length}`,
       );
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': elevenLabsKeySetting.value,
-        },
-        body: buildRequestBody(text),
-      });
+      const response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
       log.info(`[TTS] ElevenLabs response voice=${voiceId} status=${response.status} in ${Date.now() - startedAt}ms`);
 
       if (!response.ok) {
-        let errorMessage = `Unable to stream audio: ${response.status}`;
-        try {
-          errorMessage = await response.text();
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (err: any) {
-          // keep the status message
-        }
-        throw new Error(errorMessage);
+        throw new Error(elevenLabsErrorMessage(response.status, await response.text().catch(() => '')));
       }
 
       return URL.createObjectURL(await response.blob());
     },
-    [buildRequestBody, elevenLabsEndpointSetting.value, elevenLabsKeySetting.value, elevenLabsTTSSettings.value.model],
+    [buildRequest, elevenLabsTTSSettings.value.model],
   );
 
   // The /stream endpoint starts returning audio bytes ~0.6-0.8s in even on v3 (vs ~2-4s
   // for the whole file), so the first spoken line can start playing 1-3s sooner.
   const fetchAudioStream = useCallback(
     async (text: string, voiceId: string): Promise<ReadableStream<Uint8Array>> => {
-      const url = `${elevenLabsEndpointSetting.value}/text-to-speech/${voiceId}/stream`;
+      const { url, headers, body } = buildRequest(text, voiceId);
       const startedAt = Date.now();
       log.info(
         `[TTS] ElevenLabs stream request voice=${voiceId} model=${elevenLabsTTSSettings.value.model} chars=${text.length}`,
       );
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': elevenLabsKeySetting.value,
-        },
-        body: buildRequestBody(text),
-      });
+      const response = await fetch(`${url}/stream`, { method: 'POST', headers, body: JSON.stringify(body) });
       log.info(
         `[TTS] ElevenLabs stream first byte voice=${voiceId} status=${response.status} in ${Date.now() - startedAt}ms`,
       );
 
       if (!response.ok || !response.body) {
-        let errorMessage = `Unable to stream audio: ${response.status}`;
-        try {
-          errorMessage = await response.text();
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (err: any) {
-          // keep the status message
-        }
-        throw new Error(errorMessage);
+        throw new Error(elevenLabsErrorMessage(response.status, await response.text().catch(() => '')));
       }
 
       return response.body;
     },
-    [buildRequestBody, elevenLabsEndpointSetting.value, elevenLabsKeySetting.value, elevenLabsTTSSettings.value.model],
+    [buildRequest, elevenLabsTTSSettings.value.model],
   );
 
   const playUrl = useCallback(
@@ -164,13 +130,9 @@ export function useElevenLabsTTS(): TTSHook {
       playSessionRef.current += 1;
       const session = playSessionRef.current;
 
-      const isV3 = elevenLabsTTSSettings.value.model.toString() === ElevenLabsSpeechModel.ELEVEN_V3.toString();
-
       const speakable = lines.filter((line) => line.text.trim());
 
-      const lineText = (line: DialogueLine): string =>
-        // v3 understands inline audio tags like [nervous] — use the delivery note as one
-        isV3 && line.deliveryNote ? `[${line.deliveryNote}] ${line.text}` : line.text;
+      const lineText = (line: DialogueLine): string => elevenLabsLineText(line, elevenLabsTTSSettings.value.model);
       const lineVoice = (line: DialogueLine): string => {
         const voiceId = line.voiceId ?? elevenLabsTTSSettings.value.voice;
         // Voice inconsistencies are only debuggable if the cast is visible in the log

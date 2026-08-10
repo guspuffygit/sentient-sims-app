@@ -1,5 +1,6 @@
-import { Box, IconButton, Tooltip, Typography } from '@mui/material';
+import { Box, IconButton, Tooltip } from '@mui/material';
 import CachedIcon from '@mui/icons-material/Cached';
+import TerminalIcon from '@mui/icons-material/Terminal';
 import AppCard from './AppCard';
 import { SendLogButton } from './SendLogButton';
 import { AIStatusComponent } from './AIStatusComponent';
@@ -19,41 +20,42 @@ export default function DebugCard() {
   };
 
   return (
-    <AppCard>
+    <AppCard
+      title="Debug Info"
+      icon={<TerminalIcon fontSize="small" />}
+      headerAction={
+        <Tooltip title="Refresh">
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => {
+                onTest();
+              }}
+              disabled={versions.loading || aiStatus.loading}
+            >
+              <CachedIcon fontSize="small" />
+            </IconButton>
+          </span>
+        </Tooltip>
+      }
+    >
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          marginBottom: 1,
+          borderRadius: 2,
+          border: '1px solid',
+          borderColor: 'divider',
+          backgroundColor: 'rgba(0, 0, 0, 0.15)',
+          paddingX: 1.5,
+          paddingY: 1,
         }}
       >
-        <Typography variant="h6" gutterBottom>
-          Debug Info
-        </Typography>
-        <Tooltip title="Refresh">
-          <IconButton
-            style={{
-              maxWidth: '30px',
-              maxHeight: '30px',
-              minWidth: '30px',
-              minHeight: '30px',
-            }}
-            sx={{ marginLeft: 1 }}
-            onClick={() => {
-              onTest();
-            }}
-            disabled={versions.loading || aiStatus.loading}
-          >
-            <CachedIcon />
-          </IconButton>
-        </Tooltip>
+        <VersionFormHelper text="App Version" version={versions.app} />
+        <VersionFormHelper text="Mod Version" version={versions.mod} />
+        <VersionFormHelper text="Game Version" version={versions.game} />
+        <AIStatusComponent />
+        <PatreonDebug />
+        <WebGpuDebug />
       </Box>
-      <VersionFormHelper text="App Version" version={versions.app} />
-      <VersionFormHelper text="Mod Version" version={versions.mod} />
-      <VersionFormHelper text="Game Version" version={versions.game} />
-      <AIStatusComponent />
-      <PatreonDebug />
-      <WebGpuDebug />
       <SendLogButton />
     </AppCard>
   );

@@ -97,6 +97,11 @@ const electronHandler = {
 
     return () => ipcRenderer.removeListener('on-interactions-changed', callback);
   },
+  onOnlineMappingsChanged: (callback: IpcCallback) => {
+    ipcRenderer.on('on-online-mappings-changed', callback);
+
+    return () => ipcRenderer.removeListener('on-online-mappings-changed', callback);
+  },
   onDatabaseLoaded: (callback: IpcCallback) => {
     ipcRenderer.on('on-database-loaded', callback);
 

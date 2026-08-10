@@ -25,6 +25,7 @@ import {
   openaiDefaultModel,
   openrouterDefaultEndpoint,
   openrouterDefaultModel,
+  retiredGeminiModels,
   sentientSimsAIDefaultModel,
   defaultSentientSimsAIHost,
 } from '../constants';
@@ -100,6 +101,10 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.NSFW_ENABLED.toString()]: {
         type: 'boolean',
         default: false,
+      },
+      [SettingsEnum.DIRECTED_SCENES_ENABLED.toString()]: {
+        type: 'boolean',
+        default: true,
       },
       [SettingsEnum.MAPPING_NOTIFICATION_ENABLED.toString()]: {
         type: 'boolean',
@@ -517,6 +522,14 @@ export class SettingsService {
     this.set(SettingsEnum.NSFW_ENABLED, value);
   }
 
+  get directedScenesEnabled(): boolean {
+    return this.get(SettingsEnum.DIRECTED_SCENES_ENABLED) as boolean;
+  }
+
+  set directedScenesEnabled(value: boolean) {
+    this.set(SettingsEnum.DIRECTED_SCENES_ENABLED, value);
+  }
+
   get mappingNotificationEnabled(): boolean {
     return this.get(SettingsEnum.MAPPING_NOTIFICATION_ENABLED) as boolean;
   }
@@ -816,6 +829,26 @@ export class SettingsService {
       this.defaultAiProviderConfigId = seeded.id;
     } else if (!this.defaultAiProviderConfigId) {
       this.defaultAiProviderConfigId = this.aiProviderConfigs[0].id;
+    }
+
+    // Rewrite Gemini model IDs Google has removed from the API. Users get
+    // pinned to defaults set months ago and end up with 404s on every call
+    // (health check and generation both) with no clue what to pick instead.
+    if (retiredGeminiModels.has(this.geminiModel)) {
+      log.info(`Migrating retired Gemini model ${this.geminiModel} -> ${defaultGeminiModel}`);
+      this.geminiModel = defaultGeminiModel;
+    }
+    const configsToMigrate = this.aiProviderConfigs;
+    let migratedAny = false;
+    for (const config of configsToMigrate) {
+      if (config.apiType === ApiType.Gemini && config.model && retiredGeminiModels.has(config.model)) {
+        log.info(`Migrating retired Gemini model on config ${config.id}: ${config.model} -> ${defaultGeminiModel}`);
+        config.model = defaultGeminiModel;
+        migratedAny = true;
+      }
+    }
+    if (migratedAny) {
+      this.aiProviderConfigs = configsToMigrate;
     }
 
     // Pin each config's model to what resolution would fall back to, making

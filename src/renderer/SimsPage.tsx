@@ -1,9 +1,13 @@
-import { Button, Card, CardActions, CardContent, Typography } from '@mui/material';
+import { Button, Card, CardActions, CardContent } from '@mui/material';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import log from 'electron-log';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
+import SportsEsportsOutlinedIcon from '@mui/icons-material/SportsEsportsOutlined';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import AppCard from './AppCard';
+import { EmptyState } from './components/EmptyState';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { SimVoiceSelect, SimVoiceSelection } from './components/SimVoiceSelect';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
@@ -172,7 +176,13 @@ export default function SimsPage() {
   }, []);
 
   if (!status.mod) {
-    return <AppCard>Not connected to The Sims 4. Start a Sims 4 game to connect.</AppCard>;
+    return (
+      <EmptyState
+        icon={<SportsEsportsOutlinedIcon />}
+        title="Not connected to The Sims 4"
+        description="Start a Sims 4 game to connect and manage your Sims here."
+      />
+    );
   }
 
   if (sims.length > 0) {
@@ -181,6 +191,9 @@ export default function SimsPage() {
     if (editedSim) {
       editSimBox = (
         <AppCard
+          title="Edit Sim"
+          subtitle={editedSim.sim.name}
+          icon={<EditNoteIcon fontSize="small" />}
           cardActions={
             <CardActions
               sx={{
@@ -193,8 +206,7 @@ export default function SimsPage() {
               <div>
                 <Button
                   sx={{ marginRight: 1 }}
-                  color="secondary"
-                  variant="outlined"
+                  variant="contained"
                   onClick={() => {
                     void handleSave();
                   }}
@@ -225,12 +237,12 @@ export default function SimsPage() {
             </CardActions>
           }
         >
-          <Typography sx={{ marginBottom: 2 }}>Name: {editedSim.sim.name}</Typography>
           <SimVoiceSelect
             voiceId={editedSim.sim.voiceId}
             voiceName={editedSim.sim.voiceName}
             onChange={handleVoiceEdit}
           />
+
           <MemoryEditInput
             label="Description"
             handleEdit={handleDescriptionEdit}
@@ -294,5 +306,11 @@ export default function SimsPage() {
     );
   }
 
-  return <AppCard>Edit a Sim&apos;s description in game to see them here.</AppCard>;
+  return (
+    <EmptyState
+      icon={<PersonOutlineIcon />}
+      title="No Sims yet"
+      description="Edit a Sim's description in game to see them here."
+    />
+  );
 }

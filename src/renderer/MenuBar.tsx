@@ -1,26 +1,76 @@
-import { AppBar, Box, Button, IconButton, Toolbar } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { AppBar, Box, Button, IconButton, Toolbar, Tooltip } from '@mui/material';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Dispatch, SetStateAction, useState } from 'react';
 import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
-import HomeIcon from '@mui/icons-material/Home';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import useAuthCredentials from './hooks/useAuthCredentials';
 import { useDebugMode } from './providers/DebugModeProvider';
 import { useAuth } from './providers/AuthProvider';
 import handleOpenExternalLink from './hooks/handleOpenExternalLink';
 import LogoutButton from './components/LogoutButton';
 import { LoginModal } from './components/LoginModal';
-// import { GlowingGreenOrb } from './components/GlowingGreenOrb';
 
 export type MenuBarProperties = {
   hideSideBar: boolean;
   setHideSideBar: Dispatch<SetStateAction<boolean>>;
 };
 
+type NavButtonProps = {
+  id: string;
+  label: string;
+  path: string;
+};
+
+function NavButton({ id, label, path }: NavButtonProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const active = location.pathname === path;
+
+  return (
+    <Button
+      id={id}
+      onClick={() => {
+        void navigate(path);
+      }}
+      sx={{
+        'borderRadius': 99,
+        'paddingX': 1.5,
+        'whiteSpace': 'nowrap',
+        'color': active ? 'primary.light' : 'text.secondary',
+        'backgroundColor': active ? (theme) => `${theme.palette.primary.main}24` : 'transparent',
+        '&:hover': {
+          color: 'text.primary',
+          backgroundColor: active ? (theme) => `${theme.palette.primary.main}33` : 'rgba(255, 255, 255, 0.06)',
+        },
+      }}
+    >
+      {label}
+    </Button>
+  );
+}
+
+const DEBUG_NAV_ITEMS: NavButtonProps[] = [
+  { id: 'offlinememory', label: 'OfflineMemory', path: '/offlinememory' },
+  { id: 'chat', label: 'Chat', path: '/chat' },
+  { id: 'traits', label: 'Traits', path: '/traits' },
+  { id: 'mapping-browser', label: 'Mapping Browser', path: '/mapping-browser' },
+];
+
+const NAV_ITEMS: NavButtonProps[] = [
+  { id: 'sims', label: 'Sims', path: '/sims' },
+  { id: 'locations', label: 'Locations', path: '/locations' },
+  { id: 'memories', label: 'Memories', path: '/memories' },
+  { id: 'settings', label: 'Settings', path: '/settings' },
+];
+
 function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
   const { authStatus, signOut } = useAuth();
   const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const onHomePage = location.pathname === '/';
   const debugMode = useDebugMode();
   useAuthCredentials();
 
@@ -35,141 +85,76 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
   const handleOpenWiki = handleOpenExternalLink('https://github.com/guspuffygit/sentient-sims-app/wiki');
 
   return (
-    <Box sx={{ flexGrow: 1, marginBottom: 2 }}>
-      <AppBar position="static" color="transparent" sx={{ backgroundColor: '#313339' }}>
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
+    <Box sx={{ flexShrink: 0, marginBottom: 2 }}>
+      <AppBar
+        position="static"
+        color="transparent"
+        sx={{
+          backgroundColor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 3,
+        }}
+      >
+        <Toolbar
+          variant="dense"
+          sx={{
+            justifyContent: 'space-between',
+            minHeight: 56,
+            paddingX: 1.5,
+            paddingY: 0.5,
+            flexWrap: 'wrap',
+            rowGap: 0.5,
+          }}
+        >
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
+              gap: 0.5,
             }}
           >
-            <IconButton
-              color="secondary"
-              onClick={() => {
-                void navigate('/');
-              }}
-              id="homebutton"
-            >
-              <HomeIcon />
-            </IconButton>
-            <Button color="secondary" onClick={handleOpenWiki} sx={{ marginLeft: '5px', marginRight: '10px' }}>
-              Wiki
-            </Button>
-            {/* <Box display="flex" alignItems="center">
-              <Box
+            <Tooltip title="Home">
+              <IconButton
+                id="homebutton"
+                aria-label="Home"
+                onClick={() => {
+                  void navigate('/');
+                }}
                 sx={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: '50%',
-                  backgroundColor: '#313339',
-                  boxShadow: `
-                    0 0 8px 4px #fff,
-                    0 0 10px 5px #f0f,
-                    0 0 12px 6px #0ff
-                  `,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  'color': onHomePage ? 'primary.light' : 'text.secondary',
+                  'backgroundColor': onHomePage ? (theme) => `${theme.palette.primary.main}24` : 'transparent',
+                  '&:hover': {
+                    color: onHomePage ? 'primary.light' : 'text.primary',
+                    backgroundColor: onHomePage
+                      ? (theme) => `${theme.palette.primary.main}33`
+                      : 'rgba(255, 255, 255, 0.06)',
+                  },
                 }}
               >
-                <img
-                  src={`${appApiUrl}/files/icon.png`}
-                  alt="App Icon"
-                  style={{
-                    width: 30,
-                    height: 30,
-                  }}
-                />
-              </Box>
-            </Box> */}
-            {/* <GlowingGreenOrb /> */}
+                <HomeOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Open the wiki in your browser">
+              <Button
+                onClick={handleOpenWiki}
+                startIcon={<MenuBookOutlinedIcon sx={{ fontSize: 16 }} />}
+                sx={{
+                  'borderRadius': 99,
+                  'paddingX': 1.5,
+                  'color': 'text.secondary',
+                  '&:hover': { color: 'text.primary' },
+                }}
+              >
+                Wiki
+              </Button>
+            </Tooltip>
           </Box>
-          <div>
-            {debugMode.isEnabled ? (
-              <>
-                <Button
-                  color="secondary"
-                  onClick={() => {
-                    void navigate('/offlinememory');
-                  }}
-                  sx={{ marginLeft: '5px' }}
-                  id="offlinememory"
-                >
-                  OfflineMemory
-                </Button>
-                <Button
-                  color="secondary"
-                  onClick={() => {
-                    void navigate('/chat');
-                  }}
-                  sx={{ marginLeft: '5px' }}
-                  id="chat"
-                >
-                  Chat
-                </Button>
-                <Button
-                  color="secondary"
-                  onClick={() => {
-                    void navigate('/traits');
-                  }}
-                  sx={{ marginLeft: '5px' }}
-                  id="traits"
-                >
-                  Traits
-                </Button>
-                <Button
-                  color="secondary"
-                  onClick={() => {
-                    void navigate('/mapping-browser');
-                  }}
-                  sx={{ marginLeft: '5px' }}
-                  id="mapping-browser"
-                >
-                  Mapping Browser
-                </Button>
-              </>
-            ) : null}
-            <Button
-              color="secondary"
-              onClick={() => {
-                void navigate('/sims');
-              }}
-              sx={{ marginLeft: '5px' }}
-              id="sims"
-            >
-              Sims
-            </Button>
-            <Button
-              color="secondary"
-              onClick={() => {
-                void navigate('/locations');
-              }}
-              sx={{ marginLeft: '5px' }}
-              id="locations"
-            >
-              Locations
-            </Button>
-            <Button
-              color="secondary"
-              onClick={() => {
-                void navigate('/memories');
-              }}
-              sx={{ marginLeft: '5px' }}
-              id="memories"
-            >
-              Memories
-            </Button>
-            <Button
-              color="secondary"
-              onClick={() => {
-                void navigate('/settings');
-              }}
-              sx={{ marginLeft: '5px' }}
-              id="settings"
-            >
-              Settings
-            </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', rowGap: 0.5 }}>
+            {debugMode.isEnabled ? DEBUG_NAV_ITEMS.map((item) => <NavButton key={item.id} {...item} />) : null}
+            {NAV_ITEMS.map((item) => (
+              <NavButton key={item.id} {...item} />
+            ))}
             {authStatus === 'authenticated' ? (
               <LogoutButton
                 signOut={() => {
@@ -179,24 +164,32 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
             ) : (
               <Button
                 color="warning"
+                variant="outlined"
                 onClick={() => {
                   setLoginModalOpen(true);
                 }}
-                sx={{ marginLeft: '5px' }}
+                sx={{ borderRadius: 99, paddingX: 1.75, marginLeft: 0.5 }}
                 id="login"
               >
                 Login
               </Button>
             )}
-            <IconButton
-              onClick={() => {
-                setHideSideBar(!hideSideBar);
-              }}
-              sx={{ marginLeft: '5px' }}
-            >
-              {hideSideBar ? <ViewSidebarOutlinedIcon /> : <ChevronRightOutlinedIcon />}
-            </IconButton>
-          </div>
+            <Tooltip title={hideSideBar ? 'Show announcements' : 'Hide announcements'}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setHideSideBar(!hideSideBar);
+                }}
+                sx={{ marginLeft: 0.5 }}
+              >
+                {hideSideBar ? (
+                  <ViewSidebarOutlinedIcon fontSize="small" />
+                ) : (
+                  <ChevronRightOutlinedIcon fontSize="small" />
+                )}
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Toolbar>
       </AppBar>
       <LoginModal open={loginModalOpen} setOpen={setLoginModalOpen} />

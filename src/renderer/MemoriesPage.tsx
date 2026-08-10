@@ -4,7 +4,11 @@ import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
 import log from 'electron-log';
 import { DeleteMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
+import SportsEsportsOutlinedIcon from '@mui/icons-material/SportsEsportsOutlined';
+import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import AppCard from './AppCard';
+import { EmptyState } from './components/EmptyState';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { useWebsocket } from './providers/WebsocketProvider';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
@@ -222,7 +226,13 @@ export default function MemoriesPage() {
   }, []);
 
   if (!status.mod) {
-    return <AppCard>Not connected to The Sims 4. Start a Sims 4 game to connect.</AppCard>;
+    return (
+      <EmptyState
+        icon={<SportsEsportsOutlinedIcon />}
+        title="Not connected to The Sims 4"
+        description="Start a Sims 4 game to connect and see memories appear here."
+      />
+    );
   }
 
   if (memories.length > 0) {
@@ -252,6 +262,8 @@ export default function MemoriesPage() {
     if (editedMemory) {
       editMemoryBox = (
         <AppCard
+          title="Edit Memory"
+          icon={<EditNoteIcon fontSize="small" />}
           cardActions={
             <CardActions
               sx={{
@@ -264,8 +276,7 @@ export default function MemoriesPage() {
               <div>
                 <Button
                   sx={{ marginRight: 1 }}
-                  color="secondary"
-                  variant="outlined"
+                  variant="contained"
                   onClick={() => {
                     void handleSave();
                   }}
@@ -383,7 +394,11 @@ export default function MemoriesPage() {
 
   return (
     <>
-      <AppCard>Interactions between Sims in game will appear here.</AppCard>
+      <EmptyState
+        icon={<AutoStoriesOutlinedIcon />}
+        title="No memories yet"
+        description="Interactions between Sims in game will appear here."
+      />
       <Snackbar
         open={copiedSnackbar}
         autoHideDuration={1500}

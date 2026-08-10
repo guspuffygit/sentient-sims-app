@@ -145,7 +145,7 @@ function formatProperties(sentientSim: SentientSim): string[] {
   return formattedProperties;
 }
 
-export function formatSentientSim(sentientSim: SentientSim): string {
+export function formatSentientSim(sentientSim: SentientSim, options?: { traitConsistencyNote?: boolean }): string {
   const likes: string[] = [];
   const dislikes: string[] = [];
   const attractions: string[] = [];
@@ -235,7 +235,10 @@ export function formatSentientSim(sentientSim: SentientSim): string {
     prompt.push(`${sentientSim.name} ${formatListToString(properties)}`);
   }
 
-  if (genericTraits.length > 0 || moods.length > 0 || likes.length > 0 || dislikes.length > 0) {
+  if (
+    (options?.traitConsistencyNote ?? true) &&
+    (genericTraits.length > 0 || moods.length > 0 || likes.length > 0 || dislikes.length > 0)
+  ) {
     prompt.push(
       `Write ${sentientSim.name} consistently with their traits and current emotional state as described above.`,
     );
@@ -466,14 +469,24 @@ export function removeStopTokens(text: string, stopTokens?: string[]) {
   return output;
 }
 
-export function cleanupAIOutput(text: string, stopTokens?: string[]): string {
+export function cleanupAIOutput(text: string, stopTokens?: string[], options?: { classic?: boolean }): string {
   let output: string = text.trim();
 
-  // Strip leading XML blocks echoed from the system prompt (e.g. <SCENE>...</SCENE>)
-  // Only strip when non-XML content follows, so we never accidentally empty the whole response
-  output = output.replace(/^(<[A-Z_][A-Z_0-9]*>[\s\S]*?<\/[A-Z_][A-Z_0-9]*>\s*)+(?=\S)/, '').trim();
+  if (options?.classic) {
+    // Classic (pre-directed-scenes) cleanup: prose output with a leading speaker prefix
+    // stripped and a possibly-truncated final paragraph dropped
+    const index = output.indexOf(':');
+    output = index !== -1 ? output.substring(index + 1) : output;
+  } else {
+    // Strip leading XML blocks echoed from the system prompt (e.g. <SCENE>...</SCENE>)
+    // Only strip when non-XML content follows, so we never accidentally empty the whole response
+    output = output.replace(/^(<[A-Z_][A-Z_0-9]*>[\s\S]*?<\/[A-Z_][A-Z_0-9]*>\s*)+(?=\S)/, '').trim();
+  }
   output = output.replaceAll('*', '');
   output = removeStopTokens(output, stopTokens);
+  if (options?.classic) {
+    output = removeLastParagraph(output);
+  }
   output = trimIncompleteSentence(output);
   output = removeEmojis(output);
 
@@ -529,7 +542,7 @@ const dialogueLineRegex = /^([A-Za-z][A-Za-z'-]*(?:\s[A-Za-z][A-Za-z'-]*){0,2}):
  * quoted dialogue should ever be spoken. When `knownSpeakers` is provided, bare subtitle lines
  * like `Ricky: Been fishing here for years.` are also accepted for exactly those speakers (the
  * directed-scene pipeline emits this format). Falls back to a single Narrator line covering the
- * whole text when no dialogue lines are found.
+ * whole text when no dialogue lines are found, which is what plain third-person narration produces.
  */
 export function parseDialogueLines(text: string, knownSpeakers?: string[]): DialogueLine[] {
   const lines = text

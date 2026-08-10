@@ -1,4 +1,7 @@
 import {
+  classicChatPrompt,
+  classicMythoMaxSystemPrompt,
+  classicSystemPrompt,
   defaultChatPrompt,
   defaultMythoMaxNsfwSystemPrompt,
   defaultMythoMaxSystemPrompt,
@@ -8,9 +11,9 @@ import {
 import { ApiType } from './models/ApiType';
 import { SSEventType } from './models/InteractionEvents';
 
-export function getSystemPrompt(eventType: SSEventType, apiType: ApiType): string {
+export function getSystemPrompt(eventType: SSEventType, apiType: ApiType, directedScenes: boolean): string {
   if (eventType === SSEventType.CHAT || eventType === SSEventType.CHAT_CONTINUE) {
-    return defaultChatPrompt;
+    return directedScenes ? defaultChatPrompt : classicChatPrompt;
   }
 
   if (eventType === SSEventType.WANTS) {
@@ -22,8 +25,8 @@ export function getSystemPrompt(eventType: SSEventType, apiType: ApiType): strin
   }
 
   if (apiType === ApiType.OpenAI) {
-    return defaultSystemPrompt;
+    return directedScenes ? defaultSystemPrompt : classicSystemPrompt;
   }
 
-  return defaultMythoMaxSystemPrompt;
+  return directedScenes ? defaultMythoMaxSystemPrompt : classicMythoMaxSystemPrompt;
 }

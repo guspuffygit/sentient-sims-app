@@ -96,7 +96,9 @@ export class PromptRequestBuilderService {
       });
 
       formattedParticipants.push(
-        `<CHARACTER_IN_INTERACTION>\n${formatSentientSim(sentientSim)}\n</CHARACTER_IN_INTERACTION>`,
+        `<CHARACTER_IN_INTERACTION>\n${formatSentientSim(sentientSim, {
+          traitConsistencyNote: this.ctx.settings.directedScenesEnabled,
+        })}\n</CHARACTER_IN_INTERACTION>`,
       );
     });
 
@@ -500,7 +502,8 @@ export class PromptRequestBuilderService {
       log.debug(`preAssistantPreResponse: ${formattedPreAssistantPreResponse}`);
     }
 
-    const systemPrompt = getSystemPrompt(event.event_type, options.apiType);
+    const directedScenes = this.ctx.settings.directedScenesEnabled;
+    const systemPrompt = getSystemPrompt(event.event_type, options.apiType, directedScenes);
     const formattedSystemPrompt = formatAction(
       systemPrompt,
       event.sentient_sims,
@@ -511,8 +514,10 @@ export class PromptRequestBuilderService {
     );
 
     const sims = this.formatSims(event.sentient_sims, location, event.relationships);
-    sims.push(this.buildDirectorBlock(event));
-    sims.push(this.buildSceneGuidance());
+    if (directedScenes) {
+      sims.push(this.buildDirectorBlock(event));
+      sims.push(this.buildSceneGuidance());
+    }
 
     const reflections = this.getReflections(event);
     const reflectionsBlock = this.buildReflectionsBlock(reflections);

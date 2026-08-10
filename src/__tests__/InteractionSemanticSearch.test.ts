@@ -34,17 +34,17 @@ const browsable = new Map<string, BrowsableInteraction>(
       name: 'mixer_social_PassionateKiss_targeted_romance_emotionSpecific',
       action: '{actor.0} is leaning in, passionately kissing {actor.1}.',
       source: 'built-in',
-    } as BrowsableInteraction,
+    },
     mixer_socials_TellJoke_group_Funny_alwaysOn: {
       name: 'mixer_socials_TellJoke_group_Funny_alwaysOn',
       action: '{actor.0} is telling a funny joke to {actor.1}.',
       source: 'built-in',
-    } as BrowsableInteraction,
+    },
     mixer_ScienceTable_Empty: {
       name: 'mixer_ScienceTable_Empty',
       action: '{actor.0} is preparing a scientific experiment.',
       source: 'built-in',
-    } as BrowsableInteraction,
+    },
   }),
 );
 

@@ -47,7 +47,7 @@ describe('Provider Config API', () => {
       id: 'gemini-e2e',
       name: 'Gemini E2E',
       apiType: ApiType.Gemini,
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-flash-latest',
     };
     await settingsClient.updateSetting(SettingsEnum.AI_PROVIDER_CONFIGS, [
       ...ctx.settings.aiProviderConfigs,
