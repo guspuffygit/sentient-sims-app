@@ -1,18 +1,18 @@
 import { ParticipantDTO } from '../db/dto/ParticipantDTO';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
 
-// Ids can exceed Number.MAX_SAFE_INTEGER (game handles are 64-bit); bigint carries them
-// to the sqlite bind without float64 truncation silently zeroing the low digits.
+// Ids can exceed Number.MAX_SAFE_INTEGER (game handles are 64-bit); they stay strings all
+// the way to the repository, which binds them as BigInt so no float64 truncation happens.
 export type GetMemoryRequest = {
-  id: number | bigint;
+  id: string;
 };
 
 export type DeleteMemoryRequest = {
-  id: number | bigint;
+  id: string;
 };
 
 export type GetMemoryParticipantsRequest = {
-  memory_id: number;
+  memory_id: string;
 };
 
 export type GetParticipantsMemoriesRequest = {

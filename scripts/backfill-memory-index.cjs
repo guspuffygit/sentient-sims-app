@@ -353,7 +353,8 @@ function progressPath(dbPath) {
 function loadProgress(dbPath) {
   try {
     const parsed = JSON.parse(fs.readFileSync(progressPath(dbPath), 'utf8'));
-    return new Set(parsed.rated ?? []);
+    // Progress files written before ids became strings hold numbers; normalize
+    return new Set((parsed.rated ?? []).map(String));
   } catch {
     return new Set();
   }
@@ -412,6 +413,9 @@ async function processDatabase(dbPath, options, apiKey) {
       db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='memory_index'").get(),
     );
 
+    // Memory ids are 64-bit game handles: read them with safeIntegers and carry them as
+    // strings (the app's convention), else float64 rounding makes the upsert's EXISTS
+    // guard silently skip every big-id row.
     const rows = db
       .prepare(
         hasIndexTable
@@ -426,7 +430,13 @@ async function processDatabase(dbPath, options, apiKey) {
                     NULL AS existing_importance, NULL AS existing_embedding, NULL AS existing_model
              FROM memory ORDER BY memory.id ASC`,
       )
-      .all();
+      .safeIntegers()
+      .all()
+      .map((row) => ({
+        ...row,
+        id: row.id.toString(),
+        existing_importance: row.existing_importance === null ? null : Number(row.existing_importance),
+      }));
 
     const textable = rows.filter((row) => memoryText(row)).slice(0, options.limit);
     const skippedBlank = rows.length - rows.filter((row) => memoryText(row)).length;
@@ -519,7 +529,7 @@ async function processDatabase(dbPath, options, apiKey) {
         const embedding = embeddings.get(id) ?? row.existing_embedding ?? null;
         const model = embeddings.has(id) ? EMBEDDING_MODEL : (row.existing_model ?? null);
         const importance = ratings.get(id) ?? row.existing_importance ?? heuristicImportance(row.event_type);
-        upsert.run(id, importance, embedding, model, id);
+        upsert.run(BigInt(id), importance, embedding, model, BigInt(id));
       });
     });
     write();

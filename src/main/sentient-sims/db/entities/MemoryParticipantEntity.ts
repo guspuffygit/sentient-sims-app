@@ -1,5 +1,5 @@
 export type MemoryParticipantEntity = {
-  id?: number;
+  id?: bigint;
   participant_id: bigint;
-  memory_id: number;
+  memory_id: bigint;
 };

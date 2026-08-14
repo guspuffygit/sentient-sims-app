@@ -58,3 +58,9 @@ Code conventions:
   Prettier: single quotes, trailing commas, 120 char print width
   Tests in src/__tests__/, named *.test.ts (unit) or *.it.test.ts (integration)
   ESM modules ("type": "module" in package.json)
+
+64-bit game ids (sims, memories, participants): the game uses ids bigger than JavaScript numbers can
+hold exactly, so treat every id as an opaque string everywhere — JSON, websocket, IPC, renderer, and
+entity types. Only the SQLite layer touches the real integer: read INTEGER id columns with
+.safeIntegers() and convert to string with .toString(), and bind ids in queries with BigInt(id).
+Never pass an id through Number() or parseInt — it silently rounds and the id stops matching.

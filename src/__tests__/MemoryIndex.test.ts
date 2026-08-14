@@ -40,9 +40,9 @@ describe('MemoryIndexRepository', () => {
 
     // Annotation is fire-and-forget: by the time it lands the memory can be gone
     // (deleted, or the db swapped). It must no-op, not throw a FOREIGN KEY error.
-    const result = ctx.memoryIndexRepository.upsertIndex({ memory_id: 9999, importance: 5 });
+    const result = ctx.memoryIndexRepository.upsertIndex({ memory_id: '9999', importance: 5 });
     expect(result.changes).toEqual(0);
-    expect(ctx.memoryIndexRepository.getIndex(9999)).toBeUndefined();
+    expect(ctx.memoryIndexRepository.getIndex('9999')).toBeUndefined();
   });
 
   it('roundtrips index rows and cascades deletes with the memory', () => {
@@ -53,23 +53,23 @@ describe('MemoryIndexRepository', () => {
     const memory = createMemory(ctx, { content: 'saw a ghost in the kitchen' });
     const embedding = Float32Array.from([0.25, -1.5, 3]);
     ctx.memoryIndexRepository.upsertIndex({
-      memory_id: Number(memory.id),
+      memory_id: String(memory.id),
       importance: 7,
       embedding: embeddingToBuffer(embedding),
       embedding_model: 'fake-model',
     });
 
-    const row = ctx.memoryIndexRepository.getIndex(Number(memory.id));
+    const row = ctx.memoryIndexRepository.getIndex(String(memory.id));
     expect(row?.importance).toEqual(7);
     expect(row?.embedding_model).toEqual('fake-model');
     expect(Array.from(bufferToEmbedding(row?.embedding as Buffer))).toEqual([0.25, -1.5, 3]);
 
     // Upsert replaces in place
-    ctx.memoryIndexRepository.upsertIndex({ memory_id: Number(memory.id), importance: 9 });
-    expect(ctx.memoryIndexRepository.getIndex(Number(memory.id))?.importance).toEqual(9);
+    ctx.memoryIndexRepository.upsertIndex({ memory_id: String(memory.id), importance: 9 });
+    expect(ctx.memoryIndexRepository.getIndex(String(memory.id))?.importance).toEqual(9);
 
-    ctx.memoryRepository.deleteMemory({ id: Number(memory.id) });
-    expect(ctx.memoryIndexRepository.getIndex(Number(memory.id))).toBeUndefined();
+    ctx.memoryRepository.deleteMemory({ id: String(memory.id) });
+    expect(ctx.memoryIndexRepository.getIndex(String(memory.id))).toBeUndefined();
   });
 
   it('lists memories that still need an embedding, oldest first', () => {
@@ -82,12 +82,12 @@ describe('MemoryIndexRepository', () => {
 
     // second is fully indexed, third has importance but no embedding yet
     ctx.memoryIndexRepository.upsertIndex({
-      memory_id: Number(second.id),
+      memory_id: String(second.id),
       importance: 5,
       embedding: embeddingToBuffer(Float32Array.from([1])),
       embedding_model: 'fake-model',
     });
-    ctx.memoryIndexRepository.upsertIndex({ memory_id: Number(third.id), importance: 5 });
+    ctx.memoryIndexRepository.upsertIndex({ memory_id: String(third.id), importance: 5 });
 
     const unindexed = ctx.memoryIndexRepository.getUnindexedMemories(10);
     expect(unindexed.map((memory) => memory.id)).toEqual([first.id, third.id]);
@@ -135,7 +135,7 @@ describe('MemoryAnnotationService', () => {
     const memory = createMemory(ctx, { observation: 'proposed marriage at the bluffs' });
     await ctx.memoryAnnotation.annotate(memory);
 
-    const row = ctx.memoryIndexRepository.getIndex(Number(memory.id));
+    const row = ctx.memoryIndexRepository.getIndex(String(memory.id));
     expect(row?.importance).toEqual(9);
     expect(row?.embedding_model).toEqual('fake-model');
     expect(Array.from(bufferToEmbedding(row?.embedding as Buffer))).toEqual([1, 2, 3]);
@@ -149,7 +149,7 @@ describe('MemoryAnnotationService', () => {
     const memory = createMemory(ctx, { content: 'tried tell_joke and it succeeded', event_type: 'outcome' });
     await ctx.memoryAnnotation.annotate(memory);
 
-    const row = ctx.memoryIndexRepository.getIndex(Number(memory.id));
+    const row = ctx.memoryIndexRepository.getIndex(String(memory.id));
     expect(row?.importance).toEqual(5);
     expect(row?.embedding).toBeNull();
     expect(row?.embedding_model).toBeNull();

@@ -48,9 +48,7 @@ export function notifyMemoryDeleted(deleteMemoryRequest: DeleteMemoryRequest) {
   notifyAllWindows('on-memory-deleted', deleteMemoryRequest);
   sendModNotification({
     type: ModWebsocketMessageType.MEMORY_DELETED,
-    // Real DB rows have small autoincrement ids; Number() keeps the message JSON-safe
-    // (JSON.stringify throws on bigint)
-    memory_id: Number(deleteMemoryRequest.id),
+    memory_id: deleteMemoryRequest.id,
   });
 }
 
