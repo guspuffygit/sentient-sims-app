@@ -23,6 +23,7 @@ import {
   retiredGeminiModels,
   sentientSimsAIDefaultModel,
   defaultSentientSimsAIHost,
+  defaultGameAppPath,
 } from '../constants';
 import { disableDebugLogging, enableDebugLogging } from '../util/debugLog';
 import { defaultSentientSimsAITTSSettings, SentientSimsAITTSSettings } from '../models/SentientSimsAITTSSettings';
@@ -204,6 +205,10 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES.toString()]: {
         type: 'object',
         default: {},
+      },
+      [SettingsEnum.GAME_APP_PATH.toString()]: {
+        type: 'string',
+        default: defaultGameAppPath,
       },
     },
     migrations: {
@@ -689,6 +694,14 @@ export class SettingsService {
 
   set aiActionProviderOverrides(value: AIActionOverrides) {
     this.set(SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES, value);
+  }
+
+  get gameAppPath(): string {
+    return this.get(SettingsEnum.GAME_APP_PATH) as string;
+  }
+
+  set gameAppPath(value: string) {
+    this.set(SettingsEnum.GAME_APP_PATH, value);
   }
 
   get maxResponseTokens(): number {

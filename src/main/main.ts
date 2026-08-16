@@ -149,6 +149,10 @@ const startServices = () => {
   runWebSocketServer(ctx);
   runApi(ctx);
 
+  void ctx.gameSigning.ensureSigned().catch((err: unknown) => {
+    log.error('Failed to verify game signature on startup', err);
+  });
+
   log.transports.file.level = 'info';
 
   // eslint-disable-next-line import-x/no-named-as-default-member

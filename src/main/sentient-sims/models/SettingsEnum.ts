@@ -42,6 +42,7 @@ export enum SettingsEnum {
   AI_PROVIDER_CONFIGS = 'aiProviderConfigs',
   DEFAULT_AI_PROVIDER_CONFIG_ID = 'defaultAiProviderConfigId',
   AI_ACTION_PROVIDER_OVERRIDES = 'aiActionProviderOverrides',
+  GAME_APP_PATH = 'gameAppPath',
 }
 
 export enum DeprecatedSettingsEnum {

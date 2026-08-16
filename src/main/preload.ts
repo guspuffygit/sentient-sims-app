@@ -26,6 +26,10 @@ const electronHandler = {
   selectDirectory: (): Promise<string | null> => {
     return ipcRenderer.invoke('dialog:selectDirectory') as Promise<string | null>;
   },
+  selectGameApp: (): Promise<string | null> => {
+    return ipcRenderer.invoke('dialog:selectGameApp') as Promise<string | null>;
+  },
+  isMac: process.platform === 'darwin',
   setSetting: (setting: SettingsEnum, value: any) => {
     ipcRenderer.send('set-setting', setting, value);
   },

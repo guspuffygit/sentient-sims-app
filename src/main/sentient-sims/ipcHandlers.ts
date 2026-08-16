@@ -20,8 +20,22 @@ async function handleSelectDirectory() {
   return null;
 }
 
+async function handleSelectGameApp() {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    defaultPath: '/Applications',
+    properties: ['openFile'],
+    filters: [{ name: 'Applications', extensions: ['app'] }],
+  });
+  if (!canceled) {
+    return filePaths[0];
+  }
+
+  return null;
+}
+
 export default function ipcHandlers(ctx: ApiContext) {
   ipcMain.handle('dialog:selectDirectory', handleSelectDirectory);
+  ipcMain.handle('dialog:selectGameApp', handleSelectGameApp);
   ipcMain.on('set-setting', (_event: IpcMainEvent, setting: SettingsEnum, value: unknown) => {
     if (setting !== SettingsEnum.ACCESS_TOKEN) {
       log.debug(`set-setting: ${setting}, value: ${String(value)}`);

@@ -30,6 +30,7 @@ import { AIService } from './AIService';
 import { AnimationsService } from './AnimationsService';
 import { DbService } from './DbService';
 import { DirectoryService } from './DirectoryService';
+import { GameSigningService } from './GameSigningService';
 import { GeminiService } from './GeminiService';
 import { GenerationService } from './GenerationService';
 import { InteractionService } from './InteractionService';
@@ -202,6 +203,7 @@ export class ApiContext {
   private readonly _openAIEmbeddingService: OpenAIEmbeddingService;
   private readonly _noopEmbeddingService: NoopEmbeddingService;
   private readonly _interactionSemanticSearchService: InteractionSemanticSearchService;
+  private readonly _gameSigningService: GameSigningService;
 
   // --- Repositories ---
   private readonly _locationRepository: LocationRepository;
@@ -268,6 +270,7 @@ export class ApiContext {
     this._openAIEmbeddingService = new OpenAIEmbeddingService(this);
     this._noopEmbeddingService = new NoopEmbeddingService();
     this._interactionSemanticSearchService = new InteractionSemanticSearchService(this);
+    this._gameSigningService = new GameSigningService(this);
 
     this._controller = new ControllerContext(this);
   }
@@ -343,6 +346,10 @@ export class ApiContext {
 
   get interactionSemanticSearch(): InteractionSemanticSearchService {
     return this._interactionSemanticSearchService;
+  }
+
+  get gameSigning(): GameSigningService {
+    return this._gameSigningService;
   }
 
   get modelSettings(): ModelSettingsService {

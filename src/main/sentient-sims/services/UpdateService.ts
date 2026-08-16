@@ -91,6 +91,12 @@ export class UpdateService {
         });
 
       log.info(`Update completed.`);
+
+      try {
+        await this.ctx.gameSigning.signGame();
+      } catch (signErr) {
+        log.error(`Failed to re-sign game after mod update`, signErr);
+      }
     } catch (err) {
       log.error(`Unable to update mod`, err);
       throw new Error(`Unable to update mod, make sure The Sims 4 is closed before updating.`, { cause: err });
