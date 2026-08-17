@@ -26,7 +26,7 @@ describe('MemoryRepository', () => {
       memory,
       participants,
     });
-    expect(result.id).toBeGreaterThanOrEqual(0);
+    expect(Number(result.id)).toBeGreaterThanOrEqual(0);
     expect(result.content).toEqual(memory.content);
     expect(result.pre_action).toEqual(memory.pre_action);
     expect(result.observation).toEqual(memory.observation);
@@ -36,7 +36,7 @@ describe('MemoryRepository', () => {
 
     // Check createMemory also created memory_participants rows
     const memoryParticipants = ctx.memoryRepository.getMemoryParticipants({
-      memory_id: Number(result.id),
+      memory_id: String(result.id),
     });
     expect(memoryParticipants).toHaveLength(2);
 
@@ -53,7 +53,7 @@ describe('MemoryRepository', () => {
     ctx.memoryRepository.updateMemory(memory);
 
     const updatedMemory = ctx.memoryRepository.getMemory({
-      id: Number(memory.id),
+      id: String(memory.id),
     });
     expect(updatedMemory.observation).toEqual(expectedObservation);
 
@@ -72,13 +72,13 @@ describe('MemoryRepository', () => {
     expect(participantMemories).toHaveLength(1);
 
     // Delete item
-    ctx.memoryRepository.deleteMemory({ id: Number(memory.id) });
+    ctx.memoryRepository.deleteMemory({ id: String(memory.id) });
     const noResults = ctx.memoryRepository.getMemories();
     expect(noResults).toHaveLength(0);
 
     // Links rows in memory_participants table should be cascade deleted
     const noMemoryParticipants = ctx.memoryRepository.getMemoryParticipants({
-      memory_id: Number(result.id),
+      memory_id: String(result.id),
     });
     expect(noMemoryParticipants).toHaveLength(0);
 
@@ -96,7 +96,7 @@ describe('MemoryRepository', () => {
     expect(noResultsDeleteAll).toHaveLength(0);
 
     const throwsError = vi.fn(() => {
-      ctx.memoryRepository.getMemory({ id: 99999 });
+      ctx.memoryRepository.getMemory({ id: '99999' });
     });
     expect(throwsError).toThrow();
   });
@@ -154,7 +154,7 @@ describe('MemoryRepository', () => {
     expect(memories[2].content).toEqual('');
 
     // The stored rows keep their own shape
-    expect(ctx.memoryRepository.getMemory({ id: Number(memories[1].id) }).content).toBeNull();
+    expect(ctx.memoryRepository.getMemory({ id: String(memories[1].id) }).content).toBeNull();
   });
 
   it('should store interaction_name from normal interactions', () => {
@@ -180,7 +180,7 @@ describe('MemoryRepository', () => {
 
     expect(result.interaction_name).toEqual('mixer_social_GossipAbout');
 
-    const fetched = ctx.memoryRepository.getMemory({ id: Number(result.id) });
+    const fetched = ctx.memoryRepository.getMemory({ id: String(result.id) });
     expect(fetched.interaction_name).toEqual('mixer_social_GossipAbout');
   });
 
@@ -207,7 +207,7 @@ describe('MemoryRepository', () => {
 
     expect(result.interaction_name).toEqual('some_animation_name');
 
-    const fetched = ctx.memoryRepository.getMemory({ id: Number(result.id) });
+    const fetched = ctx.memoryRepository.getMemory({ id: String(result.id) });
     expect(fetched.interaction_name).toEqual('some_animation_name');
   });
 
@@ -316,6 +316,39 @@ describe('MemoryRepository', () => {
     expect('scene_id' in created).toBe(false);
   });
 
+  it('round-trips 64-bit game ids without float64 rounding', () => {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
+      recursive: true,
+    });
+    ctx.db.loadDatabase({
+      sessionId: '64bit-ids',
+      saveId: '1',
+    });
+
+    // Past 2^53: Number() would round the last digits away
+    const bigId = '1152921504606580259';
+    const created = ctx.memoryRepository.createMemory({
+      memory: { id: bigId, location_id: 1, content: 'a memory from the game' },
+      participants: [{ id: '2251799813685521' }],
+    });
+    expect(created.id).toEqual(bigId);
+
+    const fetched = ctx.memoryRepository.getMemory({ id: bigId });
+    expect(fetched.id).toEqual(bigId);
+    expect(ctx.memoryRepository.getMemories().map((memory) => memory.id)).toContain(bigId);
+
+    ctx.memoryRepository.updateMemory({ ...fetched, content: 'edited' });
+    expect(ctx.memoryRepository.getMemory({ id: bigId }).content).toEqual('edited');
+
+    const participants = ctx.memoryRepository.getMemoryParticipants({ memory_id: bigId });
+    expect(participants.map((participant) => participant.participant_id)).toEqual(['2251799813685521']);
+    expect(participants.map((participant) => participant.memory_id)).toEqual([bigId]);
+
+    ctx.memoryRepository.deleteMemory({ id: bigId });
+    expect(() => ctx.memoryRepository.getMemory({ id: bigId })).toThrow('not found');
+  });
+
   it('should update interaction_name', () => {
     const ctx = mockApiContext();
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
@@ -341,7 +374,7 @@ describe('MemoryRepository', () => {
     memory.interaction_name = 'updated_name';
     ctx.memoryRepository.updateMemory(memory);
 
-    const updated = ctx.memoryRepository.getMemory({ id: Number(result.id) });
+    const updated = ctx.memoryRepository.getMemory({ id: String(result.id) });
     expect(updated.interaction_name).toEqual('updated_name');
   });
 });

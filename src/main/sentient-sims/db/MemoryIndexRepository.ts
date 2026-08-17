@@ -1,12 +1,43 @@
 import { Repository } from './Repository';
-import { MemoryEntity } from './entities/MemoryEntity';
+import { MemoryEntity, MemoryRow, toMemoryEntity } from './entities/MemoryEntity';
 import { MemoryIndexEntity, MemoryWithIndex } from './entities/MemoryIndexEntity';
 
+// memory_index row as read with safeIntegers() (INTEGER columns arrive as bigint).
+type MemoryIndexRow = {
+  memory_id: bigint;
+  importance?: bigint | null;
+  embedding?: Buffer | null;
+  embedding_model?: string | null;
+};
+
+type MemoryWithIndexRow = MemoryRow & Omit<MemoryIndexRow, 'memory_id'>;
+
+function toMemoryWithIndex(row: MemoryWithIndexRow): MemoryWithIndex {
+  const { importance, ...rest } = row;
+  return {
+    ...toMemoryEntity(rest),
+    importance: importance === null || importance === undefined ? importance : Number(importance),
+  };
+}
+
 export class MemoryIndexRepository extends Repository {
-  getIndex(memoryId: number): MemoryIndexEntity | undefined {
-    return this.dbService.getDb().prepare('SELECT * FROM memory_index WHERE memory_id = ?').get([memoryId]) as
-      | MemoryIndexEntity
-      | undefined;
+  getIndex(memoryId: string): MemoryIndexEntity | undefined {
+    const row = this.dbService
+      .getDb()
+      .prepare('SELECT * FROM memory_index WHERE memory_id = ?')
+      .safeIntegers()
+      .get([BigInt(memoryId)]) as MemoryIndexRow | undefined;
+
+    if (!row) {
+      return undefined;
+    }
+
+    return {
+      memory_id: row.memory_id.toString(),
+      importance: row.importance === null || row.importance === undefined ? row.importance : Number(row.importance),
+      embedding: row.embedding,
+      embedding_model: row.embedding_model,
+    };
   }
 
   // Annotation is fire-and-forget, so by the time it lands the memory may have been
@@ -21,11 +52,11 @@ export class MemoryIndexRepository extends Repository {
          WHERE EXISTS (SELECT 1 FROM memory WHERE id = ?)`,
       )
       .run([
-        index.memory_id,
+        BigInt(index.memory_id),
         index.importance ?? null,
         index.embedding ?? null,
         index.embedding_model ?? null,
-        index.memory_id,
+        BigInt(index.memory_id),
       ]);
   }
 
@@ -50,16 +81,18 @@ export class MemoryIndexRepository extends Repository {
 
     const bigIntParticipantIds = participantIds.map((participantIdString) => BigInt(participantIdString));
 
-    return this.dbService
+    const rows = this.dbService
       .getDb()
       .prepare(query)
-      .all([...bigIntParticipantIds, limit]) as MemoryWithIndex[];
+      .safeIntegers()
+      .all([...bigIntParticipantIds, limit]) as MemoryWithIndexRow[];
+    return rows.map(toMemoryWithIndex);
   }
 
   // Memories with no index row yet (or indexed before an embedder was available),
   // oldest first — the backfill work queue.
   getUnindexedMemories(limit: number): MemoryEntity[] {
-    return this.dbService
+    const rows = this.dbService
       .getDb()
       .prepare(
         `
@@ -70,6 +103,8 @@ export class MemoryIndexRepository extends Repository {
           LIMIT ?;
         `,
       )
-      .all([limit]) as MemoryEntity[];
+      .safeIntegers()
+      .all([limit]) as MemoryRow[];
+    return rows.map(toMemoryEntity);
   }
 }

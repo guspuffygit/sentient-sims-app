@@ -1,7 +1,7 @@
 import { MemoryEntity } from './MemoryEntity';
 
 export type MemoryIndexEntity = {
-  memory_id: number;
+  memory_id: string;
   importance?: number | null;
   embedding?: Buffer | null;
   embedding_model?: string | null;

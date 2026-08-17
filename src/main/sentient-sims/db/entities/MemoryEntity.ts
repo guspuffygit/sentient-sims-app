@@ -1,5 +1,7 @@
+// Memory ids are 64-bit game handles — bigger than float64 holds, so like participant ids
+// they cross every JSON/IPC boundary as strings and only become BigInt at a sqlite bind.
 export type MemoryEntity = {
-  id?: number;
+  id?: string;
   pre_action?: string;
   observation?: string;
   content?: string;
@@ -9,6 +11,16 @@ export type MemoryEntity = {
   event_type?: string;
   interaction_name?: string;
 };
+
+// Raw memory row as read with safeIntegers() (all INTEGER columns arrive as bigint).
+export type MemoryRow = Omit<MemoryEntity, 'id' | 'location_id'> & {
+  id: bigint;
+  location_id: bigint;
+};
+
+export function toMemoryEntity(row: MemoryRow): MemoryEntity {
+  return { ...row, id: row.id.toString(), location_id: Number(row.location_id) };
+}
 
 // The mod's Flash memories window concatenates the whole list into one htmlText string, so a
 // raw '<' in any memory (e.g. a game repr like "<EnqueueResult: ...>" in a cancel reason) opens

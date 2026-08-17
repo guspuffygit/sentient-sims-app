@@ -30,8 +30,9 @@ export type ModWebsocketNotification = ModWebsocketMessage & {
   };
 };
 
+// Memory ids are 64-bit game handles, sent as strings so JSON number parsing can't round them
 export type ModWebsocketNotificationMemoryDeleted = ModWebsocketMessage & {
-  memory_id: number;
+  memory_id: string;
 };
 
 export type ModWebsocketNotificationMemoryEdited = ModWebsocketMessage & {
