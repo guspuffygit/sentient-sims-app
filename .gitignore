@@ -1,6 +1,12 @@
 # Logs
 logs
 *.log
+logs*.txt
+logs (*).txt
+
+# Local working notes
+scott-scratch.md
+.agent-local/sims4/
 
 # Runtime data
 pids
@@ -35,3 +41,8 @@ extracted/
 certificate.p12
 *.p12
 
+# Keys
+.env
+
+# Interaction cleanup reports (working data, not code)
+interaction-cleanup-report*.csv

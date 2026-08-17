@@ -18,6 +18,10 @@ export function runApi(ctx: ApiContext) {
 
   expressApp.post('/ai/v2/generate', ctx.controller.ai.sentientSimsGenerate);
   expressApp.post('/ai/v2/event/interaction', ctx.controller.ai.interactionEvent);
+  expressApp.post('/ai/v2/event/interaction/prefetch', ctx.controller.ai.interactionPrefetch);
+  expressApp.post('/ai/v2/event/interaction/claim', ctx.controller.ai.interactionClaim);
+  expressApp.post('/ai/v2/event/interaction/finalize', ctx.controller.ai.interactionFinalize);
+  expressApp.post('/ai/v2/event/interaction/cancel', ctx.controller.ai.interactionCancel);
   expressApp.post('/ai/v2/event/directed-scene', ctx.controller.ai.directedSceneEvent);
   expressApp.post('/ai/v2/event/classification', ctx.controller.ai.classificationEvent);
   expressApp.post('/ai/v2/event/buff', ctx.controller.ai.buffDescription);
@@ -97,11 +101,19 @@ export function runApi(ctx: ApiContext) {
   expressApp.post('/interactions', ctx.controller.interactionDescription.updateInteraction);
   expressApp.delete('/interactions', ctx.controller.interactionDescription.deleteInteraction);
   expressApp.get('/voice/phonemize', ctx.controller.voice.phonemize);
+  expressApp.get('/voice/elevenlabs/voices', ctx.controller.voice.getElevenLabsVoices);
+  expressApp.post('/voice/elevenlabs/voices/refresh', ctx.controller.voice.refreshElevenLabsVoices);
   expressApp.get('/websocket/isconnected', new WebsocketController().isConnected);
   expressApp.get('/announcements', ctx.controller.news.getNews);
 
   expressApp.get('/options/status', ctx.controller.options.getOptionsStatus);
   expressApp.post('/options/fix', ctx.controller.options.fixOptions);
+
+  expressApp.post('/cognition/outcome', ctx.controller.cognition.postOutcome);
+  expressApp.post('/cognition/perception', ctx.controller.cognition.postPerception);
+  expressApp.post('/cognition/sleep-boundary', ctx.controller.cognition.postSleepBoundary);
+  expressApp.post('/cognition/debug/enqueue', ctx.controller.cognition.debugEnqueue);
+  expressApp.post('/cognition/debug/perception', ctx.controller.cognition.debugRequestPerception);
 
   const server = expressApp.listen(ctx.port, () => {
     log.info(`Server is running on port ${ctx.port}`);

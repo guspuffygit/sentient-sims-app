@@ -494,6 +494,24 @@ export function cleanupAIOutput(text: string, stopTokens?: string[], options?: {
 }
 
 /**
+ * Detects sampler blowups / token-soup outputs (mixed scripts, code fragments, backslash
+ * runs) that should never be shown to the player or stored as a memory. Ordinary prose is
+ * overwhelmingly basic-Latin words and punctuation; degenerate output is not.
+ */
+export function isDegenerateOutput(text: string): boolean {
+  const sample = text.trim();
+  if (sample.length < 20) {
+    return false;
+  }
+  const proseChars = sample.match(/[A-Za-zÀ-ɏ0-9\s.,;:!?'"()‘’“”\-—…&]/g)?.length ?? 0;
+  if (proseChars / sample.length < 0.85) {
+    return true;
+  }
+  const codeSymbols = sample.match(/[\\{}[\]<>_^$#@%|~`+=/]/g)?.length ?? 0;
+  return codeSymbols / sample.length > 0.05;
+}
+
+/**
  * Formats a screenplay scene for the chat window: every non-empty line gets a blank line
  * before and after it so each character's line stands apart visually.
  */
@@ -576,6 +594,46 @@ export function parseDialogueLines(text: string, knownSpeakers?: string[]): Dial
   }
 
   return dialogueLines;
+}
+
+// Solo generations often parse to a single Narrator line holding a whole paragraph;
+// paced subtitles need readable pieces, so oversized lines are split into sentence
+// chunks packed up to maxChars (a lone sentence longer than maxChars stays whole
+// rather than breaking mid-word)
+export function splitLinesForPacing(lines: DialogueLine[], maxChars = 200): DialogueLine[] {
+  const result: DialogueLine[] = [];
+  lines.forEach((line) => {
+    if (line.text.length <= maxChars) {
+      result.push(line);
+      return;
+    }
+    const sentences = line.text.split(/(?<=[.!?…]["')\]]?)\s+/);
+    const chunks: string[] = [];
+    let current = '';
+    sentences.forEach((sentence) => {
+      const candidate = current.length === 0 ? sentence : `${current} ${sentence}`;
+      if (candidate.length <= maxChars || current.length === 0) {
+        current = candidate;
+        return;
+      }
+      chunks.push(current);
+      current = sentence;
+    });
+    if (current.length > 0) {
+      chunks.push(current);
+    }
+    chunks.forEach((chunk, index) => {
+      const chunkLine: DialogueLine = { speaker: line.speaker, text: chunk };
+      if (index === 0 && line.deliveryNote) {
+        chunkLine.deliveryNote = line.deliveryNote;
+      }
+      if (line.voiceId) {
+        chunkLine.voiceId = line.voiceId;
+      }
+      result.push(chunkLine);
+    });
+  });
+  return result;
 }
 
 export function cleanAIClassificationOutput(text: string): string {

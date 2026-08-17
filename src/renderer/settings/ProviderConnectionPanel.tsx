@@ -54,6 +54,17 @@ export function ProviderConnectionPanel({ apiType }: { apiType: ApiType }): Reac
           />
         </>
       );
+    case ApiType.OpenRouter:
+      return (
+        <>
+          <ApiKeyAIComponent setting={SettingsEnum.OPENROUTER_KEY} aiName="OpenRouter" />
+          <AIEndpointComponent
+            type={ApiType.OpenRouter}
+            selectedApiType={ApiType.OpenRouter}
+            settingsEnum={SettingsEnum.OPENROUTER_ENDPOINT}
+          />
+        </>
+      );
     case ApiType.VLLM:
       return (
         <>

@@ -9,6 +9,8 @@ export enum ModWebsocketMessageType {
   MEMORY_CREATED = 'memory_created',
   ADD_BUFF = 'add_buff',
   SCENE_LINE = 'scene_line',
+  ENQUEUE_INTERACTION = 'enqueue_interaction',
+  REQUEST_PERCEPTION = 'request_perception',
 }
 
 export type ModWebsocketMessage = {
@@ -28,8 +30,9 @@ export type ModWebsocketNotification = ModWebsocketMessage & {
   };
 };
 
+// Memory ids are 64-bit game handles, sent as strings so JSON number parsing can't round them
 export type ModWebsocketNotificationMemoryDeleted = ModWebsocketMessage & {
-  memory_id: number;
+  memory_id: string;
 };
 
 export type ModWebsocketNotificationMemoryEdited = ModWebsocketMessage & {
@@ -47,12 +50,36 @@ export type ModWebsocketNotificationMemoryCreated = ModWebsocketMessage & {
 export type ModSceneLine = ModWebsocketMessage & {
   speaker: string;
   text: string;
+  // The scene's driving action, shown above each line's subtitle section in-game
+  preamble?: string;
 };
 
 export type ModAddBuff = ModWebsocketMessage & {
   sim_id: string;
   mood: string;
   buff_description: string;
+};
+
+// Pushes a whitelisted action into a sim's interaction queue. The mod resolves the action key
+// via its affordance whitelist (ss_affordance_whitelist.py) and reports what happened back to
+// POST /cognition/outcome with the same request_id.
+export type ModEnqueueInteraction = ModWebsocketMessage & {
+  request_id: string;
+  sim_id: string;
+  action: string;
+  target_sim_id?: string;
+  target_object_id?: string;
+  priority?: 'high' | 'low';
+  insert_strategy?: 'next' | 'last';
+  clear_queue?: boolean;
+  source: string;
+};
+
+// Asks the mod for one sim's perception snapshot; the mod replies by POSTing the
+// snapshot to /cognition/perception with the same request_id
+export type ModRequestPerception = ModWebsocketMessage & {
+  request_id: string;
+  sim_id: string;
 };
 
 export type WebsocketNotification =
@@ -62,4 +89,6 @@ export type WebsocketNotification =
   | ModWebsocketNotificationMemoryDeleted
   | ModWebsocketNotificationMemoryCreated
   | ModAddBuff
-  | ModSceneLine;
+  | ModSceneLine
+  | ModEnqueueInteraction
+  | ModRequestPerception;

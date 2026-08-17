@@ -21,6 +21,12 @@ export function markScenePaced(content: string) {
   pendingSceneContents.set(content, Date.now() + pacedSceneTtlMs);
 }
 
+// The renderer dropped the scene before any line played, so its lines will never stream
+// to the game — un-mark it so the memory_created broadcast shows the normal subtitle block.
+export function unmarkScenePaced(content: string) {
+  pendingSceneContents.delete(content);
+}
+
 export function consumePacedScene(content?: string): boolean {
   prune();
   if (content && pendingSceneContents.has(content)) {

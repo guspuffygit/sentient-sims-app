@@ -109,6 +109,39 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
       ALTER TABLE memory
       ADD COLUMN interaction_name TEXT;
     `,
+    // Scenes are derived from location_id + timestamp instead of a dedicated column: the mod
+    // parses memory rows into a Python class with fixed fields, so any new column breaks it.
+    // This cleans up databases that briefly ran an add-scene-id migration; no-op elsewhere.
+    '011-remove-memory-scene-id': (db: Database) => {
+      const columns = db.prepare('PRAGMA table_info(memory)').all() as { name: string }[];
+      if (columns.some((column) => column.name === 'scene_id')) {
+        log.info('Dropping scene_id column from memory table');
+        db.prepare('ALTER TABLE memory DROP COLUMN scene_id').run();
+      }
+    },
+    // Retrieval metadata lives in a sidecar table instead of new memory columns: the mod
+    // parses memory rows into a Python class with fixed fields (see migration 011).
+    // embedding is a Float32Array serialized to raw little-endian bytes.
+    '012-create-memory-index': `
+      CREATE TABLE memory_index (
+        memory_id            INTEGER NOT NULL  PRIMARY KEY  ,
+        importance           INTEGER  ,
+        embedding            BLOB     ,
+        embedding_model      TEXT     ,
+        FOREIGN KEY ( memory_id ) REFERENCES memory( id ) ON DELETE CASCADE ON UPDATE CASCADE
+      );
+    `,
+    // Per-sim ElevenLabs voice overrides live in a sidecar table so the mod-facing
+    // participant row keeps its shape. Deliberately no foreign key: updateParticipant
+    // uses INSERT OR REPLACE, and a REPLACE-delete fires ON DELETE CASCADE, so an FK
+    // here would wipe a sim's voice every time the mod refreshed their description.
+    '013-create-participant-voice': `
+      CREATE TABLE participant_voice (
+        participant_id       INTEGER NOT NULL  PRIMARY KEY  ,
+        voice_id             TEXT     ,
+        voice_name           TEXT
+      );
+    `,
   }),
 );
 

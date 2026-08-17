@@ -6,6 +6,7 @@ import {
   koboldaiDefaultEndpoint,
   novelaiDefaultEndpoint,
   openaiDefaultEndpoint,
+  openrouterDefaultEndpoint,
 } from 'main/sentient-sims/constants';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import { useAuth } from 'renderer/providers/AuthProvider';
@@ -25,6 +26,8 @@ export function useProviderConnectionStatus(apiType: ApiType): ProviderConnectio
   // connection settings and pick per apiType below
   const openaiKey = useSetting(SettingsEnum.OPENAI_KEY, '');
   const openaiEndpoint = useSetting(SettingsEnum.OPENAI_ENDPOINT, openaiDefaultEndpoint);
+  const openrouterKey = useSetting(SettingsEnum.OPENROUTER_KEY, '');
+  const openrouterEndpoint = useSetting(SettingsEnum.OPENROUTER_ENDPOINT, openrouterDefaultEndpoint);
   const novelaiKey = useSetting(SettingsEnum.NOVELAI_KEY, '');
   const novelaiEndpoint = useSetting(SettingsEnum.NOVELAI_ENDPOINT, novelaiDefaultEndpoint);
   const geminiKeys = useSetting(SettingsEnum.GEMINI_KEYS, '');
@@ -54,6 +57,8 @@ export function useProviderConnectionStatus(apiType: ApiType): ProviderConnectio
   switch (apiType) {
     case ApiType.OpenAI:
       return keyStatus(openaiKey, openaiEndpoint);
+    case ApiType.OpenRouter:
+      return keyStatus(openrouterKey, openrouterEndpoint);
     case ApiType.NovelAI:
       return keyStatus(novelaiKey, novelaiEndpoint);
     case ApiType.Gemini:

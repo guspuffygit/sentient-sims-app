@@ -1,5 +1,6 @@
 import log from 'electron-log';
 import { appApiUrl, defaultTTSEnabled, defaultTTSVolume } from 'main/sentient-sims/constants';
+import { parseJsonResponse } from 'main/sentient-sims/clients/jsonResponse';
 import { AIHealthCheckResponse, AITestStatus } from 'main/sentient-sims/models/AIHealthCheckResponse';
 import { ApiType, ApiTypeFromValue, ApiTypeName } from 'main/sentient-sims/models/ApiType';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
@@ -63,7 +64,7 @@ export function AISettingsProvider({ children }: AISettingsProviderProps) {
 
     try {
       const response = await fetch(url);
-      const result = (await response.json()) as AIHealthCheckResponse;
+      const result = await parseJsonResponse<AIHealthCheckResponse>(response, 'Unable to test AI connection');
       status = result.status || '';
       error = result.error || '';
     } catch (err) {

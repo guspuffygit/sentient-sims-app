@@ -10,7 +10,10 @@ import {
   defaultElevenLabsEndpoint,
   defaultGeminiModel,
   defaultKokoroEndpoint,
+  defaultGenerationConcurrency,
+  defaultGenerationTimeoutSeconds,
   defaultMaxResponseTokens,
+  defaultPrefetchMaxQueueDepth,
   defaultTTSEnabled,
   defaultTTSVolume,
   defaultVLLMEndpoint,
@@ -20,6 +23,8 @@ import {
   novelaiGenerationDefaultEndpoint,
   openaiDefaultEndpoint,
   openaiDefaultModel,
+  openrouterDefaultEndpoint,
+  openrouterDefaultModel,
   retiredGeminiModels,
   sentientSimsAIDefaultModel,
   defaultSentientSimsAIHost,
@@ -29,6 +34,11 @@ import { disableDebugLogging, enableDebugLogging } from '../util/debugLog';
 import { defaultSentientSimsAITTSSettings, SentientSimsAITTSSettings } from '../models/SentientSimsAITTSSettings';
 import { defaultKokoroAITTSSettings, KokoroAITTSSettings } from '../models/KokoroAITTSSettings';
 import { defaultElevenLabsTTSSettings, ElevenLabsTTSSettings } from '../models/ElevenLabsTTSSettings';
+import {
+  ElevenLabsVoicesCache,
+  emptyElevenLabsVoicesCache,
+  sanitizeElevenLabsVoicesCache,
+} from '../models/ElevenLabsVoice';
 import { WizardPage } from '../models/WizardPage';
 
 export function defaultStore(cwd?: string) {
@@ -105,6 +115,18 @@ export function defaultStore(cwd?: string) {
         type: 'string',
         default: openaiDefaultEndpoint,
       },
+      [SettingsEnum.OPENROUTER_KEY.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.OPENROUTER_ENDPOINT.toString()]: {
+        type: 'string',
+        default: openrouterDefaultEndpoint,
+      },
+      [SettingsEnum.OPENROUTER_MODEL.toString()]: {
+        type: 'string',
+        default: openrouterDefaultModel,
+      },
       [SettingsEnum.SENTIENTSIMSAI_ENDPOINT.toString()]: {
         type: 'string',
         default: defaultSentientSimsAIHost,
@@ -173,6 +195,11 @@ export function defaultStore(cwd?: string) {
         type: 'object',
         default: defaultElevenLabsTTSSettings,
       },
+      // Cached "My Voices" listing, refreshed on demand from the ElevenLabs API
+      [SettingsEnum.ELEVENLABS_VOICES.toString()]: {
+        type: 'object',
+        default: emptyElevenLabsVoicesCache,
+      },
       [SettingsEnum.VLLM_ENDPOINT.toString()]: {
         type: 'string',
         default: defaultVLLMEndpoint,
@@ -188,6 +215,22 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.MAX_RESPONSE_TOKENS.toString()]: {
         type: 'number',
         default: defaultMaxResponseTokens,
+      },
+      [SettingsEnum.GENERATION_TIMEOUT_SECONDS.toString()]: {
+        type: 'number',
+        default: defaultGenerationTimeoutSeconds,
+      },
+      [SettingsEnum.GENERATION_CONCURRENCY.toString()]: {
+        type: 'number',
+        default: defaultGenerationConcurrency,
+      },
+      [SettingsEnum.PREFETCH_MAX_QUEUE_DEPTH.toString()]: {
+        type: 'number',
+        default: defaultPrefetchMaxQueueDepth,
+      },
+      [SettingsEnum.MEMORY_RETRIEVAL_ENABLED.toString()]: {
+        type: 'boolean',
+        default: false,
       },
       // Items validated by sanitizeProviderConfigs on read/write so malformed
       // entries degrade gracefully instead of throwing out of electron-store
@@ -292,6 +335,8 @@ export class SettingsService {
         return this.geminiModel;
       case ApiType.VLLM:
         return this.vllmModel;
+      case ApiType.OpenRouter:
+        return this.openrouterModel;
       default:
         // KoboldAI runs whatever model is loaded server side
         return undefined;
@@ -376,6 +421,30 @@ export class SettingsService {
 
   set openaiModel(value: string) {
     this.set(SettingsEnum.OPENAI_MODEL, value);
+  }
+
+  get openrouterModel(): string {
+    return this.get(SettingsEnum.OPENROUTER_MODEL) as string;
+  }
+
+  set openrouterModel(value: string) {
+    this.set(SettingsEnum.OPENROUTER_MODEL, value);
+  }
+
+  get openrouterKey(): string {
+    return this.get(SettingsEnum.OPENROUTER_KEY) as string;
+  }
+
+  set openrouterKey(value: string) {
+    this.set(SettingsEnum.OPENROUTER_KEY, value);
+  }
+
+  get openrouterEndpoint(): string {
+    return this.get(SettingsEnum.OPENROUTER_ENDPOINT) as string;
+  }
+
+  set openrouterEndpoint(value: string) {
+    this.set(SettingsEnum.OPENROUTER_ENDPOINT, value);
   }
 
   get sentientSimsAIModel(): string {
@@ -618,6 +687,14 @@ export class SettingsService {
     this.set(SettingsEnum.ELEVENLABS_TTS_SETTINGS, value);
   }
 
+  get elevenLabsVoices(): ElevenLabsVoicesCache {
+    return sanitizeElevenLabsVoicesCache(this.get(SettingsEnum.ELEVENLABS_VOICES));
+  }
+
+  set elevenLabsVoices(value: ElevenLabsVoicesCache) {
+    this.set(SettingsEnum.ELEVENLABS_VOICES, sanitizeElevenLabsVoicesCache(value));
+  }
+
   get vllmEndpoint(): string {
     return this.get(SettingsEnum.VLLM_ENDPOINT) as string;
   }
@@ -714,6 +791,47 @@ export class SettingsService {
     }
 
     this.set(SettingsEnum.MAX_RESPONSE_TOKENS, value);
+  }
+
+  get generationTimeoutSeconds(): number {
+    return this.get(SettingsEnum.GENERATION_TIMEOUT_SECONDS) as number;
+  }
+
+  set generationTimeoutSeconds(value: number) {
+    if (value < 1) {
+      throw new Error('generationTimeoutSeconds must be at least 1');
+    }
+    this.set(SettingsEnum.GENERATION_TIMEOUT_SECONDS, value);
+  }
+
+  get generationConcurrency(): number {
+    return this.get(SettingsEnum.GENERATION_CONCURRENCY) as number;
+  }
+
+  set generationConcurrency(value: number) {
+    if (!Number.isInteger(value) || value < 1) {
+      throw new Error('generationConcurrency must be a positive integer');
+    }
+    this.set(SettingsEnum.GENERATION_CONCURRENCY, value);
+  }
+
+  get memoryRetrievalEnabled(): boolean {
+    return this.get(SettingsEnum.MEMORY_RETRIEVAL_ENABLED) as boolean;
+  }
+
+  set memoryRetrievalEnabled(value: boolean) {
+    this.set(SettingsEnum.MEMORY_RETRIEVAL_ENABLED, value);
+  }
+
+  get prefetchMaxQueueDepth(): number {
+    return this.get(SettingsEnum.PREFETCH_MAX_QUEUE_DEPTH) as number;
+  }
+
+  set prefetchMaxQueueDepth(value: number) {
+    if (!Number.isInteger(value) || value < 1) {
+      throw new Error('prefetchMaxQueueDepth must be a positive integer');
+    }
+    this.set(SettingsEnum.PREFETCH_MAX_QUEUE_DEPTH, value);
   }
 
   runMigrations() {

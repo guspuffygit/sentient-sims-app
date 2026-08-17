@@ -29,6 +29,7 @@ export class KoboldAIService implements GenerationService {
     const url = `${this.serviceUrl()}/api/v1/generate`;
     const response = await fetch(url, {
       method: 'POST',
+      signal: AbortSignal.timeout(this.ctx.settings.generationTimeoutSeconds * 1000),
       headers: {
         'Content-Type': 'application/json',
       },

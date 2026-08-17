@@ -9,7 +9,9 @@ import {
   formatWeather,
   formatWWProperties,
   hasWWProperties,
+  isDegenerateOutput,
   parseDialogueLines,
+  splitLinesForPacing,
 } from 'main/sentient-sims/formatter/PromptFormatter';
 import { assignVoicesToSpeakers } from 'main/sentient-sims/formatter/VoiceAssignment';
 import {
@@ -36,13 +38,42 @@ describe('Output', () => {
     expect(cleanupAIOutput(actual)).toEqual(expected);
   });
 
+  it('cleanup preserves screenplay format', () => {
+    const screenplay = 'Ricky smirks, leaning back.\nRicky: "Been fishing here for years. You should try it."';
+    const result = cleanupAIOutput(screenplay);
+    expect(result).toContain('Ricky:');
+    expect(result).toContain('"Been fishing here for years.');
+    expect(result).toMatch(/"$/);
+  });
+
+  describe('isDegenerateOutput', () => {
+    it('accepts ordinary prose and screenplay dialogue', () => {
+      expect(isDegenerateOutput('Jonah kneels in the dirt, pressing a seed into the soil with quiet care.')).toBe(
+        false,
+      );
+      expect(isDegenerateOutput('Ricky: (grinning) "Been fishing here for years — you should try it!"')).toBe(false);
+      expect(isDegenerateOutput('short')).toBe(false);
+    });
+
+    it('rejects sampler-blowup token soup', () => {
+      // Trimmed from a real degenerate generation captured in playtest logs
+      const tokenSoup =
+        'для.Tposes //452 are.ca berries$$.),)\\\\查看{acleIndHe115aug\\\\https committees覆 IX恶 ' +
+        '`​覆 kW.pdf_creation\tünd reviewed ONLY/in \\}}182\\ Bill Texans\\ вели\\276 art\\';
+      expect(isDegenerateOutput(tokenSoup)).toBe(true);
+      expect(isDegenerateOutput('播放 Imagine\\ DEAD-expHotacid cor\\,\n ELовала register\\,Christmas My% theme')).toBe(
+        true,
+      );
+    });
+  });
+
   describe('parseDialogueLines', () => {
     it('parses a single dialogue line', () => {
       const result = parseDialogueLines('Ricky: "Been fishing here for years."');
       expect(result).toEqual([{ speaker: 'Ricky', text: 'Been fishing here for years.' }]);
     });
 
-    it('drops stage directions and keeps only quoted dialogue', () => {
+    it('drops delivery notes and keeps only quoted dialogue', () => {
       const screenplay = 'Ricky smirks, leaning back.\nRicky: "Been fishing here for years. You should try it."';
       const result = parseDialogueLines(screenplay);
       expect(result).toEqual([{ speaker: 'Ricky', text: 'Been fishing here for years. You should try it.' }]);
@@ -73,18 +104,13 @@ describe('Output', () => {
       expect(result).toEqual([{ speaker: 'Ricky Rickerson', text: 'Hello there.' }]);
     });
 
-    it('accepts unquoted lines only for known speakers', () => {
-      const result = parseDialogueLines('Ricky Rickerson: Been fishing here for years.', ['Ricky Rickerson']);
-      expect(result).toEqual([{ speaker: 'Ricky Rickerson', text: 'Been fishing here for years.' }]);
-    });
-
     it('falls back to a single Narrator line for plain narrator prose', () => {
       const narration = 'The house is quiet late at night, warm and lived-in.';
       const result = parseDialogueLines(narration);
       expect(result).toEqual([{ speaker: 'Narrator', text: narration }]);
     });
 
-    it('falls back to Narrator when only stage directions are present (no dialogue lines)', () => {
+    it('falls back to Narrator when only delivery notes are present (no dialogue lines)', () => {
       const result = parseDialogueLines('Ricky smirks, leaning back.');
       expect(result).toEqual([{ speaker: 'Narrator', text: 'Ricky smirks, leaning back.' }]);
     });
@@ -96,6 +122,47 @@ describe('Output', () => {
     it('does not misparse a colon-only line with no quotes', () => {
       const result = parseDialogueLines('Note: something happened');
       expect(result).toEqual([{ speaker: 'Narrator', text: 'Note: something happened' }]);
+    });
+  });
+
+  describe('splitLinesForPacing', () => {
+    it('leaves short lines untouched', () => {
+      const lines = [{ speaker: 'Ricky', text: 'Been fishing here for years.' }];
+      expect(splitLinesForPacing(lines)).toEqual(lines);
+    });
+
+    it('splits a long narration block into sentence chunks under the cap', () => {
+      const sentences = [
+        'Marisol crosses the bar and picks up the battered guitar leaning by the stage.',
+        'She tunes it slowly, listening to each string hum against the low chatter of the room.',
+        'When she finally plays, the melody is soft and a little uncertain, but the regulars turn to listen anyway.',
+      ];
+      const result = splitLinesForPacing([{ speaker: 'Narrator', text: sentences.join(' ') }], 200);
+      expect(result.length).toBeGreaterThan(1);
+      result.forEach((line) => {
+        expect(line.speaker).toEqual('Narrator');
+        expect(line.text.length).toBeLessThanOrEqual(200);
+      });
+      expect(result.map((line) => line.text).join(' ')).toEqual(sentences.join(' '));
+    });
+
+    it('keeps a single oversized sentence whole instead of breaking mid-word', () => {
+      const longSentence = `Marisol ${'hums and strums and sways '.repeat(12)}until close.`;
+      const result = splitLinesForPacing([{ speaker: 'Narrator', text: longSentence }], 200);
+      expect(result).toEqual([{ speaker: 'Narrator', text: longSentence }]);
+    });
+
+    it('keeps the delivery note on the first chunk and the voice on all chunks', () => {
+      const text = 'A very long spoken sentence that goes on and on for a while. '.repeat(4).trim();
+      const result = splitLinesForPacing([{ speaker: 'Ricky', text, deliveryNote: 'wistful', voiceId: 'voice-1' }], 80);
+      expect(result.length).toBeGreaterThan(1);
+      expect(result[0].deliveryNote).toEqual('wistful');
+      result.slice(1).forEach((line) => {
+        expect(line.deliveryNote).toBeUndefined();
+      });
+      result.forEach((line) => {
+        expect(line.voiceId).toEqual('voice-1');
+      });
     });
   });
 
@@ -241,14 +308,19 @@ describe('Output', () => {
       expect(lines[1].voiceId).toEqual(lines[0].voiceId);
       expect(lines[2].voiceId).toBeUndefined();
     });
-  });
 
-  it('cleanup preserves screenplay format', () => {
-    const screenplay = 'Ricky smirks, leaning back.\nRicky: "Been fishing here for years. You should try it."';
-    const result = cleanupAIOutput(screenplay);
-    expect(result).toContain('Ricky:');
-    expect(result).toContain('"Been fishing here for years.');
-    expect(result).toMatch(/"$/);
+    it('prefers a user pinned voice over the automatic cast', () => {
+      const lines = castVoicesForLines(
+        [
+          { speaker: 'Ricky Rickerson', text: 'Pinned voice.' },
+          { speaker: 'Narrator', text: 'No match.' },
+        ],
+        sims,
+        new Map([['1', 'pinned-voice-id']]),
+      );
+      expect(lines[0].voiceId).toEqual('pinned-voice-id');
+      expect(lines[1].voiceId).toBeUndefined();
+    });
   });
 
   describe('Event Formatter', () => {
@@ -365,7 +437,7 @@ describe('Output', () => {
 
       ctx.settings.maxResponseTokens = 300;
 
-      const result = ctx.promptBuilder.buildPromptRequest(event, {
+      const result = await ctx.promptBuilder.buildPromptRequest(event, {
         action: '{actor.0} and {actor.1} are having a friendly conversation, sharing fishing tips.',
         apiType: ApiType.SentientSimsAI,
         modelSettings: {
@@ -425,6 +497,9 @@ describe('Output', () => {
           event.sentient_sims.map((sim) => ({ id: sim.sim_id, fullName: sim.name })),
         );
 
+        // Memory is scene-scoped now (location + start time), so establish a scene first
+        ctx.sceneService.checkSceneBoundary(event);
+
         // Memory 0: narrator sets the scene — describes the setting, vibe, and characters; no invented actions
         ctx.memoryRepository.createMemory({
           memory: {
@@ -450,7 +525,7 @@ describe('Output', () => {
         };
 
         // Exchange 1 — narrator scene-setter in memory
-        const result1 = ctx.promptBuilder.buildPromptRequest(event, promptOptions);
+        const result1 = await ctx.promptBuilder.buildPromptRequest(event, promptOptions);
         const genStart1 = Date.now();
         const genResponse1 = await ctx.genai.sentientSimsGenerate(requestBuilder.buildOpenAIRequest(result1));
         console.log(`Exchange 1 generation took ${Date.now() - genStart1}ms`);
@@ -473,7 +548,7 @@ describe('Output', () => {
         });
 
         // Exchange 2 — scene-setter + exchange 1 in memory
-        const result2 = ctx.promptBuilder.buildPromptRequest(event, promptOptions);
+        const result2 = await ctx.promptBuilder.buildPromptRequest(event, promptOptions);
         const genStart2 = Date.now();
         const genResponse2 = await ctx.genai.sentientSimsGenerate(requestBuilder.buildOpenAIRequest(result2));
         console.log(`Exchange 2 generation took ${Date.now() - genStart2}ms`);

@@ -49,6 +49,22 @@ export default defineConfig([
       ],
     },
   },
+  {
+    // Standalone maintenance scripts run under Electron's Node (ELECTRON_RUN_AS_NODE) and
+    // sit outside the app's tsconfig project, so the type-aware rules see nothing but
+    // `any`. They are CommonJS with Node globals, not browser code.
+    files: ['scripts/**/*.cjs'],
+    extends: [tseslintConfigs.disableTypeChecked, eslintReact.configs['disable-type-checked']],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
   globalIgnores([
     'logs',
     '*.log',

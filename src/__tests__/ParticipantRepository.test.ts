@@ -75,4 +75,43 @@ describe('ParticipantRepository', () => {
 
     expect(noDefaultSimDescription.description).toBeUndefined();
   });
+
+  it('pins, keeps and clears a sim voice', () => {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
+      recursive: true,
+    });
+    ctx.db.loadDatabase({
+      sessionId: '9587322',
+      saveId: '3',
+    });
+
+    const participant: ParticipantDTO = { id: '5551234', name: 'Voiced Sim' };
+    ctx.participantRepository.updateParticipant(participant);
+    ctx.participantRepository.setParticipantVoice(participant.id, {
+      voiceId: 'voice-abc',
+      voiceName: 'Some Voice',
+    });
+
+    expect(ctx.participantRepository.getParticipantVoices([participant.id, '404'])).toEqual(
+      new Map([[participant.id, 'voice-abc']]),
+    );
+
+    const withVoice = ctx.participantRepository
+      .getAllParticipants()
+      .find((item) => item.id === participant.id) as ParticipantDTO;
+    expect(withVoice.voiceId).toEqual('voice-abc');
+    expect(withVoice.voiceName).toEqual('Some Voice');
+
+    // The mod re-writes participant rows constantly; the voice must survive that
+    ctx.participantRepository.updateParticipant({ ...participant, description: 'Updated in game' });
+    expect(ctx.participantRepository.getParticipantVoices([participant.id]).get(participant.id)).toEqual('voice-abc');
+
+    ctx.participantRepository.setParticipantVoice(participant.id);
+    expect(ctx.participantRepository.getParticipantVoices([participant.id]).size).toEqual(0);
+    const cleared = ctx.participantRepository
+      .getAllParticipants()
+      .find((item) => item.id === participant.id) as ParticipantDTO;
+    expect(cleared.voiceId).toBeUndefined();
+  });
 });

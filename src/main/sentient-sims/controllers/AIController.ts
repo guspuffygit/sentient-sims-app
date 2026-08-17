@@ -8,6 +8,11 @@ import { InteractionEventStatus } from '../models/InteractionEventResult';
 import { BuffEventRequest, BuffDescriptionRequest, ClassificationRequest } from '../models/OpenAIRequestBuilder';
 import { CatchErrors } from './decorators/CatchError';
 import { ApiContext } from '../services/ApiContext';
+import {
+  InteractionClaimRequest,
+  InteractionFinalizeRequest,
+  InteractionPrefetchRequest,
+} from '../services/GenerationQueueService';
 import { ApiTypeFromValue } from '../models/ApiType';
 
 export class AIController {
@@ -36,7 +41,7 @@ export class AIController {
 
     log.debug(`Interaction event: ${JSON.stringify(req.body)}`);
 
-    const result = await this.ctx.ai.interactionEvent(event);
+    const result = await this.ctx.generationQueue.runExclusive(() => this.ctx.ai.interactionEvent(event));
     result.input = event;
     // Leading newline so each generation stands apart from the previous one in the game window;
     // memories, TTS, and the app chat UI keep the untouched text. Classic mode sends it verbatim.
@@ -45,6 +50,39 @@ export class AIController {
     if (result.text) {
       sendChatGeneration(result);
     }
+  };
+
+  @CatchErrors()
+  interactionPrefetch = async (req: Request, res: Response) => {
+    const request = req.body as InteractionPrefetchRequest;
+    log.debug(`Interaction prefetch: ${request.correlation_id}`);
+    res.json(await this.ctx.generationQueue.prefetch(request));
+  };
+
+  @CatchErrors()
+  interactionClaim = async (req: Request, res: Response) => {
+    const request = req.body as InteractionClaimRequest;
+    log.debug(`Interaction claim: ${request.correlation_id}`);
+    const { result, play } = await this.ctx.generationQueue.claim(request);
+    play();
+    result.input = request.event;
+    const spacedText = this.ctx.settings.directedScenesEnabled && result.text ? `\n${result.text}` : result.text;
+    res.json({ ...result, text: spacedText });
+    if (result.text) {
+      sendChatGeneration(result);
+    }
+  };
+
+  @CatchErrors()
+  interactionFinalize = (req: Request, res: Response) => {
+    const request = req.body as InteractionFinalizeRequest;
+    res.json({ ok: true, found: this.ctx.generationQueue.finalize(request.correlation_id) });
+  };
+
+  @CatchErrors()
+  interactionCancel = (req: Request, res: Response) => {
+    const request = req.body as InteractionFinalizeRequest;
+    res.json({ ok: true, found: this.ctx.generationQueue.cancel(request.correlation_id) });
   };
 
   @CatchErrors()

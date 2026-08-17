@@ -1,5 +1,5 @@
 import log from 'electron-log';
-import { MemoryEntity } from '../db/entities/MemoryEntity';
+import { MemoryEntity, neutralizeMarkup, withDisplayContent } from '../db/entities/MemoryEntity';
 import { InteractionMappingEvent, WWInteractionEvent } from '../models/InteractionEvents';
 import { InteractionEventResult } from '../models/InteractionEventResult';
 import { DatabaseSession } from '../models/DatabaseSession';
@@ -26,12 +26,19 @@ export function notifySettingChanged(setting: string, value: unknown) {
   notifyAllWindows('setting-changed', setting, value);
 }
 
-export function notifyNewMemoryAdded(memory: MemoryEntity) {
+export function notifyNewMemoryAdded(memory: MemoryEntity, options?: { notifyMod?: boolean }) {
   log.debug('Sending new memory added to renderer');
   notifyAllWindows('on-new-memory-added', memory);
+  // Bookkeeping rows (e.g. outcome memories) skip the mod: memory_created triggers subtitle
+  // display and pauses the game clock, which only dialogue memories should do
+  if (options?.notifyMod === false) {
+    return;
+  }
   sendModNotification({
     type: ModWebsocketMessageType.MEMORY_CREATED,
-    memory,
+    // The Flash memories window can't render a null content, and one bad row in its
+    // list blanks the whole window on every redraw (see withDisplayContent)
+    memory: withDisplayContent(memory),
     paced: consumePacedScene(memory.content),
   });
 }
@@ -55,7 +62,7 @@ export function notifyMemoryEdited(memory: MemoryEntity) {
   notifyAllWindows('on-memory-edited', memory);
   sendModNotification({
     type: ModWebsocketMessageType.MEMORY_EDITED,
-    memory,
+    memory: withDisplayContent(memory),
   });
 }
 
@@ -87,27 +94,40 @@ export function sendChatGeneration(response: InteractionEventResult) {
 export function playTTSLines(
   lines: DialogueLine[],
   sims?: SentientSim[],
-  options?: { paced?: boolean; preamble?: string },
+  options?: {
+    paced?: boolean;
+    preamble?: string;
+    pacedText?: string;
+    // Voice ids the user pinned to specific sims, keyed by sim id
+    voiceOverrides?: Map<string, string>;
+  },
 ) {
   log.debug('Sending on-voice');
   let castLines = lines;
   if (sims && sims.length > 0) {
-    castLines = castVoicesForLines(lines, sims);
+    castLines = castVoicesForLines(lines, sims, options?.voiceOverrides);
   }
-  notifyAllWindows('on-voice', castLines, { paced: options?.paced ?? false, preamble: options?.preamble });
-}
-
-// Called as each scene line starts playing so the in-game subtitle appears in step
-// with the voice playback
-export function sendSceneLineToMod(line: DialogueLine) {
-  sendModNotification({
-    type: ModWebsocketMessageType.SCENE_LINE,
-    speaker: line.speaker,
-    text: line.text,
+  notifyAllWindows('on-voice', castLines, {
+    paced: options?.paced ?? false,
+    preamble: options?.preamble,
+    pacedText: options?.pacedText,
   });
 }
 
-export function playTTS(text: string, sims?: SentientSim[]) {
+// Called as each scene line starts playing so the in-game subtitle appears in step
+// with the voice playback; the preamble (the scene's driving action) heads each
+// line's subtitle section in-game
+export function sendSceneLineToMod(line: DialogueLine & { preamble?: string }) {
+  sendModNotification({
+    type: ModWebsocketMessageType.SCENE_LINE,
+    speaker: line.speaker,
+    // Scene lines land in the same Flash htmlText list as memories — see neutralizeMarkup
+    text: neutralizeMarkup(line.text),
+    preamble: line.preamble ? neutralizeMarkup(line.preamble) : line.preamble,
+  });
+}
+
+export function playTTS(text: string, sims?: SentientSim[], voiceOverrides?: Map<string, string>) {
   const lines = parseDialogueLines(
     text,
     sims?.map((sim) => sim.name),
@@ -118,11 +138,11 @@ export function playTTS(text: string, sims?: SentientSim[]) {
   // line when every line of the response was accounted for; otherwise read the whole thing.
   const nonEmptyLineCount = text.split('\n').filter((line) => line.trim().length > 0).length;
   if (lines.length < nonEmptyLineCount) {
-    playTTSLines([{ speaker: 'Narrator', text: text.trim() }]);
+    playTTSLines([{ speaker: 'Narrator', text: text.trim() }], sims, { voiceOverrides });
     return;
   }
 
-  playTTSLines(lines, sims);
+  playTTSLines(lines, sims, { voiceOverrides });
 }
 
 export function sendPopUpNotification(message?: string) {

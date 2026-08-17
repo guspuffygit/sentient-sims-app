@@ -9,6 +9,7 @@ import { SyntheticEvent, useMemo, useState } from 'react';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import AppCard from './AppCard';
 import DebugLogsSettingsComponent from './settings/DebugLogsSettingsComponent';
+import MemoryRetrievalSettingsComponent from './settings/MemoryRetrievalSettingsComponent';
 import DirectedScenesSettingsComponent from './settings/DirectedScenesSettingsComponent';
 import { AnimationMappingSettingsComponent } from './settings/AnimationMappingSettingsComponent';
 import { ModsDirectoryComponent } from './ModsDirectoryComponent';
@@ -83,6 +84,7 @@ export default function SettingsPage() {
             <GameAppPathComponent />
             <DirectedScenesSettingsComponent />
             <DebugLogsSettingsComponent />
+            <MemoryRetrievalSettingsComponent />
             <ProviderConfigsComponent />
             <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
             <ProviderConnectionSettingsComponent />

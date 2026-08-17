@@ -8,6 +8,7 @@ import { DirectedSceneRequest } from '../models/DirectedSceneRequest';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { ApiClient } from './ApiClient';
 import { axiosClient } from './AxiosClient';
+import { parseJsonResponse } from './jsonResponse';
 
 export class AIClient extends ApiClient {
   async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
@@ -33,8 +34,10 @@ export class AIClient extends ApiClient {
     const response = await fetch(`${this.apiUrl}/ai/v2/models${query}`);
 
     if (!response.ok) {
+      // Read the body once: a second read after a failed json() parse throws "Body is unreachable"
+      const textMessage = await response.text();
       try {
-        const errorResponse = (await response.json()) as { error?: string };
+        const errorResponse = JSON.parse(textMessage) as { error?: string };
         const errorMessage = errorResponse.error || 'Unknown JSON error occurred';
         throw new SentientSimsAIError(`Error getting models: ${errorMessage}`);
       } catch (e: unknown) {
@@ -43,11 +46,10 @@ export class AIClient extends ApiClient {
         }
 
         // If JSON parsing fails, fall back to plain text error message
-        const textMessage = await response.text();
         throw new Error(`Error getting models message: ${textMessage}`, { cause: e });
       }
     }
 
-    return (await response.json()) as AIModel[];
+    return parseJsonResponse<AIModel[]>(response, 'Unable to load AI models');
   }
 }

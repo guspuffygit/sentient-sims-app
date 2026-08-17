@@ -16,11 +16,11 @@ export class MemoriesController {
     this.ctx = ctx;
   }
 
-  getMemory = (req: Request, res: Response) => {
+  getMemory = (req: Request<{ memoryId: string }>, res: Response) => {
     try {
       const { memoryId } = req.params;
       const result = this.ctx.memoryRepository.getMemory({
-        id: Number(memoryId),
+        id: memoryId,
       });
       return res.json(result);
     } catch (err) {
@@ -44,11 +44,11 @@ export class MemoriesController {
     }
   };
 
-  updateMemory = (req: Request, res: Response) => {
+  updateMemory = (req: Request<{ memoryId: string }>, res: Response) => {
     try {
       const { memoryId } = req.params;
       const memory = req.body as MemoryEntity;
-      memory.id = Number(memoryId);
+      memory.id = memoryId;
 
       this.ctx.memoryRepository.updateMemory(memory);
       return res.json({
@@ -76,7 +76,7 @@ export class MemoriesController {
     try {
       const { memoryId } = req.params;
 
-      this.ctx.memoryRepository.deleteMemory({ id: Number(memoryId) });
+      this.ctx.memoryRepository.deleteMemory({ id: memoryId });
       return res.json({ text: `Deleted memory with id: ${memoryId}` });
     } catch (err) {
       log.error('Error deleting memory', err);

@@ -9,6 +9,7 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import AppCard from './AppCard';
 import { EmptyState } from './components/EmptyState';
 import { MemoryEditInput } from './components/MemoryEditInput';
+import { SimVoiceSelect, SimVoiceSelection } from './components/SimVoiceSelect';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
 import { useOnDatabaseLoaded } from './hooks/useOnDatabaseLoaded';
 import { useWebsocket } from './providers/WebsocketProvider';
@@ -19,9 +20,18 @@ type SelectedSim = {
   index: number;
 };
 
-const columns: GridColDef[] = [
+const columns: GridColDef<ParticipantDTO>[] = [
   { field: 'id', headerName: 'ID', width: 150, hideable: true },
   { field: 'name', headerName: 'Name', width: 250 },
+  {
+    field: 'voiceId',
+    headerName: 'Voice',
+    width: 180,
+    valueGetter: (value: string | undefined, row: ParticipantDTO) => {
+      if (!value) return 'Default';
+      return row.voiceName ?? value;
+    },
+  },
   {
     field: 'description',
     headerName: 'Description',
@@ -107,7 +117,11 @@ export default function SimsPage() {
       log.debug(`Edited Sim: ${JSON.stringify(editedSim.sim)}`);
 
       try {
-        await client.participant.updateParticipant(editedSim.sim);
+        await client.participant.updateParticipant({
+          ...editedSim.sim,
+          // Always sent so picking "Default" clears a previously pinned voice
+          voiceId: editedSim.sim.voiceId ?? '',
+        });
       } catch (error) {
         log.error('Error saving updated sim', error);
         if (error instanceof Error && error.cause) {
@@ -140,9 +154,23 @@ export default function SimsPage() {
     setEditedSim((previousSim) => ({
       index: Number(previousSim?.index),
       sim: {
+        ...previousSim?.sim,
         id: previousSim?.sim.id || '',
         name: previousSim?.sim.name || '',
         description: event.target.value,
+      },
+    }));
+  }, []);
+
+  const handleVoiceEdit = useCallback((voice: SimVoiceSelection) => {
+    setEditedSim((previousSim) => ({
+      index: Number(previousSim?.index),
+      sim: {
+        ...previousSim?.sim,
+        id: previousSim?.sim.id || '',
+        name: previousSim?.sim.name || '',
+        voiceId: voice.voiceId,
+        voiceName: voice.voiceName,
       },
     }));
   }, []);
@@ -209,6 +237,12 @@ export default function SimsPage() {
             </CardActions>
           }
         >
+          <SimVoiceSelect
+            voiceId={editedSim.sim.voiceId}
+            voiceName={editedSim.sim.voiceName}
+            onChange={handleVoiceEdit}
+          />
+
           <MemoryEditInput
             label="Description"
             handleEdit={handleDescriptionEdit}
@@ -235,6 +269,14 @@ export default function SimsPage() {
               <DataGrid
                 rows={sims}
                 columns={columns}
+                showToolbar
+                // The footer (and with it the pagination controls) is hidden, so anything past the
+                // grid's default 100-row page would be unreachable. -1 renders every row instead.
+                pageSizeOptions={[{ value: -1, label: 'All' }]}
+                initialState={{
+                  pagination: { paginationModel: { page: 0, pageSize: -1 } },
+                  sorting: { sortModel: [{ field: 'name', sort: 'asc' }] },
+                }}
                 slots={{
                   footer: BlankDataGridFooterComponent,
                 }}

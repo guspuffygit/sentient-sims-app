@@ -40,4 +40,24 @@ describe('DbService', () => {
     ctx.db.unloadDatabase();
     expect(ctx.directory.listSentientSimsDbUnsaved()).toHaveLength(0);
   });
+
+  it('Reloading the same session is a no-op', () => {
+    const backfill = vi.spyOn(ctx.memoryAnnotation, 'backfillInBackground');
+
+    ctx.db.loadDatabase({ sessionId: 'session-a', saveId: '1' });
+    expect(ctx.db.sessionKey).toEqual('session-a:1');
+
+    // The mod requests a load on zone load and again on websocket open — the
+    // second identical request must not rerun migrations or the backfill
+    ctx.db.loadDatabase({ sessionId: 'session-a', saveId: '1' });
+    expect(backfill).toHaveBeenCalledTimes(1);
+
+    // A different save id under the same session still reloads
+    ctx.db.loadDatabase({ sessionId: 'session-a', saveId: '2' });
+    expect(backfill).toHaveBeenCalledTimes(2);
+    expect(ctx.db.sessionKey).toEqual('session-a:2');
+
+    ctx.db.unloadDatabase();
+    expect(ctx.db.sessionKey).toBeUndefined();
+  });
 });

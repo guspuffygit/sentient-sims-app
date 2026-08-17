@@ -36,6 +36,28 @@ export type GenerationOptions = {
 
 const maxGroupSizeLength = 1700;
 
+// How many retrieved memories ride along in the prompt, and how long each is allowed to
+// be — six short lines of history, never a second transcript.
+const relevantMemoryCount = 6;
+const maxRelevantMemoryLength = 280;
+
+// How long a canceled-outcome row stays in the verbatim scene transcript. Recent enough to
+// stop a sim retrying an impossible action; short enough that failed bookkeeping doesn't
+// ride along in every later prompt (live, "grab_snack was canceled" followed the story for
+// the rest of the session). The rows stay in the DB for retrieval either way.
+const canceledOutcomeSceneWindowMs = 10 * 60 * 1000;
+
+// A memory row can hold several kinds of text; pick the most factual one and keep it short.
+export function summarizeMemory(memory: MemoryEntity): string {
+  const text = (memory.observation || memory.content || memory.action || memory.pre_action || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (text.length <= maxRelevantMemoryLength) {
+    return text;
+  }
+  return `${text.slice(0, maxRelevantMemoryLength).trimEnd()}…`;
+}
+
 export type PromptRequestBuilderOptions = GenerationOptions & {
   apiType: ApiType;
   modelSettings: ModelSettings;
@@ -87,13 +109,14 @@ export class PromptRequestBuilderService {
         if (defaultRelationshipBitDescriptions.has(bit.name)) {
           const bitDescription = defaultRelationshipBitDescriptions.get(bit.name);
           if (!bitDescription?.ignored && bitDescription?.description) {
-            relationshipDescriptions.push(
-              formatAction(
-                bitDescription.description,
-                [sims.get(bit.sim_one_id) as SentientSim, sims.get(bit.sim_two_id) as SentientSim],
-                location,
-              ),
-            );
+            const simOne = sims.get(bit.sim_one_id);
+            const simTwo = sims.get(bit.sim_two_id);
+            // Group events carry pairwise bits for the whole conversation; a bit whose
+            // sims aren't both in this (possibly narrowed) event can't be described
+            if (!simOne || !simTwo) {
+              return;
+            }
+            relationshipDescriptions.push(formatAction(bitDescription.description, [simOne, simTwo], location));
           }
         }
       });
@@ -155,12 +178,112 @@ export class PromptRequestBuilderService {
     return undefined;
   }
 
-  getMemories(sentientSims: SentientSim[]) {
-    const participantIds = sentientSims.map((sentientSim) => sentientSim.sim_id);
+  // Only the current scene's raw memories are replayed verbatim. Everything from earlier scenes
+  // is represented by the distilled reflections in the <PAST_REFLECTIONS> block instead.
+  getMemories() {
+    const scene = this.ctx.sceneService.getCurrentScene();
+    if (!scene) {
+      return [];
+    }
 
-    return this.ctx.memoryRepository.getParticipantsMemories({
-      participant_ids: participantIds,
+    const rows = this.ctx.memoryRepository.getSceneMemories(scene.locationId, scene.startedAt);
+    const cutoff = Date.now() - canceledOutcomeSceneWindowMs;
+    return rows.filter((memory) => {
+      if (memory.event_type !== 'outcome') {
+        return true;
+      }
+      // 'was canceled' matches CognitionController's outcomeVerb() exactly; success and
+      // failure outcomes keep flowing into scene context — they read naturally
+      if (!memory.observation || !memory.observation.includes('was canceled')) {
+        return true;
+      }
+      if (!memory.timestamp) {
+        return false;
+      }
+      const storedAt = Date.parse(`${memory.timestamp.replace(' ', 'T')}Z`);
+      return !Number.isNaN(storedAt) && storedAt >= cutoff;
     });
+  }
+
+  // Collects the reflections that matter for this moment, deduped and newest first:
+  // the most recent overall, the most recent at this location, and the most recent involving
+  // the sims currently in the interaction.
+  getReflections(event: SSEvent): MemoryEntity[] {
+    const locationId = event.environment.location_id;
+    const participantIds = event.sentient_sims.map((sentientSim) => sentientSim.sim_id);
+
+    const collected: MemoryEntity[] = [
+      ...this.ctx.memoryRepository.getRecentReflections(3),
+      ...this.ctx.memoryRepository.getRecentReflectionsForLocation(locationId, 2),
+      ...this.ctx.memoryRepository.getRecentReflectionsForParticipants(participantIds, 2),
+    ];
+
+    const byId = new Map<string, MemoryEntity>();
+    collected.forEach((reflection) => {
+      if (reflection.id !== undefined) {
+        byId.set(reflection.id, reflection);
+      }
+    });
+
+    return Array.from(byId.values()).sort((a, b) => (b.timestamp ?? '').localeCompare(a.timestamp ?? ''));
+  }
+
+  private buildReflectionsBlock(reflections: MemoryEntity[]): string | undefined {
+    if (reflections.length === 0) {
+      return undefined;
+    }
+
+    const lines = reflections.map((reflection) => {
+      const location = this.ctx.locationRepository.getLocation({ id: reflection.location_id });
+      return `[At ${location.name}] ${reflection.content}`;
+    });
+
+    return [
+      '<PAST_REFLECTIONS>',
+      ...lines,
+      '</PAST_REFLECTIONS>',
+      'These are the characters’ distilled memories of past scenes. Draw on them only when relevant; do not recap them.',
+    ].join('\n');
+  }
+
+  // Older memories that score as relevant to this moment (Block 5 retrieval). The current
+  // scene's rows and the reflections already shown are excluded so this block only ever
+  // adds information the prompt doesn't have yet.
+  async getRelevantMemories(event: SSEvent, queryText: string, excludeMemoryIds: string[]): Promise<MemoryEntity[]> {
+    if (!this.ctx.settings.memoryRetrievalEnabled) {
+      return [];
+    }
+
+    try {
+      const retrieved = await this.ctx.memoryRetrieval.retrieve({
+        participantIds: event.sentient_sims.map((sentientSim) => sentientSim.sim_id),
+        queryText,
+        k: relevantMemoryCount,
+        excludeMemoryIds,
+      });
+      return retrieved.map((result) => result.memory);
+    } catch (error) {
+      log.error('[Memory] Retrieval failed, continuing without relevant memories', error);
+      return [];
+    }
+  }
+
+  private buildRelevantMemoriesBlock(memories: MemoryEntity[]): string | undefined {
+    if (memories.length === 0) {
+      return undefined;
+    }
+
+    const lines = memories.map((memory) => {
+      const location = this.ctx.locationRepository.getLocation({ id: memory.location_id });
+      return `[At ${location.name}] ${summarizeMemory(memory)}`;
+    });
+
+    return [
+      '<RELEVANT_MEMORIES>',
+      ...lines,
+      '</RELEVANT_MEMORIES>',
+      'These are past moments the characters genuinely remember. Draw on them only when relevant; do not recap them.',
+    ].join('\n');
   }
 
   groupMemories(memories: MemoryEntity[]): FormattedMemoryMessage[] {
@@ -168,7 +291,7 @@ export class PromptRequestBuilderService {
 
     const locations: Record<number, LocationEntity> = {};
 
-    const addMessage = (role: ChatCompletionMessageRole, text: string, locationId: number) => {
+    const addMessage = (role: ChatCompletionMessageRole, text: string, locationId: number, includeLocation = true) => {
       if (!(locationId in locations)) {
         locations[locationId] = this.ctx.locationRepository.getLocation({
           id: locationId,
@@ -181,7 +304,8 @@ export class PromptRequestBuilderService {
       if (messages.length > 0 && messages[messages.length - 1].role === role) {
         if (
           messages[messages.length - 1].content.length < maxGroupSizeLength &&
-          location.id === messages[messages.length - 1].location
+          location.id === messages[messages.length - 1].location &&
+          includeLocation === messages[messages.length - 1].includeLocation
         ) {
           messages[messages.length - 1].content += ` ${text.trim()}`;
           return;
@@ -193,6 +317,7 @@ export class PromptRequestBuilderService {
             content: 'Continue talking and interacting',
             role: 'user',
             location: locationId,
+            includeLocation: false,
           });
         }
       }
@@ -202,19 +327,21 @@ export class PromptRequestBuilderService {
           content: text,
           role,
           location: locationId,
+          includeLocation,
         });
       } else {
         messages.push({
-          content: `At ${location.name} (${location.lot_type}), ${text}`,
+          content: includeLocation ? `At ${location.name} (${location.lot_type}), ${text}` : text,
           role,
           location: locationId,
+          includeLocation,
         });
       }
     };
 
     memories.forEach((memory) => {
       if (memory.pre_action && memory.pre_action.trim()) {
-        addMessage('user', memory.pre_action, memory.location_id);
+        addMessage('user', `(${memory.pre_action})`, memory.location_id, false);
       }
 
       if (memory.action && memory.action.trim()) {
@@ -287,7 +414,7 @@ export class PromptRequestBuilderService {
     return `<SCENE_GUIDANCE>\n${lines.join(' ')}\n</SCENE_GUIDANCE>`;
   }
 
-  buildPromptRequest(event: SSEvent, options: PromptRequestBuilderOptions): PromptRequest {
+  async buildPromptRequest(event: SSEvent, options: PromptRequestBuilderOptions): Promise<PromptRequest> {
     const location = this.ctx.locationRepository.getLocation({
       id: event.environment.location_id,
     });
@@ -391,8 +518,37 @@ export class PromptRequestBuilderService {
       sims.push(this.buildDirectorBlock(event));
       sims.push(this.buildSceneGuidance());
     }
-    const memories = this.getMemories(event.sentient_sims);
+
+    const reflections = this.getReflections(event);
+    const reflectionsBlock = this.buildReflectionsBlock(reflections);
+    if (reflectionsBlock) {
+      sims.push(reflectionsBlock);
+    }
+
+    const memories = this.getMemories();
     const groupedMemories = this.groupMemories(memories);
+
+    // Retrieval query: what is about to happen plus who is involved. Scene rows and shown
+    // reflections are already in the prompt, so they are excluded from retrieval.
+    const queryText = [formattedPreAction ?? formattedAction ?? '', ...event.sentient_sims.map((sim) => sim.name)]
+      .join(' ')
+      .trim();
+    const excludeMemoryIds = [...memories, ...reflections]
+      .map((memory) => memory.id)
+      .filter((id): id is string => id !== undefined);
+    const relevantMemories = await this.getRelevantMemories(event, queryText, excludeMemoryIds);
+    const relevantMemoriesBlock = this.buildRelevantMemoriesBlock(relevantMemories);
+    if (relevantMemoriesBlock) {
+      sims.push(relevantMemoriesBlock);
+    }
+
+    const currentScene = this.ctx.sceneService.getCurrentScene();
+    log.info(
+      `[Memory] Scene ${currentScene ? `${currentScene.sceneId} (location ${currentScene.locationId})` : 'none'}: ` +
+        `${memories.length} scene memories, ${reflections.length} reflections ` +
+        `[${reflections.map((reflection) => reflection.id).join(', ')}], ` +
+        `${relevantMemories.length} retrieved [${relevantMemories.map((memory) => memory.id).join(', ')}]`,
+    );
     const formattedLocation = formatAction(
       '<LOCATION>\n{location} ({location_type}), {location_description}\n</LOCATION>',
       event.sentient_sims,

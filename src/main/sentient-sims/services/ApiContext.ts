@@ -1,6 +1,7 @@
 import { AIController } from '../controllers/AIController';
 import { AnimationsController } from '../controllers/AnimationsController';
 import { AssetsController } from '../controllers/AssetsController';
+import { CognitionController } from '../controllers/CognitionController';
 import { DbController } from '../controllers/DbController';
 import { DebugController } from '../controllers/DebugController';
 import { FileController } from '../controllers/FileController';
@@ -19,6 +20,7 @@ import { VersionController } from '../controllers/VersionController';
 import { VoiceController } from '../controllers/VoiceController';
 import { InteractionRepository } from '../db/InteractionRepository';
 import { LocationRepository } from '../db/LocationRepository';
+import { MemoryIndexRepository } from '../db/MemoryIndexRepository';
 import { MemoryRepository } from '../db/MemoryRepository';
 import { ParticipantRepository } from '../db/ParticipantRepository';
 import { ApiType } from '../models/ApiType';
@@ -26,12 +28,16 @@ import { LLaMaTokenCounter } from '../tokens/LLaMaTokenCounter';
 import { NovelAITokenCounter } from '../tokens/NovelAITokenCounter';
 import { OpenAITokenCounter } from '../tokens/OpenAITokenCounter';
 import { TokenCounter } from '../tokens/TokenCounter';
+import { ActionDispatcherService } from './ActionDispatcherService';
 import { AIService } from './AIService';
 import { AnimationsService } from './AnimationsService';
 import { DbService } from './DbService';
 import { DirectoryService } from './DirectoryService';
+import { ElevenLabsVoicesService } from './ElevenLabsVoicesService';
+import { EmbeddingService, NoopEmbeddingService, OpenAIEmbeddingService } from './EmbeddingService';
 import { GameSigningService } from './GameSigningService';
 import { GeminiService } from './GeminiService';
+import { GenerationQueueService } from './GenerationQueueService';
 import { GenerationService } from './GenerationService';
 import { InteractionService } from './InteractionService';
 import { KoboldAIService } from './KoboldAIService';
@@ -39,13 +45,16 @@ import { LastExceptionService } from './LastExceptionService';
 import { LogSendService } from './LogSendService';
 import { LogsService } from './LogsService';
 import { MappingService } from './MappingService';
-import { EmbeddingService, NoopEmbeddingService, OpenAIEmbeddingService } from './EmbeddingService';
+import { MemoryAnnotationService } from './MemoryAnnotationService';
+import { MemoryRetrievalService } from './MemoryRetrievalService';
 import { InteractionSemanticSearchService } from './InteractionSemanticSearchService';
 import { ModelSettingsService } from './ModelSettingsService';
 import { NovelAIService } from './NovelAIService';
 import { OpenAIService } from './OpenAIService';
+import { OpenRouterService } from './OpenRouterService';
 import { PatreonService } from './PatreonService';
 import { PromptRequestBuilderService } from './PromptRequestBuilderService';
+import { SceneService } from './SceneService';
 import { ProviderConfigService } from './ProviderConfigService';
 import { SentientSimsAIService } from './SentientSimsAIService';
 import { SettingsService } from './SettingsService';
@@ -81,6 +90,7 @@ class ControllerContext {
   private readonly _mappingController: MappingController;
   private readonly _newsController: NewsController;
   private readonly _optionsController: OptionsController;
+  private readonly _cognitionController: CognitionController;
 
   constructor(ctx: ApiContext) {
     this._versionController = new VersionController(ctx);
@@ -95,13 +105,14 @@ class ControllerContext {
     this._loginController = new LoginController(ctx);
     this._debugController = new DebugController(ctx);
     this._interactionDescriptionController = new InteractionDescriptionController(ctx);
-    this._voiceController = new VoiceController();
+    this._voiceController = new VoiceController(ctx);
     this._aiController = new AIController(ctx);
     this._animationsController = new AnimationsController(ctx);
     this._assetsController = new AssetsController(ctx);
     this._mappingController = new MappingController(ctx);
     this._newsController = new NewsController(ctx);
     this._optionsController = new OptionsController(ctx);
+    this._cognitionController = new CognitionController(ctx);
   }
 
   get version(): VersionController {
@@ -179,6 +190,10 @@ class ControllerContext {
   get options(): OptionsController {
     return this._optionsController;
   }
+
+  get cognition(): CognitionController {
+    return this._cognitionController;
+  }
 }
 
 export class ApiContext {
@@ -199,15 +214,22 @@ export class ApiContext {
   private readonly _animationsService: AnimationsService;
   private readonly _interactionService: InteractionService;
   private readonly _aiService: AIService;
+  private readonly _generationQueueService: GenerationQueueService;
   private readonly _mappingService: MappingService;
+  private readonly _sceneService: SceneService;
+  private readonly _actionDispatcherService: ActionDispatcherService;
   private readonly _openAIEmbeddingService: OpenAIEmbeddingService;
   private readonly _noopEmbeddingService: NoopEmbeddingService;
+  private readonly _memoryAnnotationService: MemoryAnnotationService;
+  private readonly _memoryRetrievalService: MemoryRetrievalService;
   private readonly _interactionSemanticSearchService: InteractionSemanticSearchService;
   private readonly _gameSigningService: GameSigningService;
+  private readonly _elevenLabsVoicesService: ElevenLabsVoicesService;
 
   // --- Repositories ---
   private readonly _locationRepository: LocationRepository;
   private readonly _memoryRepository: MemoryRepository;
+  private readonly _memoryIndexRepository: MemoryIndexRepository;
   private readonly _participantRepository: ParticipantRepository;
   private readonly _interactionRepository: InteractionRepository;
 
@@ -218,6 +240,8 @@ export class ApiContext {
   private readonly _geminiService: GeminiService;
   private readonly _vllmAIService: VLLMAIService;
   private readonly _openAIService: OpenAIService;
+
+  private readonly _openRouterService: OpenRouterService;
   private readonly _modelSettingsService: ModelSettingsService;
   private readonly _providerConfigService: ProviderConfigService;
 
@@ -239,6 +263,7 @@ export class ApiContext {
     this._geminiService = new GeminiService(this);
     this._vllmAIService = new VLLMAIService(this);
     this._openAIService = new OpenAIService(this);
+    this._openRouterService = new OpenRouterService(this);
 
     this._novelAITokenCounter = new NovelAITokenCounter();
     this._openAITokenCounter = new OpenAITokenCounter();
@@ -258,19 +283,30 @@ export class ApiContext {
 
     this._locationRepository = new LocationRepository(this._db);
     this._memoryRepository = new MemoryRepository(this._db);
+    this._memoryIndexRepository = new MemoryIndexRepository(this._db);
     this._participantRepository = new ParticipantRepository(this._db);
     this._interactionRepository = new InteractionRepository(this);
+
+    this._sceneService = new SceneService();
+    this._actionDispatcherService = new ActionDispatcherService();
+    this._openAIEmbeddingService = new OpenAIEmbeddingService(this);
+    this._noopEmbeddingService = new NoopEmbeddingService();
 
     this._promptBuilder = new PromptRequestBuilderService(this);
     this._interactionService = new InteractionService(this);
 
     this._aiService = new AIService(this);
+    this._generationQueueService = new GenerationQueueService(this);
     this._mappingService = new MappingService();
 
-    this._openAIEmbeddingService = new OpenAIEmbeddingService(this);
-    this._noopEmbeddingService = new NoopEmbeddingService();
+    this._memoryAnnotationService = new MemoryAnnotationService(this);
+    this._memoryRetrievalService = new MemoryRetrievalService(this);
     this._interactionSemanticSearchService = new InteractionSemanticSearchService(this);
     this._gameSigningService = new GameSigningService(this);
+    this._elevenLabsVoicesService = new ElevenLabsVoicesService(this);
+    this._memoryRepository.setOnMemoryUpserted((memory) => {
+      this._memoryAnnotationService.annotateInBackground(memory);
+    });
 
     this._controller = new ControllerContext(this);
   }
@@ -335,13 +371,37 @@ export class ApiContext {
     return this._aiService;
   }
 
+  get generationQueue(): GenerationQueueService {
+    return this._generationQueueService;
+  }
+
   get mapping(): MappingService {
     return this._mappingService;
   }
 
-  // Evaluated per access so setting an OpenAI key at runtime upgrades from Noop
+  get sceneService(): SceneService {
+    return this._sceneService;
+  }
+
+  get actionDispatcher(): ActionDispatcherService {
+    return this._actionDispatcherService;
+  }
+
+  // Evaluated per access so setting an OpenAI key at runtime upgrades from Noop.
+  // Gated behind memoryRetrievalEnabled; off by default.
   get embedding(): EmbeddingService {
+    if (!this._settings.memoryRetrievalEnabled) {
+      return this._noopEmbeddingService;
+    }
     return this._openAIEmbeddingService.isAvailable() ? this._openAIEmbeddingService : this._noopEmbeddingService;
+  }
+
+  get memoryAnnotation(): MemoryAnnotationService {
+    return this._memoryAnnotationService;
+  }
+
+  get memoryRetrieval(): MemoryRetrievalService {
+    return this._memoryRetrievalService;
   }
 
   get interactionSemanticSearch(): InteractionSemanticSearchService {
@@ -350,6 +410,10 @@ export class ApiContext {
 
   get gameSigning(): GameSigningService {
     return this._gameSigningService;
+  }
+
+  get elevenLabsVoices(): ElevenLabsVoicesService {
+    return this._elevenLabsVoicesService;
   }
 
   get modelSettings(): ModelSettingsService {
@@ -362,6 +426,10 @@ export class ApiContext {
 
   get memoryRepository(): MemoryRepository {
     return this._memoryRepository;
+  }
+
+  get memoryIndexRepository(): MemoryIndexRepository {
+    return this._memoryIndexRepository;
   }
 
   get participantRepository(): ParticipantRepository {
@@ -396,6 +464,10 @@ export class ApiContext {
     return this._openAIService;
   }
 
+  private get openRouterService(): OpenRouterService {
+    return this._openRouterService;
+  }
+
   get providerConfigs(): ProviderConfigService {
     return this._providerConfigService;
   }
@@ -419,6 +491,10 @@ export class ApiContext {
 
     if (aiType === ApiType.VLLM) {
       return this.vllmAIService;
+    }
+
+    if (aiType === ApiType.OpenRouter) {
+      return this.openRouterService;
     }
 
     return this.openAIService;

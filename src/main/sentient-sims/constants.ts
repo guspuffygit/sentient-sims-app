@@ -77,9 +77,14 @@ export const defaultWantsSystemPrompt = 'You are the following character in the 
 export const defaultWantsPrompt =
   'If you were the character in the story, what are your wants right now? Respond in the first person';
 
-// Scene dialogue plays like subtitles: consecutive line starts are spaced at least this far
-// apart so one character finishes their moment before the next one speaks
-export const subtitleLinePacingMs = 8000;
+// Scene dialogue paces like a real conversation: each line runs for its audio's duration
+// (or a reading-time estimate when there is no audio), then the next follows after a beat
+export const sceneLineGapMs = 700;
+
+// How long a subtitle line needs on screen when no audio is timing it
+export function sceneLineReadingHoldMs(text: string): number {
+  return Math.min(8000, Math.max(2500, 1500 + 55 * text.length));
+}
 
 // The mod abandons an interaction request after 80 seconds. The directed pipeline stops
 // starting new AI calls past this point so a classic single-call fallback still fits.
@@ -90,10 +95,14 @@ export const modWebsocketPort = 25145;
 export const appApiPort = 25148;
 export const appApiUrl = `http://localhost:${appApiPort}`;
 export const openaiDefaultEndpoint = 'https://api.openai.com/v1';
+// Must stay the API root: the OpenAI SDK appends /chat/completions and /models itself.
+export const openrouterDefaultEndpoint = 'https://openrouter.ai/api/v1';
 export const koboldaiDefaultEndpoint = 'http://localhost:5000';
 export const novelaiDefaultEndpoint = 'https://api.novelai.net';
 export const novelaiGenerationDefaultEndpoint = 'https://text.novelai.net';
 export const openaiDefaultModel = 'gpt-4o-mini';
+// Cheap, fast, uncensored, and a 131k context window - see openrouterRecommendedModels.
+export const openrouterDefaultModel = 'mistralai/mistral-nemo';
 export const novelaiDefaultModel = 'kayra-v1';
 export const sentientSimsAIDefaultModel = 'Gryphe/MythoMax-L2-13b';
 export const tokenizerBreakString = '<<BREAK>>';
@@ -124,6 +133,27 @@ export const geminiDefaultEndpoint = 'https://generativelanguage.googleapis.com/
 export const defaultTTSEnabled = false;
 export const defaultTTSVolume = 0.75;
 export const defaultMaxResponseTokens = 90;
+export const defaultGenerationTimeoutSeconds = 60;
+export const defaultGenerationConcurrency = 1;
+export const defaultPrefetchMaxQueueDepth = 2;
+// How long a claimed generation may keep cooking after the animation ends before the
+// result is abandoned for the pre-action fallback. Scenes queue and play in order, so a
+// late-arriving generation still lands well; a full minute of leeway means dialogue is
+// only dropped when the model is truly stuck.
+export const postAnimationGraceMs = 60000;
+// Safety cap on a claim wait if finalize never arrives; must stay under the mod's 80s
+// claim HTTP timeout.
+export const claimMaxWaitMs = 75000;
+export const prefetchTtlMs = 180000;
+// A prefetch that dies on a transient provider error (429 rate limit, network blip) retries
+// with backoff instead of silently falling back — live, one 429 at app start left the
+// prefetch lane dead-looking for a whole session. Retries stay within prefetchTtlMs.
+export const prefetchRetryBaseMs = 15000;
+export const prefetchMaxAttempts = 3;
+// Quiet period before idle-lane work (memory annotation, embedding backfill) may start.
+// Interactions arrive in bursts, so an instantaneously empty queue is a poor idle signal;
+// annotation results only need to be ready by the next scene, never during this one.
+export const backgroundIdleDelayMs = 10000;
 export const defaultElevenLabsEndpoint = 'https://api.elevenlabs.io/v1';
 export const defaultKokoroEndpoint = 'https://api.kokorotts.com';
 export const defaultVLLMEndpoint = 'http://localhost:8000/v1';

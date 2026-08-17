@@ -12,6 +12,7 @@ export type FormattedMemoryMessage = {
 
 export type PreFormattedMemoryMessage = FormattedMemoryMessage & {
   location: number;
+  includeLocation: boolean;
 };
 
 export type PromptRequest = {

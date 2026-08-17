@@ -24,7 +24,34 @@ export class DbService {
     this.ctx = ctx;
   }
 
+  // Identity of the currently loaded database. Fire-and-forget work (annotation,
+  // backfill) captures this before awaiting and drops its result if a different
+  // database has been loaded in the meantime.
+  get sessionKey(): string | undefined {
+    if (!this.db || !this.databaseSession) {
+      return undefined;
+    }
+    return `${this.databaseSession.sessionId}:${this.databaseSession.saveId}`;
+  }
+
   loadDatabase(databaseSession: DatabaseSession) {
+    // The mod requests a load both on zone load and on websocket open, which at game
+    // boot arrive back to back. If this exact session is already open, the second
+    // request has nothing to do — re-running it would repeat migrations, flush the
+    // generation queue, and kick off a duplicate embedding backfill.
+    if (
+      this.db &&
+      this.databaseSession &&
+      this.databaseSession.sessionId === databaseSession.sessionId &&
+      this.databaseSession.saveId === databaseSession.saveId &&
+      !databaseSession.action
+    ) {
+      log.info(
+        `Database session ${databaseSession.sessionId} (save ${databaseSession.saveId}) already loaded, skipping reload`,
+      );
+      return;
+    }
+
     const unsavedDb = this.ctx.directory.getSentientSimsDbUnsaved(databaseSession);
     const savedDb = this.ctx.directory.getSentientSimsDb(databaseSession);
 
@@ -82,6 +109,10 @@ export class DbService {
 
     this.databaseSession = databaseSession;
 
+    // Loading a save jumps the game state, so any in-progress scene no longer describes reality.
+    this.ctx.generationQueue.flushToFallback();
+    this.ctx.sceneService.reset();
+
     // The mod caches sim descriptions in memory keyed by sim_id and only ever
     // drops that cache on an explicit CLEAR_SIM_CACHE message. Loading a
     // different save (or reloading the same one) leaves the mod serving stale
@@ -91,6 +122,10 @@ export class DbService {
     });
 
     notifyDatabaseLoaded(databaseSession);
+
+    // Saves from before the memory_index existed (or played without an embedder) get
+    // their retrieval metadata filled in here, off the request path. No-op without a key.
+    this.ctx.memoryAnnotation.backfillInBackground();
   }
 
   getDatabaseTemp(saveGame: SaveGame): Database {
@@ -182,6 +217,9 @@ export class DbService {
 
   unloadDatabase() {
     this.closeDatabase();
+
+    this.ctx.generationQueue.flushToFallback();
+    this.ctx.sceneService.reset();
 
     // Cleanup unsaved databases
     this.ctx.directory.listSentientSimsDbUnsaved().forEach((unsavedDb) => {

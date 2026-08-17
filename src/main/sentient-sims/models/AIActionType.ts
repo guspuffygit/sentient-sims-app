@@ -14,6 +14,10 @@ export enum AIActionType {
   CLASSIFICATION = 'classification',
   BUFF = 'buff',
   GENERATE = 'generate',
+  DIRECTED_SCENE_DIRECTOR = 'directed_scene_director',
+  DIRECTED_SCENE_ACTOR = 'directed_scene_actor',
+  DIRECTED_SCENE_REVIEWER = 'directed_scene_reviewer',
+  REFLECTION = 'reflection',
 }
 
 export const AllAIActionTypes: AIActionType[] = [
@@ -27,6 +31,10 @@ export const AllAIActionTypes: AIActionType[] = [
   AIActionType.CLASSIFICATION,
   AIActionType.BUFF,
   AIActionType.GENERATE,
+  AIActionType.DIRECTED_SCENE_DIRECTOR,
+  AIActionType.DIRECTED_SCENE_ACTOR,
+  AIActionType.DIRECTED_SCENE_REVIEWER,
+  AIActionType.REFLECTION,
 ];
 
 // configId per action; missing key means "use the default provider config"
@@ -54,6 +62,14 @@ export function AIActionTypeName(actionType: AIActionType): string {
       return 'Buff';
     case AIActionType.GENERATE:
       return 'Chat Generation';
+    case AIActionType.DIRECTED_SCENE_DIRECTOR:
+      return 'Directed Scene: Director';
+    case AIActionType.DIRECTED_SCENE_ACTOR:
+      return 'Directed Scene: Actor';
+    case AIActionType.DIRECTED_SCENE_REVIEWER:
+      return 'Directed Scene: Reviewer';
+    case AIActionType.REFLECTION:
+      return 'Scene Reflection';
     default:
       return actionType;
   }
@@ -81,6 +97,14 @@ export function AIActionTypeDescription(actionType: AIActionType): string {
       return 'Buff mood classification and description generation';
     case AIActionType.GENERATE:
       return 'Chat tab generation in the app';
+    case AIActionType.DIRECTED_SCENE_DIRECTOR:
+      return 'Directed scene briefings written by the director';
+    case AIActionType.DIRECTED_SCENE_ACTOR:
+      return 'Directed scene dialogue lines performed by each actor';
+    case AIActionType.DIRECTED_SCENE_REVIEWER:
+      return 'Directed scene final review and cleanup pass';
+    case AIActionType.REFLECTION:
+      return 'End-of-scene reflection memories';
     default:
       return '';
   }

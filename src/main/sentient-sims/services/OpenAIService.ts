@@ -7,6 +7,7 @@ import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel } from '../models/AIModel';
 import { openaiDefaultEndpoint } from '../constants';
+import { buildOpenRouterModels, isOpenRouterEndpoint } from '../models/OpenRouterModels';
 import { ApiContext } from './ApiContext';
 
 export class OpenAIKeyNotSetError extends Error {
@@ -17,9 +18,11 @@ export class OpenAIKeyNotSetError extends Error {
 }
 
 export class OpenAIService implements GenerationService {
-  private readonly ctx: ApiContext;
+  protected readonly ctx: ApiContext;
 
   private openAIClient?: OpenAI;
+
+  private openAIClientConfig?: string;
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
@@ -31,6 +34,12 @@ export class OpenAIService implements GenerationService {
 
   getOpenAIModel(): string {
     return this.ctx.settings.openaiModel;
+  }
+
+  // Only OpenAI itself is known to honour the strict json_schema response format used for
+  // guided choice. Every other OpenAI-compatible backend gets a plain prompt instead.
+  protected supportsJsonSchema(): boolean {
+    return this.serviceUrl() === openaiDefaultEndpoint;
   }
 
   getOpenAIKey(): string | undefined {
@@ -51,14 +60,24 @@ export class OpenAIService implements GenerationService {
     throw new OpenAIKeyNotSetError('No OpenAI Key set, Edit OpenAI Key to set it');
   }
 
-  private getOpenAIClient(apiKey?: string): OpenAI {
+  protected getOpenAIClient(apiKey?: string): OpenAI {
     const newApiKey = apiKey ?? this.getOpenAIKey();
-    if (!this.openAIClient || this.openAIClient.apiKey !== newApiKey) {
+    const timeout = this.ctx.settings.generationTimeoutSeconds * 1000;
+    const baseURL = this.serviceUrl();
+    const clientConfig = `${baseURL}:${timeout}`;
+    if (!this.openAIClient || this.openAIClient.apiKey !== newApiKey || this.openAIClientConfig !== clientConfig) {
       this.openAIClient = new OpenAI({
         dangerouslyAllowBrowser: process.env.NODE_ENV === 'test',
         apiKey: newApiKey,
-        baseURL: this.serviceUrl(),
+        baseURL,
+        timeout,
+        maxRetries: 0,
+        // OpenRouter attributes requests to the app on its rankings using these headers.
+        defaultHeaders: isOpenRouterEndpoint(baseURL)
+          ? { 'HTTP-Referer': 'https://sentientsimulations.com', 'X-Title': 'Sentient Sims' }
+          : undefined,
       });
+      this.openAIClientConfig = clientConfig;
     }
 
     return this.openAIClient;
@@ -105,7 +124,7 @@ export class OpenAIService implements GenerationService {
       }),
     };
 
-    if (request.guidedChoice && this.ctx.settings.openaiEndpoint === openaiDefaultEndpoint) {
+    if (request.guidedChoice && this.supportsJsonSchema()) {
       const schema: ResponseFormatJSONSchema = {
         json_schema: {
           name: 'thechoice',
@@ -133,7 +152,7 @@ export class OpenAIService implements GenerationService {
     const result = await this.getOpenAIClient().chat.completions.create(completionRequest);
     let text = this.getOutputFromGeneration(result);
 
-    if (request.guidedChoice && this.ctx.settings.openaiEndpoint === openaiDefaultEndpoint) {
+    if (request.guidedChoice && this.supportsJsonSchema()) {
       const parsed = JSON.parse(text) as { choice: string };
       text = parsed.choice.trim();
     }
@@ -180,6 +199,10 @@ export class OpenAIService implements GenerationService {
   async getModels(): Promise<AIModel[]> {
     const models = await this.getOpenAIClient().models.list();
 
+    if (isOpenRouterEndpoint(this.serviceUrl())) {
+      return buildOpenRouterModels(models.data.map((model) => model.id));
+    }
+
     // These models are the only ones that work with json_schema
     const jsonSchemaModels: Record<string, AIModel> = {
       'gpt-4o-2024-08-06': {
@@ -210,7 +233,7 @@ export class OpenAIService implements GenerationService {
 
     const aiModels: AIModel[] = [];
     models.data.forEach((model) => {
-      if (this.ctx.settings.openaiEndpoint !== openaiDefaultEndpoint) {
+      if (!this.supportsJsonSchema()) {
         aiModels.push({
           name: model.id,
           displayName: model.id,

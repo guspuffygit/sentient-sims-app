@@ -2,13 +2,15 @@ import { createContext, ReactNode, use, useCallback, useEffect, useMemo, useRef,
 import log from 'electron-log';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
-import { subtitleLinePacingMs } from 'main/sentient-sims/constants';
+import { sceneLineGapMs, sceneLineReadingHoldMs } from 'main/sentient-sims/constants';
 import { useElevenLabsTTS } from 'renderer/voice/useElevenLabsTTS';
 import { useSentientSimsTTS } from 'renderer/voice/useSentientSimsTTS';
 import { useAISettings } from './AISettingsProvider';
 
 interface TTSAudioContextType {
-  speak: (text: string) => Promise<void>;
+  // voiceId pins a specific cast voice (currently an ElevenLabs voice id) instead
+  // of the settings default — used by per-sim voice test buttons
+  speak: (text: string, voiceId?: string) => Promise<void>;
   stop: () => void;
   isWebGPUSupported: boolean | null;
   isPlaying: boolean | undefined;
@@ -65,29 +67,43 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
   }, []);
 
   const speak = useCallback(
-    async (text: string) => {
+    async (text: string, voiceId?: string) => {
       if (!text.trim()) return;
 
-      if (aiSettings.ttsEnabled) {
-        await tts?.speak(text);
+      if (!aiSettings.ttsEnabled) return;
+
+      // A pinned voice has to go through the per-line path; plain speak() always
+      // uses the settings default voice
+      if (voiceId && tts?.speakLines) {
+        await tts.speakLines([{ speaker: 'Voice test', text, voiceId }]);
+        return;
       }
+      await tts?.speak(text);
     },
     [aiSettings.ttsEnabled, tts],
   );
 
-  // One scene plays at a time; at most one more may wait. Scenes arriving while the
-  // queue is full are dropped outright so audio never piles up behind gameplay.
-  const maxQueuedScenes = 1;
-  // paced scenes stream each line to the game as it starts playing (the whole-block
-  // in-game subtitle was suppressed on their behalf); a preamble (the scene's driving
-  // action) is shown as a speakerless line right before the first dialogue line
-  const sceneQueueRef = useRef<{ lines: DialogueLine[]; paced: boolean; preamble?: string }[]>([]);
+  // One scene plays at a time; a few more may wait so back-to-back autonomous scenes all
+  // play in order. Beyond that, scenes are dropped so audio never piles up far behind
+  // gameplay. Paced scenes stream each line to the game as it starts playing (the
+  // whole-block in-game subtitle was suppressed on their behalf); the preamble (the
+  // scene's driving action) heads each line's subtitle section
+  const maxQueuedScenes = 3;
+  const sceneQueueRef = useRef<{ lines: DialogueLine[]; paced: boolean; preamble?: string; pacedText?: string }[]>([]);
   const drainingRef = useRef(false);
 
+  // A dropped paced scene will never stream its lines, so tell the main process to
+  // un-suppress its in-game subtitle block before the memory arrives from the mod
+  const reportDroppedScene = useCallback((scene: { paced: boolean; pacedText?: string }) => {
+    if (scene.paced && scene.pacedText) {
+      window.electron.notifySceneDropped(scene.pacedText);
+    }
+  }, []);
+
   const stop = useCallback(() => {
-    sceneQueueRef.current = [];
+    sceneQueueRef.current.splice(0).forEach(reportDroppedScene);
     tts?.stop();
-  }, [tts]);
+  }, [tts, reportDroppedScene]);
 
   const speakDialogueLines = useCallback(
     async (lines: DialogueLine[], paced: boolean, preamble?: string) => {
@@ -95,14 +111,9 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
 
       const notifyLineShown = paced
         ? (line: DialogueLine) => {
-            window.electron.notifySceneLineShown({ speaker: line.speaker, text: line.text });
+            window.electron.notifySceneLineShown({ speaker: line.speaker, text: line.text, preamble });
           }
         : undefined;
-
-      if (notifyLineShown && preamble) {
-        // The mod renders a speakerless scene_line as bare text above the dialogue
-        notifyLineShown({ speaker: '', text: preamble });
-      }
 
       const uniqueSpeakers = new Set(lines.map((line) => line.speaker));
       const hasCastVoices = lines.some((line) => line.voiceId);
@@ -120,20 +131,21 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
       }
 
       // Paced scene without a per-line TTS path (TTS disabled or single voice): the
-      // in-game subtitles still arrive one line at a time on the same cadence
+      // in-game subtitles still arrive one line at a time, each held for its audio's
+      // duration or, with TTS off, long enough to read
       for (let i = 0; i < lines.length; i += 1) {
-        const lineStartedAt = Date.now();
         notifyLineShown(lines[i]);
         if (aiSettings.ttsEnabled) {
           await speak(lines[i].text);
+        } else {
+          await new Promise((resolve) => {
+            setTimeout(resolve, sceneLineReadingHoldMs(lines[i].text));
+          });
         }
         if (i < lines.length - 1) {
-          const holdMs = subtitleLinePacingMs - (Date.now() - lineStartedAt);
-          if (holdMs > 0) {
-            await new Promise((resolve) => {
-              setTimeout(resolve, holdMs);
-            });
-          }
+          await new Promise((resolve) => {
+            setTimeout(resolve, sceneLineGapMs);
+          });
         }
       }
     },
@@ -156,19 +168,26 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
 
   useEffect(() => {
     const removeListener = window.electron.onVoice(
-      (_event: any, lines: DialogueLine[], options?: { paced?: boolean; preamble?: string }) => {
+      (_event: any, lines: DialogueLine[], options?: { paced?: boolean; preamble?: string; pacedText?: string }) => {
+        const scene = {
+          lines,
+          paced: options?.paced ?? false,
+          preamble: options?.preamble,
+          pacedText: options?.pacedText,
+        };
         if (sceneQueueRef.current.length >= maxQueuedScenes) {
           log.debug(`TTS scene queue full (${sceneQueueRef.current.length} waiting) — dropping incoming scene`);
+          reportDroppedScene(scene);
           return;
         }
-        sceneQueueRef.current.push({ lines, paced: options?.paced ?? false, preamble: options?.preamble });
+        sceneQueueRef.current.push(scene);
         void drainSceneQueue();
       },
     );
     return () => {
       removeListener();
     };
-  }, [drainSceneQueue]);
+  }, [drainSceneQueue, reportDroppedScene]);
 
   const contextValue = useMemo(() => {
     return {

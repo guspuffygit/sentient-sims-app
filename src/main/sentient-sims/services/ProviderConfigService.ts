@@ -36,6 +36,17 @@ export class ProviderConfigService {
     return this.getResolvedConfig(overrideId);
   }
 
+  /**
+   * A directed scene runs as several stages (director, actors, reviewer) that can each be
+   * pointed at their own provider. A stage with no override of its own inherits the one set
+   * for the interaction that started the scene, so overriding a single action still covers
+   * every AI call that action makes.
+   */
+  getConfigForDirectedStage(stage: AIActionType, interaction?: AIActionType): ResolvedProviderConfig {
+    const overrides = this.ctx.settings.aiActionProviderOverrides;
+    return this.getResolvedConfig(overrides[stage] ?? (interaction ? overrides[interaction] : undefined));
+  }
+
   resolve(config: AIProviderConfig): ResolvedProviderConfig {
     return {
       id: config.id,
