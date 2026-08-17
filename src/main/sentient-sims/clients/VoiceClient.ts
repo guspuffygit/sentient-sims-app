@@ -1,8 +1,12 @@
 import { ElevenLabsVoicesCache } from '../models/ElevenLabsVoice';
 import { ApiClient } from './ApiClient';
+import { parseJsonResponse } from './jsonResponse';
 
 async function toVoicesCache(response: Response): Promise<ElevenLabsVoicesCache> {
-  const body = (await response.json()) as ElevenLabsVoicesCache & { error?: string };
+  const body = await parseJsonResponse<ElevenLabsVoicesCache & { error?: string }>(
+    response,
+    'Unable to load ElevenLabs voices',
+  );
   if (!response.ok || body.error) {
     throw new Error(body.error ?? `Unable to load ElevenLabs voices: ${response.status}`);
   }

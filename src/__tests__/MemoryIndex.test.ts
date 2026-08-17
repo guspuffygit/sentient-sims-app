@@ -145,6 +145,8 @@ describe('MemoryAnnotationService', () => {
     const ctx = loadedContext('annotation-degraded');
     ctx.memoryRepository.setOnMemoryUpserted(() => {});
     vi.spyOn(ctx.ai, 'runOneShot').mockRejectedValue(new Error('no provider'));
+    // An ambient OPENAI_KEY env var would make the real embedder available; the premise here is "nothing configured"
+    vi.spyOn(ctx, 'embedding', 'get').mockReturnValue(new NoopEmbeddingService());
 
     const memory = createMemory(ctx, { content: 'tried tell_joke and it succeeded', event_type: 'outcome' });
     await ctx.memoryAnnotation.annotate(memory);

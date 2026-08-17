@@ -49,6 +49,7 @@ import {
   sentientSimsAIDefaultModel,
 } from 'main/sentient-sims/constants';
 import { AIHealthCheckResponse, AITestStatus } from 'main/sentient-sims/models/AIHealthCheckResponse';
+import { parseJsonResponse } from 'main/sentient-sims/clients/jsonResponse';
 import HelpButton from 'renderer/components/HelpButton';
 import useSetting from '../hooks/useSetting';
 import { useAIModels } from '../hooks/useAIModels';
@@ -118,7 +119,7 @@ function ProviderConfigDialog({ initial, onCancel, onSave }: ProviderConfigDialo
       // Test by provider type, not config id: the config may not be saved yet
       const query = new URLSearchParams({ apiType });
       const response = await fetch(`${appApiUrl}/debug/test-ai?${query.toString()}`);
-      const result = (await response.json()) as AIHealthCheckResponse;
+      const result = await parseJsonResponse<AIHealthCheckResponse>(response, 'Unable to test AI connection');
       status = result.status || '';
       error = result.error || '';
     } catch (err) {
@@ -336,7 +337,7 @@ export function ProviderConfigsComponent() {
     try {
       const query = new URLSearchParams({ configId: config.id });
       const response = await fetch(`${appApiUrl}/debug/test-ai?${query.toString()}`);
-      const result = (await response.json()) as AIHealthCheckResponse;
+      const result = await parseJsonResponse<AIHealthCheckResponse>(response, 'Unable to test AI connection');
       status = result.status || '';
       error = result.error || '';
     } catch (err) {
