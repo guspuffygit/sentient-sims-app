@@ -157,7 +157,11 @@
     "productName": "SentientSims",
     "appId": "com.sentientsimulations.sentientsimsapp",
     "asar": true,
-    "asarUnpack": "**\\*.{node,dll}",
+    "asarUnpack": [
+      "**/*.{node,dll}",
+      "**/node_modules/@img/**"
+    ],
+    "beforePack": "./myBeforePackHook.ts",
     "afterPack": "./myAfterPackHook.ts",
     "npmRebuild": false,
     "npmArgs": [
@@ -179,7 +183,8 @@
       "hardenedRuntime": true,
       "entitlements": "assets/entitlements.mac.plist",
       "entitlementsInherit": "assets/entitlements.mac.plist",
-      "gatekeeperAssess": false
+      "gatekeeperAssess": false,
+      "x64ArchFiles": "**/node_modules/@img/**"
     },
     "dmg": {
       "contents": [
