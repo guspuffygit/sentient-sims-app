@@ -160,6 +160,9 @@
     "asarUnpack": "**\\*.{node,dll}",
     "afterPack": "./myAfterPackHook.ts",
     "npmRebuild": false,
+    "npmArgs": [
+      "--build-from-source="
+    ],
     "files": [
       "dist",
       "node_modules",
