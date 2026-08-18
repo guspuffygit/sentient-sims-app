@@ -328,9 +328,8 @@ describe('prompt wiring', () => {
     expect(summarized.endsWith('…')).toBe(true);
   });
 
-  it('adds a <RELEVANT_MEMORIES> block and honors the settings toggle', async () => {
+  it('adds a <RELEVANT_MEMORIES> block', async () => {
     const ctx = loadedContext('prompt-relevant-memories');
-    ctx.settings.memoryRetrievalEnabled = true;
     vi.spyOn(ctx, 'embedding', 'get').mockReturnValue(new NoopEmbeddingService());
 
     const past = createMemory(ctx, { content: 'won the neighborhood chess tournament' });
@@ -339,15 +338,10 @@ describe('prompt wiring', () => {
     const result = await ctx.promptBuilder.buildPromptRequest(testEvent(), promptOptions());
     expect(result.participants).toContain('<RELEVANT_MEMORIES>');
     expect(result.participants).toContain('won the neighborhood chess tournament');
-
-    ctx.settings.memoryRetrievalEnabled = false;
-    const disabled = await ctx.promptBuilder.buildPromptRequest(testEvent(), promptOptions());
-    expect(disabled.participants).not.toContain('<RELEVANT_MEMORIES>');
   });
 
   it('excludes current-scene memories from retrieval', async () => {
     const ctx = loadedContext('prompt-scene-exclusion');
-    ctx.settings.memoryRetrievalEnabled = true;
     vi.spyOn(ctx, 'embedding', 'get').mockReturnValue(new NoopEmbeddingService());
 
     const older = createMemory(ctx, { content: 'burned the anniversary dinner', location_id: 2 });

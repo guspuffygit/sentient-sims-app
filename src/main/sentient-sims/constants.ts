@@ -107,13 +107,31 @@ export const openaiDefaultImageModel = 'gpt-image-1';
 export const openaiImageModels = ['gpt-image-1', 'dall-e-3', 'dall-e-2'];
 export const novelaiDefaultModel = 'kayra-v1';
 export const sentientSimsAIDefaultModel = 'Gryphe/MythoMax-L2-13b';
+// The static image model list the Sentient Sims AI /v1/images/generations
+// endpoint accepts (member-only); the server defaults to the first entry.
+export const sentientSimsAIImageModels = ['google/gemini-3.1-flash-image', 'openai/gpt-5-image-mini'];
+export const sentientSimsAIDefaultImageModel = sentientSimsAIImageModels[0];
 // Embedding model served by the Sentient Sims AI /v1/embeddings endpoint (passed through
 // verbatim, so any embedding model the server backend hosts is accepted).
 export const sentientSimsAIDefaultEmbeddingModel = 'Qwen/Qwen3-Embedding-8B';
+export const sentientSimsAIEmbeddingModels = [sentientSimsAIDefaultEmbeddingModel];
+export const openaiDefaultEmbeddingModel = 'text-embedding-3-small';
+export const openaiEmbeddingModels = [openaiDefaultEmbeddingModel, 'text-embedding-3-large'];
 export const tokenizerBreakString = '<<BREAK>>';
 export const defaultWantsPrefixes = ['I want to', 'I would like', 'I feel'];
 export const defaultGeminiModel = 'gemini-flash-latest';
+// Gemini's native image generation models; images come back as inlineData
+// parts from generateContent instead of a dedicated images endpoint.
+export const geminiImageModels = [
+  'gemini-3.1-flash-image',
+  'gemini-3.1-flash-lite-image',
+  'gemini-3-pro-image',
+  'nano-banana-pro-preview',
+  'gemini-2.5-flash-image',
+];
+export const geminiDefaultImageModel = geminiImageModels[0];
 export const geminiDefaultEmbeddingModel = 'gemini-embedding-001';
+export const geminiEmbeddingModels = [geminiDefaultEmbeddingModel];
 // Model IDs Google has removed from the Gemini API. Anyone still pinned to
 // one of these gets a 404 on every call; runMigrations rewrites them to
 // defaultGeminiModel on next launch. Values are bare model names, matched

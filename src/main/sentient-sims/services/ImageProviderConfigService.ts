@@ -1,5 +1,5 @@
-import { AIProviderConfig, newAutoConfig, ResolvedProviderConfig } from '../models/AIProviderConfig';
-import { ApiType } from '../models/ApiType';
+import { AIProviderConfig, deriveAutoApiType, newAutoConfig, ResolvedProviderConfig } from '../models/AIProviderConfig';
+import { ApiType, imageGenerationApiTypes } from '../models/ApiType';
 import { defaultImageModelFor } from '../models/ImageGeneration';
 import { ApiContext } from './ApiContext';
 
@@ -21,8 +21,15 @@ export class ImageProviderConfigService {
   getDefaultConfig(): AIProviderConfig {
     return (
       this.getConfig(this.ctx.settings.defaultImageProviderConfigId) ??
-      // Nothing configured yet: OpenAI with its default image model
-      newAutoConfig(ApiType.OpenAI)
+      // Nothing chosen: follow the main provider so picking e.g. Sentient Sims AI
+      // carries image generation along instead of silently pointing at OpenAI
+      newAutoConfig(this.autoApiType())
+    );
+  }
+
+  autoApiType(): ApiType {
+    return deriveAutoApiType(this.ctx.settings.aiApiType, imageGenerationApiTypes, (apiType) =>
+      this.ctx.settings.hasProviderCredentials(apiType),
     );
   }
 

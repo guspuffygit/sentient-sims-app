@@ -1,5 +1,6 @@
 import log from 'electron-log';
 import { axiosClient } from '../clients/AxiosClient';
+import { ApiType } from '../models/ApiType';
 import { ApiContext } from './ApiContext';
 import { EmbeddingService } from './EmbeddingService';
 
@@ -24,7 +25,7 @@ export class SentientSimsEmbeddingService implements EmbeddingService {
   }
 
   get model(): string {
-    return this.ctx.settings.sentientSimsAIEmbeddingModel;
+    return this.ctx.embeddingProviderConfigs.modelFor(ApiType.SentientSimsAI);
   }
 
   isAvailable(): boolean {

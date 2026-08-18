@@ -29,7 +29,7 @@ export const embeddingApiTypes: ApiType[] = [ApiType.OpenAI, ApiType.SentientSim
 
 // Image generation backends selectable in image provider configurations.
 // Grows as ImageGenerationService implementations are added (Gemini, etc.)
-export const imageGenerationApiTypes: ApiType[] = [ApiType.OpenAI];
+export const imageGenerationApiTypes: ApiType[] = [ApiType.OpenAI, ApiType.SentientSimsAI, ApiType.Gemini];
 
 export function ApiTypeFromValue(value: any): ApiType {
   switch (value) {

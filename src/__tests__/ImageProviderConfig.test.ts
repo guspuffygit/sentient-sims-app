@@ -1,4 +1,6 @@
 import { vi } from 'vitest';
+import http from 'http';
+import { AddressInfo } from 'net';
 import sharp from 'sharp';
 import OpenAI from 'openai';
 import { ImageGenerateParamsNonStreaming, ImagesResponse } from 'openai/resources/images.js';
@@ -6,7 +8,7 @@ import { AIProviderConfig } from 'main/sentient-sims/models/AIProviderConfig';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 import { OpenAIService } from 'main/sentient-sims/services/OpenAIService';
-import { openaiDefaultImageModel } from 'main/sentient-sims/constants';
+import { openaiDefaultImageModel, sentientSimsAIDefaultImageModel } from 'main/sentient-sims/constants';
 import { mockApiContext } from './util';
 
 describe('Image Provider Configs', () => {
@@ -37,6 +39,44 @@ describe('Image Provider Configs', () => {
     expect(resolved.model).toEqual(openaiDefaultImageModel);
   });
 
+  it('Auto follows the main provider when it supports image generation', () => {
+    ctx.settings.aiApiType = ApiType.SentientSimsAI;
+
+    const resolved = ctx.imageProviderConfigs.getResolvedConfig();
+    expect(resolved.apiType).toEqual(ApiType.SentientSimsAI);
+    expect(resolved.model).toEqual(sentientSimsAIDefaultImageModel);
+  });
+
+  it('Auto treats a CustomAI main provider as Sentient Sims AI', () => {
+    ctx.settings.aiApiType = ApiType.CustomAI;
+
+    expect(ctx.imageProviderConfigs.getResolvedConfig().apiType).toEqual(ApiType.SentientSimsAI);
+  });
+
+  it('Auto falls back to the first image-capable provider with credentials', () => {
+    ctx.settings.aiApiType = ApiType.KoboldAI;
+    ctx.settings.accessToken = 'token';
+
+    expect(ctx.imageProviderConfigs.getResolvedConfig().apiType).toEqual(ApiType.SentientSimsAI);
+
+    ctx.settings.openaiKey = 'sk-key';
+    expect(ctx.imageProviderConfigs.getResolvedConfig().apiType).toEqual(ApiType.OpenAI);
+  });
+
+  it('Auto falls back to OpenAI when no image-capable provider has credentials', () => {
+    ctx.settings.aiApiType = ApiType.KoboldAI;
+
+    expect(ctx.imageProviderConfigs.getResolvedConfig().apiType).toEqual(ApiType.OpenAI);
+  });
+
+  it('a chosen default config wins over Auto derivation', () => {
+    ctx.settings.aiApiType = ApiType.SentientSimsAI;
+    addConfig({ id: 'dalle', name: 'DALL-E', apiType: ApiType.OpenAI, model: 'dall-e-3' });
+    ctx.settings.defaultImageProviderConfigId = 'dalle';
+
+    expect(ctx.imageProviderConfigs.getResolvedConfig().apiType).toEqual(ApiType.OpenAI);
+  });
+
   it('resolves the pinned model of the default config', () => {
     addConfig({ id: 'dalle', name: 'DALL-E', apiType: ApiType.OpenAI, model: 'dall-e-3' });
     ctx.settings.defaultImageProviderConfigId = 'dalle';
@@ -54,14 +94,14 @@ describe('Image Provider Configs', () => {
     expect(ctx.imageProviderConfigs.getResolvedConfig('does-not-exist').model).toEqual('gpt-image-1');
   });
 
-  it('deleting a config prunes the default id', () => {
+  it('deleting the default config falls back to Auto', () => {
     addConfig({ id: 'keep', name: 'Keep', apiType: ApiType.OpenAI, model: 'gpt-image-1' });
     addConfig({ id: 'remove', name: 'Remove', apiType: ApiType.OpenAI, model: 'dall-e-3' });
     ctx.settings.defaultImageProviderConfigId = 'remove';
 
     ctx.settings.imageProviderConfigs = ctx.settings.imageProviderConfigs.filter((config) => config.id !== 'remove');
 
-    expect(ctx.settings.defaultImageProviderConfigId).toEqual('keep');
+    expect(ctx.settings.defaultImageProviderConfigId).toEqual('');
   });
 
   it('sanitizes malformed image provider configs', () => {
@@ -151,5 +191,100 @@ describe('Image Provider Configs', () => {
     await expect(ctx.getImageGenerationService(ApiType.OpenAI).generateImage({ prompt: 'a cat' })).rejects.toThrow(
       'No image data returned',
     );
+  });
+
+  it('resolves the Sentient Sims AI default image model when a config pins none', () => {
+    addConfig({ id: 'ssai', name: 'Sentient Sims AI', apiType: ApiType.SentientSimsAI });
+    ctx.settings.defaultImageProviderConfigId = 'ssai';
+
+    const resolved = ctx.imageProviderConfigs.getResolvedConfig();
+    expect(resolved.apiType).toEqual(ApiType.SentientSimsAI);
+    expect(resolved.model).toEqual(sentientSimsAIDefaultImageModel);
+  });
+
+  describe('Sentient Sims AI image service', () => {
+    let stub: http.Server;
+    let baseUrl: string;
+    // JSON body the stub returns from /v1/images/generations
+    let imageResponse: unknown;
+    let lastGeneration: { authentication?: string; body?: Record<string, unknown> } | undefined;
+
+    beforeAll(async () => {
+      stub = http.createServer((req, res) => {
+        const chunks: Buffer[] = [];
+        req.on('data', (chunk: Buffer) => chunks.push(chunk));
+        req.on('end', () => {
+          if ((req.url ?? '').includes('hosted-image')) {
+            res.setHeader('Content-Type', 'image/png');
+            res.end(Buffer.from('pngbytes'));
+            return;
+          }
+          lastGeneration = {
+            authentication: req.headers.authentication as string,
+            body: JSON.parse(Buffer.concat(chunks).toString()) as Record<string, unknown>,
+          };
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(imageResponse));
+        });
+      });
+      await new Promise<void>((resolve) => {
+        stub.listen(0, '127.0.0.1', () => {
+          resolve();
+        });
+      });
+      const { port } = stub.address() as AddressInfo;
+      baseUrl = `http://127.0.0.1:${port}`;
+    });
+
+    afterAll(async () => {
+      await new Promise<void>((resolve) => {
+        stub.close(() => {
+          resolve();
+        });
+      });
+    });
+
+    beforeEach(() => {
+      ctx.settings.sentientSimsAIEndpoint = baseUrl;
+      ctx.settings.accessToken = 'stub-token';
+      lastGeneration = undefined;
+    });
+
+    it('posts the prompt with the auth header and returns base64', async () => {
+      imageResponse = { created: 1, data: [{ b64_json: 'imagebytes' }] };
+
+      const response = await ctx
+        .getImageGenerationService(ApiType.SentientSimsAI)
+        .generateImage({ prompt: 'a cat', model: 'google/gemini-3.1-flash-image' });
+
+      expect(response.imageBase64).toEqual('imagebytes');
+      expect(response.apiType).toEqual(ApiType.SentientSimsAI);
+      expect(lastGeneration?.authentication).toEqual('stub-token');
+      expect(lastGeneration?.body).toEqual({ model: 'google/gemini-3.1-flash-image', prompt: 'a cat' });
+    });
+
+    it('defaults the model when the request pins none', async () => {
+      imageResponse = { created: 1, data: [{ b64_json: 'imagebytes' }] };
+
+      await ctx.getImageGenerationService(ApiType.SentientSimsAI).generateImage({ prompt: 'a cat' });
+
+      expect(lastGeneration?.body?.model).toEqual(sentientSimsAIDefaultImageModel);
+    });
+
+    it('downloads a passed-through image URL to base64', async () => {
+      imageResponse = { created: 1, data: [{ url: `${baseUrl}/hosted-image.png` }] };
+
+      const response = await ctx.getImageGenerationService(ApiType.SentientSimsAI).generateImage({ prompt: 'a cat' });
+
+      expect(Buffer.from(response.imageBase64, 'base64').toString()).toEqual('pngbytes');
+    });
+
+    it('throws when no image data comes back', async () => {
+      imageResponse = { created: 1, data: [] };
+
+      await expect(
+        ctx.getImageGenerationService(ApiType.SentientSimsAI).generateImage({ prompt: 'a cat' }),
+      ).rejects.toThrow('No image data returned');
+    });
   });
 });

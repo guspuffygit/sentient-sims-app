@@ -127,9 +127,8 @@ describe('SentientSimsEmbeddingService', () => {
 });
 
 describe('embedding provider selection', () => {
-  it('routes the embedding seam by the embeddingApiType setting', () => {
+  it('routes the embedding seam by the default embedding provider config', () => {
     const ctx = contextWithToken();
-    ctx.settings.memoryRetrievalEnabled = true;
 
     expect(ctx.getEmbeddingService(ApiType.OpenAI)).toBeInstanceOf(OpenAIEmbeddingService);
     expect(ctx.getEmbeddingService(ApiType.SentientSimsAI)).toBeInstanceOf(SentientSimsEmbeddingService);
@@ -137,22 +136,20 @@ describe('embedding provider selection', () => {
     expect(ctx.getEmbeddingService(ApiType.CustomAI)).toBeInstanceOf(SentientSimsEmbeddingService);
     expect(ctx.getEmbeddingService(ApiType.Gemini)).toBeInstanceOf(GeminiEmbeddingService);
 
-    ctx.settings.embeddingApiType = ApiType.SentientSimsAI;
+    ctx.settings.embeddingProviderConfigs = [{ id: 'ss', name: 'Sentient Sims AI', apiType: ApiType.SentientSimsAI }];
+    ctx.settings.defaultEmbeddingProviderConfigId = 'ss';
     expect(ctx.embedding).toBeInstanceOf(SentientSimsEmbeddingService);
     expect(ctx.embedding.model).toEqual(sentientSimsAIDefaultEmbeddingModel);
   });
 
-  it('falls back to noop when the selected provider is not ready or retrieval is off', () => {
+  it('falls back to noop when the selected provider is not ready', () => {
     const ctx = mockApiContext();
-    ctx.settings.memoryRetrievalEnabled = true;
-    ctx.settings.embeddingApiType = ApiType.SentientSimsAI;
+    // Auto: embeddings follow the main provider
+    ctx.settings.aiApiType = ApiType.SentientSimsAI;
     // No access token: the Sentient Sims embedder is unavailable
     expect(ctx.embedding).toBeInstanceOf(NoopEmbeddingService);
 
     ctx.settings.accessToken = 'test-token';
     expect(ctx.embedding).toBeInstanceOf(SentientSimsEmbeddingService);
-
-    ctx.settings.memoryRetrievalEnabled = false;
-    expect(ctx.embedding).toBeInstanceOf(NoopEmbeddingService);
   });
 });

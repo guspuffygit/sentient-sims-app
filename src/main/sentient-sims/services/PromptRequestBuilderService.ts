@@ -250,10 +250,6 @@ export class PromptRequestBuilderService {
   // scene's rows and the reflections already shown are excluded so this block only ever
   // adds information the prompt doesn't have yet.
   async getRelevantMemories(event: SSEvent, queryText: string, excludeMemoryIds: string[]): Promise<MemoryEntity[]> {
-    if (!this.ctx.settings.memoryRetrievalEnabled) {
-      return [];
-    }
-
     try {
       const retrieved = await this.ctx.memoryRetrieval.retrieve({
         participantIds: event.sentient_sims.map((sentientSim) => sentientSim.sim_id),

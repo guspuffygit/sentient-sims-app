@@ -1,4 +1,11 @@
-import { openaiDefaultImageModel, openaiImageModels } from '../constants';
+import {
+  geminiDefaultImageModel,
+  geminiImageModels,
+  openaiDefaultImageModel,
+  openaiImageModels,
+  sentientSimsAIDefaultImageModel,
+  sentientSimsAIImageModels,
+} from '../constants';
 import { ApiType } from './ApiType';
 
 // 'dds' returns a ready-to-write DXT1 painting texture for the game mod;
@@ -31,6 +38,10 @@ export function defaultImageModelFor(apiType: ApiType): string | undefined {
   switch (apiType) {
     case ApiType.OpenAI:
       return openaiDefaultImageModel;
+    case ApiType.SentientSimsAI:
+      return sentientSimsAIDefaultImageModel;
+    case ApiType.Gemini:
+      return geminiDefaultImageModel;
     default:
       return undefined;
   }
@@ -42,6 +53,10 @@ export function imageModelSuggestions(apiType: ApiType): string[] {
   switch (apiType) {
     case ApiType.OpenAI:
       return openaiImageModels;
+    case ApiType.SentientSimsAI:
+      return sentientSimsAIImageModels;
+    case ApiType.Gemini:
+      return geminiImageModels;
     default:
       return [];
   }

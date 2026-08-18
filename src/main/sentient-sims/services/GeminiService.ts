@@ -1,17 +1,29 @@
 import log from 'electron-log';
-import { GenerateContentParameters, GoogleGenAI, HarmBlockThreshold, HarmCategory, Model } from '@google/genai';
+import {
+  GenerateContentParameters,
+  GenerateContentResponse,
+  GoogleGenAI,
+  HarmBlockThreshold,
+  HarmCategory,
+  Modality,
+  Model,
+} from '@google/genai';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
+import { ImageGenerationRequest, ImageGenerationResponse } from '../models/ImageGeneration';
 import { AIModel } from '../models/AIModel';
 import { getRandomItem } from '../util/getRandomItem';
 import { GeminiKeysNotSetError } from '../exceptions/GeminiKeyNotSetError';
 import { isApiError } from '../exceptions/GeminiAPIError';
 import { ApiContext } from './ApiContext';
+import { ApiType } from '../models/ApiType';
+import { geminiDefaultImageModel } from '../constants';
+import { ImageGenerationService } from './ImageGenerationService';
 
 const maxRetries = 3;
 
-export class GeminiService implements GenerationService {
+export class GeminiService implements GenerationService, ImageGenerationService {
   private readonly ctx: ApiContext;
 
   constructor(ctx: ApiContext) {
@@ -203,14 +215,48 @@ export class GeminiService implements GenerationService {
   }
 
   async generate(request: GenerateContentParameters): Promise<string | undefined> {
+    const result = await this.generateContentWithRetry(request);
+    log.debug(`Gemini Response: ${result.text}`);
+    return result.text;
+  }
+
+  async generateImage(request: ImageGenerationRequest): Promise<ImageGenerationResponse> {
+    const model = request.model ?? geminiDefaultImageModel;
+
+    log.debug(`Gemini image request: model=${model}`);
+
+    // Image models have no dedicated endpoint; generateContent returns the
+    // image as a base64 inlineData part when IMAGE is a response modality
+    const result = await this.generateContentWithRetry({
+      model,
+      config: {
+        safetySettings: this.safetySettings,
+        responseModalities: [Modality.IMAGE, Modality.TEXT],
+      },
+      contents: request.prompt,
+    });
+
+    const imageBase64 = result.candidates
+      ?.flatMap((candidate) => candidate.content?.parts ?? [])
+      .find((part) => part.inlineData?.data)?.inlineData?.data;
+    if (!imageBase64) {
+      log.error(`No image data returned from Gemini:\n${JSON.stringify(result)}`);
+      throw new Error('No image data returned from Gemini');
+    }
+
+    return {
+      imageBase64,
+      model,
+      apiType: ApiType.Gemini,
+    };
+  }
+
+  private async generateContentWithRetry(request: GenerateContentParameters): Promise<GenerateContentResponse> {
     const genAI = this.getGenAIClient();
 
     for (let attempt = 0; attempt < maxRetries; attempt += 1) {
       try {
-        const result = await genAI.models.generateContent(request);
-        log.debug(`Gemini Response: ${result.text}`);
-
-        return result.text;
+        return await genAI.models.generateContent(request);
       } catch (error: unknown) {
         let message = 'Unknown error';
         if (isApiError(error)) {
@@ -230,10 +276,12 @@ export class GeminiService implements GenerationService {
         }
 
         log.error(`Gemini Error on attempt ${attempt}/${maxRetries}: ${message}`, error);
-        if (attempt === maxRetries) {
+        if (attempt === maxRetries - 1) {
           throw error;
         }
       }
     }
+
+    throw new Error('Gemini retry loop exited unexpectedly');
   }
 }

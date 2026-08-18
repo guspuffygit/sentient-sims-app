@@ -9,8 +9,6 @@ import { SyntheticEvent, useMemo, useState } from 'react';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import AppCard from './AppCard';
 import DebugLogsSettingsComponent from './settings/DebugLogsSettingsComponent';
-import MemoryRetrievalSettingsComponent from './settings/MemoryRetrievalSettingsComponent';
-import EmbeddingSettingsComponent from './settings/EmbeddingSettingsComponent';
 import DirectedScenesSettingsComponent from './settings/DirectedScenesSettingsComponent';
 import { AnimationMappingSettingsComponent } from './settings/AnimationMappingSettingsComponent';
 import { ModsDirectoryComponent } from './ModsDirectoryComponent';
@@ -19,7 +17,6 @@ import { useAISettings } from './providers/AISettingsProvider';
 import VoiceSettingsComponent from './settings/VoiceSettingsComponent';
 import { useSetupWizard } from './providers/SetupWizardProvider';
 import { AiMaxResponseLengthSettingsComponent } from './settings/AiMaxResponseLengthSettingsComponent';
-import { ImageProviderConfigsComponent } from './settings/ImageProviderConfigsComponent';
 import { ProviderConfigsComponent } from './settings/ProviderConfigsComponent';
 import { ProviderConnectionSettingsComponent } from './settings/ProviderConnectionSettingsComponent';
 import LocalizationSettingsComponent from './settings/LocalizationSettingsComponent';
@@ -86,13 +83,19 @@ export default function SettingsPage() {
             <GameAppPathComponent />
             <DirectedScenesSettingsComponent />
             <DebugLogsSettingsComponent />
-            <MemoryRetrievalSettingsComponent />
-            <EmbeddingSettingsComponent />
-            <ProviderConfigsComponent />
             <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-            <ImageProviderConfigsComponent />
-            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+            <Typography variant="h5">AI Providers</Typography>
+            <FormHelperText sx={{ marginBottom: 2 }}>
+              Connections are the shared layer: set up each provider&apos;s API key or endpoint once, then any text,
+              image, or embedding configuration can use it.
+            </FormHelperText>
             <ProviderConnectionSettingsComponent />
+            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+            <ProviderConfigsComponent capability="text" />
+            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+            <ProviderConfigsComponent capability="image" />
+            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+            <ProviderConfigsComponent capability="embedding" />
             <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
             <Typography variant="h6">Localization</Typography>
             <FormHelperText sx={{ marginBottom: 1 }}>

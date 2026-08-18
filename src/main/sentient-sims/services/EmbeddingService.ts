@@ -1,9 +1,10 @@
 import log from 'electron-log';
 import OpenAI from 'openai';
-import { openaiDefaultEndpoint } from '../constants';
+import { openaiDefaultEmbeddingModel, openaiDefaultEndpoint } from '../constants';
+import { ApiType } from '../models/ApiType';
 import { ApiContext } from './ApiContext';
 
-export const OPENAI_EMBEDDING_MODEL = 'text-embedding-3-small';
+export const OPENAI_EMBEDDING_MODEL = openaiDefaultEmbeddingModel;
 
 // Memory retrieval and semantic search degrade gracefully without an OpenAI key: callers get undefined
 // embeddings back and skip similarity scoring rather than erroring.
@@ -55,14 +56,16 @@ export class NoopEmbeddingService implements EmbeddingService {
 // Always talks to the real OpenAI API regardless of which chat provider is selected:
 // the openaiEndpoint setting may point at a local server with no embeddings endpoint.
 export class OpenAIEmbeddingService implements EmbeddingService {
-  readonly model = OPENAI_EMBEDDING_MODEL;
-
   private readonly ctx: ApiContext;
 
   private client?: OpenAI;
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
+  }
+
+  get model(): string {
+    return this.ctx.embeddingProviderConfigs.modelFor(ApiType.OpenAI);
   }
 
   private getKey(): string | undefined {

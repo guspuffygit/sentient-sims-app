@@ -18,14 +18,21 @@ function fsErrorCode(err: unknown): string | undefined {
   return undefined;
 }
 
+function isPermissionErrorCode(code: string | undefined): boolean {
+  return code === 'ENOENT' || code === 'EPERM' || code === 'EACCES';
+}
+
+function permissionErrorMessage(targetPath: string): string {
+  return [
+    `Unable to write to: ${targetPath}.`,
+    'Antivirus or Windows "Controlled folder access" may be blocking the Sentient Sims app.',
+    'Allow the app through your antivirus/ransomware protection and try again.',
+  ].join(' ');
+}
+
 function installErrorMessage(err: unknown, modsFolder: string): string {
-  const code = fsErrorCode(err);
-  if (code === 'ENOENT' || code === 'EPERM' || code === 'EACCES') {
-    return [
-      `Unable to write to the Mods folder: ${modsFolder}.`,
-      'Antivirus or Windows "Controlled folder access" may be blocking the Sentient Sims app.',
-      'Allow the app through your antivirus/ransomware protection and try again.',
-    ].join(' ');
+  if (isPermissionErrorCode(fsErrorCode(err))) {
+    return permissionErrorMessage(modsFolder);
   }
   return 'Unable to update mod, make sure The Sims 4 is closed before updating.';
 }
@@ -42,17 +49,26 @@ export class UpdateService {
     try {
       if (fs.existsSync(zippedModFile)) {
         log.info(`Zipped mod file exists, deleting: ${zippedModFile}`);
-        fs.rmSync(zippedModFile);
+        try {
+          fs.rmSync(zippedModFile);
+        } catch (err) {
+          log.error(`Unable to delete existing mod zip: ${zippedModFile}`, err);
+          if (isPermissionErrorCode(fsErrorCode(err))) {
+            throw new Error(permissionErrorMessage(zippedModFile), { cause: err });
+          }
+          throw err;
+        }
       }
 
+      let responseBody: Readable;
       try {
         const client = new S3Client({ region: 'us-east-1', credentials });
-        const getObjectCommand = new GetObjectCommand({
-          Bucket: 'sentient-sims-artifacts',
-          Key: `sentient-sims-${type}.zip`,
-        });
-
-        const response = await client.send(getObjectCommand);
+        const response = await client.send(
+          new GetObjectCommand({
+            Bucket: 'sentient-sims-artifacts',
+            Key: `sentient-sims-${type}.zip`,
+          }),
+        );
 
         if (!response.Body) {
           throw new Error('Response body is undefined.');
@@ -60,9 +76,17 @@ export class UpdateService {
         if (!(response.Body instanceof Readable)) {
           throw new Error('Body not instance of Readable');
         }
+        responseBody = response.Body;
+      } catch (err) {
+        log.error(`Unable to download mod update`, err);
+        throw new Error(`Unable to download the mod update, check your internet connection and try again.`, {
+          cause: err,
+        });
+      }
 
+      try {
         const outputStream = fs.createWriteStream(zippedModFile);
-        response.Body.pipe(outputStream);
+        responseBody.pipe(outputStream);
 
         await new Promise<void>((resolve, reject) => {
           outputStream.on('finish', resolve);
@@ -73,10 +97,11 @@ export class UpdateService {
           throw new Error(`Zipped mod file did not exist at: ${zippedModFile}`);
         }
       } catch (err) {
-        log.error(`Unable to download mod update`, err);
-        throw new Error(`Unable to download the mod update, check your internet connection and try again.`, {
-          cause: err,
-        });
+        log.error(`Unable to write mod update to ${zippedModFile}`, err);
+        if (isPermissionErrorCode(fsErrorCode(err))) {
+          throw new Error(permissionErrorMessage(zippedModFile), { cause: err });
+        }
+        throw new Error(`Unable to save the mod update to disk, try again.`, { cause: err });
       }
 
       const modsFolder = this.ctx.directory.getModsFolder();

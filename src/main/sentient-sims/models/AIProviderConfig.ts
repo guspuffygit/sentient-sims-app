@@ -33,6 +33,23 @@ export function newAutoConfig(apiType: ApiType): AIProviderConfig {
   };
 }
 
+// Which provider an unset capability default (images, embeddings) follows: the main
+// text provider when it supports the capability, otherwise the first capable provider
+// the user has credentials for, otherwise OpenAI. Pure so the renderer can mirror the
+// resolution when displaying the "Auto" choice.
+export function deriveAutoApiType(
+  mainApiType: ApiType,
+  capableTypes: ApiType[],
+  hasCredentials: (apiType: ApiType) => boolean,
+): ApiType {
+  // CustomAI endpoints share the Sentient Sims AI connection and services
+  const main = mainApiType === ApiType.CustomAI ? ApiType.SentientSimsAI : mainApiType;
+  if (capableTypes.includes(main)) {
+    return main;
+  }
+  return capableTypes.find(hasCredentials) ?? ApiType.OpenAI;
+}
+
 export function sanitizeProviderConfigs(value: unknown): AIProviderConfig[] {
   if (!Array.isArray(value)) {
     return [];

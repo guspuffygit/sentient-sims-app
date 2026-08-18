@@ -4,8 +4,11 @@ import { axiosClient } from '../clients/AxiosClient';
 import { VLLMAIService } from './VLLMAIService';
 import { DecodeToken, isTokenExpired } from '../auth/tokenVerifier';
 import { ApiType } from '../models/ApiType';
+import { sentientSimsAIDefaultImageModel } from '../constants';
+import { ImageGenerationRequest, ImageGenerationResponse } from '../models/ImageGeneration';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
+import { ImageGenerationService } from './ImageGenerationService';
 import { notifyRefreshAuth } from '../util/notifyRenderer';
 
 const tokenRefreshWaitMs = 10000;
@@ -14,7 +17,17 @@ const tokenRefreshPollMs = 250;
 // every subsequent request on another doomed wait
 const tokenRefreshRetryCooldownMs = 60000;
 
-export class SentientSimsAIService extends VLLMAIService {
+// The server cuts image generation off at 120 seconds; outlast that so its
+// timeout response arrives instead of a client-side abort
+const imageGenerationTimeoutMs = 130000;
+
+// OpenAI-compatible response shape of the server's /v1/images/generations
+type SentientSimsImageGenerationResponse = {
+  created: number;
+  data: { b64_json?: string; url?: string }[];
+};
+
+export class SentientSimsAIService extends VLLMAIService implements ImageGenerationService {
   serviceUrl(): string {
     return this.ctx.settings.sentientSimsAIEndpoint;
   }
@@ -85,11 +98,13 @@ export class SentientSimsAIService extends VLLMAIService {
     log.error('Access token is still expired after waiting for a refresh');
   }
 
-  async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
+  // Runs a request with a fresh token, refreshing and retrying once when the
+  // server rejects a token that expired or was revoked mid-request
+  private async withAuthRetry<T>(makeRequest: () => Promise<T>): Promise<T> {
     await this.waitForFreshToken();
     const tokenAtRequest = this.ctx.settings.accessToken;
     try {
-      return await super.sentientSimsGenerate(request);
+      return await makeRequest();
     } catch (err) {
       const unauthorized = err instanceof AxiosError && err.response?.status === 401;
       if (!unauthorized || !this.hasDecodableToken()) {
@@ -102,8 +117,59 @@ export class SentientSimsAIService extends VLLMAIService {
         // Nothing changed, a retry would just 401 again
         throw err;
       }
-      return super.sentientSimsGenerate(request);
+      return makeRequest();
     }
+  }
+
+  async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
+    return this.withAuthRetry(() => super.sentientSimsGenerate(request));
+  }
+
+  async generateImage(request: ImageGenerationRequest): Promise<ImageGenerationResponse> {
+    const model = request.model ?? sentientSimsAIDefaultImageModel;
+
+    log.debug(`Sentient Sims AI image request: model=${model}`);
+
+    const response = await this.withAuthRetry(() =>
+      axiosClient<SentientSimsImageGenerationResponse>({
+        url: '/v1/images/generations',
+        method: 'POST',
+        data: { model, prompt: request.prompt },
+        baseURL: this.serviceUrl(),
+        timeout: imageGenerationTimeoutMs,
+        headers: this.getAuthorizationHeaders(),
+      }),
+    );
+
+    const imageBase64 = await this.toImageBase64(response.data);
+    if (!imageBase64) {
+      log.error(`No image data returned from Sentient Sims AI:\n${JSON.stringify(response.data)}`);
+      throw new Error('No image data returned from Sentient Sims AI');
+    }
+
+    return {
+      imageBase64,
+      model,
+      apiType: ApiType.SentientSimsAI,
+    };
+  }
+
+  // The server normally returns base64, but passes provider-hosted image URLs
+  // through as-is; those get downloaded so callers always receive base64
+  private async toImageBase64(response: SentientSimsImageGenerationResponse): Promise<string | undefined> {
+    const image = response.data.at(0);
+    if (image?.b64_json) {
+      return image.b64_json;
+    }
+    if (image?.url) {
+      const download = await axiosClient<ArrayBuffer>({
+        url: image.url,
+        responseType: 'arraybuffer',
+        timeout: 30000,
+      });
+      return Buffer.from(download.data).toString('base64');
+    }
+    return undefined;
   }
 
   async healthCheck() {

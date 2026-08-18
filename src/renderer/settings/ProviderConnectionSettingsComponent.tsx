@@ -34,7 +34,10 @@ function usageLabel(count: number): string {
 // Every generation provider is always listed so its connection can be set up
 // before the first configuration referencing it exists.
 export function ProviderConnectionSettingsComponent() {
-  const configsSetting = useSetting<AIProviderConfig[]>(SettingsEnum.AI_PROVIDER_CONFIGS, []);
+  const textConfigsSetting = useSetting<AIProviderConfig[]>(SettingsEnum.AI_PROVIDER_CONFIGS, []);
+  const imageConfigsSetting = useSetting<AIProviderConfig[]>(SettingsEnum.IMAGE_PROVIDER_CONFIGS, []);
+  const embeddingConfigsSetting = useSetting<AIProviderConfig[]>(SettingsEnum.EMBEDDING_PROVIDER_CONFIGS, []);
+  const allConfigs = [...textConfigsSetting.value, ...imageConfigsSetting.value, ...embeddingConfigsSetting.value];
 
   return (
     <Box sx={{ marginBottom: 2 }}>
@@ -49,7 +52,7 @@ export function ProviderConnectionSettingsComponent() {
               <Typography sx={{ marginRight: 2 }}>{ApiTypeName(apiType)}</Typography>
               <ConnectionStatusChip apiType={apiType} />
               <Typography variant="body2" sx={{ marginLeft: 'auto', color: 'text.secondary' }}>
-                {usageLabel(connectionUsageCount(configsSetting.value, apiType))}
+                {usageLabel(connectionUsageCount(allConfigs, apiType))}
               </Typography>
             </Box>
           </AccordionSummary>

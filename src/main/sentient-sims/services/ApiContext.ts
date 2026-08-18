@@ -36,6 +36,7 @@ import { AnimationsService } from './AnimationsService';
 import { DbService } from './DbService';
 import { DirectoryService } from './DirectoryService';
 import { ElevenLabsVoicesService } from './ElevenLabsVoicesService';
+import { EmbeddingProviderConfigService } from './EmbeddingProviderConfigService';
 import { EmbeddingService, NoopEmbeddingService, OpenAIEmbeddingService } from './EmbeddingService';
 import { GameSigningService } from './GameSigningService';
 import { GeminiEmbeddingService } from './GeminiEmbeddingService';
@@ -262,6 +263,7 @@ export class ApiContext {
   private readonly _providerConfigService: ProviderConfigService;
   private readonly _openAIImageService: OpenAIImageGenerationService;
   private readonly _imageProviderConfigService: ImageProviderConfigService;
+  private readonly _embeddingProviderConfigService: EmbeddingProviderConfigService;
 
   private readonly _novelAITokenCounter: NovelAITokenCounter;
   private readonly _openAITokenCounter: OpenAITokenCounter;
@@ -300,6 +302,7 @@ export class ApiContext {
     this._modelSettingsService = new ModelSettingsService(this);
     this._providerConfigService = new ProviderConfigService(this);
     this._imageProviderConfigService = new ImageProviderConfigService(this);
+    this._embeddingProviderConfigService = new EmbeddingProviderConfigService(this);
 
     this._locationRepository = new LocationRepository(this._db);
     this._memoryRepository = new MemoryRepository(this._db);
@@ -411,12 +414,10 @@ export class ApiContext {
   }
 
   // Evaluated per access so changing the embedding provider (or setting a key/token at
-  // runtime) takes effect immediately. Gated behind memoryRetrievalEnabled; off by default.
+  // runtime) takes effect immediately.
   get embedding(): EmbeddingService {
-    if (!this._settings.memoryRetrievalEnabled) {
-      return this._noopEmbeddingService;
-    }
-    const service = this.getEmbeddingService(this._settings.embeddingApiType);
+    const config = this._embeddingProviderConfigService.getResolvedConfig();
+    const service = this.getEmbeddingService(config.apiType);
     return service.isAvailable() ? service : this._noopEmbeddingService;
   }
 
@@ -514,9 +515,21 @@ export class ApiContext {
     return this._imageProviderConfigService;
   }
 
+  get embeddingProviderConfigs(): EmbeddingProviderConfigService {
+    return this._embeddingProviderConfigService;
+  }
+
   getImageGenerationService(aiType: ApiType): ImageGenerationService {
     if (aiType === ApiType.OpenAI) {
       return this._openAIImageService;
+    }
+
+    if (aiType === ApiType.SentientSimsAI) {
+      return this.sentientSimsAIService;
+    }
+
+    if (aiType === ApiType.Gemini) {
+      return this.geminiService;
     }
 
     throw new Error(`Image generation is not supported for provider: ${aiType}`);

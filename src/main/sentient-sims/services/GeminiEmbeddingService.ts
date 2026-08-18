@@ -1,6 +1,6 @@
 import log from 'electron-log';
 import { GoogleGenAI } from '@google/genai';
-import { geminiDefaultEmbeddingModel } from '../constants';
+import { ApiType } from '../models/ApiType';
 import { getRandomItem } from '../util/getRandomItem';
 import { ApiContext } from './ApiContext';
 import { EmbeddingService } from './EmbeddingService';
@@ -12,12 +12,14 @@ const geminiEmbedBatchLimit = 100;
 // Embeds through the Gemini API using the same comma-separated key pool as generation,
 // picking a random key per request to spread quota.
 export class GeminiEmbeddingService implements EmbeddingService {
-  readonly model = geminiDefaultEmbeddingModel;
-
   private readonly ctx: ApiContext;
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
+  }
+
+  get model(): string {
+    return this.ctx.embeddingProviderConfigs.modelFor(ApiType.Gemini);
   }
 
   private getKeys(): string[] {
