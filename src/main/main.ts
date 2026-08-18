@@ -83,6 +83,9 @@ const createWindow = async () => {
     webPreferences: {
       webSecurity: false, // Disable web security
       allowRunningInsecureContent: true,
+      // Players keep the app minimized behind the game; throttled timers would stall
+      // the renderer's TTS scene queue and websocket-driven UI updates
+      backgroundThrottling: false,
       preload: preloadPath,
     },
   });

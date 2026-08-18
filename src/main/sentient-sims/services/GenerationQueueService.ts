@@ -192,9 +192,11 @@ export class GenerationQueueService {
 
   // Runs a generation under the same concurrency gate as prefetches, so legacy synchronous
   // requests (old mods, autonomous outcome events) never add a concurrent LLM pipeline on
-  // top of a prefetched one.
-  runExclusive<T>(task: () => Promise<T>): Promise<T> {
-    return this.enqueue(task);
+  // top of a prefetched one. Priority tasks (a player waiting on a chat reply) go to the
+  // front of the queue instead of behind speculative prefetch work — they still wait for
+  // running generations, but never for queued ones.
+  runExclusive<T>(task: () => Promise<T>, options?: { priority?: boolean }): Promise<T> {
+    return this.enqueue(task, options?.priority ?? false);
   }
 
   // Idle lane for low-priority work (memory annotation, embedding backfill): tasks start
@@ -328,15 +330,20 @@ export class GenerationQueueService {
     });
   }
 
-  private enqueue<T>(task: () => Promise<T>): Promise<T> {
+  private enqueue<T>(task: () => Promise<T>, priority = false): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-      this.jobs.push(async () => {
+      const job = async () => {
         try {
           resolve(await task());
         } catch (error) {
           reject(error instanceof Error ? error : new Error(String(error)));
         }
-      });
+      };
+      if (priority) {
+        this.jobs.unshift(job);
+      } else {
+        this.jobs.push(job);
+      }
       this.drain();
     });
   }

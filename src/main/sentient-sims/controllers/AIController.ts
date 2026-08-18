@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
-import { InteractionEvents } from '../models/InteractionEvents';
+import { InteractionEvents, SSEventType } from '../models/InteractionEvents';
 import { DirectedSceneRequest } from '../models/DirectedSceneRequest';
 import { playTTS, sendChatGeneration } from '../util/notifyRenderer';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
@@ -54,7 +54,12 @@ export class AIController {
 
     log.debug(`Interaction event: ${JSON.stringify(req.body)}`);
 
-    const result = await this.ctx.generationQueue.runExclusive(() => this.ctx.ai.interactionEvent(event));
+    // The chat window blocks on this response while prefetch traffic is speculative,
+    // so chat messages skip ahead of queued prefetch generations
+    const isChat = event.event_type === SSEventType.CHAT || event.event_type === SSEventType.CHAT_CONTINUE;
+    const result = await this.ctx.generationQueue.runExclusive(() => this.ctx.ai.interactionEvent(event), {
+      priority: isChat,
+    });
     result.input = event;
     // Leading newline so each generation stands apart from the previous one in the game window;
     // memories, TTS, and the app chat UI keep the untouched text. Classic mode sends it verbatim.

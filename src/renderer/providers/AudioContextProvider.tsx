@@ -175,10 +175,14 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
           preamble: options?.preamble,
           pacedText: options?.pacedText,
         };
-        if (sceneQueueRef.current.length >= maxQueuedScenes) {
-          log.debug(`TTS scene queue full (${sceneQueueRef.current.length} waiting) — dropping incoming scene`);
-          reportDroppedScene(scene);
-          return;
+        // Drop the oldest waiting scene, not the incoming one — the newest scene matches
+        // what is happening on screen right now, the oldest is furthest behind gameplay
+        while (sceneQueueRef.current.length >= maxQueuedScenes) {
+          const dropped = sceneQueueRef.current.shift();
+          if (dropped) {
+            log.debug(`TTS scene queue full — dropping oldest queued scene`);
+            reportDroppedScene(dropped);
+          }
         }
         sceneQueueRef.current.push(scene);
         void drainSceneQueue();
