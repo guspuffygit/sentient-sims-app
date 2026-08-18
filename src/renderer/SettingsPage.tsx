@@ -10,6 +10,7 @@ import ConstructionIcon from '@mui/icons-material/Construction';
 import AppCard from './AppCard';
 import DebugLogsSettingsComponent from './settings/DebugLogsSettingsComponent';
 import MemoryRetrievalSettingsComponent from './settings/MemoryRetrievalSettingsComponent';
+import EmbeddingSettingsComponent from './settings/EmbeddingSettingsComponent';
 import DirectedScenesSettingsComponent from './settings/DirectedScenesSettingsComponent';
 import { AnimationMappingSettingsComponent } from './settings/AnimationMappingSettingsComponent';
 import { ModsDirectoryComponent } from './ModsDirectoryComponent';
@@ -85,6 +86,7 @@ export default function SettingsPage() {
             <DirectedScenesSettingsComponent />
             <DebugLogsSettingsComponent />
             <MemoryRetrievalSettingsComponent />
+            <EmbeddingSettingsComponent />
             <ProviderConfigsComponent />
             <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
             <ProviderConnectionSettingsComponent />

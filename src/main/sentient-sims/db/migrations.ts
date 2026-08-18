@@ -142,6 +142,33 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
         voice_name           TEXT
       );
     `,
+    // An embedding is only comparable to vectors from the model that produced it, so
+    // embeddings move out of memory_index into their own table keyed by
+    // (memory_id, embedding_model). Every model's vectors persist side by side: switching
+    // embedding providers adds rows instead of overwriting, and switching back reuses the
+    // already-stored work. memory_index keeps importance, which is model-independent.
+    '014-move-embeddings-to-memory-embedding': (db: Database) => {
+      db.prepare(
+        `
+          CREATE TABLE memory_embedding (
+            memory_id            INTEGER NOT NULL    ,
+            embedding_model      TEXT NOT NULL       ,
+            embedding            BLOB NOT NULL       ,
+            PRIMARY KEY ( memory_id, embedding_model ),
+            FOREIGN KEY ( memory_id ) REFERENCES memory( id ) ON DELETE CASCADE ON UPDATE CASCADE
+          );
+        `,
+      ).run();
+      db.prepare(
+        `
+          INSERT INTO memory_embedding (memory_id, embedding_model, embedding)
+          SELECT memory_id, embedding_model, embedding FROM memory_index
+          WHERE embedding IS NOT NULL AND embedding_model IS NOT NULL;
+        `,
+      ).run();
+      db.prepare('ALTER TABLE memory_index DROP COLUMN embedding').run();
+      db.prepare('ALTER TABLE memory_index DROP COLUMN embedding_model').run();
+    },
   }),
 );
 

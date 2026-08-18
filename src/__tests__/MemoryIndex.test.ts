@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
+import { migrate } from 'main/sentient-sims/db/migrations';
 import {
   EmbeddingService,
   NoopEmbeddingService,
@@ -43,36 +44,69 @@ describe('MemoryIndexRepository', () => {
     const result = ctx.memoryIndexRepository.upsertIndex({ memory_id: '9999', importance: 5 });
     expect(result.changes).toEqual(0);
     expect(ctx.memoryIndexRepository.getIndex('9999')).toBeUndefined();
+
+    const embeddingResult = ctx.memoryIndexRepository.upsertEmbedding({
+      memory_id: '9999',
+      embedding_model: 'fake-model',
+      embedding: embeddingToBuffer(Float32Array.from([1])),
+    });
+    expect(embeddingResult.changes).toEqual(0);
+    expect(ctx.memoryIndexRepository.getEmbedding('9999', 'fake-model')).toBeUndefined();
   });
 
-  it('roundtrips index rows and cascades deletes with the memory', () => {
+  it('roundtrips index rows and per-model embeddings, cascading deletes with the memory', () => {
     const ctx = loadedContext('memory-index-crud');
     // Manual index management below must not race the automatic background annotation
     ctx.memoryRepository.setOnMemoryUpserted(() => {});
 
     const memory = createMemory(ctx, { content: 'saw a ghost in the kitchen' });
-    const embedding = Float32Array.from([0.25, -1.5, 3]);
-    ctx.memoryIndexRepository.upsertIndex({
-      memory_id: String(memory.id),
-      importance: 7,
-      embedding: embeddingToBuffer(embedding),
+    const memoryId = String(memory.id);
+    ctx.memoryIndexRepository.upsertIndex({ memory_id: memoryId, importance: 7 });
+    // One embedding per model: both live side by side under the same memory
+    ctx.memoryIndexRepository.upsertEmbedding({
+      memory_id: memoryId,
       embedding_model: 'fake-model',
+      embedding: embeddingToBuffer(Float32Array.from([0.25, -1.5, 3])),
+    });
+    ctx.memoryIndexRepository.upsertEmbedding({
+      memory_id: memoryId,
+      embedding_model: 'other-model',
+      embedding: embeddingToBuffer(Float32Array.from([7])),
     });
 
-    const row = ctx.memoryIndexRepository.getIndex(String(memory.id));
-    expect(row?.importance).toEqual(7);
-    expect(row?.embedding_model).toEqual('fake-model');
-    expect(Array.from(bufferToEmbedding(row?.embedding as Buffer))).toEqual([0.25, -1.5, 3]);
+    expect(ctx.memoryIndexRepository.getIndex(memoryId)?.importance).toEqual(7);
+    expect(
+      Array.from(bufferToEmbedding(ctx.memoryIndexRepository.getEmbedding(memoryId, 'fake-model') as Buffer)),
+    ).toEqual([0.25, -1.5, 3]);
+    expect(
+      Array.from(bufferToEmbedding(ctx.memoryIndexRepository.getEmbedding(memoryId, 'other-model') as Buffer)),
+    ).toEqual([7]);
 
-    // Upsert replaces in place
-    ctx.memoryIndexRepository.upsertIndex({ memory_id: String(memory.id), importance: 9 });
-    expect(ctx.memoryIndexRepository.getIndex(String(memory.id))?.importance).toEqual(9);
+    // Importance upserts replace in place without touching stored embeddings
+    ctx.memoryIndexRepository.upsertIndex({ memory_id: memoryId, importance: 9 });
+    expect(ctx.memoryIndexRepository.getIndex(memoryId)?.importance).toEqual(9);
+    expect(ctx.memoryIndexRepository.getEmbedding(memoryId, 'fake-model')).toBeDefined();
 
-    ctx.memoryRepository.deleteMemory({ id: String(memory.id) });
-    expect(ctx.memoryIndexRepository.getIndex(String(memory.id))).toBeUndefined();
+    // Re-embedding under one model replaces only that model's row
+    ctx.memoryIndexRepository.upsertEmbedding({
+      memory_id: memoryId,
+      embedding_model: 'fake-model',
+      embedding: embeddingToBuffer(Float32Array.from([1, 2])),
+    });
+    expect(
+      Array.from(bufferToEmbedding(ctx.memoryIndexRepository.getEmbedding(memoryId, 'fake-model') as Buffer)),
+    ).toEqual([1, 2]);
+    expect(
+      Array.from(bufferToEmbedding(ctx.memoryIndexRepository.getEmbedding(memoryId, 'other-model') as Buffer)),
+    ).toEqual([7]);
+
+    ctx.memoryRepository.deleteMemory({ id: memoryId });
+    expect(ctx.memoryIndexRepository.getIndex(memoryId)).toBeUndefined();
+    expect(ctx.memoryIndexRepository.getEmbedding(memoryId, 'fake-model')).toBeUndefined();
+    expect(ctx.memoryIndexRepository.getEmbedding(memoryId, 'other-model')).toBeUndefined();
   });
 
-  it('lists memories that still need an embedding, oldest first', () => {
+  it('lists memories that still need an embedding for the given model, oldest first', () => {
     const ctx = loadedContext('memory-index-unindexed');
     ctx.memoryRepository.setOnMemoryUpserted(() => {});
 
@@ -80,17 +114,66 @@ describe('MemoryIndexRepository', () => {
     const second = createMemory(ctx, { content: 'second' });
     const third = createMemory(ctx, { content: 'third' });
 
-    // second is fully indexed, third has importance but no embedding yet
-    ctx.memoryIndexRepository.upsertIndex({
+    // second is fully indexed under fake-model, third has importance but no embedding yet
+    ctx.memoryIndexRepository.upsertIndex({ memory_id: String(second.id), importance: 5 });
+    ctx.memoryIndexRepository.upsertEmbedding({
       memory_id: String(second.id),
-      importance: 5,
-      embedding: embeddingToBuffer(Float32Array.from([1])),
       embedding_model: 'fake-model',
+      embedding: embeddingToBuffer(Float32Array.from([1])),
     });
     ctx.memoryIndexRepository.upsertIndex({ memory_id: String(third.id), importance: 5 });
 
-    const unindexed = ctx.memoryIndexRepository.getUnindexedMemories(10);
-    expect(unindexed.map((memory) => memory.id)).toEqual([first.id, third.id]);
+    // Embeddings only match the model that produced them: a covered model skips its rows,
+    // a model never used before queues everything
+    const sameModel = ctx.memoryIndexRepository.getUnindexedMemories(10, 'fake-model');
+    expect(sameModel.map((memory) => memory.id)).toEqual([first.id, third.id]);
+    const otherModel = ctx.memoryIndexRepository.getUnindexedMemories(10, 'other-model');
+    expect(otherModel.map((memory) => memory.id)).toEqual([first.id, second.id, third.id]);
+
+    // Embedding under the second model doesn't disturb the first model's coverage:
+    // switching back finds its earlier work still done
+    ctx.memoryIndexRepository.upsertEmbedding({
+      memory_id: String(second.id),
+      embedding_model: 'other-model',
+      embedding: embeddingToBuffer(Float32Array.from([2])),
+    });
+    expect(ctx.memoryIndexRepository.getUnindexedMemories(10, 'other-model').map((memory) => memory.id)).toEqual([
+      first.id,
+      third.id,
+    ]);
+    expect(ctx.memoryIndexRepository.getUnindexedMemories(10, 'fake-model').map((memory) => memory.id)).toEqual([
+      first.id,
+      third.id,
+    ]);
+  });
+
+  it('migrates legacy inline memory_index embeddings into memory_embedding', () => {
+    const ctx = loadedContext('memory-index-migration');
+    ctx.memoryRepository.setOnMemoryUpserted(() => {});
+    const memory = createMemory(ctx, { content: 'embedded before the split' });
+
+    // Recreate the pre-014 schema: embeddings stored inline on memory_index
+    const db = ctx.db.getDb();
+    db.prepare('DROP TABLE memory_embedding').run();
+    db.prepare('ALTER TABLE memory_index ADD COLUMN embedding BLOB').run();
+    db.prepare('ALTER TABLE memory_index ADD COLUMN embedding_model TEXT').run();
+    db.prepare("DELETE FROM migrations WHERE name = '014-move-embeddings-to-memory-embedding'").run();
+    db.prepare(
+      'INSERT OR REPLACE INTO memory_index (memory_id, importance, embedding, embedding_model) VALUES (?, ?, ?, ?)',
+    ).run([BigInt(String(memory.id)), 7, embeddingToBuffer(Float32Array.from([1, 2])), 'legacy-model']);
+
+    migrate(db);
+
+    // The stored embedding survives the move, keyed by the model that produced it
+    const moved = ctx.memoryIndexRepository.getEmbedding(String(memory.id), 'legacy-model');
+    expect(Array.from(bufferToEmbedding(moved as Buffer))).toEqual([1, 2]);
+    expect(ctx.memoryIndexRepository.getIndex(String(memory.id))?.importance).toEqual(7);
+
+    // The inline columns are gone from memory_index
+    const columns = (db.prepare('PRAGMA table_info(memory_index)').all() as { name: string }[]).map(
+      (column) => column.name,
+    );
+    expect(columns).toEqual(['memory_id', 'importance']);
   });
 });
 
@@ -135,10 +218,9 @@ describe('MemoryAnnotationService', () => {
     const memory = createMemory(ctx, { observation: 'proposed marriage at the bluffs' });
     await ctx.memoryAnnotation.annotate(memory);
 
-    const row = ctx.memoryIndexRepository.getIndex(String(memory.id));
-    expect(row?.importance).toEqual(9);
-    expect(row?.embedding_model).toEqual('fake-model');
-    expect(Array.from(bufferToEmbedding(row?.embedding as Buffer))).toEqual([1, 2, 3]);
+    expect(ctx.memoryIndexRepository.getIndex(String(memory.id))?.importance).toEqual(9);
+    const embedding = ctx.memoryIndexRepository.getEmbedding(String(memory.id), 'fake-model');
+    expect(Array.from(bufferToEmbedding(embedding as Buffer))).toEqual([1, 2, 3]);
   });
 
   it('degrades to heuristic importance and no embedding when nothing is configured', async () => {
@@ -151,10 +233,25 @@ describe('MemoryAnnotationService', () => {
     const memory = createMemory(ctx, { content: 'tried tell_joke and it succeeded', event_type: 'outcome' });
     await ctx.memoryAnnotation.annotate(memory);
 
-    const row = ctx.memoryIndexRepository.getIndex(String(memory.id));
-    expect(row?.importance).toEqual(5);
-    expect(row?.embedding).toBeNull();
-    expect(row?.embedding_model).toBeNull();
+    expect(ctx.memoryIndexRepository.getIndex(String(memory.id))?.importance).toEqual(5);
+    expect(ctx.memoryIndexRepository.getEmbedding(String(memory.id), 'fake-model')).toBeUndefined();
+  });
+
+  it('drops stale embeddings when a memory is re-annotated with its text changed', async () => {
+    const ctx = loadedContext('annotation-stale-embeddings');
+    ctx.memoryRepository.setOnMemoryUpserted(() => {});
+    vi.spyOn(ctx.ai, 'runOneShot').mockResolvedValue({ text: '6' } as never);
+    const embedderSpy = vi.spyOn(ctx, 'embedding', 'get').mockReturnValue(fakeEmbedder([1, 2]));
+
+    const memory = createMemory(ctx, { content: 'original text' });
+    await ctx.memoryAnnotation.annotate(memory);
+    expect(ctx.memoryIndexRepository.getEmbedding(String(memory.id), 'fake-model')).toBeDefined();
+
+    // The text changes while no embedder is available: the old vector describes text that
+    // no longer exists, so it must not linger and score against future queries
+    embedderSpy.mockReturnValue(new NoopEmbeddingService());
+    await ctx.memoryAnnotation.annotate({ ...memory, content: 'rewritten text' });
+    expect(ctx.memoryIndexRepository.getEmbedding(String(memory.id), 'fake-model')).toBeUndefined();
   });
 
   it('is triggered automatically when memories are created or updated', () => {

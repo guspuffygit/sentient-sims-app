@@ -26,6 +26,7 @@ import {
   openrouterDefaultEndpoint,
   openrouterDefaultModel,
   retiredGeminiModels,
+  sentientSimsAIDefaultEmbeddingModel,
   sentientSimsAIDefaultModel,
   defaultSentientSimsAIHost,
   defaultGameAppPath,
@@ -231,6 +232,14 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.MEMORY_RETRIEVAL_ENABLED.toString()]: {
         type: 'boolean',
         default: false,
+      },
+      [SettingsEnum.EMBEDDING_API_TYPE.toString()]: {
+        type: 'string',
+        default: ApiType.OpenAI.toString(),
+      },
+      [SettingsEnum.SENTIENTSIMSAI_EMBEDDING_MODEL.toString()]: {
+        type: 'string',
+        default: sentientSimsAIDefaultEmbeddingModel,
       },
       // Items validated by sanitizeProviderConfigs on read/write so malformed
       // entries degrade gracefully instead of throwing out of electron-store
@@ -821,6 +830,22 @@ export class SettingsService {
 
   set memoryRetrievalEnabled(value: boolean) {
     this.set(SettingsEnum.MEMORY_RETRIEVAL_ENABLED, value);
+  }
+
+  get embeddingApiType(): ApiType {
+    return ApiTypeFromValue(this.get(SettingsEnum.EMBEDDING_API_TYPE));
+  }
+
+  set embeddingApiType(value: ApiType) {
+    this.set(SettingsEnum.EMBEDDING_API_TYPE, value.toString());
+  }
+
+  get sentientSimsAIEmbeddingModel(): string {
+    return this.get(SettingsEnum.SENTIENTSIMSAI_EMBEDDING_MODEL) as string;
+  }
+
+  set sentientSimsAIEmbeddingModel(value: string) {
+    this.set(SettingsEnum.SENTIENTSIMSAI_EMBEDDING_MODEL, value);
   }
 
   get prefetchMaxQueueDepth(): number {

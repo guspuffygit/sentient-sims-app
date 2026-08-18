@@ -36,6 +36,7 @@ import { DirectoryService } from './DirectoryService';
 import { ElevenLabsVoicesService } from './ElevenLabsVoicesService';
 import { EmbeddingService, NoopEmbeddingService, OpenAIEmbeddingService } from './EmbeddingService';
 import { GameSigningService } from './GameSigningService';
+import { GeminiEmbeddingService } from './GeminiEmbeddingService';
 import { GeminiService } from './GeminiService';
 import { GenerationQueueService } from './GenerationQueueService';
 import { GenerationService } from './GenerationService';
@@ -57,6 +58,7 @@ import { PromptRequestBuilderService } from './PromptRequestBuilderService';
 import { SceneService } from './SceneService';
 import { ProviderConfigService } from './ProviderConfigService';
 import { SentientSimsAIService } from './SentientSimsAIService';
+import { SentientSimsEmbeddingService } from './SentientSimsEmbeddingService';
 import { SettingsService } from './SettingsService';
 import { UpdateService } from './UpdateService';
 import { VersionService } from './VersionService';
@@ -219,6 +221,8 @@ export class ApiContext {
   private readonly _sceneService: SceneService;
   private readonly _actionDispatcherService: ActionDispatcherService;
   private readonly _openAIEmbeddingService: OpenAIEmbeddingService;
+  private readonly _sentientSimsEmbeddingService: SentientSimsEmbeddingService;
+  private readonly _geminiEmbeddingService: GeminiEmbeddingService;
   private readonly _noopEmbeddingService: NoopEmbeddingService;
   private readonly _memoryAnnotationService: MemoryAnnotationService;
   private readonly _memoryRetrievalService: MemoryRetrievalService;
@@ -290,6 +294,8 @@ export class ApiContext {
     this._sceneService = new SceneService();
     this._actionDispatcherService = new ActionDispatcherService();
     this._openAIEmbeddingService = new OpenAIEmbeddingService(this);
+    this._sentientSimsEmbeddingService = new SentientSimsEmbeddingService(this);
+    this._geminiEmbeddingService = new GeminiEmbeddingService(this);
     this._noopEmbeddingService = new NoopEmbeddingService();
 
     this._promptBuilder = new PromptRequestBuilderService(this);
@@ -387,13 +393,24 @@ export class ApiContext {
     return this._actionDispatcherService;
   }
 
-  // Evaluated per access so setting an OpenAI key at runtime upgrades from Noop.
-  // Gated behind memoryRetrievalEnabled; off by default.
+  // Evaluated per access so changing the embedding provider (or setting a key/token at
+  // runtime) takes effect immediately. Gated behind memoryRetrievalEnabled; off by default.
   get embedding(): EmbeddingService {
     if (!this._settings.memoryRetrievalEnabled) {
       return this._noopEmbeddingService;
     }
-    return this._openAIEmbeddingService.isAvailable() ? this._openAIEmbeddingService : this._noopEmbeddingService;
+    const service = this.getEmbeddingService(this._settings.embeddingApiType);
+    return service.isAvailable() ? service : this._noopEmbeddingService;
+  }
+
+  getEmbeddingService(apiType: ApiType): EmbeddingService {
+    if (apiType === ApiType.SentientSimsAI || apiType === ApiType.CustomAI) {
+      return this._sentientSimsEmbeddingService;
+    }
+    if (apiType === ApiType.Gemini) {
+      return this._geminiEmbeddingService;
+    }
+    return this._openAIEmbeddingService;
   }
 
   get memoryAnnotation(): MemoryAnnotationService {

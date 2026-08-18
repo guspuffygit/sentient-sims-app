@@ -24,6 +24,9 @@ export const generationApiTypes: ApiType[] = [
   ApiType.VLLM,
 ];
 
+// Backends that can generate embeddings for memory retrieval and semantic search.
+export const embeddingApiTypes: ApiType[] = [ApiType.OpenAI, ApiType.SentientSimsAI, ApiType.Gemini];
+
 export function ApiTypeFromValue(value: any): ApiType {
   switch (value) {
     case ApiType.SentientSimsAI:

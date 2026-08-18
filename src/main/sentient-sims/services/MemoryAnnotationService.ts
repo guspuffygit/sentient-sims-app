@@ -79,12 +79,18 @@ export class MemoryAnnotationService {
       return;
     }
 
-    this.ctx.memoryIndexRepository.upsertIndex({
-      memory_id: memory.id,
-      importance,
-      embedding,
-      embedding_model: embeddingModel,
-    });
+    this.ctx.memoryIndexRepository.upsertIndex({ memory_id: memory.id, importance });
+    // The memory's text may have just changed, so stored vectors of the old text — under
+    // any model — no longer describe it. Dropped rows re-embed via backfill when their
+    // model becomes active again.
+    this.ctx.memoryIndexRepository.deleteEmbeddings(memory.id);
+    if (embedding && embeddingModel) {
+      this.ctx.memoryIndexRepository.upsertEmbedding({
+        memory_id: memory.id,
+        embedding_model: embeddingModel,
+        embedding,
+      });
+    }
     log.debug(`[Annotation] memory ${memory.id} importance=${importance} embedded=${Boolean(embedding)}`);
   }
 
@@ -94,8 +100,11 @@ export class MemoryAnnotationService {
     });
   }
 
-  // Fills in embeddings for memories from before the index existed, or written while no
-  // embedder was configured. Batched so a large backlog costs few API calls. Importance on
+  // Fills in embeddings for memories from before the index existed, written while no
+  // embedder was configured, or never embedded by the current model (each model keeps its
+  // own rows in memory_embedding, so a switch to a new model embeds everything once and a
+  // switch back finds its old rows intact). Batched so a large backlog costs few API
+  // calls. Importance on
   // never-indexed rows uses the cheap event-type heuristic — no LLM call per historical
   // memory — while rows the live path already rated keep their rating.
   async backfill(batchSize = 50): Promise<number> {
@@ -110,7 +119,7 @@ export class MemoryAnnotationService {
         log.debug('[Annotation] database changed during backfill, stopping');
         break;
       }
-      const batch = this.ctx.memoryIndexRepository.getUnindexedMemories(batchSize);
+      const batch = this.ctx.memoryIndexRepository.getUnindexedMemories(batchSize, this.ctx.embedding.model);
       if (batch.length === 0) {
         break;
       }
@@ -155,8 +164,11 @@ export class MemoryAnnotationService {
       this.ctx.memoryIndexRepository.upsertIndex({
         memory_id: memory.id,
         importance: existing?.importance ?? heuristicImportance(memory.event_type),
-        embedding: embeddingToBuffer(vector),
+      });
+      this.ctx.memoryIndexRepository.upsertEmbedding({
+        memory_id: memory.id,
         embedding_model: model,
+        embedding: embeddingToBuffer(vector),
       });
       embedded += 1;
     });

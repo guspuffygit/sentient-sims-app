@@ -105,9 +105,13 @@ export const openaiDefaultModel = 'gpt-4o-mini';
 export const openrouterDefaultModel = 'mistralai/mistral-nemo';
 export const novelaiDefaultModel = 'kayra-v1';
 export const sentientSimsAIDefaultModel = 'Gryphe/MythoMax-L2-13b';
+// Embedding model served by the Sentient Sims AI /v1/embeddings endpoint (passed through
+// verbatim, so any embedding model the server backend hosts is accepted).
+export const sentientSimsAIDefaultEmbeddingModel = 'Qwen/Qwen3-Embedding-8B';
 export const tokenizerBreakString = '<<BREAK>>';
 export const defaultWantsPrefixes = ['I want to', 'I would like', 'I feel'];
 export const defaultGeminiModel = 'gemini-flash-latest';
+export const geminiDefaultEmbeddingModel = 'gemini-embedding-001';
 // Model IDs Google has removed from the Gemini API. Anyone still pinned to
 // one of these gets a 404 on every call; runMigrations rewrites them to
 // defaultGeminiModel on next launch. Values are bare model names, matched
