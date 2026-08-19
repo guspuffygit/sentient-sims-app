@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
 import { sendPopUpNotification } from '../util/notifyRenderer';
+import { isGameRunning } from '../util/gameProcess';
 import { ApiContext } from '../services/ApiContext';
 import { ModUpdate } from '../services/UpdateService';
 
 export type UpdateModResponse = {
   done?: 'done';
+  skipped?: 'game-running';
   error?: {
     stack?: string;
     message?: string;
@@ -20,9 +22,22 @@ export class UpdateController {
   }
 
   updateMod = async (req: Request, res: Response) => {
+    const modUpdate = req.body as ModUpdate;
     try {
-      log.info('Starting update.');
-      const modUpdate = req.body as ModUpdate;
+      log.info(`Starting ${modUpdate.auto ? 'auto ' : ''}update.`);
+
+      // Installing over the game's locked .package files fails partway and
+      // leaves the mod folder inconsistent, so refuse up front
+      if (await isGameRunning()) {
+        if (modUpdate.auto) {
+          log.info('Skipping mod auto-update, The Sims 4 is running.');
+          const response: UpdateModResponse = { skipped: 'game-running' };
+          res.json(response);
+          return;
+        }
+        throw new Error('Close The Sims 4 before updating the mod.');
+      }
+
       // expiration needs to be a Date object and not a string
       const credentials = {
         ...modUpdate.credentials,
@@ -41,7 +56,11 @@ export class UpdateController {
         },
       };
       log.error(`Error updating:`, err);
-      sendPopUpNotification(message);
+      // The startup auto-update retries on the next launch; only bother the
+      // user with a popup when they clicked the button themselves
+      if (!modUpdate.auto) {
+        sendPopUpNotification(message);
+      }
       res.status(200).json(response);
     }
   };

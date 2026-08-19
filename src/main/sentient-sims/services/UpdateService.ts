@@ -1,7 +1,11 @@
 import * as fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { randomUUID } from 'crypto';
 import { AwsCredentialIdentity } from '@aws-sdk/types';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
+import { pipeline } from 'stream/promises';
 import AdmZip from 'adm-zip';
 import log from 'electron-log';
 import { ApiContext } from './ApiContext';
@@ -9,6 +13,8 @@ import { ApiContext } from './ApiContext';
 export type ModUpdate = {
   type: string;
   credentials: AwsCredentialIdentity;
+  // Set by the app's startup auto-update; auto failures are logged, not popped up
+  auto?: boolean;
 };
 
 function fsErrorCode(err: unknown): string | undefined {
@@ -37,29 +43,53 @@ function installErrorMessage(err: unknown, modsFolder: string): string {
   return 'Unable to update mod, make sure The Sims 4 is closed before updating.';
 }
 
+const noop = () => {};
+
+type InFlightUpdate = {
+  type: string;
+  promise: Promise<void>;
+};
+
 export class UpdateService {
   private ctx: ApiContext;
+
+  // Two updates racing used to interleave their downloads into one temp file and
+  // corrupt it (CRC32 failures on extract), so callers requesting the release
+  // that is already installing join it, and other releases queue behind it.
+  private inFlight?: InFlightUpdate;
+
+  private queueTail: Promise<void> = Promise.resolve();
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
   }
 
-  async updateMod({ type, credentials }: ModUpdate) {
-    const zippedModFile = this.ctx.directory.getZippedModFile();
-    try {
-      if (fs.existsSync(zippedModFile)) {
-        log.info(`Zipped mod file exists, deleting: ${zippedModFile}`);
-        try {
-          fs.rmSync(zippedModFile);
-        } catch (err) {
-          log.error(`Unable to delete existing mod zip: ${zippedModFile}`, err);
-          if (isPermissionErrorCode(fsErrorCode(err))) {
-            throw new Error(permissionErrorMessage(zippedModFile), { cause: err });
-          }
-          throw err;
-        }
-      }
+  updateMod(modUpdate: ModUpdate): Promise<void> {
+    if (this.inFlight && this.inFlight.type === modUpdate.type) {
+      log.info(`Mod update for '${modUpdate.type}' already in progress, joining it`);
+      return this.inFlight.promise;
+    }
 
+    const run = this.queueTail.then(() => this.installMod(modUpdate));
+    this.queueTail = run.then(noop, noop);
+
+    const entry: InFlightUpdate = { type: modUpdate.type, promise: run };
+    this.inFlight = entry;
+    const clear = () => {
+      if (this.inFlight === entry) {
+        this.inFlight = undefined;
+      }
+    };
+    run.then(clear).catch(clear);
+
+    return run;
+  }
+
+  private async installMod({ type, credentials }: ModUpdate): Promise<void> {
+    // A unique path per install keeps a second app instance (e.g. briefly alive
+    // across a self-update relaunch) from writing into the same download
+    const zippedModFile = path.join(os.tmpdir(), `sentient-sims-${randomUUID()}.zip`);
+    try {
       let responseBody: Readable;
       try {
         const client = new S3Client({ region: 'us-east-1', credentials });
@@ -85,23 +115,18 @@ export class UpdateService {
       }
 
       try {
-        const outputStream = fs.createWriteStream(zippedModFile);
-        responseBody.pipe(outputStream);
-
-        await new Promise<void>((resolve, reject) => {
-          outputStream.on('finish', resolve);
-          outputStream.on('error', reject);
-        });
-
-        if (!fs.existsSync(zippedModFile)) {
-          throw new Error(`Zipped mod file did not exist at: ${zippedModFile}`);
-        }
+        await pipeline(responseBody, fs.createWriteStream(zippedModFile));
       } catch (err) {
         log.error(`Unable to write mod update to ${zippedModFile}`, err);
         if (isPermissionErrorCode(fsErrorCode(err))) {
           throw new Error(permissionErrorMessage(zippedModFile), { cause: err });
         }
-        throw new Error(`Unable to save the mod update to disk, try again.`, { cause: err });
+        throw new Error(
+          `Unable to save the mod update, check your internet connection and disk space, then try again.`,
+          {
+            cause: err,
+          },
+        );
       }
 
       const modsFolder = this.ctx.directory.getModsFolder();
@@ -148,10 +173,14 @@ export class UpdateService {
         log.error(`Failed to re-sign game after mod update`, signErr);
       }
     } finally {
-      this.ctx.directory.filesToDelete().forEach((fileToDelete) => {
-        if (fs.existsSync(fileToDelete)) {
-          log.info(`File exists, deleting: ${fileToDelete}`);
-          fs.rmSync(fileToDelete);
+      [zippedModFile, ...this.ctx.directory.filesToDelete()].forEach((fileToDelete) => {
+        try {
+          if (fs.existsSync(fileToDelete)) {
+            log.info(`File exists, deleting: ${fileToDelete}`);
+            fs.rmSync(fileToDelete);
+          }
+        } catch (cleanupErr) {
+          log.error(`Unable to clean up ${fileToDelete}`, cleanupErr);
         }
       });
     }

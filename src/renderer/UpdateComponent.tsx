@@ -1,55 +1,15 @@
-/* eslint no-alert: off, consistent-return: off, no-useless-return: off */
-import { useState } from 'react';
 import { Box, CardActions, Chip, IconButton, Tooltip, Typography, Button } from '@mui/material';
 import CachedIcon from '@mui/icons-material/Cached';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
-import { fetchAuthSession } from 'aws-amplify/auth';
-import { ModUpdate } from 'main/sentient-sims/services/UpdateService';
-import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import AppCard from './AppCard';
-import useNewVersionChecker from './hooks/useNewVersionChecker';
-import useSetting, { SettingsHook } from './hooks/useSetting';
 import { useVersions } from './providers/VersionsProvider';
+import { useModUpdate } from './providers/ModUpdateProvider';
 import { ReleaseTypeSelector } from './components/ReleaseTypeSelector';
-import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
-
-const client = new SentientSimsAppClient();
 
 export default function UpdateComponent() {
   const versions = useVersions();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const releaseType: SettingsHook<string> = useSetting<string>(SettingsEnum.MOD_RELEASE, 'main');
-  const { updateState, handleCheckForUpdates } = useNewVersionChecker({
-    setIsLoading,
-    releaseType: releaseType.value,
-  });
-
-  const handleUpdate = async (forceUpdate: boolean): Promise<void> => {
-    await handleCheckForUpdates();
-
-    const authSession = await fetchAuthSession();
-    if (authSession.credentials) {
-      const modUpdate: ModUpdate = {
-        type: releaseType.value,
-        credentials: authSession.credentials,
-      };
-      if (updateState.newVersionAvailable || forceUpdate) {
-        setIsLoading(true);
-        return client.update
-          .updateMod(modUpdate)
-          .then(() => {
-            return handleCheckForUpdates();
-          })
-          .finally(() => {
-            setIsLoading(false);
-            void versions.refresh();
-          });
-      }
-    }
-
-    return;
-  };
+  const { newVersionAvailable, lastChecked, busy, checkForUpdates, installUpdate } = useModUpdate();
 
   let updateText = 'Update now';
   let statusChip = (
@@ -70,7 +30,7 @@ export default function UpdateComponent() {
         sx={{ color: 'info.main', borderColor: (theme) => `${theme.palette.info.main}66` }}
       />
     );
-  } else if (updateState.newVersionAvailable) {
+  } else if (newVersionAvailable) {
     statusChip = (
       <Chip
         size="small"
@@ -94,9 +54,9 @@ export default function UpdateComponent() {
                 <IconButton
                   size="small"
                   onClick={() => {
-                    void handleCheckForUpdates();
+                    void checkForUpdates();
                   }}
-                  disabled={versions.loading || isLoading}
+                  disabled={versions.loading || busy}
                 >
                   <CachedIcon fontSize="small" />
                 </IconButton>
@@ -111,10 +71,10 @@ export default function UpdateComponent() {
           <div>
             <Button
               onClick={() => {
-                void handleUpdate(false);
+                void installUpdate();
               }}
-              loading={isLoading}
-              disabled={!updateState.newVersionAvailable}
+              loading={busy}
+              disabled={!newVersionAvailable}
               color="success"
               variant="contained"
             >
@@ -126,9 +86,9 @@ export default function UpdateComponent() {
               <Tooltip title="Force reinstalls the latest version of the mod">
                 <Button
                   onClick={() => {
-                    void handleUpdate(true);
+                    void installUpdate();
                   }}
-                  loading={isLoading}
+                  loading={busy}
                   color="warning"
                   variant="outlined"
                 >
@@ -148,7 +108,7 @@ export default function UpdateComponent() {
             fontSize: 13,
           }}
         >
-          Last checked: {updateState.lastChecked}
+          Last checked: {lastChecked}
         </Typography>
       </Box>
     </AppCard>

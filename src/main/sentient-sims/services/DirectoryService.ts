@@ -39,8 +39,8 @@ export class DirectoryService {
   }
 
   getZippedModFile(): string {
-    // Download outside the Mods folder so antivirus/Controlled Folder Access
-    // protecting Documents cannot block the download itself
+    // Legacy download location; UpdateService now downloads to a unique temp
+    // file per install. Kept in filesToDelete() to clean up old leftovers.
     return path.join(os.tmpdir(), 'sentient-sims.zip');
   }
 
