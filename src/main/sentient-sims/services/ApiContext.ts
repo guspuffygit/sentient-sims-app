@@ -39,6 +39,7 @@ import { ElevenLabsVoicesService } from './ElevenLabsVoicesService';
 import { EmbeddingProviderConfigService } from './EmbeddingProviderConfigService';
 import { EmbeddingService, NoopEmbeddingService, OpenAIEmbeddingService } from './EmbeddingService';
 import { GameSigningService } from './GameSigningService';
+import { PaintingMountService } from './PaintingMountService';
 import { GeminiEmbeddingService } from './GeminiEmbeddingService';
 import { GeminiService } from './GeminiService';
 import { GenerationQueueService } from './GenerationQueueService';
@@ -240,6 +241,7 @@ export class ApiContext {
   private readonly _memoryRetrievalService: MemoryRetrievalService;
   private readonly _interactionSemanticSearchService: InteractionSemanticSearchService;
   private readonly _gameSigningService: GameSigningService;
+  private readonly _paintingMountService: PaintingMountService;
   private readonly _elevenLabsVoicesService: ElevenLabsVoicesService;
 
   // --- Repositories ---
@@ -329,6 +331,7 @@ export class ApiContext {
     this._memoryRetrievalService = new MemoryRetrievalService(this);
     this._interactionSemanticSearchService = new InteractionSemanticSearchService(this);
     this._gameSigningService = new GameSigningService(this);
+    this._paintingMountService = new PaintingMountService(this);
     this._elevenLabsVoicesService = new ElevenLabsVoicesService(this);
     this._memoryRepository.setOnMemoryUpserted((memory) => {
       this._memoryAnnotationService.annotateInBackground(memory);
@@ -445,6 +448,10 @@ export class ApiContext {
 
   get gameSigning(): GameSigningService {
     return this._gameSigningService;
+  }
+
+  get paintingMount(): PaintingMountService {
+    return this._paintingMountService;
   }
 
   get elevenLabsVoices(): ElevenLabsVoicesService {

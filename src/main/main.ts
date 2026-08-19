@@ -160,6 +160,12 @@ const startServices = () => {
     log.error('Failed to verify game signature on startup', err);
   });
 
+  try {
+    ctx.paintingMount.ensureMount();
+  } catch (err: unknown) {
+    log.error('Failed to set up paintings texture mount on startup', err);
+  }
+
   log.transports.file.level = 'info';
 
   // eslint-disable-next-line import-x/no-named-as-default-member

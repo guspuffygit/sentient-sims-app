@@ -168,6 +168,12 @@ export class UpdateService {
       log.info(`Update completed.`);
 
       try {
+        this.ctx.paintingMount.ensureMount();
+      } catch (mountErr) {
+        log.error(`Failed to set up paintings texture mount after mod update`, mountErr);
+      }
+
+      try {
         await this.ctx.gameSigning.signGame();
       } catch (signErr) {
         log.error(`Failed to re-sign game after mod update`, signErr);
