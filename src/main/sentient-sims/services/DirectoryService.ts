@@ -6,6 +6,26 @@ import { SettingsService } from './SettingsService';
 import { DatabaseSession } from '../models/DatabaseSession';
 import { SaveGame, SaveGameType } from '../models/SaveGame';
 
+// Everything the release zip ships into Mods/sentient-sims (plus the zip
+// itself and a retired script). A copy of any of these anywhere else under
+// Mods is a manual or leftover install: the game loads a stray
+// sentient-sims.ts4script instead of the real one, which then cannot find
+// ss_overlay.dll next to itself and reports the overlay unavailable.
+export const SHIPPED_MOD_FILES = [
+  'sentient-sims.ts4script',
+  'sentient-sims.package',
+  'ss_overlay.dll',
+  'ss_overlay.dylib',
+  '_ctypes.dylib',
+  'sentient-sims.zip',
+  'sentient-sims-descriptions.ts4script',
+];
+
+export type StrayModFileCleanup = {
+  removed: string[];
+  failed: string[];
+};
+
 export class DirectoryService {
   readonly settingsService: SettingsService;
 
@@ -50,6 +70,55 @@ export class DirectoryService {
 
   filesToDelete(): string[] {
     return [path.join(this.getSentientSimsFolder(), 'sentient-sims-descriptions.ts4script'), this.getZippedModFile()];
+  }
+
+  findStrayModFiles(): string[] {
+    const modsFolder = this.getModsFolder();
+    const sentientSimsFolder = path.resolve(this.getSentientSimsFolder());
+    const shipped = new Set(SHIPPED_MOD_FILES.map((name) => name.toLowerCase()));
+    const stray: string[] = [];
+
+    const walk = (folder: string) => {
+      let entries: fs.Dirent[];
+      try {
+        entries = fs.readdirSync(folder, { withFileTypes: true });
+      } catch (err) {
+        log.warn(`Unable to scan ${folder} for stray mod files`, err);
+        return;
+      }
+      entries.forEach((entry) => {
+        const entryPath = path.join(folder, entry.name);
+        if (entry.isDirectory()) {
+          walk(entryPath);
+        } else if (
+          entry.isFile() &&
+          shipped.has(entry.name.toLowerCase()) &&
+          path.resolve(folder) !== sentientSimsFolder
+        ) {
+          stray.push(entryPath);
+        }
+      });
+    };
+
+    if (fs.existsSync(modsFolder)) {
+      walk(modsFolder);
+    }
+    return stray;
+  }
+
+  removeStrayModFiles(): StrayModFileCleanup {
+    const result: StrayModFileCleanup = { removed: [], failed: [] };
+    this.findStrayModFiles().forEach((file) => {
+      try {
+        fs.rmSync(file);
+        log.info(`Removed stray mod file outside ${this.getSentientSimsFolder()}: ${file}`);
+        result.removed.push(file);
+      } catch (err) {
+        log.error(`Unable to remove stray mod file ${file}`, err);
+        result.failed.push(file);
+      }
+    });
+    return result;
   }
 
   createDirectoryIfNotExist(directoryPath: string) {

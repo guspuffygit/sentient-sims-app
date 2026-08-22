@@ -1,5 +1,6 @@
 import log from 'electron-log';
 import { OpenAIMessage } from '../models/OpenAIMessage';
+import { TokenCounter } from '../tokens/TokenCounter';
 
 export function arraysAreEqual(arr1: number[], arr2: number[]): boolean {
   if (arr1.length !== arr2.length) {
@@ -59,4 +60,34 @@ export function truncateMessages(
   }
 
   return messages.slice(chunksToChopOff);
+}
+
+/**
+ * Cut text down to a token budget, keeping either the start or the end of the string.
+ * Binary-searches on character length because token counts only exist for whole strings.
+ */
+export function truncateToTokens(
+  text: string,
+  maxTokens: number,
+  tokenCounter: TokenCounter,
+  keep: 'head' | 'tail' = 'tail',
+): string {
+  if (maxTokens <= 0) {
+    return '';
+  }
+  if (tokenCounter.countTokens(text) <= maxTokens) {
+    return text;
+  }
+  let lo = 0;
+  let hi = text.length;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    const slice = keep === 'tail' ? text.slice(text.length - mid) : text.slice(0, mid);
+    if (tokenCounter.countTokens(slice) <= maxTokens) {
+      lo = mid;
+    } else {
+      hi = mid - 1;
+    }
+  }
+  return keep === 'tail' ? text.slice(text.length - lo) : text.slice(0, lo);
 }

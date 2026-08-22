@@ -145,6 +145,46 @@ describe('UpdateService', () => {
     expect(fs.existsSync(path.join(folder, 'sentient-sims.package'))).toBe(true);
   });
 
+  it('removes stray copies of the shipped mod files outside Mods/sentient-sims', async () => {
+    const ctx = mockApiContext();
+    const mods = ctx.directory.getModsFolder();
+    const strayFolder = path.join(mods, 'old sentient sims');
+    fs.mkdirSync(strayFolder, { recursive: true });
+    // The player report: the script dropped straight into Mods, where it
+    // shadows the real install, plus the DLL they moved up to make it work
+    const strays = [
+      path.join(mods, 'sentient-sims.ts4script'),
+      path.join(mods, 'SS_Overlay.dll'),
+      path.join(mods, 'sentient-sims.zip'),
+      path.join(strayFolder, 'sentient-sims.package'),
+      path.join(strayFolder, 'ss_overlay.dylib'),
+    ];
+    strays.forEach((file) => {
+      fs.writeFileSync(file, 'stray');
+    });
+    const otherMod = path.join(mods, 'other_mod.ts4script');
+    fs.writeFileSync(otherMod, 'not ours');
+    serveZips({ main: buildModZip('iiii') });
+
+    await ctx.update.updateMod({ type: 'main', credentials });
+
+    strays.forEach((file) => {
+      expect(fs.existsSync(file)).toBe(false);
+    });
+    expect(fs.existsSync(otherMod)).toBe(true);
+    const folder = ctx.directory.getSentientSimsFolder();
+    expect(fs.existsSync(path.join(folder, 'sentient-sims.ts4script'))).toBe(true);
+    expect(installedVersion(ctx)).toEqual('iiii');
+  });
+
+  it('finds no stray files in a clean install', async () => {
+    const ctx = mockApiContext();
+    serveZips({ main: buildModZip('jjjj') });
+    await ctx.update.updateMod({ type: 'main', credentials });
+
+    expect(ctx.directory.findStrayModFiles()).toEqual([]);
+  });
+
   it('reports a friendly error when the download fails and recovers on retry', async () => {
     const ctx = mockApiContext();
     s3.send.mockRejectedValueOnce(new Error('network down'));

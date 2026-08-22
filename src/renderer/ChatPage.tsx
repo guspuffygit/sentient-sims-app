@@ -7,6 +7,8 @@ import {
   FormControlLabel,
   Modal,
   Snackbar,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from '@mui/material';
@@ -30,6 +32,7 @@ import { LLMExchangePanel } from './scenarioTester/LLMExchangePanel';
 import { playAudioUrl } from './voice/audioPlayback';
 import AppCard from './AppCard';
 import { EmptyState } from './components/EmptyState';
+import PaintingsPanel from './PaintingsPanel';
 
 export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -115,6 +118,7 @@ export default function ChatPage() {
 
   const [openInputView, setOpenInputView] = useState(false);
   const [copiedSnackbar, setCopiedSnackbar] = useState(false);
+  const [activeTab, setActiveTab] = useState<'chat' | 'paintings'>('chat');
 
   const copyInteractionName = () => {
     if (interactionName) {
@@ -126,8 +130,25 @@ export default function ChatPage() {
     setOpenInputView(true);
   }
 
+  const [paintingsEverOpened, setPaintingsEverOpened] = useState(false);
+
   return (
     <>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }}>
+        <Tabs
+          value={activeTab}
+          onChange={(_, next) => {
+            const nextTab = next as 'chat' | 'paintings';
+            setActiveTab(nextTab);
+            if (nextTab === 'paintings') setPaintingsEverOpened(true);
+          }}
+          aria-label="Chat page tabs"
+        >
+          <Tab label="Chat" value="chat" />
+          <Tab label="Paintings" value="paintings" />
+        </Tabs>
+      </Box>
+      <Box sx={{ display: activeTab === 'chat' ? 'block' : 'none' }}>
       {debugMode.isEnabled && (
         <ScenarioTesterComponent
           loading={loading}
@@ -398,6 +419,12 @@ export default function ChatPage() {
         }}
         message="Copied to clipboard"
       />
+      </Box>
+      {paintingsEverOpened ? (
+        <Box sx={{ display: activeTab === 'paintings' ? 'block' : 'none' }}>
+          <PaintingsPanel />
+        </Box>
+      ) : null}
     </>
   );
 }

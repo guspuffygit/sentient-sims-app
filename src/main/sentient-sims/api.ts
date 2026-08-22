@@ -58,6 +58,7 @@ export function runApi(ctx: ApiContext) {
 
   expressApp.get('/paintings', ctx.controller.paintings.getPaintingsManifest);
   expressApp.get('/paintings/:instanceId/texture', ctx.controller.paintings.getPaintingTexture);
+  expressApp.get('/paintings/:instanceId/png', ctx.controller.paintings.getPaintingPng);
 
   expressApp.get('/memories/:memoryId', ctx.controller.memories.getMemory);
   expressApp.get('/memories', ctx.controller.memories.getMemories);

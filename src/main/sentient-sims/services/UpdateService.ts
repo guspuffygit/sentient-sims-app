@@ -165,6 +165,18 @@ export class UpdateService {
         throw new Error(installErrorMessage(err, modsFolder), { cause: err });
       }
 
+      // Players who move the mod files around by hand (a sentient-sims.ts4script
+      // dropped straight into Mods, an old sentient-sims.zip left behind) end
+      // up with the game loading the stray copy instead of this install, so
+      // sweep them out rather than letting the two fight.
+      const stray = this.ctx.directory.removeStrayModFiles();
+      if (stray.removed.length > 0) {
+        log.info(`Removed ${stray.removed.length} stray mod file(s): ${stray.removed.join(', ')}`);
+      }
+      if (stray.failed.length > 0) {
+        log.warn(`Could not remove stray mod file(s), delete them by hand: ${stray.failed.join(', ')}`);
+      }
+
       log.info(`Update completed.`);
 
       try {

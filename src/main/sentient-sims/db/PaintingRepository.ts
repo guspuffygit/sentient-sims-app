@@ -14,7 +14,7 @@ export class PaintingRepository extends Repository {
   getManifest(): PaintingManifestDTO[] {
     return this.dbService
       .getDb()
-      .prepare('SELECT uuid, instance_id, created_at FROM painting ORDER BY created_at')
+      .prepare('SELECT uuid, instance_id, prompt, metadata, created_at FROM painting ORDER BY created_at')
       .all() as PaintingManifestDTO[];
   }
 

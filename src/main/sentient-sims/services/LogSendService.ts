@@ -193,7 +193,9 @@ export class LogSendService {
       // Dont send tokens or secrets in the logs
       if (!settingsEnum.includes('Key') && !settingsEnum.includes('Token')) {
         const settingsValue = this.ctx.settings.getSetting(settingsEnum);
-        if (Object.prototype.toString.call(settingsValue) === '[object Object]') {
+        // Arrays too: aiProviderConfigs printed as "[object Object],..." hides which
+        // provider a report is actually routed to
+        if (settingsValue !== null && typeof settingsValue === 'object') {
           settings.push(`${settingsEnum}: ${JSON.stringify(settingsValue)}`);
         } else {
           settings.push(`${settingsEnum}: ${String(settingsValue)}`);

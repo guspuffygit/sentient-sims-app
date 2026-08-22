@@ -47,4 +47,22 @@ export class PaintingsController {
       return res.json({ error: errorMessage(err) });
     }
   };
+
+  getPaintingPng = (req: Request<{ instanceId: string }>, res: Response) => {
+    try {
+      const { instanceId } = req.params;
+      const painting = this.ctx.paintingRepository.getPaintingByInstanceId(instanceId);
+      if (!painting || !painting.image) {
+        return res.status(404).json({
+          error: `Painting with instance id ${instanceId} not found.`,
+        });
+      }
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'no-cache');
+      return res.send(painting.image);
+    } catch (err) {
+      log.error('Error getting painting png', err);
+      return res.status(500).json({ error: errorMessage(err) });
+    }
+  };
 }
