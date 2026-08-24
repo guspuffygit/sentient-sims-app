@@ -24,35 +24,39 @@ import { EmptyState } from './components/EmptyState';
 
 export default function PaintingsPanel() {
   const [manifest, setManifest] = useState<PaintingManifestDTO[]>([]);
-  const [manifestLoading, setManifestLoading] = useState(false);
+  const [manifestLoading, setManifestLoading] = useState(true);
   const [manifestError, setManifestError] = useState<string | undefined>();
   const [selectedInstanceId, setSelectedInstanceId] = useState<string | undefined>();
   const [snackbar, setSnackbar] = useState<string | undefined>();
 
+  async function fetchManifest() {
+    try {
+      const res = await fetch(`${appApiUrl}/paintings`);
+      const body = (await res.json()) as PaintingManifestDTO[] | { error?: string };
+      if (!Array.isArray(body)) {
+        throw new Error(body.error ?? 'Failed to load paintings');
+      }
+      const sorted = [...body].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+      setManifest(sorted);
+      setManifestError(undefined);
+    } catch (err: unknown) {
+      log.error('Failed to load paintings manifest', err);
+      setManifestError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setManifestLoading(false);
+    }
+  }
+
   function loadManifest() {
     setManifestLoading(true);
-    setManifestError(undefined);
-    fetch(`${appApiUrl}/paintings`)
-      .then((res) => res.json())
-      .then((body: PaintingManifestDTO[] | { error: string }) => {
-        if (!Array.isArray(body)) {
-          throw new Error(body.error ?? 'Failed to load paintings');
-        }
-        const sorted = [...body].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
-        setManifest(sorted);
-      })
-      .catch((err: unknown) => {
-        log.error('Failed to load paintings manifest', err);
-        setManifestError(err instanceof Error ? err.message : String(err));
-      })
-      .finally(() => {
-        setManifestLoading(false);
-      });
+    void fetchManifest();
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadManifest();
+    const initialLoad = async () => {
+      await fetchManifest();
+    };
+    void initialLoad();
   }, []);
 
   const selectedPainting = useMemo(
@@ -176,42 +180,37 @@ function PaintingEditor({ painting, onGenerated, onWarning }: PaintingEditorProp
   const [regenError, setRegenError] = useState<string | undefined>();
   const [regenImageBase64, setRegenImageBase64] = useState<string | undefined>();
 
-  function regenerate() {
+  async function regenerate() {
     if (!promptDraft.trim()) {
       onWarning('Prompt is empty');
       return;
     }
     setRegenLoading(true);
     setRegenError(undefined);
-    fetch(`${appApiUrl}/ai/v2/image/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: promptDraft, format: 'png' }),
-    })
-      .then(async (res) => {
-        const body = (await res.json()) as { imageBase64?: string; error?: string };
-        if (!res.ok || !body.imageBase64) {
-          throw new Error(body.error ?? `Generation failed (HTTP ${res.status})`);
-        }
-        setRegenImageBase64(body.imageBase64);
-        onGenerated();
-      })
-      .catch((err: unknown) => {
-        log.error('Failed to regenerate painting', err);
-        setRegenError(err instanceof Error ? err.message : String(err));
-      })
-      .finally(() => {
-        setRegenLoading(false);
+    try {
+      const res = await fetch(`${appApiUrl}/ai/v2/image/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: promptDraft, format: 'png' }),
       });
+      const body = (await res.json()) as { imageBase64?: string; error?: string };
+      if (!res.ok || !body.imageBase64) {
+        throw new Error(body.error ?? `Generation failed (HTTP ${res.status})`);
+      }
+      setRegenImageBase64(body.imageBase64);
+      onGenerated();
+    } catch (err: unknown) {
+      log.error('Failed to regenerate painting', err);
+      setRegenError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setRegenLoading(false);
+    }
   }
 
   return (
     <>
       <Box sx={{ display: 'flex', gap: 2, marginBottom: 2, minHeight: 0 }}>
-        <PaintingPreview
-          title="Stored"
-          imageSrc={`${appApiUrl}/paintings/${painting.instance_id}/png`}
-        />
+        <PaintingPreview title="Stored" imageSrc={`${appApiUrl}/paintings/${painting.instance_id}/png`} />
         <PaintingPreview
           title="Regenerated"
           imageSrc={regenImageBase64 ? `data:image/png;base64,${regenImageBase64}` : undefined}
@@ -249,7 +248,7 @@ function PaintingEditor({ painting, onGenerated, onWarning }: PaintingEditorProp
           variant="contained"
           color="primary"
           onClick={() => {
-            regenerate();
+            void regenerate();
           }}
           disabled={regenLoading}
           endIcon={regenLoading ? <CircularProgress size={16} /> : <PlayArrowIcon />}
