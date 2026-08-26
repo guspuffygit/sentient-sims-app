@@ -21,9 +21,11 @@ import {
   notifyMapInteraction,
   playTTS,
   playTTSLines,
+  PlayTTSVoiceOptions,
   sendChatGeneration,
   sendSceneLineToMod,
 } from '../util/notifyRenderer';
+import { voiceTypeForTTS } from '../models/VoiceType';
 import { markScenePaced } from '../util/pacedScenes';
 import { GenerationOptions, PromptRequestBuilderOptions } from './PromptRequestBuilderService';
 import { containsPlayerSim } from '../util/eventContainsPlayerSim';
@@ -1417,7 +1419,7 @@ Write me a buff description based on the conversation so that ${buffRequest.name
   }
 
   playTts(text: string, sims?: SentientSim[]) {
-    playTTS(text, sims, this.simVoiceOverrides(sims));
+    playTTS(text, sims, this.voiceCastingOptions(sims));
   }
 
   playTtsLines(
@@ -1425,21 +1427,29 @@ Write me a buff description based on the conversation so that ${buffRequest.name
     sims?: SentientSim[],
     options?: { paced?: boolean; preamble?: string; pacedText?: string },
   ) {
-    playTTSLines(lines, sims, { ...options, voiceOverrides: this.simVoiceOverrides(sims) });
+    playTTSLines(lines, sims, { ...options, ...this.voiceCastingOptions(sims) });
   }
 
-  // Voices the user pinned to these sims in the Sims tab. Best effort: TTS should still
-  // play with automatically cast voices if the save database isn't loaded.
-  private simVoiceOverrides(sims?: SentientSim[]): Map<string, string> | undefined {
-    if (!sims || sims.length === 0) {
-      return undefined;
+  // Which provider's voices to cast per sim, plus the voices the user pinned to these
+  // sims in the Sims tab. Best effort: TTS should still play with automatically cast
+  // voices if the save database isn't loaded.
+  private voiceCastingOptions(sims?: SentientSim[]): PlayTTSVoiceOptions {
+    const voiceType = voiceTypeForTTS(this.ctx.settings.ttsApiType, this.ctx.settings.sentientSimsAITtsSettings.model);
+    if (!voiceType || !sims || sims.length === 0) {
+      return { voiceType };
     }
 
     try {
-      return this.ctx.participantRepository.getParticipantVoices(sims.map((sim) => sim.sim_id));
+      return {
+        voiceType,
+        voiceOverrides: this.ctx.participantRepository.getParticipantVoices(
+          sims.map((sim) => sim.sim_id),
+          voiceType,
+        ),
+      };
     } catch (err) {
       log.warn('Unable to look up per-sim voice overrides', err);
-      return undefined;
+      return { voiceType };
     }
   }
 }

@@ -5,6 +5,7 @@ import { sendModNotification } from '../websocketServer';
 import { ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { SaveGame, ToSaveGameType } from '../models/SaveGame';
 import { ApiContext } from '../services/ApiContext';
+import { toVoiceType } from '../models/VoiceType';
 
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
@@ -13,6 +14,7 @@ function errorMessage(err: unknown): string {
 type UpdateParticipantBody = {
   description?: string;
   name?: string;
+  voiceType?: string;
   voiceId?: string;
   voiceName?: string;
 };
@@ -71,9 +73,10 @@ export class ParticipantsController {
 
       this.ctx.participantRepository.updateParticipant(participant);
       // The mod's participant updates never carry voice fields, so only the app's
-      // Sims tab (which always sends voiceId) can change or clear a voice pin
-      if ('voiceId' in body) {
-        this.ctx.participantRepository.setParticipantVoice(participantId, {
+      // Sims tab (which sends voiceId with a voiceType) can change or clear a voice pin
+      const voiceType = toVoiceType(body.voiceType);
+      if ('voiceId' in body && voiceType) {
+        this.ctx.participantRepository.setParticipantVoice(participantId, voiceType, {
           voiceId: body.voiceId,
           voiceName: body.voiceName,
         });

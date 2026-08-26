@@ -1,19 +1,6 @@
 import { SentientSim } from '../models/SentientSim';
-import { SimAge } from '../models/SimAge';
-import { DialogueLine } from './PromptFormatter';
+import { bestVoicesForSim, CastableVoice } from './CastableVoice';
 import { hashString } from './VoiceAssignment';
-
-type VoiceGender = 'male' | 'female';
-type VoiceAge = 'child' | 'young' | 'middle' | 'old';
-
-type CastableVoice = {
-  voiceId: string;
-  name: string;
-  gender: VoiceGender;
-  age: VoiceAge;
-  // Personality/intonation qualities of the voice, matched against sim traits and moods
-  tags: string[];
-};
 
 // ElevenLabs premade voices with their published characteristics
 export const elevenLabsVoiceCatalog: CastableVoice[] = [
@@ -53,139 +40,13 @@ export const elevenLabsVoiceCatalog: CastableVoice[] = [
   { voiceId: '2EiwWnXFnvU5JabPnv8n', name: 'Clyde', gender: 'male', age: 'middle', tags: ['gruff', 'intense'] },
 ];
 
-// Sim trait/mood key fragments (case-insensitive) mapped to the voice qualities they suggest
-const traitTagAffinities: [string, string[]][] = [
-  ['evil', ['intense', 'gruff', 'deep']],
-  ['mean', ['intense', 'gruff']],
-  ['hotheaded', ['intense', 'energetic']],
-  ['angry', ['intense', 'gruff']],
-  ['romantic', ['seductive', 'warm']],
-  ['flirty', ['seductive', 'warm']],
-  ['outgoing', ['energetic', 'cheerful']],
-  ['cheerful', ['cheerful', 'warm']],
-  ['goofball', ['cheerful', 'energetic', 'childish']],
-  ['playful', ['cheerful', 'energetic']],
-  ['childish', ['childish', 'cheerful']],
-  ['loner', ['soft', 'calm']],
-  ['shy', ['soft', 'nervous']],
-  ['gloomy', ['soft', 'calm']],
-  ['sad', ['soft', 'gentle']],
-  ['ambitious', ['confident', 'formal']],
-  ['selfassured', ['confident']],
-  ['confident', ['confident']],
-  ['perfectionist', ['formal', 'confident']],
-  ['snob', ['formal']],
-  ['genius', ['formal', 'calm']],
-  ['bookworm', ['calm', 'soft']],
-  ['creative', ['emotional', 'warm']],
-  ['music', ['emotional', 'warm']],
-  ['active', ['energetic']],
-  ['fitness', ['energetic']],
-  ['lazy', ['casual', 'calm']],
-  ['tense', ['nervous']],
-  ['scared', ['nervous', 'soft']],
-  ['energized', ['energetic']],
-  ['happy', ['cheerful', 'warm']],
-  ['good', ['warm', 'gentle']],
-  ['family', ['warm', 'gentle']],
-];
-
-function simAgeToVoiceAge(age: SimAge): VoiceAge {
-  switch (age) {
-    case SimAge.BABY:
-    case SimAge.INFANT:
-    case SimAge.TODDLER:
-    case SimAge.CHILD:
-      return 'child';
-    case SimAge.TEEN:
-    case SimAge.YOUNGADULT:
-      return 'young';
-    case SimAge.ADULT:
-      return 'middle';
-    case SimAge.ELDER:
-      return 'old';
-    default:
-      return 'middle';
-  }
-}
-
-const voiceAgeOrder: VoiceAge[] = ['child', 'young', 'middle', 'old'];
-
-function desiredTagsForSim(sim: SentientSim): string[] {
-  const descriptors = [...sim.traits, ...sim.moods].map((key) => key.toLowerCase());
-  const tags: string[] = [];
-  traitTagAffinities.forEach(([fragment, affinityTags]) => {
-    if (descriptors.some((descriptor) => descriptor.includes(fragment))) {
-      tags.push(...affinityTags);
-    }
-  });
-  return tags;
-}
-
 /**
  * Casts an ElevenLabs voice for a sim based on who they are: gender is a hard filter, age
  * closeness and trait/mood-derived voice qualities are scored, and ties break deterministically
  * on the sim's name so the same character always speaks with the same voice.
  */
 export function castElevenLabsVoice(sim: SentientSim): string {
-  const gender: VoiceGender = sim.gender.toLowerCase() === 'female' ? 'female' : 'male';
-  const targetAge = simAgeToVoiceAge(sim.age);
-
-  let candidates = elevenLabsVoiceCatalog.filter((voice) => voice.gender === gender);
-  // Adults should never get a child voice; children only get child/young voices
-  if (targetAge === 'child') {
-    const childish = candidates.filter((voice) => voice.age === 'child' || voice.age === 'young');
-    if (childish.length > 0) candidates = childish;
-  } else {
-    const grown = candidates.filter((voice) => voice.age !== 'child');
-    if (grown.length > 0) candidates = grown;
-  }
-
-  const desiredTags = desiredTagsForSim(sim);
-  const targetAgeIndex = voiceAgeOrder.indexOf(targetAge);
-
-  let bestScore = -Infinity;
-  let bestVoices: CastableVoice[] = [];
-  candidates.forEach((voice) => {
-    const ageDistance = Math.abs(voiceAgeOrder.indexOf(voice.age) - targetAgeIndex);
-    const tagScore = voice.tags.reduce((score, tag) => score + (desiredTags.includes(tag) ? 2 : 0), 0);
-    const score = tagScore - ageDistance;
-    if (score > bestScore) {
-      bestScore = score;
-      bestVoices = [voice];
-    } else if (score === bestScore) {
-      bestVoices.push(voice);
-    }
-  });
-
+  const bestVoices = bestVoicesForSim(sim, elevenLabsVoiceCatalog);
   const chosen = bestVoices[hashString(sim.name) % bestVoices.length];
   return chosen.voiceId;
-}
-
-function findSimForSpeaker(speaker: string, sims: SentientSim[]): SentientSim | undefined {
-  const speakerLower = speaker.toLowerCase();
-  return sims.find((sim) => {
-    const nameLower = sim.name.toLowerCase();
-    return nameLower === speakerLower || nameLower.startsWith(`${speakerLower} `);
-  });
-}
-
-/**
- * Attaches an ElevenLabs voice id to each dialogue line whose speaker matches one of the sims
- * in the scene: the voice the user pinned to that sim in the Sims tab if there is one, otherwise
- * a personality cast one. Lines with no matching sim (e.g. Narrator) are left uncast and fall
- * back to the user's configured voice.
- */
-export function castVoicesForLines(
-  lines: DialogueLine[],
-  sims: SentientSim[],
-  voiceOverrides?: Map<string, string>,
-): DialogueLine[] {
-  return lines.map((line) => {
-    const sim = findSimForSpeaker(line.speaker, sims);
-    if (!sim) {
-      return line;
-    }
-    return { ...line, voiceId: voiceOverrides?.get(sim.sim_id) ?? castElevenLabsVoice(sim) };
-  });
 }

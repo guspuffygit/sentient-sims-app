@@ -40,15 +40,19 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const { user, authStatus, signOut } = useAuthenticator();
+  // The facade types `user` as non-optional, but the underlying auth machine
+  // allows undefined even while authStatus is 'authenticated' (e.g. mid token
+  // refresh). Widen it so every deref below is forced through a guard.
+  const { user: authenticatorUser, authStatus, signOut } = useAuthenticator();
+  const user = authenticatorUser as AuthUser | undefined;
 
   const {
     data: userAttributes,
     isFetching,
     refetch,
   } = useQuery<AuthUserAttributes>({
-    queryKey: ['userAttributes', authStatus === 'authenticated' ? user.userId : undefined],
-    enabled: authStatus === 'authenticated',
+    queryKey: ['userAttributes', authStatus === 'authenticated' ? user?.userId : undefined],
+    enabled: authStatus === 'authenticated' && !!user,
     queryFn: async () => {
       const attributes = await fetchUserAttributes();
       log.debug(`User attributes: ${JSON.stringify(attributes, null, 2)}`);
@@ -59,7 +63,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         email: attributes.email,
         subscriptionLevel: attributes['custom:subscription_level'],
         founderStatus: attributes['custom:founderstatus'],
-        sub: attributes.sub ?? user.userId,
+        sub: attributes.sub ?? user?.userId ?? '',
         emailVerified: attributes.email_verified === 'true',
         patreonId: attributes.preferred_username,
         groups,

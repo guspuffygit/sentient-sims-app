@@ -8,8 +8,8 @@ import { useSentientSimsTTS } from 'renderer/voice/useSentientSimsTTS';
 import { useAISettings } from './AISettingsProvider';
 
 interface TTSAudioContextType {
-  // voiceId pins a specific cast voice (currently an ElevenLabs voice id) instead
-  // of the settings default — used by per-sim voice test buttons
+  // voiceId pins a specific cast voice (an ElevenLabs voice id or a Kokoro blend like
+  // 'af_heart+af_sky') instead of the settings default — used by per-sim voice test buttons
   speak: (text: string, voiceId?: string) => Promise<void>;
   stop: () => void;
   isWebGPUSupported: boolean | null;

@@ -6,6 +6,7 @@ import { ParticipantVoiceEntity } from './entities/ParticipantVoiceEntity';
 import { ParticipantDTO } from './dto/ParticipantDTO';
 import { notifySimsChanged } from '../util/notifyRenderer';
 import { SaveGame } from '../models/SaveGame';
+import { toVoiceType, VoiceType } from '../models/VoiceType';
 
 export class ParticipantRepository extends Repository {
   /**
@@ -52,23 +53,28 @@ export class ParticipantRepository extends Repository {
   }
 
   getAllParticipants(saveGame?: SaveGame): ParticipantDTO[] {
-    const participants = this.dbService
-      .getDb(saveGame)
-      .prepare(
-        `SELECT participant.*, participant_voice.voice_id, participant_voice.voice_name
-         FROM participant
-         LEFT JOIN participant_voice ON participant_voice.participant_id = participant.id`,
-      )
-      .safeIntegers()
-      .all() as (ParticipantEntity & Pick<ParticipantVoiceEntity, 'voice_id' | 'voice_name'>)[];
+    const db = this.dbService.getDb(saveGame);
+    const participants = db.prepare('SELECT * FROM participant').safeIntegers().all() as ParticipantEntity[];
+    const voiceRows = db.prepare('SELECT * FROM participant_voice').safeIntegers().all() as ParticipantVoiceEntity[];
+
+    const voicesByParticipant = new Map<string, ParticipantDTO['voices']>();
+    voiceRows.forEach((row) => {
+      const voiceType = toVoiceType(row.voice_type);
+      if (!row.voice_id || !voiceType) {
+        return;
+      }
+      const participantId = row.participant_id.toString();
+      const voices = voicesByParticipant.get(participantId) ?? {};
+      voices[voiceType] = { voiceId: row.voice_id, voiceName: row.voice_name ?? undefined };
+      voicesByParticipant.set(participantId, voices);
+    });
 
     return participants.map((participantEntity) => {
       return {
         id: participantEntity.id.toString(),
         description: participantEntity.description,
         name: participantEntity.name,
-        voiceId: participantEntity.voice_id ?? undefined,
-        voiceName: participantEntity.voice_name ?? undefined,
+        voices: voicesByParticipant.get(participantEntity.id.toString()),
       };
     });
   }
@@ -111,28 +117,35 @@ export class ParticipantRepository extends Repository {
   }
 
   /**
-   * Pins a sim to a specific ElevenLabs voice, or clears the pin so the sim goes back
-   * to automatic voice casting. Stored separately from the participant row, see
-   * migration 013.
+   * Pins a sim to a specific voice of the given type, or clears that type's pin so the
+   * sim goes back to automatic voice casting for it. Pins of other voice types are
+   * untouched, so switching TTS providers keeps each provider's assignments. Stored
+   * separately from the participant row, see migrations 013/015.
    */
-  setParticipantVoice(participantId: string, voice?: { voiceId?: string; voiceName?: string }) {
+  setParticipantVoice(participantId: string, voiceType: VoiceType, voice?: { voiceId?: string; voiceName?: string }) {
     if (!voice?.voiceId) {
-      const cleared = this.clearParticipantVoice(participantId);
+      const cleared = this.dbService
+        .getDb()
+        .prepare('DELETE FROM participant_voice WHERE participant_id = ? AND voice_type = ?')
+        .safeIntegers()
+        .run([BigInt(participantId), voiceType.toString()]);
       notifySimsChanged();
       return cleared;
     }
 
     const result = this.dbService
       .getDb()
-      .prepare('INSERT OR REPLACE INTO participant_voice(participant_id, voice_id, voice_name) VALUES(?, ?, ?)')
+      .prepare(
+        'INSERT OR REPLACE INTO participant_voice(participant_id, voice_type, voice_id, voice_name) VALUES(?, ?, ?, ?)',
+      )
       .safeIntegers()
-      .run([BigInt(participantId), voice.voiceId, voice.voiceName ?? null]);
+      .run([BigInt(participantId), voiceType.toString(), voice.voiceId, voice.voiceName ?? null]);
     notifySimsChanged();
     return result;
   }
 
-  // Voice ids keyed by participant id, for the sims that have an override set
-  getParticipantVoices(participantIds: string[]): Map<string, string> {
+  // Voice ids of the given type keyed by participant id, for the sims that have an override set
+  getParticipantVoices(participantIds: string[], voiceType: VoiceType): Map<string, string> {
     const voices = new Map<string, string>();
     if (participantIds.length === 0) {
       return voices;
@@ -141,9 +154,12 @@ export class ParticipantRepository extends Repository {
     const placeholders = participantIds.map(() => '?').join(', ');
     const rows = this.dbService
       .getDb()
-      .prepare(`SELECT participant_id, voice_id FROM participant_voice WHERE participant_id IN (${placeholders})`)
+      .prepare(
+        `SELECT participant_id, voice_type, voice_id FROM participant_voice
+         WHERE voice_type = ? AND participant_id IN (${placeholders})`,
+      )
       .safeIntegers()
-      .all(participantIds.map((id) => BigInt(id))) as ParticipantVoiceEntity[];
+      .all([voiceType.toString(), ...participantIds.map((id) => BigInt(id))]) as ParticipantVoiceEntity[];
 
     rows.forEach((row) => {
       if (row.voice_id) {

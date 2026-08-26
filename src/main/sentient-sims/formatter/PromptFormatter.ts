@@ -528,7 +528,8 @@ export type DialogueLine = {
   text: string;
   // Inline parenthetical delivery note, e.g. `Ricky: (nervous) "..."` — feeds v3 audio tags
   deliveryNote?: string;
-  // Provider-specific voice cast for this speaker (currently an ElevenLabs voice id)
+  // Provider-specific voice cast for this speaker (an ElevenLabs voice id, or a Kokoro
+  // voice blend like 'af_heart+af_sky')
   voiceId?: string;
 };
 

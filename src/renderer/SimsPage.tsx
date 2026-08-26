@@ -1,8 +1,9 @@
 import { Button, Card, CardActions, CardContent } from '@mui/material';
-import { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import log from 'electron-log';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
+import { VoiceType } from 'main/sentient-sims/models/VoiceType';
 import SportsEsportsOutlinedIcon from '@mui/icons-material/SportsEsportsOutlined';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
 import EditNoteIcon from '@mui/icons-material/EditNote';
@@ -10,8 +11,10 @@ import AppCard from './AppCard';
 import { EmptyState } from './components/EmptyState';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { SimVoiceSelect, SimVoiceSelection } from './components/SimVoiceSelect';
+import { KokoroSimVoiceSelect } from './components/KokoroSimVoiceSelect';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
 import { useOnDatabaseLoaded } from './hooks/useOnDatabaseLoaded';
+import { useActiveVoiceType } from './hooks/useActiveVoiceType';
 import { useWebsocket } from './providers/WebsocketProvider';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 
@@ -20,31 +23,38 @@ type SelectedSim = {
   index: number;
 };
 
-const columns: GridColDef<ParticipantDTO>[] = [
-  { field: 'id', headerName: 'ID', width: 150, hideable: true },
-  { field: 'name', headerName: 'Name', width: 250 },
-  {
-    field: 'voiceId',
-    headerName: 'Voice',
-    width: 180,
-    valueGetter: (value: string | undefined, row: ParticipantDTO) => {
-      if (!value) return 'Default';
-      return row.voiceName ?? value;
-    },
-  },
-  {
-    field: 'description',
-    headerName: 'Description',
-    width: 2000,
-  },
-];
-
 const client = new SentientSimsAppClient();
 
 export default function SimsPage() {
   const [sims, setSims] = useState<ParticipantDTO[]>([]);
   const [editedSim, setEditedSim] = useState<SelectedSim | null | undefined>();
   const { status } = useWebsocket();
+  // Which provider's pinned voices the page shows and edits (ElevenLabs or Kokoro),
+  // driven by the TTS provider selected in settings
+  const activeVoiceType = useActiveVoiceType();
+
+  const columns: GridColDef<ParticipantDTO>[] = useMemo(
+    () => [
+      { field: 'id', headerName: 'ID', width: 150, hideable: true },
+      { field: 'name', headerName: 'Name', width: 250 },
+      {
+        field: 'voice',
+        headerName: 'Voice',
+        width: 180,
+        valueGetter: (_value: never, row: ParticipantDTO) => {
+          const voice = activeVoiceType ? row.voices?.[activeVoiceType] : undefined;
+          if (!voice?.voiceId) return 'Default';
+          return voice.voiceName ?? voice.voiceId;
+        },
+      },
+      {
+        field: 'description',
+        headerName: 'Description',
+        width: 2000,
+      },
+    ],
+    [activeVoiceType],
+  );
 
   function getSims() {
     client.participant
@@ -117,10 +127,14 @@ export default function SimsPage() {
       log.debug(`Edited Sim: ${JSON.stringify(editedSim.sim)}`);
 
       try {
+        const pinnedVoice = activeVoiceType ? editedSim.sim.voices?.[activeVoiceType] : undefined;
         await client.participant.updateParticipant({
           ...editedSim.sim,
-          // Always sent so picking "Default" clears a previously pinned voice
-          voiceId: editedSim.sim.voiceId ?? '',
+          // The active type's voice is always sent so picking "Default" clears a
+          // previously pinned voice; other voice types' pins are left untouched
+          ...(activeVoiceType
+            ? { voiceType: activeVoiceType, voiceId: pinnedVoice?.voiceId ?? '', voiceName: pinnedVoice?.voiceName }
+            : {}),
         });
       } catch (error) {
         log.error('Error saving updated sim', error);
@@ -162,18 +176,24 @@ export default function SimsPage() {
     }));
   }, []);
 
-  const handleVoiceEdit = useCallback((voice: SimVoiceSelection) => {
-    setEditedSim((previousSim) => ({
-      index: Number(previousSim?.index),
-      sim: {
-        ...previousSim?.sim,
-        id: previousSim?.sim.id || '',
-        name: previousSim?.sim.name || '',
-        voiceId: voice.voiceId,
-        voiceName: voice.voiceName,
-      },
-    }));
-  }, []);
+  const handleVoiceEdit = useCallback(
+    (voice: SimVoiceSelection) => {
+      if (!activeVoiceType) return;
+      setEditedSim((previousSim) => ({
+        index: Number(previousSim?.index),
+        sim: {
+          ...previousSim?.sim,
+          id: previousSim?.sim.id || '',
+          name: previousSim?.sim.name || '',
+          voices: {
+            ...previousSim?.sim.voices,
+            [activeVoiceType]: voice.voiceId ? { voiceId: voice.voiceId, voiceName: voice.voiceName } : undefined,
+          },
+        },
+      }));
+    },
+    [activeVoiceType],
+  );
 
   if (!status.mod) {
     return (
@@ -237,11 +257,19 @@ export default function SimsPage() {
             </CardActions>
           }
         >
-          <SimVoiceSelect
-            voiceId={editedSim.sim.voiceId}
-            voiceName={editedSim.sim.voiceName}
-            onChange={handleVoiceEdit}
-          />
+          {activeVoiceType === VoiceType.ElevenLabs && (
+            <SimVoiceSelect
+              voiceId={editedSim.sim.voices?.[VoiceType.ElevenLabs]?.voiceId}
+              voiceName={editedSim.sim.voices?.[VoiceType.ElevenLabs]?.voiceName}
+              onChange={handleVoiceEdit}
+            />
+          )}
+          {activeVoiceType === VoiceType.Kokoro && (
+            <KokoroSimVoiceSelect
+              voiceId={editedSim.sim.voices?.[VoiceType.Kokoro]?.voiceId}
+              onChange={handleVoiceEdit}
+            />
+          )}
 
           <MemoryEditInput
             label="Description"

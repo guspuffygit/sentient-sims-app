@@ -179,6 +179,32 @@ export const migrations: Map<string, DbMigrationSql> = new Map(
       db.prepare('ALTER TABLE memory_index DROP COLUMN embedding').run();
       db.prepare('ALTER TABLE memory_index DROP COLUMN embedding_model').run();
     },
+    // A sim keeps one pinned voice per voice type (ElevenLabs, Kokoro), so switching TTS
+    // providers back and forth never loses either assignment. The table is rebuilt because
+    // the primary key grows from participant_id to (participant_id, voice_type); existing
+    // pins predate voice types and were always ElevenLabs voices.
+    '015-participant-voice-per-voice-type': (db: Database) => {
+      db.prepare(
+        `
+          CREATE TABLE participant_voice_typed (
+            participant_id       INTEGER NOT NULL    ,
+            voice_type           TEXT NOT NULL       ,
+            voice_id             TEXT     ,
+            voice_name           TEXT     ,
+            PRIMARY KEY ( participant_id, voice_type )
+          );
+        `,
+      ).run();
+      db.prepare(
+        `
+          INSERT INTO participant_voice_typed (participant_id, voice_type, voice_id, voice_name)
+          SELECT participant_id, 'elevenlabs', voice_id, voice_name FROM participant_voice
+          WHERE voice_id IS NOT NULL;
+        `,
+      ).run();
+      db.prepare('DROP TABLE participant_voice').run();
+      db.prepare('ALTER TABLE participant_voice_typed RENAME TO participant_voice').run();
+    },
   }),
 );
 

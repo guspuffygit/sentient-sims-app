@@ -14,11 +14,10 @@ import {
   splitLinesForPacing,
 } from 'main/sentient-sims/formatter/PromptFormatter';
 import { assignVoicesToSpeakers } from 'main/sentient-sims/formatter/VoiceAssignment';
-import {
-  castElevenLabsVoice,
-  castVoicesForLines,
-  elevenLabsVoiceCatalog,
-} from 'main/sentient-sims/formatter/ElevenLabsVoiceCasting';
+import { castElevenLabsVoice, elevenLabsVoiceCatalog } from 'main/sentient-sims/formatter/ElevenLabsVoiceCasting';
+import { castKokoroVoice, kokoroVoiceCatalog } from 'main/sentient-sims/formatter/KokoroVoiceCasting';
+import { castVoicesForLines } from 'main/sentient-sims/formatter/VoiceCasting';
+import { VoiceType } from 'main/sentient-sims/models/VoiceType';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
@@ -266,6 +265,44 @@ describe('Output', () => {
       const sweetheartVoice = voiceById(castElevenLabsVoice(sweetheart));
       expect(sweetheartVoice.tags.some((tag) => ['seductive', 'warm'].includes(tag))).toBe(true);
     });
+
+    describe('castKokoroVoice', () => {
+      function kokoroVoiceById(voiceId: string) {
+        const voice = kokoroVoiceCatalog.find((v) => v.voiceId === voiceId);
+        if (!voice) {
+          throw new Error(`Voice ${voiceId} not found in kokoro catalog`);
+        }
+        return voice;
+      }
+
+      it('is deterministic for the same sim', () => {
+        const sim = makeSim({ name: 'Ricky Rickerson', traits: ['trait_Evil'] });
+        expect(castKokoroVoice(sim)).toEqual(castKokoroVoice(sim));
+      });
+
+      it('blends two distinct voices of a matching gender', () => {
+        const male = makeSim({ name: 'Ricky', gender: 'Male' });
+        const female = makeSim({ name: 'Bella', gender: 'Female' });
+
+        [castKokoroVoice(male), castKokoroVoice(female)].forEach((blend, index) => {
+          const parts = blend.split('+');
+          expect(parts).toHaveLength(2);
+          expect(parts[0]).not.toEqual(parts[1]);
+          parts.forEach((part) => {
+            expect(kokoroVoiceById(part).gender).toBe(index === 0 ? 'male' : 'female');
+          });
+        });
+      });
+
+      it('gives same-gender same-trait sims different blended voices', () => {
+        const voices = new Set(
+          ['Bella Goth', 'Cassandra Goth', 'Eliza Pancakes', 'Summer Holiday', 'Liberty Lee'].map((name) =>
+            castKokoroVoice(makeSim({ name, gender: 'Female' })),
+          ),
+        );
+        expect(voices.size).toBeGreaterThan(1);
+      });
+    });
   });
 
   describe('castVoicesForLines', () => {
@@ -303,6 +340,7 @@ describe('Output', () => {
           { speaker: 'Narrator', text: 'No match.' },
         ],
         sims,
+        VoiceType.ElevenLabs,
       );
       expect(lines[0].voiceId).toBeDefined();
       expect(lines[1].voiceId).toEqual(lines[0].voiceId);
@@ -316,10 +354,21 @@ describe('Output', () => {
           { speaker: 'Narrator', text: 'No match.' },
         ],
         sims,
+        VoiceType.ElevenLabs,
         new Map([['1', 'pinned-voice-id']]),
       );
       expect(lines[0].voiceId).toEqual('pinned-voice-id');
       expect(lines[1].voiceId).toBeUndefined();
+    });
+
+    it('casts kokoro blends when the kokoro voice type is active', () => {
+      const lines = castVoicesForLines(
+        [{ speaker: 'Ricky Rickerson', text: 'Blended voice.' }],
+        sims,
+        VoiceType.Kokoro,
+      );
+      expect(lines[0].voiceId).toContain('+');
+      expect(lines[0].voiceId?.startsWith('am_') || lines[0].voiceId?.startsWith('bm_')).toBe(true);
     });
   });
 

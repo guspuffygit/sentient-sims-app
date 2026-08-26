@@ -1,5 +1,5 @@
 import { ApiClient } from './ApiClient';
-import { ParticipantDTO } from '../db/dto/ParticipantDTO';
+import { ParticipantDTO, UpdateParticipantRequest } from '../db/dto/ParticipantDTO';
 import { SaveGameType } from '../models/SaveGame';
 import { axiosClient } from './AxiosClient';
 
@@ -33,9 +33,9 @@ export class ParticipantClient extends ApiClient {
 
   /**
    * POST /participants/:participantId
-   * Updates a participant's name or description.
+   * Updates a participant's name, description, or pinned voice for a voice type.
    */
-  async updateParticipant(participant: ParticipantDTO): Promise<{ text: string }> {
+  async updateParticipant(participant: UpdateParticipantRequest): Promise<{ text: string }> {
     const response = await axiosClient.post<{ text: string }>(
       `${this.apiUrl}/participants/${participant.id}`,
       participant,

@@ -246,15 +246,23 @@ export function useSentientSimsTTS(): TTSHook {
       if (lines.length === 0) return;
 
       const pool = sentientSimsAITTSSettings.value.voice;
-      if (pool.length === 0) {
+      // Lines carrying a cast/pinned voice don't need the settings pool; only speakers
+      // without one (e.g. the Narrator) fall back to it
+      const uncastSpeakers = lines.filter((line) => !line.voiceId).map((line) => line.speaker);
+      if (pool.length === 0 && uncastSpeakers.length > 0) {
         setError('At least one Sentient Sims Voice must be selected');
         return;
       }
 
-      const assignments = assignVoicesToSpeakers(
-        lines.map((line) => line.speaker),
-        pool,
-      );
+      const assignments = assignVoicesToSpeakers(uncastSpeakers, pool);
+      const lineVoice = (line: DialogueLine): string[] => {
+        // A cast voice is a single voice or a Kokoro blend like 'af_heart+af_sky'
+        log.info(`[TTS] Line for ${line.speaker}: voice=${line.voiceId ?? '(default, no cast voice)'}`);
+        if (line.voiceId) {
+          return line.voiceId.split('+');
+        }
+        return assignments.get(line.speaker) ?? pool;
+      };
 
       speakSessionRef.current += 1;
       const session = speakSessionRef.current;
@@ -267,7 +275,7 @@ export function useSentientSimsTTS(): TTSHook {
       const startFetch = (index: number) => {
         if (index < lines.length && !audioPromises[index]) {
           const line = lines[index];
-          audioPromises[index] = fetchAudioUrl(line.text, assignments.get(line.speaker) ?? pool);
+          audioPromises[index] = fetchAudioUrl(line.text, lineVoice(line));
         }
       };
       startFetch(0);
