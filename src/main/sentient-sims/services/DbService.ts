@@ -82,6 +82,22 @@ export class DbService {
 
     log.debug(`loadDatabase unsavedDb: ${unsavedDb} savedDb: ${savedDb}`);
 
+    // The game keeps one guid per played game but writes a brand new slot id when a save
+    // is recovered from a backup or saved into a new slot, so the first load of that slot
+    // would start from an empty database and silently drop every sim and lot biography.
+    // Seed it from the same game's most recently saved database instead.
+    if (!DirectoryService.fileExistsSync(unsavedDb) && !DirectoryService.fileExistsSync(savedDb)) {
+      try {
+        const seedDb = this.findSameGameSeedDb(databaseSession);
+        if (seedDb) {
+          log.info(`Save ${databaseSession.saveId} has no database yet, seeding it from ${seedDb}`);
+          fs.copyFileSync(seedDb, unsavedDb);
+        }
+      } catch (err) {
+        log.error(`Unable to seed database for save ${databaseSession.saveId}`, err);
+      }
+    }
+
     // Create a "working" version of the database and only commit changes to it if the game saves
     if (!DirectoryService.fileExistsSync(unsavedDb) && DirectoryService.fileExistsSync(savedDb)) {
       log.debug(`Copying ${savedDb} to ${unsavedDb}`);
@@ -126,6 +142,30 @@ export class DbService {
     // Saves from before the memory_index existed (or played without an embedder) get
     // their retrieval metadata filled in here, off the request path. No-op without a key.
     this.ctx.memoryAnnotation.backfillInBackground();
+  }
+
+  // A save id is `{slot_id}_{guid}` where the guid identifies the played game across
+  // slot changes; any saved database sharing the guid is an earlier state of the same game.
+  private findSameGameSeedDb(databaseSession: DatabaseSession): string | undefined {
+    const match = databaseSession.saveId.match(/^\d+_(\d+)$/);
+    if (!match) {
+      return undefined;
+    }
+
+    let newest: string | undefined;
+    let newestMtimeMs = -Infinity;
+    this.ctx.directory
+      .listSentientSimsDbSaved()
+      .filter((file) => new RegExp(`^\\d+_${match[1]}-sentient-sims\\.db$`).test(path.basename(file)))
+      .forEach((file) => {
+        const { mtimeMs } = fs.statSync(file);
+        if (mtimeMs > newestMtimeMs) {
+          newest = file;
+          newestMtimeMs = mtimeMs;
+        }
+      });
+
+    return newest;
   }
 
   getDatabaseTemp(saveGame: SaveGame): Database {

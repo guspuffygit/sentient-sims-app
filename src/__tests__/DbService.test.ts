@@ -41,6 +41,40 @@ describe('DbService', () => {
     expect(ctx.directory.listSentientSimsDbUnsaved()).toHaveLength(0);
   });
 
+  // The game keeps one guid per played game but writes a new slot id when a save is
+  // recovered from a backup or saved into a new slot — the new slot must inherit the
+  // game's existing data instead of starting empty
+  it('First load of a new slot seeds from the newest database with the same game guid', async () => {
+    // An older save of the same game without the marker — it should lose to the newer slot 2 database
+    ctx.db.loadDatabase({ sessionId: 'session-stale', saveId: '4_756285447' });
+    await ctx.db.saveDatabase({ sessionId: 'session-stale', saveId: '4_756285447' });
+    const staleDb = ctx.directory.getSentientSimsDb({ sessionId: 'session-stale', saveId: '4_756285447' });
+    const past = new Date(Date.now() - 60_000);
+    fs.utimesSync(staleDb, past, past);
+
+    ctx.db.loadDatabase({ sessionId: 'session-old', saveId: '2_756285447' });
+    ctx.db.getDb().exec('CREATE TABLE seed_marker (id INTEGER)');
+    await ctx.db.saveDatabase({ sessionId: 'session-old', saveId: '2_756285447' });
+
+    ctx.db.loadDatabase({ sessionId: 'session-recovered', saveId: '3_756285447' });
+    const marker = ctx.db.getDb().prepare("SELECT name FROM sqlite_master WHERE name = 'seed_marker'").all();
+    expect(marker).toHaveLength(1);
+
+    ctx.db.unloadDatabase();
+  });
+
+  it('First load of a different game guid starts empty', async () => {
+    ctx.db.loadDatabase({ sessionId: 'session-old', saveId: '2_756285447' });
+    ctx.db.getDb().exec('CREATE TABLE seed_marker (id INTEGER)');
+    await ctx.db.saveDatabase({ sessionId: 'session-old', saveId: '2_756285447' });
+
+    ctx.db.loadDatabase({ sessionId: 'session-new-game', saveId: '2_111222333' });
+    const marker = ctx.db.getDb().prepare("SELECT name FROM sqlite_master WHERE name = 'seed_marker'").all();
+    expect(marker).toHaveLength(0);
+
+    ctx.db.unloadDatabase();
+  });
+
   it('Reloading the same session is a no-op', () => {
     const backfill = vi.spyOn(ctx.memoryAnnotation, 'backfillInBackground');
 
