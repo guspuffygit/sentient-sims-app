@@ -30,6 +30,15 @@ export class PaintingsController {
     }
   };
 
+  installMount = (req: Request, res: Response) => {
+    try {
+      return res.json(this.ctx.paintingMount.ensureMount());
+    } catch (err) {
+      log.error('Error installing paintings texture mount', err);
+      return res.status(500).json({ error: errorMessage(err) });
+    }
+  };
+
   getPaintingTexture = async (req: Request<{ instanceId: string }>, res: Response) => {
     try {
       const { instanceId } = req.params;

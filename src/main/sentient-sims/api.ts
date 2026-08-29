@@ -57,6 +57,7 @@ export function runApi(ctx: ApiContext) {
   expressApp.delete('/locations/:locationId', ctx.controller.locations.deleteLocation);
 
   expressApp.get('/paintings', ctx.controller.paintings.getPaintingsManifest);
+  expressApp.post('/paintings/mount', ctx.controller.paintings.installMount);
   expressApp.get('/paintings/:instanceId/texture', ctx.controller.paintings.getPaintingTexture);
   expressApp.get('/paintings/:instanceId/png', ctx.controller.paintings.getPaintingPng);
 

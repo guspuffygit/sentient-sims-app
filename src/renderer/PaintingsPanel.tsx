@@ -11,14 +11,17 @@ import {
   ListItemText,
   Snackbar,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
+import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
 import log from 'electron-log';
 import { appApiUrl } from 'main/sentient-sims/constants';
 import { PaintingManifestDTO } from 'main/sentient-sims/db/dto/PaintingManifestDTO';
+import type { PaintingMountResult } from 'main/sentient-sims/services/PaintingMountService';
 import AppCard from './AppCard';
 import { EmptyState } from './components/EmptyState';
 
@@ -28,6 +31,28 @@ export default function PaintingsPanel() {
   const [manifestError, setManifestError] = useState<string | undefined>();
   const [selectedInstanceId, setSelectedInstanceId] = useState<string | undefined>();
   const [snackbar, setSnackbar] = useState<string | undefined>();
+  const [mountLoading, setMountLoading] = useState(false);
+  const [mountError, setMountError] = useState<string | undefined>();
+
+  async function installMount() {
+    setMountLoading(true);
+    setMountError(undefined);
+    try {
+      const res = await fetch(`${appApiUrl}/paintings/mount`, { method: 'POST' });
+      const body = (await res.json()) as (PaintingMountResult & { error?: undefined }) | { error: string };
+      if (!res.ok || body.error !== undefined) {
+        throw new Error(body.error ?? `Mount install failed (HTTP ${res.status})`);
+      }
+      setSnackbar(
+        body.added ? `Added paintings mount to ${body.cfgPath}` : `Paintings mount already in ${body.cfgPath}`,
+      );
+    } catch (err: unknown) {
+      log.error('Failed to install paintings mount', err);
+      setMountError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setMountLoading(false);
+    }
+  }
 
   async function fetchManifest() {
     try {
@@ -70,21 +95,47 @@ export default function PaintingsPanel() {
       subtitle={`${manifest.length} painting${manifest.length === 1 ? '' : 's'} on file`}
       icon={<ImageOutlinedIcon sx={{ fontSize: 18 }} />}
       headerAction={
-        <IconButton
-          size="small"
-          onClick={() => {
-            loadManifest();
-          }}
-          disabled={manifestLoading}
-          aria-label="Refresh paintings"
-        >
-          <RefreshIcon fontSize="small" />
-        </IconButton>
+        <>
+          <Tooltip title="Create the Mods/sentient-sims/paintings texture mount by hand — normally done on mod install, which dev setups skip">
+            <Button
+              variant="outlined"
+              color="secondary"
+              loading={mountLoading}
+              startIcon={<HandymanOutlinedIcon sx={{ fontSize: 16 }} />}
+              onClick={() => {
+                void installMount();
+              }}
+            >
+              Install mount
+            </Button>
+          </Tooltip>
+          <IconButton
+            size="small"
+            onClick={() => {
+              loadManifest();
+            }}
+            disabled={manifestLoading}
+            aria-label="Refresh paintings"
+          >
+            <RefreshIcon fontSize="small" />
+          </IconButton>
+        </>
       }
     >
       {manifestError ? (
         <Alert severity="error" sx={{ marginBottom: 2 }}>
           {manifestError}
+        </Alert>
+      ) : null}
+      {mountError ? (
+        <Alert
+          severity="error"
+          sx={{ marginBottom: 2 }}
+          onClose={() => {
+            setMountError(undefined);
+          }}
+        >
+          {mountError}
         </Alert>
       ) : null}
       <Box sx={{ display: 'flex', gap: 2, height: 650 }}>

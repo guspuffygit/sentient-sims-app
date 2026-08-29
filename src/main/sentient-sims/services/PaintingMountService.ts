@@ -24,6 +24,12 @@ const VANILLA_RULES = [
   '',
 ].join('\n');
 
+export type PaintingMountResult = {
+  paintingsFolder: string;
+  cfgPath: string;
+  added: boolean;
+};
+
 export class PaintingMountService {
   private ctx: ApiContext;
 
@@ -35,17 +41,19 @@ export class PaintingMountService {
   // create the directory and append the DirectoryFiles block to
   // Mods/Resource.cfg. Idempotent; safe while the game is running (the cfg
   // is only read at boot, and the mod tolerates a missing directory).
-  ensureMount(): void {
+  ensureMount(): PaintingMountResult {
     const modsFolder = this.ctx.directory.getModsFolder();
-    fs.mkdirSync(this.getPaintingsFolder(), { recursive: true });
+    const paintingsFolder = this.getPaintingsFolder();
+    fs.mkdirSync(paintingsFolder, { recursive: true });
 
     const cfgPath = path.join(modsFolder, 'Resource.cfg');
     const content = fs.existsSync(cfgPath) ? fs.readFileSync(cfgPath, 'utf8') : VANILLA_RULES;
     if (content.includes(MOUNT_DIRECTIVE)) {
-      return;
+      return { paintingsFolder, cfgPath, added: false };
     }
     fs.writeFileSync(cfgPath, content + MOUNT_BLOCK);
     log.info(`Added paintings texture mount to ${cfgPath}`);
+    return { paintingsFolder, cfgPath, added: true };
   }
 
   getPaintingsFolder(): string {

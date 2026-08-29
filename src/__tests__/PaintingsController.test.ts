@@ -3,6 +3,7 @@ import { Server } from 'http';
 import sharp from 'sharp';
 import { runApi } from 'main/sentient-sims/api';
 import { PaintingManifestDTO } from 'main/sentient-sims/db/dto/PaintingManifestDTO';
+import { PaintingMountResult } from 'main/sentient-sims/services/PaintingMountService';
 import { mockApiContext } from './util';
 
 describe('PaintingsController', () => {
@@ -60,6 +61,18 @@ describe('PaintingsController', () => {
     // ready-to-write 512x512 DXT1 painting texture with a 10-level mip chain
     expect(dds.toString('ascii', 0, 4)).toEqual('DDS ');
     expect(dds.length).toEqual(174904);
+  });
+
+  it('installs the paintings texture mount on demand and reports idempotence', async () => {
+    const res = await fetch(`${apiUrl}/paintings/mount`, { method: 'POST' });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as PaintingMountResult;
+    expect(body.added).toBe(true);
+    expect(fs.existsSync(body.paintingsFolder)).toBe(true);
+    expect(fs.readFileSync(body.cfgPath, 'utf8')).toContain('DirectoryFiles sentient-sims/paintings');
+
+    const again = await fetch(`${apiUrl}/paintings/mount`, { method: 'POST' });
+    expect(((await again.json()) as PaintingMountResult).added).toBe(false);
   });
 
   it('returns 404 for unknown texture ids', async () => {
