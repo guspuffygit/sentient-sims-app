@@ -8,8 +8,15 @@ export const AmplifyConfig: ResourcesConfig = {
       userPoolClientId: '2cjmpeg1ie22sfud6ddbsgvjpl',
       identityPoolId: 'us-east-1:2d20518d-feb1-46ff-87ad-ac45fae61eb1',
       signUpVerificationMethod: 'code',
+      userAttributes: {
+        email: {
+          required: true,
+        },
+      },
       loginWith: {
-        email: true,
+        // The user pool has no email alias (UsernameAttributes/AliasAttributes are null),
+        // so sign-in and password reset must use the Cognito username, not the email.
+        username: true,
         oauth: {
           domain: 'sentientsimulations.auth.us-east-1.amazoncognito.com',
           scopes: ['phone', 'email', 'openid', 'profile', 'aws.cognito.signin.user.admin'],
