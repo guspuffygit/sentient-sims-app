@@ -4,7 +4,7 @@ import { axiosClient } from '../clients/AxiosClient';
 import { VLLMAIService } from './VLLMAIService';
 import { DecodeToken, isTokenExpired } from '../auth/tokenVerifier';
 import { ApiType } from '../models/ApiType';
-import { sentientSimsAIDefaultImageModel } from '../constants';
+import { resolveSentientSimsAIModel, sentientSimsAIDefaultImageModel } from '../constants';
 import { ImageGenerationRequest, ImageGenerationResponse } from '../models/ImageGeneration';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
@@ -122,6 +122,13 @@ export class SentientSimsAIService extends VLLMAIService implements ImageGenerat
   }
 
   async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
+    // Provider configs already resolve away replaced models; this catches requests that
+    // carry an explicit model pick (chat page, scenario tester stages). CustomAI requests
+    // are stamped with their own apiType and pass through untouched.
+    const apiType = request.apiType ?? this.modelSettingsApiType();
+    if (apiType === ApiType.SentientSimsAI) {
+      request = { ...request, model: resolveSentientSimsAIModel(request.model ?? this.getModel()) };
+    }
     return this.withAuthRetry(() => super.sentientSimsGenerate(request));
   }
 

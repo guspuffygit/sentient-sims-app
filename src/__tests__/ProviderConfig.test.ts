@@ -112,6 +112,36 @@ describe('Provider Configs', () => {
     expect(resolved.model).toEqual('gpt-4o');
   });
 
+  it('mythomax selected for sentient sims ai resolves to rpmax', () => {
+    addConfig({
+      id: 'ss-mythomax',
+      name: 'Sentient Sims',
+      apiType: ApiType.SentientSimsAI,
+      model: 'Gryphe/MythoMax-L2-13b',
+    });
+    ctx.settings.defaultAiProviderConfigId = 'ss-mythomax';
+
+    const resolved = ctx.providerConfigs.getConfigForAction();
+    expect(resolved.model).toEqual('Llama-3.3-70B-ArliAI-RPMax-v1.4');
+  });
+
+  it('unpinned sentient sims ai config falls back through the legacy mythomax default to rpmax', () => {
+    addConfig({ id: 'ss-unpinned', name: 'Sentient Sims', apiType: ApiType.SentientSimsAI });
+    ctx.settings.defaultAiProviderConfigId = 'ss-unpinned';
+
+    expect(ctx.settings.sentientSimsAIModel).toEqual('Gryphe/MythoMax-L2-13b');
+    const resolved = ctx.providerConfigs.getConfigForAction();
+    expect(resolved.model).toEqual('Llama-3.3-70B-ArliAI-RPMax-v1.4');
+  });
+
+  it('mythomax on a custom ai config is left alone', () => {
+    addConfig({ id: 'custom-mythomax', name: 'Custom', apiType: ApiType.CustomAI, model: 'Gryphe/MythoMax-L2-13b' });
+    ctx.settings.defaultAiProviderConfigId = 'custom-mythomax';
+
+    const resolved = ctx.providerConfigs.getConfigForAction();
+    expect(resolved.model).toEqual('Gryphe/MythoMax-L2-13b');
+  });
+
   it('per-action override routes to the override config', () => {
     ctx.settings.aiApiType = ApiType.OpenAI;
     addConfig({ id: 'classification', name: 'Classifier', apiType: ApiType.VLLM, model: 'small-model' });

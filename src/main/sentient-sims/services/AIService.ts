@@ -629,6 +629,8 @@ Keep it concise and grounded. Do not invent events that are not in the scene bel
     const spoken = chatEvent.action.trim();
     if (this.ctx.settings.directedScenesEnabled && primaryEvent.sentient_sims.length >= 2 && spoken.length > 0) {
       const directed = await this.tryDirectedGeneration(primaryEvent, {
+        // action only feeds memory retrieval here; playerLine drives the scene itself
+        action: chatEvent.action,
         playerLine: { speaker: primaryEvent.sentient_sims[0].name, text: spoken },
       });
       if (directed?.status === InteractionEventStatus.GENERATED) {

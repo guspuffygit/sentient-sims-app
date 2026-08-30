@@ -9,7 +9,8 @@ import {
 } from 'main/sentient-sims/services/EmbeddingService';
 import { recencyScore, scoreCandidate } from 'main/sentient-sims/services/MemoryRetrievalService';
 import { summarizeMemory, PromptRequestBuilderOptions } from 'main/sentient-sims/services/PromptRequestBuilderService';
-import { SSEvent, SSEventType } from 'main/sentient-sims/models/InteractionEvents';
+import { ChatInteractionEvent, SSEvent, SSEventType } from 'main/sentient-sims/models/InteractionEvents';
+import { InteractionEventStatus } from 'main/sentient-sims/models/InteractionEventResult';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { SimAge } from 'main/sentient-sims/models/SimAge';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
@@ -317,6 +318,40 @@ describe('prompt wiring', () => {
       },
     };
   }
+
+  it('feeds the action into the retrieval query alongside participant names', async () => {
+    const ctx = loadedContext('prompt-query-text');
+    vi.spyOn(ctx, 'embedding', 'get').mockReturnValue(new NoopEmbeddingService());
+    const retrieve = vi.spyOn(ctx.memoryRetrieval, 'retrieve');
+
+    await ctx.promptBuilder.buildPromptRequest(testEvent(), promptOptions());
+
+    expect(retrieve).toHaveBeenCalledOnce();
+    const { queryText } = retrieve.mock.calls[0][0];
+    expect(queryText).toContain('chats about weekend plans');
+    expect(queryText).toContain('Testy Tester');
+  });
+
+  it('directed chat passes the typed line as the action so retrieval can use it', async () => {
+    const ctx = loadedContext('prompt-chat-action');
+    ctx.settings.directedScenesEnabled = true;
+    const runDirected = vi
+      .spyOn(ctx.ai, 'runDirectedGeneration')
+      .mockResolvedValue({ status: InteractionEventStatus.GENERATED });
+
+    const event: ChatInteractionEvent = {
+      ...testEvent(),
+      action: 'Do you remember the concert where we met?',
+      sentient_sims: [makeSim(), { ...makeSim(), sim_id: '101', name: 'Angela Catalano', is_player_sim: false }],
+    };
+    const result = await ctx.ai.handleChat(event);
+
+    expect(result.status).toEqual(InteractionEventStatus.GENERATED);
+    expect(runDirected).toHaveBeenCalledOnce();
+    const options = runDirected.mock.calls[0][1];
+    expect(options.action).toEqual('Do you remember the concert where we met?');
+    expect(options.playerLine).toEqual({ speaker: 'Testy Tester', text: 'Do you remember the concert where we met?' });
+  });
 
   it('summarizes memory text preferring observation and truncating long content', () => {
     expect(summarizeMemory({ location_id: 1, observation: 'saw it happen', content: 'a long transcript' })).toEqual(
