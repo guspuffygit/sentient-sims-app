@@ -26,7 +26,7 @@ describe('SentientSimsAIService token refresh', () => {
   beforeAll(async () => {
     stub = http.createServer((req, res) => {
       const chunks: Buffer[] = [];
-      req.on('data', (chunk) => chunks.push(chunk));
+      req.on('data', (chunk: Buffer) => chunks.push(chunk));
       req.on('end', () => {
         res.setHeader('Content-Type', 'application/json');
         if ((req.url ?? '').includes('modelsettings')) {
@@ -37,7 +37,8 @@ describe('SentientSimsAIService token refresh', () => {
           res.end(JSON.stringify({ count: 5, max_model_len: 4096, tokens: [1, 2] }));
           return;
         }
-        lastCompletionModel = JSON.parse(Buffer.concat(chunks).toString() || '{}').model;
+        const completionBody = JSON.parse(Buffer.concat(chunks).toString() || '{}') as { model?: string };
+        lastCompletionModel = completionBody.model;
         const auth = req.headers.authentication as string;
         if (!acceptedTokens.has(auth)) {
           onUnauthorized?.();
