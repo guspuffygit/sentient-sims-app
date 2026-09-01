@@ -1,6 +1,6 @@
 import { AppBar, Box, Button, IconButton, Toolbar, Tooltip } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import ViewSidebarOutlinedIcon from '@mui/icons-material/ViewSidebarOutlined';
 import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
@@ -10,7 +10,7 @@ import { useDebugMode } from './providers/DebugModeProvider';
 import { useAuth } from './providers/AuthProvider';
 import handleOpenExternalLink from './hooks/handleOpenExternalLink';
 import LogoutButton from './components/LogoutButton';
-import { LoginModal } from './components/LoginModal';
+import { useLoginModal } from './providers/LoginModalProvider';
 
 export type MenuBarProperties = {
   hideSideBar: boolean;
@@ -67,7 +67,7 @@ const NAV_ITEMS: NavButtonProps[] = [
 
 function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
   const { authStatus, signOut } = useAuth();
-  const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
+  const { openLogin } = useLoginModal();
   const navigate = useNavigate();
   const location = useLocation();
   const onHomePage = location.pathname === '/';
@@ -77,10 +77,6 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
   const logOut = () => {
     signOut();
   };
-
-  if (authStatus === 'authenticated' && loginModalOpen) {
-    setLoginModalOpen(false);
-  }
 
   const handleOpenWiki = handleOpenExternalLink('https://github.com/guspuffygit/sentient-sims-app/wiki');
 
@@ -165,9 +161,7 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
               <Button
                 color="warning"
                 variant="outlined"
-                onClick={() => {
-                  setLoginModalOpen(true);
-                }}
+                onClick={openLogin}
                 sx={{ borderRadius: 99, paddingX: 1.75, marginLeft: 0.5 }}
                 id="login"
               >
@@ -192,7 +186,6 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
           </Box>
         </Toolbar>
       </AppBar>
-      <LoginModal open={loginModalOpen} setOpen={setLoginModalOpen} />
     </Box>
   );
 }

@@ -7,6 +7,7 @@ import { ModUpdate } from 'main/sentient-sims/services/UpdateService';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting, { SettingsHook } from 'renderer/hooks/useSetting';
 import { useAuth } from './AuthProvider';
+import { useSnackBar } from './SnackBarProvider';
 import { useVersions } from './VersionsProvider';
 import { isNewVersionAvailable } from '../versions';
 
@@ -54,6 +55,7 @@ interface ModUpdateProviderProps {
 // and-install, the concurrent installs raced and corrupted the download.
 export function ModUpdateProvider({ children }: ModUpdateProviderProps) {
   const { authStatus } = useAuth();
+  const { showMessage } = useSnackBar();
   const versions = useVersions();
   const releaseType: SettingsHook<string> = useSetting<string>(SettingsEnum.MOD_RELEASE, 'main');
 
@@ -104,6 +106,9 @@ export function ModUpdateProvider({ children }: ModUpdateProviderProps) {
           const authSession = await fetchAuthSession();
           if (!authSession.credentials) {
             log.info('Skipping mod update, not signed in');
+            if (!options?.auto) {
+              showMessage('Sign in to install the mod', 'warning');
+            }
             return;
           }
           const modUpdate: ModUpdate = {
@@ -137,7 +142,7 @@ export function ModUpdateProvider({ children }: ModUpdateProviderProps) {
       run.then(clear).catch(clear);
       return run;
     },
-    [releaseType.value, checkForUpdates],
+    [releaseType.value, checkForUpdates, showMessage],
   );
 
   // On startup: once auth and the release-channel setting have settled, check and

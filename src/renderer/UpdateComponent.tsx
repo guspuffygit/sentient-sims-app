@@ -6,10 +6,16 @@ import AppCard from './AppCard';
 import { useVersions } from './providers/VersionsProvider';
 import { useModUpdate } from './providers/ModUpdateProvider';
 import { ReleaseTypeSelector } from './components/ReleaseTypeSelector';
+import { useAuth } from './providers/AuthProvider';
+import { useLoginModal } from './providers/LoginModalProvider';
 
 export default function UpdateComponent() {
   const versions = useVersions();
   const { newVersionAvailable, lastChecked, busy, checkForUpdates, installUpdate } = useModUpdate();
+  const { authStatus } = useAuth();
+  const { openLogin } = useLoginModal();
+  const notInstalled = versions.mod.version === 'none';
+  const signInRequired = notInstalled && authStatus === 'unauthenticated';
 
   let updateText = 'Update now';
   let statusChip = (
@@ -20,7 +26,17 @@ export default function UpdateComponent() {
       sx={{ color: 'success.light', borderColor: (theme) => `${theme.palette.success.main}66` }}
     />
   );
-  if (versions.mod.version === 'none') {
+  if (signInRequired) {
+    updateText = 'Sign in to install';
+    statusChip = (
+      <Chip
+        size="small"
+        variant="outlined"
+        label="Sign in required"
+        sx={{ color: 'warning.main', borderColor: (theme) => `${theme.palette.warning.main}66` }}
+      />
+    );
+  } else if (notInstalled) {
     updateText = 'Install';
     statusChip = (
       <Chip
@@ -71,11 +87,15 @@ export default function UpdateComponent() {
           <div>
             <Button
               onClick={() => {
+                if (signInRequired) {
+                  openLogin();
+                  return;
+                }
                 void installUpdate();
               }}
               loading={busy}
-              disabled={!newVersionAvailable}
-              color="success"
+              disabled={!signInRequired && !newVersionAvailable}
+              color={signInRequired ? 'warning' : 'success'}
               variant="contained"
             >
               {updateText}
