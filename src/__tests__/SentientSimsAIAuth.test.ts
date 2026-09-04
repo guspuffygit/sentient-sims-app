@@ -21,24 +21,26 @@ describe('SentientSimsAIService token refresh', () => {
   // Completions succeed only for tokens in this set
   const acceptedTokens = new Set<string>();
   let onUnauthorized: (() => void) | undefined;
-  let lastCompletionModel: string | undefined;
 
   beforeAll(async () => {
     stub = http.createServer((req, res) => {
-      const chunks: Buffer[] = [];
-      req.on('data', (chunk: Buffer) => chunks.push(chunk));
+      req.resume();
       req.on('end', () => {
         res.setHeader('Content-Type', 'application/json');
         if ((req.url ?? '').includes('modelsettings')) {
           res.end(JSON.stringify({}));
           return;
         }
+        if ((req.url ?? '').includes('v1/models')) {
+          res.end(
+            JSON.stringify({ data: [{ id: 'Gryphe/MythoMax-L2-13b' }, { id: 'Llama-3.3-70B-ArliAI-RPMax-v1.4' }] }),
+          );
+          return;
+        }
         if ((req.url ?? '').includes('tokenize')) {
           res.end(JSON.stringify({ count: 5, max_model_len: 4096, tokens: [1, 2] }));
           return;
         }
-        const completionBody = JSON.parse(Buffer.concat(chunks).toString() || '{}') as { model?: string };
-        lastCompletionModel = completionBody.model;
         const auth = req.headers.authentication as string;
         if (!acceptedTokens.has(auth)) {
           onUnauthorized?.();
@@ -112,34 +114,16 @@ describe('SentientSimsAIService token refresh', () => {
     }
   }, 30000);
 
-  it('rewrites an explicit mythomax model pick to rpmax', async () => {
-    const token = fakeJwt(3600);
-    acceptedTokens.clear();
-    acceptedTokens.add(token);
-    ctx.settings.accessToken = token;
+  it('hides retired models from the hosted service model list', async () => {
+    const models = await ctx.ai.getModels(ApiType.SentientSimsAI);
 
-    const service = ctx.getGenerationService(ApiType.SentientSimsAI);
-    const response = await service.sentientSimsGenerate({ ...request, model: 'Gryphe/MythoMax-L2-13b' });
-
-    expect(response.text).toEqual('generated text');
-    expect(lastCompletionModel).toEqual('Llama-3.3-70B-ArliAI-RPMax-v1.4');
+    expect(models.map((model) => model.name)).toEqual(['Llama-3.3-70B-ArliAI-RPMax-v1.4']);
   }, 30000);
 
-  it('leaves a custom ai request model untouched', async () => {
-    const token = fakeJwt(3600);
-    acceptedTokens.clear();
-    acceptedTokens.add(token);
-    ctx.settings.accessToken = token;
+  it('keeps retired models in a custom ai model list', async () => {
+    const models = await ctx.ai.getModels(ApiType.CustomAI);
 
-    const service = ctx.getGenerationService(ApiType.CustomAI);
-    const response = await service.sentientSimsGenerate({
-      ...request,
-      model: 'Gryphe/MythoMax-L2-13b',
-      apiType: ApiType.CustomAI,
-    });
-
-    expect(response.text).toEqual('generated text');
-    expect(lastCompletionModel).toEqual('Gryphe/MythoMax-L2-13b');
+    expect(models.map((model) => model.name)).toEqual(['Gryphe/MythoMax-L2-13b', 'Llama-3.3-70B-ArliAI-RPMax-v1.4']);
   }, 30000);
 
   it('surfaces the 401 when no renewed token arrives', async () => {

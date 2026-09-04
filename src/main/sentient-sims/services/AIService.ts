@@ -35,6 +35,7 @@ import {
   defaultWantsPrefixes,
   defaultWantsPrompt,
   directedSceneBudgetMs,
+  retiredSentientSimsAIModels,
 } from '../constants';
 import {
   BuffEventRequest,
@@ -1390,8 +1391,12 @@ Write me a buff description based on the conversation so that ${buffRequest.name
   }
 
   async getModels(apiType?: ApiType): Promise<AIModel[]> {
-    const service = apiType ? this.ctx.getGenerationService(apiType) : this.ctx.genai;
-    return service.getModels();
+    const resolvedApiType = apiType ?? this.ctx.providerConfigs.getDefaultConfig().apiType;
+    const models = await this.ctx.getGenerationService(resolvedApiType).getModels();
+    if (resolvedApiType !== ApiType.SentientSimsAI) {
+      return models;
+    }
+    return models.filter((model) => !(model.name in retiredSentientSimsAIModels));
   }
 
   async handleInteractionMapping(event: InteractionMappingEvent) {

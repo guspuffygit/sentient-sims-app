@@ -1,4 +1,3 @@
-import { resolveSentientSimsAIModel } from '../constants';
 import { AIActionType } from '../models/AIActionType';
 import { AIProviderConfig, newAutoConfig, ResolvedProviderConfig } from '../models/AIProviderConfig';
 import { ApiType } from '../models/ApiType';
@@ -49,12 +48,11 @@ export class ProviderConfigService {
   }
 
   resolve(config: AIProviderConfig): ResolvedProviderConfig {
-    const model = config.model ?? this.providerModel(config.apiType);
     return {
       id: config.id,
       name: config.name,
       apiType: config.apiType,
-      model: config.apiType === ApiType.SentientSimsAI && model ? resolveSentientSimsAIModel(model) : model,
+      model: config.model ?? this.providerModel(config.apiType),
     };
   }
 

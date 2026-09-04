@@ -27,6 +27,7 @@ import {
   openrouterDefaultEndpoint,
   openrouterDefaultModel,
   retiredGeminiModels,
+  retiredSentientSimsAIModels,
   sentientSimsAIDefaultEmbeddingModel,
   sentientSimsAIDefaultModel,
   defaultSentientSimsAIHost,
@@ -1029,6 +1030,27 @@ export class SettingsService {
     }
     if (pinnedAny) {
       this.aiProviderConfigs = configsToPin;
+    }
+
+    // Runs after pinning so a CustomAI config keeps whatever the legacy model setting
+    // held; only the hosted service retired these models.
+    const retiredSentientSimsAIModel = retiredSentientSimsAIModels[this.sentientSimsAIModel];
+    if (retiredSentientSimsAIModel) {
+      log.info(`Migrating retired Sentient Sims AI model ${this.sentientSimsAIModel} -> ${retiredSentientSimsAIModel}`);
+      this.sentientSimsAIModel = retiredSentientSimsAIModel;
+    }
+    const configsToRetire = this.aiProviderConfigs;
+    let retiredAny = false;
+    for (const config of configsToRetire) {
+      const replacement = config.model ? retiredSentientSimsAIModels[config.model] : undefined;
+      if (config.apiType === ApiType.SentientSimsAI && replacement) {
+        log.info(`Migrating retired Sentient Sims AI model on config ${config.id}: ${config.model} -> ${replacement}`);
+        config.model = replacement;
+        retiredAny = true;
+      }
+    }
+    if (retiredAny) {
+      this.aiProviderConfigs = configsToRetire;
     }
 
     if (this.sentientSimsAITtsSettings.model.toString() === 'kokoro') {

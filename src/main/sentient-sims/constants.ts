@@ -106,15 +106,13 @@ export const openrouterDefaultModel = 'mistralai/mistral-nemo';
 export const openaiDefaultImageModel = 'gpt-image-1';
 export const openaiImageModels = ['gpt-image-1', 'dall-e-3', 'dall-e-2'];
 export const novelaiDefaultModel = 'kayra-v1';
-export const sentientSimsAIDefaultModel = 'Gryphe/MythoMax-L2-13b';
-// MythoMax selections (the long-time default) generate with RPMax instead. Only for the
-// hosted Sentient Sims AI service — a CustomAI server may genuinely run MythoMax.
-const sentientSimsAIModelReplacements: { [model: string]: string } = {
-  [sentientSimsAIDefaultModel]: 'Llama-3.3-70B-ArliAI-RPMax-v1.4',
+export const sentientSimsAIDefaultModel = 'Llama-3.3-70B-ArliAI-RPMax-v1.4';
+// Models the hosted Sentient Sims AI service no longer offers, mapped to what now serves
+// them. runMigrations rewrites saved picks on launch and the model picker hides them. Only
+// for the hosted service — a CustomAI server may genuinely run one of these.
+export const retiredSentientSimsAIModels: { [model: string]: string } = {
+  'Gryphe/MythoMax-L2-13b': sentientSimsAIDefaultModel,
 };
-export function resolveSentientSimsAIModel(model: string): string {
-  return sentientSimsAIModelReplacements[model] ?? model;
-}
 // The static image model list the Sentient Sims AI /v1/images/generations
 // endpoint accepts (member-only); the server defaults to the first entry.
 export const sentientSimsAIImageModels = ['google/gemini-3.1-flash-image', 'openai/gpt-5-image-mini'];

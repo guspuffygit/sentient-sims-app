@@ -48,6 +48,7 @@ describe('ApiIT', () => {
     await settingsClient.updateSetting(SettingsEnum.AI_API_TYPE, ApiType.SentientSimsAI);
     const aiClient = new AIClient(apiUrl);
     const models = await aiClient.getModels();
-    expect(models[0].name).toEqual('Gryphe/MythoMax-L2-13b');
+    expect(models[0].name).toEqual('Llama-3.3-70B-ArliAI-RPMax-v1.4');
+    expect(models.some((model) => model.name === 'Gryphe/MythoMax-L2-13b')).toBeFalsy();
   });
 });
