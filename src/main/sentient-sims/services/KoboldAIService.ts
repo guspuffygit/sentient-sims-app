@@ -14,6 +14,12 @@ type KoboldAIGenerateResponse = {
   results: { text: string }[];
 };
 
+// Node's fetch reports every network-level failure as the opaque "fetch failed" and
+// hides the real reason (ECONNREFUSED etc.) in the cause, which is all the player sees
+function isConnectionFailure(err: unknown): boolean {
+  return err instanceof TypeError && err.message === 'fetch failed';
+}
+
 export class KoboldAIService implements GenerationService {
   private ctx: ApiContext;
 
@@ -25,9 +31,24 @@ export class KoboldAIService implements GenerationService {
     return this.ctx.settings.koboldaiEndpoint;
   }
 
+  private notRunningMessage(): string {
+    return `Could not connect to KoboldAI at ${this.serviceUrl()}. Make sure KoboldAI (or KoboldCpp) is running with a model loaded, or switch to a different AI provider in Settings.`;
+  }
+
+  private async fetchKobold(url: string, init?: RequestInit): Promise<Response> {
+    try {
+      return await fetch(url, init);
+    } catch (err) {
+      if (isConnectionFailure(err)) {
+        throw new Error(this.notRunningMessage(), { cause: err });
+      }
+      throw err;
+    }
+  }
+
   async generate(prompt: string, maxResponseTokens: number): Promise<string> {
     const url = `${this.serviceUrl()}/api/v1/generate`;
-    const response = await fetch(url, {
+    const response = await this.fetchKobold(url, {
       method: 'POST',
       signal: AbortSignal.timeout(this.ctx.settings.generationTimeoutSeconds * 1000),
       headers: {
@@ -82,9 +103,10 @@ export class KoboldAIService implements GenerationService {
       };
     } catch (e) {
       log.error('Error checking KoboldAI health', e);
-      sendPopUpNotification(e instanceof Error ? e.message : undefined);
+      const message = e instanceof Error ? e.message : String(e);
+      sendPopUpNotification(message);
       return {
-        status: 'Kobold AI Not accessible',
+        status: `Error: ${message}`,
       };
     }
   }
@@ -94,7 +116,7 @@ export class KoboldAIService implements GenerationService {
     const url = `${this.serviceUrl()}/api/v1/model`;
     log.debug(`Grabbing koboldai model: ${url}`);
     try {
-      const response = await fetch(url);
+      const response = await this.fetchKobold(url);
       const modelResponse = (await response.json()) as KoboldAIModelResponse;
       const currentModel = modelResponse.result.toLowerCase();
       log.debug(`Current KoboldAI Model: ${currentModel}`);
