@@ -36,6 +36,7 @@ npm-debug.log.*
 extracted
 extracted/
 .claude/settings.local.json
+CLAUDE.local.md
 
 # Code-signing certificate (materialized from APPLE_P12_BASE64 at build time)
 certificate.p12
