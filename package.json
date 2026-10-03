@@ -123,7 +123,7 @@
     "cross-env": "^7.0.3",
     "detect-port": "^2.1.0",
     "electron": "^41.7.2",
-    "electron-builder": "^26.15.2",
+    "electron-builder": "^26.16.1",
     "electron-chromedriver": "^41.7.2",
     "electron-devtools-installer": "^4.0.0",
     "electron-vite": "^5.0.0",
