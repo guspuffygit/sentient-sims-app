@@ -112,27 +112,30 @@ describe('Provider Configs', () => {
     expect(resolved.model).toEqual('gpt-4o');
   });
 
-  it('runMigrations rewrites a retired sentient sims ai model on configs and the legacy setting', () => {
-    ctx.settings.sentientSimsAIModel = 'Gryphe/MythoMax-L2-13b';
-    ctx.settings.aiProviderConfigs = [
-      { id: 'ss-mythomax', name: 'Sentient Sims', apiType: ApiType.SentientSimsAI, model: 'Gryphe/MythoMax-L2-13b' },
-      { id: 'ss-unpinned', name: 'Unpinned', apiType: ApiType.SentientSimsAI },
-      { id: 'custom-mythomax', name: 'Custom', apiType: ApiType.CustomAI, model: 'Gryphe/MythoMax-L2-13b' },
-      { id: 'custom-unpinned', name: 'Custom Unpinned', apiType: ApiType.CustomAI },
-    ];
+  it.each(['Gryphe/MythoMax-L2-13b', 'Llama-3.3-70B-ArliAI-RPMax-v1.4'])(
+    'runMigrations rewrites retired sentient sims ai model %s on configs and the legacy setting',
+    (retired) => {
+      ctx.settings.sentientSimsAIModel = retired;
+      ctx.settings.aiProviderConfigs = [
+        { id: 'ss-retired', name: 'Sentient Sims', apiType: ApiType.SentientSimsAI, model: retired },
+        { id: 'ss-unpinned', name: 'Unpinned', apiType: ApiType.SentientSimsAI },
+        { id: 'custom-retired', name: 'Custom', apiType: ApiType.CustomAI, model: retired },
+        { id: 'custom-unpinned', name: 'Custom Unpinned', apiType: ApiType.CustomAI },
+      ];
 
-    ctx.settings.runMigrations();
+      ctx.settings.runMigrations();
 
-    const modelOf = (id: string) => ctx.settings.aiProviderConfigs.find((config) => config.id === id)?.model;
-    expect(ctx.settings.sentientSimsAIModel).toEqual('Llama-3.3-70B-ArliAI-RPMax-v1.4');
-    expect(modelOf('ss-mythomax')).toEqual('Llama-3.3-70B-ArliAI-RPMax-v1.4');
-    expect(modelOf('ss-unpinned')).toEqual('Llama-3.3-70B-ArliAI-RPMax-v1.4');
-    expect(modelOf('custom-mythomax')).toEqual('Gryphe/MythoMax-L2-13b');
-    expect(modelOf('custom-unpinned')).toEqual('Gryphe/MythoMax-L2-13b');
-  });
+      const modelOf = (id: string) => ctx.settings.aiProviderConfigs.find((config) => config.id === id)?.model;
+      expect(ctx.settings.sentientSimsAIModel).toEqual('meta-llama/Llama-3.3-70B-Instruct');
+      expect(modelOf('ss-retired')).toEqual('meta-llama/Llama-3.3-70B-Instruct');
+      expect(modelOf('ss-unpinned')).toEqual('meta-llama/Llama-3.3-70B-Instruct');
+      expect(modelOf('custom-retired')).toEqual(retired);
+      expect(modelOf('custom-unpinned')).toEqual(retired);
+    },
+  );
 
-  it('new sentient sims ai users default to rpmax', () => {
-    expect(ctx.settings.sentientSimsAIModel).toEqual('Llama-3.3-70B-ArliAI-RPMax-v1.4');
+  it('new sentient sims ai users default to llama 3.3', () => {
+    expect(ctx.settings.sentientSimsAIModel).toEqual('meta-llama/Llama-3.3-70B-Instruct');
   });
 
   it('per-action override routes to the override config', () => {

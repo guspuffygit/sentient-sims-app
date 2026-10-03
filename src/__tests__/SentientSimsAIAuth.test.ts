@@ -33,7 +33,13 @@ describe('SentientSimsAIService token refresh', () => {
         }
         if ((req.url ?? '').includes('v1/models')) {
           res.end(
-            JSON.stringify({ data: [{ id: 'Gryphe/MythoMax-L2-13b' }, { id: 'Llama-3.3-70B-ArliAI-RPMax-v1.4' }] }),
+            JSON.stringify({
+              data: [
+                { id: 'Gryphe/MythoMax-L2-13b' },
+                { id: 'Llama-3.3-70B-ArliAI-RPMax-v1.4' },
+                { id: 'meta-llama/Llama-3.3-70B-Instruct' },
+              ],
+            }),
           );
           return;
         }
@@ -117,13 +123,17 @@ describe('SentientSimsAIService token refresh', () => {
   it('hides retired models from the hosted service model list', async () => {
     const models = await ctx.ai.getModels(ApiType.SentientSimsAI);
 
-    expect(models.map((model) => model.name)).toEqual(['Llama-3.3-70B-ArliAI-RPMax-v1.4']);
+    expect(models.map((model) => model.name)).toEqual(['meta-llama/Llama-3.3-70B-Instruct']);
   }, 30000);
 
   it('keeps retired models in a custom ai model list', async () => {
     const models = await ctx.ai.getModels(ApiType.CustomAI);
 
-    expect(models.map((model) => model.name)).toEqual(['Gryphe/MythoMax-L2-13b', 'Llama-3.3-70B-ArliAI-RPMax-v1.4']);
+    expect(models.map((model) => model.name)).toEqual([
+      'Gryphe/MythoMax-L2-13b',
+      'Llama-3.3-70B-ArliAI-RPMax-v1.4',
+      'meta-llama/Llama-3.3-70B-Instruct',
+    ]);
   }, 30000);
 
   it('surfaces the 401 when no renewed token arrives', async () => {

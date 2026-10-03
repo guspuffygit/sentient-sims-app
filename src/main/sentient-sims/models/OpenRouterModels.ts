@@ -31,6 +31,10 @@ export const openrouterRecommendedModels: AIModel[] = [
     displayName: 'Dolphin Mistral 24B Venice - fully uncensored',
   },
   {
+    name: 'meta-llama/llama-3.3-70b-instruct',
+    displayName: 'Llama 3.3 70B - smart all-rounder, widely hosted',
+  },
+  {
     name: 'nousresearch/hermes-4-70b',
     displayName: 'Hermes 4 70B - smartest, still permissive',
   },

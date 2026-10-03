@@ -54,6 +54,10 @@ export class DirectoryService {
     return path.join(this.getSentientSimsFolder(), 'logs.txt');
   }
 
+  getOverlayLogFile(): string {
+    return path.join(this.getSentientSimsFolder(), 'ss_overlay.log');
+  }
+
   getConfigFile(): string {
     return path.join(this.getSims4Folder(), 'Config.log');
   }
