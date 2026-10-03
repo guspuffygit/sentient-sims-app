@@ -1,5 +1,9 @@
 import log from 'electron-log';
-import { buildElevenLabsSpeechRequest, elevenLabsLineText } from 'main/sentient-sims/clients/ElevenLabsTTSRequest';
+import {
+  buildElevenLabsDialogueRequest,
+  buildElevenLabsSpeechRequest,
+  elevenLabsLineText,
+} from 'main/sentient-sims/clients/ElevenLabsTTSRequest';
 import { defaultElevenLabsTTSSettings, ElevenLabsSpeechModel } from 'main/sentient-sims/models/ElevenLabsTTSSettings';
 import { castElevenLabsVoice, elevenLabsVoiceCatalog } from 'main/sentient-sims/formatter/ElevenLabsVoiceCasting';
 import {
@@ -34,6 +38,24 @@ async function speak(text: string, voiceId: string, model: string): Promise<Blob
   return response.blob();
 }
 
+async function speakDialogue(text: string, voiceId: string, model: string, previousText?: string): Promise<Blob> {
+  const { url, headers, body } = buildElevenLabsDialogueRequest({
+    text,
+    voiceId,
+    endpoint: defaultElevenLabsEndpoint,
+    apiKey: apiKey as string,
+    settings: { ...defaultElevenLabsTTSSettings, model },
+    previousText,
+  });
+
+  const response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+  if (!response.ok) {
+    throw new Error(`ElevenLabs returned ${response.status}: ${await response.text()}`);
+  }
+
+  return response.blob();
+}
+
 describe('ElevenLabsIT', () => {
   it.skipIf(!apiKey)('generates audio for a dialogue line', async () => {
     const audio = await speak(
@@ -55,6 +77,35 @@ describe('ElevenLabsIT', () => {
 
     const audio = await speak(text, defaultElevenLabsTTSSettings.voice, ElevenLabsSpeechModel.ELEVEN_V3);
     expect(audio.size).toBeGreaterThan(0);
+  });
+
+  // v4 has no speed setting; this proves the API takes the v4 voice_settings shape on text-to-speech
+  it.skipIf(!apiKey)('generates audio for eleven_v4 on text-to-speech without speed', async () => {
+    const audio = await speak(
+      'Been fishing here for years.',
+      defaultElevenLabsTTSSettings.voice,
+      ElevenLabsSpeechModel.ELEVEN_V4,
+    );
+    expect(audio.size).toBeGreaterThan(0);
+    expect(audio.type).toContain('audio');
+  });
+
+  // The dialogue endpoint has its own body shape (inputs[], settings.similarity, future_text)
+  it.skipIf(!apiKey)('generates audio for a v4 dialogue line with an audio tag and context', async () => {
+    const text = elevenLabsLineText(
+      { speaker: 'Ricky', text: 'Been fishing here for years.', deliveryNote: 'nervous' },
+      ElevenLabsSpeechModel.ELEVEN_V4,
+    );
+    expect(text).toEqual('[nervous] Been fishing here for years.');
+
+    const audio = await speakDialogue(
+      text,
+      defaultElevenLabsTTSSettings.voice,
+      ElevenLabsSpeechModel.ELEVEN_V4,
+      'How long have you been coming here?',
+    );
+    expect(audio.size).toBeGreaterThan(0);
+    expect(audio.type).toContain('audio');
   });
 
   it.skipIf(!apiKey)('generates audio with the voice cast for a sim', async () => {

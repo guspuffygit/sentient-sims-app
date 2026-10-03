@@ -13,6 +13,10 @@ export enum ElevenLabsOutputFormat {
 }
 
 export enum ElevenLabsSpeechModel {
+  // v4 (2026-09-28): highest quality, reads [audio tags], 10k chars; no style/speed settings
+  ELEVEN_V4 = 'eleven_v4',
+  // v4 tuned for realtime (~100ms first byte); same tags, same settings as v4
+  ELEVEN_V4_TURBO = 'eleven_v4_turbo',
   ELEVEN_V3 = 'eleven_v3',
   // v3 tuned for realtime (~280ms), at half v3's per-character price
   ELEVEN_V3_CONVERSATIONAL = 'eleven_v3_conversational',
