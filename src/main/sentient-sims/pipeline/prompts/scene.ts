@@ -76,7 +76,7 @@ Rules:
 - If a character's description and their <KNOWN_FACTS> disagree, the FACTS are right and the description is out of date. Descriptions are written once and never revised, so a character can be described as a teenager years after growing up. The same goes for the location's description: residents it names may have moved, grown up, or never lived there; the household facts win, and nobody it names is present unless they appear in the scene.
 - A <PAST_REFLECTIONS> block, if present, holds one character's own distilled memories of earlier scenes (the speaker attribute says whose). Mine it for that character's continuity and feelings in their private briefing only — the other actors were not in that character's head, so never put it in the shared scene or in anyone else's briefing. It is not happening now: never stage it as the current scene, and fold in only the details that matter here.
 - Smooth over wrinkles: if the context is awkward, contradictory, or overloaded, resolve it into a clean, playable scene.
-- If the user message contains "Previously in this scene", the conversation is already underway: tell each actor to pick up mid-flow and build on what has already been said — no greetings, no introductions, no re-describing the setting.
+- If the user message contains "Previously in this scene", the conversation is already underway: tell each actor to pick up mid-flow and build on what has already been said — no greetings, no introductions, no re-describing the setting. The exception is a user message that ends by saying to open the scene: then the lines above are an earlier conversation these characters did not have together, and the first line starts this one.
 ${lengthRule}
 - Give every scene bit a SHAPE — a beginning (what starts it), a middle (where it turns), and an end (where it lands) — even inside two to four lines. If this is the opening beat, direct the first line to actually open the conversation; if the scene is already underway, direct where this round should land.
 - Do not write any dialogue or inner-monologue lines, and do not tell the actors specific lines to say or think.
@@ -176,7 +176,7 @@ Rules for SAY:
 - ONE short line, ten words or so, the way people actually talk. Never a speech.
 - Talk like a real person in this conversation: your line must be a direct, natural reply to what was just said, in ${simName}'s voice and in the tone your director set. Not every line needs to be clever — a plain reply that keeps the conversation flowing beats a quip that does not connect.
 - Move the conversation forward — answer questions that were asked, follow up on what the other person said, never repeat or rephrase anything already said.
-- If the conversation is already underway (anything under "Previously in this scene"), jump straight in mid-flow — no greetings and no re-introductions.
+- If the conversation is already underway (anything under "Previously in this scene"), jump straight in mid-flow — no greetings and no re-introductions. When you are told to open the scene, the lines above were an earlier conversation: start this one.
 - Do not mention physical actions, props, furniture, or locations.
 
 Rules for THINK:
@@ -238,6 +238,8 @@ export function buildSceneReviewSystemPrompt(context: SceneReviewPromptContext):
 ${factsBlocks.join('\n\n')}
 
 Read every delivered line against its speaker's facts. A claim the facts deny — a parent or child called a sibling, a sibling called a parent, a job when the record says there is none, a partner when the record says single, an age the record contradicts, a relative the record does not have — is the actor's mistake, never a performance choice, and the default to return lines exactly as written does not protect it. Repair just that claim to match the facts, in the actor's own voice and at the same length, and keep the rest of the line.
+
+Check a line only against ITS OWN speaker's facts. Another character's facts are that character's record, not the speaker's knowledge: never use them to judge or rewrite what the speaker says about that character. A repair removes or corrects the wrong claim; it never adds a name, job, title or detail the line did not already contain.
 
 `
       : '';
@@ -350,4 +352,89 @@ export function withContentFreeHint(
     return formattedPreAction;
   }
   return `${formattedPreAction} ${hint}`;
+}
+
+// A spoken lie only works if the listener never hears the stage direction. Live 2026-09-30:
+// LieAboutCareer sent "Elliot is telling Paolo a false story about their career" to BOTH
+// actors, so Paolo called the bluff ("I know you're not a CEO") before Elliot had told any
+// story, and Elliot, given no material, said only "Everything's going great at work". The
+// target now sees the beat as they would ("Elliot is telling Paolo how his career is going");
+// the liar sees the truth plus a nudge to actually tell the lie. Only verbal deceptions are
+// here: a jump scare or a hand buzzer is something the target experiences, so it hides nothing.
+export type DeceptionFraming = {
+  // The beat as the target experiences it, instead of the true pre-action
+  targetView: string;
+  // Appended to the liar's (true) pre-action
+  liarHint: string;
+};
+
+const DECEPTION_SOCIALS: Array<{ pattern: RegExp; framing: (liar: string, target: string) => DeceptionFraming }> = [
+  {
+    pattern: /LieAboutCareer/i,
+    framing: (liar, target) => ({
+      targetView: `${liar} is telling ${target} how work is going.`,
+      liarHint: `${liar} makes the story up out loud: a specific, impressive claim about their job that ${target} could believe. ${target} has not heard it before and does not know it is false.`,
+    }),
+  },
+  {
+    pattern: /GiveFakeBadNews/i,
+    framing: (liar, target) => ({
+      targetView: `${liar} is telling ${target} some bad news.`,
+      liarHint: `${liar} invents the bad news on the spot and says it plainly, as if it were true. ${target} does not know it is made up.`,
+    }),
+  },
+  {
+    pattern: /InstillWithFalseConfidence/i,
+    framing: (liar, target) => ({
+      targetView: `${liar} is encouraging ${target}.`,
+      liarHint: `${liar} does not mean it: the encouragement is mischief, meant to send ${target} off overconfident. ${target} takes it at face value.`,
+    }),
+  },
+  {
+    pattern: /InviteToFakeParty/i,
+    framing: (liar, target) => ({
+      targetView: `${liar} is inviting ${target} to a party.`,
+      liarHint: `There is no party: ${liar} is pranking ${target}, and ${target} does not know.`,
+    }),
+  },
+];
+
+export function deceptionFraming(
+  interactionName: string | undefined,
+  liar: string,
+  target: string,
+): DeceptionFraming | undefined {
+  if (!interactionName) {
+    return undefined;
+  }
+  const match = DECEPTION_SOCIALS.find(({ pattern }) => pattern.test(interactionName));
+  return match?.framing(liar, target);
+}
+
+// V-5b's opener fired only when "Previously in this scene" was empty. It rarely is: it holds
+// the last few rows at this location, whoever was in them, so a new pair right after another
+// conversation was told to jump in mid-flow and skipped the first half of theirs (live
+// 2026-09-30: Elliot's first line to Paolo followed his conversation with Lillie, as if Paolo
+// had been in it). The pair is underway only when some beat above carries dialogue from
+// every performer; a beat is the run of lines between two non-dialogue lines (a pre-action,
+// an interaction header).
+export function performersAlreadyTalking(previously: string, performerNames: string[]): boolean {
+  if (!previously || performerNames.length === 0) {
+    return false;
+  }
+  const beats: Set<string>[] = [new Set()];
+  previously.split('\n').forEach((raw) => {
+    const line = raw.trim();
+    if (!line) {
+      return;
+    }
+    const speaker = performerNames.find((name) => line.startsWith(`${name}:`));
+    if (speaker) {
+      beats[beats.length - 1].add(speaker);
+    } else if (!/^[^:]{1,60}:\s/.test(line) && beats[beats.length - 1].size > 0) {
+      // A non-dialogue line closes the beat; another speaker's dialogue does not
+      beats.push(new Set());
+    }
+  });
+  return beats.some((beat) => performerNames.every((name) => beat.has(name)));
 }

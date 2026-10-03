@@ -3,6 +3,8 @@ import {
   buildBriefingSystemPrompt,
   buildSceneReviewSystemPrompt,
   buildSpeechSystemPrompt,
+  deceptionFraming,
+  performersAlreadyTalking,
 } from 'main/sentient-sims/pipeline/prompts/scene';
 
 // Fix B2: cheap insurance for a save whose stored description predates an age-up. Live
@@ -160,5 +162,82 @@ describe('scene prompts with a silent performer', () => {
     const oneSpeaker = buildSceneReviewSystemPrompt({ ...base, speakerNames: ['Anker Solheim'] });
     expect(oneSpeaker).not.toContain('Both characters must speak');
     expect(oneSpeaker).toContain('one to three lines');
+  });
+});
+
+// Live 2026-09-30: Paolo's "I know you're not a CEO" aired as "I know you're not a Tech Guru
+// CEO" - the reviewer read Paolo's line against Elliot's facts and "repaired" it by adding them.
+describe('scene review fact check scope', () => {
+  it('checks each line against its own speaker only and never adds detail', () => {
+    const prompt = buildSceneReviewSystemPrompt({
+      simNames: ['Elliot Chatman', 'Paolo Rocca'],
+      performerNames: ['Elliot Chatman', 'Paolo Rocca'],
+      hasPlayerLine: false,
+      performerNamesList: 'Elliot Chatman and Paolo Rocca',
+      factsBySim: new Map([
+        ['Elliot Chatman', '<KNOWN_FACTS>\n- you work in the Tech Guru career, level 5\n</KNOWN_FACTS>'],
+      ]),
+    });
+    expect(prompt).toContain("Check a line only against ITS OWN speaker's facts");
+    expect(prompt).toContain('it never adds a name, job, title or detail the line did not already contain');
+    expect(prompt.indexOf('ITS OWN speaker')).toBeLessThan(prompt.indexOf('Respond with the final scene'));
+  });
+});
+
+describe('deception framing', () => {
+  it('gives the target an innocent view and the liar the material', () => {
+    const framing = deceptionFraming('mixer_social_LieAboutCareer_group_mischief_skills', 'Elliot', 'Paolo');
+    expect(framing?.targetView).toBe('Elliot is telling Paolo how work is going.');
+    expect(framing?.targetView).not.toMatch(/false|lie|fake|made up/i);
+    expect(framing?.liarHint).toContain('makes the story up out loud');
+  });
+
+  it('covers the verbal lies and leaves physical pranks and ordinary socials alone', () => {
+    ['GiveFakeBadNews_targeted', 'InstillWithFalseConfidence_targeted', 'InviteToFakeParty_targeted'].forEach(
+      (name) => {
+        const framing = deceptionFraming(`mixer_social_${name}`, 'A', 'B');
+        expect(framing?.targetView).not.toMatch(/false|lie|fake|made up|prank/i);
+      },
+    );
+    expect(deceptionFraming('mixer_social_AttemptToScare_targeted_mischief_skills', 'A', 'B')).toBeUndefined();
+    expect(deceptionFraming('mixer_social_Chat', 'A', 'B')).toBeUndefined();
+    expect(deceptionFraming(undefined, 'A', 'B')).toBeUndefined();
+  });
+});
+
+// Live 2026-09-30: Elliot started on Paolo right after a conversation with Lillie, and both
+// actors were told to jump in mid-flow because "Previously in this scene" was not empty.
+describe('performersAlreadyTalking', () => {
+  const lillieScene = [
+    'Elliot Chatman is asking Lillie Cason about their day.',
+    'Elliot Chatman: How was your day though',
+    'Lillie Cason: It was amazing, thanks for asking',
+    'Elliot Chatman is flirting with Lillie Cason.',
+    'Elliot Chatman: You light up when you talk about things you love',
+    "Lillie Cason: That's what makes life worth living, right?",
+  ].join('\n');
+
+  it("is false for a new pair after someone else's conversation", () => {
+    expect(performersAlreadyTalking(lillieScene, ['Elliot Chatman', 'Paolo Rocca'])).toBe(false);
+  });
+
+  it('is true when the pair spoke in one beat', () => {
+    expect(performersAlreadyTalking(lillieScene, ['Elliot Chatman', 'Lillie Cason'])).toBe(true);
+  });
+
+  it('does not join two separate beats that each had one of them', () => {
+    const text = [
+      'Elliot Chatman is chatting with Lillie Cason.',
+      'Elliot Chatman: Hey',
+      'Lillie Cason: Hi',
+      'Paolo Rocca is chatting with Adrian House.',
+      'Paolo Rocca: Yo',
+      'Adrian House: Hey man',
+    ].join('\n');
+    expect(performersAlreadyTalking(text, ['Elliot Chatman', 'Paolo Rocca'])).toBe(false);
+  });
+
+  it('is false with no history', () => {
+    expect(performersAlreadyTalking('', ['Elliot Chatman', 'Paolo Rocca'])).toBe(false);
   });
 });

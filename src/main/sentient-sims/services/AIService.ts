@@ -64,7 +64,9 @@ import {
   buildSceneReviewSystemPrompt,
   buildSceneSalienceSystemPrompt,
   buildSpeechSystemPrompt,
+  deceptionFraming,
   DIRECTOR_REVIEW_SYSTEM_PROMPT,
+  performersAlreadyTalking,
   withContentFreeHint,
 } from '../pipeline/prompts/scene';
 import { buildDiaryOnlySystemPrompt } from '../pipeline/prompts/consolidation';
@@ -1736,6 +1738,10 @@ ${factsBlock}
     // between friends". Anything a sim can read back uses this; only the model sees
     // sceneAction.
     let displayAction: string | undefined;
+    // A spoken lie gives each side its own action (deceptionFraming): the listener must never
+    // read "a false story". Unset, every performer and the director get sceneAction.
+    let actionFor: ((name: string) => string) | undefined;
+    let directorAction: string | undefined;
     if (continuingScene && playerLine) {
       // The chat window's Continue inside an open thread: the sim keeps talking to the
       // player, who said nothing new — or wraps up
@@ -1759,24 +1765,48 @@ ${factsBlock}
         sceneAction += ` ${playerLine.speaker} is ${flavor}. Their words are heard only by ${formatListToString(performerNames)}; nobody else in the room hears them.`;
       }
     } else {
-      sceneAction = promptRequest.action ?? options.action;
-      displayAction = sceneAction;
-      // J6: a content-free social (inside joke, story, gossip) says where its material may
-      // come from. Model-only, after displayAction is taken: the memory row keeps the
-      // beat as it happened, never a stage direction (the 08-16 lesson above).
-      sceneAction = withContentFreeHint(sceneAction, (event as { interaction_name?: string }).interaction_name);
+      displayAction = promptRequest.action ?? options.action;
+      const interactionName = (event as { interaction_name?: string }).interaction_name;
       // V-5b: a fresh scene OPENS — the actors are just starting this conversation.
       // Without it they launched mid-thought ("That reminds me of a joke:" before the
-      // joke) because nothing told them this was the first exchange.
-      if (sceneAction && !previously) {
-        sceneAction = `${sceneAction} Open the scene: the characters are just starting this conversation — the first line begins it, nothing was said before.`;
-      }
+      // joke) because nothing told them this was the first exchange. Fresh means these
+      // performers have not been talking, not that nothing at all was said here before.
+      const opensScene = !performersAlreadyTalking(previously, performerNames);
       // N-1: the interaction's own valence frames the beat. Without it the model read
       // 'YellAT' as a friendly chat (playtest 08-04..08-14) — the pre_action text alone
       // was not enough once the director chose a warm genre.
       const valenceClause = valenceFraming((event as { valence?: string }).valence);
-      if (sceneAction && valenceClause) {
-        sceneAction = `${sceneAction} ${valenceClause}`;
+      const frame = (base: string | undefined, withValence: boolean): string | undefined => {
+        // J6: a content-free social (inside joke, story, gossip) says where its material may
+        // come from. Model-only, after displayAction is taken: the memory row keeps the
+        // beat as it happened, never a stage direction (the 08-16 lesson above).
+        let action = withContentFreeHint(base, interactionName);
+        if (action && opensScene) {
+          action += previously
+            ? ' Open the scene: the characters are just starting this conversation — the first line begins it. The lines above were an earlier conversation, not part of this one.'
+            : ' Open the scene: the characters are just starting this conversation — the first line begins it, nothing was said before.';
+        }
+        if (action && withValence && valenceClause) {
+          action += ` ${valenceClause}`;
+        }
+        return action;
+      };
+      sceneAction = frame(displayAction, true);
+
+      const liar = event.sentient_sims[0]?.name;
+      const target = event.sentient_sims[1]?.name;
+      const deception =
+        sceneAction && performers.length === 2 && liar && target
+          ? deceptionFraming(interactionName, liar, target)
+          : undefined;
+      if (sceneAction && deception) {
+        const liarAction = `${sceneAction} ${deception.liarHint}`;
+        // No valence for the target: "a HOSTILE beat" tells them as much as "false story"
+        const targetAction = frame(deception.targetView, false) ?? deception.targetView;
+        actionFor = (name) => (name === target ? targetAction : liarAction);
+        directorAction =
+          `${liarAction}\n\n${target} does not know it is a lie. Only ${liar}'s private briefing may say so; ` +
+          `the shared briefing and ${target}'s briefing describe the beat as ${target} experiences it: "${deception.targetView}"`;
       }
       if (sceneAction && intimateAct) {
         sceneAction = `${sceneAction} ${INTIMATE_SCENE_FRAMING}`;
@@ -1831,7 +1861,7 @@ ${factsBlock}
       const briefing = await this.runOneShot(
         'Director Briefing',
         briefingSystemPrompt,
-        `${previouslyBlock}${sceneAction}`,
+        `${previouslyBlock}${directorAction ?? sceneAction}`,
         500,
         options.directorModel,
         AIActionType.DIRECTED_SCENE_DIRECTOR,
@@ -1930,7 +1960,7 @@ ${factsBlock}
       });
 
       const conversationSoFar = toTranscript(sceneLines);
-      const actorUserText = `${previouslyBlock}${sceneAction}${
+      const actorUserText = `${previouslyBlock}${actionFor?.(sim.name) ?? sceneAction}${
         conversationSoFar ? `\n\nThe conversation so far:\n${conversationSoFar}` : ''
       }`;
 

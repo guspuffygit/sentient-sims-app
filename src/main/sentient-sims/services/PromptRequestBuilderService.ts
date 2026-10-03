@@ -405,7 +405,11 @@ export class PromptRequestBuilderService {
           location.id === messages[messages.length - 1].location &&
           includeLocation === messages[messages.length - 1].includeLocation
         ) {
-          messages[messages.length - 1].content += ` ${text.trim()}`;
+          // A scene row is a transcript ("<header>\nA: ...\nB: ..."); glued on with a space,
+          // one scene's last line ran into the next one's header ("B: Thanks for asking
+          // Elliot is flirting with Lillie."), live 2026-09-30
+          const separator = role === 'assistant' ? '\n' : ' ';
+          messages[messages.length - 1].content += `${separator}${text.trim()}`;
           return;
         }
         if (role === 'assistant') {
