@@ -1,5 +1,6 @@
 import { Button, Card, CardActions, CardContent } from '@mui/material';
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { SimFactsDialog } from './components/SimFactsDialog';
 import log from 'electron-log';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
@@ -28,6 +29,10 @@ const client = new SentientSimsAppClient();
 export default function SimsPage() {
   const [sims, setSims] = useState<ParticipantDTO[]>([]);
   const [editedSim, setEditedSim] = useState<SelectedSim | null | undefined>();
+  // The Sim whose semantic facts are open. What a Sim KNOWS is separate from its
+  // description: the description is what the player wrote, the facts are what the game
+  // and the conversations put there (Phase 3.1 H4).
+  const [factsSim, setFactsSim] = useState<ParticipantDTO | undefined>();
   const { status } = useWebsocket();
   // Which provider's pinned voices the page shows and edits (ElevenLabs or Kokoro),
   // driven by the TTS provider selected in settings
@@ -46,6 +51,23 @@ export default function SimsPage() {
           if (!voice?.voiceId) return 'Default';
           return voice.voiceName ?? voice.voiceId;
         },
+      },
+      {
+        field: 'facts',
+        headerName: 'Facts',
+        width: 110,
+        sortable: false,
+        filterable: false,
+        renderCell: (params: { row: ParticipantDTO }) => (
+          <Button
+            size="small"
+            onClick={() => {
+              setFactsSim(params.row);
+            }}
+          >
+            Facts
+          </Button>
+        ),
       },
       {
         field: 'description',
@@ -330,6 +352,14 @@ export default function SimsPage() {
           </CardContent>
         </Card>
         {editSimBox}
+        <SimFactsDialog
+          open={factsSim !== undefined}
+          simId={factsSim?.id}
+          simName={factsSim?.name}
+          onClose={() => {
+            setFactsSim(undefined);
+          }}
+        />
       </div>
     );
   }

@@ -20,8 +20,11 @@ function objectLabel(object: PerceivedObject): string {
 }
 
 function describeSim(sim: PerceivedSim): string {
-  const name = sim.name ?? 'someone';
-  const activity = sim.doing ? pretty(sim.doing) : 'nearby';
+  // || not ??: an empty-string name (nameless NPC from an older mod) must also fall back
+  const name = sim.name || 'someone';
+  // Asleep is stated outright: it is the one state that makes every social impossible,
+  // and 'doing: sleep' read to the model as an activity to interrupt rather than a wall
+  const activity = sim.asleep ? 'asleep' : sim.doing ? pretty(sim.doing) : 'nearby';
   const distance = sim.distance !== undefined ? `, ${Math.round(sim.distance)}m away` : '';
   return `${name} (${activity}${distance})`;
 }

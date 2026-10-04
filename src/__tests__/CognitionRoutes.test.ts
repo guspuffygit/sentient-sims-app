@@ -6,7 +6,7 @@ import { WebsocketNotification } from 'main/sentient-sims/models/ModWebsocketMes
 import { mockApiContext } from './util';
 
 describe('cognition routes', () => {
-  const ctx = mockApiContext({ port: 25204 });
+  const ctx = mockApiContext({ port: 25204, tiers: [] });
   const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server;
 
@@ -179,8 +179,12 @@ describe('cognition routes', () => {
     });
 
     const reflectedScenes: unknown[] = [];
-    vi.spyOn(ctx.ai, 'runSceneReflection').mockImplementation((scene) => {
+    const reflectedPovs: unknown[] = [];
+    const reflectedBoundaries: unknown[] = [];
+    vi.spyOn(ctx.ai, 'runSceneReflection').mockImplementation((scene, pov, boundary) => {
       reflectedScenes.push(scene);
+      reflectedPovs.push(pov);
+      reflectedBoundaries.push(boundary);
       return Promise.resolve();
     });
 
@@ -192,6 +196,10 @@ describe('cognition routes', () => {
     expect(result).toMatchObject({ ok: true, reflected: true, scene_id: scene?.sceneId });
     expect(reflectedScenes).toHaveLength(1);
     expect(reflectedScenes[0]).toMatchObject({ sceneId: scene?.sceneId, locationId: 42 });
+    // First-person reflections need to know whose head they're in, and the diary
+    // framing needs to know the day is closing (vs a travel boundary)
+    expect(reflectedPovs[0]).toMatchObject({ simId: '123', simName: 'Marisol Rocca' });
+    expect(reflectedBoundaries[0]).toBe('sleep');
 
     // The old scene ended and a fresh one started at the same location, so the next
     // travel boundary only covers what happens after the nap

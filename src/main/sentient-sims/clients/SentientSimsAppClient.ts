@@ -12,6 +12,7 @@ import { SentientSimsAiApiClient } from './SentientSimsAiApiClient';
 import { SentientSimulationsWebsiteClient } from './SentientSimulationsWebsiteClient';
 import { SettingsClient } from './SettingsClient';
 import { UpdateClient } from './UpdateClient';
+import { SimFactsClient } from './SimFactsClient';
 import { VersionClient } from './VersionClient';
 import { VoiceClient } from './VoiceClient';
 import { WebsocketClient } from './WebsocketClient';
@@ -33,6 +34,7 @@ export class SentientSimsAppClient {
   private readonly _sentientSimsAiApi: SentientSimsAiApiClient;
   private readonly _files: FilesClient;
   private readonly _options: OptionsClient;
+  private readonly _simFacts: SimFactsClient;
 
   constructor(apiUrl?: string) {
     const url = apiUrl ?? appApiUrl;
@@ -53,6 +55,11 @@ export class SentientSimsAppClient {
     this._sentientSimsAiApi = new SentientSimsAiApiClient(url);
     this._files = new FilesClient(url);
     this._options = new OptionsClient(url);
+    this._simFacts = new SimFactsClient(url);
+  }
+
+  get simFacts(): SimFactsClient {
+    return this._simFacts;
   }
 
   get ai(): AIClient {
