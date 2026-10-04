@@ -10,6 +10,13 @@ export type MemoryEntity = {
   action?: string;
   event_type?: string;
   interaction_name?: string;
+  // Owner: whose inner voice a monologue/reflection/thought row is. The mod's memories
+  // window attributes the row by these (overlay_memories.split_lines), so they ride the
+  // websocket pushes too.
+  owner_participant_id?: string;
+  owner_name?: string;
+  // V-4: renderer-only name tags (stripped from the mod-bound copy via toModMemory)
+  participant_names?: string[];
 };
 
 // Raw memory row as read with safeIntegers() (all INTEGER columns arrive as bigint).
@@ -20,6 +27,13 @@ export type MemoryRow = Omit<MemoryEntity, 'id' | 'location_id'> & {
 
 export function toMemoryEntity(row: MemoryRow): MemoryEntity {
   return { ...row, id: row.id.toString(), location_id: Number(row.location_id) };
+}
+
+// The row shape handed to the mod: SentientMemory.from_row ignores fields it does not know,
+// and the overlay's memories window reads the owner fields off the raw row.
+export function toModMemory(memory: MemoryEntity): MemoryEntity {
+  const { participant_names: _names, ...modRow } = memory;
+  return modRow;
 }
 
 // The mod's Flash memories window concatenates the whole list into one htmlText string, so a

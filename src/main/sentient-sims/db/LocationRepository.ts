@@ -42,6 +42,28 @@ export class LocationRepository extends Repository {
     };
   }
 
+  // V-6: store a GENERATED description for a lot that only ever had the stock default.
+  // Guarded like the participant path: re-read first, and never replace a description the
+  // player (or an earlier generation) already put there.
+  setDescriptionIfGeneric(location: LocationEntity, description: string, zoneName?: string): boolean {
+    const existing = this.dbService
+      .getDb()
+      .prepare('SELECT * FROM location WHERE id = ?')
+      .all([location.id]) as LocationEntity[];
+
+    if (existing.length > 0 && existing[0].description && existing[0].description !== defaultLotDescription) {
+      return false;
+    }
+
+    this.updateLocation({
+      id: location.id,
+      name: zoneName || existing[0]?.name || location.name,
+      lot_type: existing[0]?.lot_type || location.lot_type,
+      description,
+    });
+    return true;
+  }
+
   /**
    * Updates an existing location or inserts a new location if it does not exist in the database.
    *

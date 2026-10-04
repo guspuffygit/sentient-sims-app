@@ -11,9 +11,21 @@ import path from 'path';
 
 const FETCH_RETRY_COOLDOWN_MS = 60_000;
 const FETCH_TIMEOUT_MS = 15_000;
+const MAX_SEEN_UNMAPPED = 500;
+
+// An interaction that ran in game with no mapping from any source. Kept so the mapping
+// browser can list it (with the game's own pie-menu label) and give it real text.
+export type SeenUnmappedInteraction = {
+  displayName?: string;
+  // The line the app made up for it, shown as the starting text to edit
+  action?: string;
+  lastSeen: number;
+  count: number;
+};
 
 export class InteractionRepository {
   private ctx: ApiContext;
+  private seenUnmapped?: Map<string, SeenUnmappedInteraction>;
   private localInteractions?: Map<string, BasicInteraction>;
   private interactions?: Map<string, BasicInteraction>;
   private lastFetchFailure?: number;
@@ -69,6 +81,57 @@ export class InteractionRepository {
       return JSON.parse(fileContent) as Record<string, BasicInteraction>;
     }
     return {};
+  }
+
+  private getSeenUnmappedPath(): string {
+    return path.join(this.ctx.directory.getSentientSimsFolder(), 'seen_unmapped_interactions.json');
+  }
+
+  private loadSeenUnmapped(): Map<string, SeenUnmappedInteraction> {
+    if (!this.seenUnmapped) {
+      this.seenUnmapped = new Map();
+      try {
+        const seenPath = this.getSeenUnmappedPath();
+        if (fs.existsSync(seenPath)) {
+          const parsed = JSON.parse(fs.readFileSync(seenPath, 'utf-8')) as Record<string, SeenUnmappedInteraction>;
+          this.seenUnmapped = new Map(Object.entries(parsed));
+        }
+      } catch (err) {
+        log.error('[Unmapped] Could not load seen unmapped interactions.', err);
+      }
+    }
+    return this.seenUnmapped;
+  }
+
+  private writeSeenUnmapped(seen: Map<string, SeenUnmappedInteraction>) {
+    try {
+      fs.writeFileSync(this.getSeenUnmappedPath(), JSON.stringify(Object.fromEntries(seen), null, 2));
+    } catch (err) {
+      log.error('[Unmapped] Could not save seen unmapped interactions.', err);
+    }
+  }
+
+  recordUnmappedInteraction(name: string, displayName?: string, action?: string) {
+    if (!name) {
+      return;
+    }
+    const seen = this.loadSeenUnmapped();
+    const previous = seen.get(name);
+    seen.delete(name);
+    seen.set(name, {
+      displayName: displayName || previous?.displayName,
+      action,
+      lastSeen: Date.now(),
+      count: (previous?.count ?? 0) + 1,
+    });
+    // Insertion order is recency: the oldest fall off the front
+    while (seen.size > MAX_SEEN_UNMAPPED) {
+      seen.delete(seen.keys().next().value as string);
+    }
+    // Only a change the browser would show is worth a disk write
+    if (!previous || previous.displayName !== displayName || previous.action !== action) {
+      this.writeSeenUnmapped(seen);
+    }
   }
 
   saveLocalInteraction(interaction: BasicInteraction) {
@@ -181,6 +244,19 @@ export class InteractionRepository {
         ...(onlineVersion ? { online: { action: onlineVersion.action, ignored: onlineVersion.ignored } } : {}),
         ...(builtIn ? { builtIn } : {}),
       });
+    });
+
+    // Seen in game with no mapping anywhere. Once one is saved (locally or online) it is
+    // listed above under that source, and this entry stops showing.
+    this.loadSeenUnmapped().forEach((seen, name) => {
+      if (!browsable.has(name)) {
+        browsable.set(name, {
+          name,
+          action: seen.action,
+          source: 'unmapped',
+          ...(seen.displayName ? { displayName: seen.displayName } : {}),
+        });
+      }
     });
 
     return browsable;

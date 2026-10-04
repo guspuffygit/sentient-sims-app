@@ -1,5 +1,9 @@
 import log from 'electron-log';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
+import { StageId } from '../pipeline/stages';
+import { IMPORTANCE_SYSTEM_PROMPT } from '../pipeline/prompts/utility';
+import { AIActionType } from '../models/AIActionType';
+import { memoryRecallText } from '../util/memoryRecallText';
 import { ApiContext } from './ApiContext';
 import { embeddingToBuffer } from './EmbeddingService';
 
@@ -10,12 +14,11 @@ const IMPORTANCE_BY_EVENT_TYPE: Record<string, number> = {
   reflection: 8,
   outcome: 5,
   thought: 2,
+  // A scene-attached inner monologue normally arrives pre-scored by the scene's
+  // reflection stage; this prior only catches rows whose scoring call failed
+  monologue: 3,
 };
 const DEFAULT_IMPORTANCE = 3;
-
-const IMPORTANCE_SYSTEM_PROMPT = `You rate how memorable a life event is for the character who experienced it.
-1 means mundane and forgettable (routine chores, small talk), 10 means life-changing (a breakup, a birth, a betrayal).
-Respond with only a single integer from 1 to 10, nothing else.`;
 
 export function heuristicImportance(eventType?: string): number {
   if (eventType && eventType in IMPORTANCE_BY_EVENT_TYPE) {
@@ -57,14 +60,27 @@ export class MemoryAnnotationService {
     }
 
     const session = this.ctx.db.sessionKey;
-    const text = memory.observation || memory.content || '';
-    const importance = text
-      ? await this.rateImportance(text, memory.event_type)
-      : heuristicImportance(memory.event_type);
+    // Rated and embedded as it is recalled: a reply to the player carries the question it
+    // answered, so a later question about the same thing can find it
+    const text = memory.observation || memory.content ? memoryRecallText(memory) : '';
+    // A rating the pipeline already computed (scene reflection scores, stamped at
+    // creation) wins over a fresh rating call — one score per memory, no double-spend
+    const existing = this.ctx.memoryIndexRepository.getIndex(memory.id);
+    let importance: number;
+    if (typeof existing?.importance === 'number') {
+      importance = existing.importance;
+    } else if (text) {
+      importance = await this.rateImportance(text, memory.event_type, memory.id);
+    } else {
+      importance = heuristicImportance(memory.event_type);
+    }
 
     let embedding: Buffer | undefined;
     let embeddingModel: string | undefined;
-    if (text) {
+    // Outcome rows are structured bookkeeping, not narrative — embedding them polluted the
+    // vector index with 111 near-identical "X tried Y" rows. They keep an importance rating
+    // (recency+importance retrieval still sees them) but never enter similarity search.
+    if (text && memory.event_type !== 'outcome') {
       const [vector] = await this.ctx.embedding.embed([text]);
       if (vector) {
         embedding = embeddingToBuffer(vector);
@@ -140,14 +156,14 @@ export class MemoryAnnotationService {
   }
 
   private async backfillBatch(batch: MemoryEntity[], session: string | undefined): Promise<number> {
-    const textable = batch.filter((memory) => memory.observation || memory.content);
+    const textable = batch.filter(
+      (memory) => (memory.observation || memory.content) && memory.event_type !== 'outcome',
+    );
     if (textable.length === 0) {
       return 0;
     }
 
-    const vectors = await this.ctx.embedding.embed(
-      textable.map((memory) => memory.observation || memory.content || ''),
-    );
+    const vectors = await this.ctx.embedding.embed(textable.map((memory) => memoryRecallText(memory)));
     if (this.ctx.db.sessionKey !== session) {
       log.debug('[Annotation] database changed during backfill batch, dropping results');
       return 0;
@@ -175,9 +191,27 @@ export class MemoryAnnotationService {
     return embedded;
   }
 
-  private async rateImportance(text: string, eventType?: string): Promise<number> {
+  private async rateImportance(text: string, eventType?: string, memoryId?: string): Promise<number> {
     try {
-      const result = await this.ctx.ai.runOneShot('Memory Importance', IMPORTANCE_SYSTEM_PROMPT, text, 5);
+      const result = await this.ctx.ai.runOneShot(
+        'Memory Importance',
+        IMPORTANCE_SYSTEM_PROMPT,
+        text,
+        5,
+        undefined,
+        AIActionType.MEMORY_IMPORTANCE,
+        undefined,
+        { stageId: StageId.HIPPOCAMPUS_IMPORTANCE },
+      );
+      // The row already exists by the time this runs, so the stage attaches by id. Kept in
+      // its own try/catch: debug bookkeeping must not send a real rating to the heuristic.
+      if (memoryId !== undefined) {
+        try {
+          this.ctx.ext.trace?.appendExchange(memoryId, result.exchange);
+        } catch (error) {
+          log.debug(`[Annotation] could not attach importance trace to memory ${memoryId}: ${String(error)}`);
+        }
+      }
       const rating = parseImportance(result.text);
       if (rating !== undefined) {
         return rating;
