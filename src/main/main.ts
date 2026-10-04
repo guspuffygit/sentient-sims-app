@@ -9,6 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
+import fs from 'fs';
 import { install as installSourceMapSupport } from 'source-map-support';
 import { app, BrowserWindow, shell, session, WebRequestFilter, dialog } from 'electron';
 import log from 'electron-log';
@@ -22,6 +23,8 @@ import { appApiPort } from './sentient-sims/constants';
 import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { disableDebugLogging, enableDebugLogging } from './sentient-sims/util/debugLog';
 import { notifySettingChanged } from './sentient-sims/util/notifyRenderer';
+import { setSimAliases } from './sentient-sims/util/simAliases';
+import { SettingsEnum } from './sentient-sims/models/SettingsEnum';
 import debug from 'electron-debug';
 // electron-updater is CommonJS; import the default (whole module) and destructure
 // locally. A bare dynamic import() would be left external by the bundler and break
@@ -29,13 +32,48 @@ import debug from 'electron-debug';
 import electronUpdater from 'electron-updater';
 import { resolveHtmlPath } from './util';
 import { ApiContext } from './sentient-sims/services/ApiContext';
+import { VoiceInputService } from './sentient-sims/services/VoiceInputService';
 import { version as releaseAppVersion } from '../../release/app/package.json';
+import { TIER, TIER_STAMP } from './sentient-sims/tiers';
 
 log.initialize({ preload: true });
 // Get uncaught main-process errors into main.log so they show up in player log bundles.
 log.errorHandler.startCatching({ showDialog: false });
 
+// Log archiving. electron-log's default rotation is 1MB -> a single main.old.log, which
+// destroyed evidence mid-incident during the 08-04..08-14 playtest (a busy hour of cognition
+// overwrites the archive twice). Rotate at 25MB into timestamped archives and keep the
+// newest ARCHIVED_LOG_COUNT so a full night survives in the player's log bundle.
+const ARCHIVED_LOG_COUNT = 10;
+log.transports.file.maxSize = 25 * 1024 * 1024;
+log.transports.file.archiveLogFn = (oldLogFile) => {
+  const file = oldLogFile.toString();
+  const dir = path.dirname(file);
+  const ext = path.extname(file);
+  const base = path.basename(file, ext);
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  try {
+    fs.renameSync(file, path.join(dir, `${base}.${stamp}${ext}`));
+    const archives = fs
+      .readdirSync(dir)
+      .filter((name) => name.startsWith(`${base}.`) && name.endsWith(ext) && name !== `${base}${ext}`)
+      .sort();
+    archives.slice(0, Math.max(0, archives.length - ARCHIVED_LOG_COUNT)).forEach((name) => {
+      try {
+        fs.unlinkSync(path.join(dir, name));
+      } catch (err) {
+        console.warn(`Could not prune archived log ${name}`, err);
+      }
+    });
+  } catch (err) {
+    console.warn('Could not archive log file', err);
+  }
+};
+
 let mainWindow: BrowserWindow | null = null;
+let voiceInputService: VoiceInputService | null = null;
+// Kept for will-quit, where the build tiers shut down
+let apiContext: ApiContext | null = null;
 
 if (process.env.NODE_ENV === 'production') {
   installSourceMapSupport();
@@ -76,9 +114,10 @@ const createWindow = async () => {
     show: false,
     width: 1400,
     height: 850,
+    minWidth: 800,
+    minHeight: 500,
     autoHideMenuBar: true,
     icon: getAssetPath('icon.png'),
-    thickFrame: false,
     backgroundColor: '#2f3136',
     webPreferences: {
       webSecurity: false, // Disable web security
@@ -129,9 +168,10 @@ const createWindow = async () => {
 // Everything here binds ports or registers global handlers, so it must run exactly
 // once per process, not once per window.
 const startServices = () => {
+  // The stamp string is what scripts/verify-build.ts looks for in the main bundle
+  log.info(`App build tier: ${TIER} (${TIER_STAMP})`);
   const settingsService = new SettingsService();
   settingsService.runMigrations();
-  settingsService.onSettingChanged(notifySettingChanged);
 
   const directoryService = new DirectoryService(settingsService);
   const ctx = new ApiContext({
@@ -144,7 +184,28 @@ const startServices = () => {
     // mod-out-of-date error on every connect. Report the real app version instead.
     appVersion: app.isPackaged ? app.getVersion() : releaseAppVersion,
   });
-  ipcHandlers(ctx);
+  voiceInputService?.shutdown();
+  voiceInputService = new VoiceInputService(ctx);
+  apiContext = ctx;
+  // Single listener slot: compose so the renderer cache, the voice hotkey, and the build
+  // tiers (stream: the Twitch connection) all react to setting writes
+  settingsService.onSettingChanged((key, value) => {
+    notifySettingChanged(key, value);
+    if (key === (SettingsEnum.TWITCH_SIM_ALIASES as string)) {
+      // Voice casting and chat targeting read the alias registry (util/simAliases)
+      setSimAliases(settingsService.twitchSimAliases);
+    }
+    voiceInputService?.onSettingChanged(key);
+    for (const tier of ctx.tiers) {
+      tier.onSettingChanged?.(ctx, key);
+    }
+  });
+  ipcHandlers(ctx, voiceInputService);
+  voiceInputService.initialize();
+  // The build tiers connect once IPC is bound (stream: Twitch chat)
+  for (const tier of ctx.tiers) {
+    tier.start?.(ctx);
+  }
 
   if (ctx.settings.debugLogs) {
     enableDebugLogging();
@@ -215,6 +276,17 @@ app.on('window-all-closed', () => {
   // after all windows have been closed
   if (process.platform !== 'darwin') {
     app.quit();
+  }
+});
+
+// The uiohook keyboard-hook thread keeps the process alive unless stopped
+app.on('will-quit', () => {
+  voiceInputService?.shutdown();
+  const ctx = apiContext;
+  if (ctx) {
+    for (const tier of ctx.tiers) {
+      tier.shutdown?.(ctx);
+    }
   }
 });
 

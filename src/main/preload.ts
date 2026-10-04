@@ -7,6 +7,13 @@ import 'electron-log/preload';
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 import { SettingsEnum } from './sentient-sims/models/SettingsEnum';
 import { CaughtError } from './sentient-sims/models/CaughtError';
+import type {
+  TierEventChannel,
+  TierEventChannels,
+  TierInvokeArgs,
+  TierInvokeChannel,
+  TierInvokeResult,
+} from './sentient-sims/tiers/ipc';
 
 type IpcCallback = (event: IpcRendererEvent, ...args: any[]) => void;
 
@@ -144,16 +151,88 @@ const electronHandler = {
 
     return () => ipcRenderer.removeListener('on-voice', callback);
   },
-  notifySceneLineShown: (line: { speaker: string; text: string; preamble?: string }) => {
+  notifySceneLineShown: (line: {
+    speaker: string;
+    text: string;
+    preamble?: string;
+    voiced?: boolean;
+    simId?: string;
+    sceneId?: string;
+    participantSimIds?: string[];
+    continues?: boolean;
+  }) => {
     ipcRenderer.send('scene-line-shown', line);
+  },
+  notifySceneLineEnded: (line: { speaker: string; text: string; sceneId?: string; continues?: boolean }) => {
+    ipcRenderer.send('scene-line-ended', line);
   },
   notifySceneDropped: (pacedText: string) => {
     ipcRenderer.send('scene-dropped', pacedText);
+  },
+  // A scene's playback is over: completed false means it was cut short
+  notifyScenePlaybackEnded: (payload: { sceneId: string; completed: boolean }) => {
+    ipcRenderer.send('scene-playback-ended', payload);
+  },
+  // The game ended a conversation partway (a sim walked away or left the lot)
+  onSceneStop: (callback: IpcCallback) => {
+    ipcRenderer.on('scene-stop', callback);
+
+    return () => ipcRenderer.removeListener('scene-stop', callback);
+  },
+  onClockState: (callback: IpcCallback) => {
+    ipcRenderer.on('clock-state', callback);
+
+    return () => ipcRenderer.removeListener('clock-state', callback);
+  },
+  onProviderHealth: (callback: IpcCallback) => {
+    ipcRenderer.on('provider-health', callback);
+
+    return () => ipcRenderer.removeListener('provider-health', callback);
   },
   onWebsocketStatusChange: (callback: IpcCallback) => {
     ipcRenderer.on('websocket-status-change', callback);
 
     return () => ipcRenderer.removeListener('websocket-status-change', callback);
+  },
+  onVoiceRecordStart: (callback: IpcCallback) => {
+    ipcRenderer.on('voice-record-start', callback);
+
+    return () => ipcRenderer.removeListener('voice-record-start', callback);
+  },
+  onVoiceRecordStop: (callback: IpcCallback) => {
+    ipcRenderer.on('voice-record-stop', callback);
+
+    return () => ipcRenderer.removeListener('voice-record-stop', callback);
+  },
+  onVoiceTranscript: (callback: IpcCallback) => {
+    ipcRenderer.on('voice-transcript', callback);
+
+    return () => ipcRenderer.removeListener('voice-transcript', callback);
+  },
+  transcribeVoice: (audio: ArrayBuffer, mimeType?: string): Promise<string> => {
+    return ipcRenderer.invoke('voice-transcribe', audio, mimeType) as Promise<string>;
+  },
+  testTranscribeVoice: (audio: ArrayBuffer, mimeType?: string): Promise<{ text?: string; error?: string }> => {
+    return ipcRenderer.invoke('voice-transcribe-test', audio, mimeType) as Promise<{ text?: string; error?: string }>;
+  },
+  notifyVoiceRecordError: (message: string) => {
+    ipcRenderer.send('voice-record-error', message);
+  },
+  // Channels a build tier adds (tiers/ipc.ts). Typed over interfaces the tier's own files
+  // augment, so a stripped build has no channel names and a leftover caller fails tsc.
+  tierInvoke: <C extends TierInvokeChannel>(channel: C, ...args: TierInvokeArgs<C>): Promise<TierInvokeResult<C>> => {
+    return ipcRenderer.invoke(channel, ...args) as Promise<TierInvokeResult<C>>;
+  },
+  tierOn: <C extends TierEventChannel>(
+    channel: C,
+    callback: (event: IpcRendererEvent, payload: TierEventChannels[C]) => void,
+  ) => {
+    const listener = (event: IpcRendererEvent, payload: TierEventChannels[C]) => {
+      callback(event, payload);
+    };
+    ipcRenderer.on(channel, listener);
+
+    return () => ipcRenderer.removeListener(channel, listener);
   },
   setAmplify: async (key: string, value: string): Promise<unknown> => {
     return ipcRenderer.invoke('set-amplify', key, value);

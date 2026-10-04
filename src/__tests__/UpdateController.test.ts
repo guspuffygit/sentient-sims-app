@@ -9,6 +9,10 @@ vi.mock('main/sentient-sims/util/gameProcess', () => gameProcess);
 
 const notify = vi.hoisted(() => ({
   sendPopUpNotification: vi.fn(),
+  // Read by ApiContext when it builds the scene playback registry
+  notifySceneStop: vi.fn(),
+  sendSceneEndedToMod: vi.fn(),
+  setSceneMemoryObserver: vi.fn(),
 }));
 vi.mock('main/sentient-sims/util/notifyRenderer', () => notify);
 

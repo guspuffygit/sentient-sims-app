@@ -5,6 +5,9 @@ import log from 'electron-log';
 // Pure check — installing is ModUpdateProvider's job. This used to also kick off
 // the install, so every mounted version checker started its own concurrent
 // download and the racing writes corrupted the zip.
+// It runs unprompted on every mount of UpdateComponent (the home page), so installing
+// here also overwrote sentient-sims.package on app start and left the "Update now"
+// button disabled.
 export async function isNewVersionAvailable(currentVersionId: string, type = 'main'): Promise<boolean> {
   log.debug(`current version: ${currentVersionId}`);
   try {

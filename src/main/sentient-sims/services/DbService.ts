@@ -125,9 +125,20 @@ export class DbService {
 
     this.databaseSession = databaseSession;
 
+    // The AI exchange log is persisted in this save (F4), so its ids have to continue above
+    // the rows already stored there before anything new is recorded against it.
+    this.ctx.aiExchangeLog.onDatabaseLoaded();
+
+    // The build tiers' own per-save work (autonomy: the graded outcomes' bounding pass)
+    for (const tier of this.ctx.tiers) {
+      tier.onDatabaseLoaded?.(this.ctx);
+    }
+
     // Loading a save jumps the game state, so any in-progress scene no longer describes reality.
     this.ctx.generationQueue.flushToFallback();
     this.ctx.sceneService.reset();
+    // ...including one mid-playback: its sims belong to the world that was just left
+    this.ctx.scenePlayback.stopAll('zone_unload');
 
     // The mod caches sim descriptions in memory keyed by sim_id and only ever
     // drops that cache on an explicit CLEAR_SIM_CACHE message. Loading a
@@ -260,6 +271,7 @@ export class DbService {
 
     this.ctx.generationQueue.flushToFallback();
     this.ctx.sceneService.reset();
+    this.ctx.scenePlayback.stopAll('zone_unload');
 
     // Cleanup unsaved databases
     this.ctx.directory.listSentientSimsDbUnsaved().forEach((unsavedDb) => {
@@ -274,6 +286,10 @@ export class DbService {
         wnd.webContents.send('on-database-unloaded');
       }
     });
+  }
+
+  isLoaded(): boolean {
+    return Boolean(this.db);
   }
 
   getDb(saveGame?: SaveGame) {
