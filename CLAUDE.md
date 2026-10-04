@@ -17,6 +17,23 @@ setup in vitest.setup.ts). This is required because the native better-sqlite3 ad
 not system Node's. Vitest runs files serially (fileParallelism: false) to avoid Express port collisions.
 Integration tests (.it.test.ts) require OPENAI_KEY env var; the AWS-backed tests in Api.test.ts need AWS_PROFILE=sentientsims.
 
+Build tiers (release 4.5): this tree is the CORE build, one of three the same codebase produces (core
+= the public release; a stream build and the loose dev tree add layers this tree does not carry).
+tiers.json lists the paths those layers would add. Core code reaches layer code ONLY through
+src/main/sentient-sims/tiers/: the ApiContext.ext capability slots and the TierRegistration hooks
+(construct, routes, ipc, start, onSettingChanged, onDatabaseLoaded, onSceneClosed, onModMessage,
+onMemoryUpserted, shutdown), every slot empty here (CoreWithoutTiers.test.ts). The renderer asks
+src/renderer/tiers/merge.ts for tier routes, nav, settings tabs/rows. tiers/index.ts and renderer
+tiers/index.tsx are GENERATED (scripts/gen-tier-index.ts --tier core; Tiers.test.ts pins them); src/
+never imports tiers.json. IPC a layer adds goes through tierInvoke/tierOn over interfaces the layer's
+own file augments (tiers/ipc.ts). `bash scripts/strip-check.sh core` re-checks the tree (worktree of
+HEAD: strip, tsc, unit tests, electron-vite build, scripts/verify-build.ts reads the source maps and
+the tier stamp); it skips Api.test.ts, whose update and interaction tests need AWS and OpenAI
+credentials (test.yml runs them with secrets). The 4.1.0 cognition plumbing (CognitionController,
+ActionDispatcherService, ActionIntent, formatPerception and the /cognition/* routes in api.ts) is
+core; a layer may hand core subclass instances through ctx.ext.cognitionController /
+ctx.ext.actionDispatcher, so those routes serve them without being bound twice.
+
 Architecture:
 
   Main process (src/main/main.ts) creates the BrowserWindow, starts an Express HTTP server on port 25148 (tests use 25198), and sets up WebSocket servers (mod 25145, renderer 25146). The Sims 4 mod communicates with this Express API.
@@ -33,6 +50,7 @@ Backend (src/main/sentient-sims/):
     GenerationService           - Interface implemented by each AI provider
     ProviderConfigService       - Resolves named provider configs (AIProviderConfig: provider + model) with a default config and per-action overrides; legacy aiApiType stays two-way synced with the default config via SettingsService hooks
     PromptRequestBuilderService - Builds prompts from game state, memories, interaction context
+    PlayerConversationService   - The thread between the player (chat window, voice persona) and a sim: each reply sees the exchange so far, and the thread closes when the sim has said their piece, on idle, or when the game stops the scene
     SettingsService             - Persists user settings via electron-store
     DirectoryService            - Manages Sims 4 mod/save file paths
     DbService                   - SQLite database via better-sqlite3
@@ -46,6 +64,20 @@ Frontend (src/renderer/):
   clients/     - HTTP client wrappers (at src/main/sentient-sims/clients/) for the local Express API
   providers/   - React context providers
   settings/    - Settings UI components
+
+Player-facing replies (2026-09-21): a directed scene driven by a playerLine (chat window, voice/conscience)
+is `playerFacing` in AIService.runDirectedGeneration — full-length straight answers (pipeline/prompts/scene.ts
+playerFacing branch, playerReplyMaxTokens), the sim's live <STATUS>/<TODAYS_PLAN> block (util/formatSelfStatus)
+and the conversation thread as context (PlayerConversationService). The scorer's action verdict is offered to
+a layer through ctx.ext (actOnConversation); with no layer it is dropped. Long replies air in sentence chunks
+(util/airingChunks, `continues` on DialogueLine → 150 ms gap, mouth stays open in the mod). Sim-to-sim scenes
+keep the short-line rules.
+
+Mod log lines (2026-09-22): every `log` message from the mod is appended to Mods/sentient-sims/logs.txt under
+modsDirectory (util/format formatLog, timestamps in UTC) and, at INFO and above, mirrored into electron-log's
+main.log as `[Mod] <LEVEL> <message>` (util/modLogMirror), so the mod's game-thread stall watchdog lines
+(`game thread stall: ...`, `game thread slow ...`) sit next to [Scene]/PUSHDIAG with local timestamps. DEBUG never
+reaches main.log. Test: ModLogMirror.test.ts.
 
 IPC: ipcHandlers.ts registers Electron IPC handlers (dialog, settings, clipboard, navigation). Renderer uses window.electron.ipcRenderer for direct main process calls, and HTTP clients for Express API calls.
 

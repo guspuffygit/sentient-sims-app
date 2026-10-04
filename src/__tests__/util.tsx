@@ -4,6 +4,7 @@ import { SettingsService, defaultStore } from 'main/sentient-sims/services/Setti
 import path from 'path';
 import os from 'os';
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
+import type { TierRegistration } from 'main/sentient-sims/tiers/types';
 
 export function randomString() {
   return Math.random().toString(36).substring(2, 12);
@@ -35,6 +36,8 @@ export interface MockApiContextParams {
   getAssetPath?: (...paths: string[]) => string;
   settingsService?: SettingsService;
   directoryService?: DirectoryService;
+  // The build tiers to run; [] is the core build. Default: the generated list (dev).
+  tiers?: TierRegistration[];
 }
 
 export function mockApiContext(params?: MockApiContextParams): ApiContext {
@@ -49,5 +52,6 @@ export function mockApiContext(params?: MockApiContextParams): ApiContext {
     settingsService: params?.settingsService ?? settingsService,
     directoryService: params?.directoryService ?? directoryService,
     appVersion: '1.0.0',
+    tiers: params?.tiers,
   });
 }
