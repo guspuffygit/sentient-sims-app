@@ -361,6 +361,31 @@ describe('Output', () => {
       expect(lines[1].voiceId).toBeUndefined();
     });
 
+    it('leaves an ambiguous first name uncast rather than binding the first sim', () => {
+      const collidingSims: SentientSim[] = [
+        { ...sims[0], name: 'Lillian Vale', sim_id: '10' },
+        { ...sims[0], name: 'Lillie Cason', sim_id: '11' },
+        { ...sims[0], name: 'Lillie Bramble', sim_id: '12' },
+      ];
+      const lines = castVoicesForLines(
+        [
+          { speaker: 'Lillie', text: 'Ambiguous first name.' },
+          { speaker: 'Lillie Cason', text: 'Exact full name wins.' },
+          { speaker: 'Lillian', text: 'Unambiguous first name.' },
+        ],
+        collidingSims,
+        VoiceType.ElevenLabs,
+        new Map([
+          ['10', 'vale-voice'],
+          ['11', 'cason-voice'],
+          ['12', 'bramble-voice'],
+        ]),
+      );
+      expect(lines[0].voiceId).toBeUndefined();
+      expect(lines[1].voiceId).toEqual('cason-voice');
+      expect(lines[2].voiceId).toEqual('vale-voice');
+    });
+
     it('casts kokoro blends when the kokoro voice type is active', () => {
       const lines = castVoicesForLines(
         [{ speaker: 'Ricky Rickerson', text: 'Blended voice.' }],

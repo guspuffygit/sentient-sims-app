@@ -7,6 +7,7 @@ import {
   defaultMythoMaxSystemPrompt,
   defaultSystemPrompt,
   defaultWantsSystemPrompt,
+  defaultWickedWhimsSceneSystemPrompt,
 } from './constants';
 import { ApiType } from './models/ApiType';
 import { SSEventType } from './models/InteractionEvents';
@@ -21,7 +22,9 @@ export function getSystemPrompt(eventType: SSEventType, apiType: ApiType, direct
   }
 
   if (eventType === SSEventType.WICKED_WHIMS) {
-    return defaultMythoMaxNsfwSystemPrompt;
+    // Classic playback airs one Narrator utterance, so prose fits there; directed playback
+    // parses Name: "line" rows and needs the prompt to ask for them
+    return directedScenes ? defaultWickedWhimsSceneSystemPrompt : defaultMythoMaxNsfwSystemPrompt;
   }
 
   if (apiType === ApiType.OpenAI) {

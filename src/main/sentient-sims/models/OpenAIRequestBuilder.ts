@@ -1,4 +1,6 @@
+import log from 'electron-log';
 import { TokenCounter } from 'main/sentient-sims/tokens/TokenCounter';
+import { truncateToTokens } from '../util/tokenTruncate';
 import { OpenAICompatibleRequest } from './OpenAICompatibleRequest';
 import { ChatCompletionMessageRole } from './ChatCompletionMessageRole';
 import { OpenAIMessage } from './OpenAIMessage';
@@ -65,6 +67,12 @@ export type BuffDescriptionRequest = {
   mood: string;
   messages: string[];
 };
+
+// A one-shot's user text IS the payload — a scene transcript, a state report, a line to
+// review. Dropping it leaves the model with a system prompt and nothing to work on, so an
+// oversized payload is truncated rather than discarded, and never below this floor even when
+// the system prompt alone already fills the context window.
+export const MIN_ONE_SHOT_USER_TOKENS = 256;
 
 export class OpenAIRequestBuilder {
   private readonly tokenCounter: TokenCounter;
@@ -159,9 +167,7 @@ export class OpenAIRequestBuilder {
     };
 
     const messages: OpenAIMessage[] = [];
-    const memoriesToInsert: string[] = [];
-    let tokenCount = systemMessage.tokens;
-    let userInputCount = 0;
+    let reservedTokens = systemMessage.tokens;
 
     if (oneShotRequest.assistantPreResponse) {
       const assistantMessage: OpenAIMessage = {
@@ -170,36 +176,82 @@ export class OpenAIRequestBuilder {
         tokens: this.tokenCounter.countTokens(oneShotRequest.assistantPreResponse),
       };
       messages.push(assistantMessage);
-      tokenCount += assistantMessage.tokens;
+      reservedTokens += assistantMessage.tokens;
     }
 
-    for (let i = oneShotRequest.messages.length - 1; i >= 0; i--) {
-      const message = `${oneShotRequest.messages[i]}\n`;
+    // The pre-response is instruction scaffolding ("### Input:", the buff brief), never the
+    // payload, so it is charged against the budget but never truncated.
+    if (oneShotRequest.userPreResponse) {
+      reservedTokens += this.tokenCounter.countTokens(oneShotRequest.userPreResponse);
+    }
 
-      const newTokens = this.tokenCounter.countTokens(message);
-      tokenCount += newTokens;
-      userInputCount += newTokens;
-      if (tokenCount > oneShotRequest.maxTokens) {
+    const availableTokens = Math.max(oneShotRequest.maxTokens - reservedTokens, MIN_ONE_SHOT_USER_TOKENS);
+
+    const messageTexts = oneShotRequest.messages.map((message) => `${message}\n`);
+    const messageTokens = messageTexts.map((text) => this.tokenCounter.countTokens(text));
+    const requestedUserTokens = messageTokens.reduce((total, tokens) => total + tokens, 0);
+
+    const memoriesToInsert: string[] = [];
+    let userInputCount = 0;
+    for (let i = messageTexts.length - 1; i >= 0; i--) {
+      const remaining = availableTokens - userInputCount;
+      if (remaining <= 0) {
         break;
       }
 
-      memoriesToInsert.unshift(message);
+      if (messageTokens[i] <= remaining) {
+        userInputCount += messageTokens[i];
+        memoriesToInsert.unshift(messageTexts[i]);
+        continue;
+      }
+
+      // Keep the tail: in a one-shot the end of the text is the part being acted on (the
+      // scene action after the "previously" block, the newest lines of a transcript).
+      const truncated = truncateToTokens(messageTexts[i], remaining, this.tokenCounter, 'tail');
+      if (truncated !== '') {
+        userInputCount += this.tokenCounter.countTokens(truncated);
+        memoriesToInsert.unshift(truncated);
+      }
+      // Nothing older can fit once this one had to be cut.
+      break;
     }
 
     if (oneShotRequest.userPreResponse) {
       memoriesToInsert.unshift(oneShotRequest.userPreResponse);
     }
 
+    const userContent = memoriesToInsert.join('').trimEnd();
     const userInput: OpenAIMessage = {
       role: 'user',
-      content: memoriesToInsert.join('').trimEnd(),
-      tokens: userInputCount,
+      content: userContent,
+      tokens: this.tokenCounter.countTokens(userContent),
     };
 
-    return {
+    const request: OpenAICompatibleRequest = {
       messages: [systemMessage, userInput, ...messages],
       maxResponseTokens: oneShotRequest.maxResponseTokens,
       guidedChoice: oneShotRequest.guidedChoice,
     };
+
+    // Overflow is flagged whenever the request that goes out is over budget, not only when
+    // user text was cut: a system prompt that alone fills the window (the director briefing
+    // carries the whole scene context there) still leaves the floor's worth of user text in
+    // place with nothing dropped, and that request is just as oversized.
+    const droppedTokens = requestedUserTokens - userInputCount;
+    const sentTokens = reservedTokens + userInputCount;
+    if (droppedTokens > 0 || sentTokens > oneShotRequest.maxTokens) {
+      request.promptOverflow = {
+        budgetTokens: oneShotRequest.maxTokens,
+        requestedTokens: reservedTokens + requestedUserTokens,
+        droppedTokens,
+      };
+      log.warn(
+        `prompt_overflow: one-shot prompt needed ${reservedTokens + requestedUserTokens} tokens against a ` +
+          `${oneShotRequest.maxTokens} budget; truncated ${droppedTokens} tokens off the user message, ` +
+          `sending ${sentTokens}`,
+      );
+    }
+
+    return request;
   }
 }

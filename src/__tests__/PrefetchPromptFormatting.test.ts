@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { PromptRequestBuilderService } from 'main/sentient-sims/services/PromptRequestBuilderService';
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
-import { formatPreviouslyInScene, toPrimaryInteractionEvent } from 'main/sentient-sims/services/AIService';
+import {
+  MAX_SCENE_PERFORMERS,
+  formatPreviouslyInScene,
+  toPrimaryInteractionEvent,
+} from 'main/sentient-sims/services/AIService';
 import { InteractionEvent } from 'main/sentient-sims/models/InteractionEvents';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
 import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
@@ -35,66 +39,7 @@ describe('prefetch prompt formatting', () => {
     ).toBe('Alex: Hi.\n\n(Morgan waves)\nMorgan: Hey.');
   });
 
-  it('narrows a group interaction to the initiator plus one rotating partner', () => {
-    const event = {
-      sentient_sims: [
-        { sim_id: '1', name: 'Initiator' },
-        { sim_id: '2', name: 'Target' },
-        { sim_id: '3', name: 'Bystander' },
-      ],
-    } as unknown as InteractionEvent;
-
-    for (let i = 0; i < 10; i += 1) {
-      const primaryEvent = toPrimaryInteractionEvent(event);
-      const names = primaryEvent.sentient_sims.map((sim) => sim.name);
-      expect(names).toHaveLength(2);
-      expect(names[0]).toBe('Initiator');
-      expect(['Target', 'Bystander']).toContain(names[1]);
-    }
-    expect(event.sentient_sims).toHaveLength(3);
-  });
-
-  it('rotates through different partners across narrowings', () => {
-    const event = {
-      sentient_sims: [
-        { sim_id: '1', name: 'Initiator' },
-        { sim_id: '2', name: 'Target' },
-        { sim_id: '3', name: 'Bystander' },
-      ],
-    } as unknown as InteractionEvent;
-
-    const partners = new Set<string>();
-    for (let i = 0; i < 200 && partners.size < 2; i += 1) {
-      partners.add(toPrimaryInteractionEvent(event).sentient_sims[1].name);
-    }
-    expect(partners).toEqual(new Set(['Target', 'Bystander']));
-  });
-
-  it('favors the player sim as partner when an NPC initiates a group beat', () => {
-    const event = {
-      sentient_sims: [
-        { sim_id: '1', name: 'NpcActor' },
-        { sim_id: '2', name: 'OtherNpc' },
-        { sim_id: '3', name: 'Player', is_player_sim: true },
-      ],
-    } as unknown as InteractionEvent;
-
-    let playerPicks = 0;
-    let npcPicks = 0;
-    for (let i = 0; i < 400; i += 1) {
-      const partner = toPrimaryInteractionEvent(event).sentient_sims[1];
-      if (partner.name === 'Player') {
-        playerPicks += 1;
-      } else {
-        npcPicks += 1;
-      }
-    }
-    // Weighted pick lands on the player ~80% of the time; NPC-NPC still occurs
-    expect(playerPicks).toBeGreaterThan(npcPicks);
-    expect(npcPicks).toBeGreaterThan(0);
-  });
-
-  it('trims relationship bits to the narrowed pair', () => {
+  it('keeps every member of a small group as a performer', () => {
     const event = {
       sentient_sims: [
         { sim_id: '1', name: 'Initiator' },
@@ -104,19 +49,60 @@ describe('prefetch prompt formatting', () => {
       relationships: {
         relationship_bits: [
           { sim_one_id: '1', sim_two_id: '2', name: 'has_met' },
-          { sim_one_id: '1', sim_two_id: '3', name: 'has_met' },
           { sim_one_id: '2', sim_two_id: '3', name: 'romantic-Married' },
         ],
       },
     } as unknown as InteractionEvent;
 
     const primaryEvent = toPrimaryInteractionEvent(event);
-    const pairIds = new Set(primaryEvent.sentient_sims.map((sim) => sim.sim_id));
+    expect(primaryEvent).toBe(event);
+    expect(primaryEvent.sentient_sims.map((sim) => sim.name)).toEqual(['Initiator', 'Target', 'Bystander']);
+    expect(primaryEvent.relationships?.relationship_bits).toHaveLength(2);
+  });
+
+  const bigGroup = (playerIndex?: number) =>
+    ({
+      sentient_sims: Array.from({ length: MAX_SCENE_PERFORMERS + 3 }, (_, i) => ({
+        sim_id: String(i + 1),
+        name: `Sim${i + 1}`,
+        is_player_sim: i === playerIndex,
+      })),
+      relationships: {
+        relationship_bits: [
+          { sim_one_id: '1', sim_two_id: '2', name: 'has_met' },
+          { sim_one_id: '1', sim_two_id: String(MAX_SCENE_PERFORMERS + 3), name: 'has_met' },
+        ],
+      },
+    }) as unknown as InteractionEvent;
+
+  it('caps an oversized group at the performer limit, actor first', () => {
+    for (let i = 0; i < 10; i += 1) {
+      const primaryEvent = toPrimaryInteractionEvent(bigGroup());
+      const names = primaryEvent.sentient_sims.map((sim) => sim.name);
+      expect(names).toHaveLength(MAX_SCENE_PERFORMERS);
+      expect(names[0]).toBe('Sim1');
+      expect(new Set(names).size).toBe(MAX_SCENE_PERFORMERS);
+    }
+  });
+
+  it('always keeps the player sim when capping an NPC-initiated group', () => {
+    for (let i = 0; i < 20; i += 1) {
+      const primaryEvent = toPrimaryInteractionEvent(bigGroup(MAX_SCENE_PERFORMERS + 2));
+      const names = primaryEvent.sentient_sims.map((sim) => sim.name);
+      expect(names[0]).toBe('Sim1');
+      expect(names).toContain(`Sim${MAX_SCENE_PERFORMERS + 3}`);
+    }
+  });
+
+  it('trims relationship bits to the kept performers when capping', () => {
+    const event = bigGroup();
+    const primaryEvent = toPrimaryInteractionEvent(event);
+    const keptIds = new Set(primaryEvent.sentient_sims.map((sim) => sim.sim_id));
     primaryEvent.relationships?.relationship_bits?.forEach((bit) => {
-      expect(pairIds.has(bit.sim_one_id)).toBe(true);
-      expect(pairIds.has(bit.sim_two_id)).toBe(true);
+      expect(keptIds.has(bit.sim_one_id)).toBe(true);
+      expect(keptIds.has(bit.sim_two_id)).toBe(true);
     });
-    expect(event.relationships?.relationship_bits).toHaveLength(3);
+    expect(event.relationships?.relationship_bits).toHaveLength(2);
   });
 
   it('formatSims skips relationship bits whose sims are not in the event', () => {
@@ -124,6 +110,8 @@ describe('prefetch prompt formatting', () => {
       participantRepository: {
         getParticipants: () => [],
       },
+      // V-6: formatSims offers every undescribed sim to the default-description generator
+      defaultDescriptions: { considerSim: () => undefined },
       settings: { directedScenesEnabled: true },
     } as unknown as ApiContext;
     const builder = new PromptRequestBuilderService(ctx);

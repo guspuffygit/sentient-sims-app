@@ -17,7 +17,26 @@ export enum AIActionType {
   DIRECTED_SCENE_DIRECTOR = 'directed_scene_director',
   DIRECTED_SCENE_ACTOR = 'directed_scene_actor',
   DIRECTED_SCENE_REVIEWER = 'directed_scene_reviewer',
+  DIRECTED_SCENE_SCORES = 'directed_scene_scores',
   REFLECTION = 'reflection',
+  // Block 9 tick monologue + scores — route to a cheap/fast provider config
+  COGNITION = 'cognition',
+  // Full Autonomy Action Scenes (options/choice/review) — fired only over threshold
+  ACTION_SCENE = 'action_scene',
+  // Nightly (or lazy mid-day) daily plan: goals from the game pool, persona, loadout
+  DAILY_PLAN = 'daily_plan',
+  // V-8: map the player's spoken order onto the sim's offered vocabulary
+  VOICE_COMMAND = 'voice_command',
+  // V-6: fill a missing sim/location description from live facts
+  DESCRIPTION_DEFAULT = 'description_default',
+  // Ask actions: a Voice/Twitch line may be a request for the sim to DO something —
+  // triage talk-vs-do, match onto the full offered vocabulary, then the sim decides
+  ASK_TRIAGE = 'ask_triage',
+  ASK_ACTION_MATCH = 'ask_action_match',
+  ASK_DECISION = 'ask_decision',
+  // The salience tag written onto every stored memory. It had no action type of its own,
+  // so it fell into the GENERATE slot and was routed by whatever the chat tab was set to.
+  MEMORY_IMPORTANCE = 'memory_importance',
 }
 
 export const AllAIActionTypes: AIActionType[] = [
@@ -34,7 +53,29 @@ export const AllAIActionTypes: AIActionType[] = [
   AIActionType.DIRECTED_SCENE_DIRECTOR,
   AIActionType.DIRECTED_SCENE_ACTOR,
   AIActionType.DIRECTED_SCENE_REVIEWER,
+  AIActionType.DIRECTED_SCENE_SCORES,
   AIActionType.REFLECTION,
+  AIActionType.COGNITION,
+  AIActionType.ACTION_SCENE,
+  AIActionType.DAILY_PLAN,
+  AIActionType.VOICE_COMMAND,
+  AIActionType.DESCRIPTION_DEFAULT,
+  AIActionType.ASK_TRIAGE,
+  AIActionType.ASK_ACTION_MATCH,
+  AIActionType.ASK_DECISION,
+  AIActionType.MEMORY_IMPORTANCE,
+];
+
+// The stages only the autonomy tier runs (release 4.5). The enum and the settings stay whole
+// in every build; the provider-override table lists these only when a tier offers them.
+export const TIER_ACTION_TYPES: AIActionType[] = [
+  AIActionType.COGNITION,
+  AIActionType.ACTION_SCENE,
+  AIActionType.DAILY_PLAN,
+  AIActionType.VOICE_COMMAND,
+  AIActionType.ASK_TRIAGE,
+  AIActionType.ASK_ACTION_MATCH,
+  AIActionType.ASK_DECISION,
 ];
 
 // configId per action; missing key means "use the default provider config"
@@ -68,8 +109,28 @@ export function AIActionTypeName(actionType: AIActionType): string {
       return 'Directed Scene: Actor';
     case AIActionType.DIRECTED_SCENE_REVIEWER:
       return 'Directed Scene: Reviewer';
+    case AIActionType.DIRECTED_SCENE_SCORES:
+      return 'Directed Scene: Scores';
     case AIActionType.REFLECTION:
       return 'Scene Reflection';
+    case AIActionType.COGNITION:
+      return 'Cognition Tick';
+    case AIActionType.ACTION_SCENE:
+      return 'Action Scene';
+    case AIActionType.DAILY_PLAN:
+      return 'Daily Plan';
+    case AIActionType.VOICE_COMMAND:
+      return 'Voice Command';
+    case AIActionType.DESCRIPTION_DEFAULT:
+      return 'Default Description';
+    case AIActionType.ASK_TRIAGE:
+      return 'Ask: Triage';
+    case AIActionType.ASK_ACTION_MATCH:
+      return 'Ask: Action Match';
+    case AIActionType.ASK_DECISION:
+      return 'Ask: Decision';
+    case AIActionType.MEMORY_IMPORTANCE:
+      return 'Memory Importance';
     default:
       return actionType;
   }
@@ -103,8 +164,28 @@ export function AIActionTypeDescription(actionType: AIActionType): string {
       return 'Directed scene dialogue lines performed by each actor';
     case AIActionType.DIRECTED_SCENE_REVIEWER:
       return 'Directed scene final review and cleanup pass';
+    case AIActionType.DIRECTED_SCENE_SCORES:
+      return 'Per-character memory and action scores after each scene (cheap model recommended)';
     case AIActionType.REFLECTION:
       return 'End-of-scene reflection memories';
+    case AIActionType.COGNITION:
+      return 'Autonomous per-sim tick monologue and scoring (cheap model recommended)';
+    case AIActionType.ACTION_SCENE:
+      return 'Choose-your-own-adventure action beats when a sim wants a change of course';
+    case AIActionType.DAILY_PLAN:
+      return 'Nightly goals, persona and action loadout per sim';
+    case AIActionType.VOICE_COMMAND:
+      return "Maps a spoken order onto the sim's offered actions (cheap model recommended)";
+    case AIActionType.DESCRIPTION_DEFAULT:
+      return 'Writes a first description for sims and locations that have none';
+    case AIActionType.ASK_TRIAGE:
+      return 'Decides whether a Voice/Chat line is talk or a request to act (cheap model recommended)';
+    case AIActionType.ASK_ACTION_MATCH:
+      return "Matches a Voice/Chat request onto the sim's full offered vocabulary (cheap model recommended)";
+    case AIActionType.ASK_DECISION:
+      return 'The sim decides in character whether to do what was asked, and why';
+    case AIActionType.MEMORY_IMPORTANCE:
+      return 'Rates how memorable each stored memory is, for retrieval (cheap model recommended)';
     default:
       return '';
   }

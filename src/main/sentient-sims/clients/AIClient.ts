@@ -1,4 +1,5 @@
 import { SentientSimsAIError } from '../exceptions/SentientSimsAIError';
+import { AIExchangeDetail, AIExchangeSummary } from '../models/AIExchangeLog';
 import { AIModel } from '../models/AIModel';
 import { ApiType } from '../models/ApiType';
 import { InteractionEventResult } from '../models/InteractionEventResult';
@@ -27,6 +28,29 @@ export class AIClient extends ApiClient {
       request,
     );
     return response.data;
+  }
+
+  /**
+   * GET /ai/exchanges
+   * Every AI provider call this app session made, newest first (dev mode).
+   */
+  async getExchanges(limit?: number): Promise<AIExchangeSummary[]> {
+    const query = limit ? `?${new URLSearchParams({ limit: String(limit) }).toString()}` : '';
+    const response = await axiosClient.get<AIExchangeSummary[]>(`${this.apiUrl}/ai/exchanges${query}`);
+    return response.data;
+  }
+
+  /**
+   * GET /ai/exchanges/:id
+   * One call's full prompt and response.
+   */
+  async getExchange(exchangeId: number): Promise<AIExchangeDetail | undefined> {
+    try {
+      const response = await axiosClient.get<AIExchangeDetail>(`${this.apiUrl}/ai/exchanges/${exchangeId}`);
+      return response.data;
+    } catch {
+      return undefined;
+    }
   }
 
   async getModels(apiType?: ApiType): Promise<AIModel[]> {

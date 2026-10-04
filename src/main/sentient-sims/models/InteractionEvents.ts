@@ -80,7 +80,7 @@ export type SSRelationshipBit = {
   name: string;
   directionality?: SSRelationshipDirection;
   group_id?: SSRelationshipBitType;
-  timout?: number;
+  timeout?: number;
   priority?: number;
   persisted?: boolean;
   is_collection?: boolean;
@@ -121,7 +121,17 @@ export type ChatContinueInteractionEvent = SSEvent;
 
 export type InteractionEvent = SSEvent & {
   interaction_name: string;
+  // The interaction's pie-menu label as the player reads it ("Talk about Recent Studies"),
+  // when the mod could read the game's string tables (mod 2026-09-19+)
+  interaction_display_name?: string;
+  // The same label with this save's sim names put back as {actor.N} ("Play with
+  // {actor.1}"): the form that is safe as text the player may publish to everyone
+  interaction_display_name_template?: string;
   testing_action?: string;
+  // N-1 (mod 2026-08-15+): whitelist/heuristic category and valence of the interaction,
+  // so a yell is framed as a yell before a word is generated. Absent on older mods.
+  interaction_category?: string;
+  valence?: 'positive' | 'negative' | 'romance' | 'neutral';
 };
 
 export type InteractionMappingEvent = InteractionEvent & {
