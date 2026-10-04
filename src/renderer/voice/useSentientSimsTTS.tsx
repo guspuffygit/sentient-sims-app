@@ -5,7 +5,12 @@ import axios from 'axios';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting from 'renderer/hooks/useSetting';
-import { defaultSentientSimsAIHost, sceneLineGapMs, sceneLineReadingHoldMs } from 'main/sentient-sims/constants';
+import {
+  defaultSentientSimsAIHost,
+  sceneChunkGapMs,
+  sceneLineGapMs,
+  sceneLineReadingHoldMs,
+} from 'main/sentient-sims/constants';
 import {
   defaultSentientSimsAITTSSettings,
   SentientSimsAITTSSettings,
@@ -16,6 +21,7 @@ import { SentenceTokenizeRequest } from 'main/sentient-sims/models/SentenceToken
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
 import { assignVoicesToSpeakers } from 'main/sentient-sims/formatter/VoiceAssignment';
 import { AudioPlaybackHandle, playAudioUrl } from './audioPlayback';
+import { pacedDelay } from './playbackClock';
 import { TTSHook } from './TTSHook';
 
 type QueuedSpeech = { text: string; voice: string[] };
@@ -242,7 +248,12 @@ export function useSentientSimsTTS(): TTSHook {
   );
 
   const speakLines = useCallback(
-    async (lines: DialogueLine[], onLineStart?: (line: DialogueLine) => void): Promise<void> => {
+    async (
+      lines: DialogueLine[],
+      onLineStart?: (line: DialogueLine, voiced: boolean) => void,
+      onLineEnd?: (line: DialogueLine) => void,
+      shouldContinue?: () => boolean,
+    ): Promise<void> => {
       if (lines.length === 0) return;
 
       const pool = sentientSimsAITTSSettings.value.voice;
@@ -284,6 +295,9 @@ export function useSentientSimsTTS(): TTSHook {
       try {
         for (let i = 0; i < lines.length; i += 1) {
           if (speakSessionRef.current !== session) break;
+          // The conversation ended while the previous line was playing; that line got
+          // to finish, this one never starts
+          if (shouldContinue && !shouldContinue()) break;
           startFetch(i + 1);
           const audioUrl = (await audioPromises[i]) ?? null;
           if (speakSessionRef.current !== session) {
@@ -291,30 +305,32 @@ export function useSentientSimsTTS(): TTSHook {
             break;
           }
 
-          onLineStart?.(lines[i]);
-          if (audioUrl) {
-            try {
-              const playback = await playAudioUrl(audioUrl, aiSettings.ttsVolume);
-              currentPlaybackRef.current = playback;
-              await playback.finished;
-            } catch (err) {
-              log.error(`Error playing audio: ${err instanceof Error ? `${err.name}: ${err.message}` : String(err)}`);
-              setError('An error occurred during audio playback.');
-            } finally {
-              currentPlaybackRef.current = null;
-              URL.revokeObjectURL(audioUrl);
+          onLineStart?.(lines[i], audioUrl !== null);
+          try {
+            if (audioUrl) {
+              try {
+                const playback = await playAudioUrl(audioUrl, aiSettings.ttsVolume);
+                currentPlaybackRef.current = playback;
+                await playback.finished;
+              } catch (err) {
+                log.error(`Error playing audio: ${err instanceof Error ? `${err.name}: ${err.message}` : String(err)}`);
+                setError('An error occurred during audio playback.');
+              } finally {
+                currentPlaybackRef.current = null;
+                URL.revokeObjectURL(audioUrl);
+              }
+            } else {
+              // No audio to time the subtitle — hold for its reading time instead
+              // (paced: scales with game speed, freezes on a user pause — V-1)
+              await pacedDelay(sceneLineReadingHoldMs(lines[i].text));
             }
-          } else {
-            // No audio to time the subtitle — hold for its reading time instead
-            await new Promise((resolve) => {
-              setTimeout(resolve, sceneLineReadingHoldMs(lines[i].text));
-            });
+          } finally {
+            // Whatever ended the line (audio done, error, stop()), the mod hears it
+            onLineEnd?.(lines[i]);
           }
 
           if (i < lines.length - 1 && speakSessionRef.current === session) {
-            await new Promise((resolve) => {
-              setTimeout(resolve, sceneLineGapMs);
-            });
+            await pacedDelay(lines[i].continues ? sceneChunkGapMs : sceneLineGapMs);
           }
         }
       } finally {

@@ -28,7 +28,9 @@ export function assignVoicesToSpeakers(speakers: string[], pool: string[]): Map<
   }
 
   uniqueSpeakers.forEach((speaker) => {
-    const index = hashString(speaker) % pool.length;
+    // Hash without any delivery label ("Jasmine (to self)") so a labeled line keeps the
+    // same voice as the character's plain dialogue lines
+    const index = hashString(speaker.replace(/\s*\([^)]*\)\s*$/, '')) % pool.length;
     assignments.set(speaker, [pool[index]]);
   });
 

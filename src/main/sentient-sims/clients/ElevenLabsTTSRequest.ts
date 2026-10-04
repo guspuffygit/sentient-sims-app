@@ -19,8 +19,12 @@ export type ElevenLabsSpeechRequest = {
   };
 };
 
+// Both v3 models read inline audio tags; v3 Conversational is v3 tuned for realtime
 export function isElevenLabsV3(model: string): boolean {
-  return model === ElevenLabsSpeechModel.ELEVEN_V3.toString();
+  return (
+    model === ElevenLabsSpeechModel.ELEVEN_V3.toString() ||
+    model === ElevenLabsSpeechModel.ELEVEN_V3_CONVERSATIONAL.toString()
+  );
 }
 
 /**

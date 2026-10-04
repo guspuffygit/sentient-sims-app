@@ -2,13 +2,19 @@ import { useState, useCallback, useRef } from 'react';
 import log from 'electron-log';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { defaultElevenLabsEndpoint, sceneLineGapMs, sceneLineReadingHoldMs } from 'main/sentient-sims/constants';
+import {
+  defaultElevenLabsEndpoint,
+  sceneChunkGapMs,
+  sceneLineGapMs,
+  sceneLineReadingHoldMs,
+} from 'main/sentient-sims/constants';
 import useSetting from 'renderer/hooks/useSetting';
 import { defaultElevenLabsTTSSettings, ElevenLabsTTSSettings } from 'main/sentient-sims/models/ElevenLabsTTSSettings';
 import { buildElevenLabsSpeechRequest, elevenLabsLineText } from 'main/sentient-sims/clients/ElevenLabsTTSRequest';
 import { elevenLabsErrorMessage } from 'main/sentient-sims/clients/ElevenLabsError';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
 import { AudioPlaybackHandle, playAudioStream, playAudioUrl } from './audioPlayback';
+import { pacedDelay } from './playbackClock';
 import { TTSHook } from './TTSHook';
 
 export function useElevenLabsTTS(): TTSHook {
@@ -125,7 +131,12 @@ export function useElevenLabsTTS(): TTSHook {
   );
 
   const speakLines = useCallback(
-    async (lines: DialogueLine[], onLineStart?: (line: DialogueLine) => void): Promise<void> => {
+    async (
+      lines: DialogueLine[],
+      onLineStart?: (line: DialogueLine, voiced: boolean) => void,
+      onLineEnd?: (line: DialogueLine) => void,
+      shouldContinue?: () => boolean,
+    ): Promise<void> => {
       setError(undefined);
       playSessionRef.current += 1;
       const session = playSessionRef.current;
@@ -159,6 +170,9 @@ export function useElevenLabsTTS(): TTSHook {
 
       for (let i = 0; i < speakable.length; i += 1) {
         if (playSessionRef.current !== session) break;
+        // The conversation ended while the previous line was playing; that line got
+        // to finish, this one never starts
+        if (shouldContinue && !shouldContinue()) break;
         startFetch(i + 1);
 
         let played = false;
@@ -169,8 +183,12 @@ export function useElevenLabsTTS(): TTSHook {
               stream.cancel().catch(() => {});
               break;
             }
-            onLineStart?.(speakable[0]);
-            await playStream(stream);
+            onLineStart?.(speakable[0], true);
+            try {
+              await playStream(stream);
+            } finally {
+              onLineEnd?.(speakable[0]);
+            }
             played = true;
           } catch (err: any) {
             // Fall back to the buffered path below
@@ -188,27 +206,28 @@ export function useElevenLabsTTS(): TTSHook {
             break;
           }
 
-          onLineStart?.(speakable[i]);
-          if (audioUrl) {
-            try {
-              await playUrl(audioUrl);
-            } catch (err: any) {
-              const errorMessage = `TTS playback failed: ${err instanceof Error ? err.message : String(err)}`;
-              log.error(errorMessage);
-              setError(errorMessage);
+          onLineStart?.(speakable[i], audioUrl !== null);
+          try {
+            if (audioUrl) {
+              try {
+                await playUrl(audioUrl);
+              } catch (err: any) {
+                const errorMessage = `TTS playback failed: ${err instanceof Error ? err.message : String(err)}`;
+                log.error(errorMessage);
+                setError(errorMessage);
+              }
+            } else {
+              // No audio to time the subtitle — hold for its reading time instead
+              await pacedDelay(sceneLineReadingHoldMs(speakable[i].text));
             }
-          } else {
-            // No audio to time the subtitle — hold for its reading time instead
-            await new Promise((resolve) => {
-              setTimeout(resolve, sceneLineReadingHoldMs(speakable[i].text));
-            });
+          } finally {
+            // Whatever ended the line (audio done, error, stop()), the mod hears it
+            onLineEnd?.(speakable[i]);
           }
         }
 
         if (i < speakable.length - 1 && playSessionRef.current === session) {
-          await new Promise((resolve) => {
-            setTimeout(resolve, sceneLineGapMs);
-          });
+          await pacedDelay(speakable[i].continues ? sceneChunkGapMs : sceneLineGapMs);
         }
       }
 
