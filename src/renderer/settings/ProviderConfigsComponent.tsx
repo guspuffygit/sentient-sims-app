@@ -46,6 +46,7 @@ import {
   AIActionTypeDescription,
   AIActionTypeName,
   AllAIActionTypes,
+  TIER_ACTION_TYPES,
 } from 'main/sentient-sims/models/AIActionType';
 import { defaultImageModelFor, imageModelSuggestions } from 'main/sentient-sims/models/ImageGeneration';
 import { defaultEmbeddingModelFor, embeddingModelSuggestions } from 'main/sentient-sims/models/EmbeddingModels';
@@ -68,6 +69,7 @@ import { useAISettings } from '../providers/AISettingsProvider';
 import { useAuth } from '../providers/AuthProvider';
 import { ProviderConnectionPanel } from './ProviderConnectionPanel';
 import { ConnectionStatusChip } from './ProviderConnectionSettingsComponent';
+import { rendererTiers } from '../tiers/merge';
 
 export type ProviderCapability = 'text' | 'image' | 'embedding';
 
@@ -82,6 +84,11 @@ type CapabilityDefinition = {
   hasAutoRow: boolean;
   dialogNoun: string;
 };
+
+// Every action type, minus the tier-owned stages a stripped build does not run
+const OVERRIDE_ACTION_TYPES = AllAIActionTypes.filter(
+  (action) => !TIER_ACTION_TYPES.includes(action) || rendererTiers.overrideActionTypes.includes(action),
+);
 
 const CAPABILITIES: Record<ProviderCapability, CapabilityDefinition> = {
   text: {
@@ -623,7 +630,7 @@ export function ProviderConfigsComponent({
             <FormHelperText sx={{ marginBottom: 1 }}>
               Route specific AI actions to a different provider configuration than the default.
             </FormHelperText>
-            {AllAIActionTypes.map((action) => {
+            {OVERRIDE_ACTION_TYPES.map((action) => {
               const overrideId = overrides[action];
               const value = overrideId && configs.some((config) => config.id === overrideId) ? overrideId : '';
               return (

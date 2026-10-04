@@ -21,10 +21,22 @@ import { ProviderConfigsComponent } from './settings/ProviderConfigsComponent';
 import { ProviderConnectionSettingsComponent } from './settings/ProviderConnectionSettingsComponent';
 import LocalizationSettingsComponent from './settings/LocalizationSettingsComponent';
 import useSetting from './hooks/useSetting';
+import { rendererTiers } from './tiers/merge';
 
 enum SettingsTabSelectionValue {
   Settings = 'settings',
   Voice = 'voice',
+}
+
+// The core tabs, then the build tiers' (stream: Twitch)
+const SETTINGS_TABS: { value: string; label: string }[] = [
+  { value: SettingsTabSelectionValue.Settings, label: 'Settings' },
+  { value: SettingsTabSelectionValue.Voice, label: 'Voice' },
+  ...rendererTiers.settingsTabs.map(({ value, label }) => ({ value, label })),
+];
+
+function tierRows() {
+  return rendererTiers.settingsRows.map(({ id, Component }) => <Component key={id} />);
 }
 
 export default function SettingsPage() {
@@ -62,8 +74,8 @@ export default function SettingsPage() {
             }}
           >
             <TabList onChange={handleChange} aria-label="lab API tabs example">
-              {Object.entries(SettingsTabSelectionValue).map((selectionvalue) => (
-                <Tab key={selectionvalue[0]} label={selectionvalue[0]} value={selectionvalue[1]} />
+              {SETTINGS_TABS.map((tab) => (
+                <Tab key={tab.value} label={tab.label} value={tab.value} />
               ))}
             </TabList>
 
@@ -82,6 +94,7 @@ export default function SettingsPage() {
             <ModsDirectoryComponent />
             <GameAppPathComponent />
             <DirectedScenesSettingsComponent />
+            {tierRows()}
             <DebugLogsSettingsComponent />
             <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
             <Typography variant="h5">AI Providers</Typography>
@@ -109,6 +122,11 @@ export default function SettingsPage() {
           <TabPanel value={SettingsTabSelectionValue.Voice}>
             <VoiceSettingsComponent />
           </TabPanel>
+          {rendererTiers.settingsTabs.map(({ value, Component }) => (
+            <TabPanel key={value} value={value}>
+              <Component />
+            </TabPanel>
+          ))}
         </TabContext>
       </AppCard>
     </div>
