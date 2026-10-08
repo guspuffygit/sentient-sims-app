@@ -757,12 +757,13 @@ function AIProviderPage({ setPage }: PageProps) {
 
 function SentientSimsAISetupPage({ setPage }: PageProps) {
   const { aiStatus, aiApiTypeSetting } = useAISettings();
+  const { setSetting: setAiApiType } = aiApiTypeSetting;
   const { userAttributes } = useAuth();
   const patreonUser = new PatreonUser(userAttributes);
 
   useEffect(() => {
-    void aiApiTypeSetting.setSetting(ApiType.SentientSimsAI);
-  }, [aiApiTypeSetting]);
+    void setAiApiType(ApiType.SentientSimsAI);
+  }, [setAiApiType]);
 
   const notLoggedIn = (
     <>
@@ -864,10 +865,11 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
 
 function OpenAISetupPage({ setPage }: PageProps) {
   const { testAI, aiStatus, aiApiTypeSetting } = useAISettings();
+  const { setSetting: setAiApiType } = aiApiTypeSetting;
 
   useEffect(() => {
-    void aiApiTypeSetting.setSetting(ApiType.OpenAI);
-  }, [aiApiTypeSetting]);
+    void setAiApiType(ApiType.OpenAI);
+  }, [setAiApiType]);
 
   return (
     <WizardStep
@@ -983,10 +985,11 @@ function OpenAISetupPage({ setPage }: PageProps) {
 
 function GeminiSetupPage({ setPage }: PageProps) {
   const { testAI, aiStatus, aiApiTypeSetting } = useAISettings();
+  const { setSetting: setAiApiType } = aiApiTypeSetting;
 
   useEffect(() => {
-    void aiApiTypeSetting.setSetting(ApiType.Gemini);
-  }, [aiApiTypeSetting]);
+    void setAiApiType(ApiType.Gemini);
+  }, [setAiApiType]);
 
   return (
     <WizardStep
@@ -1066,6 +1069,7 @@ function GeminiSetupPage({ setPage }: PageProps) {
 
 function SelfHostedSetupPage({ setPage }: PageProps) {
   const { testAI, aiStatus, aiApiTypeSetting } = useAISettings();
+  const { setSetting: setAiApiType } = aiApiTypeSetting;
   const selected = ApiTypeFromValue(aiApiTypeSetting.value);
   const selfHostedType = selected === ApiType.VLLM ? ApiType.VLLM : ApiType.KoboldAI;
 
@@ -1073,9 +1077,9 @@ function SelfHostedSetupPage({ setPage }: PageProps) {
   // other provider setup pages select theirs on mount
   useEffect(() => {
     if (selected !== ApiType.KoboldAI && selected !== ApiType.VLLM) {
-      void aiApiTypeSetting.setSetting(ApiType.KoboldAI);
+      void setAiApiType(ApiType.KoboldAI);
     }
-  }, [aiApiTypeSetting, selected]);
+  }, [setAiApiType, selected]);
 
   return (
     <WizardStep

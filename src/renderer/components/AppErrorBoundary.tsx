@@ -2,6 +2,18 @@ import { Component, CSSProperties, ErrorInfo, ReactNode, SyntheticEvent } from '
 import log from 'electron-log';
 import { DebugClient } from 'main/sentient-sims/clients/DebugClient';
 import { SendLogsRequest } from 'main/sentient-sims/models/SendLogsRequest';
+import { AuthUserAttributes, loadUserAttributes } from 'renderer/providers/AuthProvider';
+
+// The boundary sits above AuthProvider, so the crash screen reads the session
+// directly; without these lines a crash report cannot answer Patreon questions.
+async function userAttributesForReport(): Promise<AuthUserAttributes | undefined> {
+  try {
+    return await loadUserAttributes();
+  } catch (err) {
+    log.warn('Crash report sent without user attributes', err);
+    return undefined;
+  }
+}
 
 interface AppErrorBoundaryProps {
   children: ReactNode;
@@ -174,6 +186,7 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
       const request: SendLogsRequest = {
         discordUsername,
         errorDescription: crashReportDescription(errorDescription, error, componentStack),
+        userAttributes: await userAttributesForReport(),
       };
       const response = await debugClient.sendDebugLogs(request);
       if (response.errors.length > 0) {

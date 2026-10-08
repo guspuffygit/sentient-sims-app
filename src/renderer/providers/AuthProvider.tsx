@@ -27,6 +27,23 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+export async function loadUserAttributes(fallbackSub?: string): Promise<AuthUserAttributes> {
+  const attributes = await fetchUserAttributes();
+  log.debug(`User attributes: ${JSON.stringify(attributes, null, 2)}`);
+  const session = await fetchAuthSession();
+  const rawGroups = session.tokens?.accessToken.payload['cognito:groups'];
+  const groups = Array.isArray(rawGroups) ? rawGroups.filter((group) => typeof group === 'string') : [];
+  return {
+    email: attributes.email,
+    subscriptionLevel: attributes['custom:subscription_level'],
+    founderStatus: attributes['custom:founderstatus'],
+    sub: attributes.sub ?? fallbackSub ?? '',
+    emailVerified: attributes.email_verified === 'true',
+    patreonId: attributes.preferred_username,
+    groups,
+  };
+}
+
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -53,22 +70,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   } = useQuery<AuthUserAttributes>({
     queryKey: ['userAttributes', authStatus === 'authenticated' ? user?.userId : undefined],
     enabled: authStatus === 'authenticated' && !!user,
-    queryFn: async () => {
-      const attributes = await fetchUserAttributes();
-      log.debug(`User attributes: ${JSON.stringify(attributes, null, 2)}`);
-      const session = await fetchAuthSession();
-      const rawGroups = session.tokens?.accessToken.payload['cognito:groups'];
-      const groups = Array.isArray(rawGroups) ? rawGroups.filter((group) => typeof group === 'string') : [];
-      return {
-        email: attributes.email,
-        subscriptionLevel: attributes['custom:subscription_level'],
-        founderStatus: attributes['custom:founderstatus'],
-        sub: attributes.sub ?? user?.userId ?? '',
-        emailVerified: attributes.email_verified === 'true',
-        patreonId: attributes.preferred_username,
-        groups,
-      };
-    },
+    queryFn: () => loadUserAttributes(user?.userId),
   });
 
   const refreshUserAttributes = useCallback(async () => {

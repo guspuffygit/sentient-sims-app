@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
@@ -69,5 +69,7 @@ export default function useSetting<T>(settingsEnum: SettingsEnum, defaultValue: 
     };
   }, [queryClient, settingName, settingsEnum]);
 
-  return { value, isLoading, setSetting, resetSetting };
+  // A fresh object per render lets an effect keyed on the hook result re-run on
+  // every provider render; one that writes the setting then re-renders forever.
+  return useMemo(() => ({ value, isLoading, setSetting, resetSetting }), [value, isLoading, setSetting, resetSetting]);
 }
