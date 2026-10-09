@@ -22,6 +22,7 @@ import {
   openaiDefaultEndpoint,
 } from 'main/sentient-sims/constants';
 import { voiceHotkeyPresets } from 'main/sentient-sims/models/VoiceHotkeyPresets';
+import { VOICE_INPUT_LANGUAGES, normalizeVoiceInputLanguage } from 'main/sentient-sims/models/VoiceInputLanguages';
 import useSetting from 'renderer/hooks/useSetting';
 import {
   PLAYER_VOICE_PERSONAS,
@@ -255,13 +256,21 @@ export default function VoiceInputSettingsComponent() {
           )}
           <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
             <Typography sx={{ minWidth: 110 }}>Language:</Typography>
-            <TextField
+            <Select
               size="small"
-              sx={{ width: 100 }}
-              value={language.value}
-              placeholder="auto"
+              displayEmpty
+              value={normalizeVoiceInputLanguage(language.value)}
               onChange={(change) => void language.setSetting(change.target.value)}
-            />
+              sx={{ minWidth: 260 }}
+              MenuProps={{ slotProps: { paper: { sx: { maxHeight: 360 } } } }}
+            >
+              <MenuItem value="">Auto-detect</MenuItem>
+              {VOICE_INPUT_LANGUAGES.map((option) => (
+                <MenuItem key={option.code} value={option.code}>
+                  {option.name}
+                </MenuItem>
+              ))}
+            </Select>
           </Stack>
           <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
             <Typography sx={{ minWidth: 110 }}>Microphone:</Typography>

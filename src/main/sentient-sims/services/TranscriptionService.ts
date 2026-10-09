@@ -114,7 +114,7 @@ export class TranscriptionService {
     mimeType = 'audio/webm',
     options: { namePrompt?: boolean } = {},
   ): Promise<string> {
-    const language = this.ctx.settings.voiceInputLanguage.trim();
+    const language = this.ctx.settings.voiceInputLanguage;
     const prompt = options.namePrompt === false ? undefined : this.namePrompt();
 
     if (this.ctx.settings.voiceInputProvider === ApiType.SentientSimsAI) {

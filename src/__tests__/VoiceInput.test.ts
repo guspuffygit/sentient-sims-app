@@ -4,6 +4,7 @@ import { vi, describe, it, expect, beforeEach, afterEach, type Mock } from 'vite
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
+import { VOICE_INPUT_LANGUAGES, normalizeVoiceInputLanguage } from 'main/sentient-sims/models/VoiceInputLanguages';
 import { mockEnvironment } from './util';
 
 const openaiMocks = vi.hoisted(() => ({
@@ -193,6 +194,37 @@ describe('voice input settings', () => {
     expect(settingsService.voiceInputEnabled).toBe(true);
     expect(settingsService.voiceInputHotkeyMode).toBe('toggle');
   });
+
+  it('reads a free-text language as its code', () => {
+    const { settingsService } = mockEnvironment();
+    settingsService.set(SettingsEnum.VOICE_INPUT_LANGUAGE, 'English');
+    expect(settingsService.voiceInputLanguage).toBe('en');
+  });
+});
+
+describe('normalizeVoiceInputLanguage', () => {
+  it.each([
+    ['en', 'en'],
+    ['EN', 'en'],
+    [' de ', 'de'],
+    ['English', 'en'],
+    ['english', 'en'],
+    ['en-US', 'en'],
+    ['pt_BR', 'pt'],
+    ['', ''],
+    [undefined, ''],
+    ['zz', ''],
+    ['Klingon', ''],
+  ])('maps %j to %j', (value, code) => {
+    expect(normalizeVoiceInputLanguage(value)).toBe(code);
+  });
+
+  it('keeps every listed code and resolves every listed name', () => {
+    for (const language of VOICE_INPUT_LANGUAGES) {
+      expect(normalizeVoiceInputLanguage(language.code)).toBe(language.code);
+      expect(normalizeVoiceInputLanguage(language.name)).toBe(language.code);
+    }
+  });
 });
 
 function transcriptionContext() {
@@ -350,6 +382,20 @@ describe('TranscriptionService on Sentient Sims AI', () => {
         input_audio: { data: Buffer.from(audio).toString('base64'), format: 'webm' },
         language: 'de',
       });
+    } finally {
+      await server.close();
+    }
+  });
+
+  it('sends a language name saved as free text as its code', async () => {
+    const server = await startTranscriptionServer(200, { text: 'Hello' });
+    try {
+      const { settingsService, service } = sentientSimsTranscriptionContext(server.url);
+      settingsService.set(SettingsEnum.VOICE_INPUT_LANGUAGE, 'English');
+
+      await service.transcribe(new Uint8Array([1, 2, 3, 4]).buffer);
+
+      expect(server.requests[0].body.language).toBe('en');
     } finally {
       await server.close();
     }

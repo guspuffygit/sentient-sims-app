@@ -56,6 +56,7 @@ import {
   sanitizeElevenLabsVoicesCache,
 } from '../models/ElevenLabsVoice';
 import { WizardPage } from '../models/WizardPage';
+import { normalizeVoiceInputLanguage } from '../models/VoiceInputLanguages';
 
 export function defaultStore(cwd?: string) {
   return new Store({
@@ -1320,7 +1321,7 @@ export class SettingsService {
   }
 
   get voiceInputLanguage(): string {
-    return this.get(SettingsEnum.VOICE_INPUT_LANGUAGE) as string;
+    return normalizeVoiceInputLanguage(this.get(SettingsEnum.VOICE_INPUT_LANGUAGE) as string);
   }
 
   get twitchChatEnabled(): boolean {
