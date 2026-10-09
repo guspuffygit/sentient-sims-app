@@ -9,6 +9,14 @@ export type ModLogWebsocketMessage = {
   scene_control?: SceneControl;
   // Which build just connected, sent once per websocket open (ss_version_service.announce_mod_info)
   mod_info?: ModInfo;
+  // The overlay heard a bound voice chord go down or up (overlay/overlay_voice_hotkey.py)
+  voice_key?: VoiceKeyEvent;
+};
+
+export type VoiceKeyEvent = {
+  // 'talk' = speak to the sim; 'command' (V-8) = an order
+  id: 'talk' | 'command';
+  down: boolean;
 };
 
 export type ModInfo = {

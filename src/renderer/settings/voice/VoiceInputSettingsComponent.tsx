@@ -15,7 +15,13 @@ import {
 import MicIcon from '@mui/icons-material/Mic';
 import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { defaultVoiceInputHotkey, defaultVoiceInputModel, openaiDefaultEndpoint } from 'main/sentient-sims/constants';
+import { ApiType } from 'main/sentient-sims/models/ApiType';
+import {
+  defaultVoiceInputHotkeyFor,
+  defaultVoiceInputModel,
+  openaiDefaultEndpoint,
+} from 'main/sentient-sims/constants';
+import { voiceHotkeyPresets } from 'main/sentient-sims/models/VoiceHotkeyPresets';
 import useSetting from 'renderer/hooks/useSetting';
 import {
   PLAYER_VOICE_PERSONAS,
@@ -28,27 +34,16 @@ import { rendererTiers } from '../../tiers/merge';
 // AUTONOMY: the command chord, only in a build that can carry an order out
 const VoiceCommandRow = rendererTiers.voiceCommandRow;
 
-// Single keys must be ones The Sims 4 leaves unbound — the hook observes without
-// consuming, so the game still sees every press
-const hotkeyPresets = [
-  { value: 'Backquote', label: '` (backquote)' },
-  { value: 'Insert', label: 'Insert' },
-  { value: 'ScrollLock', label: 'Scroll Lock' },
-  { value: 'F13', label: 'F13' },
-  { value: 'Ctrl+Space', label: 'Ctrl+Space' },
-  { value: 'Ctrl+Alt+Space', label: 'Ctrl+Alt+Space' },
-  { value: 'Ctrl+Shift+Space', label: 'Ctrl+Shift+Space' },
-  { value: 'Alt+V', label: 'Alt+V' },
-];
-
 const testRecordMs = 3000;
 
 export default function VoiceInputSettingsComponent() {
+  const { isMac } = window.electron;
   const enabled = useSetting<boolean>(SettingsEnum.VOICE_INPUT_ENABLED, false);
+  const provider = useSetting<ApiType>(SettingsEnum.VOICE_INPUT_PROVIDER, ApiType.SentientSimsAI);
   const endpoint = useSetting<string>(SettingsEnum.VOICE_INPUT_ENDPOINT, openaiDefaultEndpoint);
   const apiKey = useSetting<string>(SettingsEnum.VOICE_INPUT_KEY, '');
   const model = useSetting<string>(SettingsEnum.VOICE_INPUT_MODEL, defaultVoiceInputModel);
-  const hotkey = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY, defaultVoiceInputHotkey);
+  const hotkey = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY, defaultVoiceInputHotkeyFor(isMac));
   const hotkeyMode = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY_MODE, 'hold');
   const language = useSetting<string>(SettingsEnum.VOICE_INPUT_LANGUAGE, '');
   const deviceId = useSetting<string>(SettingsEnum.VOICE_INPUT_DEVICE_ID, '');
@@ -56,6 +51,9 @@ export default function VoiceInputSettingsComponent() {
   const personaBio = useSetting<string>(SettingsEnum.PLAYER_VOICE_PERSONA_BIO, '');
   const personaName = useSetting<string>(SettingsEnum.PLAYER_VOICE_PERSONA_NAME, '');
   const followsClock = useSetting<boolean>(SettingsEnum.PLAYBACK_FOLLOWS_GAME_CLOCK, true);
+
+  const usesSentientSimsAI = provider.value !== ApiType.OpenAI;
+  const hotkeyPresets = voiceHotkeyPresets(isMac, hotkey.value);
 
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [testState, setTestState] = useState<'idle' | 'recording' | 'transcribing'>('idle');
@@ -146,7 +144,7 @@ export default function VoiceInputSettingsComponent() {
             <Typography sx={{ minWidth: 110 }}>Hotkey:</Typography>
             <Select
               size="small"
-              value={hotkeyPresets.some((preset) => preset.value === hotkey.value) ? hotkey.value : 'Ctrl+Space'}
+              value={hotkey.value}
               onChange={(change) => void hotkey.setSetting(change.target.value)}
             >
               {hotkeyPresets.map((preset) => (
@@ -210,34 +208,53 @@ export default function VoiceInputSettingsComponent() {
             }
           />
           <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
-            <Typography sx={{ minWidth: 110 }}>Endpoint:</Typography>
-            <TextField
+            <Typography sx={{ minWidth: 110 }}>Transcription:</Typography>
+            <Select
               size="small"
-              fullWidth
-              value={endpoint.value}
-              onChange={(change) => void endpoint.setSetting(change.target.value)}
-              helperText="Any OpenAI-compatible /audio/transcriptions endpoint (OpenAI, Groq, local whisper server)"
-            />
+              value={usesSentientSimsAI ? ApiType.SentientSimsAI : ApiType.OpenAI}
+              onChange={(change) => void provider.setSetting(change.target.value)}
+            >
+              <MenuItem value={ApiType.SentientSimsAI}>Sentient Sims AI</MenuItem>
+              <MenuItem value={ApiType.OpenAI}>OpenAI-compatible endpoint</MenuItem>
+            </Select>
           </Stack>
+          {usesSentientSimsAI ? (
+            <FormHelperText>Uses your Sentient Sims AI login. No endpoint, key or model is needed.</FormHelperText>
+          ) : (
+            <>
+              <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
+                <Typography sx={{ minWidth: 110 }}>Endpoint:</Typography>
+                <TextField
+                  size="small"
+                  fullWidth
+                  value={endpoint.value}
+                  onChange={(change) => void endpoint.setSetting(change.target.value)}
+                  helperText="Any OpenAI-compatible /audio/transcriptions endpoint (OpenAI, Groq, local whisper server)"
+                />
+              </Stack>
+              <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
+                <Typography sx={{ minWidth: 110 }}>API Key:</Typography>
+                <TextField
+                  size="small"
+                  fullWidth
+                  type="password"
+                  value={apiKey.value}
+                  onChange={(change) => void apiKey.setSetting(change.target.value)}
+                  helperText="Leave empty to reuse your OpenAI key from the AI settings (OpenAI endpoint only)"
+                />
+              </Stack>
+              <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
+                <Typography sx={{ minWidth: 110 }}>Model:</Typography>
+                <TextField
+                  size="small"
+                  value={model.value}
+                  onChange={(change) => void model.setSetting(change.target.value)}
+                />
+              </Stack>
+            </>
+          )}
           <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
-            <Typography sx={{ minWidth: 110 }}>API Key:</Typography>
-            <TextField
-              size="small"
-              fullWidth
-              type="password"
-              value={apiKey.value}
-              onChange={(change) => void apiKey.setSetting(change.target.value)}
-              helperText="Leave empty to reuse your OpenAI key from the AI settings (OpenAI endpoint only)"
-            />
-          </Stack>
-          <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
-            <Typography sx={{ minWidth: 110 }}>Model:</Typography>
-            <TextField
-              size="small"
-              value={model.value}
-              onChange={(change) => void model.setSetting(change.target.value)}
-            />
-            <Typography sx={{ minWidth: 80 }}>Language:</Typography>
+            <Typography sx={{ minWidth: 110 }}>Language:</Typography>
             <TextField
               size="small"
               sx={{ width: 100 }}
@@ -275,7 +292,8 @@ export default function VoiceInputSettingsComponent() {
           {testError ? <FormHelperText error>Error: {testError}</FormHelperText> : null}
           <FormHelperText>
             Hold the hotkey while the game is focused, speak, and release — your words become your active Sim&apos;s
-            spoken line to whoever they&apos;re talking to.
+            spoken line to whoever they&apos;re talking to. The game&apos;s overlay listens for the key, so it works
+            only while the game window is focused and the overlay is loaded; no system permission is needed.
           </FormHelperText>
         </Stack>
       ) : null}

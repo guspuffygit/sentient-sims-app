@@ -73,6 +73,12 @@ export const SINGLE_VALUED_PREDICATES: ReadonlySet<string> = new Set([
   FactPredicate.FIANCE,
 ]);
 
+const KNOWN_PREDICATES: ReadonlySet<string> = new Set(Object.values(FactPredicate));
+
+export function isKnownPredicate(value: unknown): value is FactPredicate {
+  return typeof value === 'string' && KNOWN_PREDICATES.has(value);
+}
+
 export function isEdgePredicate(predicate: string): boolean {
   return EDGE_PREDICATES.has(predicate);
 }

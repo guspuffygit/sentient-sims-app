@@ -3,6 +3,7 @@ import { DefaultDescriptionService } from 'main/sentient-sims/services/DefaultDe
 import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
 import { defaultLotDescription } from 'main/sentient-sims/descriptions/locationDescriptions';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
+import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 import { mockApiContext } from './util';
 
 // V-6: a generated default may only ever FILL a hole. These tests pin the two rules that
@@ -18,13 +19,14 @@ function stubContext(answer: string) {
   const prompts: string[] = [];
   const participants = new Map<string, string>();
   const locations = new Map<number, string>();
-  const ctx: any = {
-    settings: { generatedDefaultDescriptions: true },
+  const settings = { generatedDefaultDescriptions: true };
+  const ctx = {
+    settings,
     ai: {
-      runOneShot: async (label: string, _system: string, userText: string) => {
+      runOneShot: (label: string, _system: string, userText: string) => {
         calls.push(label);
         prompts.push(userText);
-        return { exchange: {}, text: answer };
+        return Promise.resolve({ exchange: {}, text: answer });
       },
     },
     participantRepository: {
@@ -38,12 +40,12 @@ function stubContext(answer: string) {
     },
     locationRepository: {
       setDescriptionIfGeneric: (location: LocationEntity, description: string) => {
-        locations.set(Number(location.id), description);
+        locations.set(location.id, description);
         return true;
       },
     },
-  };
-  return { ctx, calls, prompts, participants, locations };
+  } as unknown as ApiContext;
+  return { ctx, settings, calls, prompts, participants, locations };
 }
 
 function loadedContext(saveId: string) {
@@ -166,7 +168,7 @@ describe('DefaultDescriptionService', () => {
   });
 
   it('generates once per sim, skips described sims, and honours the setting', async () => {
-    const { ctx, calls, participants } = stubContext('A steady presence who keeps the household running.');
+    const { ctx, settings, calls, participants } = stubContext('A steady presence who keeps the household running.');
     const service = new DefaultDescriptionService(ctx);
 
     // Already described: nothing queued
@@ -179,7 +181,7 @@ describe('DefaultDescriptionService', () => {
     expect(calls).toEqual(['Default Description: Blank Sim']);
     expect(participants.get('7002')).toEqual('A steady presence who keeps the household running.');
 
-    ctx.settings.generatedDefaultDescriptions = false;
+    settings.generatedDefaultDescriptions = false;
     service.considerSim(sim('7003', 'Off Sim'));
     await flush();
     expect(calls).toHaveLength(1);

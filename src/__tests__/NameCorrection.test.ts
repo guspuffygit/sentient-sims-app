@@ -79,8 +79,11 @@ describe('STT dictionary (V-7)', () => {
     const prompt = buildTranscriptionPrompt([['Lillie Cason'], ['Mika Oshino', 'Lillie Cason'], []]);
     expect(prompt).toBe('Names in this scene: Lillie Cason, Mika Oshino.');
     expect(buildTranscriptionPrompt([[]])).toBeUndefined();
+    expect(buildTranscriptionPrompt([['Lillie Cason'], [null, undefined, '  ']])).toBe(
+      'Names in this scene: Lillie Cason.',
+    );
     const many = Array.from({ length: 200 }, (_, index) => `Person Number${index}`);
-    expect(buildTranscriptionPrompt([many])!.length).toBeLessThanOrEqual(720);
+    expect(buildTranscriptionPrompt([many])?.length).toBeLessThanOrEqual(720);
   });
 
   it('levenshtein basics', () => {
@@ -155,7 +158,9 @@ describe('STT dictionary (V-7)', () => {
       'I guess Chat might be one of them.',
       'You just went to Party House.',
     ];
-    heard.forEach((line) => expect(correctNames(line, pool)).toBe(line));
+    heard.forEach((line) => {
+      expect(correctNames(line, pool)).toBe(line);
+    });
     // while the real mishearings still land
     expect(correctNames('Hey Lily, how are you?', pool)).toBe('Hey Lillie, how are you?');
     expect(correctNames('What do you think of Nauki?', pool)).toBe('What do you think of Naoki?');

@@ -1,4 +1,5 @@
 import { AuthUserAttributes } from 'renderer/providers/AuthProvider';
+import { AIModel } from '../models/AIModel';
 
 export enum CognitoGroup {
   Mappers = 'mappers',
@@ -62,5 +63,17 @@ export class PatreonUser {
 
   isMember() {
     return this.isFounder() || this.isSubscriber() || this.isDev();
+  }
+
+  // Tier 2 perks go to tier 2 subscribers and devs; founders and tier 1 see them locked
+  hasTier2Access() {
+    return this.isDev() || this.getSubscriptionLevel() === 'tier2';
+  }
+
+  canUseModel(model: AIModel) {
+    if (!model.requiresTier) {
+      return true;
+    }
+    return model.requiresTier === 'tier2' && this.hasTier2Access();
   }
 }

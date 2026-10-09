@@ -21,6 +21,9 @@ const tokenRefreshRetryCooldownMs = 60000;
 // timeout response arrives instead of a client-side abort
 const imageGenerationTimeoutMs = 130000;
 
+// Hotkey clips are short, so a slow answer means the server is stuck
+const transcriptionTimeoutMs = 30000;
+
 // OpenAI-compatible response shape of the server's /v1/images/generations
 type SentientSimsImageGenerationResponse = {
   created: number;
@@ -152,6 +155,26 @@ export class SentientSimsAIService extends VLLMAIService implements ImageGenerat
       model,
       apiType: ApiType.SentientSimsAI,
     };
+  }
+
+  // The server takes base64 JSON and picks its own speech-to-text model
+  async transcribe(audio: Buffer, format: string, language?: string, prompt?: string): Promise<string> {
+    const response = await this.withAuthRetry(() =>
+      axiosClient<{ text: string }>({
+        url: '/v1/audio/transcriptions',
+        method: 'POST',
+        data: {
+          input_audio: { data: audio.toString('base64'), format },
+          ...(language ? { language } : {}),
+          ...(prompt ? { prompt } : {}),
+        },
+        baseURL: this.serviceUrl(),
+        timeout: transcriptionTimeoutMs,
+        headers: this.getAuthorizationHeaders(),
+      }),
+    );
+
+    return response.data.text;
   }
 
   // The server normally returns base64, but passes provider-hosted image URLs

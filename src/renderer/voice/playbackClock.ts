@@ -28,17 +28,21 @@ const rateListeners = new Set<RateListener>();
 const pauseListeners = new Set<(paused: boolean) => void>();
 
 export function setClockState(state: ClockState) {
-  const nextPaused = Boolean(state.paused) && state.paused_by === 'user';
-  const nextRate = RATE_BY_SPEED[(state.speed ?? 'NORMAL').toUpperCase()] ?? 1;
+  const nextPaused = state.paused && state.paused_by === 'user';
+  const nextRate = RATE_BY_SPEED[state.speed.toUpperCase()] ?? 1;
   if (nextPaused !== userPaused) {
     userPaused = nextPaused;
     log.info(`[PlaybackClock] user pause ${userPaused ? 'ON' : 'OFF'} (game ${state.speed})`);
-    pauseListeners.forEach((listener) => listener(userPaused));
+    pauseListeners.forEach((listener) => {
+      listener(userPaused);
+    });
   }
   if (!nextPaused && nextRate !== rate) {
     rate = nextRate;
     log.info(`[PlaybackClock] rate ${rate} (game ${state.speed})`);
-    rateListeners.forEach((listener) => listener(rate));
+    rateListeners.forEach((listener) => {
+      listener(rate);
+    });
   }
 }
 

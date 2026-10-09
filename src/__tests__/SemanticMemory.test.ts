@@ -44,7 +44,7 @@ describe('semantic memory', () => {
   });
 
   it('turns a dossier into game facts', () => {
-    const result = ctx.semanticMemory.ingestDossier(dossier(), { hash: 'h1', day: 10 });
+    const result = ctx.semanticMemory.ingestDossier(dossier(), { day: 10 });
     expect(result.skipped).toBe(false);
     expect(result.inserted).toBeGreaterThan(0);
 
@@ -62,35 +62,45 @@ describe('semantic memory', () => {
     );
   });
 
-  it('does nothing at all when the hash has not moved', () => {
-    ctx.semanticMemory.ingestDossier(dossier(), { hash: 'h1', day: 10 });
+  it('adds and retires nothing when the dossier is re-sent unchanged', () => {
+    // A zone load and a sleep push re-send unconditionally: the diff is what must keep
+    // the table from growing.
+    ctx.semanticMemory.ingestDossier(dossier(), { day: 10 });
     const before = ctx.simFactRepository.count();
-    const again = ctx.semanticMemory.ingestDossier(dossier(), { hash: 'h1', day: 11 });
+    const again = ctx.semanticMemory.ingestDossier(dossier(), { day: 11 });
     expect(again.skipped).toBe(true);
-    expect(ctx.simFactRepository.count()).toBe(before);
-  });
-
-  it('re-ingesting an unchanged dossier under a new hash inserts nothing new', () => {
-    // The mod's hash deliberately ignores relationship scores, but a zone load re-sends
-    // unconditionally: the diff, not the hash, is what must keep the table from growing.
-    ctx.semanticMemory.ingestDossier(dossier(), { hash: 'h1', day: 10 });
-    const before = ctx.simFactRepository.count();
-    const again = ctx.semanticMemory.ingestDossier(dossier(), { hash: 'h2', day: 11 });
     expect(again.inserted).toBe(0);
     expect(again.retired).toBe(0);
     expect(ctx.simFactRepository.count()).toBe(before);
+  });
+
+  it('sees a change that leaves the dossier JSON the same length', () => {
+    const cook = (level: number) => [{ career: 'career_Adult_Culinary', level, performance: 50, at_work: false }];
+    const before = dossier({ age: 'ADULT', careers: cook(3) });
+    const after = dossier({ age: 'ELDER', careers: cook(4) });
+    expect(JSON.stringify(after).length).toBe(JSON.stringify(before).length);
+
+    ctx.semanticMemory.ingestDossier(before, { day: 1 });
+    const result = ctx.semanticMemory.ingestDossier(after, { day: 2 });
+
+    expect(result.skipped).toBe(false);
+    expect(result.identityChanged).toEqual([FactPredicate.AGE_STAGE]);
+    const facts = ctx.semanticMemory.getCurrentFacts('100');
+    expect(facts.find((fact) => fact.predicate === FactPredicate.AGE_STAGE)?.objectText).toBe('ELDER');
+    expect(facts.find((fact) => fact.predicate === FactPredicate.JOB)?.objectText).toBe(
+      'career_Adult_Culinary (level 4)',
+    );
   });
 
   it('retires a fact the dossier stopped asserting, without deleting it', () => {
     // A divorce: the old edge is history, not a lie, and "she used to be married to him"
     // is worth keeping
     ctx.semanticMemory.ingestDossier(dossier({ family: { spouse_id: '300', steady_ids: [] } }), {
-      hash: 'h1',
       day: 10,
     });
     expect(ctx.semanticMemory.getCurrentFacts('100').some((f) => f.predicate === FactPredicate.SPOUSE)).toBe(true);
 
-    ctx.semanticMemory.ingestDossier(dossier({ family: { steady_ids: [] } }), { hash: 'h2', day: 20 });
+    ctx.semanticMemory.ingestDossier(dossier({ family: { steady_ids: [] } }), { day: 20 });
 
     expect(ctx.semanticMemory.getCurrentFacts('100').some((f) => f.predicate === FactPredicate.SPOUSE)).toBe(false);
     const historic = ctx.semanticMemory.getHistory('100').find((f) => f.predicate === FactPredicate.SPOUSE);
@@ -99,8 +109,8 @@ describe('semantic memory', () => {
   });
 
   it('a new single-valued game fact supersedes the old one', () => {
-    ctx.semanticMemory.ingestDossier(dossier({ age: 'ADULT' }), { hash: 'h1', day: 1 });
-    ctx.semanticMemory.ingestDossier(dossier({ age: 'ELDER' }), { hash: 'h2', day: 2 });
+    ctx.semanticMemory.ingestDossier(dossier({ age: 'ADULT' }), { day: 1 });
+    ctx.semanticMemory.ingestDossier(dossier({ age: 'ELDER' }), { day: 2 });
     const current = ctx.semanticMemory.getCurrentFacts('100').filter((f) => f.predicate === FactPredicate.AGE_STAGE);
     expect(current).toHaveLength(1);
     expect(current[0].objectText).toBe('ELDER');
@@ -108,7 +118,7 @@ describe('semantic memory', () => {
 
   it('keeps a told lie but never lets it beat the game', () => {
     // The 3.1 acceptance test: tell the sim a false family fact
-    ctx.semanticMemory.ingestDossier(dossier(), { hash: 'h1', day: 10 });
+    ctx.semanticMemory.ingestDossier(dossier(), { day: 10 });
     const toldId = ctx.semanticMemory.addFact({
       subjectSimId: '100',
       predicate: FactPredicate.SPOUSE,
@@ -127,7 +137,6 @@ describe('semantic memory', () => {
 
     // ...and the moment the game asserts a real spouse, the lie is retired by it
     ctx.semanticMemory.ingestDossier(dossier({ family: { spouse_id: '300', steady_ids: [] } }), {
-      hash: 'h2',
       day: 11,
     });
     const spouses = ctx.semanticMemory.getCurrentFacts('100').filter((f) => f.predicate === FactPredicate.SPOUSE);
@@ -138,7 +147,6 @@ describe('semantic memory', () => {
 
   it('a told fact cannot retire a game fact', () => {
     ctx.semanticMemory.ingestDossier(dossier({ family: { spouse_id: '300', steady_ids: [] } }), {
-      hash: 'h1',
       day: 10,
     });
     ctx.semanticMemory.addFact({
@@ -156,7 +164,7 @@ describe('semantic memory', () => {
   });
 
   it('renders what the sim knows into a KNOWN_FACTS block', () => {
-    ctx.semanticMemory.ingestDossier(dossier(), { hash: 'h1', day: 10 });
+    ctx.semanticMemory.ingestDossier(dossier(), { day: 10 });
     const block = ctx.semanticMemory.recall('100', { mentionedSimIds: ['200'] });
     expect(block).toContain('<KNOWN_FACTS>');
     expect(block).toContain('you are an elder (retirement age)');
@@ -179,7 +187,7 @@ describe('semantic memory', () => {
           { sim_id: '400', name: 'Alice Landgraab', has_met: true, friendship: 2, romance: 0 },
         ],
       }),
-      { hash: 'h1', day: 10 },
+      { day: 10 },
     );
 
     const block = ctx.semanticMemory.recall('100');
@@ -214,7 +222,7 @@ describe('semantic memory', () => {
           { sim_id: '600', name: 'Al Pacino', has_met: true, friendship: 20, romance: 0 },
         ],
       }),
-      { hash: 'h1', day: 10 },
+      { day: 10 },
     );
 
     const block = ctx.semanticMemory.recall('100', {
@@ -235,7 +243,7 @@ describe('semantic memory', () => {
       friendship: 100 - i,
       romance: 0,
     }));
-    ctx.semanticMemory.ingestDossier(dossier({ relationships }), { hash: 'h1', day: 10 });
+    ctx.semanticMemory.ingestDossier(dossier({ relationships }), { day: 10 });
     const block = ctx.semanticMemory.recall('100');
     expect(block).toContain('Friend Number9');
     expect(block).not.toContain('Friend Number10');
@@ -245,22 +253,21 @@ describe('semantic memory', () => {
     // Fix B: an age-up means the stored character description was written about somebody
     // this sim no longer is. A first ingest inserts the age without changing anything -
     // there was no previous answer for it to contradict.
-    const first = ctx.semanticMemory.ingestDossier(dossier({ age: 'TEEN' }), { hash: 'h1', day: 1 });
+    const first = ctx.semanticMemory.ingestDossier(dossier({ age: 'TEEN' }), { day: 1 });
     expect(first.inserted).toBeGreaterThan(0);
     expect(first.identityChanged).toEqual([]);
 
-    const aged = ctx.semanticMemory.ingestDossier(dossier({ age: 'ELDER' }), { hash: 'h2', day: 2 });
+    const aged = ctx.semanticMemory.ingestDossier(dossier({ age: 'ELDER' }), { day: 2 });
     expect(aged.identityChanged).toEqual([FactPredicate.AGE_STAGE]);
 
     // ...and it is reported once, not on every push afterwards
-    const again = ctx.semanticMemory.ingestDossier(dossier({ age: 'ELDER' }), { hash: 'h3', day: 3 });
+    const again = ctx.semanticMemory.ingestDossier(dossier({ age: 'ELDER' }), { day: 3 });
     expect(again.identityChanged).toEqual([]);
   });
 
   it('does not call a new trait or a new friend an identity change', () => {
-    ctx.semanticMemory.ingestDossier(dossier(), { hash: 'h1', day: 1 });
+    ctx.semanticMemory.ingestDossier(dossier(), { day: 1 });
     const changed = ctx.semanticMemory.ingestDossier(dossier({ traits: ['trait_Geek', 'trait_Cheerful'] }), {
-      hash: 'h2',
       day: 2,
     });
     expect(changed.inserted).toBeGreaterThan(0);
@@ -271,10 +278,10 @@ describe('semantic memory', () => {
     // Gender is a fact ABOUT a sim, never an edge, so the speaker's own rows cannot supply
     // it: without reading Mackenzie's rows the block named him and left his gender to be
     // guessed from the name, and a sim called him "she" (live 2026-09-03).
-    ctx.semanticMemory.ingestDossier(dossier(), { hash: 'h1', day: 10 });
+    ctx.semanticMemory.ingestDossier(dossier(), { day: 10 });
     ctx.semanticMemory.ingestDossier(
       { sim_id: '200', name: 'Mackenzie Scott', gender: 'MALE', family: { parents: ['100'], steady_ids: [] } },
-      { hash: 'm1', day: 10 },
+      { day: 10 },
     );
 
     expect(ctx.semanticMemory.recall('100', { mentionedSimIds: ['200'] })).toContain('Mackenzie Scott (he/him)');
@@ -283,7 +290,7 @@ describe('semantic memory', () => {
   it('states the absences the game records, once a dossier has been ingested', () => {
     ctx.semanticMemory.ingestDossier(
       dossier({ family: { parents: [], siblings: [], children: [], grandparents: [], steady_ids: [] } }),
-      { hash: 'h1', day: 10 },
+      { day: 10 },
     );
     const block = ctx.semanticMemory.recall('100');
     expect(block).toContain('you have no parents, siblings or children on record');
@@ -302,7 +309,7 @@ describe('semantic memory', () => {
         romance: 0,
       })),
     ];
-    ctx.semanticMemory.ingestDossier(dossier({ relationships }), { hash: 'h1', day: 10 });
+    ctx.semanticMemory.ingestDossier(dossier({ relationships }), { day: 10 });
 
     const block = ctx.semanticMemory.recall('100');
     expect(block.length).toBeLessThan(1600);
@@ -315,14 +322,14 @@ describe('semantic memory', () => {
   });
 
   it('finds the path between two sims through the edges', () => {
-    ctx.semanticMemory.ingestDossier(dossier(), { hash: 'h1', day: 10 });
+    ctx.semanticMemory.ingestDossier(dossier(), { day: 10 });
     ctx.semanticMemory.ingestDossier(
       {
         sim_id: '200',
         name: 'Mackenzie Scott',
         family: { parents: ['100'], children: ['400'], steady_ids: [] },
       },
-      { hash: 'm1', day: 10 },
+      { day: 10 },
     );
     const direct = ctx.semanticMemory.pathBetween('100', '200');
     expect(direct.length).toBe(1);
@@ -331,8 +338,33 @@ describe('semantic memory', () => {
     expect(ctx.semanticMemory.pathBetween('100', '7777', 2)).toEqual([]);
   });
 
+  it('walks a densely connected save without retracing it', () => {
+    const sims = 60;
+    ctx.db.getDb().transaction(() => {
+      for (let sim = 0; sim < sims; sim += 1) {
+        for (let step = 1; step <= 20; step += 1) {
+          ctx.simFactRepository.insert({
+            subjectSimId: `${sim}`,
+            predicate: FactPredicate.KNOWS,
+            objectSimId: `${(sim + step) % sims}`,
+            source: 'game',
+            confidence: 1,
+          });
+        }
+      }
+    })();
+
+    expect(ctx.semanticMemory.pathBetween('0', 'nobody', 5)).toEqual([]);
+
+    const path = ctx.semanticMemory.pathBetween('0', '30', 5);
+    expect(path.length).toBe(2);
+    const middle = path[0].subjectSimId === '0' ? path[0].objectSimId : path[0].subjectSimId;
+    expect([path[0].subjectSimId, path[0].objectSimId]).toContain('0');
+    expect([path[1].subjectSimId, path[1].objectSimId].sort()).toEqual([middle, '30'].sort());
+  });
+
   it('keeps facts and the stored dossier across a restart', () => {
-    ctx.semanticMemory.ingestDossier(dossier(), { hash: 'h1', day: 10 });
+    ctx.semanticMemory.ingestDossier(dossier(), { day: 10 });
 
     const restarted = mockApiContext({ directoryService, settingsService });
     restarted.db.loadDatabase({ sessionId, saveId: '1' });
@@ -340,6 +372,6 @@ describe('semantic memory', () => {
     expect(restarted.semanticMemory.getCurrentFacts('100').length).toBeGreaterThan(0);
     expect(restarted.semanticMemory.readDossier('100')?.name).toBe('Travis Scott');
     // ...and an unchanged dossier is still recognized as unchanged after the restart
-    expect(restarted.semanticMemory.ingestDossier(dossier(), { hash: 'h1' }).skipped).toBe(true);
+    expect(restarted.semanticMemory.ingestDossier(dossier()).skipped).toBe(true);
   });
 });

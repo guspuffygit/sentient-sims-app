@@ -112,7 +112,7 @@ describe('Provider Configs', () => {
     expect(resolved.model).toEqual('gpt-4o');
   });
 
-  it.each(['Gryphe/MythoMax-L2-13b', 'Llama-3.3-70B-ArliAI-RPMax-v1.4'])(
+  it.each(['Gryphe/MythoMax-L2-13b', 'Llama-3.3-70B-ArliAI-RPMax-v1.4', 'deepseek-ai/DeepSeek-V4-Flash'])(
     'runMigrations rewrites retired sentient sims ai model %s on configs and the legacy setting',
     (retired) => {
       ctx.settings.sentientSimsAIModel = retired;

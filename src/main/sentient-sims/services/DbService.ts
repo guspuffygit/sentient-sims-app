@@ -104,6 +104,13 @@ export class DbService {
       fs.copyFileSync(savedDb, unsavedDb);
     }
 
+    // Loading a save jumps the game state, so any in-progress scene no longer describes reality.
+    // A scene mid-playback stops while its own database is still open, because the stop trims
+    // that scene's memory row by id and the same id is a different row in the next save.
+    this.ctx.generationQueue.flushToFallback();
+    this.ctx.sceneService.reset();
+    this.ctx.scenePlayback.stopAll('zone_unload');
+
     // Close any previously loaded database first: an open handle keeps the old
     // session's -wal/-shm files locked on Windows, which makes cleanup fail
     this.closeDatabase();
@@ -133,12 +140,6 @@ export class DbService {
     for (const tier of this.ctx.tiers) {
       tier.onDatabaseLoaded?.(this.ctx);
     }
-
-    // Loading a save jumps the game state, so any in-progress scene no longer describes reality.
-    this.ctx.generationQueue.flushToFallback();
-    this.ctx.sceneService.reset();
-    // ...including one mid-playback: its sims belong to the world that was just left
-    this.ctx.scenePlayback.stopAll('zone_unload');
 
     // The mod caches sim descriptions in memory keyed by sim_id and only ever
     // drops that cache on an explicit CLEAR_SIM_CACHE message. Loading a
@@ -267,11 +268,11 @@ export class DbService {
   }
 
   unloadDatabase() {
-    this.closeDatabase();
-
     this.ctx.generationQueue.flushToFallback();
     this.ctx.sceneService.reset();
     this.ctx.scenePlayback.stopAll('zone_unload');
+
+    this.closeDatabase();
 
     // Cleanup unsaved databases
     this.ctx.directory.listSentientSimsDbUnsaved().forEach((unsavedDb) => {

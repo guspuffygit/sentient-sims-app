@@ -38,6 +38,7 @@ export interface MockApiContextParams {
   directoryService?: DirectoryService;
   // The build tiers to run; [] is the core build. Default: the generated list (dev).
   tiers?: TierRegistration[];
+  devBuild?: boolean;
 }
 
 export function mockApiContext(params?: MockApiContextParams): ApiContext {
@@ -53,5 +54,6 @@ export function mockApiContext(params?: MockApiContextParams): ApiContext {
     directoryService: params?.directoryService ?? directoryService,
     appVersion: '1.0.0',
     tiers: params?.tiers,
+    devBuild: params?.devBuild,
   });
 }

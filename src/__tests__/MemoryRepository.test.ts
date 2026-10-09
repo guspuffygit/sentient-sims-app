@@ -2,7 +2,17 @@ import * as fs from 'fs';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
 import { migrate } from 'main/sentient-sims/db/migrations';
+import { CreateMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
+import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 import { mockApiContext } from './util';
+
+function createMemory(ctx: ApiContext, request: CreateMemoryRequest): MemoryEntity {
+  const created = ctx.memoryRepository.createMemory(request);
+  if (!created) {
+    throw new Error('createMemory stored nothing');
+  }
+  return created;
+}
 
 describe('MemoryRepository', () => {
   it('CRUD', () => {
@@ -22,10 +32,10 @@ describe('MemoryRepository', () => {
       observation: 'joijofi10298',
       action: 'ojf0192830hkljh12',
     };
-    const result = ctx.memoryRepository.createMemory({
+    const result = createMemory(ctx, {
       memory,
       participants,
-    })!;
+    });
     expect(Number(result.id)).toBeGreaterThanOrEqual(0);
     expect(result.content).toEqual(memory.content);
     expect(result.pre_action).toEqual(memory.pre_action);
@@ -174,10 +184,10 @@ describe('MemoryRepository', () => {
       content: 'test content',
       interaction_name: 'mixer_social_GossipAbout',
     };
-    const result = ctx.memoryRepository.createMemory({
+    const result = createMemory(ctx, {
       memory,
       participants: [{ id: '100' }],
-    })!;
+    });
 
     expect(result.interaction_name).toEqual('mixer_social_GossipAbout');
 
@@ -201,10 +211,10 @@ describe('MemoryRepository', () => {
       content: 'ww content',
       interaction_name: 'some_animation_name',
     };
-    const result = ctx.memoryRepository.createMemory({
+    const result = createMemory(ctx, {
       memory,
       participants: [{ id: '200' }, { id: '201' }],
-    })!;
+    });
 
     expect(result.interaction_name).toEqual('some_animation_name');
 
@@ -230,20 +240,20 @@ describe('MemoryRepository', () => {
       participants,
     });
     // Scene B memory at a different location
-    const b1 = ctx.memoryRepository.createMemory({
+    const b1 = createMemory(ctx, {
       memory: { location_id: 20, content: 'b1' },
       participants: [{ id: '501' }],
-    })!;
+    });
     // A reflection at location 10 — must be excluded from getSceneMemories
     ctx.memoryRepository.createMemory({
       memory: { location_id: 10, content: 'reflection of A', event_type: 'reflection' },
       participants,
     });
     // An older memory at location 10 from a previous visit — excluded by the since filter
-    const old = ctx.memoryRepository.createMemory({
+    const old = createMemory(ctx, {
       memory: { location_id: 10, content: 'previous visit' },
       participants: [{ id: '999' }],
-    })!;
+    });
     ctx.memoryRepository.updateMemory({ ...old, timestamp: '1999-01-01 00:00:00' });
 
     const sceneA = ctx.memoryRepository.getSceneMemories(10, sceneStart);
@@ -310,10 +320,10 @@ describe('MemoryRepository', () => {
     expect(hasSceneId()).toBe(false);
 
     // Memory rows no longer carry the column that broke the mod's parser
-    const created = ctx.memoryRepository.createMemory({
+    const created = createMemory(ctx, {
       memory: { location_id: 1, content: 'clean row' },
       participants: [{ id: '900' }],
-    })!;
+    });
     expect('scene_id' in created).toBe(false);
   });
 
@@ -329,10 +339,10 @@ describe('MemoryRepository', () => {
 
     // Past 2^53: Number() would round the last digits away
     const bigId = '1152921504606580259';
-    const created = ctx.memoryRepository.createMemory({
+    const created = createMemory(ctx, {
       memory: { id: bigId, location_id: 1, content: 'a memory from the game' },
       participants: [{ id: '2251799813685521' }],
-    })!;
+    });
     expect(created.id).toEqual(bigId);
 
     const fetched = ctx.memoryRepository.getMemory({ id: bigId });
@@ -366,10 +376,10 @@ describe('MemoryRepository', () => {
       content: 'content',
       interaction_name: 'original_name',
     };
-    const result = ctx.memoryRepository.createMemory({
+    const result = createMemory(ctx, {
       memory,
       participants: [{ id: '300' }],
-    })!;
+    });
 
     memory.id = result.id;
     memory.interaction_name = 'updated_name';

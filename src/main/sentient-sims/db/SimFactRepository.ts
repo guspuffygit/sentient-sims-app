@@ -35,7 +35,6 @@ type SimFactRow = {
 
 export type SimDossierRecord = {
   simId: string;
-  hash: string;
   json: string;
   updatedDay?: number;
   updatedAt: string;
@@ -43,7 +42,6 @@ export type SimDossierRecord = {
 
 type SimDossierRow = {
   sim_id: string;
-  hash: string;
   json: string;
   updated_day: number | null;
   updated_at: string;
@@ -193,53 +191,52 @@ export class SimFactRepository extends Repository {
   }
 
   /**
-   * Shortest chain of current edges from a to b, up to maxHops. Recursive CTE rather than
-   * repeated round trips, because the provenance tools ask this interactively ("how is she
-   * related to him at all?") and a two-hop answer over a few hundred edges should be one
-   * query. Returns the edge rows along the path, nearest hop first, or [] if unreachable.
+   * Shortest chain of current edges from a to b, up to maxHops. The walk is breadth-first
+   * and expands each sim once, so the edge count bounds its cost whatever maxHops is.
+   * Returns the edge rows along the path, nearest hop first, or [] if unreachable.
    */
   pathBetween(simA: string, simB: string, maxHops = 2): SimFactRecord[] {
     if (simA === simB) {
       return [];
     }
-    const row = this.dbService
-      .getDb()
-      .prepare(
-        `WITH RECURSIVE walk(node, depth, path_ids) AS (
-           SELECT ?, 0, ''
-           UNION ALL
-           SELECT CASE WHEN f.subject_sim_id = walk.node THEN f.object_sim_id ELSE f.subject_sim_id END,
-                  walk.depth + 1,
-                  walk.path_ids || ',' || f.id
-           FROM walk
-           JOIN sim_fact f
-             ON f.valid_to_day IS NULL
-            AND f.object_sim_id IS NOT NULL
-            AND (f.subject_sim_id = walk.node OR f.object_sim_id = walk.node)
-           WHERE walk.depth < ?
-             AND instr(walk.path_ids || ',', ',' || f.id || ',') = 0
-         )
-         SELECT path_ids FROM walk WHERE node = ? ORDER BY depth ASC LIMIT 1`,
-      )
-      .get([simA, maxHops, simB]) as { path_ids: string } | undefined;
-    if (!row || !row.path_ids) {
-      return [];
+    const edgesOf = this.dbService.getDb().prepare(
+      `SELECT * FROM sim_fact
+       WHERE valid_to_day IS NULL
+         AND object_sim_id IS NOT NULL
+         AND (subject_sim_id = ? OR object_sim_id = ?)
+       ORDER BY id ASC`,
+    );
+    const reachedBy = new Map<string, { edge: SimFactRow; from: string }>();
+    let frontier = [simA];
+    for (let depth = 0; depth < maxHops && frontier.length > 0 && !reachedBy.has(simB); depth += 1) {
+      const next: string[] = [];
+      for (const sim of frontier) {
+        for (const edge of edgesOf.all([sim, sim]) as SimFactRow[]) {
+          const other = edge.subject_sim_id === sim ? edge.object_sim_id : edge.subject_sim_id;
+          if (other && other !== simA && !reachedBy.has(other)) {
+            reachedBy.set(other, { edge, from: sim });
+            next.push(other);
+          }
+        }
+      }
+      frontier = next;
     }
-    const ids = row.path_ids
-      .split(',')
-      .filter(Boolean)
-      .map((value) => Number(value));
-    return ids.map((id) => this.getFact(id)).filter((fact): fact is SimFactRecord => Boolean(fact));
+    const path: SimFactRecord[] = [];
+    for (let step = reachedBy.get(simB); step; step = reachedBy.get(step.from)) {
+      path.unshift(toRecord(step.edge));
+    }
+    return path;
   }
 
+  // Nothing reads sim_dossier.hash. The column is NOT NULL, so it is written empty.
   saveDossier(record: SimDossierRecord) {
     this.dbService
       .getDb()
       .prepare(
         `INSERT OR REPLACE INTO sim_dossier(sim_id, hash, json, updated_day, updated_at)
-         VALUES (?, ?, ?, ?, ?)`,
+         VALUES (?, '', ?, ?, ?)`,
       )
-      .run([record.simId, record.hash, record.json, record.updatedDay ?? null, record.updatedAt]);
+      .run([record.simId, record.json, record.updatedDay ?? null, record.updatedAt]);
   }
 
   getDossier(simId: string): SimDossierRecord | undefined {
@@ -251,7 +248,6 @@ export class SimFactRepository extends Repository {
     }
     return {
       simId: row.sim_id,
-      hash: row.hash,
       json: row.json,
       updatedDay: row.updated_day ?? undefined,
       updatedAt: row.updated_at,

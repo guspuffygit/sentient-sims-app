@@ -77,13 +77,6 @@ export function notifyNewMemoryAdded(
   // that later reads it — keeps the clean speaker)
   const modBound = options?.modDisplayAction ? { ...memory, action: options.modDisplayAction } : memory;
   const paced = consumePacedScene(memory.content);
-  if (paced && memory.content && memory.id) {
-    try {
-      sceneMemoryObserver?.(memory.content, memory.id);
-    } catch (err) {
-      log.warn('Scene memory observer failed', err);
-    }
-  }
   sendModNotification({
     type: ModWebsocketMessageType.MEMORY_CREATED,
     // The Flash memories window can't render a null content, and one bad row in its
@@ -92,6 +85,15 @@ export function notifyNewMemoryAdded(
     memory: withDisplayContent(toModMemory(modBound)),
     paced,
   });
+  // After memory_created: a scene that already closed rewrites the row here, and the
+  // mod must hear of the row before it hears of the edit
+  if (paced && memory.content && memory.id) {
+    try {
+      sceneMemoryObserver?.(memory.content, memory.id);
+    } catch (err) {
+      log.warn('Scene memory observer failed', err);
+    }
+  }
 }
 
 export function notifyMemoryDeleted(deleteMemoryRequest: DeleteMemoryRequest) {
@@ -270,7 +272,7 @@ export function sendPlayerVoiceMessageToMod(text: string) {
 // so it MUST equal the speaker the reply is generated with (playerSpeakerLabel).
 // `mode` (V-8): 'chat' = talk to the sim, 'command' = an order the sim will act on.
 export function sendPlayerVoiceStatusToMod(
-  status: 'listening' | 'transcribing' | 'error',
+  status: 'listening' | 'transcribing' | 'cancelled' | 'error',
   detail?: string,
   extra?: { speaker?: string; mode?: 'chat' | 'command' },
 ) {
@@ -280,6 +282,16 @@ export function sendPlayerVoiceStatusToMod(
     detail,
     speaker: extra?.speaker,
     mode: extra?.mode,
+  });
+}
+
+// The chords the game overlay listens for (D8); the mod re-sends them whenever the
+// overlay (re)loads, so this only has to reach the mod once per change
+export function sendVoiceHotkeysToMod(bindings: { talk: string; command: string }) {
+  sendModNotification({
+    type: ModWebsocketMessageType.VOICE_HOTKEYS,
+    talk: bindings.talk,
+    command: bindings.command,
   });
 }
 

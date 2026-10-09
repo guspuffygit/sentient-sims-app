@@ -135,7 +135,9 @@ export async function playAudioStream(
     if (paused) {
       audio.pause();
     } else {
-      void audio.play().catch((err: unknown) => log.debug('resume after user pause failed', err));
+      void audio.play().catch((err: unknown) => {
+        log.debug('resume after user pause failed', err);
+      });
     }
   });
 
@@ -273,7 +275,9 @@ export async function playAudioStream(
       cleanup();
       settle();
     },
-    pause: () => audio.pause(),
+    pause: () => {
+      audio.pause();
+    },
     resume: () => {
       void audio.play();
     },

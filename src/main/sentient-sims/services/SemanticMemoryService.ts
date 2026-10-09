@@ -114,99 +114,84 @@ export class SemanticMemoryService {
   /**
    * Reconcile one sim's `game` facts against a fresh dossier. Returns what changed.
    *
-   * The hash gate is the cheap path and the common one: the mod only POSTs on a
-   * structural change, but a zone load and a sleep push both re-send unconditionally, and
-   * re-deriving forty facts to insert none of them is waste.
+   * The diff runs on every dossier. A zone load and a sleep push re-send unconditionally,
+   * and the diff over the fact keys is what keeps an unchanged dossier from adding rows.
    */
   ingestDossier(
     dossier: SimDossier,
-    options: { hash?: string; day?: number } = {},
+    options: { day?: number } = {},
   ): {
     inserted: number;
     retired: number;
+    // True when no fact was added or retired.
     skipped: boolean;
     // Single-valued facts about WHO the sim is that replaced a previous game fact: an
     // age-up, a gender change, a transformation, a death. A first ingest changes nothing,
     // however much it inserts - there was no previous answer to contradict.
     identityChanged: string[];
   } {
-    const unchanged = { inserted: 0, retired: 0, skipped: true, identityChanged: [] };
     if (!this.isLoaded() || !dossier.sim_id) {
-      return unchanged;
+      return { inserted: 0, retired: 0, skipped: true, identityChanged: [] };
     }
     const simId = dossier.sim_id;
-    const hash = options.hash ?? JSON.stringify(dossier).length.toString(36);
-    const stored = this.facts.getDossier(simId);
     const day = options.day;
 
-    if (stored?.hash !== hash) {
-      const derived = dossierToFacts(dossier);
-      const derivedKeys = new Set(derived.map(factKey));
-      const current = this.facts.getCurrentFacts(simId).filter((fact) => fact.source === 'game');
-      const currentKeys = new Map(current.map((fact) => [factKey(fact), fact]));
+    const derived = dossierToFacts(dossier);
+    const derivedKeys = new Set(derived.map(factKey));
+    const current = this.facts.getCurrentFacts(simId).filter((fact) => fact.source === 'game');
+    const currentKeys = new Map(current.map((fact) => [factKey(fact), fact]));
 
-      let inserted = 0;
-      let retired = 0;
-      const identityChanged: string[] = [];
-      for (const fact of derived) {
-        if (currentKeys.has(factKey(fact))) {
-          continue;
-        }
-        // A new answer to a question the store already had an answer to. Checked before
-        // the insert, while "what the game used to say" is still readable.
-        if (
-          IDENTITY_PREDICATES.has(fact.predicate) &&
-          current.some((existing) => existing.predicate === fact.predicate)
-        ) {
-          identityChanged.push(fact.predicate);
-        }
-        const id = this.facts.insert({
-          subjectSimId: simId,
-          predicate: fact.predicate,
-          objectText: fact.objectText,
-          objectSimId: fact.objectSimId,
-          source: 'game',
-          confidence: DEFAULT_CONFIDENCE.game,
-          validFromDay: day,
-          createdAt: new Date().toISOString(),
-        });
-        inserted += 1;
-        // A game fact retires whatever contradicted it, whoever said it. This is where a
-        // told lie loses: it stays in the table with its valid_to_day set, so the Facts
-        // dialog can still show that the sim was told it and when it stopped counting.
-        if (isSingleValued(fact.predicate)) {
-          retired += this.retireContradicting(simId, fact.predicate, fact.objectText, fact.objectSimId, id, day);
-        }
+    let inserted = 0;
+    let retired = 0;
+    const identityChanged: string[] = [];
+    for (const fact of derived) {
+      if (currentKeys.has(factKey(fact))) {
+        continue;
       }
-      // Facts the dossier no longer asserts: a divorce, a moved-out sibling, a dropped
-      // trait. Retired, never deleted.
-      for (const [key, fact] of currentKeys) {
-        if (!derivedKeys.has(key) && fact.id !== undefined) {
-          this.facts.invalidate(fact.id, day);
-          retired += 1;
-        }
+      // A new answer to a question the store already had an answer to. Checked before
+      // the insert, while "what the game used to say" is still readable.
+      if (
+        IDENTITY_PREDICATES.has(fact.predicate) &&
+        current.some((existing) => existing.predicate === fact.predicate)
+      ) {
+        identityChanged.push(fact.predicate);
       }
-
-      this.facts.saveDossier({
-        simId,
-        hash,
-        json: JSON.stringify(dossier),
-        updatedDay: day,
-        updatedAt: new Date().toISOString(),
+      const id = this.facts.insert({
+        subjectSimId: simId,
+        predicate: fact.predicate,
+        objectText: fact.objectText,
+        objectSimId: fact.objectSimId,
+        source: 'game',
+        confidence: DEFAULT_CONFIDENCE.game,
+        validFromDay: day,
+        createdAt: new Date().toISOString(),
       });
-      return { inserted, retired, skipped: false, identityChanged };
+      inserted += 1;
+      // A game fact retires whatever contradicted it, whoever said it. This is where a
+      // told lie loses: it stays in the table with its valid_to_day set, so the Facts
+      // dialog can still show that the sim was told it and when it stopped counting.
+      if (isSingleValued(fact.predicate)) {
+        retired += this.retireContradicting(simId, fact.predicate, fact.objectText, fact.objectSimId, id, day);
+      }
+    }
+    // Facts the dossier no longer asserts: a divorce, a moved-out sibling, a dropped
+    // trait. Retired, never deleted.
+    for (const [key, fact] of currentKeys) {
+      if (!derivedKeys.has(key) && fact.id !== undefined) {
+        this.facts.invalidate(fact.id, day);
+        retired += 1;
+      }
     }
 
-    // Same structure, but the scores inside may have moved and the battery grades against
-    // this json, so keep it current even when no fact changed.
+    // The scores inside may have moved even when no fact did, and the battery grades
+    // against this json, so the stored dossier is always replaced.
     this.facts.saveDossier({
       simId,
-      hash,
       json: JSON.stringify(dossier),
       updatedDay: day,
       updatedAt: new Date().toISOString(),
     });
-    return unchanged;
+    return { inserted, retired, skipped: inserted === 0 && retired === 0, identityChanged };
   }
 
   private retireContradicting(

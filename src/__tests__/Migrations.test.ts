@@ -73,6 +73,8 @@ describe('migrate', () => {
       expect(names).not.toContain(oldName);
     });
     expect(names.filter((name) => name === '022-create-daily-plan')).toHaveLength(1);
-    expect(db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'daily_plan'").get()).toBeTruthy();
+    expect(
+      db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'daily_plan'").get(),
+    ).toBeTruthy();
   });
 });

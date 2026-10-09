@@ -2135,7 +2135,15 @@ ${factsBlock}
         traits: sim.traits,
         moods: sim.moods,
       }));
-      this.ctx.scenePlayback.roundQueued(sceneId, participantSimIds, round, castLines, finalText, sceneCast);
+      this.ctx.scenePlayback.roundQueued(
+        sceneId,
+        participantSimIds,
+        round,
+        castLines,
+        finalText,
+        sceneCast,
+        preActionLine,
+      );
       this.playTtsLines(castLines, event.sentient_sims, {
         paced: true,
         priority: playbackOptions.priority,
@@ -2148,8 +2156,9 @@ ${factsBlock}
         log.info(
           `[Pipeline] Scene round ${round + 1}/${this.ctx.settings.sceneMaxRounds}: continuing the conversation`,
         );
-        const nextRoundLines = [...(options.carriedLines ?? []), ...(playerLine ? [playerLine] : []), ...finalLines];
-        // Fire-and-forget: the continuation is its own generation with its own memory row.
+        const nextRoundLines = [...carriedLines, ...(playerLine ? [playerLine] : []), ...finalLines];
+        // Fire-and-forget: the continuation is its own generation. Its lines join the
+        // scene's shared memory row when the scene closes (ScenePlaybackRegistry).
         // Registered as in-flight so the scene is not declared finished while a round is
         // still being written — and so a stop from the game reaches it.
         // Queued (priority FIFO lane) rather than run bare so a later-requested generation

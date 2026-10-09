@@ -521,8 +521,7 @@ export class PromptRequestBuilderService {
     // Only describe the lot the report is actually about — an event from another lot (a
     // memory replay, a travelling sim) must not borrow this one's facts. Match on lot_id:
     // location_id IS the lot id, and the report's zone_id is a different handle entirely.
-    const sameLot =
-      reportedLot?.lot_id !== undefined && String(reportedLot.lot_id) === String(event.environment.location_id);
+    const sameLot = reportedLot?.lot_id !== undefined && reportedLot.lot_id === String(event.environment.location_id);
     this.ctx.defaultDescriptions.considerLocation(
       location,
       sameLot ? reportedLot : undefined,

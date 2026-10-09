@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 import { AddFactRequest, SimFactsResponse } from 'main/sentient-sims/clients/SimFactsClient';
@@ -57,15 +58,18 @@ export function useSimFacts(simId?: string, history = false): SimFactsHook {
 }
 
 /**
- * The predicate vocabulary, served by the app so the UI never hardcodes it. Cached for
- * the session: unlike facts, the list only changes when the app itself does.
+ * The predicates whose value is plain text, served by the app so the UI never hardcodes
+ * them. Cached for the session: unlike facts, the list only changes when the app itself does.
  */
-export function useFactPredicates(enabled = true): string[] {
+export function useAttributePredicates(enabled = true): string[] {
   const { data } = useQuery({
     queryKey: ['factPredicates'],
     queryFn: () => client.simFacts.getPredicates(),
     enabled,
     staleTime: Infinity,
   });
-  return data ?? [];
+  return useMemo(() => {
+    const edges = new Set(data?.edges ?? []);
+    return (data?.predicates ?? []).filter((predicate) => !edges.has(predicate));
+  }, [data]);
 }

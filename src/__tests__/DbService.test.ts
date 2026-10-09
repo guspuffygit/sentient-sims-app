@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import { DatabaseNotLoadedError } from 'main/sentient-sims/exceptions/DatabaseNotLoadedError';
 import { mockApiContext } from './util';
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
+import { markScenePaced } from 'main/sentient-sims/util/pacedScenes';
 
 describe('DbService', () => {
   let ctx: ApiContext;
@@ -93,5 +94,97 @@ describe('DbService', () => {
 
     ctx.db.unloadDatabase();
     expect(ctx.db.sessionKey).toBeUndefined();
+  });
+
+  // Memory ids restart in every save, so a scene cut by a save load must be trimmed in
+  // the save it aired in, never by id in the save that replaces it
+  it('Loading another save trims a cut scene in its own save', () => {
+    const saveA = { sessionId: 'session-trim-a', saveId: '1' };
+    const saveB = { sessionId: 'session-trim-b', saveId: '2' };
+    const participants = [{ id: '128937674' }, { id: '18276365' }];
+
+    ctx.db.loadDatabase(saveB);
+    const other = ctx.memoryRepository.createMemory({
+      memory: { location_id: 1, content: 'A memory of the other save' },
+      participants,
+    });
+
+    ctx.db.loadDatabase(saveA);
+    const transcript = 'Alex: Hello.\nBella: Hi.\nAlex: So anyway.';
+    const scene = ctx.memoryRepository.createMemory({
+      memory: { location_id: 1, content: transcript },
+      participants,
+    });
+    if (!other?.id || !scene?.id) {
+      throw new Error('createMemory stored nothing');
+    }
+    expect(scene.id).toEqual(other.id);
+
+    ctx.scenePlayback.roundQueued(
+      'scene-trim',
+      ['128937674', '18276365'],
+      1,
+      [
+        { speaker: 'Alex', text: 'Hello.' },
+        { speaker: 'Bella', text: 'Hi.' },
+        { speaker: 'Alex', text: 'So anyway.' },
+      ],
+      transcript,
+    );
+    ctx.scenePlayback.attachMemory(transcript, scene.id);
+    ctx.scenePlayback.lineShown('scene-trim');
+    ctx.scenePlayback.lineShown('scene-trim');
+
+    ctx.db.loadDatabase(saveB);
+    expect(ctx.memoryRepository.getMemory({ id: other.id }).content).toEqual('A memory of the other save');
+
+    ctx.db.loadDatabase(saveA);
+    expect(ctx.memoryRepository.getMemory({ id: scene.id }).content).toEqual('Alex: Hello.');
+
+    ctx.db.unloadDatabase();
+  });
+
+  it('A scene that ran past round 1 saves every round in the row the mod posted', () => {
+    ctx.db.loadDatabase({ sessionId: 'session-rounds', saveId: '1' });
+    const participants = ['128937674', '18276365'];
+    const opening = 'Alex greets Bella.\nAlex: Hello.\nBella: Hi.';
+    const openingLines = [
+      { speaker: 'Alex', text: 'Hello.' },
+      { speaker: 'Bella', text: 'Hi.' },
+    ];
+
+    // Round 1 airs, and the mod posts its transcript back
+    markScenePaced(opening);
+    ctx.scenePlayback.roundQueued(
+      'scene-rounds',
+      participants,
+      1,
+      openingLines,
+      opening,
+      undefined,
+      'Alex greets Bella.',
+    );
+    const scene = ctx.memoryRepository.createMemory({
+      memory: { location_id: 1, content: opening },
+      participants: participants.map((id) => ({ id })),
+    });
+    if (!scene?.id) {
+      throw new Error('createMemory stored nothing');
+    }
+
+    ctx.scenePlayback.roundQueued(
+      'scene-rounds',
+      participants,
+      2,
+      [{ speaker: 'Alex', text: 'Still here?' }],
+      'Alex: Still here?',
+    );
+    ctx.scenePlayback.playbackEnded('scene-rounds', true);
+    expect(ctx.memoryRepository.getMemory({ id: scene.id }).content).toEqual(opening);
+    ctx.scenePlayback.playbackEnded('scene-rounds', true);
+
+    expect(ctx.memoryRepository.getMemory({ id: scene.id }).content).toEqual(`${opening}\nAlex: Still here?`);
+
+    ctx.db.unloadDatabase();
   });
 });

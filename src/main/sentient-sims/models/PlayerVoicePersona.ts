@@ -29,7 +29,7 @@ export const PLAYER_VOICE_PERSONA_FLAVOR: Record<PlayerVoicePersona, string> = {
 const PLAYER_VOICE_NAME_MAX = 40;
 
 export function sanitizePlayerVoiceName(raw: string | undefined | null): string {
-  return String(raw ?? '')
+  return (raw ?? '')
     .replace(/[:()[\]{}<>]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
@@ -45,14 +45,14 @@ export function playerSpeakerLabel(persona: PlayerVoicePersona, customName?: str
   if (custom) {
     return custom;
   }
-  return PLAYER_VOICE_PERSONA_LABELS[persona] ?? PLAYER_VOICE_PERSONA_LABELS.voice;
+  return PLAYER_VOICE_PERSONA_LABELS[persona];
 }
 
 // What the sim is told is speaking to them: the persona's nature, plus the player's own
 // bio when they wrote one. The bio applies to every persona — the player is still a
 // guardian angel or a conscience, just one the sim knows something about.
 export function playerPersonaFlavor(persona: PlayerVoicePersona, bio?: string): string {
-  const flavor = PLAYER_VOICE_PERSONA_FLAVOR[persona] ?? PLAYER_VOICE_PERSONA_FLAVOR.voice;
+  const flavor = PLAYER_VOICE_PERSONA_FLAVOR[persona];
   const trimmed = (bio ?? '').trim();
   return trimmed ? `${flavor} — ${trimmed}` : flavor;
 }

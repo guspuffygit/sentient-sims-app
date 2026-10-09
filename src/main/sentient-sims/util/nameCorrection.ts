@@ -34,12 +34,12 @@ export function levenshtein(a: string, b: string): number {
 const PROMPT_MAX_CHARS = 700;
 
 // Names go in tightest-scope-first order so the on-lot sims survive truncation
-export function buildTranscriptionPrompt(nameGroups: string[][]): string | undefined {
+export function buildTranscriptionPrompt(nameGroups: (string | null | undefined)[][]): string | undefined {
   const seen = new Set<string>();
   const ordered: string[] = [];
   nameGroups.forEach((group) => {
     group.forEach((name) => {
-      const trimmed = (name ?? '').trim();
+      const trimmed = name?.trim();
       if (trimmed && !seen.has(trimmed.toLowerCase())) {
         seen.add(trimmed.toLowerCase());
         ordered.push(trimmed);
@@ -123,7 +123,7 @@ const CONTRACTION = /[’'](t|re|ve|ll|d|m)$/;
 // Meika/Mika, Ren/Wren). A different first sound is a different word: "People" ->
 // Temple, "Looks" -> Socks, "San" -> Ian (live 09-17..09-22)
 function firstSound(text: string): string {
-  return text.replace(/^c/, 'k')[0] ?? '';
+  return text.replace(/^c/, 'k').charAt(0);
 }
 
 // The game's worlds. Whisper has never heard of them and spells what it hears: "Dale Sol
@@ -256,7 +256,7 @@ export function correctNames(transcript: string, knownNames: string[], onLotName
       // "Sim 153" would otherwise contribute "Sim" as a name candidate
       return;
     }
-    (full ?? '')
+    full
       .split(/\s+/)
       .map((part) => part.trim())
       .filter((part) => part.length >= 3)

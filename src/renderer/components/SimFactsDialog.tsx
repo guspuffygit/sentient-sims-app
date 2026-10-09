@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { SimFactRecord } from 'main/sentient-sims/db/SimFactRepository';
-import { useFactPredicates, useSimFacts } from '../hooks/useSimFacts';
+import { useAttributePredicates, useSimFacts } from '../hooks/useSimFacts';
 
 // The trust ladder, in the order the store applies it. Colour is the fastest way to see
 // that a claim came from a conversation rather than from the game.
@@ -67,7 +67,7 @@ export function SimFactsDialog({ open, simId, simName, onClose }: SimFactsDialog
   const [newObject, setNewObject] = useState('');
 
   const { data, isLoading, error, addFact, retireFact } = useSimFacts(open ? simId : undefined, history);
-  const predicates = useFactPredicates(open);
+  const predicates = useAttributePredicates(open);
 
   const facts = useMemo(() => data?.facts ?? [], [data]);
   const names = data?.names ?? {};
@@ -85,19 +85,11 @@ export function SimFactsDialog({ open, simId, simName, onClose }: SimFactsDialog
   }, [facts]);
 
   const submit = () => {
-    if (!newPredicate || !newObject) {
+    const value = newObject.trim();
+    if (!newPredicate || !value) {
       return;
     }
-    // A long digits-only value is read as another Sim's id, which is what lets this
-    // dialog state a relationship and not only an attribute.
-    const value = newObject.trim();
-    const isSimId = /^\d{6,}$/.test(value);
-    addFact({
-      predicate: newPredicate,
-      objectSimId: isSimId ? value : undefined,
-      objectText: isSimId ? undefined : value,
-      source: 'player',
-    });
+    addFact({ predicate: newPredicate, objectText: value, source: 'player' });
     setNewObject('');
   };
 
@@ -201,14 +193,15 @@ export function SimFactsDialog({ open, simId, simName, onClose }: SimFactsDialog
           </TextField>
           <TextField
             size="small"
-            label="Value, or another Sim's id"
+            label="Value"
             value={newObject}
             onChange={(event) => {
               setNewObject(event.target.value);
             }}
+            slotProps={{ htmlInput: { maxLength: 200 } }}
             sx={{ flex: 1 }}
           />
-          <Button onClick={submit} disabled={!newPredicate || !newObject}>
+          <Button onClick={submit} disabled={!newPredicate || !newObject.trim()}>
             Add
           </Button>
         </Box>

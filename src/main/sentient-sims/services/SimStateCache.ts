@@ -34,7 +34,7 @@ export class SimStateCache {
       log.debug(`[SimStateCache] dropping stale report seq=${report.seq} < ${this.lastSeq}`);
       return;
     }
-    this.lastSeq = Math.max(this.lastSeq, report.seq ?? 0);
+    this.lastSeq = Math.max(this.lastSeq, report.seq);
     this.latestReport = report;
     this.receivedAt = Date.now();
     (report.sims ?? []).forEach((entry) => {

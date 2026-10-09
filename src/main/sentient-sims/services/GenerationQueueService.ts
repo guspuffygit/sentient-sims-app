@@ -447,7 +447,7 @@ export class GenerationQueueService {
   // pending background work another full quiet period out. A timer that fires while the
   // queue turned busy again is a no-op; the drain after that work reschedules it.
   private scheduleBackground() {
-    if (this.backgroundJobs.length === 0 || this.activeCount > 0 || this.jobs.length + this.priorityJobs.length > 0) {
+    if (this.backgroundJobs.length === 0 || this.activeCount > 0 || this.hasForegroundWaiting()) {
       return;
     }
     if (this.idleTimer) {
@@ -461,7 +461,7 @@ export class GenerationQueueService {
   }
 
   private startBackground() {
-    if (this.activeCount > 0 || this.jobs.length + this.priorityJobs.length > 0) {
+    if (this.activeCount > 0 || this.hasForegroundWaiting()) {
       return;
     }
     const job = this.backgroundJobs.shift();
@@ -471,7 +471,7 @@ export class GenerationQueueService {
     this.activeCount += 1;
     void job().finally(() => {
       this.activeCount -= 1;
-      if (this.jobs.length + this.priorityJobs.length > 0) {
+      if (this.hasForegroundWaiting()) {
         // Foreground work arrived while this task ran — it goes first; its drain
         // restarts the idle countdown for whatever background work remains
         this.drain();
@@ -479,6 +479,10 @@ export class GenerationQueueService {
         this.startBackground();
       }
     });
+  }
+
+  private hasForegroundWaiting(): boolean {
+    return this.speechJobs.length + this.priorityJobs.length + this.jobs.length + this.cognitionJobs.length > 0;
   }
 
   private hasState(entry: PrefetchEntry, state: EntryState): boolean {

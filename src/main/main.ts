@@ -23,6 +23,7 @@ import { appApiPort } from './sentient-sims/constants';
 import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { disableDebugLogging, enableDebugLogging } from './sentient-sims/util/debugLog';
 import { notifySettingChanged } from './sentient-sims/util/notifyRenderer';
+import { publishClockState } from './sentient-sims/websocketServer';
 import { setSimAliases } from './sentient-sims/util/simAliases';
 import { SettingsEnum } from './sentient-sims/models/SettingsEnum';
 import debug from 'electron-debug';
@@ -47,7 +48,7 @@ log.errorHandler.startCatching({ showDialog: false });
 const ARCHIVED_LOG_COUNT = 10;
 log.transports.file.maxSize = 25 * 1024 * 1024;
 log.transports.file.archiveLogFn = (oldLogFile) => {
-  const file = oldLogFile.toString();
+  const file = oldLogFile.path;
   const dir = path.dirname(file);
   const ext = path.extname(file);
   const base = path.basename(file, ext);
@@ -183,6 +184,7 @@ const startServices = () => {
     // version check reads as "app far newer than required" and pauses the game with a
     // mod-out-of-date error on every connect. Report the real app version instead.
     appVersion: app.isPackaged ? app.getVersion() : releaseAppVersion,
+    devBuild: !app.isPackaged,
   });
   voiceInputService?.shutdown();
   voiceInputService = new VoiceInputService(ctx);
@@ -196,6 +198,9 @@ const startServices = () => {
       setSimAliases(settingsService.twitchSimAliases);
     }
     voiceInputService?.onSettingChanged(key);
+    if (key === (SettingsEnum.PLAYBACK_FOLLOWS_GAME_CLOCK as string)) {
+      publishClockState(ctx);
+    }
     for (const tier of ctx.tiers) {
       tier.onSettingChanged?.(ctx, key);
     }
@@ -279,7 +284,7 @@ app.on('window-all-closed', () => {
   }
 });
 
-// The uiohook keyboard-hook thread keeps the process alive unless stopped
+// Drop the mic and let the build tiers close their connections before the process goes
 app.on('will-quit', () => {
   voiceInputService?.shutdown();
   const ctx = apiContext;

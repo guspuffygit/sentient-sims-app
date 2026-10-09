@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import { Request, Response } from 'express';
 import log from 'electron-log';
 import { sendPopUpNotification } from '../util/notifyRenderer';
@@ -7,7 +8,7 @@ import { ModUpdate } from '../services/UpdateService';
 
 export type UpdateModResponse = {
   done?: 'done';
-  skipped?: 'game-running';
+  skipped?: 'game-running' | 'dev-mod';
   error?: {
     stack?: string;
     message?: string;
@@ -25,6 +26,19 @@ export class UpdateController {
     const modUpdate = req.body as ModUpdate;
     try {
       log.info(`Starting ${modUpdate.auto ? 'auto ' : ''}update.`);
+
+      // A mod built from the repo (the app running from source, or a Scripts folder in the
+      // mod folder) must not be replaced by a release behind the developer's back; the
+      // Update and Reinstall buttons still install one on request
+      if (modUpdate.auto) {
+        const devModReason = this.devModReason();
+        if (devModReason) {
+          log.info(`Skipping mod auto-update, ${devModReason}.`);
+          const response: UpdateModResponse = { skipped: 'dev-mod' };
+          res.json(response);
+          return;
+        }
+      }
 
       // Installing over the game's locked .package files fails partway and
       // leaves the mod folder inconsistent, so refuse up front
@@ -64,4 +78,15 @@ export class UpdateController {
       res.status(200).json(response);
     }
   };
+
+  private devModReason(): string | undefined {
+    if (this.ctx.devBuild) {
+      return 'the app is running from source';
+    }
+    const scriptsFolder = this.ctx.directory.getSentientSimsScriptsFolder();
+    if (fs.existsSync(scriptsFolder)) {
+      return `${scriptsFolder} exists`;
+    }
+    return undefined;
+  }
 }

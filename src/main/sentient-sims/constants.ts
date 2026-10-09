@@ -128,12 +128,14 @@ export const openaiDefaultImageModel = 'gpt-image-1';
 export const openaiImageModels = ['gpt-image-1', 'dall-e-3', 'dall-e-2'];
 export const novelaiDefaultModel = 'kayra-v1';
 export const sentientSimsAIDefaultModel = 'meta-llama/Llama-3.3-70B-Instruct';
+export const patreonMembershipUrl = 'https://www.patreon.com/SentientSims/membership';
 // Models the hosted Sentient Sims AI service no longer offers, mapped to what now serves
 // them. runMigrations rewrites saved picks on launch and the model picker hides them. Only
 // for the hosted service — a CustomAI server may genuinely run one of these.
 export const retiredSentientSimsAIModels: { [model: string]: string } = {
   'Gryphe/MythoMax-L2-13b': sentientSimsAIDefaultModel,
   'Llama-3.3-70B-ArliAI-RPMax-v1.4': sentientSimsAIDefaultModel,
+  'deepseek-ai/DeepSeek-V4-Flash': sentientSimsAIDefaultModel,
 };
 // The static image model list the Sentient Sims AI /v1/images/generations
 // endpoint accepts (member-only); the server defaults to the first entry.
@@ -211,6 +213,11 @@ export const defaultKokoroEndpoint = 'https://api.kokorotts.com';
 export const defaultVLLMEndpoint = 'http://localhost:8000/v1';
 export const defaultVoiceInputModel = 'whisper-1';
 export const defaultVoiceInputHotkey = 'Ctrl+Space';
+// macOS takes Ctrl+Space to switch input sources before the game ever sees it
+export const defaultVoiceInputHotkeyMac = 'Alt+V';
+export function defaultVoiceInputHotkeyFor(isMac: boolean): string {
+  return isMac ? defaultVoiceInputHotkeyMac : defaultVoiceInputHotkey;
+}
 // Backstop for a lost keyup (alt-tab mid-hold) so the mic never stays hot indefinitely
 export const voiceInputMaxRecordMs = 60000;
 // Recordings shorter than this are accidental hotkey taps, not speech

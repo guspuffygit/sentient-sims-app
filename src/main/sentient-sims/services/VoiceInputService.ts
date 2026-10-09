@@ -6,7 +6,7 @@ import { VoiceHotkeyService } from './VoiceHotkeyService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { voiceInputMaxRecordMs, voiceInputMinAudioBytes } from '../constants';
 import { sendPlayerVoiceMessageToMod, sendPlayerVoiceStatusToMod, sendPopUpNotification } from '../util/notifyRenderer';
-import { isWebSocketConnected } from '../websocketServer';
+import { isWebSocketConnected, setVoiceKeySink } from '../websocketServer';
 import { getAllBrowserWindows } from '../util/browserWindows';
 
 type VoiceInputState = 'idle' | 'listening' | 'transcribing';
@@ -23,10 +23,10 @@ function notifyAllWindows(message: string, ...args: unknown[]) {
   });
 }
 
-// Hold-to-talk orchestration: the global hotkey (main process) starts/stops a renderer
-// MediaRecorder over IPC, the audio comes back for transcription, and the transcript
-// goes to the mod over the websocket as the active sim's spoken line. The mic is only
-// hot between record-start and record-stop.
+// Hold-to-talk orchestration: the hotkey (heard by the game overlay, relayed by the
+// mod) starts/stops a renderer MediaRecorder over IPC, the audio comes back for
+// transcription, and the transcript goes to the mod over the websocket as the active
+// sim's spoken line. The mic is only hot between record-start and record-stop.
 export class VoiceInputService {
   private readonly ctx: ApiContext;
 
@@ -44,15 +44,14 @@ export class VoiceInputService {
   }
 
   initialize() {
+    setVoiceKeySink(this.hotkey);
     this.armHotkey();
   }
 
   shutdown() {
+    setVoiceKeySink(undefined);
     this.hotkey.shutdown();
-  }
-
-  get usingFallbackHotkey(): boolean {
-    return this.hotkey.usingFallback;
+    this.reset();
   }
 
   onSettingChanged(key: string) {
@@ -192,7 +191,7 @@ export class VoiceInputService {
   // are handled by correctNames' COMMON_WORDS guard instead of by shrinking this pool.
   private knownNames(): string[] {
     try {
-      const report = this.ctx.simStateCache?.getReport?.();
+      const report = this.ctx.simStateCache.getReport();
       const names = new Set<string>();
       const add = (name: string | undefined) => {
         if (name && !isPlaceholderName(name)) {
@@ -201,7 +200,7 @@ export class VoiceInputService {
       };
       (report?.sims ?? []).forEach((entry) => {
         add(entry.sim_name);
-        (entry.sims ?? []).forEach((sim) => {
+        entry.sims.forEach((sim) => {
           add(sim.name);
         });
       });
@@ -259,6 +258,10 @@ export class VoiceInputService {
     if (this.deliveryTimer) {
       clearTimeout(this.deliveryTimer);
       this.deliveryTimer = undefined;
+    }
+    // The mod reads clicks on sims as target picks until it hears the hold ended
+    if (this.state === 'listening') {
+      sendPlayerVoiceStatusToMod('cancelled');
     }
     this.state = 'idle';
   }

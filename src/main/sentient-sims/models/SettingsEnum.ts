@@ -74,6 +74,7 @@ export enum SettingsEnum {
   // Voice input: hold-to-talk mic capture transcribed via an OpenAI-compatible
   // /audio/transcriptions endpoint, injected into the game as the active sim speaking
   VOICE_INPUT_ENABLED = 'voiceInputEnabled',
+  VOICE_INPUT_PROVIDER = 'voiceInputProvider', // sentientsimsai | openai (any compatible endpoint)
   VOICE_INPUT_ENDPOINT = 'voiceInputEndpoint',
   VOICE_INPUT_KEY = 'voiceInputKey',
   VOICE_INPUT_MODEL = 'voiceInputModel',

@@ -1,7 +1,17 @@
 import { Request, Response } from 'express';
 import { ApiContext } from '../services/ApiContext';
 import { CatchErrors } from './decorators/CatchError';
-import { FactPredicate, isKnownSource } from '../pipeline/facts/predicates';
+import {
+  EDGE_PREDICATES,
+  FactPredicate,
+  isEdgePredicate,
+  isKnownPredicate,
+  isKnownSource,
+} from '../pipeline/facts/predicates';
+
+const DEFAULT_PATH_HOPS = 2;
+const MAX_PATH_HOPS = 6;
+const MAX_OBJECT_TEXT_LENGTH = 200;
 
 /**
  * Read and write one sim's semantic facts (Phase 3.1 H4).
@@ -54,8 +64,11 @@ export class SimFactsController {
   getFactPath = (req: Request, res: Response) => {
     const simId = SimFactsController.param(req.params.id);
     const otherId = SimFactsController.param(req.params.otherId);
-    const hops = Number(req.query.hops ?? 2);
-    const path = this.ctx.semanticMemory.pathBetween(simId, otherId, Number.isFinite(hops) ? hops : 2);
+    const hops = req.query.hops === undefined ? DEFAULT_PATH_HOPS : Number(req.query.hops);
+    if (!Number.isInteger(hops) || hops < 1 || hops > MAX_PATH_HOPS) {
+      return res.status(400).json({ error: `hops must be a whole number from 1 to ${MAX_PATH_HOPS}` });
+    }
+    const path = this.ctx.semanticMemory.pathBetween(simId, otherId, hops);
     const names = this.nameMap([
       simId,
       otherId,
@@ -113,8 +126,22 @@ export class SimFactsController {
     if (!body.predicate) {
       return res.status(400).json({ error: 'predicate is required' });
     }
+    if (!isKnownPredicate(body.predicate)) {
+      return res.status(400).json({ error: `unknown predicate ${body.predicate}` });
+    }
     if (!body.objectText && !body.objectSimId) {
       return res.status(400).json({ error: 'objectText or objectSimId is required' });
+    }
+    // The prompt names an edge by its sim id and lists an attribute by its text, so a
+    // fact carrying only the other one renders as nothing, or as "undefined".
+    if (isEdgePredicate(body.predicate) && !body.objectSimId) {
+      return res.status(400).json({ error: `${body.predicate} is a relationship and needs objectSimId` });
+    }
+    if (!isEdgePredicate(body.predicate) && !body.objectText) {
+      return res.status(400).json({ error: `${body.predicate} needs objectText` });
+    }
+    if (body.objectText && body.objectText.length > MAX_OBJECT_TEXT_LENGTH) {
+      return res.status(400).json({ error: `objectText is limited to ${MAX_OBJECT_TEXT_LENGTH} characters` });
     }
     // `game` is reserved for the dossier. Letting a route assert it would put a claim
     // nothing can ever correct at the top of the trust ladder.
@@ -141,13 +168,17 @@ export class SimFactsController {
   // DELETE /sims/:id/facts/:factId — retire, never remove. The row stays as history.
   @CatchErrors()
   retireFact = (req: Request, res: Response) => {
+    const simId = SimFactsController.param(req.params.id);
     const factId = Number(SimFactsController.param(req.params.factId));
     if (!Number.isFinite(factId)) {
       return res.status(400).json({ error: 'factId must be a number' });
     }
     const fact = this.ctx.semanticMemory.getFact(factId);
-    if (!fact) {
-      return res.status(404).json({ error: `no fact ${factId}` });
+    if (!fact || fact.subjectSimId !== simId) {
+      return res.status(404).json({ error: `no fact ${factId} for sim ${simId}` });
+    }
+    if (fact.source === 'game') {
+      return res.status(400).json({ error: 'a game fact cannot be retired, the next dossier asserts it again' });
     }
     this.ctx.semanticMemory.invalidateFact(factId, this.ctx.simStateCache.getReport()?.lot?.clock?.absolute_day);
     return res.json({ ok: true, retired: factId });
@@ -155,5 +186,6 @@ export class SimFactsController {
 
   // GET /facts/predicates — the vocabulary, so the UI and the tools do not hardcode it
   @CatchErrors()
-  getPredicates = (_req: Request, res: Response) => res.json({ predicates: Object.values(FactPredicate) });
+  getPredicates = (_req: Request, res: Response) =>
+    res.json({ predicates: Object.values(FactPredicate), edges: [...EDGE_PREDICATES] });
 }

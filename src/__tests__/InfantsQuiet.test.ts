@@ -96,9 +96,7 @@ describe('infants go quiet', () => {
     vi.spyOn(ctx.memoryRepository, 'getSceneParticipantIds').mockReturnValue(['500', '600']);
     vi.spyOn(ctx.participantRepository, 'getParticipantNames').mockReturnValue(['Travis Scott', 'Ariel Scott']);
     vi.spyOn(ctx.locationRepository, 'getLocation').mockReturnValue({ id: 10, name: 'Sandtrap Flat' } as never);
-    const oneShot = vi
-      .spyOn(ctx.ai, 'runOneShot')
-      .mockResolvedValue({ text: 'A quiet stop.', exchange: {} } as never);
+    const oneShot = vi.spyOn(ctx.ai, 'runOneShot').mockResolvedValue({ text: 'A quiet stop.', exchange: {} } as never);
     ctx.simStateCache.ingest({
       type: 'state_report',
       seq: 1,

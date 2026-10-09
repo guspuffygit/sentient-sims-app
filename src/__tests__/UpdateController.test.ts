@@ -1,3 +1,6 @@
+import * as fs from 'fs';
+import os from 'os';
+import path from 'path';
 import { Request, Response } from 'express';
 import { UpdateController, UpdateModResponse } from 'main/sentient-sims/controllers/UpdateController';
 import { mockApiContext } from './util';
@@ -80,6 +83,49 @@ describe('UpdateController', () => {
     expect(res.body).toEqual({ skipped: 'game-running' });
     expect(updateMod).not.toHaveBeenCalled();
     expect(notify.sendPopUpNotification).not.toHaveBeenCalled();
+  });
+
+  it('silently skips an auto update when the app runs from source', async () => {
+    const ctx = mockApiContext({ devBuild: true });
+    const updateMod = vi.spyOn(ctx.update, 'updateMod').mockResolvedValue();
+    const controller = new UpdateController(ctx);
+    const res = mockResponse();
+
+    await controller.updateMod(updateRequest(true), res);
+
+    expect(res.body).toEqual({ skipped: 'dev-mod' });
+    expect(updateMod).not.toHaveBeenCalled();
+    expect(gameProcess.isGameRunning).not.toHaveBeenCalled();
+  });
+
+  it('silently skips an auto update when the mod folder has a Scripts folder', async () => {
+    const ctx = mockApiContext();
+    const scriptsFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'ss-scripts-'));
+    vi.spyOn(ctx.directory, 'getSentientSimsScriptsFolder').mockReturnValue(scriptsFolder);
+    const updateMod = vi.spyOn(ctx.update, 'updateMod').mockResolvedValue();
+    const controller = new UpdateController(ctx);
+    const res = mockResponse();
+
+    try {
+      await controller.updateMod(updateRequest(true), res);
+    } finally {
+      fs.rmSync(scriptsFolder, { recursive: true, force: true });
+    }
+
+    expect(res.body).toEqual({ skipped: 'dev-mod' });
+    expect(updateMod).not.toHaveBeenCalled();
+  });
+
+  it('still runs a manual update when the app runs from source', async () => {
+    const ctx = mockApiContext({ devBuild: true });
+    const updateMod = vi.spyOn(ctx.update, 'updateMod').mockResolvedValue();
+    const controller = new UpdateController(ctx);
+    const res = mockResponse();
+
+    await controller.updateMod(updateRequest(), res);
+
+    expect(res.body).toEqual({ done: 'done' });
+    expect(updateMod).toHaveBeenCalledTimes(1);
   });
 
   it('refuses a manual update while the game is running, with a popup', async () => {

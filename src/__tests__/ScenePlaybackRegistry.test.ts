@@ -12,10 +12,10 @@ function lines(...texts: string[]): DialogueLine[] {
 function build() {
   const notifyStop = vi.fn();
   const notifySceneEnded = vi.fn();
-  const trimMemory = vi.fn();
+  const rewriteMemory = vi.fn();
   const onSceneClosed = vi.fn<(closed: SceneClosed) => void>();
-  const registry = new ScenePlaybackRegistry({ notifyStop, notifySceneEnded, trimMemory, onSceneClosed });
-  return { registry, notifyStop, notifySceneEnded, trimMemory, onSceneClosed };
+  const registry = new ScenePlaybackRegistry({ notifyStop, notifySceneEnded, rewriteMemory, onSceneClosed });
+  return { registry, notifyStop, notifySceneEnded, rewriteMemory, onSceneClosed };
 }
 
 const CAST = [
@@ -106,7 +106,7 @@ describe('ScenePlaybackRegistry', () => {
   });
 
   it('trims a cut scene to the lines that were actually spoken', () => {
-    const { registry, trimMemory } = harness;
+    const { registry, rewriteMemory } = harness;
     registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.', 'So anyway.'), 'paced text');
     expect(registry.attachMemory('paced text', '900')).toBe(true);
 
@@ -115,11 +115,11 @@ describe('ScenePlaybackRegistry', () => {
     // Bella walks off while her line plays; soft means that line still counts as heard
     registry.stop(SCENE, 'walked_away', 'soft');
 
-    expect(trimMemory).toHaveBeenCalledWith('900', 'Alex: Hello.\nBella: Hi.');
+    expect(rewriteMemory).toHaveBeenCalledWith('900', 'Alex: Hello.\nBella: Hi.');
   });
 
   it('does not count the line a hard stop cut off mid-word', () => {
-    const { registry, trimMemory } = harness;
+    const { registry, rewriteMemory } = harness;
     registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.', 'So anyway.'), 'paced text');
     registry.attachMemory('paced text', '900');
 
@@ -127,11 +127,70 @@ describe('ScenePlaybackRegistry', () => {
     registry.lineShown(SCENE);
     registry.stop(SCENE, 'left_lot', 'hard');
 
-    expect(trimMemory).toHaveBeenCalledWith('900', 'Alex: Hello.');
+    expect(rewriteMemory).toHaveBeenCalledWith('900', 'Alex: Hello.');
+  });
+
+  it('keeps the action sentence that heads the row', () => {
+    const { registry, rewriteMemory } = harness;
+    registry.roundQueued(
+      SCENE,
+      PARTICIPANTS,
+      1,
+      lines('Hello.', 'Hi.', 'So anyway.'),
+      'paced text',
+      undefined,
+      'Alex greets Bella.',
+    );
+    registry.attachMemory('paced text', '900');
+
+    registry.lineShown(SCENE);
+    registry.stop(SCENE, 'walked_away', 'soft');
+
+    expect(rewriteMemory).toHaveBeenCalledWith('900', 'Alex greets Bella.\nAlex: Hello.');
+  });
+
+  it('writes the action sentence alone when no line was heard', () => {
+    const { registry, rewriteMemory } = harness;
+    registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.'), 'paced text', undefined, 'Alex greets Bella.');
+    registry.attachMemory('paced text', '900');
+
+    registry.lineShown(SCENE);
+    // The only line shown was cut off mid-word
+    registry.stop(SCENE, 'left_lot', 'hard');
+
+    expect(rewriteMemory).toHaveBeenCalledWith('900', 'Alex greets Bella.');
+  });
+
+  it('never empties a row when no line was heard and no action heads it', () => {
+    const { registry, rewriteMemory } = harness;
+    registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.'), 'paced text');
+    registry.attachMemory('paced text', '900');
+
+    registry.stop(SCENE, 'walked_away', 'soft');
+
+    expect(rewriteMemory).not.toHaveBeenCalled();
+  });
+
+  it('writes a line that aired in chunks back as one line', () => {
+    const { registry, rewriteMemory } = harness;
+    const chunked: DialogueLine[] = [
+      { speaker: 'Alex', text: 'First sentence.', continues: true },
+      { speaker: 'Alex', text: 'Second sentence.', continues: true },
+      { speaker: 'Alex', text: 'Third sentence.' },
+      { speaker: 'Bella', text: 'Hi.' },
+    ];
+    registry.roundQueued(SCENE, PARTICIPANTS, 1, chunked, 'paced text');
+    registry.attachMemory('paced text', '900');
+
+    registry.lineShown(SCENE);
+    registry.lineShown(SCENE);
+    registry.stop(SCENE, 'walked_away', 'soft');
+
+    expect(rewriteMemory).toHaveBeenCalledWith('900', 'Alex: First sentence. Second sentence.');
   });
 
   it('leaves the memory alone when the whole scene was heard', () => {
-    const { registry, trimMemory } = harness;
+    const { registry, rewriteMemory } = harness;
     registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.'), 'paced text');
     registry.attachMemory('paced text', '900');
 
@@ -140,30 +199,115 @@ describe('ScenePlaybackRegistry', () => {
     // Cut after the last line: nothing was lost, so the row stands as written
     registry.stop(SCENE, 'walked_away', 'soft');
 
-    expect(trimMemory).not.toHaveBeenCalled();
+    expect(rewriteMemory).not.toHaveBeenCalled();
   });
 
   it('leaves the memory alone when its row never arrived', () => {
-    const { registry, trimMemory } = harness;
+    const { registry, rewriteMemory } = harness;
     registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.'), 'paced text');
 
     registry.stop(SCENE, 'walked_away', 'soft');
 
-    expect(trimMemory).not.toHaveBeenCalled();
+    expect(rewriteMemory).not.toHaveBeenCalled();
   });
 
-  it('only trims the opening round, the only one with a shared row', () => {
-    const { registry, trimMemory } = harness;
+  it('writes every round into the shared row when the scene runs its course', () => {
+    const { registry, rewriteMemory } = harness;
+    registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.'), 'paced text', undefined, 'Alex greets Bella.');
+    registry.attachMemory('paced text', '900');
+    registry.roundQueued(SCENE, PARTICIPANTS, 2, lines('Still here?', 'Yes.'), 'second paced text');
+    // A continuation has no row of its own for the mod to post back
+    expect(registry.attachMemory('second paced text', '901')).toBe(false);
+
+    registry.playbackEnded(SCENE, true);
+    expect(rewriteMemory).not.toHaveBeenCalled();
+    registry.playbackEnded(SCENE, true);
+
+    expect(rewriteMemory).toHaveBeenCalledTimes(1);
+    expect(rewriteMemory).toHaveBeenCalledWith(
+      '900',
+      'Alex greets Bella.\nAlex: Hello.\nBella: Hi.\nAlex: Still here?\nBella: Yes.',
+    );
+  });
+
+  it('leaves the row as written when a one-round scene runs its course', () => {
+    const { registry, rewriteMemory } = harness;
     registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.'), 'paced text');
     registry.attachMemory('paced text', '900');
-    // A continuation's transcript is never written to a shared memory row
+
+    registry.playbackEnded(SCENE, true);
+
+    expect(rewriteMemory).not.toHaveBeenCalled();
+  });
+
+  it('keeps round 1 and the heard part of a later round when the scene is cut there', () => {
+    const { registry, rewriteMemory } = harness;
+    registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.'), 'paced text');
+    registry.attachMemory('paced text', '900');
+    registry.roundQueued(SCENE, PARTICIPANTS, 2, lines('Still here?', 'Yes.'), 'second paced text');
+
+    registry.lineShown(SCENE);
+    registry.lineShown(SCENE);
+    registry.lineShown(SCENE);
+    registry.stop(SCENE, 'walked_away', 'soft');
+
+    expect(rewriteMemory).toHaveBeenCalledWith('900', 'Alex: Hello.\nBella: Hi.\nAlex: Still here?');
+  });
+
+  it('trims round 1 when the scene is cut before a queued later round airs', () => {
+    const { registry, rewriteMemory } = harness;
+    registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.'), 'paced text');
+    registry.attachMemory('paced text', '900');
     registry.roundQueued(SCENE, PARTICIPANTS, 2, lines('Still here?'), 'second paced text');
-    expect(registry.attachMemory('second paced text', '901')).toBe(false);
 
     registry.lineShown(SCENE);
     registry.stop(SCENE, 'walked_away', 'soft');
 
-    expect(trimMemory).toHaveBeenCalledWith('900', 'Alex: Hello.');
+    expect(rewriteMemory).toHaveBeenCalledWith('900', 'Alex: Hello.');
+  });
+
+  it('rewrites a row that lands after its scene ran its course', () => {
+    const { registry, rewriteMemory } = harness;
+    registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.'), 'paced text');
+    registry.roundQueued(SCENE, PARTICIPANTS, 2, lines('Still here?', 'Yes.'), 'second paced text');
+    registry.playbackEnded(SCENE, true);
+    registry.playbackEnded(SCENE, true);
+    expect(rewriteMemory).not.toHaveBeenCalled();
+
+    expect(registry.attachMemory('paced text', '900')).toBe(true);
+
+    expect(rewriteMemory).toHaveBeenCalledWith('900', 'Alex: Hello.\nBella: Hi.\nAlex: Still here?\nBella: Yes.');
+    // The rewrite is owed once
+    expect(registry.attachMemory('paced text', '902')).toBe(false);
+  });
+
+  it('trims a row that lands after its scene was stopped', () => {
+    const { registry, rewriteMemory } = harness;
+    registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.', 'So anyway.'), 'paced text');
+    registry.lineShown(SCENE);
+    registry.stop(SCENE, 'walked_away', 'soft');
+    expect(rewriteMemory).not.toHaveBeenCalled();
+
+    registry.attachMemory('paced text', '900');
+
+    expect(rewriteMemory).toHaveBeenCalledWith('900', 'Alex: Hello.');
+  });
+
+  it('keeps an earlier reply out of the row of a reply that opens on the same scene', () => {
+    const { registry, rewriteMemory } = harness;
+    // A player thread reuses its scene id, and the next reply can open before the last one finished airing
+    registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('First answer.'), 'first paced text');
+    registry.attachMemory('first paced text', '900');
+    registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Second answer.', 'Agreed.'), 'second paced text');
+    registry.attachMemory('second paced text', '901');
+    registry.roundQueued(SCENE, PARTICIPANTS, 2, lines('One more thing.'), 'third paced text');
+
+    registry.playbackEnded(SCENE, true);
+    registry.playbackEnded(SCENE, true);
+    registry.playbackEnded(SCENE, true);
+
+    expect(rewriteMemory).toHaveBeenCalledTimes(1);
+    expect(rewriteMemory).toHaveBeenCalledWith('901', 'Alex: Second answer.\nBella: Agreed.\nAlex: One more thing.');
   });
 
   it('hands a finished conversation on whole, with every round and the cast', () => {

@@ -303,6 +303,66 @@ describe('GenerationQueueService', () => {
     expect(order).toEqual(['idle1', 'foreground', 'idle2']);
   });
 
+  it.each(['runSpeech', 'runCognition'] as const)(
+    'starts %s work that arrived during the last idle task',
+    async (lane) => {
+      vi.useFakeTimers();
+      const { ctx } = makeContext();
+      const queue = new GenerationQueueService(ctx);
+      const order: string[] = [];
+      let finishIdle!: () => void;
+      const idleGate = new Promise<void>((resolve) => {
+        finishIdle = resolve;
+      });
+
+      void queue.runWhenIdle(async () => {
+        order.push('idle');
+        await idleGate;
+      });
+      await vi.advanceTimersByTimeAsync(backgroundIdleDelayMs);
+
+      void queue[lane](() => {
+        order.push(lane);
+        return Promise.resolve();
+      });
+      finishIdle();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(order).toEqual(['idle', lane]);
+    },
+  );
+
+  it.each(['runSpeech', 'runCognition'] as const)('lets %s work cut in ahead of further idle work', async (lane) => {
+    vi.useFakeTimers();
+    const { ctx } = makeContext();
+    const queue = new GenerationQueueService(ctx);
+    const order: string[] = [];
+    let finishFirst!: () => void;
+    const firstGate = new Promise<void>((resolve) => {
+      finishFirst = resolve;
+    });
+
+    void queue.runWhenIdle(async () => {
+      order.push('idle1');
+      await firstGate;
+    });
+    void queue.runWhenIdle(() => {
+      order.push('idle2');
+      return Promise.resolve();
+    });
+    await vi.advanceTimersByTimeAsync(backgroundIdleDelayMs);
+
+    void queue[lane](() => {
+      order.push(lane);
+      return Promise.resolve();
+    });
+    finishFirst();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(order).toEqual(['idle1', lane]);
+
+    await vi.advanceTimersByTimeAsync(backgroundIdleDelayMs);
+    expect(order).toEqual(['idle1', lane, 'idle2']);
+  });
+
   it('rejects the idle caller when its task fails without disturbing later idle work', async () => {
     vi.useFakeTimers();
     const { ctx } = makeContext();

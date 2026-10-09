@@ -127,7 +127,7 @@ export class MemoryRepository extends Repository {
         .all(bigIntIds) as { memory_id: bigint | number; owner_participant_id: bigint | number | null }[];
       const ownerByMemory = new Map<string, string>();
       owners.forEach((row) => {
-        if (row.owner_participant_id !== null && row.owner_participant_id !== undefined) {
+        if (row.owner_participant_id !== null) {
           ownerByMemory.set(String(row.memory_id), String(row.owner_participant_id));
         }
       });

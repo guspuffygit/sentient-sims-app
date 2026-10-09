@@ -7,7 +7,7 @@ function registry() {
   return new ScenePlaybackRegistry({
     notifyStop: vi.fn(),
     notifySceneEnded: vi.fn(),
-    trimMemory: vi.fn(),
+    rewriteMemory: vi.fn(),
     onSceneClosed: vi.fn(),
   });
 }

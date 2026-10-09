@@ -19,6 +19,12 @@ export type AddFactRequest = {
   confidence?: number;
 };
 
+// `edges` is the subset of `predicates` whose object is another sim.
+export type FactPredicatesResponse = {
+  predicates: string[];
+  edges: string[];
+};
+
 export class SimFactsClient extends ApiClient {
   async getFacts(simId: string, options: { about?: string; history?: boolean } = {}): Promise<SimFactsResponse> {
     const query = new URLSearchParams();
@@ -43,8 +49,8 @@ export class SimFactsClient extends ApiClient {
     await axiosClient.delete(`${this.apiUrl}/sims/${simId}/facts/${factId}`);
   }
 
-  async getPredicates(): Promise<string[]> {
-    const response = await axiosClient.get<{ predicates: string[] }>(`${this.apiUrl}/facts/predicates`);
-    return response.data.predicates;
+  async getPredicates(): Promise<FactPredicatesResponse> {
+    const response = await axiosClient.get<FactPredicatesResponse>(`${this.apiUrl}/facts/predicates`);
+    return response.data;
   }
 }

@@ -32,7 +32,8 @@ export function toMemoryEntity(row: MemoryRow): MemoryEntity {
 // The row shape handed to the mod: SentientMemory.from_row ignores fields it does not know,
 // and the overlay's memories window reads the owner fields off the raw row.
 export function toModMemory(memory: MemoryEntity): MemoryEntity {
-  const { participant_names: _names, ...modRow } = memory;
+  const modRow = { ...memory };
+  delete modRow.participant_names;
   return modRow;
 }
 

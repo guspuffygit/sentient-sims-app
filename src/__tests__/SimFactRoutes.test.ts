@@ -41,10 +41,10 @@ describe('sim fact routes', () => {
   beforeAll(() => {
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
     ctx.db.loadDatabase({ sessionId: `routes-${Math.random().toString(36).slice(2)}`, saveId: '1' });
-    ctx.semanticMemory.ingestDossier(dossier, { hash: 'r1', day: 10 });
+    ctx.semanticMemory.ingestDossier(dossier, { day: 10 });
     ctx.semanticMemory.ingestDossier(
       { sim_id: '200', name: 'Mackenzie Scott', family: { parents: ['100'], children: ['400'], steady_ids: [] } },
-      { hash: 'r2', day: 10 },
+      { day: 10 },
     );
     server = runApi(ctx);
   });
@@ -103,6 +103,20 @@ describe('sim fact routes', () => {
     expect(unrelated.body.connected).toBe(false);
   });
 
+  it('stops the walk at ?hops and refuses a value outside 1 to 6', async () => {
+    const oneHop = await get('/sims/100/facts/path/400?hops=1');
+    expect(oneHop.status).toBe(200);
+    expect(oneHop.body.connected).toBe(false);
+    const twoHops = await get('/sims/100/facts/path/400?hops=2');
+    expect(twoHops.body.connected).toBe(true);
+
+    const refused = await Promise.all(
+      ['0', '-1', '7', '1e9', '1.5', 'Infinity', 'abc', ''].map((hops) => get(`/sims/100/facts/path/400?hops=${hops}`)),
+    );
+    expect(refused.map((response) => response.status)).toEqual(refused.map(() => 400));
+    expect(refused[0].body.error).toContain('hops');
+  });
+
   it('accepts a player fact and refuses to let anyone claim to be the game', async () => {
     const added = await send('POST', '/sims/100/facts', {
       predicate: FactPredicate.LIKES,
@@ -126,6 +140,41 @@ describe('sim fact routes', () => {
     expect(status).toBe(400);
   });
 
+  it('rejects a predicate outside the vocabulary', async () => {
+    const { status, body } = await send('POST', '/sims/100/facts', {
+      predicate: 'favourite_food',
+      objectText: 'grilled cheese',
+      source: 'told',
+    });
+    expect(status).toBe(400);
+    expect(body.error).toContain('favourite_food');
+  });
+
+  it('rejects a relationship stated as text and an attribute stated as a sim id', async () => {
+    const before = ctx.semanticMemory.getCurrentFacts('100').length;
+    const namedParent = await send('POST', '/sims/100/facts', {
+      predicate: FactPredicate.PARENT,
+      objectText: 'Bob Pancakes',
+    });
+    expect(namedParent.status).toBe(400);
+    const likedSim = await send('POST', '/sims/100/facts', { predicate: FactPredicate.LIKES, objectSimId: '200' });
+    expect(likedSim.status).toBe(400);
+    expect(ctx.semanticMemory.getCurrentFacts('100').length).toBe(before);
+
+    const parent = await send('POST', '/sims/100/facts', { predicate: FactPredicate.PARENT, objectSimId: '500' });
+    expect(parent.status).toBe(200);
+  });
+
+  it('rejects text longer than 200 characters', async () => {
+    const atLimit = await send('POST', '/sims/100/facts', {
+      predicate: FactPredicate.LIKES,
+      objectText: 'a'.repeat(200),
+    });
+    expect(atLimit.status).toBe(200);
+    const over = await send('POST', '/sims/100/facts', { predicate: FactPredicate.LIKES, objectText: 'a'.repeat(201) });
+    expect(over.status).toBe(400);
+  });
+
   it('explains where a fact came from and what it replaced', async () => {
     const told = ctx.semanticMemory.addFact({
       subjectSimId: '100',
@@ -144,7 +193,6 @@ describe('sim fact routes', () => {
     ctx.semanticMemory.ingestDossier(
       { ...dossier, family: { spouse_id: '300', steady_ids: [] } },
       {
-        hash: 'r3',
         day: 11,
       },
     );
@@ -168,6 +216,25 @@ describe('sim fact routes', () => {
     expect(ctx.semanticMemory.getHistory('100').some((fact) => fact.id === id)).toBe(true);
   });
 
+  it('refuses to retire a fact through another sim', async () => {
+    const id = ctx.semanticMemory.addFact({
+      subjectSimId: '200',
+      predicate: FactPredicate.LIKES,
+      objectText: 'chess',
+      source: 'player',
+      day: 12,
+    });
+    expect((await send('DELETE', `/sims/100/facts/${id}`)).status).toBe(404);
+    expect(ctx.semanticMemory.getCurrentFacts('200').some((fact) => fact.id === id)).toBe(true);
+  });
+
+  it('refuses to retire a game fact', async () => {
+    const trait = ctx.semanticMemory.getCurrentFacts('100').find((fact) => fact.source === 'game');
+    expect(trait?.id).toBeDefined();
+    expect((await send('DELETE', `/sims/100/facts/${trait?.id}`)).status).toBe(400);
+    expect(ctx.semanticMemory.getCurrentFacts('100').some((fact) => fact.id === trait?.id)).toBe(true);
+  });
+
   it('404s an unknown fact rather than inventing one', async () => {
     expect((await get('/facts/999999/explain')).status).toBe(404);
     expect((await send('DELETE', '/sims/100/facts/999999')).status).toBe(404);
@@ -176,5 +243,8 @@ describe('sim fact routes', () => {
   it('publishes the predicate vocabulary so callers do not hardcode it', async () => {
     const { body } = await get('/facts/predicates');
     expect(body.predicates as unknown as string[]).toContain(FactPredicate.PARENT);
+    const edges = body.edges as unknown as string[];
+    expect(edges).toContain(FactPredicate.PARENT);
+    expect(edges).not.toContain(FactPredicate.LIKES);
   });
 });

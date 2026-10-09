@@ -1,7 +1,9 @@
 import log from 'electron-log';
+import { AxiosError } from 'axios';
 import OpenAI, { toFile } from 'openai';
 import { ApiContext } from './ApiContext';
 import { AIHealthCheckResponse } from '../models/AIHealthCheckResponse';
+import { ApiType } from '../models/ApiType';
 import { openaiDefaultEndpoint } from '../constants';
 import { buildTranscriptionPrompt } from '../util/nameCorrection';
 
@@ -12,10 +14,25 @@ export class TranscriptionError extends Error {
   }
 }
 
+// The server answers a bad request with its reason in the body
+function errorMessage(error: unknown): string {
+  if (error instanceof AxiosError) {
+    const reason = (error.response?.data as { error?: unknown; message?: unknown } | undefined) ?? {};
+    if (typeof reason.error === 'string') {
+      return reason.error;
+    }
+    if (typeof reason.message === 'string') {
+      return reason.message;
+    }
+  }
+  return error instanceof Error ? error.message : String(error);
+}
+
 // Speech-to-text over any OpenAI-compatible /audio/transcriptions endpoint (OpenAI,
 // Groq, local faster-whisper/speaches). Deliberately separate from the generation
 // providers: the STT endpoint/key/model are an independent settings axis, so this owns
-// its own client instead of borrowing OpenAIService's LLM-configured one.
+// its own client instead of borrowing OpenAIService's LLM-configured one. Sentient
+// Sims AI is the exception, since it speaks its own JSON request and login token.
 export class TranscriptionService {
   private readonly ctx: ApiContext;
 
@@ -64,10 +81,12 @@ export class TranscriptionService {
   // household knows, then the current location), as a soft transcription bias
   namePrompt(): string | undefined {
     try {
-      const report = this.ctx.simStateCache?.getReport?.();
+      const report = this.ctx.simStateCache.getReport();
       const onLot = (report?.sims ?? []).map((entry) => entry.sim_name ?? '').filter(Boolean);
       const known = (report?.known_sims ?? []).map((sim) => sim.name ?? '').filter(Boolean);
-      const perceived = (report?.sims ?? []).flatMap((entry) => (entry.sims ?? []).map((sim) => sim.name ?? '')).filter(Boolean);
+      const perceived = (report?.sims ?? [])
+        .flatMap((entry) => entry.sims.map((sim) => sim.name ?? ''))
+        .filter(Boolean);
       let participants: string[] = [];
       try {
         participants = this.ctx.participantRepository.getAllParticipants().map((participant) => participant.name ?? '');
@@ -80,7 +99,7 @@ export class TranscriptionService {
         locations = this.ctx.locationRepository
           .getAllLocations()
           .filter((location) => lotId === undefined || String(location.id) === String(lotId))
-          .map((location) => location.name ?? '');
+          .map((location) => location.name);
       } catch {
         locations = [];
       }
@@ -90,12 +109,28 @@ export class TranscriptionService {
     }
   }
 
-  async transcribe(audio: ArrayBuffer, mimeType = 'audio/webm', options: { namePrompt?: boolean } = {}): Promise<string> {
-    const client = this.getClient();
+  async transcribe(
+    audio: ArrayBuffer,
+    mimeType = 'audio/webm',
+    options: { namePrompt?: boolean } = {},
+  ): Promise<string> {
     const language = this.ctx.settings.voiceInputLanguage.trim();
+    const prompt = options.namePrompt === false ? undefined : this.namePrompt();
+
+    if (this.ctx.settings.voiceInputProvider === ApiType.SentientSimsAI) {
+      const format = mimeType.split(';')[0].split('/')[1] ?? 'webm';
+      try {
+        const text = await this.ctx.sentientSimsTranscription.transcribe(Buffer.from(audio), format, language, prompt);
+        return text.trim();
+      } catch (error) {
+        log.error('Voice transcription failed:', error);
+        throw new TranscriptionError(errorMessage(error));
+      }
+    }
+
+    const client = this.getClient();
     // The filename extension is how whisper servers detect the container format
     const file = await toFile(Buffer.from(audio), 'speech.webm', { type: mimeType });
-    const prompt = options.namePrompt === false ? undefined : this.namePrompt();
 
     try {
       const response = await client.audio.transcriptions.create({
@@ -113,6 +148,10 @@ export class TranscriptionService {
   }
 
   async healthCheck(): Promise<AIHealthCheckResponse> {
+    if (this.ctx.settings.voiceInputProvider === ApiType.SentientSimsAI) {
+      return this.ctx.sentientSimsTranscription.healthCheck();
+    }
+
     // No cheap transcription ping exists; a models listing works on OpenAI, Groq,
     // and the common local whisper servers
     try {

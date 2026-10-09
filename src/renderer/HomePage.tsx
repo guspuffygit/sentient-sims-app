@@ -41,7 +41,9 @@ function ProviderHealthChip() {
   const [health, setHealth] = useState<{ down: boolean; failures: number; lastError?: string } | undefined>();
   useEffect(() => {
     const remove = window.electron.onProviderHealth(
-      (_event: unknown, next: { down: boolean; failures: number; lastError?: string }) => setHealth(next),
+      (_event: unknown, next: { down: boolean; failures: number; lastError?: string }) => {
+        setHealth(next);
+      },
     );
     return () => {
       remove();

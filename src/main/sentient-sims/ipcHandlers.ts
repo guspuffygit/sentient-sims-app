@@ -3,6 +3,7 @@ import log from 'electron-log';
 import { SettingsEnum } from './models/SettingsEnum';
 import { notifySettingChanged, sendSceneLineEndedToMod, sendSceneLineToMod } from './util/notifyRenderer';
 import { unmarkScenePaced } from './util/pacedScenes';
+import { redactSettingValue } from './util/redactSetting';
 import { DialogueLine } from './formatter/PromptFormatter';
 import { getAllBrowserWindows } from './util/browserWindows';
 import { resolveHtmlPath } from '../util';
@@ -40,7 +41,7 @@ export default function ipcHandlers(ctx: ApiContext, voiceInput: VoiceInputServi
   ipcMain.handle('dialog:selectGameApp', handleSelectGameApp);
   ipcMain.on('set-setting', (_event: IpcMainEvent, setting: SettingsEnum, value: unknown) => {
     if (setting !== SettingsEnum.ACCESS_TOKEN) {
-      log.debug(`set-setting: ${setting}, value: ${String(value)}`);
+      log.debug(`set-setting: ${setting}, value: ${String(redactSettingValue(setting, value))}`);
     }
     ctx.settings.set(setting, value);
 

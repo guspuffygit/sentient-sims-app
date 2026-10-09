@@ -29,6 +29,9 @@ export enum ModWebsocketMessageType {
   // Recording lifecycle so the game can show "Listening…" / mic errors while the app
   // is unfocused behind the game window
   PLAYER_VOICE_STATUS = 'player_voice_status',
+  // The chords the game overlay should listen for on the app's behalf; sent on every
+  // mod connect and voice setting change (VoiceHotkeyService)
+  VOICE_HOTKEYS = 'voice_hotkeys',
 }
 
 export type ModWebsocketMessage = {
@@ -158,7 +161,7 @@ export type ModPlayerVoiceMessage = ModWebsocketMessage & {
 };
 
 export type ModPlayerVoiceStatus = ModWebsocketMessage & {
-  status: 'listening' | 'transcribing' | 'error';
+  status: 'listening' | 'transcribing' | 'cancelled' | 'error';
   detail?: string;
   // V-3: the persona label the player speaks as (byte-identical to the reply's speaker)
   speaker?: string;
@@ -166,8 +169,15 @@ export type ModPlayerVoiceStatus = ModWebsocketMessage & {
   mode?: 'chat' | 'command';
 };
 
+// Chord strings as the settings spell them ("Ctrl+Space", "F13"); '' clears a binding
+export type ModVoiceHotkeys = ModWebsocketMessage & {
+  talk: string;
+  command: string;
+};
+
 export type WebsocketNotification =
   | ModWebsocketMessage
+  | ModVoiceHotkeys
   | ModWebsocketNotification
   | ModWebsocketNotificationMemoryEdited
   | ModWebsocketNotificationMemoryDeleted

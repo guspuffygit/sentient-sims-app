@@ -49,12 +49,18 @@ type SceneEntry = {
   stopped: boolean;
   stoppedAt?: number;
   touchedAt: number;
-  // The shared memory row for this scene (round 1's transcript), once it lands
+  // The shared memory row for this scene, once it lands. The mod writes it with
+  // round 1's transcript, and the scene's close rewrites it to what was heard.
   memoryId?: string;
   // The paced text of round 1, which is how the memory row is recognised
   openingPacedText?: string;
-  // Lines of round 1, and how many of them actually reached the player
+  // The action sentence that heads the memory row above the dialogue
+  openingPreAction?: string;
+  // Lines of round 1, which are the lines the row holds as first written
   openingLines: DialogueLine[];
+  // Where round 1 starts in allLines
+  openingStart: number;
+  // How many of the scene's lines actually reached the player
   airedLines: number;
   // Every round's lines in airing order, so the conversation can be judged whole
   allLines: DialogueLine[];
@@ -68,7 +74,7 @@ export type ScenePlaybackDeps = {
   // Tell the mod the conversation is over
   notifySceneEnded: (sceneId: string, reason: SceneEndedReason) => void;
   // Rewrite the scene's memory row to what was actually said
-  trimMemory?: (memoryId: string, content: string) => void;
+  rewriteMemory?: (memoryId: string, content: string) => void;
   // The conversation is over and this is what was heard: appraise what it left behind
   onSceneClosed?: (closed: SceneClosed) => void;
 };
@@ -87,6 +93,10 @@ export type ScenePlaybackDeps = {
 export class ScenePlaybackRegistry {
   private readonly scenes = new Map<string, SceneEntry>();
 
+  // Rewrites owed to rows that had not landed when their scene closed, keyed by
+  // the paced text the row arrives with
+  private readonly lateRewrites = new Map<string, { content: string; closedAt: number }>();
+
   constructor(private readonly deps: ScenePlaybackDeps) {}
 
   /** A round's lines have been handed to the renderer. */
@@ -97,16 +107,20 @@ export class ScenePlaybackRegistry {
     lines: DialogueLine[],
     pacedText?: string,
     cast?: SceneCastMember[],
+    preAction?: string,
   ) {
     const entry = this.entry(sceneId, participantSimIds);
     entry.pendingRounds += 1;
     entry.touchedAt = Date.now();
     const spoken = lines.filter((line) => !line.skipSceneLine);
     if (round <= 1) {
-      // Only the opening round is ever written to a shared memory row, so it is
-      // the only transcript a cut can leave claiming more than was said
+      // The mod writes the shared memory row from the opening round alone. Later
+      // rounds reach the row when the scene closes (settleMemory).
       entry.openingLines = spoken;
+      entry.openingStart = entry.allLines.length;
       entry.openingPacedText = pacedText;
+      entry.openingPreAction = preAction;
+      entry.memoryId = undefined;
     }
     entry.allLines.push(...spoken);
     if (cast && cast.length > 0 && entry.cast.length === 0) {
@@ -157,7 +171,7 @@ export class ScenePlaybackRegistry {
 
   /**
    * End a scene: the renderer drops what is left, the mod is told, and the
-   * memory row is trimmed to what the player actually heard. Idempotent - a
+   * memory row is rewritten to what the player actually heard. Idempotent - a
    * stop from the game and the renderer's own report often both arrive.
    */
   stop(sceneId: string, reason: SceneStopReason, mode: SceneStopMode = 'soft') {
@@ -174,7 +188,7 @@ export class ScenePlaybackRegistry {
     } catch (err) {
       log.error('[Scene] failed to stop playback', err);
     }
-    this.trimMemory(entry, mode);
+    this.settleMemory(entry, this.heardLines(entry, 'stopped', mode));
     try {
       this.deps.notifySceneEnded(sceneId, 'stopped');
     } catch (err) {
@@ -199,9 +213,16 @@ export class ScenePlaybackRegistry {
   /**
    * The memory row for this scene has landed. Matched on the paced text because
    * that is the only thing the row and the scene share - the mod POSTs the
-   * transcript back without ever seeing a scene id.
+   * transcript back without ever seeing a scene id. A row that lands after its
+   * scene closed gets the rewrite the close could not make.
    */
   attachMemory(pacedText: string, memoryId: string): boolean {
+    const late = this.lateRewrites.get(pacedText);
+    if (late) {
+      this.lateRewrites.delete(pacedText);
+      this.rewriteMemory(memoryId, late.content);
+      return true;
+    }
     for (const entry of this.scenes.values()) {
       if (entry.openingPacedText && entry.openingPacedText === pacedText) {
         entry.memoryId = memoryId;
@@ -229,6 +250,7 @@ export class ScenePlaybackRegistry {
       stopped: false,
       touchedAt: Date.now(),
       openingLines: [],
+      openingStart: 0,
       airedLines: 0,
       allLines: [],
       cast: [],
@@ -245,6 +267,7 @@ export class ScenePlaybackRegistry {
     // Nothing left playing and nothing left to generate: the conversation ran
     // its course. The mod stops watching it.
     this.scenes.delete(sceneId);
+    this.settleMemory(entry, entry.allLines);
     try {
       this.deps.notifySceneEnded(sceneId, 'finished');
     } catch (err) {
@@ -294,28 +317,50 @@ export class ScenePlaybackRegistry {
   }
 
   /**
-   * A cut scene leaves a memory row claiming dialogue nobody heard, and every
-   * later scene reads that row as history. Shrink it to the lines that aired.
+   * The memory row holds round 1 as written, and every later scene reads it as
+   * history. A cut scene's row claims dialogue nobody heard, and a scene that ran
+   * on past round 1 has a row that stops before the conversation did. Rewrite the
+   * row to the lines that aired.
    */
-  private trimMemory(entry: SceneEntry, mode: SceneStopMode) {
-    if (!entry.memoryId || !this.deps.trimMemory || entry.openingLines.length === 0) {
+  private settleMemory(entry: SceneEntry, heard: DialogueLine[]) {
+    if (!this.deps.rewriteMemory || entry.openingLines.length === 0) {
       return;
     }
-    // A soft stop lets the line that was playing finish, so it counts as heard;
-    // a hard stop cut it off mid-word, so it does not.
-    const heard = mode === 'soft' ? entry.airedLines : Math.max(0, entry.airedLines - 1);
-    const kept = Math.min(heard, entry.openingLines.length);
-    if (kept >= entry.openingLines.length) {
+    const kept = heard.slice(entry.openingStart);
+    if (kept.length === entry.openingLines.length) {
+      // Round 1 was heard whole and nothing aired after it: the row stands as written
       return;
     }
-    const content = entry.openingLines
-      .slice(0, kept)
-      .map((line) => `${line.speaker}: ${line.text}`)
-      .join('\n');
+    // The row keeps its action sentence, and a long line that aired in chunks
+    // goes back as one line
+    const rows: string[] = entry.openingPreAction ? [entry.openingPreAction] : [];
+    let joinsPrevious = false;
+    kept.forEach((line) => {
+      if (joinsPrevious) {
+        rows[rows.length - 1] += ` ${line.text}`;
+      } else {
+        rows.push(`${line.speaker}: ${line.text}`);
+      }
+      joinsPrevious = Boolean(line.continues);
+    });
+    if (rows.length === 0) {
+      // Nothing was heard and no action heads the row: an empty row would show
+      // blank and drop the interaction from history
+      return;
+    }
+    const content = rows.join('\n');
+    if (entry.memoryId) {
+      this.rewriteMemory(entry.memoryId, content);
+    } else if (entry.openingPacedText) {
+      this.lateRewrites.set(entry.openingPacedText, { content, closedAt: Date.now() });
+    }
+  }
+
+  private rewriteMemory(memoryId: string, content: string) {
     try {
-      this.deps.trimMemory(entry.memoryId, content);
+      this.deps.rewriteMemory?.(memoryId, content);
     } catch (err) {
-      log.error('[Scene] failed to trim the cut scene memory', err);
+      log.error('[Scene] failed to rewrite the scene memory', err);
     }
   }
 
@@ -326,6 +371,11 @@ export class ScenePlaybackRegistry {
       const since = entry.stopped ? (entry.stoppedAt ?? entry.touchedAt) : entry.touchedAt;
       if (now - since > ttl) {
         this.scenes.delete(sceneId);
+      }
+    });
+    this.lateRewrites.forEach((late, pacedText) => {
+      if (now - late.closedAt > SCENE_TTL_MS) {
+        this.lateRewrites.delete(pacedText);
       }
     });
   }

@@ -60,7 +60,9 @@ describe('isForeignSpeakerLine', () => {
     // The caller appends the live playerSpeakerName, so a renamed player ("Robin") is
     // guarded exactly like the built-in persona labels
     expect(isForeignSpeakerLine('Robin: hush now', 'Ricky Rickerson', [...SPEAKERS, 'Robin'])).toBe(true);
-    expect(isForeignSpeakerLine('I keep hearing Robin in my head', 'Ricky Rickerson', [...SPEAKERS, 'Robin'])).toBe(false);
+    expect(isForeignSpeakerLine('I keep hearing Robin in my head', 'Ricky Rickerson', [...SPEAKERS, 'Robin'])).toBe(
+      false,
+    );
   });
 
   it('flags a line the actor wrote for another sim, but not their own label', () => {
@@ -178,15 +180,17 @@ describe('private memory ownership', () => {
     const ids = (rows: { id?: string }[]) => rows.map((row) => row.id).sort();
 
     // No scope: shared only — another sim's head is never a default
-    expect(ids(ctx.memoryIndexRepository.getRetrievalCandidates(['100', '200'], 10, 'fake-model'))).toEqual([shared?.id]);
+    expect(ids(ctx.memoryIndexRepository.getRetrievalCandidates(['100', '200'], 10, 'fake-model'))).toEqual([
+      shared?.id,
+    ]);
     // Sim 100 retrieving for itself sees its own private row, never sim 200's
     expect(ids(ctx.memoryIndexRepository.getRetrievalCandidates(['100', '200'], 10, 'fake-model', ['100']))).toEqual(
       ids([{ id: shared?.id }, { id: privateA?.id }]),
     );
     // A scene containing both sims (the omniscient director) sees everything
-    expect(ids(ctx.memoryIndexRepository.getRetrievalCandidates(['100', '200'], 10, 'fake-model', ['100', '200']))).toEqual(
-      ids([{ id: shared?.id }, { id: privateA?.id }, { id: privateB?.id }]),
-    );
+    expect(
+      ids(ctx.memoryIndexRepository.getRetrievalCandidates(['100', '200'], 10, 'fake-model', ['100', '200'])),
+    ).toEqual(ids([{ id: shared?.id }, { id: privateA?.id }, { id: privateB?.id }]));
   });
 
   it('gates 64-bit owner ids without precision loss', () => {
