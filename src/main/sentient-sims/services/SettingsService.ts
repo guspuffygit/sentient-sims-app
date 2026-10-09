@@ -2,10 +2,17 @@ import log from 'electron-log';
 import Store from 'electron-store';
 import path from 'path';
 import { DeprecatedSettingsEnum, SettingsEnum } from '../models/SettingsEnum';
+import {
+  PLAYER_VOICE_PERSONAS,
+  PlayerVoicePersona,
+  playerSpeakerLabel,
+  sanitizePlayerVoiceName,
+} from '../models/PlayerVoicePersona';
 import { defaultOpenAITTSSettings, OpenAITTSSettings } from '../models/OpenAITTSSettings';
 import { ApiType, ApiTypeFromValue } from '../models/ApiType';
 import { AIProviderConfig, autoConfigId, newAutoConfig, sanitizeProviderConfigs } from '../models/AIProviderConfig';
 import { AIActionOverrides } from '../models/AIActionType';
+import { sanitizeStagePromptOverrides, StagePromptOverrides } from '../pipeline/prompts';
 import { defaultEmbeddingModelFor } from '../models/EmbeddingModels';
 import {
   defaultElevenLabsEndpoint,
@@ -32,7 +39,13 @@ import {
   sentientSimsAIDefaultModel,
   defaultSentientSimsAIHost,
   defaultGameAppPath,
+  defaultVoiceInputHotkeyFor,
+  defaultVoiceInputModel,
+  defaultTwitchCommandWord,
+  defaultTwitchChatVoiceId,
 } from '../constants';
+import { TwitchStoredAuth } from '../models/TwitchStoredAuth';
+import { redactSettingValue } from '../util/redactSetting';
 import { disableDebugLogging, enableDebugLogging } from '../util/debugLog';
 import { defaultSentientSimsAITTSSettings, SentientSimsAITTSSettings } from '../models/SentientSimsAITTSSettings';
 import { defaultKokoroAITTSSettings, KokoroAITTSSettings } from '../models/KokoroAITTSSettings';
@@ -239,6 +252,207 @@ export function defaultStore(cwd?: string) {
         type: 'string',
         default: sentientSimsAIDefaultEmbeddingModel,
       },
+      [SettingsEnum.COGNITION_ENABLED.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
+      [SettingsEnum.COGNITION_AUTONOMY_LEVEL.toString()]: {
+        type: 'string',
+        default: 'suggest',
+      },
+      [SettingsEnum.COGNITION_TICK_INTERVAL_SECONDS.toString()]: {
+        type: 'number',
+        default: 30,
+      },
+      [SettingsEnum.COGNITION_MAX_CONCURRENT.toString()]: {
+        type: 'number',
+        // 2 not 1: with a single slot one slow chain (retries inside a held slot) stalled
+        // a whole household 4m48s in the 08-04..08-14 playtest. Clamped to [1, 4] in the getter.
+        default: 2,
+      },
+      [SettingsEnum.COGNITION_PER_SIM_HOURLY_BUDGET.toString()]: {
+        type: 'number',
+        default: 20,
+      },
+      [SettingsEnum.COGNITION_PIPELINE.toString()]: {
+        type: 'string',
+        default: 'review',
+      },
+      [SettingsEnum.COGNITION_ACTION_SCORE_THRESHOLD.toString()]: {
+        type: 'number',
+        // Live scores cluster 2-7: at 7 an NPC arc almost never fires (Phase D playtest
+        // peaked at 6 without arming), at 1 contentment itself stages Action Scenes
+        // (floodgates 2026-08-09). 6 lets genuine wants through.
+        default: 6,
+      },
+      [SettingsEnum.DAILY_GOALS_ENABLED.toString()]: {
+        type: 'boolean',
+        // On by default: inert against an older mod (no absolute_day/goal_pool in
+        // reports) and every failure path fails open to pre-plan behavior
+        default: true,
+      },
+      [SettingsEnum.DAILY_LOADOUT_SIZE.toString()]: {
+        type: 'number',
+        // 8 not 6 (2026-08-15): the discretionary set grew from 22 to 34 keys with the
+        // fitness/creative/skill verbs; six slots collapsed every day into socials
+        default: 8,
+      },
+      [SettingsEnum.VOICE_INPUT_ENABLED.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
+      [SettingsEnum.PLAYBACK_FOLLOWS_GAME_CLOCK.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
+      [SettingsEnum.PLAYER_VOICE_PERSONA.toString()]: {
+        type: 'string',
+        default: 'voice',
+      },
+      [SettingsEnum.PLAYER_VOICE_PERSONA_BIO.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.PLAYER_VOICE_PERSONA_NAME.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.VOICE_COMMAND_HOTKEY.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.ASK_ACTIONS_ENABLED.toString()]: {
+        type: 'boolean',
+        // On by default: the triage stage is one cheap call, and every failure path falls
+        // through to the ordinary voice/chat reply
+        default: true,
+      },
+      [SettingsEnum.OUTCOME_INSTANT_SUCCESS_MS.toString()]: {
+        type: 'number',
+        // The live phantom answered in 126ms. A real push that reaches RUNNING inside 1.5s
+        // is possible (the sim is already standing at the object), which is why 'never seen
+        // running' is required alongside this window.
+        default: 1500,
+      },
+      [SettingsEnum.SCENE_MAX_ROUNDS.toString()]: {
+        type: 'number',
+        default: 3,
+      },
+      [SettingsEnum.PLAYER_REPLY_MAX_TOKENS.toString()]: {
+        type: 'number',
+        // A full answer with its reasons is a paragraph, not a line: 400 tokens is
+        // roughly 300 words. Sim-to-sim lines keep their own 120.
+        default: 400,
+      },
+      [SettingsEnum.PLAYER_CONVERSATION_IDLE_MINUTES.toString()]: {
+        type: 'number',
+        // Real minutes since the last line before a player conversation is forgotten
+        // as a thread (the memory rows remain). Five covers a pause to click around.
+        default: 5,
+      },
+      [SettingsEnum.CONVERSATION_ACTIONS_ENABLED.toString()]: {
+        type: 'boolean',
+        // A reply to the player may turn into an action ("you should go paint" gets the
+        // answer AND, once the reply has aired, the walk to the easel) instead of arming a
+        // desire for the next cognition tick
+        default: true,
+      },
+      [SettingsEnum.CONVERSATION_ACTION_SCORE_THRESHOLD.toString()]: {
+        type: 'number',
+        // Above the tick's 6: on the 09-22 stream 78 of 119 player-facing beats crossed
+        // 6 and most of them were casual lines. 8 is "I really should" territory.
+        default: 8,
+      },
+      [SettingsEnum.GENERATED_DEFAULT_DESCRIPTIONS.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
+      [SettingsEnum.VOICE_INPUT_PROVIDER.toString()]: {
+        type: 'string',
+        default: ApiType.SentientSimsAI,
+      },
+      [SettingsEnum.VOICE_INPUT_ENDPOINT.toString()]: {
+        type: 'string',
+        default: openaiDefaultEndpoint,
+      },
+      [SettingsEnum.VOICE_INPUT_KEY.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.VOICE_INPUT_MODEL.toString()]: {
+        type: 'string',
+        default: defaultVoiceInputModel,
+      },
+      [SettingsEnum.VOICE_INPUT_HOTKEY.toString()]: {
+        type: 'string',
+        default: defaultVoiceInputHotkeyFor(process.platform === 'darwin'),
+      },
+      [SettingsEnum.VOICE_INPUT_HOTKEY_MODE.toString()]: {
+        type: 'string',
+        default: 'hold',
+      },
+      [SettingsEnum.VOICE_INPUT_LANGUAGE.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.VOICE_INPUT_DEVICE_ID.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.TWITCH_CHAT_ENABLED.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
+      [SettingsEnum.TWITCH_CHANNEL.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.TWITCH_COMMAND_WORD.toString()]: {
+        type: 'string',
+        default: defaultTwitchCommandWord,
+      },
+      // Cooldowns default OFF: live 08-24 the 60s viewer cooldown was the top reason viewer
+      // questions silently died; the FIFO queue already paces answers one at a time
+      [SettingsEnum.TWITCH_VIEWER_COOLDOWN_SECONDS.toString()]: {
+        type: 'number',
+        default: 0,
+      },
+      [SettingsEnum.TWITCH_GLOBAL_COOLDOWN_SECONDS.toString()]: {
+        type: 'number',
+        default: 0,
+      },
+      [SettingsEnum.TWITCH_ASK_PERMISSION.toString()]: {
+        type: 'string',
+        default: 'everyone',
+      },
+      // On by default: the follower requirement is the point of the account login;
+      // without a connected account the gate fails closed with a visible reason
+      [SettingsEnum.TWITCH_FOLLOWERS_ONLY.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
+      [SettingsEnum.TWITCH_CLIENT_ID.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.TWITCH_SIM_ALIASES.toString()]: {
+        type: 'string',
+        default: '',
+      },
+      [SettingsEnum.TWITCH_AUTH.toString()]: {
+        type: 'object',
+        default: {},
+      },
+      // On by default: only activates when Twitch chat AND ElevenLabs TTS are already on,
+      // both of which are opt-in
+      [SettingsEnum.TWITCH_SPEAK_QUESTIONS.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
+      [SettingsEnum.TWITCH_CHAT_VOICE_ID.toString()]: {
+        type: 'string',
+        default: '',
+      },
       // Items validated by sanitizeProviderConfigs on read/write so malformed
       // entries degrade gracefully instead of throwing out of electron-store
       [SettingsEnum.AI_PROVIDER_CONFIGS.toString()]: {
@@ -255,6 +469,14 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES.toString()]: {
         type: 'object',
         default: {},
+      },
+      [SettingsEnum.STAGE_PROMPT_OVERRIDES.toString()]: {
+        type: 'object',
+        default: {},
+      },
+      [SettingsEnum.MEMORY_RETRIEVAL_CANDIDATE_LIMIT.toString()]: {
+        type: 'number',
+        default: 1000,
       },
       [SettingsEnum.GAME_APP_PATH.toString()]: {
         type: 'string',
@@ -299,16 +521,8 @@ export function defaultStore(cwd?: string) {
   });
 }
 
-// Player log bundles are uploaded publicly to Discord, so secret-bearing
-// settings (openaiKey, elevenlabsKey, geminiKeys, ...) must never be logged
-// verbatim.
-const secretSettingKey = /(key|keys|token|secret|password)$/i;
-
 function loggableSettingValue(key: string, value: unknown): string {
-  if (secretSettingKey.test(key) && typeof value === 'string' && value !== '') {
-    return '"<redacted>"';
-  }
-  return JSON.stringify(value);
+  return JSON.stringify(redactSettingValue(key, value));
 }
 
 export class SettingsService {
@@ -863,6 +1077,16 @@ export class SettingsService {
     this.set(SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES, value);
   }
 
+  // A player-set replacement for one pipeline stage's system prompt, keyed by StageId.
+  // Unknown keys and blank text are dropped rather than sent to a provider.
+  get stagePromptOverrides(): StagePromptOverrides {
+    return sanitizeStagePromptOverrides(this.get(SettingsEnum.STAGE_PROMPT_OVERRIDES));
+  }
+
+  set stagePromptOverrides(value: StagePromptOverrides) {
+    this.set(SettingsEnum.STAGE_PROMPT_OVERRIDES, sanitizeStagePromptOverrides(value));
+  }
+
   get gameAppPath(): string {
     return this.get(SettingsEnum.GAME_APP_PATH) as string;
   }
@@ -953,6 +1177,218 @@ export class SettingsService {
 
   set sentientSimsAIEmbeddingModel(value: string) {
     this.set(SettingsEnum.SENTIENTSIMSAI_EMBEDDING_MODEL, value);
+  }
+
+  get memoryRetrievalCandidateLimit(): number {
+    const limit = this.get(SettingsEnum.MEMORY_RETRIEVAL_CANDIDATE_LIMIT) as number;
+    // A zero or a negative would silently disable retrieval altogether
+    return Number.isFinite(limit) && limit > 0 ? limit : 1000;
+  }
+
+  get cognitionEnabled(): boolean {
+    return this.get(SettingsEnum.COGNITION_ENABLED) as boolean;
+  }
+
+  get cognitionAutonomyLevel(): 'off' | 'suggest' | 'full' {
+    const level = this.get(SettingsEnum.COGNITION_AUTONOMY_LEVEL) as string;
+    return level === 'full' || level === 'off' ? level : 'suggest';
+  }
+
+  get cognitionTickIntervalSeconds(): number {
+    return Math.max(5, this.get(SettingsEnum.COGNITION_TICK_INTERVAL_SECONDS) as number);
+  }
+
+  get cognitionMaxConcurrent(): number {
+    const raw = Number(this.get(SettingsEnum.COGNITION_MAX_CONCURRENT));
+    return Math.min(4, Math.max(1, Number.isFinite(raw) ? raw : 2));
+  }
+
+  get cognitionPerSimHourlyBudget(): number {
+    return Math.max(1, this.get(SettingsEnum.COGNITION_PER_SIM_HOURLY_BUDGET) as number);
+  }
+
+  get cognitionPipeline(): 'off' | 'review' {
+    return (this.get(SettingsEnum.COGNITION_PIPELINE) as string) === 'off' ? 'off' : 'review';
+  }
+
+  get cognitionActionScoreThreshold(): number {
+    return Math.min(10, Math.max(1, this.get(SettingsEnum.COGNITION_ACTION_SCORE_THRESHOLD) as number));
+  }
+
+  get dailyGoalsEnabled(): boolean {
+    return this.get(SettingsEnum.DAILY_GOALS_ENABLED) as boolean;
+  }
+
+  get dailyLoadoutSize(): number {
+    return Math.min(10, Math.max(3, this.get(SettingsEnum.DAILY_LOADOUT_SIZE) as number));
+  }
+
+  get voiceInputEnabled(): boolean {
+    return this.get(SettingsEnum.VOICE_INPUT_ENABLED) as boolean;
+  }
+
+  get playbackFollowsGameClock(): boolean {
+    return this.get(SettingsEnum.PLAYBACK_FOLLOWS_GAME_CLOCK) !== false;
+  }
+
+  get playerVoicePersona(): PlayerVoicePersona {
+    const stored = this.get(SettingsEnum.PLAYER_VOICE_PERSONA);
+    return PLAYER_VOICE_PERSONAS.find((persona) => persona === stored) ?? 'voice';
+  }
+
+  get playerVoicePersonaBio(): string {
+    const bio = this.get(SettingsEnum.PLAYER_VOICE_PERSONA_BIO);
+    return typeof bio === 'string' ? bio.trim() : '';
+  }
+
+  get playerVoicePersonaName(): string {
+    return sanitizePlayerVoiceName(this.get(SettingsEnum.PLAYER_VOICE_PERSONA_NAME) as string);
+  }
+
+  // The one place persona + custom name resolve into the speaker string. Every producer of
+  // a player line, the flavor gate that recognizes one, and the label pushed to the mod all
+  // read this, so they cannot drift apart (the mod's subtitle dedupe compares full strings).
+  get playerSpeakerName(): string {
+    return playerSpeakerLabel(this.playerVoicePersona, this.playerVoicePersonaName);
+  }
+
+  get voiceCommandHotkey(): string {
+    const hotkey = this.get(SettingsEnum.VOICE_COMMAND_HOTKEY);
+    return typeof hotkey === 'string' ? hotkey.trim() : '';
+  }
+
+  get askActionsEnabled(): boolean {
+    return this.get(SettingsEnum.ASK_ACTIONS_ENABLED) as boolean;
+  }
+
+  get outcomeInstantSuccessMs(): number {
+    return this.get(SettingsEnum.OUTCOME_INSTANT_SUCCESS_MS) as number;
+  }
+
+  get generatedDefaultDescriptions(): boolean {
+    return this.get(SettingsEnum.GENERATED_DEFAULT_DESCRIPTIONS) as boolean;
+  }
+
+  get sceneMaxRounds(): number {
+    const raw = Number(this.get(SettingsEnum.SCENE_MAX_ROUNDS));
+    return Math.min(5, Math.max(1, Number.isFinite(raw) ? raw : 3));
+  }
+
+  // Player-facing replies: the actor's token budget when answering the player. Clamped so
+  // a typo cannot cut a reply below a sentence or run past the reply's share of the window.
+  get playerReplyMaxTokens(): number {
+    const raw = Number(this.get(SettingsEnum.PLAYER_REPLY_MAX_TOKENS));
+    return Math.min(1000, Math.max(120, Number.isFinite(raw) ? raw : 400));
+  }
+
+  get playerConversationIdleMinutes(): number {
+    const raw = Number(this.get(SettingsEnum.PLAYER_CONVERSATION_IDLE_MINUTES));
+    return Math.min(60, Math.max(1, Number.isFinite(raw) ? raw : 5));
+  }
+
+  get conversationActionsEnabled(): boolean {
+    return this.get(SettingsEnum.CONVERSATION_ACTIONS_ENABLED) !== false;
+  }
+
+  get conversationActionScoreThreshold(): number {
+    const raw = Number(this.get(SettingsEnum.CONVERSATION_ACTION_SCORE_THRESHOLD));
+    return Math.min(10, Math.max(1, Number.isFinite(raw) ? raw : 8));
+  }
+
+  get voiceInputProvider(): ApiType.OpenAI | ApiType.SentientSimsAI {
+    return this.get(SettingsEnum.VOICE_INPUT_PROVIDER) === ApiType.OpenAI ? ApiType.OpenAI : ApiType.SentientSimsAI;
+  }
+
+  get voiceInputEndpoint(): string {
+    return this.get(SettingsEnum.VOICE_INPUT_ENDPOINT) as string;
+  }
+
+  get voiceInputKey(): string {
+    return this.get(SettingsEnum.VOICE_INPUT_KEY) as string;
+  }
+
+  get voiceInputModel(): string {
+    return this.get(SettingsEnum.VOICE_INPUT_MODEL) as string;
+  }
+
+  get voiceInputHotkey(): string {
+    return this.get(SettingsEnum.VOICE_INPUT_HOTKEY) as string;
+  }
+
+  get voiceInputHotkeyMode(): 'hold' | 'toggle' {
+    return (this.get(SettingsEnum.VOICE_INPUT_HOTKEY_MODE) as string) === 'toggle' ? 'toggle' : 'hold';
+  }
+
+  get voiceInputLanguage(): string {
+    return this.get(SettingsEnum.VOICE_INPUT_LANGUAGE) as string;
+  }
+
+  get twitchChatEnabled(): boolean {
+    return this.get(SettingsEnum.TWITCH_CHAT_ENABLED) as boolean;
+  }
+
+  // Normalized for IRC JOIN: lowercase login name, no leading '#'
+  get twitchChannel(): string {
+    return (this.get(SettingsEnum.TWITCH_CHANNEL) as string).trim().replace(/^#/, '').toLowerCase();
+  }
+
+  get twitchCommandWord(): string {
+    return (this.get(SettingsEnum.TWITCH_COMMAND_WORD) as string).trim() || defaultTwitchCommandWord;
+  }
+
+  get twitchViewerCooldownSeconds(): number {
+    const raw = Number(this.get(SettingsEnum.TWITCH_VIEWER_COOLDOWN_SECONDS));
+    return Math.min(3600, Math.max(0, Number.isFinite(raw) ? raw : 0));
+  }
+
+  get twitchGlobalCooldownSeconds(): number {
+    const raw = Number(this.get(SettingsEnum.TWITCH_GLOBAL_COOLDOWN_SECONDS));
+    return Math.min(3600, Math.max(0, Number.isFinite(raw) ? raw : 0));
+  }
+
+  get twitchAskPermission(): 'everyone' | 'subs' | 'mods' {
+    const raw = this.get(SettingsEnum.TWITCH_ASK_PERMISSION) as string;
+    return raw === 'subs' || raw === 'mods' ? raw : 'everyone';
+  }
+
+  get twitchFollowersOnly(): boolean {
+    return this.get(SettingsEnum.TWITCH_FOLLOWERS_ONLY) !== false;
+  }
+
+  get twitchClientId(): string {
+    return (this.get(SettingsEnum.TWITCH_CLIENT_ID) as string).trim();
+  }
+
+  // "Name=simId" per line (or comma-separated): extra !ask targets for sims the game
+  // reports without a usable name (service NPCs like the Grim Reaper)
+  get twitchSimAliases(): { name: string; simId: string }[] {
+    return (this.get(SettingsEnum.TWITCH_SIM_ALIASES) as string)
+      .split(/[\r\n,]+/)
+      .map((line) => line.trim())
+      .filter((line) => line.includes('='))
+      .flatMap((line) => {
+        const eq = line.indexOf('=');
+        const name = line.slice(0, eq).trim();
+        const simId = line.slice(eq + 1).trim();
+        return name && /^\d+$/.test(simId) ? [{ name, simId }] : [];
+      });
+  }
+
+  get twitchAuth(): TwitchStoredAuth {
+    const raw = this.get(SettingsEnum.TWITCH_AUTH);
+    return raw && typeof raw === 'object' ? raw : {};
+  }
+
+  set twitchAuth(value: TwitchStoredAuth) {
+    this.set(SettingsEnum.TWITCH_AUTH, value);
+  }
+
+  get twitchSpeakQuestions(): boolean {
+    return this.get(SettingsEnum.TWITCH_SPEAK_QUESTIONS) !== false;
+  }
+
+  get twitchChatVoiceId(): string {
+    return (this.get(SettingsEnum.TWITCH_CHAT_VOICE_ID) as string).trim() || defaultTwitchChatVoiceId;
   }
 
   get prefetchMaxQueueDepth(): number {

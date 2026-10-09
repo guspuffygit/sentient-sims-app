@@ -2,11 +2,13 @@ import { Request, Response } from 'express';
 import { randomUUID } from 'crypto';
 import log from 'electron-log';
 import { ApiContext } from '../services/ApiContext';
+import { SceneState } from '../services/SceneService';
 import { ActionIntent, InteractionOutcomeEvent } from '../models/ActionIntent';
 import { ModRequestPerception, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { PerceptionSnapshot } from '../models/PerceptionSnapshot';
 import { ParticipantDTO } from '../db/dto/ParticipantDTO';
 import { formatPerception } from '../util/formatPerception';
+import { isBelowChild, lifeStageOf } from '../util/simLifeStage';
 
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
@@ -26,22 +28,41 @@ function outcomeVerb(outcome: InteractionOutcomeEvent['outcome']): string {
 // "<EnqueueResult: Bills: Interaction requires a utility that is shut off. <ExecuteResult: False: (None)>>".
 // Keep the human sentence, drop the machine wrappers — this text lands in a permanent memory
 // row, and raw angle brackets also read as tags in the mod's Flash memories window.
-function humanizeOutcomeReason(reason: string): string {
+export function humanizeOutcomeReason(reason: string): string {
   let text = reason.trim();
-  // Unwrap outer <Label: ...> repr shells (possibly nested)
-  for (;;) {
-    const unwrapped = /^<\w+:\s*([\s\S]*)>$/.exec(text);
-    if (!unwrapped) {
-      break;
-    }
-    text = unwrapped[1].trim();
-  }
-  // Drop any leftover embedded reprs like <ExecuteResult: False: (None)>
+  // Unwrap <Label: ...> repr shells wherever they sit, innermost first — a prefixed
+  // reason like "clean push refused: <EnqueueResult: states do not match...>" must keep
+  // the inner explanation (observed live 2026-08-07: the whole-string-only unwrap never
+  // fired past the prefix, so the repr-strip below deleted the entire why and the
+  // memory read just "clean push refused:")
   let previous;
   do {
     previous = text;
-    text = text.replace(/<[^<>]*>/g, '');
+    text = text.replace(/<\w+:\s*([^<>]*)>/g, '$1');
   } while (text !== previous);
+  // Drop any leftover angle-bracket noise and the bare result plumbing the unwrap
+  // exposes (ExecuteResult bodies like "False: (None)" carry no reason)
+  text = text
+    .replace(/<[^<>]*>/g, '')
+    // An UNTERMINATED shell: the mod truncates long reasons, so "<EnqueueResult: True
+    // <ExecuteResult: Interaction finished during app..." arrives with no closing '>'
+    // and neither unwrap above can match it. That exact shape reached permanent memory
+    // rows (live 2026-08-16, memories 2036 and 2124, stored with the leading guillemet).
+    // The mod strips reprs before truncating now; this catches older and other shapes.
+    .replace(/<\w+:\s*/g, '')
+    .replace(/[<>]/g, '')
+    .replace(/\b(?:True|False|None)\b:?\s*\(None\)/g, '')
+    .replace(/\(None\)/g, '')
+    .replace(/\(\s*\)/g, '');
+  // Final guard against slots the unwrap emptied (P-9): "between and ." / "Sim []" /
+  // dangling ':' — the mod fills names it knows; this keeps whatever slips through
+  // readable rather than a permanent memory reading "between and ."
+  text = text
+    .replace(/\bbetween\s+and\b/gi, 'between the two of them')
+    .replace(/\bSim\s*\[\s*\]/g, 'the sim')
+    .replace(/\s+([.,;:])/g, '$1')
+    .replace(/[.:]+\s*:\s*$/g, '.')
+    .replace(/:\s*$/g, '');
   return text.replace(/\s{2,}/g, ' ').trim();
 }
 
@@ -58,6 +79,20 @@ export class CognitionController {
 
   getPerception(simId: string): PerceptionSnapshot | undefined {
     return this.latestPerception.get(simId);
+  }
+
+  // Did this sim actually take part in the scene? Judged by memory ownership, which is
+  // what the reflection's transcript is built from. An empty scene (no memories yet)
+  // counts as theirs — there is nothing to misattribute.
+  private simIsInScene(simId: string, scene: SceneState): boolean {
+    try {
+      const participantIds = this.ctx.memoryRepository.getSceneParticipantIds(scene.locationId, scene.startedAt);
+      return participantIds.length === 0 || participantIds.includes(simId);
+    } catch {
+      // No DB loaded / query failed: fall back to the old behaviour rather than
+      // silently dropping every sleep boundary
+      return true;
+    }
   }
 
   private lookupParticipantName(simId?: string): string | undefined {
@@ -121,7 +156,7 @@ export class CognitionController {
       );
 
       log.info(`[Cognition] outcome ${event.request_id ?? '(uncorrelated)'}: ${observation}`);
-      return res.json({ ok: true, correlated: pending !== undefined, memory_id: memory.id });
+      return res.json({ ok: true, correlated: pending !== undefined, memory_id: memory?.id });
     } catch (err) {
       log.error('Error handling cognition outcome', err);
       return res.status(500).json({ error: errorMessage(err) });
@@ -133,20 +168,59 @@ export class CognitionController {
   // the same location so the next boundary only covers what happens after the nap.
   postSleepBoundary = async (req: Request, res: Response) => {
     try {
-      const { sim_id: simId, sim_name: simName } = req.body as {
+      const {
+        sim_id: simId,
+        sim_name: simName,
+        clock,
+        passed_out: passedOut,
+      } = req.body as {
         sim_id?: string;
         sim_name?: string;
+        // Game clock at the moment of falling asleep (newer mods) — keys the overnight
+        // daily plan to the day the sim wakes into
+        clock?: { hour?: number; absolute_day?: number };
+        // The mod also fires the boundary when a sim passes out from exhaustion
+        passed_out?: boolean;
       };
       if (!simId) {
         return res.status(400).json({ error: 'sim_id is required' });
       }
       const who = simName || this.lookupParticipantName(simId) || `Sim ${simId}`;
-      const previousScene = this.ctx.sceneService.endCurrentScene(`${who} fell asleep`);
+      // J8: an infant naps several times a day and has no diary to write; ending the
+      // household's scene at every nap chopped everyone else's evening into fragments and
+      // wrote first-person entries for a Sim who cannot talk (the 2026-09-04 playtest handoff, cause 8).
+      // Below CHILD the boundary is a no-op and the scene keeps running.
+      const stage = lifeStageOf(this.ctx, simId);
+      if (isBelowChild(stage)) {
+        log.info(`[Cognition] sleep boundary for ${who}: ${stage} writes no diary; leaving the scene running`);
+        return res.json({
+          ok: true,
+          reflected: false,
+          reason: `sleeper is ${stage?.toLowerCase()}: no diary below child`,
+        });
+      }
+      // A sleeper who took no part in the active scene must not end it: the scene belongs
+      // to the sims who are in it, and closing it here both loses THEIR reflection and
+      // hands the sleeper a first-person diary of an evening they never attended (live
+      // 2026-08-16 — Ariel slept at home while the app's active scene was still the bar
+      // Mackenzie had travelled to). The sleeper's own next boundary writes their diary.
+      const activeScene = this.ctx.sceneService.getCurrentScene();
+      if (activeScene && !this.simIsInScene(simId, activeScene)) {
+        log.info(
+          `[Cognition] sleep boundary for ${who}: not a participant of scene ${activeScene.sceneId} ` +
+            `(location ${activeScene.locationId}); leaving the scene running`,
+        );
+        return res.json({ ok: true, reflected: false, reason: 'sleeper was not in the active scene' });
+      }
+      const previousScene = this.ctx.sceneService.endCurrentScene(
+        passedOut ? `${who} passed out from exhaustion` : `${who} fell asleep`,
+      );
       if (!previousScene) {
         return res.json({ ok: true, reflected: false, reason: 'no active scene' });
       }
       log.info(`[Cognition] sleep boundary for ${who}: reflecting on scene ${previousScene.sceneId}`);
-      await this.ctx.ai.runSceneReflection(previousScene);
+      // The sleeper is the reflecting mind — their day closes as a diary entry in their voice
+      await this.ctx.ai.runSceneReflection(previousScene, { simId, simName: who }, 'sleep', clock);
       return res.json({ ok: true, reflected: true, scene_id: previousScene.sceneId });
     } catch (err) {
       log.error('Error handling sleep boundary', err);

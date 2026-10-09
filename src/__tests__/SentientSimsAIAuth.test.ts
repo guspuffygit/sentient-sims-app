@@ -37,6 +37,7 @@ describe('SentientSimsAIService token refresh', () => {
               data: [
                 { id: 'Gryphe/MythoMax-L2-13b' },
                 { id: 'Llama-3.3-70B-ArliAI-RPMax-v1.4' },
+                { id: 'deepseek-ai/DeepSeek-V4-Flash' },
                 { id: 'meta-llama/Llama-3.3-70B-Instruct' },
               ],
             }),
@@ -132,6 +133,7 @@ describe('SentientSimsAIService token refresh', () => {
     expect(models.map((model) => model.name)).toEqual([
       'Gryphe/MythoMax-L2-13b',
       'Llama-3.3-70B-ArliAI-RPMax-v1.4',
+      'deepseek-ai/DeepSeek-V4-Flash',
       'meta-llama/Llama-3.3-70B-Instruct',
     ]);
   }, 30000);

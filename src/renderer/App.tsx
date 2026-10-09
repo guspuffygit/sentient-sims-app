@@ -1,7 +1,7 @@
 import './App.css';
 import { Box, Container, Grid } from '@mui/material';
 import { Outlet } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import MenuBar from './MenuBar';
 import PopupNotificationModal from './PopupNotification';
 import { AnimationMappingComponent } from './components/AnimationMappingComponent';
@@ -13,7 +13,11 @@ import { Announcements } from './components/Announcements';
 import { LoginModalProvider } from './providers/LoginModalProvider';
 
 export default function App() {
-  const [hideSideBar, setHideSideBar] = useState(false);
+  const [hideSideBar, setHideSideBar] = useState(() => localStorage.getItem('hideSideBar') === 'true');
+
+  useEffect(() => {
+    localStorage.setItem('hideSideBar', String(hideSideBar));
+  }, [hideSideBar]);
 
   const mainWindowWidth = hideSideBar ? 12 : 8.5;
 
@@ -21,9 +25,9 @@ export default function App() {
     <LoginModalProvider>
       <SetupWizardProvider>
         <Container maxWidth={false} className="root">
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             <Grid size={mainWindowWidth}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 40px)', minHeight: 280 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 24px)', minHeight: 280 }}>
                 <MenuBar hideSideBar={hideSideBar} setHideSideBar={setHideSideBar} />
                 <Box id="page-scroll" sx={{ flexGrow: 1, minHeight: 0, overflowY: 'auto', scrollbarGutter: 'stable' }}>
                   <Outlet />

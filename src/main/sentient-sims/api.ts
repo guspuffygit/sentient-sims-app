@@ -121,7 +121,25 @@ export function runApi(ctx: ApiContext) {
   expressApp.post('/cognition/debug/enqueue', ctx.controller.cognition.debugEnqueue);
   expressApp.post('/cognition/debug/perception', ctx.controller.cognition.debugRequestPerception);
 
-  const server = expressApp.listen(ctx.port, () => {
+  expressApp.post('/cognition/state', ctx.controller.simState.postState);
+  expressApp.post('/cognition/dossier', ctx.controller.dossier.postDossier);
+
+  // Phase 3.1 H4: the semantic facts, readable and correctable. The explain and path
+  // routes are the provenance surface the watches and the MCP tools ask through.
+  expressApp.get('/facts/predicates', ctx.controller.simFacts.getPredicates);
+  expressApp.get('/facts/:factId/explain', ctx.controller.simFacts.getExplain);
+  expressApp.get('/sims/:id/facts', ctx.controller.simFacts.getFacts);
+  expressApp.get('/sims/:id/facts/path/:otherId', ctx.controller.simFacts.getFactPath);
+  expressApp.post('/sims/:id/facts', ctx.controller.simFacts.addFact);
+  expressApp.delete('/sims/:id/facts/:factId', ctx.controller.simFacts.retireFact);
+
+  // The build tiers' routes, after every core route (release 4.5)
+  for (const tier of ctx.tiers) {
+    tier.routes?.(expressApp, ctx);
+  }
+
+  // Loopback only: the mod and the renderer are on this machine, nothing else should reach it
+  const server = expressApp.listen(ctx.port, '127.0.0.1', () => {
     log.info(`Server is running on port ${ctx.port}`);
   });
 

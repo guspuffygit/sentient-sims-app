@@ -1,9 +1,31 @@
 import log from 'electron-log';
+import { currentRate, isUserPaused, onPauseChange, onRateChange, waitWhileUserPaused } from './playbackClock';
 
 export type AudioPlaybackHandle = {
   finished: Promise<void>;
   stop: () => void;
+  // V-1: driven by the playback clock (user pause / game speed); playAudio* wire them
+  pause?: () => void;
+  resume?: () => void;
+  setRate?: (rate: number) => void;
 };
+
+// V-1: a user pause suspends the shared context (every line, WebAudio and media
+// element alike); resume brings it back. Registered once, survives every line.
+let clockWired = false;
+function wirePlaybackClock(context: AudioContext) {
+  if (clockWired) {
+    return;
+  }
+  clockWired = true;
+  onPauseChange((paused) => {
+    if (paused && context.state === 'running') {
+      void context.suspend();
+    } else if (!paused && context.state === 'suspended') {
+      void context.resume();
+    }
+  });
+}
 
 // One AudioContext shared by all TTS playback. Spinning up a fresh HTMLAudioElement per
 // line lets the output device go idle between lines, and the first fraction of a second
@@ -27,7 +49,10 @@ const playbackLeadInSeconds = 0.1;
  */
 export async function playAudioUrl(audioUrl: string, volume: number): Promise<AudioPlaybackHandle> {
   const context = getAudioContext();
-  if (context.state === 'suspended') {
+  wirePlaybackClock(context);
+  // A user pause holds the line before it starts (never resume the context over a pause)
+  await waitWhileUserPaused();
+  if (context.state === 'suspended' && !isUserPaused()) {
     await context.resume();
   }
 
@@ -41,10 +66,20 @@ export async function playAudioUrl(audioUrl: string, volume: number): Promise<Au
 
   const source = context.createBufferSource();
   source.buffer = audioBuffer;
+  source.playbackRate.value = currentRate();
   source.connect(gain);
+
+  const offRate = onRateChange((rate) => {
+    try {
+      source.playbackRate.value = rate;
+    } catch (err) {
+      log.debug('Could not change playback rate', err);
+    }
+  });
 
   const finished = new Promise<void>((resolve) => {
     source.onended = () => {
+      offRate();
       source.disconnect();
       gain.disconnect();
       resolve();
@@ -62,6 +97,9 @@ export async function playAudioUrl(audioUrl: string, volume: number): Promise<Au
         log.debug('Audio source already stopped', err);
       }
     },
+    setRate: (rate: number) => {
+      source.playbackRate.value = rate;
+    },
   };
 }
 
@@ -76,13 +114,32 @@ export async function playAudioStream(
   volume: number,
 ): Promise<AudioPlaybackHandle> {
   const context = getAudioContext();
-  if (context.state === 'suspended') {
+  wirePlaybackClock(context);
+  await waitWhileUserPaused();
+  if (context.state === 'suspended' && !isUserPaused()) {
     await context.resume();
+  }
+  if (context.state !== 'running') {
+    log.warn(`[TTS] AudioContext not running after resume: ${context.state} — stream will be silent`);
   }
 
   const mediaSource = new MediaSource();
   const audio = new Audio();
   audio.src = URL.createObjectURL(mediaSource);
+  audio.playbackRate = currentRate();
+  const offRate = onRateChange((rate) => {
+    audio.playbackRate = rate;
+  });
+  // The element keeps its own transport: pause/resume it with the user pause too
+  const offPause = onPauseChange((paused) => {
+    if (paused) {
+      audio.pause();
+    } else {
+      void audio.play().catch((err: unknown) => {
+        log.debug('resume after user pause failed', err);
+      });
+    }
+  });
 
   const element = context.createMediaElementSource(audio);
   const gain = context.createGain();
@@ -93,7 +150,14 @@ export async function playAudioStream(
   // Ref-object rather than a bare boolean so the flag set by stop() stays visible
   // inside the pump loop without TS narrowing it to its initial value
   const stopState = { current: false };
+  // stop() and the element's own 'ended'/'error' can each fire; the second must not
+  // disconnect nodes twice or revoke an already-revoked URL
+  let cleanedUp = false;
   const cleanup = () => {
+    if (cleanedUp) return;
+    cleanedUp = true;
+    offRate();
+    offPause();
     element.disconnect();
     gain.disconnect();
     URL.revokeObjectURL(audio.src);
@@ -154,10 +218,26 @@ export async function playAudioStream(
     }
   })();
 
+  // audio.pause() in stop() fires neither 'ended' nor 'error', so stop() must settle
+  // this itself — a caller awaiting `finished` (the scene drain loop) would otherwise
+  // hang forever after the player pre-empts a line, and no later scene would ever play
+  let settle: () => void = () => {};
   const finished = new Promise<void>((resolve) => {
+    settle = resolve;
     audio.addEventListener(
       'ended',
       () => {
+        // currentTime near zero at 'ended' is the smoking gun for a silent death —
+        // observed live: a line logged 'playback started' and produced no audio, and
+        // with no completion logging the failure was invisible
+        const played = audio.currentTime;
+        if (played < 0.5) {
+          log.warn(
+            `[TTS] Streaming playback ENDED after only ${played.toFixed(2)}s — likely silent failure (context state: ${context.state})`,
+          );
+        } else {
+          log.info(`[TTS] Streaming playback finished after ${played.toFixed(2)}s`);
+        }
         cleanup();
         resolve();
       },
@@ -191,7 +271,18 @@ export async function playAudioStream(
         log.debug('Stream reader already cancelled', err);
       });
       audio.pause();
+      log.info(`[TTS] Streaming playback stopped after ${audio.currentTime.toFixed(2)}s`);
       cleanup();
+      settle();
+    },
+    pause: () => {
+      audio.pause();
+    },
+    resume: () => {
+      void audio.play();
+    },
+    setRate: (rate: number) => {
+      audio.playbackRate = rate;
     },
   };
 }

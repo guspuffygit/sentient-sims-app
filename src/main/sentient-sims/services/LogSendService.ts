@@ -12,6 +12,7 @@ import { GetPatreonDebugText } from '../util/patreonUtil';
 import { CaughtError } from '../models/CaughtError';
 import { ApiContext } from './ApiContext';
 import { SendLogsResponse } from '../models/SendLogsResponse';
+import { redactSettingValue } from '../util/redactSetting';
 
 export const webhookUrl = [
   'https://d',
@@ -191,16 +192,13 @@ export class LogSendService {
     const settings: string[] = [];
 
     Object.values(SettingsEnum).forEach((settingsEnum) => {
-      // Dont send tokens or secrets in the logs
-      if (!settingsEnum.includes('Key') && !settingsEnum.includes('Token')) {
-        const settingsValue = this.ctx.settings.getSetting(settingsEnum);
-        // Arrays too: aiProviderConfigs printed as "[object Object],..." hides which
-        // provider a report is actually routed to
-        if (settingsValue !== null && typeof settingsValue === 'object') {
-          settings.push(`${settingsEnum}: ${JSON.stringify(settingsValue)}`);
-        } else {
-          settings.push(`${settingsEnum}: ${String(settingsValue)}`);
-        }
+      const settingsValue = redactSettingValue(settingsEnum, this.ctx.settings.getSetting(settingsEnum));
+      // Arrays too: aiProviderConfigs printed as "[object Object],..." hides which
+      // provider a report is actually routed to
+      if (settingsValue !== null && typeof settingsValue === 'object') {
+        settings.push(`${settingsEnum}: ${JSON.stringify(settingsValue)}`);
+      } else {
+        settings.push(`${settingsEnum}: ${String(settingsValue)}`);
       }
     });
 

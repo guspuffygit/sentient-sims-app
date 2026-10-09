@@ -67,11 +67,24 @@ export class GenerationQueueService {
 
   private readonly jobs: Array<() => Promise<void>> = [];
 
+  // Priority lane: player-facing generations (chat replies, scene continuations) go ahead
+  // of speculative prefetches but FIFO among themselves — an unshift onto `jobs` made the
+  // lane LIFO, so a later-requested reply could air before an earlier one.
+  private readonly priorityJobs: Array<() => Promise<void>> = [];
+
+  // V-2: the player's own voice. Drained BEFORE jobs — the reply to something the
+  // player just said out loud must not queue behind autonomous scenes and prefetches.
+  private readonly speechJobs: Array<() => Promise<void>> = [];
+
+  private readonly cognitionJobs: Array<() => Promise<void>> = [];
+
   private readonly backgroundJobs: Array<() => Promise<void>> = [];
 
   private idleTimer?: ReturnType<typeof setTimeout>;
 
   private activeCount = 0;
+
+  private cognitionActive = 0;
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
@@ -197,6 +210,41 @@ export class GenerationQueueService {
   // running generations, but never for queued ones.
   runExclusive<T>(task: () => Promise<T>, options?: { priority?: boolean }): Promise<T> {
     return this.enqueue(task, options?.priority ?? false);
+  }
+
+  // V-2: speech-lane variant of runExclusive
+  runSpeech<T>(task: () => Promise<T>): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      this.speechJobs.push(async () => {
+        try {
+          resolve(await task());
+        } catch (error) {
+          reject(error instanceof Error ? error : new Error(String(error)));
+        }
+      });
+      this.drain();
+    });
+  }
+
+  // Cognition lane (Block 9 deliberations): below foreground speech/interaction work,
+  // above the idle lane — cognition never waits out the background quiet period, but a
+  // player-facing generation arriving mid-queue always goes first. One deliberation at a
+  // time within the lane; foreground jobs still fill any remaining concurrency.
+  runCognition<T>(task: () => Promise<T>): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      this.cognitionJobs.push(async () => {
+        try {
+          resolve(await task());
+        } catch (error) {
+          reject(error instanceof Error ? error : new Error(String(error)));
+        }
+      });
+      this.drain();
+    });
+  }
+
+  get cognitionQueueDepth(): number {
+    return this.cognitionJobs.length + this.cognitionActive;
   }
 
   // Idle lane for low-priority work (memory annotation, embedding backfill): tasks start
@@ -340,7 +388,7 @@ export class GenerationQueueService {
         }
       };
       if (priority) {
-        this.jobs.unshift(job);
+        this.priorityJobs.push(job);
       } else {
         this.jobs.push(job);
       }
@@ -350,8 +398,9 @@ export class GenerationQueueService {
 
   private drain() {
     const concurrency = Math.max(1, this.ctx.settings.generationConcurrency);
-    while (this.activeCount < concurrency && this.jobs.length > 0) {
-      const job = this.jobs.shift();
+    // V-2: speech first, always
+    while (this.activeCount < concurrency && this.speechJobs.length > 0) {
+      const job = this.speechJobs.shift();
       if (!job) {
         return;
       }
@@ -361,6 +410,36 @@ export class GenerationQueueService {
         this.drain();
       });
     }
+    while (this.activeCount < concurrency && (this.priorityJobs.length > 0 || this.jobs.length > 0)) {
+      const job = this.priorityJobs.shift() ?? this.jobs.shift();
+      if (!job) {
+        return;
+      }
+      this.activeCount += 1;
+      void job().finally(() => {
+        this.activeCount -= 1;
+        this.drain();
+      });
+    }
+    // Foreground queue is empty: spend leftover capacity on at most one cognition
+    // deliberation. New foreground work re-enters drain() and naturally goes first.
+    if (
+      this.jobs.length + this.priorityJobs.length === 0 &&
+      this.cognitionActive === 0 &&
+      this.cognitionJobs.length > 0 &&
+      this.activeCount < concurrency
+    ) {
+      const job = this.cognitionJobs.shift();
+      if (job) {
+        this.activeCount += 1;
+        this.cognitionActive += 1;
+        void job().finally(() => {
+          this.activeCount -= 1;
+          this.cognitionActive -= 1;
+          this.drain();
+        });
+      }
+    }
     this.scheduleBackground();
   }
 
@@ -368,7 +447,7 @@ export class GenerationQueueService {
   // pending background work another full quiet period out. A timer that fires while the
   // queue turned busy again is a no-op; the drain after that work reschedules it.
   private scheduleBackground() {
-    if (this.backgroundJobs.length === 0 || this.activeCount > 0 || this.jobs.length > 0) {
+    if (this.backgroundJobs.length === 0 || this.activeCount > 0 || this.hasForegroundWaiting()) {
       return;
     }
     if (this.idleTimer) {
@@ -382,7 +461,7 @@ export class GenerationQueueService {
   }
 
   private startBackground() {
-    if (this.activeCount > 0 || this.jobs.length > 0) {
+    if (this.activeCount > 0 || this.hasForegroundWaiting()) {
       return;
     }
     const job = this.backgroundJobs.shift();
@@ -392,7 +471,7 @@ export class GenerationQueueService {
     this.activeCount += 1;
     void job().finally(() => {
       this.activeCount -= 1;
-      if (this.jobs.length > 0) {
+      if (this.hasForegroundWaiting()) {
         // Foreground work arrived while this task ran — it goes first; its drain
         // restarts the idle countdown for whatever background work remains
         this.drain();
@@ -400,6 +479,10 @@ export class GenerationQueueService {
         this.startBackground();
       }
     });
+  }
+
+  private hasForegroundWaiting(): boolean {
+    return this.speechJobs.length + this.priorityJobs.length + this.jobs.length + this.cognitionJobs.length > 0;
   }
 
   private hasState(entry: PrefetchEntry, state: EntryState): boolean {

@@ -79,6 +79,8 @@ describe('Chat pipeline', () => {
         text = briefing;
       } else if (systemPrompt.includes('You are the director of a show')) {
         text = reviewerOutput;
+      } else if (systemPrompt.includes('You are scoring the scene')) {
+        text = '{"Nancy Landgraab": {"memory": 3, "action": 2, "action_reason": "Happy chatting."}}';
       }
       return Promise.resolve({ text, request });
     });
@@ -100,7 +102,7 @@ describe('Chat pipeline', () => {
 
     expect(result.status).toEqual(InteractionEventStatus.GENERATED);
     const labels = result.exchanges?.map((exchange) => exchange.label);
-    expect(labels).toEqual(['Director Briefing', 'Actor: Nancy Landgraab', 'Director Review']);
+    expect(labels).toEqual(['Director Briefing', 'Actor: Nancy Landgraab', 'Director Review', 'Scene Scores']);
     // The player already spoke, so their sim takes no actor turn
     expect(labels).not.toContain('Actor: Marisol Vega');
   });
@@ -127,6 +129,18 @@ describe('Chat pipeline', () => {
     expect(result.memory?.content).toEqual(`Nancy Landgraab: ${actorLine}`);
   });
 
+  it('cuts the reviewer off when it extends the scene past the delivered lines', async () => {
+    // The known rogue behavior: instead of reviewing, the reviewer keeps writing the scene
+    reviewerOutput = `Nancy Landgraab: ${actorLine}\nNancy Landgraab: Anyway, want to grab a smoothie after?\nMarisol Vega: Sure, sounds great!`;
+    mockGeneration();
+
+    const result = await ctx.ai.interactionEvent(buildChatEvent('Nice, me too!', [playerSim, targetSim]));
+
+    // Only the one delivered line airs; the reviewer's continuation is dropped
+    expect(result.text).toEqual(`Nancy Landgraab: ${actorLine}`);
+    expect(result.memory?.content).toEqual(`Nancy Landgraab: ${actorLine}`);
+  });
+
   it('carries the running conversation into the next chat beat', async () => {
     const generate = mockGeneration();
 
@@ -150,11 +164,37 @@ describe('Chat pipeline', () => {
     expect(userText).toContain('What are you training for?');
   });
 
-  it('falls back to the single-shot path when there is nobody to reply', async () => {
+  it('plays a solo chat as The Voice speaking to the sim', async () => {
+    // Nobody in earshot: the player talks directly TO their sim, who answers aloud
+    // through the directed pipeline — not a monologue beat
+    reviewerOutput = `Marisol Vega: ${actorLine}`;
     mockGeneration();
 
-    const result = await ctx.ai.interactionEvent(buildChatEvent('Talking to myself again.', [playerSim]));
+    const result = await ctx.ai.interactionEvent(buildChatEvent('How are you feeling today?', [playerSim]));
 
-    expect(result.exchanges?.map((exchange) => exchange.label)).toEqual(['Scene Generation', 'Director Review']);
+    expect(result.status).toEqual(InteractionEventStatus.GENERATED);
+    const labels = result.exchanges?.map((exchange) => exchange.label);
+    expect(labels).toEqual(['Director Briefing', 'Actor: Marisol Vega', 'Director Review', 'Scene Scores']);
+    // The sim replies out loud; the player's line is remembered attributed to The Voice
+    expect(result.text).toContain(`Marisol Vega: ${actorLine}`);
+    expect(result.text).not.toContain('The Voice:');
+    expect(result.memory?.content).toEqual(`Marisol Vega: ${actorLine}`);
+    expect(result.memory?.action).toEqual('The Voice: How are you feeling today?');
+  });
+
+  it('plays a solo chat single-shot when Directed Scenes is off', async () => {
+    ctx.settings.directedScenesEnabled = false;
+    const generate = mockGeneration();
+
+    const result = await ctx.ai.interactionEvent(buildChatEvent('How are you feeling today?', [playerSim]));
+
+    expect(result.status).toEqual(InteractionEventStatus.GENERATED);
+    // Gus's classic single-shot generation: no director briefing, no actor turns
+    const systemPrompts = generate.mock.calls.map(
+      ([request]) => request.messages.find((message) => message.role === 'system')?.content ?? '',
+    );
+    expect(systemPrompts.some((prompt) => prompt.includes('You are directing a scene'))).toBe(false);
+    expect(result.exchanges).toBeUndefined();
+    expect(result.memory?.action).toEqual('How are you feeling today?');
   });
 });

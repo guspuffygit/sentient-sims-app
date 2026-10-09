@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { PatreonButton } from 'renderer/PatreonComponent';
 import log from 'electron-log';
+import { patreonMembershipUrl } from 'main/sentient-sims/constants';
 import { useAuth } from 'renderer/providers/AuthProvider';
 
 export function PatreonSubscribingComponent() {
@@ -40,7 +41,7 @@ export function PatreonSubscribingComponent() {
           alignItems: 'center',
         }}
       >
-        <PatreonButton url="https://www.patreon.com/SentientSims/membership" onClick={onClick} />
+        <PatreonButton url={patreonMembershipUrl} onClick={onClick} />
       </Box>
     </>
   );

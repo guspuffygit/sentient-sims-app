@@ -15,7 +15,7 @@ export type PendingDispatch = {
 const PENDING_TTL_MS = 10 * 60 * 1000;
 
 export class ActionDispatcherService {
-  private readonly pending = new Map<string, PendingDispatch>();
+  protected readonly pending = new Map<string, PendingDispatch>();
 
   dispatch(intent: ActionIntent): string {
     this.prune();
@@ -62,7 +62,7 @@ export class ActionDispatcherService {
     return this.pending.size;
   }
 
-  private prune() {
+  protected prune() {
     const cutoff = Date.now() - PENDING_TTL_MS;
     this.pending.forEach((entry, id) => {
       if (entry.dispatchedAt < cutoff) {

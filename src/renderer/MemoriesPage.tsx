@@ -1,5 +1,6 @@
 import { Box, Button, Card, CardActions, CardContent, Chip, Snackbar, Typography } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
 import log from 'electron-log';
@@ -10,8 +11,13 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import AppCard from './AppCard';
 import { EmptyState } from './components/EmptyState';
 import { MemoryEditInput } from './components/MemoryEditInput';
+import { rendererTiers } from './tiers/merge';
+import { useDebugMode } from './providers/DebugModeProvider';
 import { useWebsocket } from './providers/WebsocketProvider';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
+
+// DEV: the pipeline behind a memory ("View Prompt")
+const TraceDialog = rendererTiers.MemoryTraceDialog;
 
 type SelectedMemory = {
   memory: MemoryEntity;
@@ -19,6 +25,39 @@ type SelectedMemory = {
 };
 
 const client = new SentientSimsAppClient();
+
+// V-4: "Milo (thought):" style tag from the row's owner + event_type. Skipped when the
+// content already leads with the name (older rows carry "Name (thinking):", "Name (diary):",
+// or "Name: line" transcripts) so nothing renders twice.
+export function memoryNameTag(
+  memory: { owner_name?: string; participant_names?: string[]; event_type?: string },
+  body: string,
+): string | undefined {
+  const name = memory.owner_name ?? (memory.participant_names?.length === 1 ? memory.participant_names[0] : undefined);
+  const kind = (memory.event_type ?? '').toLowerCase();
+  const first = (memory.participant_names ?? [])[0];
+  const leadName = name ?? first;
+  if (!leadName || !body) {
+    return undefined;
+  }
+  const opening = body.trimStart().toLowerCase();
+  const alreadyTagged = (memory.participant_names ?? [])
+    .concat(name ? [name] : [])
+    .some((candidate) => candidate && opening.startsWith(candidate.toLowerCase()));
+  if (alreadyTagged) {
+    return undefined;
+  }
+  if (kind === 'thought' || kind === 'monologue') {
+    return `${leadName} (thought):`;
+  }
+  if (kind === 'reflection') {
+    return `${leadName} (diary):`;
+  }
+  if (kind === 'outcome') {
+    return undefined;
+  }
+  return `${leadName}:`;
+}
 
 export default function MemoriesPage() {
   const textareaRef = useRef<HTMLDivElement>(null);
@@ -30,7 +69,9 @@ export default function MemoriesPage() {
   }, [memoriesFocused]);
   const [editedMemory, setEditedMemory] = useState<SelectedMemory | null | undefined>();
   const { status } = useWebsocket();
+  const debugMode = useDebugMode();
   const [copiedSnackbar, setCopiedSnackbar] = useState(false);
+  const [traceOpen, setTraceOpen] = useState(false);
 
   const copyInteractionName = (name: string) => {
     void navigator.clipboard.writeText(name);
@@ -113,6 +154,7 @@ export default function MemoriesPage() {
 
   const handleSetSelectedMemory = useCallback(
     (index: number) => {
+      setTraceOpen(false);
       if (index < 0) {
         setEditedMemory(null);
       } else {
@@ -239,6 +281,12 @@ export default function MemoriesPage() {
     const renderText: any[] = [];
 
     memories.forEach((memory, index) => {
+      // A content-less memory is served with its observation/pre_action as content so the
+      // in-game window can render it, so drop the repeat instead of printing it twice
+      const body = [memory.observation, memory.action, memory.content]
+        .filter((m, i, all) => m && all.indexOf(m) === i)
+        .join('\n');
+      const tag = memoryNameTag(memory, body);
       renderText.push(
         <Typography
           variant="body2"
@@ -247,11 +295,12 @@ export default function MemoriesPage() {
           }}
           className="hoverHighlightTypography"
         >
-          {/* A content-less memory is served with its observation/pre_action as content so the
-              in-game window can render it, so drop the repeat instead of printing it twice */}
-          {[memory.observation, memory.action, memory.content]
-            .filter((m, i, all) => m && all.indexOf(m) === i)
-            .join('\n')}
+          {tag ? (
+            <Typography component="span" variant="body2" sx={{ color: 'text.secondary', marginRight: 0.5 }}>
+              {tag}
+            </Typography>
+          ) : null}
+          {body}
         </Typography>,
       );
       renderText.push(<Typography> </Typography>);
@@ -292,6 +341,18 @@ export default function MemoriesPage() {
                 >
                   Cancel
                 </Button>
+                {TraceDialog && debugMode.isEnabled && editedMemory.memory.id !== undefined && (
+                  <Button
+                    sx={{ marginLeft: 1 }}
+                    variant="outlined"
+                    startIcon={<VisibilityIcon />}
+                    onClick={() => {
+                      setTraceOpen(true);
+                    }}
+                  >
+                    View Prompt
+                  </Button>
+                )}
               </div>
               <div>
                 <Button
@@ -380,6 +441,15 @@ export default function MemoriesPage() {
           </CardContent>
         </Card>
         {editMemoryBox}
+        {TraceDialog ? (
+          <TraceDialog
+            open={traceOpen}
+            memoryId={editedMemory?.memory.id}
+            onClose={() => {
+              setTraceOpen(false);
+            }}
+          />
+        ) : null}
         <Snackbar
           open={copiedSnackbar}
           autoHideDuration={1500}

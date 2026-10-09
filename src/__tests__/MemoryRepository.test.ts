@@ -2,7 +2,17 @@ import * as fs from 'fs';
 import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
 import { migrate } from 'main/sentient-sims/db/migrations';
+import { CreateMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
+import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 import { mockApiContext } from './util';
+
+function createMemory(ctx: ApiContext, request: CreateMemoryRequest): MemoryEntity {
+  const created = ctx.memoryRepository.createMemory(request);
+  if (!created) {
+    throw new Error('createMemory stored nothing');
+  }
+  return created;
+}
 
 describe('MemoryRepository', () => {
   it('CRUD', () => {
@@ -22,7 +32,7 @@ describe('MemoryRepository', () => {
       observation: 'joijofi10298',
       action: 'ojf0192830hkljh12',
     };
-    const result = ctx.memoryRepository.createMemory({
+    const result = createMemory(ctx, {
       memory,
       participants,
     });
@@ -133,14 +143,16 @@ describe('MemoryRepository', () => {
       },
       participants: [],
     });
-    // Nothing renderable at all
-    ctx.memoryRepository.createMemory({
+    // Nothing renderable at all — the hygiene gate refuses to persist it (the playtest
+    // DB carried 76 text-less failed generations that polluted retrieval)
+    const rejected = ctx.memoryRepository.createMemory({
       memory: { location_id: 1, event_type: 'interaction' },
       participants: [],
     });
+    expect(rejected).toBeUndefined();
 
     const memories = ctx.memoryRepository.getMemories();
-    expect(memories).toHaveLength(3);
+    expect(memories).toHaveLength(2);
     memories.forEach((memory) => {
       expect(typeof memory.content).toEqual('string');
       expect(memory.content).not.toMatch(/[<>]/);
@@ -151,7 +163,6 @@ describe('MemoryRepository', () => {
     // observation is neutralized identically so consumers comparing the fields see equal strings
     expect(memories[0].observation).toEqual(memories[0].content);
     expect(memories[1].content).toEqual('Marisol Vega is asking Julio Brewer about their career.');
-    expect(memories[2].content).toEqual('');
 
     // The stored rows keep their own shape
     expect(ctx.memoryRepository.getMemory({ id: String(memories[1].id) }).content).toBeNull();
@@ -173,7 +184,7 @@ describe('MemoryRepository', () => {
       content: 'test content',
       interaction_name: 'mixer_social_GossipAbout',
     };
-    const result = ctx.memoryRepository.createMemory({
+    const result = createMemory(ctx, {
       memory,
       participants: [{ id: '100' }],
     });
@@ -200,7 +211,7 @@ describe('MemoryRepository', () => {
       content: 'ww content',
       interaction_name: 'some_animation_name',
     };
-    const result = ctx.memoryRepository.createMemory({
+    const result = createMemory(ctx, {
       memory,
       participants: [{ id: '200' }, { id: '201' }],
     });
@@ -229,7 +240,7 @@ describe('MemoryRepository', () => {
       participants,
     });
     // Scene B memory at a different location
-    const b1 = ctx.memoryRepository.createMemory({
+    const b1 = createMemory(ctx, {
       memory: { location_id: 20, content: 'b1' },
       participants: [{ id: '501' }],
     });
@@ -239,7 +250,7 @@ describe('MemoryRepository', () => {
       participants,
     });
     // An older memory at location 10 from a previous visit — excluded by the since filter
-    const old = ctx.memoryRepository.createMemory({
+    const old = createMemory(ctx, {
       memory: { location_id: 10, content: 'previous visit' },
       participants: [{ id: '999' }],
     });
@@ -309,7 +320,7 @@ describe('MemoryRepository', () => {
     expect(hasSceneId()).toBe(false);
 
     // Memory rows no longer carry the column that broke the mod's parser
-    const created = ctx.memoryRepository.createMemory({
+    const created = createMemory(ctx, {
       memory: { location_id: 1, content: 'clean row' },
       participants: [{ id: '900' }],
     });
@@ -328,7 +339,7 @@ describe('MemoryRepository', () => {
 
     // Past 2^53: Number() would round the last digits away
     const bigId = '1152921504606580259';
-    const created = ctx.memoryRepository.createMemory({
+    const created = createMemory(ctx, {
       memory: { id: bigId, location_id: 1, content: 'a memory from the game' },
       participants: [{ id: '2251799813685521' }],
     });
@@ -365,7 +376,7 @@ describe('MemoryRepository', () => {
       content: 'content',
       interaction_name: 'original_name',
     };
-    const result = ctx.memoryRepository.createMemory({
+    const result = createMemory(ctx, {
       memory,
       participants: [{ id: '300' }],
     });
@@ -376,5 +387,81 @@ describe('MemoryRepository', () => {
 
     const updated = ctx.memoryRepository.getMemory({ id: String(result.id) });
     expect(updated.interaction_name).toEqual('updated_name');
+  });
+});
+
+// getOwnDayMemories is the battery's MEM-today oracle. Both halves of this were live bugs
+// on 2026-09-05, one after the other: first it returned other Sims' diaries about the
+// subject, then, tightened onto game_day, it returned nothing at all because 30,378 of
+// ~30,522 memory_index rows on the real save have game_day NULL.
+describe('getOwnDayMemories', () => {
+  const ME = '821650642008040319';
+  const SOMEONE_ELSE = '121340882759582053';
+
+  const load = () => {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
+    ctx.db.loadDatabase({ sessionId: '7981724', saveId: '3' });
+    return ctx;
+  };
+
+  it("returns the Sim's own rows even when nothing stamped a game day", () => {
+    const ctx = load();
+    // No gameDayProvider set, so every row lands with game_day NULL - the live case
+    ctx.memoryRepository.createMemory({
+      memory: { location_id: 1, content: "Ehren Alder tried 'dance'", interaction_name: 'generic_Dance' },
+      participants: [{ id: ME }],
+    });
+
+    const rows = ctx.memoryRepository.getOwnDayMemories(ME, 605, 20);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].interaction_name).toEqual('generic_Dance');
+  });
+
+  it("leaves out another Sim's diary that merely lists this Sim as present", () => {
+    const ctx = load();
+    // A reflection lists everyone who was in the scene, which is how a toddler's "today"
+    // used to come back as his parents' diaries about him
+    ctx.memoryRepository.createMemory({
+      memory: { location_id: 1, content: 'Jonah Alder (diary): today was quiet', event_type: 'reflection' },
+      participants: [{ id: ME }, { id: SOMEONE_ELSE }],
+      index: { owner: SOMEONE_ELSE },
+    });
+    ctx.memoryRepository.createMemory({
+      memory: { location_id: 1, content: 'Ehren Alder (diary): I danced', event_type: 'reflection' },
+      participants: [{ id: ME }],
+      index: { owner: ME },
+    });
+
+    const contents = ctx.memoryRepository.getOwnDayMemories(ME, 605, 20).map((row) => row.content);
+    expect(contents).toEqual(['Ehren Alder (diary): I danced']);
+  });
+
+  it('excludes a row explicitly stamped with a different day', () => {
+    const ctx = load();
+    ctx.memoryRepository.setGameDayProvider(() => 604);
+    ctx.memoryRepository.createMemory({
+      memory: { location_id: 1, content: 'yesterday' },
+      participants: [{ id: ME }],
+    });
+    ctx.memoryRepository.setGameDayProvider(() => 605);
+    ctx.memoryRepository.createMemory({
+      memory: { location_id: 1, content: 'today' },
+      participants: [{ id: ME }],
+    });
+
+    const contents = ctx.memoryRepository.getOwnDayMemories(ME, 605, 20).map((row) => row.content);
+    expect(contents).toEqual(['today']);
+  });
+
+  it('returns the newest rows, oldest first, when more exist than the limit', () => {
+    const ctx = load();
+    ['first', 'second', 'third'].forEach((content) => {
+      ctx.memoryRepository.createMemory({ memory: { location_id: 1, content }, participants: [{ id: ME }] });
+    });
+
+    // The limit has to bite on the NEWEST rows, but a day reads oldest-first
+    const contents = ctx.memoryRepository.getOwnDayMemories(ME, 605, 2).map((row) => row.content);
+    expect(contents).toEqual(['second', 'third']);
   });
 });

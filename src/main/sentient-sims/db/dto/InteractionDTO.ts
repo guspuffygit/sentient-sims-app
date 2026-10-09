@@ -23,6 +23,8 @@ export type ShadowedVersion = {
 
 export type BrowsableInteraction = BasicInteraction & {
   source: MappingSource;
+  // The game's own pie-menu label, known for interactions seen in game while unmapped
+  displayName?: string;
   // The versions this entry shadows, when they exist, so the UI can show whether
   // the displayed text matches what everyone else gets and what the original was
   online?: ShadowedVersion;

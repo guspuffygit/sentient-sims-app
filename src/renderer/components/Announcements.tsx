@@ -234,10 +234,10 @@ export const Announcements = () => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: 'calc(100vh - 40px)',
+        height: 'calc(100vh - 24px)',
         minHeight: 280,
         position: 'sticky',
-        top: 20,
+        top: 12,
       }}
     >
       <AppBar

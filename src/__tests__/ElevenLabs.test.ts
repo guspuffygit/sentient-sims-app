@@ -39,6 +39,11 @@ describe('ElevenLabs speech model', () => {
     expect(isElevenLabsV3(ElevenLabsSpeechModel.ELEVEN_FLASH_V2_5)).toBe(false);
   });
 
+  it('accepts eleven_v3_conversational and treats it as v3', () => {
+    expect(toSpeechModel('eleven_v3_conversational')).toEqual(ElevenLabsSpeechModel.ELEVEN_V3_CONVERSATIONAL);
+    expect(isElevenLabsV3(ElevenLabsSpeechModel.ELEVEN_V3_CONVERSATIONAL)).toBe(true);
+  });
+
   it('rejects an unknown model', () => {
     expect(() => toSpeechModel('eleven_not_a_model')).toThrow();
   });

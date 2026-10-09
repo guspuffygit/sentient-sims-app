@@ -64,7 +64,24 @@ export class MemoriesController {
     try {
       const createMemoryRequest = req.body as CreateMemoryRequest;
 
+      // A solo scene's inner monologue rides the mod's normal memory round-trip (the mod
+      // can't send index metadata), so ownership is stamped here: a monologue with exactly
+      // one participant is that sim's private thought — no other sim may retrieve it.
+      if (
+        !createMemoryRequest.index &&
+        createMemoryRequest.memory.event_type === 'monologue' &&
+        createMemoryRequest.participants.length === 1
+      ) {
+        createMemoryRequest.index = { owner: createMemoryRequest.participants[0].id };
+      }
+
       const memory = this.ctx.memoryRepository.createMemory(createMemoryRequest);
+      if (!memory) {
+        // A hygiene rejection (empty, refusal, scaffolding) is a NORMAL outcome, not a
+        // fault: the mod treats `error` as fatal and pauses the game (5 UI pauses in the
+        // 08-04..08-14 playtest came from this line). `rejected` is the non-fatal shape.
+        return res.json({ rejected: true, reason: 'Memory rejected by hygiene gate (empty, refusal, or scaffolding)' });
+      }
       return res.json(memory);
     } catch (err) {
       log.error('Error creating memory', err);

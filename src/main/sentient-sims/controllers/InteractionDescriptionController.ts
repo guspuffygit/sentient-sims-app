@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { InteractionDTO, BasicInteraction } from '../db/dto/InteractionDTO';
 import { ApiContext } from '../services/ApiContext';
+import { InteractionService } from '../services/InteractionService';
 import log from 'electron-log';
 
 export class InteractionDescriptionController {
@@ -11,11 +12,21 @@ export class InteractionDescriptionController {
   }
 
   updateInteraction = async (req: Request, res: Response) => {
+    const interaction = req.body as InteractionDTO & { force?: boolean };
     try {
-      const interaction = req.body as InteractionDTO;
-      await this.ctx.interactions.updateUnmappedInteraction(interaction);
+      await this.ctx.interactions.updateUnmappedInteraction(interaction, interaction.force === true);
       res.json({ done: 'done' });
     } catch (err) {
+      // Not an error the caller should retry: it is text from this save on its way to
+      // everyone. 422 carries the words back so the browser can name them and offer to
+      // publish anyway.
+      if (err instanceof Error && err.message === InteractionService.NAMES_FROM_SAVE) {
+        res.status(422).json({
+          error: InteractionService.NAMES_FROM_SAVE,
+          names: this.ctx.interactions.namesFromSaveIn(interaction.action),
+        });
+        return;
+      }
       log.error('[Controller] Error saving interaction online:', err);
       res.status(500).json({ error: 'Failed to save interaction online.' });
     }

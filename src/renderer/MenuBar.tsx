@@ -11,6 +11,7 @@ import { useAuth } from './providers/AuthProvider';
 import handleOpenExternalLink from './hooks/handleOpenExternalLink';
 import LogoutButton from './components/LogoutButton';
 import { useLoginModal } from './providers/LoginModalProvider';
+import { rendererTiers } from './tiers/merge';
 
 export type MenuBarProperties = {
   hideSideBar: boolean;
@@ -56,6 +57,8 @@ const DEBUG_NAV_ITEMS: NavButtonProps[] = [
   { id: 'chat', label: 'Chat', path: '/chat' },
   { id: 'traits', label: 'Traits', path: '/traits' },
   { id: 'mapping-browser', label: 'Mapping Browser', path: '/mapping-browser' },
+  // The build tiers' debug pages (dev: the AI log)
+  ...rendererTiers.navItems,
 ];
 
 const NAV_ITEMS: NavButtonProps[] = [

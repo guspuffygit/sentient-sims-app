@@ -19,6 +19,15 @@ axiosClient.interceptors.request.use((config) => {
 
 const defaultMaxRetries = 3;
 
+// The server names the model and the tier it needs; the hint points at the fix
+export function tierUpgradeMessage(body: unknown): string {
+  const reason =
+    body && typeof body === 'object' && typeof (body as { error?: unknown }).error === 'string'
+      ? (body as { error: string }).error
+      : 'This model needs a higher Patreon tier';
+  return `${reason}. Upgrade on Patreon or pick another model in the AI provider settings.`;
+}
+
 function retryElseThrow(error: Error, maxRetries: number, config?: AxiosRequestConfig) {
   if (typeof config?.retryCount === 'number' && config.retryCount < maxRetries) {
     config.retryCount += 1;
@@ -74,6 +83,9 @@ axiosClient.interceptors.response.use(
       }
       case SentientSimsHTTPStatusCode.NOT_MEMBER_EXCEPTION: {
         throw new Error('Must be a Founder or Patron to use the Sentient Sims Uncensored AI Server.');
+      }
+      case SentientSimsHTTPStatusCode.TIER_UPGRADE_REQUIRED: {
+        throw new Error(tierUpgradeMessage(error.response?.data));
       }
       default: {
         return retryElseThrow(error, 3, error.config);

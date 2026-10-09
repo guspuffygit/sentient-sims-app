@@ -238,7 +238,7 @@ export const interactionDescriptions: Map<string, InteractionDescription> = new 
       pre_actions: ['{actor.0} is rudely brushing off {actor.1}.'],
     },
     'mixer_social_YellAT_targeted_mean': {
-      pre_actions: ['{actor.0} is starting a conversation with {actor.1}.'],
+      pre_actions: ['{actor.0} is yelling at {actor.1}, furious.'],
     },
     'mixer_social_TryToChat_targeted_friendly_lowScore': {
       pre_actions: ['{actor.0} is attempting to chat with {actor.1} in a friendly manner.'],
@@ -622,7 +622,7 @@ export const interactionDescriptions: Map<string, InteractionDescription> = new 
     },
     'mixer_social_RantLogically_targeted_mean_emotionSpecific': {
       pre_actions: [
-        '{actor.0} is passionately declaring their thoughts to {actor.1}, explaining their logical viewpoint.',
+        '{actor.0} is ranting AT {actor.1}, angrily laying out their logic and not letting them get a word in.',
       ],
     },
     'mixer_social_AskToCleanUpToys_targeted_Friendly_alwaysOn': {
@@ -8345,5 +8345,105 @@ export const interactionDescriptions: Map<string, InteractionDescription> = new 
     'TURBODRIVER:WickedWhims_AffSuper_Peeping_FindWindow_Trigger': {
       ignored: true,
     },
+    // ---- N-3 (2026-08-15): the top of the UNMAPPED tail from the 08-04..08-14 playtest log
+    // Night watch 2026-08-18: this is a picker SI and fires with the actor only (the target
+    // is chosen after the event), so the old '{actor.0} … chat with {actor.1}' line rendered
+    // degenerate 127/127 times. Ignored like every other picker; the picked chat's mixers
+    // carry the memory.
+    'autonomousSimPicker_SocialObservation_FamiliarChat': {
+      ignored: true,
+    },
+    'super_Gardening_TalkToPlants_FromTrait': {
+      pre_actions: ['{actor.0} is talking to the plants, tending them and murmuring to them.'],
+    },
+    'Chess_Social': {
+      pre_actions: ['{actor.0} and {actor.1} are chatting over a chess board.'],
+    },
+    'tent_Relax_CryInTent': {
+      pre_actions: ['{actor.0} has crawled into a tent and is quietly crying.'],
+    },
+    'tent_Relax_Cry_Active': {
+      pre_actions: ['{actor.0} is crying inside a tent.'],
+    },
+    'generic_Tent': {
+      pre_actions: ['{actor.0} is relaxing in a tent.'],
+    },
+    'Socials_Targeted_Friendly_AlwaysOn_PlantLover_Favorite': {
+      pre_actions: ['{actor.0} is telling {actor.1} all about their favorite plant.'],
+    },
+    'Socials_Targeted_Friendly_AlwaysOn_PlantLover_Advice': {
+      pre_actions: ['{actor.0} is giving {actor.1} earnest gardening advice.'],
+    },
+    'Socials_Targeted_Friendly_AlwaysOn_PlantLover_Enthuse': {
+      pre_actions: ['{actor.0} is enthusing to {actor.1} about plants.'],
+    },
+    'super_Ailments_BurningPassion_Burn': {
+      pre_actions: ['{actor.0} is overcome by a sudden feverish rush.'],
+    },
+    'Telescope_WatchNeighbors_Passive': {
+      pre_actions: ['{actor.0} is spying on the neighbors through a telescope.'],
+    },
+    'Idle_Trait_PlantLover': { ignored: true },
+    'PlantSim_idle': { ignored: true },
+    'PlantSim_Idle_SunlightAbsorb': {
+      pre_actions: ['{actor.0} is basking in the sunlight, absorbing it like a plant.'],
+    },
+    'idle_Buff_SimPreference_Likes_Activities_NLS': { ignored: true },
+    'idle_Buff_SimPreference_Likes_Activities_Computer': { ignored: true },
+    'idle_Buff_SimPreference_Likes_Activities_Phone': { ignored: true },
+    'idle_Lifestyles_Outdoorsy_Bored': { ignored: true },
+    'si_SatisfyConstraint_SimOrFairy': { ignored: true },
+    'createCarry_FairyWings': { ignored: true },
+    'superInteraction_FairyOccult_Wings_HoldWingProxyObject_Back': { ignored: true },
+    'super_FairyHome_Object_EmotionalAppetite': {
+      pre_actions: ['{actor.0} is feeding on the emotions swirling around the fairy home.'],
+    },
+    'super_FairyHome_Object_ShakeForFairyDust': {
+      pre_actions: ['{actor.0} is shaking the fairy home to gather fairy dust.'],
+    },
+    'social_GreenMan_GreetSim': {
+      pre_actions: ['{actor.0} is greeting {actor.1} with a solemn, leafy nod.'],
+    },
+    'super_EP19Gardening_ChasePixies_Fairy': {
+      pre_actions: ['{actor.0} is chasing pixies around the garden.'],
+    },
+    'Toddler_AskForKiddiePool': {
+      pre_actions: ['{actor.0}, a toddler, is begging {actor.1} to play in the kiddie pool.'],
+    },
+    'phone_TakePTO_Scientist': {
+      pre_actions: ['{actor.0} is calling in to take a day off from the lab.'],
+    },
+    'sim_HaveWedding_Arch_Groom': {
+      pre_actions: ['{actor.0} is standing under the wedding arch, about to be married to {actor.1}.'],
+    },
+    'sim_HaveWedding_Arch_Bride': {
+      pre_actions: ['{actor.0} is standing under the wedding arch, about to be married to {actor.1}.'],
+    },
+    'stereo_listen_Smart_Hub': {
+      pre_actions: ['{actor.0} is listening to music from the smart hub.'],
+    },
+    'mixer_Social_WooHoo_targeted_romance_transition_Crypts': {
+      pre_actions: ['{actor.0} is leading {actor.1} off to WooHoo among the crypts.'],
+    },
+    'mixer_Social_FairyOccult_Discuss_Targeted_Friendly_AlwaysOn_FairytoNonFairy': {
+      pre_actions: ['{actor.0} is telling {actor.1} what it is like to be a fairy.'],
+    },
+    'superInteraction_FairyOccult_MotiveSolving_BatheInNature': {
+      pre_actions: ['{actor.0} is bathing in nature, letting the greenery restore them.'],
+    },
+    'superInteraction_FairyOccult_Ability_NurtureNature_Plant': {
+      pre_actions: ['{actor.0} is nurturing a plant with fairy magic.'],
+    },
+    'sim_FairyOccult_EmotionalAppetiteDistress_EmotionallyStarving': {
+      pre_actions: ['{actor.0} is emotionally starving, desperate for a feeling to feed on.'],
+    },
+    'food_eat_Passive_ChopsticksOptional': {
+      pre_actions: ['{actor.0} is eating.'],
+    },
+    'socials_Targeted_Friendly_SimPreference_Recent_Likes_Computer': {
+      pre_actions: ['{actor.0} is telling {actor.1} how much they enjoyed some time on the computer.'],
+    },
+    'mixer_Career_Reaper_Investigate_WipeSweat': { ignored: true },
+    'Computer_Use_React': { ignored: true },
   }),
 );

@@ -4,6 +4,7 @@ import { AssetsController } from '../controllers/AssetsController';
 import { CognitionController } from '../controllers/CognitionController';
 import { DbController } from '../controllers/DbController';
 import { DebugController } from '../controllers/DebugController';
+import { DossierController } from '../controllers/DossierController';
 import { FileController } from '../controllers/FileController';
 import { InteractionDescriptionController } from '../controllers/InteractionDescriptionController';
 import { LocationsController } from '../controllers/LocationsController';
@@ -16,6 +17,8 @@ import { PaintingsController } from '../controllers/PaintingsController';
 import { ParticipantsController } from '../controllers/ParticipantsController';
 import { PatreonController } from '../controllers/PatreonController';
 import { SettingsController } from '../controllers/SettingsController';
+import { SimFactsController } from '../controllers/SimFactsController';
+import { SimStateController } from '../controllers/SimStateController';
 import { UpdateController } from '../controllers/UpdateController';
 import { VersionController } from '../controllers/VersionController';
 import { VoiceController } from '../controllers/VoiceController';
@@ -25,15 +28,19 @@ import { MemoryIndexRepository } from '../db/MemoryIndexRepository';
 import { MemoryRepository } from '../db/MemoryRepository';
 import { PaintingRepository } from '../db/PaintingRepository';
 import { ParticipantRepository } from '../db/ParticipantRepository';
+import { SimFactRepository } from '../db/SimFactRepository';
 import { ApiType } from '../models/ApiType';
+import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { LLaMaTokenCounter } from '../tokens/LLaMaTokenCounter';
 import { NovelAITokenCounter } from '../tokens/NovelAITokenCounter';
 import { OpenAITokenCounter } from '../tokens/OpenAITokenCounter';
 import { TokenCounter } from '../tokens/TokenCounter';
 import { ActionDispatcherService } from './ActionDispatcherService';
+import { AIExchangeLogService } from './AIExchangeLogService';
 import { AIService } from './AIService';
 import { AnimationsService } from './AnimationsService';
 import { DbService } from './DbService';
+import { DefaultDescriptionService } from './DefaultDescriptionService';
 import { DirectoryService } from './DirectoryService';
 import { ElevenLabsVoicesService } from './ElevenLabsVoicesService';
 import { EmbeddingProviderConfigService } from './EmbeddingProviderConfigService';
@@ -61,15 +68,29 @@ import { OpenAIImageGenerationService } from './OpenAIImageGenerationService';
 import { OpenAIService } from './OpenAIService';
 import { OpenRouterService } from './OpenRouterService';
 import { PatreonService } from './PatreonService';
+import { PlayerConversationService } from './PlayerConversationService';
 import { PromptRequestBuilderService } from './PromptRequestBuilderService';
 import { SceneService } from './SceneService';
+import { ScenePlaybackRegistry } from './ScenePlaybackRegistry';
 import { ProviderConfigService } from './ProviderConfigService';
+import { SemanticMemoryService } from './SemanticMemoryService';
 import { SentientSimsAIService } from './SentientSimsAIService';
 import { SentientSimsEmbeddingService } from './SentientSimsEmbeddingService';
 import { SettingsService } from './SettingsService';
+import { SimStateCache } from './SimStateCache';
+import { TranscriptionService } from './TranscriptionService';
 import { UpdateService } from './UpdateService';
 import { VersionService } from './VersionService';
 import { VLLMAIService } from './VLLMAIService';
+import {
+  notifySceneStop,
+  sendConversationClosedToMod,
+  sendSceneEndedToMod,
+  setSceneMemoryObserver,
+} from '../util/notifyRenderer';
+import { setSimAliases } from '../util/simAliases';
+import { TIER_REGISTRATIONS } from '../tiers';
+import type { TierExtensions, TierRegistration } from '../tiers/types';
 
 export type ApiContextParams = {
   port: number;
@@ -77,6 +98,12 @@ export type ApiContextParams = {
   settingsService: SettingsService;
   directoryService: DirectoryService;
   appVersion: string;
+  // The build tiers this context runs (release 4.5). Defaults to the generated list for
+  // the build; tests that pin core behaviour pass [].
+  tiers?: TierRegistration[];
+  // True when the app runs from source (main.ts: !app.isPackaged). The startup mod
+  // auto-update stays off, so a mod built from the repo is not replaced by a release.
+  devBuild?: boolean;
 };
 
 class ControllerContext {
@@ -100,6 +127,9 @@ class ControllerContext {
   private readonly _newsController: NewsController;
   private readonly _optionsController: OptionsController;
   private readonly _cognitionController: CognitionController;
+  private readonly _simStateController: SimStateController;
+  private readonly _dossierController: DossierController;
+  private readonly _simFactsController: SimFactsController;
   private readonly _paintingsController: PaintingsController;
 
   constructor(ctx: ApiContext) {
@@ -122,7 +152,10 @@ class ControllerContext {
     this._mappingController = new MappingController(ctx);
     this._newsController = new NewsController(ctx);
     this._optionsController = new OptionsController(ctx);
-    this._cognitionController = new CognitionController(ctx);
+    this._cognitionController = ctx.ext.cognitionController ?? new CognitionController(ctx);
+    this._simStateController = new SimStateController(ctx);
+    this._dossierController = new DossierController(ctx);
+    this._simFactsController = new SimFactsController(ctx);
     this._paintingsController = new PaintingsController(ctx);
   }
 
@@ -206,6 +239,18 @@ class ControllerContext {
     return this._cognitionController;
   }
 
+  get simState(): SimStateController {
+    return this._simStateController;
+  }
+
+  get dossier(): DossierController {
+    return this._dossierController;
+  }
+
+  get simFacts(): SimFactsController {
+    return this._simFactsController;
+  }
+
   get paintings(): PaintingsController {
     return this._paintingsController;
   }
@@ -233,12 +278,25 @@ export class ApiContext {
   private readonly _mappingService: MappingService;
   private readonly _sceneService: SceneService;
   private readonly _actionDispatcherService: ActionDispatcherService;
+
+  private readonly _scenePlaybackRegistry: ScenePlaybackRegistry;
+  private readonly _playerConversationService: PlayerConversationService;
+
+  private _defaultDescriptionService?: DefaultDescriptionService;
+  private readonly _simStateCache: SimStateCache;
   private readonly _openAIEmbeddingService: OpenAIEmbeddingService;
   private readonly _sentientSimsEmbeddingService: SentientSimsEmbeddingService;
   private readonly _geminiEmbeddingService: GeminiEmbeddingService;
   private readonly _noopEmbeddingService: NoopEmbeddingService;
   private readonly _memoryAnnotationService: MemoryAnnotationService;
   private readonly _memoryRetrievalService: MemoryRetrievalService;
+  private readonly _aiExchangeLogService: AIExchangeLogService;
+  private readonly _semanticMemoryService: SemanticMemoryService;
+  private readonly _transcriptionService: TranscriptionService;
+
+  // One logging wrapper per provider service, so repeated getGenerationService calls
+  // hand back the same object instead of allocating a new proxy each time
+  private readonly _loggedGenerationServices = new Map<GenerationService, GenerationService>();
   private readonly _interactionSemanticSearchService: InteractionSemanticSearchService;
   private readonly _gameSigningService: GameSigningService;
   private readonly _paintingMountService: PaintingMountService;
@@ -251,6 +309,7 @@ export class ApiContext {
   private readonly _paintingRepository: PaintingRepository;
   private readonly _participantRepository: ParticipantRepository;
   private readonly _interactionRepository: InteractionRepository;
+  private readonly _simFactRepository: SimFactRepository;
 
   // --- AI Services ---
   private readonly _sentientSimsAIService: SentientSimsAIService;
@@ -273,11 +332,24 @@ export class ApiContext {
 
   private readonly _controller: ControllerContext;
 
+  private readonly _tiers: TierRegistration[];
+
+  readonly devBuild: boolean;
+
+  // Capability slots the build tiers fill in construct() (tiers/types.ts TierExtensions).
+  // Core code calls only these, and carries on without the feature when a slot is empty.
+  readonly ext: TierExtensions = {};
+
   constructor(options: ApiContextParams) {
+    this._tiers = options.tiers ?? TIER_REGISTRATIONS;
+    this.devBuild = options.devBuild ?? false;
     this._port = options.port;
     this._getAssetPath = options.getAssetPath;
     this._settings = options.settingsService;
     this._directory = options.directoryService;
+    // Alias sims (the Grim Reaper and friends) are named in voice casting and targeting in
+    // every build; main.ts refreshes the registry when the setting changes
+    setSimAliases(this._settings.twitchSimAliases);
 
     this._sentientSimsAIService = new SentientSimsAIService(this);
     this._koboldAIService = new KoboldAIService(this);
@@ -312,9 +384,51 @@ export class ApiContext {
     this._paintingRepository = new PaintingRepository(this._db);
     this._participantRepository = new ParticipantRepository(this._db);
     this._interactionRepository = new InteractionRepository(this);
+    this._simFactRepository = new SimFactRepository(this._db);
 
     this._sceneService = new SceneService();
     this._actionDispatcherService = new ActionDispatcherService();
+    this._playerConversationService = new PlayerConversationService({
+      idleMs: () => this._settings.playerConversationIdleMinutes * 60_000,
+      notifyClosed: (conversation, reason) => {
+        sendConversationClosedToMod({
+          simIds: conversation.simIds,
+          simNames: conversation.simNames,
+          speaker: conversation.speaker,
+          reason,
+        });
+      },
+    });
+    this._scenePlaybackRegistry = new ScenePlaybackRegistry({
+      notifyStop: notifySceneStop,
+      // A conversation that closed is weighed for the moodlet it leaves on each sim, and
+      // a reply to the player that wanted to act may act now that it has been heard
+      onSceneClosed: (closed) => {
+        for (const tier of this._tiers) {
+          tier.onSceneClosed?.(this, closed);
+        }
+      },
+      notifySceneEnded: (sceneId, reason) => {
+        // The game ended the conversation (walk-away, left lot, zone unload): a player
+        // thread riding that scene id is over too. 'finished' is just a round's playback
+        // running out, which every reply does while the thread stays open.
+        if (reason === 'stopped') {
+          this._playerConversationService.onSceneStopped(sceneId);
+        }
+        sendSceneEndedToMod(sceneId, reason);
+      },
+      rewriteMemory: (memoryId, content) => {
+        if (!this._db.isLoaded()) {
+          return;
+        }
+        const existing = this._memoryRepository.getMemory({ id: memoryId });
+        this._memoryRepository.updateMemory({ ...existing, content });
+      },
+    });
+    // A scene's transcript row is saved from round 1 alone; this is how the scene
+    // finds its row again at its close to rewrite it to what was actually said.
+    setSceneMemoryObserver((pacedText, memoryId) => this._scenePlaybackRegistry.attachMemory(pacedText, memoryId));
+    this._simStateCache = new SimStateCache();
     this._openAIEmbeddingService = new OpenAIEmbeddingService(this);
     this._sentientSimsEmbeddingService = new SentientSimsEmbeddingService(this);
     this._geminiEmbeddingService = new GeminiEmbeddingService(this);
@@ -333,11 +447,42 @@ export class ApiContext {
     this._gameSigningService = new GameSigningService(this);
     this._paintingMountService = new PaintingMountService(this);
     this._elevenLabsVoicesService = new ElevenLabsVoicesService(this);
+    this._transcriptionService = new TranscriptionService(this);
+    this._aiExchangeLogService = new AIExchangeLogService();
+    // Names come from the participant table rather than being passed around: the fact
+    // store holds ids, and every rendering of a fact needs a name for them.
+    this._semanticMemoryService = new SemanticMemoryService(this._simFactRepository, (simIds) => {
+      try {
+        return this._participantRepository.getParticipantNameMap(simIds);
+      } catch {
+        // No database loaded, or unknown ids - the renderer falls back to 'sim <id>'
+        return {};
+      }
+    });
+    this._memoryRepository.setGameDayProvider(() => {
+      try {
+        return this._simStateCache.getReport()?.lot?.clock?.absolute_day;
+      } catch {
+        return undefined;
+      }
+    });
     this._memoryRepository.setOnMemoryUpserted((memory) => {
       this._memoryAnnotationService.annotateInBackground(memory);
+      for (const tier of this._tiers) {
+        tier.onMemoryUpserted?.(this, memory);
+      }
     });
 
+    // Every core service exists; each build tier builds its own and fills its slots
+    for (const tier of this._tiers) {
+      tier.construct?.(this);
+    }
+
     this._controller = new ControllerContext(this);
+  }
+
+  get tiers(): readonly TierRegistration[] {
+    return this._tiers;
   }
 
   get port(): number {
@@ -413,7 +558,27 @@ export class ApiContext {
   }
 
   get actionDispatcher(): ActionDispatcherService {
-    return this._actionDispatcherService;
+    return this.ext.actionDispatcher ?? this._actionDispatcherService;
+  }
+
+  get scenePlayback(): ScenePlaybackRegistry {
+    return this._scenePlaybackRegistry;
+  }
+
+  get playerConversations(): PlayerConversationService {
+    return this._playerConversationService;
+  }
+
+  // V-6: lazily built — it needs ai, which is built late
+  get defaultDescriptions(): DefaultDescriptionService {
+    if (!this._defaultDescriptionService) {
+      this._defaultDescriptionService = new DefaultDescriptionService(this);
+    }
+    return this._defaultDescriptionService;
+  }
+
+  get simStateCache(): SimStateCache {
+    return this._simStateCache;
   }
 
   // Evaluated per access so changing the embedding provider (or setting a key/token at
@@ -438,8 +603,16 @@ export class ApiContext {
     return this._memoryAnnotationService;
   }
 
+  get transcription(): TranscriptionService {
+    return this._transcriptionService;
+  }
+
   get memoryRetrieval(): MemoryRetrievalService {
     return this._memoryRetrievalService;
+  }
+
+  get aiExchangeLog(): AIExchangeLogService {
+    return this._aiExchangeLogService;
   }
 
   get interactionSemanticSearch(): InteractionSemanticSearchService {
@@ -486,7 +659,19 @@ export class ApiContext {
     return this._interactionRepository;
   }
 
+  get simFactRepository(): SimFactRepository {
+    return this._simFactRepository;
+  }
+
+  get semanticMemory(): SemanticMemoryService {
+    return this._semanticMemoryService;
+  }
+
   private get sentientSimsAIService(): SentientSimsAIService {
+    return this._sentientSimsAIService;
+  }
+
+  get sentientSimsTranscription(): Pick<SentientSimsAIService, 'transcribe' | 'healthCheck'> {
     return this._sentientSimsAIService;
   }
 
@@ -542,7 +727,55 @@ export class ApiContext {
     throw new Error(`Image generation is not supported for provider: ${aiType}`);
   }
 
+  // Every AI call in the app goes through here, which makes it the one place that can log
+  // them all — see AIExchangeLogService.
   getGenerationService(aiType: ApiType): GenerationService {
+    return this.withExchangeLogging(this.resolveGenerationService(aiType));
+  }
+
+  // A Proxy rather than a hand-rolled object: callers (and tests) still see the real
+  // service — `instanceof SentientSimsAIService` holds, and spying on the returned object
+  // defines the spy on the underlying service, so the logging still runs around it.
+  private withExchangeLogging(service: GenerationService): GenerationService {
+    const existing = this._loggedGenerationServices.get(service);
+    if (existing) {
+      return existing;
+    }
+
+    const exchangeLog = this._aiExchangeLogService;
+    const loggedGenerate = async (request: OpenAICompatibleRequest) => {
+      const startedAt = Date.now();
+      try {
+        const response = await service.sentientSimsGenerate(request);
+        exchangeLog.record({ request, responseText: response.text, durationMs: Date.now() - startedAt });
+        return response;
+      } catch (err) {
+        exchangeLog.record({
+          request,
+          responseText: '',
+          durationMs: Date.now() - startedAt,
+          error: err instanceof Error ? err.message : String(err),
+        });
+        throw err;
+      }
+    };
+
+    const wrapped = new Proxy(service, {
+      get(target, property, receiver) {
+        if (property === 'sentientSimsGenerate') {
+          return loggedGenerate;
+        }
+        const value: unknown = Reflect.get(target, property, receiver);
+        // Bound to the real service so delegated methods keep their own `this`
+        return typeof value === 'function' ? (value as (...args: unknown[]) => unknown).bind(target) : value;
+      },
+    });
+
+    this._loggedGenerationServices.set(service, wrapped);
+    return wrapped;
+  }
+
+  private resolveGenerationService(aiType: ApiType): GenerationService {
     if (aiType === ApiType.SentientSimsAI || aiType === ApiType.CustomAI) {
       return this.sentientSimsAIService;
     }

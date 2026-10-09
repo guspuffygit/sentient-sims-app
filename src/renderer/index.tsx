@@ -27,6 +27,7 @@ import { VersionsProvider } from './providers/VersionsProvider';
 import { ModUpdateProvider } from './providers/ModUpdateProvider';
 import TraitsPage from './TraitsPage';
 import { AudioContextProvider } from './providers/AudioContextProvider';
+import { VoiceInputProvider } from './providers/VoiceInputProvider';
 import OfflineMemory from './OfflineMemory';
 import { WebsocketProvider } from './providers/WebsocketProvider';
 import 'aws-amplify/auth/enable-oauth-listener';
@@ -34,6 +35,7 @@ import { AuthProvider } from './providers/AuthProvider';
 import { AmplifyConfig } from './AmplifyConfig';
 import OnlineMappingBrowser from './components/OnlineMappingBrowser';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
+import { rendererTiers } from './tiers/merge';
 
 Amplify.configure(AmplifyConfig);
 
@@ -86,6 +88,8 @@ const router = createMemoryRouter([
         path: '/logs',
         element: <LogViewerPage />,
       },
+      // The build tiers' pages (dev: the AI log)
+      ...rendererTiers.routes,
     ],
   },
 ]);
@@ -113,11 +117,13 @@ root.render(
                     <ModUpdateProvider>
                       <AISettingsProvider>
                         <AudioContextProvider>
-                          <ChatGenerationProvider>
-                            <DebugModeProvider>
-                              <RouterProvider router={router} />
-                            </DebugModeProvider>
-                          </ChatGenerationProvider>
+                          <VoiceInputProvider>
+                            <ChatGenerationProvider>
+                              <DebugModeProvider>
+                                <RouterProvider router={router} />
+                              </DebugModeProvider>
+                            </ChatGenerationProvider>
+                          </VoiceInputProvider>
                         </AudioContextProvider>
                       </AISettingsProvider>
                     </ModUpdateProvider>

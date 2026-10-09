@@ -20,10 +20,14 @@ function loadedContext(sessionId: string): ApiContext {
 }
 
 function createMemory(ctx: ApiContext, memory: Partial<MemoryEntity>): MemoryEntity {
-  return ctx.memoryRepository.createMemory({
+  const created = ctx.memoryRepository.createMemory({
     memory: { location_id: 1, content: 'a memory', ...memory },
     participants: [{ id: '100' }],
   });
+  if (!created) {
+    throw new Error('test memory rejected by hygiene gate');
+  }
+  return created;
 }
 
 function fakeEmbedder(vector: number[]): EmbeddingService {
@@ -52,6 +56,31 @@ describe('MemoryIndexRepository', () => {
     });
     expect(embeddingResult.changes).toEqual(0);
     expect(ctx.memoryIndexRepository.getEmbedding('9999', 'fake-model')).toBeUndefined();
+  });
+
+  // Found live 2026-09-05: INSERT OR REPLACE rewrites the whole row, so annotating a memory
+  // dropped the game day it was stamped with at creation. 11,474 of 11,499 rows on the live
+  // save had lost theirs; the 25 that kept one were outcome rows, which carry no text to
+  // annotate. The memory-recall battery grades against that day, so it graded nothing.
+  it('keeps the game day a memory was stamped with when the annotator rates it', () => {
+    const ctx = loadedContext(`memory-index-game-day-${Math.random().toString(36).slice(2)}`);
+    ctx.memoryRepository.setOnMemoryUpserted(() => {});
+    ctx.memoryRepository.setGameDayProvider(() => 42);
+
+    const memory = createMemory(ctx, { content: 'walked to the gym before work' });
+    const memoryId = String(memory.id);
+    expect(ctx.memoryIndexRepository.getIndex(memoryId)?.game_day).toEqual(42);
+
+    ctx.memoryIndexRepository.upsertIndex({ memory_id: memoryId, importance: 8 });
+
+    expect(ctx.memoryIndexRepository.getIndex(memoryId)?.importance).toEqual(8);
+    expect(ctx.memoryIndexRepository.getIndex(memoryId)?.game_day).toEqual(42);
+
+    // And the owner still survives the same write, as it always has
+    ctx.memoryIndexRepository.upsertIndex({ memory_id: memoryId, owner_participant_id: 100 });
+    ctx.memoryIndexRepository.upsertIndex({ memory_id: memoryId, importance: 3 });
+    expect(String(ctx.memoryIndexRepository.getIndex(memoryId)?.owner_participant_id)).toEqual('100');
+    expect(ctx.memoryIndexRepository.getIndex(memoryId)?.game_day).toEqual(42);
   });
 
   it('roundtrips index rows and per-model embeddings, cascading deletes with the memory', () => {
@@ -169,11 +198,14 @@ describe('MemoryIndexRepository', () => {
     expect(Array.from(bufferToEmbedding(moved as Buffer))).toEqual([1, 2]);
     expect(ctx.memoryIndexRepository.getIndex(String(memory.id))?.importance).toEqual(7);
 
-    // The inline columns are gone from memory_index
+    // The inline columns are gone from memory_index (owner_participant_id is ours, from
+    // 021-add-memory-index-owner, once 014, and stays)
     const columns = (db.prepare('PRAGMA table_info(memory_index)').all() as { name: string }[]).map(
       (column) => column.name,
     );
-    expect(columns).toEqual(['memory_id', 'importance']);
+    // game_day joined the index in 019 so retrieval can decay on the sim's own clock;
+    // owner_participant_id follows it on a fresh database now that its migration is 021
+    expect(columns).toEqual(['memory_id', 'importance', 'game_day', 'owner_participant_id']);
   });
 });
 

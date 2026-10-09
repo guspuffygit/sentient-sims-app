@@ -173,4 +173,35 @@ describe('InteractionRepository', () => {
     ignored = (await ctx.interactionRepository.getIgnoredInteractions()).ignoredInteractionNames;
     expect(ignored).not.toContain('mixer_MusicProductionStation_Idle');
   });
+
+  it('lists an interaction seen in game while unmapped until it gets a mapping', async () => {
+    ctx.interactionRepository.recordUnmappedInteraction(
+      'Brand_New_Mod_Interaction',
+      'Talk about Recent Studies',
+      '{actor.0}: Talk about Recent Studies (with {actor.1})',
+    );
+    ctx.interactionRepository.recordUnmappedInteraction('mixer_Baby_ShowOff', 'Show Off', '{actor.0}: Show Off');
+
+    let browsable = await ctx.interactionRepository.getBrowsableInteractions();
+    expect(browsable.get('Brand_New_Mod_Interaction')).toEqual({
+      name: 'Brand_New_Mod_Interaction',
+      action: '{actor.0}: Talk about Recent Studies (with {actor.1})',
+      source: 'unmapped',
+      displayName: 'Talk about Recent Studies',
+    });
+    // Already mapped elsewhere: the mapping is what shows
+    expect(browsable.get('mixer_Baby_ShowOff')?.source).toEqual('online');
+
+    const seenFile = path.join(ctx.directory.getSentientSimsFolder(), 'seen_unmapped_interactions.json');
+    const seen = JSON.parse(fs.readFileSync(seenFile, 'utf-8')) as Record<string, { count: number }>;
+    expect(seen.Brand_New_Mod_Interaction.count).toEqual(1);
+
+    ctx.interactionRepository.saveLocalInteraction({ name: 'Brand_New_Mod_Interaction', action: 'studies talk' });
+    browsable = await ctx.interactionRepository.getBrowsableInteractions();
+    expect(browsable.get('Brand_New_Mod_Interaction')).toEqual({
+      name: 'Brand_New_Mod_Interaction',
+      action: 'studies talk',
+      source: 'local',
+    });
+  });
 });

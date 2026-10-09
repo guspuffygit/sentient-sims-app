@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import log from 'electron-log';
 import { sendPopUpNotification } from '../util/notifyRenderer';
 import { ApiContext } from '../services/ApiContext';
+import { TIER } from '../tiers';
 
 export function modOutOfDate(req: Request, res: Response) {
   try {
@@ -29,7 +30,8 @@ export class VersionController {
   };
 
   getAppVersion = (req: Request, res: Response) => {
-    res.json(this.ctx.version.getAppVerson());
+    // tier is the app-side mirror of the mod's mod_info.tier (release 4.5 build tiers)
+    res.json({ ...this.ctx.version.getAppVerson(), tier: TIER });
   };
 
   getGameVersion = (req: Request, res: Response) => {

@@ -22,4 +22,8 @@ export type GetParticipantsMemoriesRequest = {
 export type CreateMemoryRequest = {
   memory: MemoryEntity;
   participants: ParticipantDTO[];
+  // Retrieval metadata known at creation time, stamped synchronously into memory_index:
+  // owner makes the row private to one participant (inner monologue), importance is a
+  // score the pipeline already computed so the annotator skips its own rating call.
+  index?: { owner?: string; importance?: number };
 };

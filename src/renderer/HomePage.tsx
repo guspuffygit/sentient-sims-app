@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Box, Chip, Grid, Typography } from '@mui/material';
 import UpdateComponent from './UpdateComponent';
 import DebugCard from './DebugCard';
@@ -34,6 +35,34 @@ function ConnectionChip() {
   );
 }
 
+// O-6: dead-pipeline badge — appears after 3 consecutive provider failures, clears on the
+// next success (main process decides; this only renders what it is told)
+function ProviderHealthChip() {
+  const [health, setHealth] = useState<{ down: boolean; failures: number; lastError?: string } | undefined>();
+  useEffect(() => {
+    const remove = window.electron.onProviderHealth(
+      (_event: unknown, next: { down: boolean; failures: number; lastError?: string }) => {
+        setHealth(next);
+      },
+    );
+    return () => {
+      remove();
+    };
+  }, []);
+  if (!health?.down) {
+    return null;
+  }
+  return (
+    <Chip
+      size="small"
+      color="error"
+      variant="outlined"
+      title={health.lastError}
+      label={`AI provider failing (${health.failures} in a row)`}
+    />
+  );
+}
+
 function HomeHero() {
   return (
     <Box
@@ -64,7 +93,10 @@ function HomeHero() {
           Your AI companion for The Sims 4
         </Typography>
       </Box>
-      <ConnectionChip />
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+        <ProviderHealthChip />
+        <ConnectionChip />
+      </Box>
     </Box>
   );
 }

@@ -106,19 +106,39 @@ export class AnimationsService {
     return browsable;
   }
 
+  // O-7: mtime of the override file at last load — a miss re-checks it, so a file
+  // edited while the app runs (or dropped in after start) is picked up without a restart
+  private localOverridesMtimeMs = 0;
+
   private loadLocalAnimations() {
     try {
       const sentientSimsFolder = this.ctx.directory.getSentientSimsFolder();
       const localMapPath = path.join(sentientSimsFolder, 'user_animation_overrides.json');
 
       if (fs.existsSync(localMapPath)) {
+        this.localOverridesMtimeMs = fs.statSync(localMapPath).mtimeMs;
         const fileContent = fs.readFileSync(localMapPath, 'utf-8');
         const parsed = JSON.parse(fileContent) as Record<string, Animation>;
         this.localAnimations = new Map(Object.entries(parsed));
         log.info(`[Override] Local Animations-Overrides loaded Successfully.`);
+      } else {
+        this.localOverridesMtimeMs = 0;
+        this.localAnimations = undefined;
       }
     } catch (err) {
       log.error('[Override] could not load local Animations-Overrides', err);
+    }
+  }
+
+  private reloadLocalAnimationsIfChanged() {
+    try {
+      const localMapPath = path.join(this.ctx.directory.getSentientSimsFolder(), 'user_animation_overrides.json');
+      const mtimeMs = fs.existsSync(localMapPath) ? fs.statSync(localMapPath).mtimeMs : 0;
+      if (mtimeMs !== this.localOverridesMtimeMs) {
+        this.loadLocalAnimations();
+      }
+    } catch {
+      // best effort: the constructor-time load stands
     }
   }
 
@@ -222,10 +242,19 @@ export class AnimationsService {
   async getAnimation(animationAuthor: string, animationIdentifier: string) {
     const animationKey = getAnimationKey(animationAuthor, animationIdentifier);
 
-    const localAnimation = this.localAnimations?.get(animationKey);
-    if (localAnimation) {
+    let localAnimation = this.localAnimations?.get(animationKey);
+    if (!localAnimation) {
+      // O-7: reload on miss — the file may have changed since the constructor read it
+      this.reloadLocalAnimationsIfChanged();
+      localAnimation = this.localAnimations?.get(animationKey);
+    }
+    // An empty override ({} or no act) must not shadow the built-in/online mapping
+    if (localAnimation && localAnimation.act && localAnimation.act.trim().length > 0) {
       log.debug(`[Override] Load '${animationKey}' from user_animation_overrides.json`);
       return localAnimation;
+    }
+    if (localAnimation) {
+      log.debug(`[Override] '${animationKey}' override is empty; falling through to the built-in mapping`);
     }
 
     const animationsMap = await this.getAnimations();

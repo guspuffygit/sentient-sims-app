@@ -152,3 +152,54 @@ The reload existed only because the card didn't know what it would fall back to.
 ## Verification
 
 Every commit passed `tsc --noEmit`, ESLint, and the Vitest suite (run through Electron's Node for the better-sqlite3 ABI). New tests cover display-name derivation, semantic ranking + cache reuse + no-key fallback, and the shadowed-version merge. Two pre-existing environment-dependent test failures are unrelated: `Api.test.ts` (needs AWS credentials) and one `MemoryIndex` test (assumes no `OPENAI_KEY` env var; passes with the key unset).
+
+## 8. Unmapped interactions seen in game
+
+An interaction that runs in game with no mapping from any source gets a synthesized
+pre-action. When the mod sends `interaction_display_name` (the game's pie-menu label, mod
+2026-09-19+) that line is `{actor.0}: <label> (with {actor.1})`; without it, the old
+`is busy with '<tuning name>'` sentence. Each one is recorded in
+`seen_unmapped_interactions.json` (newest 500) and listed in the browser under the
+**Unmapped (seen in game)** source/tag, titled with the pie label and pre-filled with the
+synthesized line. Saving it locally or online makes it a normal mapping and the unmapped
+entry stops showing. No new persisted mapping field: the editable text is still `action`.
+
+## 9. Nothing published carries a name out of the save
+
+### What
+
+The game renders a pie-menu label against the save it is running, so the label can be a
+real sim: `playmat_Socials_PlayWithInfant_PostureProvided` came back as "Play with Elliot
+Jr" and the card offered it as text to **Save Online** — to everyone. Change #3 above found
+this had already happened to the shared database ("Tav", "Lae'zel", "Mattia Sartoris" from
+other people's saves), so this closes the path rather than sweeping it again.
+
+Three layers, because no one of them catches everything:
+
+1. **The mod sends a name-free form.** `interaction_label` now returns a pair, the rendered
+   label and a template with `{actor.N}` where each sim name was (`someone` for a sim the
+   event is not about, `{actor.N.his/her}` for a gendered pair the formatter can re-render).
+   It rides along as `interaction_display_name_template`. Only the mod knows which substring
+   *was* a name, and the template exists one line before it is substituted.
+2. **The suggestion is built from the template** (`synthesizePreAction.ts`), which also had
+   to stop stripping `{}` off the label. The rendered label stays the card's title, which is
+   local. Nothing had to change for the prompt: `formatAction` puts the names straight back.
+3. **The publish is refused if the text still names anyone in the loaded save**
+   (`util/savedNames.ts`, enforced in `InteractionService.updateUnmappedInteraction`). That
+   is the one chokepoint both the browser and the old in-game modal pass through, so the
+   renderer cannot go around it. A 422 carries the words back and the card offers "Publish
+   anyway"; a name under 3 characters is ignored, and with no save loaded there is nothing
+   to compare against so the publish goes through.
+
+Also fixed here: `handleSaveOnline` never cleared `source`, so a card stayed chipped
+"Unmapped (seen in game)" after it had been published.
+
+### Why this shape
+
+The guard alone would be a wall the player hits constantly, since the suggested text starts
+with a name in it. The template alone would miss a pet, a renamed object, or a name somebody
+typed. Existing `seen_unmapped_interactions.json` entries need no migration: each rewrites
+itself the next time that interaction runs, and the guard holds the line meanwhile.
+
+Verified live 2026-09-19 against the running game: "Chat with Desmond" → `Chat with
+{actor.1}`, and a pet social "Attack Takama" → `Attack {actor.1}`.

@@ -69,18 +69,20 @@ const SOURCE_LABELS: Record<MappingSource, string> = {
   'built-in': 'Built-in',
   'online': 'Online',
   'local': 'Local override',
+  'unmapped': 'Unmapped (seen in game)',
 };
 
-const SOURCE_COLORS: Record<MappingSource, 'default' | 'info' | 'success'> = {
+const SOURCE_COLORS: Record<MappingSource, 'default' | 'info' | 'success' | 'warning'> = {
   'built-in': 'default',
   'online': 'info',
   'local': 'success',
+  'unmapped': 'warning',
 };
 
 // Tag filters shown as toggleable chips. Tags within a group are mutually
 // exclusive; tags across groups combine with AND.
 const TAG_GROUPS: Record<string, string[]> = {
-  source: ['Built-in', 'Online', 'Local override'],
+  source: ['Built-in', 'Online', 'Local override', 'Unmapped (seen in game)'],
   onlineStatus: ['Matches online', 'Differs from online', 'Not online'],
   flags: ['Ignored'],
 };
@@ -139,6 +141,8 @@ function MappingItem({
   const [removingOverride, setRemovingOverride] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  // Names from the loaded save that the server found in this text and refused to publish
+  const [namesFromSave, setNamesFromSave] = useState<string[]>([]);
   const [comparing, setComparing] = useState(false);
   // Set when the mapping was deleted and nothing shadows it, so the card can
   // stay in place (preserving search/page position) instead of forcing a reload
@@ -249,10 +253,10 @@ function MappingItem({
     setSavingLocally(false);
   };
 
-  const handleSaveOnline = async () => {
+  const handleSaveOnline = async (force = false) => {
     setSavingOnline(true);
     const body = interaction
-      ? { ...interaction, action, ignored }
+      ? { ...interaction, action, ignored, ...(force ? { force: true } : {}) }
       : { ...(mapping.fullObject as Animation), act: action };
 
     try {
@@ -261,13 +265,26 @@ function MappingItem({
         body: JSON.stringify(body),
         headers: { 'Content-Type': 'application/json' },
       });
+      // Held back because the text names somebody in this save. Nothing was published:
+      // show who, and let it through only on a second, deliberate press.
+      if (response.status === 422) {
+        const refusal = (await response.json()) as { names?: string[] };
+        setNamesFromSave(refusal.names?.length ? refusal.names : ['a name from your save']);
+        setSavingOnline(false);
+        return;
+      }
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
       }
+      setNamesFromSave([]);
       setSavedAction(action);
       setSavedIgnored(ignored);
       if (interaction) {
         setOnlineVersion({ action, ignored });
+        if (source === 'unmapped') {
+          // It has a mapping now, and it is the shared one
+          setSource('online');
+        }
       }
       showMessage(`Saved online: ${mapping.key}`, 'success');
       log.info(`[MappingBrowser] Saved online mapping: ${mapping.key}`);
@@ -535,6 +552,47 @@ function MappingItem({
         )}
       </Stack>
       <Dialog
+        open={namesFromSave.length > 0}
+        onClose={() => {
+          setNamesFromSave([]);
+        }}
+      >
+        <DialogTitle>This text names somebody in your save</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {namesFromSave.length === 1
+              ? `"${namesFromSave[0]}" is a name from your save.`
+              : `${namesFromSave.map((name) => `"${name}"`).join(', ')} are names from your save.`}{' '}
+            An online mapping is shared with everyone who uses the mod, and nobody else has a sim by that name - they
+            would read your sim's name in their own game.
+          </DialogContentText>
+          <DialogContentText sx={{ mt: 1 }}>
+            Nothing has been published. Write {'{actor.0}'} and {'{actor.1}'} where the names are and save again, or
+            publish anyway if the word really is meant to be there.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setNamesFromSave([]);
+            }}
+          >
+            Let me fix it
+          </Button>
+          <Button
+            color="warning"
+            loading={savingOnline}
+            onClick={() => {
+              setNamesFromSave([]);
+              void handleSaveOnline(true);
+            }}
+          >
+            Publish anyway
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
         open={confirmingDelete}
         onClose={() => {
           setConfirmingDelete(false);
@@ -720,13 +778,16 @@ export default function OnlineMappingBrowser() {
           const builtInVersion = 'builtIn' in rest ? rest.builtIn : undefined;
           delete (rest as BrowsableInteraction).online;
           delete (rest as BrowsableInteraction).builtIn;
+          // The game's own pie-menu label, known for interactions seen in game while unmapped
+          const gameLabel = (rest as BrowsableInteraction).displayName;
+          delete (rest as BrowsableInteraction).displayName;
           const fullObject = rest;
           const action =
             type === 'interactions' ? (fullObject as BasicInteraction).action : (fullObject as Animation).act;
 
           return {
             key,
-            displayName: type === 'interactions' ? interactionDisplayName(key) : undefined,
+            displayName: type === 'interactions' ? gameLabel || interactionDisplayName(key) : undefined,
             action: action || '',
             source,
             onlineVersion,
