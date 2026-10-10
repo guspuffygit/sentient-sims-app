@@ -66,6 +66,8 @@ import { ModelSettingsService } from './ModelSettingsService';
 import { NovelAIService } from './NovelAIService';
 import { OpenAIImageGenerationService } from './OpenAIImageGenerationService';
 import { OpenAIService } from './OpenAIService';
+import { OpenRouterEmbeddingService } from './OpenRouterEmbeddingService';
+import { OpenRouterImageGenerationService } from './OpenRouterImageGenerationService';
 import { OpenRouterService } from './OpenRouterService';
 import { PatreonService } from './PatreonService';
 import { PlayerConversationService } from './PlayerConversationService';
@@ -287,6 +289,7 @@ export class ApiContext {
   private readonly _openAIEmbeddingService: OpenAIEmbeddingService;
   private readonly _sentientSimsEmbeddingService: SentientSimsEmbeddingService;
   private readonly _geminiEmbeddingService: GeminiEmbeddingService;
+  private readonly _openRouterEmbeddingService: OpenRouterEmbeddingService;
   private readonly _noopEmbeddingService: NoopEmbeddingService;
   private readonly _memoryAnnotationService: MemoryAnnotationService;
   private readonly _memoryRetrievalService: MemoryRetrievalService;
@@ -323,6 +326,7 @@ export class ApiContext {
   private readonly _modelSettingsService: ModelSettingsService;
   private readonly _providerConfigService: ProviderConfigService;
   private readonly _openAIImageService: OpenAIImageGenerationService;
+  private readonly _openRouterImageService: OpenRouterImageGenerationService;
   private readonly _imageProviderConfigService: ImageProviderConfigService;
   private readonly _embeddingProviderConfigService: EmbeddingProviderConfigService;
 
@@ -359,6 +363,7 @@ export class ApiContext {
     this._openAIService = new OpenAIService(this);
     this._openRouterService = new OpenRouterService(this);
     this._openAIImageService = new OpenAIImageGenerationService(this._openAIService);
+    this._openRouterImageService = new OpenRouterImageGenerationService(this._openRouterService);
 
     this._novelAITokenCounter = new NovelAITokenCounter();
     this._openAITokenCounter = new OpenAITokenCounter();
@@ -432,6 +437,7 @@ export class ApiContext {
     this._openAIEmbeddingService = new OpenAIEmbeddingService(this);
     this._sentientSimsEmbeddingService = new SentientSimsEmbeddingService(this);
     this._geminiEmbeddingService = new GeminiEmbeddingService(this);
+    this._openRouterEmbeddingService = new OpenRouterEmbeddingService(this);
     this._noopEmbeddingService = new NoopEmbeddingService();
 
     this._promptBuilder = new PromptRequestBuilderService(this);
@@ -596,6 +602,9 @@ export class ApiContext {
     if (apiType === ApiType.Gemini) {
       return this._geminiEmbeddingService;
     }
+    if (apiType === ApiType.OpenRouter) {
+      return this._openRouterEmbeddingService;
+    }
     return this._openAIEmbeddingService;
   }
 
@@ -722,6 +731,10 @@ export class ApiContext {
 
     if (aiType === ApiType.Gemini) {
       return this.geminiService;
+    }
+
+    if (aiType === ApiType.OpenRouter) {
+      return this._openRouterImageService;
     }
 
     throw new Error(`Image generation is not supported for provider: ${aiType}`);

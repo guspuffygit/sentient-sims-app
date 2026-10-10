@@ -1,14 +1,28 @@
 import log from 'electron-log';
 import OpenAI from 'openai';
 import { ChatCompletion, ResponseFormatJSONSchema } from 'openai/resources/index.js';
-import { ChatCompletionCreateParams } from 'openai/resources/chat/completions.js';
+import { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions.js';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel } from '../models/AIModel';
 import { openaiDefaultEndpoint } from '../constants';
-import { buildOpenRouterModels, isOpenRouterEndpoint } from '../models/OpenRouterModels';
+import { buildOpenRouterModels, isOpenRouterEndpoint, openrouterAttributionHeaders } from '../models/OpenRouterModels';
 import { ApiContext } from './ApiContext';
+
+// OpenRouter's reasoning control. The SDK types lack it, but the SDK sends extra body
+// fields through untouched.
+type OpenRouterCompletionParams = ChatCompletionCreateParamsNonStreaming & {
+  reasoning: { effort: 'none' | 'minimal' };
+};
+
+// Reply-token allowance added for a model that must reason before it answers. Such models
+// spent 150-500 tokens reasoning at minimal effort on a one-line dialogue prompt.
+const mandatoryReasoningHeadroomTokens = 1024;
+
+function isReasoningRejection(error: unknown): boolean {
+  return error instanceof OpenAI.APIError && error.status === 400 && /reasoning/i.test(error.message);
+}
 
 export class OpenAIKeyNotSetError extends Error {
   constructor(message: string) {
@@ -23,6 +37,9 @@ export class OpenAIService implements GenerationService {
   private openAIClient?: OpenAI;
 
   private openAIClientConfig?: string;
+
+  // OpenRouter models that refused to run with reasoning off
+  private readonly mandatoryReasoningModels = new Set<string>();
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
@@ -74,10 +91,7 @@ export class OpenAIService implements GenerationService {
         baseURL,
         timeout,
         maxRetries: 0,
-        // OpenRouter attributes requests to the app on its rankings using these headers.
-        defaultHeaders: isOpenRouterEndpoint(baseURL)
-          ? { 'HTTP-Referer': 'https://sentientsimulations.com', 'X-Title': 'Sentient Sims' }
-          : undefined,
+        defaultHeaders: isOpenRouterEndpoint(baseURL) ? openrouterAttributionHeaders : undefined,
       });
       this.openAIClientConfig = clientConfig;
     }
@@ -115,7 +129,7 @@ export class OpenAIService implements GenerationService {
   }
 
   async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
-    const completionRequest: ChatCompletionCreateParams = {
+    const completionRequest: ChatCompletionCreateParamsNonStreaming = {
       model: request.model ?? this.getOpenAIModel(),
       max_tokens: request.maxResponseTokens,
       messages: request.messages.map((message) => {
@@ -151,7 +165,7 @@ export class OpenAIService implements GenerationService {
 
     log.debug(`OpenAI Request:\n${JSON.stringify(completionRequest, null, 2)}`);
 
-    const result = await this.getOpenAIClient().chat.completions.create(completionRequest);
+    const result = await this.createCompletion(completionRequest, request.maxResponseTokens);
     let text = this.getOutputFromGeneration(result);
 
     if (request.guidedChoice && this.supportsJsonSchema()) {
@@ -169,19 +183,61 @@ export class OpenAIService implements GenerationService {
     };
   }
 
+  // Reasoning tokens count against max_tokens, so a reasoning model given the short reply
+  // limits used here spends the whole limit thinking and returns no text. OpenRouter turns
+  // reasoning off on request for most models; one that refuses runs at the lowest effort
+  // with room for its reasoning on top of the reply.
+  private async createCompletion(
+    request: ChatCompletionCreateParamsNonStreaming,
+    maxResponseTokens?: number,
+  ): Promise<ChatCompletion> {
+    const client = this.getOpenAIClient();
+    if (!isOpenRouterEndpoint(this.serviceUrl())) {
+      return client.chat.completions.create(request);
+    }
+
+    if (!this.mandatoryReasoningModels.has(request.model)) {
+      const withoutReasoning: OpenRouterCompletionParams = { ...request, reasoning: { effort: 'none' } };
+      try {
+        return await client.chat.completions.create(withoutReasoning);
+      } catch (error) {
+        if (!isReasoningRejection(error)) {
+          throw error;
+        }
+        log.info(`OpenRouter model ${request.model} cannot turn reasoning off, using minimal effort`);
+        this.mandatoryReasoningModels.add(request.model);
+      }
+    }
+
+    const minimalReasoning: OpenRouterCompletionParams = {
+      ...request,
+      max_tokens: maxResponseTokens === undefined ? undefined : maxResponseTokens + mandatoryReasoningHeadroomTokens,
+      reasoning: { effort: 'minimal' },
+    };
+    return client.chat.completions.create(minimalReasoning);
+  }
+
   getOutputFromGeneration(generation: ChatCompletion) {
-    const output = generation.choices[0].message.content;
+    const choice = generation.choices[0];
+    const output = choice.message.content;
     if (output) {
       return output.trim();
     }
 
     log.error(`Output wasnt truthy from OpenAI API:\n${JSON.stringify(generation)}`);
 
+    const reasoningTokens = generation.usage?.completion_tokens_details?.reasoning_tokens ?? 0;
+    if (choice.finish_reason === 'length' && reasoningTokens > 0) {
+      throw new Error(
+        `${generation.model} spent its whole reply limit on reasoning and wrote no reply. Choose a model that does not reason.`,
+      );
+    }
+
     throw new Error(`Output wasnt truthy from OpenAI API ${output}`);
   }
 
   async translate(text: string, language: string, model?: string) {
-    const request: ChatCompletionCreateParams = {
+    const request: ChatCompletionCreateParamsNonStreaming = {
       model: model ?? this.getOpenAIModel(),
       messages: [
         {
@@ -194,7 +250,7 @@ export class OpenAIService implements GenerationService {
         },
       ],
     };
-    const result = await this.getOpenAIClient().chat.completions.create(request);
+    const result = await this.createCompletion(request);
     return this.getOutputFromGeneration(result);
   }
 

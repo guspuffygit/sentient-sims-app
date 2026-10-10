@@ -2,6 +2,7 @@ import log from 'electron-log';
 import OpenAI from 'openai';
 import { openaiDefaultEmbeddingModel, openaiDefaultEndpoint } from '../constants';
 import { ApiType } from '../models/ApiType';
+import { isOpenRouterEndpoint, openrouterAttributionHeaders } from '../models/OpenRouterModels';
 import { ApiContext } from './ApiContext';
 
 export const OPENAI_EMBEDDING_MODEL = openaiDefaultEmbeddingModel;
@@ -56,7 +57,7 @@ export class NoopEmbeddingService implements EmbeddingService {
 // Always talks to the real OpenAI API regardless of which chat provider is selected:
 // the openaiEndpoint setting may point at a local server with no embeddings endpoint.
 export class OpenAIEmbeddingService implements EmbeddingService {
-  private readonly ctx: ApiContext;
+  protected readonly ctx: ApiContext;
 
   private client?: OpenAI;
 
@@ -68,8 +69,17 @@ export class OpenAIEmbeddingService implements EmbeddingService {
     return this.ctx.embeddingProviderConfigs.modelFor(ApiType.OpenAI);
   }
 
-  private getKey(): string | undefined {
+  protected getKey(): string | undefined {
     return this.ctx.settings.openaiKey || process.env.OPENAI_KEY || undefined;
+  }
+
+  protected baseURL(): string {
+    return openaiDefaultEndpoint;
+  }
+
+  // Unset, the SDK asks for base64 and decodes it
+  protected encodingFormat(): 'float' | undefined {
+    return undefined;
   }
 
   isAvailable(): boolean {
@@ -79,14 +89,16 @@ export class OpenAIEmbeddingService implements EmbeddingService {
   private getClient(): OpenAI {
     const apiKey = this.getKey();
     if (!apiKey) {
-      throw new Error('No OpenAI key available for embeddings');
+      throw new Error('No API key available for embeddings');
     }
-    if (!this.client || this.client.apiKey !== apiKey) {
+    const baseURL = this.baseURL();
+    if (!this.client || this.client.apiKey !== apiKey || this.client.baseURL !== baseURL) {
       this.client = new OpenAI({
         dangerouslyAllowBrowser: process.env.NODE_ENV === 'test',
         apiKey,
-        baseURL: openaiDefaultEndpoint,
+        baseURL,
         maxRetries: 1,
+        defaultHeaders: isOpenRouterEndpoint(baseURL) ? openrouterAttributionHeaders : undefined,
       });
     }
     return this.client;
@@ -101,6 +113,7 @@ export class OpenAIEmbeddingService implements EmbeddingService {
       const response = await this.getClient().embeddings.create({
         model: this.model,
         input: texts,
+        encoding_format: this.encodingFormat(),
       });
       const byIndex = new Map(response.data.map((item) => [item.index, item.embedding]));
       return texts.map((_, index) => {

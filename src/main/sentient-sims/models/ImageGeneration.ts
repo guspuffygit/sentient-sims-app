@@ -3,6 +3,8 @@ import {
   geminiImageModels,
   openaiDefaultImageModel,
   openaiImageModels,
+  openrouterDefaultImageModel,
+  openrouterImageModels,
   sentientSimsAIDefaultImageModel,
   sentientSimsAIImageModels,
 } from '../constants';
@@ -42,6 +44,8 @@ export function defaultImageModelFor(apiType: ApiType): string | undefined {
       return sentientSimsAIDefaultImageModel;
     case ApiType.Gemini:
       return geminiDefaultImageModel;
+    case ApiType.OpenRouter:
+      return openrouterDefaultImageModel;
     default:
       return undefined;
   }
@@ -57,6 +61,8 @@ export function imageModelSuggestions(apiType: ApiType): string[] {
       return sentientSimsAIImageModels;
     case ApiType.Gemini:
       return geminiImageModels;
+    case ApiType.OpenRouter:
+      return openrouterImageModels;
     default:
       return [];
   }

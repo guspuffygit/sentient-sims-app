@@ -147,6 +147,25 @@ export const sentientSimsAIDefaultEmbeddingModel = 'Qwen/Qwen3-Embedding-8B';
 export const sentientSimsAIEmbeddingModels = [sentientSimsAIDefaultEmbeddingModel];
 export const openaiDefaultEmbeddingModel = 'text-embedding-3-small';
 export const openaiEmbeddingModels = [openaiDefaultEmbeddingModel, 'text-embedding-3-large'];
+// A sample of the OpenRouter /embeddings/models catalog; any other id can be typed in.
+export const openrouterDefaultEmbeddingModel = 'openai/text-embedding-3-small';
+export const openrouterEmbeddingModels = [
+  openrouterDefaultEmbeddingModel,
+  'openai/text-embedding-3-large',
+  'qwen/qwen3-embedding-8b',
+  'google/gemini-embedding-001',
+  'baai/bge-m3',
+];
+// A sample of the OpenRouter /images/models catalog; any other id can be typed in.
+export const openrouterImageModels = [
+  'google/gemini-3.1-flash-image',
+  'google/gemini-3.1-flash-lite-image',
+  'openai/gpt-image-1-mini',
+  'openai/gpt-image-1',
+  'black-forest-labs/flux.2-pro',
+  'bytedance-seed/seedream-4.5',
+];
+export const openrouterDefaultImageModel = openrouterImageModels[0];
 export const tokenizerBreakString = '<<BREAK>>';
 export const defaultWantsPrefixes = ['I want to', 'I would like', 'I feel'];
 export const defaultGeminiModel = 'gemini-flash-latest';

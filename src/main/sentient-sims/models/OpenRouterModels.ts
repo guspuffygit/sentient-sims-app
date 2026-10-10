@@ -5,6 +5,12 @@ export function isOpenRouterEndpoint(endpoint: string): boolean {
   return endpoint.trim().replace(/\/+$/, '').toLowerCase() === openrouterDefaultEndpoint;
 }
 
+// OpenRouter attributes requests to the app on its rankings using these headers.
+export const openrouterAttributionHeaders = {
+  'HTTP-Referer': 'https://sentientsimulations.com',
+  'X-Title': 'Sentient Sims',
+};
+
 // Curated picks for Sims dialogue: uncensored (none refused an explicit scene prompt),
 // quick enough for in-game generation (~160-380ms for the default 90 response tokens),
 // and served by providers at 99.6%+ uptime. Ordered fastest first. The app truncates

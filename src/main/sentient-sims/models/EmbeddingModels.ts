@@ -3,6 +3,8 @@ import {
   geminiEmbeddingModels,
   openaiDefaultEmbeddingModel,
   openaiEmbeddingModels,
+  openrouterDefaultEmbeddingModel,
+  openrouterEmbeddingModels,
   sentientSimsAIDefaultEmbeddingModel,
   sentientSimsAIEmbeddingModels,
 } from '../constants';
@@ -18,6 +20,8 @@ export function defaultEmbeddingModelFor(apiType: ApiType): string | undefined {
       return sentientSimsAIDefaultEmbeddingModel;
     case ApiType.Gemini:
       return geminiDefaultEmbeddingModel;
+    case ApiType.OpenRouter:
+      return openrouterDefaultEmbeddingModel;
     default:
       return undefined;
   }
@@ -34,6 +38,8 @@ export function embeddingModelSuggestions(apiType: ApiType): string[] {
       return sentientSimsAIEmbeddingModels;
     case ApiType.Gemini:
       return geminiEmbeddingModels;
+    case ApiType.OpenRouter:
+      return openrouterEmbeddingModels;
     default:
       return [];
   }

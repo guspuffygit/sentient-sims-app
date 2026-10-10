@@ -158,12 +158,13 @@ function defaultModelFor(capability: ProviderCapability, apiType: ApiType): stri
 }
 
 // Mirrors SettingsService.hasProviderCredentials for the capability-capable
-// providers (OpenAI, Sentient Sims AI, Gemini) so the Auto row shows the same
-// provider the backend will resolve to
+// providers (OpenAI, Sentient Sims AI, Gemini, OpenRouter) so the Auto row shows
+// the same provider the backend will resolve to
 function useAutoApiType(capableTypes: ApiType[]): ApiType {
   const aiSettings = useAISettings();
   const openaiKey = useSetting<string>(SettingsEnum.OPENAI_KEY, '');
   const geminiKeys = useSetting<string>(SettingsEnum.GEMINI_KEYS, '');
+  const openrouterKey = useSetting<string>(SettingsEnum.OPENROUTER_KEY, '');
   const { userAttributes } = useAuth();
 
   return deriveAutoApiType(aiSettings.aiApiType, capableTypes, (apiType) => {
@@ -172,6 +173,8 @@ function useAutoApiType(capableTypes: ApiType[]): ApiType {
         return openaiKey.value.trim() !== '';
       case ApiType.Gemini:
         return geminiKeys.value.trim() !== '';
+      case ApiType.OpenRouter:
+        return openrouterKey.value.trim() !== '';
       case ApiType.SentientSimsAI:
       case ApiType.CustomAI:
         return Boolean(userAttributes);
