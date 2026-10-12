@@ -21,13 +21,19 @@ if (!apiKey) {
   log.warn('ELEVENLABS_KEY is not set, skipping ElevenLabs integration tests');
 }
 
-async function speak(text: string, voiceId: string, model: string): Promise<Blob> {
+async function speak(
+  text: string,
+  voiceId: string,
+  model: string,
+  context?: { previousText?: string; nextText?: string },
+): Promise<Blob> {
   const { url, headers, body } = buildElevenLabsSpeechRequest({
     text,
     voiceId,
     endpoint: defaultElevenLabsEndpoint,
     apiKey: apiKey as string,
     settings: { ...defaultElevenLabsTTSSettings, model },
+    ...context,
   });
 
   const response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
@@ -86,6 +92,16 @@ describe('ElevenLabsIT', () => {
       defaultElevenLabsTTSSettings.voice,
       ElevenLabsSpeechModel.ELEVEN_V4,
     );
+    expect(audio.size).toBeGreaterThan(0);
+    expect(audio.type).toContain('audio');
+  });
+
+  // v3 returns 400 "unsupported_model" if previous_text/next_text reach it; the builder must drop them
+  it.skipIf(!apiKey)('generates audio for eleven_v3 with neighbouring lines given', async () => {
+    const audio = await speak('Been fishing here for years.', defaultElevenLabsTTSSettings.voice, 'eleven_v3', {
+      previousText: 'How long have you been coming here?',
+      nextText: 'Caught anything?',
+    });
     expect(audio.size).toBeGreaterThan(0);
     expect(audio.type).toContain('audio');
   });

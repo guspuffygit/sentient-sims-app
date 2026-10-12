@@ -8,6 +8,7 @@ import {
   isElevenLabsV3,
   isElevenLabsV4,
   supportsAudioTags,
+  supportsSpeechContext,
   usesDialogueEndpoint,
 } from 'main/sentient-sims/clients/ElevenLabsTTSRequest';
 import {
@@ -170,6 +171,27 @@ describe('buildElevenLabsSpeechRequest', () => {
     });
     expect(request.body.previous_text).toEqual('Who goes there?');
     expect(request.body.next_text).toEqual('Come in, then.');
+  });
+
+  it('drops previous_text and next_text on v3, which the API rejects them for', () => {
+    expect(supportsSpeechContext(ElevenLabsSpeechModel.ELEVEN_V3)).toBe(false);
+    expect(supportsSpeechContext(ElevenLabsSpeechModel.ELEVEN_V3_CONVERSATIONAL)).toBe(false);
+    expect(supportsSpeechContext(ElevenLabsSpeechModel.ELEVEN_FLASH_V2_5)).toBe(true);
+    expect(supportsSpeechContext(ElevenLabsSpeechModel.ELEVEN_MULTILINGUAL_V2)).toBe(true);
+
+    [ElevenLabsSpeechModel.ELEVEN_V3, ElevenLabsSpeechModel.ELEVEN_V3_CONVERSATIONAL].forEach((model) => {
+      const request = buildElevenLabsSpeechRequest({
+        text: 'Hello there.',
+        voiceId: rachelVoiceId,
+        endpoint: defaultElevenLabsEndpoint,
+        apiKey: 'test-key',
+        settings: settings({ model }),
+        previousText: 'Who goes there?',
+        nextText: 'Come in, then.',
+      });
+      expect('previous_text' in request.body).toBe(false);
+      expect('next_text' in request.body).toBe(false);
+    });
   });
 
   it('targets /stream when asked to', () => {

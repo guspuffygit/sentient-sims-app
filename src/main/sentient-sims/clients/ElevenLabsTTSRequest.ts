@@ -58,6 +58,14 @@ export function supportsAudioTags(model: string): boolean {
 }
 
 /**
+ * Text to Speech rejects previous_text / next_text on the v3 models ("not yet supported
+ * with the 'eleven_v3' model", HTTP 400), so those lines go out without context.
+ */
+export function supportsSpeechContext(model: string): boolean {
+  return !isElevenLabsV3(model);
+}
+
+/**
  * v4 is built for Text to Dialogue: one request per line still, but with the
  * neighbouring lines as context so the delivery carries across the scene.
  */
@@ -133,6 +141,7 @@ export type ElevenLabsLineRequestParams = {
  */
 export function buildElevenLabsSpeechRequest(params: ElevenLabsLineRequestParams): ElevenLabsSpeechRequest {
   const { text, voiceId, endpoint, apiKey, settings, previousText, nextText, stream } = params;
+  const withContext = supportsSpeechContext(settings.model);
 
   return {
     url: `${endpoint}/text-to-speech/${voiceId}${stream ? '/stream' : ''}`,
@@ -141,8 +150,8 @@ export function buildElevenLabsSpeechRequest(params: ElevenLabsLineRequestParams
       text,
       model_id: settings.model,
       voice_settings: elevenLabsVoiceSettings(settings),
-      ...(previousText ? { previous_text: previousText } : {}),
-      ...(nextText ? { next_text: nextText } : {}),
+      ...(withContext && previousText ? { previous_text: previousText } : {}),
+      ...(withContext && nextText ? { next_text: nextText } : {}),
     },
   };
 }
