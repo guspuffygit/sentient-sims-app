@@ -1,7 +1,15 @@
 import {
+  buildElevenLabsDialogueRequest,
+  buildElevenLabsLineRequest,
   buildElevenLabsSpeechRequest,
+  dialogueContext,
+  ELEVENLABS_DIALOGUE_CONTEXT_CHARS,
   elevenLabsLineText,
   isElevenLabsV3,
+  isElevenLabsV4,
+  supportsAudioTags,
+  supportsSpeechContext,
+  usesDialogueEndpoint,
 } from 'main/sentient-sims/clients/ElevenLabsTTSRequest';
 import {
   defaultElevenLabsTTSSettings,
@@ -42,6 +50,35 @@ describe('ElevenLabs speech model', () => {
   it('accepts eleven_v3_conversational and treats it as v3', () => {
     expect(toSpeechModel('eleven_v3_conversational')).toEqual(ElevenLabsSpeechModel.ELEVEN_V3_CONVERSATIONAL);
     expect(isElevenLabsV3(ElevenLabsSpeechModel.ELEVEN_V3_CONVERSATIONAL)).toBe(true);
+  });
+
+  it('accepts eleven_v4 and eleven_v4_turbo as v4, not v3', () => {
+    expect(toSpeechModel('eleven_v4')).toEqual(ElevenLabsSpeechModel.ELEVEN_V4);
+    expect(toSpeechModel('eleven_v4_turbo')).toEqual(ElevenLabsSpeechModel.ELEVEN_V4_TURBO);
+    expect(isElevenLabsV4(ElevenLabsSpeechModel.ELEVEN_V4)).toBe(true);
+    expect(isElevenLabsV4(ElevenLabsSpeechModel.ELEVEN_V4_TURBO)).toBe(true);
+    expect(isElevenLabsV4(ElevenLabsSpeechModel.ELEVEN_V3)).toBe(false);
+    expect(isElevenLabsV3(ElevenLabsSpeechModel.ELEVEN_V4)).toBe(false);
+  });
+
+  it('reads audio tags on v3 and v4 only', () => {
+    expect(supportsAudioTags(ElevenLabsSpeechModel.ELEVEN_V3)).toBe(true);
+    expect(supportsAudioTags(ElevenLabsSpeechModel.ELEVEN_V3_CONVERSATIONAL)).toBe(true);
+    expect(supportsAudioTags(ElevenLabsSpeechModel.ELEVEN_V4)).toBe(true);
+    expect(supportsAudioTags(ElevenLabsSpeechModel.ELEVEN_V4_TURBO)).toBe(true);
+    expect(supportsAudioTags(ElevenLabsSpeechModel.ELEVEN_FLASH_V2_5)).toBe(false);
+    expect(supportsAudioTags(ElevenLabsSpeechModel.ELEVEN_MULTILINGUAL_V2)).toBe(false);
+  });
+
+  it('sends only v4 to the dialogue endpoint', () => {
+    expect(usesDialogueEndpoint(ElevenLabsSpeechModel.ELEVEN_V4)).toBe(true);
+    expect(usesDialogueEndpoint(ElevenLabsSpeechModel.ELEVEN_V4_TURBO)).toBe(true);
+    expect(usesDialogueEndpoint(ElevenLabsSpeechModel.ELEVEN_V3)).toBe(false);
+    expect(usesDialogueEndpoint(ElevenLabsSpeechModel.ELEVEN_FLASH_V2_5)).toBe(false);
+  });
+
+  it('keeps flash as the default so existing users are unchanged', () => {
+    expect(defaultElevenLabsTTSSettings.model).toEqual(ElevenLabsSpeechModel.ELEVEN_FLASH_V2_5);
   });
 
   it('rejects an unknown model', () => {
@@ -96,6 +133,165 @@ describe('buildElevenLabsSpeechRequest', () => {
   it('sends the text unchanged', () => {
     const request = buildRequest('Been fishing here for years.', rachelVoiceId, settings());
     expect(request.body.text).toEqual('Been fishing here for years.');
+  });
+
+  it('sends no speed on v4, which has no speed setting', () => {
+    const request = buildRequest('Hello there.', rachelVoiceId, settings({ model: ElevenLabsSpeechModel.ELEVEN_V4 }));
+    expect(request.body.voice_settings).toEqual({ stability: 0, similarity_boost: 0 });
+    expect('speed' in request.body.voice_settings).toBe(false);
+
+    const turbo = buildRequest(
+      'Hello there.',
+      rachelVoiceId,
+      settings({ model: ElevenLabsSpeechModel.ELEVEN_V4_TURBO }),
+    );
+    expect('speed' in turbo.body.voice_settings).toBe(false);
+  });
+
+  it('keeps sending speed on flash', () => {
+    const request = buildRequest('Hello there.', rachelVoiceId, settings());
+    expect(request.body.voice_settings.speed).toEqual(defaultElevenLabsVoiceSettings.speed);
+  });
+
+  it('omits previous_text and next_text unless given', () => {
+    const request = buildRequest('Hello there.', rachelVoiceId, settings());
+    expect('previous_text' in request.body).toBe(false);
+    expect('next_text' in request.body).toBe(false);
+  });
+
+  it('sends the neighbouring lines as previous_text and next_text', () => {
+    const request = buildElevenLabsSpeechRequest({
+      text: 'Hello there.',
+      voiceId: rachelVoiceId,
+      endpoint: defaultElevenLabsEndpoint,
+      apiKey: 'test-key',
+      settings: settings(),
+      previousText: 'Who goes there?',
+      nextText: 'Come in, then.',
+    });
+    expect(request.body.previous_text).toEqual('Who goes there?');
+    expect(request.body.next_text).toEqual('Come in, then.');
+  });
+
+  it('drops previous_text and next_text on v3, which the API rejects them for', () => {
+    expect(supportsSpeechContext(ElevenLabsSpeechModel.ELEVEN_V3)).toBe(false);
+    expect(supportsSpeechContext(ElevenLabsSpeechModel.ELEVEN_V3_CONVERSATIONAL)).toBe(false);
+    expect(supportsSpeechContext(ElevenLabsSpeechModel.ELEVEN_FLASH_V2_5)).toBe(true);
+    expect(supportsSpeechContext(ElevenLabsSpeechModel.ELEVEN_MULTILINGUAL_V2)).toBe(true);
+
+    [ElevenLabsSpeechModel.ELEVEN_V3, ElevenLabsSpeechModel.ELEVEN_V3_CONVERSATIONAL].forEach((model) => {
+      const request = buildElevenLabsSpeechRequest({
+        text: 'Hello there.',
+        voiceId: rachelVoiceId,
+        endpoint: defaultElevenLabsEndpoint,
+        apiKey: 'test-key',
+        settings: settings({ model }),
+        previousText: 'Who goes there?',
+        nextText: 'Come in, then.',
+      });
+      expect('previous_text' in request.body).toBe(false);
+      expect('next_text' in request.body).toBe(false);
+    });
+  });
+
+  it('targets /stream when asked to', () => {
+    const request = buildElevenLabsSpeechRequest({
+      text: 'Hello there.',
+      voiceId: rachelVoiceId,
+      endpoint: defaultElevenLabsEndpoint,
+      apiKey: 'test-key',
+      settings: settings(),
+      stream: true,
+    });
+    expect(request.url).toEqual(`${defaultElevenLabsEndpoint}/text-to-speech/${rachelVoiceId}/stream`);
+  });
+});
+
+describe('buildElevenLabsDialogueRequest', () => {
+  const v4 = settings({ model: ElevenLabsSpeechModel.ELEVEN_V4 });
+
+  function buildDialogue(overrides?: { previousText?: string; nextText?: string; stream?: boolean }) {
+    return buildElevenLabsDialogueRequest({
+      text: '[nervous] Been fishing here for years.',
+      voiceId: rachelVoiceId,
+      endpoint: defaultElevenLabsEndpoint,
+      apiKey: 'test-key',
+      settings: v4,
+      ...overrides,
+    });
+  }
+
+  it('targets text-to-dialogue with the output format as a query parameter', () => {
+    const request = buildDialogue();
+    expect(request.url).toEqual(
+      `${defaultElevenLabsEndpoint}/text-to-dialogue?output_format=${defaultElevenLabsTTSSettings.output_format}`,
+    );
+    expect(request.headers['xi-api-key']).toEqual('test-key');
+    expect(request.headers['Content-Type']).toEqual('application/json');
+  });
+
+  it('targets the stream variant before the query string', () => {
+    const request = buildDialogue({ stream: true });
+    expect(request.url).toEqual(
+      `${defaultElevenLabsEndpoint}/text-to-dialogue/stream?output_format=${defaultElevenLabsTTSSettings.output_format}`,
+    );
+  });
+
+  it('sends one voiced input, the model, and dialogue-style settings without speed', () => {
+    const request = buildDialogue();
+    expect(request.body.inputs).toEqual([{ text: '[nervous] Been fishing here for years.', voice_id: rachelVoiceId }]);
+    expect(request.body.model_id).toEqual('eleven_v4');
+    expect(request.body.settings).toEqual({ stability: 0, similarity: 0 });
+    expect('similarity_boost' in request.body.settings).toBe(false);
+    expect(JSON.stringify(request.body)).not.toContain('speed');
+  });
+
+  it('omits context unless given', () => {
+    const request = buildDialogue();
+    expect('previous_text' in request.body).toBe(false);
+    expect('future_text' in request.body).toBe(false);
+  });
+
+  it('sends the neighbouring lines as previous_text and future_text', () => {
+    const request = buildDialogue({ previousText: 'Who goes there?', nextText: 'Come in, then.' });
+    expect(request.body.previous_text).toEqual('Who goes there?');
+    expect(request.body.future_text).toEqual('Come in, then.');
+  });
+
+  it('clamps context to 100 chars: the tail of the line before, the head of the line after', () => {
+    const long = `${'a'.repeat(150)}END`;
+    const request = buildDialogue({ previousText: long, nextText: `START${'b'.repeat(150)}` });
+    expect(request.body.previous_text).toHaveLength(ELEVENLABS_DIALOGUE_CONTEXT_CHARS);
+    expect(request.body.previous_text?.endsWith('END')).toBe(true);
+    expect(request.body.future_text).toHaveLength(ELEVENLABS_DIALOGUE_CONTEXT_CHARS);
+    expect(request.body.future_text?.startsWith('START')).toBe(true);
+  });
+
+  it('treats blank context as absent', () => {
+    expect(dialogueContext('   ', 'previous')).toBeUndefined();
+    expect(dialogueContext(undefined, 'next')).toBeUndefined();
+    expect(dialogueContext(' short ', 'next')).toEqual('short');
+  });
+});
+
+describe('buildElevenLabsLineRequest', () => {
+  const params = {
+    text: 'Hello there.',
+    voiceId: rachelVoiceId,
+    endpoint: defaultElevenLabsEndpoint,
+    apiKey: 'test-key',
+  };
+
+  it('picks the dialogue endpoint for v4', () => {
+    const request = buildElevenLabsLineRequest({ ...params, settings: settings({ model: 'eleven_v4_turbo' }) });
+    expect(request.url).toContain('/text-to-dialogue?');
+    expect('inputs' in request.body).toBe(true);
+  });
+
+  it('picks text-to-speech for everything else', () => {
+    const request = buildElevenLabsLineRequest({ ...params, settings: settings({ model: 'eleven_v3' }) });
+    expect(request.url).toEqual(`${defaultElevenLabsEndpoint}/text-to-speech/${rachelVoiceId}`);
+    expect('text' in request.body).toBe(true);
   });
 });
 
@@ -251,6 +447,13 @@ describe('elevenLabsLineText', () => {
     expect(elevenLabsLineText(line, ElevenLabsSpeechModel.ELEVEN_FLASH_V2_5)).toEqual('Been fishing here for years.');
     expect(elevenLabsLineText(line, ElevenLabsSpeechModel.ELEVEN_MULTILINGUAL_V2)).toEqual(
       'Been fishing here for years.',
+    );
+  });
+
+  it('turns a delivery note into a v4 audio tag', () => {
+    expect(elevenLabsLineText(line, ElevenLabsSpeechModel.ELEVEN_V4)).toEqual('[nervous] Been fishing here for years.');
+    expect(elevenLabsLineText(line, ElevenLabsSpeechModel.ELEVEN_V4_TURBO)).toEqual(
+      '[nervous] Been fishing here for years.',
     );
   });
 

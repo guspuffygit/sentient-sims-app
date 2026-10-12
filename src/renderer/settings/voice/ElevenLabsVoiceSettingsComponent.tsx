@@ -29,6 +29,7 @@ import useSetting from 'renderer/hooks/useSetting';
 import handleOpenExternalLink from 'renderer/hooks/handleOpenExternalLink';
 import { useTTS } from 'renderer/providers/AudioContextProvider';
 import { ElevenLabsVoiceInfo } from 'main/sentient-sims/clients/ElevenLabsVoiceRequest';
+import { isElevenLabsV4 } from 'main/sentient-sims/clients/ElevenLabsTTSRequest';
 import { useElevenLabsVoiceInfo } from 'renderer/voice/useElevenLabsVoiceInfo';
 
 const voiceLibraryUrl = 'https://elevenlabs.io/app/voice-library';
@@ -139,6 +140,12 @@ export function ElevenLabsVoiceSettingsComponent() {
         >
           {modelMenuItems}
         </Select>
+        {isElevenLabsV4(elevenLabsTTSSettings.value.model) ? (
+          <FormHelperText>
+            Eleven v4 reads delivery notes as audio tags and has no speed setting; lines air at the model&apos;s own
+            pace.
+          </FormHelperText>
+        ) : null}
       </Box>
       {tts.error ? (
         <Box sx={{ marginBottom: 2 }}>
