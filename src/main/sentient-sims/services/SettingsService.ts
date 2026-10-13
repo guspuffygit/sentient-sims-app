@@ -58,6 +58,12 @@ import {
 } from '../models/ElevenLabsVoice';
 import { WizardPage } from '../models/WizardPage';
 import { normalizeVoiceInputLanguage } from '../models/VoiceInputLanguages';
+import {
+  customVoiceInputProvider,
+  defaultVoiceInputModelFor,
+  VoiceInputProvider,
+  voiceInputProviderFromValue,
+} from '../models/VoiceInputProvider';
 
 export function defaultStore(cwd?: string) {
   return new Store({
@@ -384,6 +390,10 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.VOICE_INPUT_MODEL.toString()]: {
         type: 'string',
         default: defaultVoiceInputModel,
+      },
+      [SettingsEnum.VOICE_INPUT_MODELS.toString()]: {
+        type: 'object',
+        default: {},
       },
       [SettingsEnum.VOICE_INPUT_HOTKEY.toString()]: {
         type: 'string',
@@ -1297,8 +1307,30 @@ export class SettingsService {
     return Math.min(10, Math.max(1, Number.isFinite(raw) ? raw : 8));
   }
 
-  get voiceInputProvider(): ApiType.OpenAI | ApiType.SentientSimsAI {
-    return this.get(SettingsEnum.VOICE_INPUT_PROVIDER) === ApiType.OpenAI ? ApiType.OpenAI : ApiType.SentientSimsAI;
+  get voiceInputProvider(): VoiceInputProvider {
+    return voiceInputProviderFromValue(this.get(SettingsEnum.VOICE_INPUT_PROVIDER));
+  }
+
+  set voiceInputProvider(value: VoiceInputProvider) {
+    this.set(SettingsEnum.VOICE_INPUT_PROVIDER, value);
+  }
+
+  get voiceInputModels(): Partial<Record<string, string>> {
+    const raw = this.get(SettingsEnum.VOICE_INPUT_MODELS);
+    return raw && typeof raw === 'object' ? raw : {};
+  }
+
+  set voiceInputModels(value: Partial<Record<string, string>>) {
+    this.set(SettingsEnum.VOICE_INPUT_MODELS, value);
+  }
+
+  // The speech-to-text model for a provider, falling back to the provider's default. The
+  // custom endpoint keeps its own model setting.
+  voiceInputModelFor(provider: VoiceInputProvider): string | undefined {
+    if (provider === customVoiceInputProvider) {
+      return this.voiceInputModel.trim() || defaultVoiceInputModel;
+    }
+    return this.voiceInputModels[provider]?.trim() || defaultVoiceInputModelFor(provider);
   }
 
   get voiceInputEndpoint(): string {
@@ -1405,6 +1437,20 @@ export class SettingsService {
   }
 
   runMigrations() {
+    // Before 4.5.3 the voice provider was openai for every OpenAI-compatible server, told
+    // apart by its endpoint. The pinned model moves with it so a working setup stays put.
+    const savedVoiceProvider = this.get(SettingsEnum.VOICE_INPUT_PROVIDER);
+    if (savedVoiceProvider === ApiType.OpenAI) {
+      const migrated = voiceInputProviderFromValue(savedVoiceProvider, this.voiceInputEndpoint);
+      if (migrated === ApiType.OpenAI && !this.voiceInputModels[ApiType.OpenAI] && this.voiceInputModel.trim()) {
+        this.voiceInputModels = { ...this.voiceInputModels, [ApiType.OpenAI]: this.voiceInputModel.trim() };
+      }
+      if (migrated !== ApiType.OpenAI) {
+        log.info(`Migrating voice input provider openai at ${this.voiceInputEndpoint} to ${migrated}`);
+        this.voiceInputProvider = migrated;
+      }
+    }
+
     // Seed the multi-provider configs from the legacy single-provider selection
     if (this.aiProviderConfigs.length === 0) {
       const seeded = newAutoConfig(this.aiApiType);

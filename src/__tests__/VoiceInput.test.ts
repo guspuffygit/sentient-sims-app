@@ -29,6 +29,23 @@ vi.mock('openai', () => {
   };
 });
 
+const geminiMocks = vi.hoisted(() => ({
+  generateContent: vi.fn(),
+  list: vi.fn(),
+  apiKeys: [] as string[],
+}));
+
+vi.mock('@google/genai', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  GoogleGenAI: class {
+    models = { generateContent: geminiMocks.generateContent, list: geminiMocks.list };
+
+    constructor(config: { apiKey: string }) {
+      geminiMocks.apiKeys.push(config.apiKey);
+    }
+  },
+}));
+
 const notifyMocks = vi.hoisted(() => ({
   sendPlayerVoiceMessageToMod: vi.fn(),
   sendPlayerVoiceStatusToMod: vi.fn(),
@@ -59,11 +76,25 @@ import { HotkeyCallbacks, VoiceHotkeyService } from 'main/sentient-sims/services
 
 import { VoiceInputService } from 'main/sentient-sims/services/VoiceInputService';
 
-import { defaultVoiceInputHotkeyFor } from 'main/sentient-sims/constants';
+import {
+  defaultVoiceInputHotkeyFor,
+  geminiDefaultTranscriptionModel,
+  openaiDefaultTranscriptionModel,
+  openrouterDefaultEndpoint,
+  openrouterDefaultTranscriptionModel,
+} from 'main/sentient-sims/constants';
 
 import { voiceHotkeyLabel, voiceHotkeyPresets } from 'main/sentient-sims/models/VoiceHotkeyPresets';
 
 import { SentientSimsAIService } from 'main/sentient-sims/services/SentientSimsAIService';
+
+import {
+  customVoiceInputProvider,
+  defaultVoiceInputModelFor,
+  voiceInputModelSuggestions,
+  voiceInputProviderFromValue,
+  voiceInputProviders,
+} from 'main/sentient-sims/models/VoiceInputProvider';
 
 type CallbackSpies = { [K in keyof HotkeyCallbacks]: Mock<() => void> };
 
@@ -200,6 +231,82 @@ describe('voice input settings', () => {
     settingsService.set(SettingsEnum.VOICE_INPUT_LANGUAGE, 'English');
     expect(settingsService.voiceInputLanguage).toBe('en');
   });
+
+  it('offers a default model per provider and keeps a saved pick', () => {
+    const { settingsService } = mockEnvironment();
+    expect(settingsService.voiceInputModelFor(ApiType.OpenAI)).toBe(openaiDefaultTranscriptionModel);
+    expect(settingsService.voiceInputModelFor(ApiType.OpenRouter)).toBe(openrouterDefaultTranscriptionModel);
+    expect(settingsService.voiceInputModelFor(ApiType.Gemini)).toBe(geminiDefaultTranscriptionModel);
+    expect(settingsService.voiceInputModelFor(customVoiceInputProvider)).toBe('whisper-1');
+    expect(settingsService.voiceInputModelFor(ApiType.SentientSimsAI)).toBeUndefined();
+
+    settingsService.voiceInputModels = { [ApiType.OpenRouter]: 'openai/whisper-large-v3' };
+    settingsService.set(SettingsEnum.VOICE_INPUT_MODEL, 'Systran/faster-whisper-small');
+    expect(settingsService.voiceInputModelFor(ApiType.OpenRouter)).toBe('openai/whisper-large-v3');
+    expect(settingsService.voiceInputModelFor(ApiType.OpenAI)).toBe(openaiDefaultTranscriptionModel);
+    expect(settingsService.voiceInputModelFor(customVoiceInputProvider)).toBe('Systran/faster-whisper-small');
+  });
+
+  it('reads every provider back and treats unknown values as Sentient Sims AI', () => {
+    const { settingsService } = mockEnvironment();
+    for (const provider of voiceInputProviders) {
+      settingsService.voiceInputProvider = provider;
+      expect(settingsService.voiceInputProvider).toBe(provider);
+    }
+    settingsService.set(SettingsEnum.VOICE_INPUT_PROVIDER, 'koboldai');
+    expect(settingsService.voiceInputProvider).toBe(ApiType.SentientSimsAI);
+  });
+
+  it('migrates a legacy openai provider pointed at a custom server to the custom provider', () => {
+    const { settingsService } = mockEnvironment();
+    settingsService.set(SettingsEnum.VOICE_INPUT_PROVIDER, ApiType.OpenAI);
+    settingsService.set(SettingsEnum.VOICE_INPUT_ENDPOINT, 'http://localhost:8000/v1');
+    settingsService.set(SettingsEnum.VOICE_INPUT_MODEL, 'Systran/faster-whisper-small');
+
+    settingsService.runMigrations();
+
+    expect(settingsService.voiceInputProvider).toBe(customVoiceInputProvider);
+    expect(settingsService.voiceInputModelFor(customVoiceInputProvider)).toBe('Systran/faster-whisper-small');
+    expect(settingsService.voiceInputModels).toEqual({});
+  });
+
+  it('migrates a legacy openai provider on the OpenAI endpoint and keeps its model', () => {
+    const { settingsService } = mockEnvironment();
+    settingsService.set(SettingsEnum.VOICE_INPUT_PROVIDER, ApiType.OpenAI);
+
+    settingsService.runMigrations();
+
+    expect(settingsService.voiceInputProvider).toBe(ApiType.OpenAI);
+    expect(settingsService.voiceInputModelFor(ApiType.OpenAI)).toBe('whisper-1');
+
+    // A second launch leaves a later pick alone
+    settingsService.voiceInputModels = { [ApiType.OpenAI]: 'gpt-4o-transcribe' };
+    settingsService.runMigrations();
+    expect(settingsService.voiceInputModelFor(ApiType.OpenAI)).toBe('gpt-4o-transcribe');
+  });
+});
+
+describe('voice input providers', () => {
+  it('maps the legacy openai value by endpoint', () => {
+    expect(voiceInputProviderFromValue(ApiType.OpenAI, 'https://api.openai.com/v1')).toBe(ApiType.OpenAI);
+    expect(voiceInputProviderFromValue(ApiType.OpenAI, 'http://localhost:8000/v1')).toBe(customVoiceInputProvider);
+    expect(voiceInputProviderFromValue(ApiType.OpenAI)).toBe(ApiType.OpenAI);
+    expect(voiceInputProviderFromValue(undefined)).toBe(ApiType.SentientSimsAI);
+  });
+
+  it('suggests models that start with each provider default', () => {
+    for (const provider of voiceInputProviders) {
+      const fallback = defaultVoiceInputModelFor(provider);
+      const suggestions = voiceInputModelSuggestions(provider);
+      if (provider === ApiType.SentientSimsAI) {
+        expect(fallback).toBeUndefined();
+        expect(suggestions).toEqual([]);
+      } else {
+        expect(suggestions[0]).toBe(fallback);
+      }
+    }
+    expect(voiceInputModelSuggestions(ApiType.OpenRouter).every((model) => model.includes('/'))).toBe(true);
+  });
 });
 
 describe('normalizeVoiceInputLanguage', () => {
@@ -227,14 +334,16 @@ describe('normalizeVoiceInputLanguage', () => {
   });
 });
 
-function transcriptionContext() {
+function transcriptionContext(provider: string = customVoiceInputProvider) {
   const { settingsService } = mockEnvironment();
-  settingsService.set(SettingsEnum.VOICE_INPUT_PROVIDER, ApiType.OpenAI);
+  settingsService.set(SettingsEnum.VOICE_INPUT_PROVIDER, provider);
   const ctx = { settings: settingsService } as unknown as ApiContext;
   return { settingsService, service: new TranscriptionService(ctx) };
 }
 
-describe('TranscriptionService', () => {
+type OpenAIClientConfig = { apiKey: string; baseURL: string; defaultHeaders?: Record<string, string> };
+
+describe('TranscriptionService on a custom OpenAI-compatible endpoint', () => {
   beforeEach(() => {
     openaiMocks.create.mockReset();
     openaiMocks.constructorConfigs.length = 0;
@@ -270,17 +379,6 @@ describe('TranscriptionService', () => {
     await expect(service.transcribe(new ArrayBuffer(16))).rejects.toThrow(TranscriptionError);
   });
 
-  it('falls back to the app OpenAI key on the OpenAI endpoint', async () => {
-    const { settingsService, service } = transcriptionContext();
-    settingsService.set(SettingsEnum.OPENAI_KEY, 'sk-app-key');
-    openaiMocks.create.mockResolvedValue({ text: 'hi' });
-
-    await service.transcribe(new ArrayBuffer(16));
-
-    const config = openaiMocks.constructorConfigs[0] as { apiKey: string };
-    expect(config.apiKey).toBe('sk-app-key');
-  });
-
   it('never sends the app OpenAI key to a custom endpoint', async () => {
     const { settingsService, service } = transcriptionContext();
     settingsService.set(SettingsEnum.OPENAI_KEY, 'sk-app-key');
@@ -289,8 +387,24 @@ describe('TranscriptionService', () => {
 
     await service.transcribe(new ArrayBuffer(16));
 
-    const config = openaiMocks.constructorConfigs[0] as { apiKey: string };
+    const config = openaiMocks.constructorConfigs[0] as OpenAIClientConfig;
     expect(config.apiKey).toBe('not-set');
+    expect(config.baseURL).toBe('http://localhost:8000/v1');
+  });
+
+  it('sends the voice key the user typed', async () => {
+    const { settingsService, service } = transcriptionContext();
+    settingsService.set(SettingsEnum.VOICE_INPUT_KEY, 'gsk-groq');
+    settingsService.set(SettingsEnum.VOICE_INPUT_ENDPOINT, 'https://api.groq.com/openai/v1');
+    settingsService.set(SettingsEnum.VOICE_INPUT_MODEL, 'whisper-large-v3-turbo');
+    openaiMocks.create.mockResolvedValue({ text: 'hi' });
+
+    await service.transcribe(new ArrayBuffer(16));
+
+    const config = openaiMocks.constructorConfigs[0] as OpenAIClientConfig;
+    expect(config.apiKey).toBe('gsk-groq');
+    const request = openaiMocks.create.mock.calls[0][0] as { model: string };
+    expect(request.model).toBe('whisper-large-v3-turbo');
   });
 
   it('rebuilds the client when endpoint or key changes', async () => {
@@ -304,6 +418,182 @@ describe('TranscriptionService', () => {
     settingsService.set(SettingsEnum.VOICE_INPUT_ENDPOINT, 'http://localhost:8000/v1');
     await service.transcribe(new ArrayBuffer(16));
     expect(openaiMocks.constructorConfigs).toHaveLength(2);
+  });
+});
+
+describe('TranscriptionService on OpenAI', () => {
+  beforeEach(() => {
+    openaiMocks.create.mockReset();
+    openaiMocks.constructorConfigs.length = 0;
+  });
+
+  it('uses the app OpenAI key and endpoint with the OpenAI transcription model', async () => {
+    const { settingsService, service } = transcriptionContext(ApiType.OpenAI);
+    settingsService.set(SettingsEnum.OPENAI_KEY, 'sk-app-key');
+    // The custom endpoint settings play no part here
+    settingsService.set(SettingsEnum.VOICE_INPUT_ENDPOINT, 'http://localhost:8000/v1');
+    settingsService.set(SettingsEnum.VOICE_INPUT_KEY, 'local-key');
+    settingsService.set(SettingsEnum.VOICE_INPUT_MODEL, 'Systran/faster-whisper-small');
+    openaiMocks.create.mockResolvedValue({ text: ' Hello ' });
+
+    const text = await service.transcribe(new ArrayBuffer(16));
+
+    expect(text).toBe('Hello');
+    const config = openaiMocks.constructorConfigs[0] as OpenAIClientConfig;
+    expect(config.apiKey).toBe('sk-app-key');
+    expect(config.baseURL).toBe('https://api.openai.com/v1');
+    expect(config.defaultHeaders).toBeUndefined();
+    const request = openaiMocks.create.mock.calls[0][0] as { model: string };
+    expect(request.model).toBe(openaiDefaultTranscriptionModel);
+  });
+
+  it('sends the model picked for OpenAI', async () => {
+    const { settingsService, service } = transcriptionContext(ApiType.OpenAI);
+    settingsService.set(SettingsEnum.OPENAI_KEY, 'sk-app-key');
+    settingsService.voiceInputModels = { [ApiType.OpenAI]: 'whisper-1', [ApiType.OpenRouter]: 'openai/whisper-1' };
+    openaiMocks.create.mockResolvedValue({ text: 'hi' });
+
+    await service.transcribe(new ArrayBuffer(16));
+
+    const request = openaiMocks.create.mock.calls[0][0] as { model: string };
+    expect(request.model).toBe('whisper-1');
+  });
+
+  it('rebuilds the client when the provider changes', async () => {
+    const { settingsService, service } = transcriptionContext(ApiType.OpenAI);
+    settingsService.set(SettingsEnum.OPENAI_KEY, 'sk-app-key');
+    settingsService.set(SettingsEnum.OPENROUTER_KEY, 'sk-or-key');
+    openaiMocks.create.mockResolvedValue({ text: 'hi' });
+
+    await service.transcribe(new ArrayBuffer(16));
+    settingsService.voiceInputProvider = ApiType.OpenRouter;
+    await service.transcribe(new ArrayBuffer(16));
+
+    expect(openaiMocks.constructorConfigs).toHaveLength(2);
+    expect((openaiMocks.constructorConfigs[1] as OpenAIClientConfig).apiKey).toBe('sk-or-key');
+  });
+});
+
+describe('TranscriptionService on OpenRouter', () => {
+  beforeEach(() => {
+    openaiMocks.create.mockReset();
+    openaiMocks.constructorConfigs.length = 0;
+  });
+
+  it('uses the OpenRouter key, endpoint, attribution headers and model', async () => {
+    const { settingsService, service } = transcriptionContext(ApiType.OpenRouter);
+    settingsService.set(SettingsEnum.OPENROUTER_KEY, 'sk-or-key');
+    settingsService.set(SettingsEnum.OPENAI_KEY, 'sk-app-key');
+    settingsService.set(SettingsEnum.VOICE_INPUT_LANGUAGE, 'fr');
+    openaiMocks.create.mockResolvedValue({ text: 'Bonjour' });
+
+    const text = await service.transcribe(new ArrayBuffer(16));
+
+    expect(text).toBe('Bonjour');
+    const config = openaiMocks.constructorConfigs[0] as OpenAIClientConfig;
+    expect(config.apiKey).toBe('sk-or-key');
+    expect(config.baseURL).toBe(openrouterDefaultEndpoint);
+    expect(config.defaultHeaders).toEqual({
+      'HTTP-Referer': 'https://sentientsimulations.com',
+      'X-Title': 'Sentient Sims',
+    });
+    const request = openaiMocks.create.mock.calls[0][0] as { model: string; language?: string };
+    expect(request.model).toBe(openrouterDefaultTranscriptionModel);
+    expect(request.language).toBe('fr');
+  });
+
+  it('sends the model picked for OpenRouter', async () => {
+    const { settingsService, service } = transcriptionContext(ApiType.OpenRouter);
+    settingsService.set(SettingsEnum.OPENROUTER_KEY, 'sk-or-key');
+    settingsService.voiceInputModels = { [ApiType.OpenRouter]: 'openai/whisper-large-v3' };
+    openaiMocks.create.mockResolvedValue({ text: 'hi' });
+
+    await service.transcribe(new ArrayBuffer(16));
+
+    const request = openaiMocks.create.mock.calls[0][0] as { model: string };
+    expect(request.model).toBe('openai/whisper-large-v3');
+  });
+});
+
+type GeminiRequest = {
+  model: string;
+  config?: { temperature?: number };
+  contents: { parts: { text?: string; inlineData?: { mimeType: string; data: string } }[] }[];
+};
+
+function geminiContext(onLotNames: string[] = []) {
+  const { settingsService } = mockEnvironment();
+  settingsService.set(SettingsEnum.VOICE_INPUT_PROVIDER, ApiType.Gemini);
+  settingsService.geminiKeys = 'gm-key-1, gm-key-2';
+  const ctx = {
+    settings: settingsService,
+    simStateCache: { getReport: () => ({ sims: onLotNames.map((name) => ({ sim_name: name, sims: [] })) }) },
+  } as unknown as ApiContext;
+  return { settingsService, service: new TranscriptionService(ctx) };
+}
+
+describe('TranscriptionService on Gemini', () => {
+  beforeEach(() => {
+    openaiMocks.create.mockReset();
+    geminiMocks.generateContent.mockReset();
+    geminiMocks.apiKeys.length = 0;
+  });
+
+  it('hands the recording to a text model inline and returns the bare transcript', async () => {
+    const { settingsService, service } = geminiContext(['Bella Goth']);
+    settingsService.set(SettingsEnum.VOICE_INPUT_LANGUAGE, 'de');
+    geminiMocks.generateContent.mockResolvedValue({ text: ' "Hallo Bella." ' });
+    const audio = new Uint8Array([1, 2, 3, 4]);
+
+    const text = await service.transcribe(audio.buffer, 'audio/webm;codecs=opus');
+
+    expect(text).toBe('Hallo Bella.');
+    expect(openaiMocks.create).not.toHaveBeenCalled();
+    expect(['gm-key-1', 'gm-key-2']).toContain(geminiMocks.apiKeys[0]);
+    const request = geminiMocks.generateContent.mock.calls[0][0] as GeminiRequest;
+    expect(request.model).toBe(geminiDefaultTranscriptionModel);
+    expect(request.config?.temperature).toBe(0);
+    const [instruction, inline] = request.contents[0].parts;
+    expect(instruction.text).toContain('Transcribe');
+    expect(instruction.text).toContain('German');
+    expect(instruction.text).toContain('Bella Goth');
+    expect(inline.inlineData).toEqual({ mimeType: 'audio/webm', data: Buffer.from(audio).toString('base64') });
+  });
+
+  it('sends the model picked for Gemini', async () => {
+    const { settingsService, service } = geminiContext();
+    settingsService.voiceInputModels = { [ApiType.Gemini]: 'gemini-flash-lite-latest' };
+    geminiMocks.generateContent.mockResolvedValue({ text: 'hi' });
+
+    await service.transcribe(new ArrayBuffer(16));
+
+    const request = geminiMocks.generateContent.mock.calls[0][0] as GeminiRequest;
+    expect(request.model).toBe('gemini-flash-lite-latest');
+  });
+
+  it('treats an empty answer as hearing nothing', async () => {
+    const { service } = geminiContext();
+    geminiMocks.generateContent.mockResolvedValue({ text: undefined });
+
+    expect(await service.transcribe(new ArrayBuffer(16))).toBe('');
+  });
+
+  it('fails clearly without a Gemini key', async () => {
+    const { settingsService, service } = geminiContext();
+    settingsService.geminiKeys = '';
+
+    const failure = service.transcribe(new ArrayBuffer(16));
+
+    await expect(failure).rejects.toThrow(TranscriptionError);
+    await expect(failure).rejects.toThrow('No Gemini API key set');
+    expect(geminiMocks.generateContent).not.toHaveBeenCalled();
+  });
+
+  it('wraps Gemini failures in TranscriptionError', async () => {
+    const { service } = geminiContext();
+    geminiMocks.generateContent.mockRejectedValue(new Error('429 quota'));
+
+    await expect(service.transcribe(new ArrayBuffer(16))).rejects.toThrow(TranscriptionError);
   });
 });
 

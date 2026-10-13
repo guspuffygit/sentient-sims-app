@@ -71,13 +71,16 @@ export enum SettingsEnum {
   // Daily plans: nightly goals-from-pool + persona sentence + discretionary action loadout
   DAILY_GOALS_ENABLED = 'dailyGoalsEnabled',
   DAILY_LOADOUT_SIZE = 'dailyLoadoutSize',
-  // Voice input: hold-to-talk mic capture transcribed via an OpenAI-compatible
-  // /audio/transcriptions endpoint, injected into the game as the active sim speaking
+  // Voice input: hold-to-talk mic capture transcribed by the chosen provider, injected
+  // into the game as the active sim speaking
   VOICE_INPUT_ENABLED = 'voiceInputEnabled',
-  VOICE_INPUT_PROVIDER = 'voiceInputProvider', // sentientsimsai | openai (any compatible endpoint)
+  VOICE_INPUT_PROVIDER = 'voiceInputProvider', // sentientsimsai | openai | openrouter | gemini | custom
+  // The custom OpenAI-compatible endpoint's own connection
   VOICE_INPUT_ENDPOINT = 'voiceInputEndpoint',
   VOICE_INPUT_KEY = 'voiceInputKey',
   VOICE_INPUT_MODEL = 'voiceInputModel',
+  // Speech-to-text model per provider (openai, openrouter, gemini), keyed by provider id
+  VOICE_INPUT_MODELS = 'voiceInputModels',
   VOICE_INPUT_HOTKEY = 'voiceInputHotkey',
   VOICE_INPUT_HOTKEY_MODE = 'voiceInputHotkeyMode', // hold | toggle
   VOICE_INPUT_LANGUAGE = 'voiceInputLanguage', // ISO-639-1 hint, empty = auto-detect

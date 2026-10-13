@@ -1,11 +1,15 @@
 import log from 'electron-log';
 import { AxiosError } from 'axios';
 import OpenAI, { toFile } from 'openai';
+import { GoogleGenAI, HarmBlockThreshold, HarmCategory } from '@google/genai';
 import { ApiContext } from './ApiContext';
 import { AIHealthCheckResponse } from '../models/AIHealthCheckResponse';
 import { ApiType } from '../models/ApiType';
-import { openaiDefaultEndpoint } from '../constants';
+import { VoiceInputProvider, voiceInputProviderName } from '../models/VoiceInputProvider';
+import { isOpenRouterEndpoint, openrouterAttributionHeaders } from '../models/OpenRouterModels';
+import { VOICE_INPUT_LANGUAGES } from '../models/VoiceInputLanguages';
 import { buildTranscriptionPrompt } from '../util/nameCorrection';
+import { getRandomItem } from '../util/getRandomItem';
 
 export class TranscriptionError extends Error {
   constructor(message: string) {
@@ -28,11 +32,24 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-// Speech-to-text over any OpenAI-compatible /audio/transcriptions endpoint (OpenAI,
-// Groq, local faster-whisper/speaches). Deliberately separate from the generation
-// providers: the STT endpoint/key/model are an independent settings axis, so this owns
-// its own client instead of borrowing OpenAIService's LLM-configured one. Sentient
-// Sims AI is the exception, since it speaks its own JSON request and login token.
+// Local whisper servers ignore auth entirely; a placeholder keeps the SDK happy there
+// while a real endpoint rejects it with a clear 401
+const noKey = 'not-set';
+
+const requestTimeoutMs = 30000;
+
+const geminiSafetySettings = [
+  HarmCategory.HARM_CATEGORY_HARASSMENT,
+  HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+  HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+  HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+].map((category) => ({ category, threshold: HarmBlockThreshold.BLOCK_NONE }));
+
+// Speech-to-text for the player's voice. OpenAI, OpenRouter and any custom server share
+// the OpenAI /audio/transcriptions wire format and differ only in endpoint, key and
+// model, so one cached OpenAI client serves all three. Gemini has no speech endpoint and
+// is handed the audio inline by a text model. Sentient Sims AI speaks its own JSON
+// request and login token.
 export class TranscriptionService {
   private readonly ctx: ApiContext;
 
@@ -44,37 +61,59 @@ export class TranscriptionService {
     this.ctx = ctx;
   }
 
-  private getApiKey(): string {
-    const voiceKey = this.ctx.settings.voiceInputKey;
-    if (voiceKey) {
-      return voiceKey;
-    }
-    // Reuse the app's OpenAI key only against OpenAI itself — never send it to a
-    // custom endpoint the user pointed elsewhere
-    if (this.ctx.settings.voiceInputEndpoint === openaiDefaultEndpoint && this.ctx.settings.openaiKey) {
-      return this.ctx.settings.openaiKey;
-    }
-    // Local whisper servers ignore auth entirely; a placeholder keeps the SDK happy
-    // there while a real endpoint rejects it with a clear 401
-    return 'not-set';
+  get provider(): VoiceInputProvider {
+    return this.ctx.settings.voiceInputProvider;
   }
 
-  private getClient(): OpenAI {
-    const apiKey = this.getApiKey();
-    const baseURL = this.ctx.settings.voiceInputEndpoint;
+  private connection(provider: VoiceInputProvider): { baseURL: string; apiKey: string } {
+    const { settings } = this.ctx;
+    switch (provider) {
+      case ApiType.OpenAI:
+        return {
+          baseURL: settings.openaiEndpoint,
+          apiKey: settings.openaiKey || process.env.OPENAI_KEY || noKey,
+        };
+      case ApiType.OpenRouter:
+        return {
+          baseURL: settings.openrouterEndpoint,
+          apiKey: settings.openrouterKey || process.env.OPENROUTER_KEY || noKey,
+        };
+      default:
+        return { baseURL: settings.voiceInputEndpoint, apiKey: settings.voiceInputKey || noKey };
+    }
+  }
+
+  private getClient(provider: VoiceInputProvider): OpenAI {
+    const { baseURL, apiKey } = this.connection(provider);
     const clientConfig = `${baseURL}:${apiKey}`;
     if (!this.client || this.clientConfig !== clientConfig) {
       this.client = new OpenAI({
         dangerouslyAllowBrowser: process.env.NODE_ENV === 'test',
         apiKey,
         baseURL,
-        timeout: 30000,
+        timeout: requestTimeoutMs,
         maxRetries: 0,
+        defaultHeaders: isOpenRouterEndpoint(baseURL) ? openrouterAttributionHeaders : undefined,
       });
       this.clientConfig = clientConfig;
     }
 
     return this.client;
+  }
+
+  private geminiKeys(): string[] {
+    return (this.ctx.settings.geminiKeys || '')
+      .split(',')
+      .map((key) => key.trim())
+      .filter((key) => key.length > 0);
+  }
+
+  private getGeminiClient(): GoogleGenAI {
+    const keys = this.geminiKeys();
+    if (keys.length === 0) {
+      throw new TranscriptionError('No Gemini API key set, add one under AI settings');
+    }
+    return new GoogleGenAI({ apiKey: getRandomItem(keys) });
   }
 
   // V-7: the names in play, tightest scope first (on-lot sims, then everyone the
@@ -116,46 +155,100 @@ export class TranscriptionService {
   ): Promise<string> {
     const language = this.ctx.settings.voiceInputLanguage;
     const prompt = options.namePrompt === false ? undefined : this.namePrompt();
-
-    if (this.ctx.settings.voiceInputProvider === ApiType.SentientSimsAI) {
-      const format = mimeType.split(';')[0].split('/')[1] ?? 'webm';
-      try {
-        const text = await this.ctx.sentientSimsTranscription.transcribe(Buffer.from(audio), format, language, prompt);
-        return text.trim();
-      } catch (error) {
-        log.error('Voice transcription failed:', error);
-        throw new TranscriptionError(errorMessage(error));
-      }
-    }
-
-    const client = this.getClient();
-    // The filename extension is how whisper servers detect the container format
-    const file = await toFile(Buffer.from(audio), 'speech.webm', { type: mimeType });
+    const { provider } = this;
 
     try {
-      const response = await client.audio.transcriptions.create({
-        file,
-        model: this.ctx.settings.voiceInputModel,
-        ...(language ? { language } : {}),
-        ...(prompt ? { prompt } : {}),
-      });
-      return response.text.trim();
+      if (provider === ApiType.SentientSimsAI) {
+        const format = mimeType.split(';')[0].split('/')[1] ?? 'webm';
+        const text = await this.ctx.sentientSimsTranscription.transcribe(Buffer.from(audio), format, language, prompt);
+        return text.trim();
+      }
+      if (provider === ApiType.Gemini) {
+        return await this.transcribeWithGemini(audio, mimeType, language, prompt);
+      }
+      return await this.transcribeOpenAICompatible(provider, audio, mimeType, language, prompt);
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      log.error('Voice transcription failed:', error);
-      throw new TranscriptionError(message);
+      log.error(`Voice transcription failed (${voiceInputProviderName(provider)}):`, error);
+      throw error instanceof TranscriptionError ? error : new TranscriptionError(errorMessage(error));
     }
   }
 
+  private async transcribeOpenAICompatible(
+    provider: VoiceInputProvider,
+    audio: ArrayBuffer,
+    mimeType: string,
+    language: string,
+    prompt: string | undefined,
+  ): Promise<string> {
+    const client = this.getClient(provider);
+    // The filename extension is how whisper servers detect the container format
+    const file = await toFile(Buffer.from(audio), 'speech.webm', { type: mimeType });
+    const response = await client.audio.transcriptions.create({
+      file,
+      model: this.ctx.settings.voiceInputModelFor(provider) ?? '',
+      ...(language ? { language } : {}),
+      ...(prompt ? { prompt } : {}),
+    });
+    return response.text.trim();
+  }
+
+  // Gemini hears the recording as an inline audio part next to a transcription
+  // instruction; the names and language hints ride along as plain text
+  private async transcribeWithGemini(
+    audio: ArrayBuffer,
+    mimeType: string,
+    language: string,
+    prompt: string | undefined,
+  ): Promise<string> {
+    const client = this.getGeminiClient();
+    const model = this.ctx.settings.voiceInputModelFor(ApiType.Gemini) ?? '';
+    const languageName = VOICE_INPUT_LANGUAGES.find((option) => option.code === language)?.name;
+    const instruction = [
+      'Transcribe the speech in this recording word for word.',
+      'Reply with the transcript only, with no quotes, labels or commentary.',
+      'If nothing is said, reply with nothing at all.',
+      languageName ? `The speaker is speaking ${languageName}.` : undefined,
+      prompt,
+    ]
+      .filter(Boolean)
+      .join(' ');
+
+    const response = await client.models.generateContent({
+      model,
+      config: {
+        temperature: 0,
+        safetySettings: geminiSafetySettings,
+      },
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            { text: instruction },
+            { inlineData: { mimeType: mimeType.split(';')[0], data: Buffer.from(audio).toString('base64') } },
+          ],
+        },
+      ],
+    });
+    const text = response.text ?? '';
+    return text
+      .trim()
+      .replace(/^["“](.*)["”]$/s, '$1')
+      .trim();
+  }
+
   async healthCheck(): Promise<AIHealthCheckResponse> {
-    if (this.ctx.settings.voiceInputProvider === ApiType.SentientSimsAI) {
+    const { provider } = this;
+    if (provider === ApiType.SentientSimsAI) {
       return this.ctx.sentientSimsTranscription.healthCheck();
     }
 
-    // No cheap transcription ping exists; a models listing works on OpenAI, Groq,
-    // and the common local whisper servers
+    // No cheap transcription ping exists; a models listing works on every provider
     try {
-      await this.getClient().models.list();
+      if (provider === ApiType.Gemini) {
+        await this.getGeminiClient().models.list();
+      } else {
+        await this.getClient(provider).models.list();
+      }
       return { status: 'OK' };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

@@ -237,7 +237,26 @@ export const backgroundIdleDelayMs = 10000;
 export const defaultElevenLabsEndpoint = 'https://api.elevenlabs.io/v1';
 export const defaultKokoroEndpoint = 'https://api.kokorotts.com';
 export const defaultVLLMEndpoint = 'http://localhost:8000/v1';
+// Speech-to-text models per voice input provider; any other id can be typed in.
+// Custom OpenAI-compatible endpoints (Groq, local whisper servers) default to whisper-1,
+// the one name every one of them serves.
 export const defaultVoiceInputModel = 'whisper-1';
+export const openaiTranscriptionModels = ['gpt-4o-mini-transcribe', 'gpt-4o-transcribe', 'whisper-1'];
+export const openaiDefaultTranscriptionModel = openaiTranscriptionModels[0];
+// A sample of the OpenRouter /models?output_modalities=transcription catalog.
+export const openrouterTranscriptionModels = [
+  'openai/gpt-4o-mini-transcribe',
+  'openai/gpt-4o-transcribe',
+  'openai/whisper-large-v3-turbo',
+  'openai/whisper-1',
+  'google/gemini-3.5-transcribe',
+  'mistralai/voxtral-mini-transcribe',
+  'elevenlabs/scribe-v2',
+];
+export const openrouterDefaultTranscriptionModel = openrouterTranscriptionModels[0];
+// Gemini has no dedicated speech endpoint: a text model is handed the audio inline.
+export const geminiTranscriptionModels = ['gemini-flash-latest', 'gemini-flash-lite-latest'];
+export const geminiDefaultTranscriptionModel = geminiTranscriptionModels[0];
 export const defaultVoiceInputHotkey = 'Ctrl+Space';
 // macOS takes Ctrl+Space to switch input sources before the game ever sees it
 export const defaultVoiceInputHotkeyMac = 'Alt+V';
