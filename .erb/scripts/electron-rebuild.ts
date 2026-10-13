@@ -5,7 +5,7 @@ import webpackPaths from '../configs/webpack.paths.ts';
 
 if (Object.keys(packageJson.dependencies || {}).length > 0 && fs.existsSync(webpackPaths.appNodeModulesPath)) {
   const electronRebuildCmd =
-    '../../node_modules/.bin/electron-rebuild --force --types prod,dev,optional --module-dir .';
+    '../../node_modules/.bin/electron-rebuild --force --disable-pre-gyp-copy --types prod,dev,optional --module-dir .';
   const cmd = process.platform === 'win32' ? electronRebuildCmd.replace(/\//g, '\\') : electronRebuildCmd;
   execSync(cmd, {
     cwd: webpackPaths.appPath,
