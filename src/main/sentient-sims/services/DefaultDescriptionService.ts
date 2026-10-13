@@ -6,6 +6,7 @@ import { SentientSim } from '../models/SentientSim';
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { LotBlock } from '../models/SimStateReport';
 import { cleanupAIOutput, formatSentientSim } from '../formatter/PromptFormatter';
+import { lotFacts, lotHasFacts, placeDescriptionProblems } from '../util/lotDescription';
 import {
   LOCATION_DESCRIPTION_SYSTEM_PROMPT as LOCATION_SYSTEM_PROMPT,
   SIM_DESCRIPTION_SYSTEM_PROMPT as SIM_SYSTEM_PROMPT,
@@ -76,6 +77,13 @@ export class DefaultDescriptionService {
     if (!this.enabled() || !location.is_generic) {
       return;
     }
+    // No lot block (the state report was about another lot), or one that names no venue and
+    // no object: the writer would only have the repository's defaults and still write three
+    // sentences about "the home" (ten such rows by 2026-10-12). Return BEFORE the once-per-run
+    // mark so the next event that does carry this lot's block gets to describe it.
+    if (!lotHasFacts(lot)) {
+      return;
+    }
     const locationId = String(location.id);
     if (this.attemptedLocations.has(locationId)) {
       return;
@@ -124,54 +132,46 @@ export class DefaultDescriptionService {
   }
 
   private async generateLocationDescription(location: LocationEntity, lot?: LotBlock, zoneName?: string) {
-    const facts = this.locationFacts(location, lot, zoneName);
+    const facts = lotFacts(location, lot, zoneName);
     const label = zoneName || location.name || 'this place';
-    const oneShot = await this.ctx.ai.runOneShot(
-      `Default Description: ${label}`,
-      LOCATION_SYSTEM_PROMPT,
-      `Facts about ${label}:\n${facts}`,
-      MAX_DESCRIPTION_TOKENS,
-      undefined,
-      AIActionType.DESCRIPTION_DEFAULT,
-      undefined,
-      { stageId: StageId.DESCRIPTION_DEFAULT },
-    );
-    const description = cleanupAIOutput(oneShot.text).trim();
-    if (description.length < 20) {
-      log.warn(`[DefaultDescription] location ${label} produced nothing usable`);
+    const description = await this.writeLocationDescription(label, facts, lot?.venue);
+    if (!description) {
       return;
     }
     const stored = this.ctx.locationRepository.setDescriptionIfGeneric(location, description, zoneName);
     log.info(`[DefaultDescription] location ${label}: ${stored ? 'stored' : 'skipped (already described)'}`);
   }
 
-  private locationFacts(location: LocationEntity, lot?: LotBlock, zoneName?: string): string {
-    const facts: string[] = [];
-    facts.push(`Name: ${zoneName || location.name || 'unnamed lot'}`);
-    if (location.lot_type) {
-      facts.push(`Lot type: ${location.lot_type}`);
+  // The reply is checked before it can be stored: a person in the place, a passing moment, or
+  // a venue called a residence means ONE fresh sample, and a second miss keeps the stock text
+  // (the row stays generic, so a later app run tries again). The gate is the safety net behind
+  // the prompt and the facts, not the fix; see util/lotDescription.ts.
+  private async writeLocationDescription(label: string, facts: string, venue?: string): Promise<string | undefined> {
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      const oneShot = await this.ctx.ai.runOneShot(
+        `Default Description: ${label}`,
+        LOCATION_SYSTEM_PROMPT,
+        `Facts about ${label}:\n${facts}`,
+        MAX_DESCRIPTION_TOKENS,
+        undefined,
+        AIActionType.DESCRIPTION_DEFAULT,
+        undefined,
+        { stageId: StageId.DESCRIPTION_DEFAULT },
+      );
+      const description = cleanupAIOutput(oneShot.text).trim();
+      if (description.length < 20) {
+        log.warn(`[DefaultDescription] location ${label} produced nothing usable`);
+        return undefined;
+      }
+      const problems = placeDescriptionProblems(description, venue);
+      if (problems.length === 0) {
+        return description;
+      }
+      log.warn(
+        `[DefaultDescription] location ${label}: attempt ${attempt} rejected (${problems.join(', ')}): ${description.slice(0, 160)}`,
+      );
     }
-    if (lot?.venue) {
-      facts.push(`Venue type: ${lot.venue}`);
-    }
-    if (lot?.is_home) {
-      facts.push('This is the household home lot.');
-    }
-    const owned = Object.entries(lot?.owned ?? {})
-      .filter(([, count]) => count > 0)
-      .map(([kind, count]) => (count > 1 ? `${kind} x${count}` : kind));
-    if (owned.length > 0) {
-      facts.push(`Objects on the lot: ${owned.join(', ')}`);
-    }
-    const conditions = (lot?.conditions ?? [])
-      .map((condition) => `${condition.name ?? 'an object'} is ${condition.conditions.join(' and ')}`)
-      .filter((text) => text.length > 0);
-    if (conditions.length > 0) {
-      facts.push(`Current state of repair: ${conditions.join('; ')}`);
-    }
-    if (lot?.situations && lot.situations.length > 0) {
-      facts.push(`Happening here right now: ${lot.situations.join(', ')}`);
-    }
-    return facts.join('\n');
+    log.warn(`[DefaultDescription] location ${label}: rejected twice, keeping the stock text`);
+    return undefined;
   }
 }
