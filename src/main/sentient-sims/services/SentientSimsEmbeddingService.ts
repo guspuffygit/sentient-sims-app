@@ -1,3 +1,4 @@
+import axios from 'axios';
 import log from 'electron-log';
 import { axiosClient } from '../clients/AxiosClient';
 import { ApiType } from '../models/ApiType';
@@ -59,7 +60,15 @@ export class SentientSimsEmbeddingService implements EmbeddingService {
         return embedding ? Float32Array.from(embedding) : undefined;
       });
     } catch (error) {
-      log.error('Sentient Sims AI embedding request failed', error);
+      // The server answers a bad model with a 400 and a reason; surface that instead of
+      // the axios error dump so a log reader can tell a rejected model from an outage
+      if (axios.isAxiosError(error) && error.response) {
+        log.error(
+          `Sentient Sims AI embedding request for ${this.model} failed with HTTP ${error.response.status}: ${JSON.stringify(error.response.data)}`,
+        );
+      } else {
+        log.error(`Sentient Sims AI embedding request for ${this.model} failed`, error);
+      }
       return texts.map(() => undefined);
     }
   }

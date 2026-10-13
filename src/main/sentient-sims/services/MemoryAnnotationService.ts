@@ -1,5 +1,7 @@
 import log from 'electron-log';
+import { retiredSentientSimsAIEmbeddingModels } from '../constants';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
+import { ApiType } from '../models/ApiType';
 import { StageId } from '../pipeline/stages';
 import { IMPORTANCE_SYSTEM_PROMPT } from '../pipeline/prompts/utility';
 import { AIActionType } from '../models/AIActionType';
@@ -41,6 +43,16 @@ export function parseImportance(text: string): number | undefined {
 // to be ready by the next scene, not during this one.
 export class MemoryAnnotationService {
   private readonly ctx: ApiContext;
+
+  // One backfill at a time: two loops would each claim the same oldest batch and embed it
+  // twice. A request arriving mid-run is remembered and the loop runs once more at the end,
+  // which costs a single query when the running loop already caught up.
+  private backfillInFlight?: Promise<void>;
+
+  private backfillRequested = false;
+
+  // The model the last backfill ran for; a setting write that leaves it unchanged is noise
+  private backfillModel?: string;
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
@@ -111,9 +123,59 @@ export class MemoryAnnotationService {
   }
 
   backfillInBackground(): void {
-    this.backfill().catch((error: unknown) => {
-      log.error('[Annotation] Backfill failed', error);
-    });
+    if (this.backfillInFlight) {
+      this.backfillRequested = true;
+      return;
+    }
+    this.backfillModel = this.ctx.embedding.model;
+    this.backfillInFlight = this.backfill()
+      .then(() => undefined)
+      .catch((error: unknown) => {
+        log.error('[Annotation] Backfill failed', error);
+      })
+      .finally(() => {
+        this.backfillInFlight = undefined;
+        if (this.backfillRequested) {
+          this.backfillRequested = false;
+          this.backfillInBackground();
+        }
+      });
+  }
+
+  // Any setting write may change which embedder is active (the embedding configs, the main
+  // provider Auto follows, a key or token arriving). Compare the resolved model instead of
+  // enumerating keys, and re-run the backfill when it moved so the switch takes effect
+  // without reloading the save.
+  onSettingChanged(): void {
+    if (!this.ctx.db.isLoaded()) {
+      return;
+    }
+    const { model } = this.ctx.embedding;
+    if (model === this.backfillModel || !this.ctx.embedding.isAvailable()) {
+      return;
+    }
+    log.info(`[Annotation] Embedding model changed from ${this.backfillModel ?? 'none'} to ${model}, backfilling`);
+    this.backfillInBackground();
+  }
+
+  // Vectors from a model the hosted service retired can never match a query again: the
+  // replacement model's vectors have a different length, so similarity would score 0 and
+  // at 16 KB a row they outweigh the memories themselves. Only when the hosted service is
+  // the active embedder — a CustomAI server may still run the retired model.
+  dropRetiredEmbeddings(): void {
+    if (this.ctx.embeddingProviderConfigs.getResolvedConfig().apiType !== ApiType.SentientSimsAI) {
+      return;
+    }
+    for (const model of Object.keys(retiredSentientSimsAIEmbeddingModels)) {
+      try {
+        const dropped = this.ctx.memoryIndexRepository.deleteEmbeddingsForModel(model);
+        if (dropped > 0) {
+          log.info(`[Annotation] Dropped ${dropped} stored embeddings from retired model ${model}`);
+        }
+      } catch (error) {
+        log.error(`[Annotation] Failed to drop stored embeddings from retired model ${model}`, error);
+      }
+    }
   }
 
   // Fills in embeddings for memories from before the index existed, written while no
@@ -125,17 +187,27 @@ export class MemoryAnnotationService {
   // memory — while rows the live path already rated keep their rating.
   async backfill(batchSize = 50): Promise<number> {
     if (!this.ctx.embedding.isAvailable()) {
+      log.debug('[Annotation] No embedder available, skipping backfill');
       return 0;
     }
 
     const session = this.ctx.db.sessionKey;
+    const startModel = this.ctx.embedding.model;
+    const pending = this.ctx.memoryIndexRepository.countUnindexedMemories(startModel);
+    if (pending === 0) {
+      log.debug(`[Annotation] Every memory already has an embedding from ${startModel}`);
+      return 0;
+    }
+    log.info(`[Annotation] ${pending} memories need embeddings from ${startModel}, backfilling ${batchSize} at a time`);
+
     let total = 0;
     for (;;) {
       if (this.ctx.db.sessionKey !== session) {
-        log.debug('[Annotation] database changed during backfill, stopping');
+        log.info(`[Annotation] Database changed during backfill, stopping after ${total} memories`);
         break;
       }
-      const batch = this.ctx.memoryIndexRepository.getUnindexedMemories(batchSize, this.ctx.embedding.model);
+      const { model } = this.ctx.embedding;
+      const batch = this.ctx.memoryIndexRepository.getUnindexedMemories(batchSize, model);
       if (batch.length === 0) {
         break;
       }
@@ -145,12 +217,19 @@ export class MemoryAnnotationService {
       total += embedded;
       // Rows that can't make progress (no text, failing embedder) must not spin forever
       if (embedded === 0) {
+        const remaining = this.ctx.memoryIndexRepository.countUnindexedMemories(model);
+        if (remaining > 0 && this.ctx.db.sessionKey === session) {
+          log.warn(
+            `[Annotation] Backfill stopped: ${model} returned no embeddings for a batch of ${batch.length}, ` +
+              `${remaining} memories still unembedded. It retries on the next save load or embedding setting change.`,
+          );
+        }
         break;
       }
     }
 
     if (total > 0) {
-      log.info(`[Annotation] Backfilled embeddings for ${total} memories`);
+      log.info(`[Annotation] Backfilled embeddings from ${this.ctx.embedding.model} for ${total} memories`);
     }
     return total;
   }

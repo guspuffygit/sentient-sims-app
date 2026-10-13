@@ -168,6 +168,29 @@ describe('Embedding Provider Configs', () => {
       expect(ctx.settings.defaultEmbeddingProviderConfigId).toEqual(configs[0].id);
     });
 
+    it('rewrites the retired Qwen embedding model on hosted configs and the legacy setting', () => {
+      ctx.settings.sentientSimsAIEmbeddingModel = 'Qwen/Qwen3-Embedding-8B';
+      ctx.settings.embeddingProviderConfigs = [
+        { id: 'ss-retired', name: 'Sentient Sims', apiType: ApiType.SentientSimsAI, model: 'Qwen/Qwen3-Embedding-8B' },
+        { id: 'ss-unpinned', name: 'Unpinned', apiType: ApiType.SentientSimsAI },
+        { id: 'custom-retired', name: 'Custom', apiType: ApiType.CustomAI, model: 'Qwen/Qwen3-Embedding-8B' },
+      ];
+
+      ctx.settings.runMigrations();
+
+      const modelOf = (id: string) => ctx.settings.embeddingProviderConfigs.find((config) => config.id === id)?.model;
+      expect(ctx.settings.sentientSimsAIEmbeddingModel).toEqual('openai/text-embedding-3-small');
+      expect(modelOf('ss-retired')).toEqual('openai/text-embedding-3-small');
+      expect(modelOf('ss-unpinned')).toBeUndefined();
+      // A self-hosted server may genuinely still serve the retired model
+      expect(modelOf('custom-retired')).toEqual('Qwen/Qwen3-Embedding-8B');
+    });
+
+    it('new hosted embedding users default to the OpenAI small model', () => {
+      expect(sentientSimsAIDefaultEmbeddingModel).toEqual('openai/text-embedding-3-small');
+      expect(ctx.settings.sentientSimsAIEmbeddingModel).toEqual('openai/text-embedding-3-small');
+    });
+
     it('leaves the OpenAI legacy default unseeded so Auto applies', () => {
       ctx.settings.runMigrations();
 

@@ -143,8 +143,15 @@ export const sentientSimsAIImageModels = ['google/gemini-3.1-flash-image', 'open
 export const sentientSimsAIDefaultImageModel = sentientSimsAIImageModels[0];
 // Embedding model served by the Sentient Sims AI /v1/embeddings endpoint (passed through
 // verbatim, so any embedding model the server backend hosts is accepted).
-export const sentientSimsAIDefaultEmbeddingModel = 'Qwen/Qwen3-Embedding-8B';
+export const sentientSimsAIDefaultEmbeddingModel = 'openai/text-embedding-3-small';
 export const sentientSimsAIEmbeddingModels = [sentientSimsAIDefaultEmbeddingModel];
+// Embedding models the hosted service no longer serves. runMigrations rewrites saved picks
+// on launch and the stored vectors are dropped when a save loads, since the replacement
+// model's vectors have a different length and the old ones can never match a query again.
+// Only for the hosted service — a CustomAI server may genuinely run one of these.
+export const retiredSentientSimsAIEmbeddingModels: { [model: string]: string } = {
+  'Qwen/Qwen3-Embedding-8B': sentientSimsAIDefaultEmbeddingModel,
+};
 export const openaiDefaultEmbeddingModel = 'text-embedding-3-small';
 export const openaiEmbeddingModels = [openaiDefaultEmbeddingModel, 'text-embedding-3-large'];
 // A sample of the OpenRouter /embeddings/models catalog; any other id can be typed in.

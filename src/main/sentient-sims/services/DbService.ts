@@ -153,6 +153,7 @@ export class DbService {
 
     // Saves from before the memory_index existed (or played without an embedder) get
     // their retrieval metadata filled in here, off the request path. No-op without a key.
+    this.ctx.memoryAnnotation.dropRetiredEmbeddings();
     this.ctx.memoryAnnotation.backfillInBackground();
   }
 

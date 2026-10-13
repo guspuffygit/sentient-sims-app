@@ -10,6 +10,7 @@ import {
 } from 'main/sentient-sims/services/EmbeddingService';
 import { heuristicImportance, parseImportance } from 'main/sentient-sims/services/MemoryAnnotationService';
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
+import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { mockApiContext } from './util';
 
 function loadedContext(sessionId: string): ApiContext {
@@ -17,6 +18,13 @@ function loadedContext(sessionId: string): ApiContext {
   fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
   ctx.db.loadDatabase({ sessionId, saveId: '1' });
   return ctx;
+}
+
+// Loading a save starts a backfill; let it settle so a test's own call isn't folded into it
+function settleLoadBackfill(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    setImmediate(resolve);
+  });
 }
 
 function createMemory(ctx: ApiContext, memory: Partial<MemoryEntity>): MemoryEntity {
@@ -176,6 +184,36 @@ describe('MemoryIndexRepository', () => {
     ]);
   });
 
+  it('counts and drops stored embeddings per model', () => {
+    const ctx = loadedContext('memory-index-per-model');
+    ctx.memoryRepository.setOnMemoryUpserted(() => {});
+
+    const first = createMemory(ctx, { content: 'first' });
+    const second = createMemory(ctx, { content: 'second' });
+    createMemory(ctx, { content: 'tried tell_joke', event_type: 'outcome' });
+    for (const memory of [first, second]) {
+      for (const model of ['retired-model', 'fake-model']) {
+        ctx.memoryIndexRepository.upsertEmbedding({
+          memory_id: String(memory.id),
+          embedding_model: model,
+          embedding: embeddingToBuffer(Float32Array.from([1])),
+        });
+      }
+    }
+    // No index row yet, so both are still "unindexed" for every model; the outcome row never counts
+    expect(ctx.memoryIndexRepository.countUnindexedMemories('fake-model')).toEqual(2);
+    ctx.memoryIndexRepository.upsertIndex({ memory_id: String(first.id), importance: 5 });
+    ctx.memoryIndexRepository.upsertIndex({ memory_id: String(second.id), importance: 5 });
+    expect(ctx.memoryIndexRepository.countUnindexedMemories('fake-model')).toEqual(0);
+    expect(ctx.memoryIndexRepository.countUnindexedMemories('other-model')).toEqual(2);
+
+    expect(ctx.memoryIndexRepository.deleteEmbeddingsForModel('retired-model')).toEqual(2);
+    expect(ctx.memoryIndexRepository.deleteEmbeddingsForModel('retired-model')).toEqual(0);
+    expect(ctx.memoryIndexRepository.getEmbedding(String(first.id), 'retired-model')).toBeUndefined();
+    expect(ctx.memoryIndexRepository.getEmbedding(String(first.id), 'fake-model')).toBeDefined();
+    expect(ctx.memoryIndexRepository.countUnindexedMemories('retired-model')).toEqual(2);
+  });
+
   it('migrates legacy inline memory_index embeddings into memory_embedding', () => {
     const ctx = loadedContext('memory-index-migration');
     ctx.memoryRepository.setOnMemoryUpserted(() => {});
@@ -284,6 +322,129 @@ describe('MemoryAnnotationService', () => {
     embedderSpy.mockReturnValue(new NoopEmbeddingService());
     await ctx.memoryAnnotation.annotate({ ...memory, content: 'rewritten text' });
     expect(ctx.memoryIndexRepository.getEmbedding(String(memory.id), 'fake-model')).toBeUndefined();
+  });
+
+  it('backfills every memory that lacks a vector from the active model', async () => {
+    const ctx = loadedContext('annotation-backfill');
+    ctx.memoryRepository.setOnMemoryUpserted(() => {});
+    vi.spyOn(ctx, 'embedding', 'get').mockReturnValue(fakeEmbedder([4, 5]));
+
+    const first = createMemory(ctx, { content: 'first' });
+    const second = createMemory(ctx, { content: 'second' });
+    createMemory(ctx, { content: 'tried tell_joke', event_type: 'outcome' });
+    ctx.memoryIndexRepository.upsertEmbedding({
+      memory_id: String(second.id),
+      embedding_model: 'old-model',
+      embedding: embeddingToBuffer(Float32Array.from([1])),
+    });
+
+    expect(await ctx.memoryAnnotation.backfill(1)).toEqual(2);
+
+    for (const memory of [first, second]) {
+      const embedding = ctx.memoryIndexRepository.getEmbedding(String(memory.id), 'fake-model');
+      expect(Array.from(bufferToEmbedding(embedding as Buffer))).toEqual([4, 5]);
+    }
+    expect(ctx.memoryIndexRepository.countUnindexedMemories('fake-model')).toEqual(0);
+    expect(await ctx.memoryAnnotation.backfill()).toEqual(0);
+  });
+
+  it('stops the backfill when the embedder returns nothing instead of spinning', async () => {
+    const ctx = loadedContext('annotation-backfill-failing');
+    ctx.memoryRepository.setOnMemoryUpserted(() => {});
+    const embed = vi.fn(() => Promise.resolve([undefined, undefined]));
+    vi.spyOn(ctx, 'embedding', 'get').mockReturnValue({ model: 'fake-model', isAvailable: () => true, embed });
+
+    createMemory(ctx, { content: 'first' });
+    createMemory(ctx, { content: 'second' });
+
+    expect(await ctx.memoryAnnotation.backfill()).toEqual(0);
+    expect(embed).toHaveBeenCalledTimes(1);
+    expect(ctx.memoryIndexRepository.countUnindexedMemories('fake-model')).toEqual(2);
+  });
+
+  it('runs one backfill at a time and once more when asked mid-run', async () => {
+    const ctx = loadedContext('annotation-backfill-serial');
+    ctx.memoryRepository.setOnMemoryUpserted(() => {});
+    await settleLoadBackfill();
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const backfill = vi.spyOn(ctx.memoryAnnotation, 'backfill').mockImplementation(() => gate.then(() => 0));
+
+    ctx.memoryAnnotation.backfillInBackground();
+    ctx.memoryAnnotation.backfillInBackground();
+    ctx.memoryAnnotation.backfillInBackground();
+    expect(backfill).toHaveBeenCalledTimes(1);
+
+    release();
+    await gate;
+    await settleLoadBackfill();
+    expect(backfill).toHaveBeenCalledTimes(2);
+  });
+
+  it('re-runs the backfill when a setting write changes the active embedding model', async () => {
+    const ctx = loadedContext('annotation-setting-change');
+    ctx.memoryRepository.setOnMemoryUpserted(() => {});
+    await settleLoadBackfill();
+    const embedderSpy = vi.spyOn(ctx, 'embedding', 'get').mockReturnValue(fakeEmbedder([1]));
+    const backfill = vi.spyOn(ctx.memoryAnnotation, 'backfill').mockResolvedValue(0);
+
+    // The save load ran the backfill for fake-model; writes that keep the model are noise
+    ctx.memoryAnnotation.backfillInBackground();
+    await settleLoadBackfill();
+    expect(backfill).toHaveBeenCalledTimes(1);
+    ctx.memoryAnnotation.onSettingChanged();
+    await settleLoadBackfill();
+    expect(backfill).toHaveBeenCalledTimes(1);
+
+    embedderSpy.mockReturnValue({ ...fakeEmbedder([1]), model: 'other-model' });
+    ctx.memoryAnnotation.onSettingChanged();
+    await settleLoadBackfill();
+    expect(backfill).toHaveBeenCalledTimes(2);
+
+    // Losing the embedder is not a switch to backfill for
+    embedderSpy.mockReturnValue(new NoopEmbeddingService());
+    ctx.memoryAnnotation.onSettingChanged();
+    await settleLoadBackfill();
+    expect(backfill).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores setting writes while no database is loaded', () => {
+    const ctx = mockApiContext();
+    vi.spyOn(ctx, 'embedding', 'get').mockReturnValue(fakeEmbedder([1]));
+    const backfill = vi.spyOn(ctx.memoryAnnotation, 'backfill').mockResolvedValue(0);
+
+    ctx.memoryAnnotation.onSettingChanged();
+    expect(backfill).not.toHaveBeenCalled();
+  });
+
+  it('drops retired hosted-service vectors on load only when the hosted service embeds', () => {
+    const ctx = loadedContext('annotation-retired-vectors');
+    ctx.memoryRepository.setOnMemoryUpserted(() => {});
+    const memory = createMemory(ctx, { content: 'remembered under qwen' });
+    const storeRetired = () =>
+      ctx.memoryIndexRepository.upsertEmbedding({
+        memory_id: String(memory.id),
+        embedding_model: 'Qwen/Qwen3-Embedding-8B',
+        embedding: embeddingToBuffer(Float32Array.from([1])),
+      });
+
+    // OpenAI is the resolved embedder: nothing of the hosted service's is touched
+    storeRetired();
+    ctx.memoryAnnotation.dropRetiredEmbeddings();
+    expect(ctx.memoryIndexRepository.getEmbedding(String(memory.id), 'Qwen/Qwen3-Embedding-8B')).toBeDefined();
+
+    // A self-hosted server may still serve the model
+    ctx.settings.embeddingProviderConfigs = [{ id: 'custom', name: 'Custom', apiType: ApiType.CustomAI }];
+    ctx.settings.defaultEmbeddingProviderConfigId = 'custom';
+    ctx.memoryAnnotation.dropRetiredEmbeddings();
+    expect(ctx.memoryIndexRepository.getEmbedding(String(memory.id), 'Qwen/Qwen3-Embedding-8B')).toBeDefined();
+
+    ctx.settings.embeddingProviderConfigs = [{ id: 'ss', name: 'Sentient Sims AI', apiType: ApiType.SentientSimsAI }];
+    ctx.settings.defaultEmbeddingProviderConfigId = 'ss';
+    ctx.memoryAnnotation.dropRetiredEmbeddings();
+    expect(ctx.memoryIndexRepository.getEmbedding(String(memory.id), 'Qwen/Qwen3-Embedding-8B')).toBeUndefined();
   });
 
   it('is triggered automatically when memories are created or updated', () => {

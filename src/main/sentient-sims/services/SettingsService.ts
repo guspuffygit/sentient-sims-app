@@ -34,6 +34,7 @@ import {
   openrouterDefaultEndpoint,
   openrouterDefaultModel,
   retiredGeminiModels,
+  retiredSentientSimsAIEmbeddingModels,
   retiredSentientSimsAIModels,
   sentientSimsAIDefaultEmbeddingModel,
   sentientSimsAIDefaultModel,
@@ -1488,6 +1489,31 @@ export class SettingsService {
     }
     if (retiredAny) {
       this.aiProviderConfigs = configsToRetire;
+    }
+
+    // Same rule for embeddings. Stored vectors are keyed by model name, so the rewrite
+    // makes the backfill re-embed every memory under the replacement on the next save load.
+    const retiredEmbeddingModel = retiredSentientSimsAIEmbeddingModels[this.sentientSimsAIEmbeddingModel];
+    if (retiredEmbeddingModel) {
+      log.info(
+        `Migrating retired Sentient Sims AI embedding model ${this.sentientSimsAIEmbeddingModel} -> ${retiredEmbeddingModel}`,
+      );
+      this.sentientSimsAIEmbeddingModel = retiredEmbeddingModel;
+    }
+    const embeddingConfigsToRetire = this.embeddingProviderConfigs;
+    let retiredEmbeddingAny = false;
+    for (const config of embeddingConfigsToRetire) {
+      const replacement = config.model ? retiredSentientSimsAIEmbeddingModels[config.model] : undefined;
+      if (config.apiType === ApiType.SentientSimsAI && replacement) {
+        log.info(
+          `Migrating retired Sentient Sims AI embedding model on config ${config.id}: ${config.model} -> ${replacement}`,
+        );
+        config.model = replacement;
+        retiredEmbeddingAny = true;
+      }
+    }
+    if (retiredEmbeddingAny) {
+      this.embeddingProviderConfigs = embeddingConfigsToRetire;
     }
 
     if (this.sentientSimsAITtsSettings.model.toString() === 'kokoro') {

@@ -27,6 +27,15 @@ function toMemoryWithIndex(row: MemoryWithIndexRow): MemoryWithIndex {
   };
 }
 
+// Memories with no index row, or no stored vector for the bound model. Outcome rows are
+// bookkeeping and never enter similarity search, so they are never "unindexed".
+const unindexedMemoriesFrom = `
+  FROM memory
+  LEFT JOIN memory_index ON memory_index.memory_id = memory.id
+  LEFT JOIN memory_embedding ON memory_embedding.memory_id = memory.id AND memory_embedding.embedding_model = ?
+  WHERE (memory_index.memory_id IS NULL OR memory_embedding.memory_id IS NULL)
+    AND (memory.event_type IS NULL OR memory.event_type != 'outcome')`;
+
 export class MemoryIndexRepository extends Repository {
   getIndex(memoryId: string): MemoryIndexEntity | undefined {
     const row = this.dbService
@@ -106,6 +115,14 @@ export class MemoryIndexRepository extends Repository {
       .getDb()
       .prepare('DELETE FROM memory_embedding WHERE memory_id = ?')
       .run([BigInt(memoryId)]);
+  }
+
+  // Drops every memory's vector for one model and returns how many rows went.
+  deleteEmbeddingsForModel(embeddingModel: string): number {
+    return this.dbService
+      .getDb()
+      .prepare('DELETE FROM memory_embedding WHERE embedding_model = ?')
+      .run([embeddingModel]).changes;
   }
 
   // Recent memories involving any of the given participants, joined with their retrieval
@@ -206,11 +223,8 @@ export class MemoryIndexRepository extends Repository {
       .getDb()
       .prepare(
         `
-          SELECT memory.* FROM memory
-          LEFT JOIN memory_index ON memory_index.memory_id = memory.id
-          LEFT JOIN memory_embedding ON memory_embedding.memory_id = memory.id AND memory_embedding.embedding_model = ?
-          WHERE (memory_index.memory_id IS NULL OR memory_embedding.memory_id IS NULL)
-            AND (memory.event_type IS NULL OR memory.event_type != 'outcome')
+          SELECT memory.*
+          ${unindexedMemoriesFrom}
           ORDER BY memory.timestamp ASC, memory.id ASC
           LIMIT ?;
         `,
@@ -218,5 +232,13 @@ export class MemoryIndexRepository extends Repository {
       .safeIntegers()
       .all([embeddingModel, limit]) as MemoryRow[];
     return rows.map(toMemoryEntity);
+  }
+
+  countUnindexedMemories(embeddingModel: string): number {
+    const row = this.dbService
+      .getDb()
+      .prepare(`SELECT COUNT(*) AS count ${unindexedMemoriesFrom};`)
+      .get([embeddingModel]) as { count: number };
+    return row.count;
   }
 }

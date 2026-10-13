@@ -198,6 +198,7 @@ const startServices = () => {
       setSimAliases(settingsService.twitchSimAliases);
     }
     voiceInputService?.onSettingChanged(key);
+    ctx.memoryAnnotation.onSettingChanged();
     if (key === (SettingsEnum.PLAYBACK_FOLLOWS_GAME_CLOCK as string)) {
       publishClockState(ctx);
     }
