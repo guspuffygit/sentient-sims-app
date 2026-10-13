@@ -226,11 +226,74 @@ describe('DefaultDescriptionService', () => {
     await flush();
 
     expect(prompts[0]).toContain('Garden Essence');
-    expect(prompts[0]).toContain('venue_residential');
-    expect(prompts[0]).toContain('computer x2');
-    expect(prompts[0]).toContain('Sink is broken');
-    expect(prompts[0]).toContain('house party');
+    expect(prompts[0]).toContain('Kind of place: a private home');
+    expect(prompts[0]).toContain("This is the household's own home.");
+    expect(prompts[0]).toContain('reading and study (two computers)');
+    // A moment is not a fact about the place (2026-10-12): the broken sink and the party
+    // never reach the writer, and neither does the repository's 'Residence' placeholder
+    expect(prompts[0]).not.toContain('Sink');
+    expect(prompts[0]).not.toContain('house party');
+    expect(prompts[0]).not.toContain('Residence');
     expect(prompts[0]).not.toContain(defaultLotDescription);
+  });
+
+  it('does not describe a lot it has no facts for, and stays willing to later', async () => {
+    const { ctx, calls, locations } = stubContext('The home is a residence. It has a toilet and a shower.');
+    const service = new DefaultDescriptionService(ctx);
+    const row: LocationEntity = {
+      id: 717171,
+      name: 'the home',
+      lot_type: 'Residence',
+      description: defaultLotDescription,
+      is_generic: true,
+    };
+
+    // The state report was about another lot: nothing but the repository defaults to go on
+    service.considerLocation(row, undefined, undefined);
+    service.considerLocation(row, { owned: { computer: 0 } }, undefined);
+    await flush();
+    expect(calls).toHaveLength(0);
+    expect(locations.size).toEqual(0);
+
+    // The next event carries the lot block: the lot was not marked attempted, so it is described now
+    service.considerLocation(row, { venue: 'venue_residential', owned: { bed: 1 } }, 'Inner Circle');
+    await flush();
+    expect(calls).toEqual(['Default Description: Inner Circle']);
+  });
+
+  it('retries a reply that puts a person or a moment in the place, then keeps the stock text', async () => {
+    const answers = [
+      "She stands at 13 Acacia Avenue, a residence that appears to be a hub of creative activity. As she waits to be acknowledged by the home's occupant, the atmosphere feels awkward.",
+      'Mansión de la Pasión is a residence where someone is currently visiting, though they have not been greeted yet.',
+      '13 Acacia Avenue is a private home. Three easels and a piano share the main room with four bookshelves.',
+    ];
+    const { ctx, calls, locations } = stubContext('');
+    (ctx.ai as unknown as { runOneShot: unknown }).runOneShot = (label: string) => {
+      calls.push(label);
+      return Promise.resolve({ exchange: {}, text: answers[calls.length - 1] });
+    };
+    const service = new DefaultDescriptionService(ctx);
+    const lot = { venue: 'venue_residential', owned: { easel: 3, piano: 1, bookshelf: 4 } };
+
+    // Two bad samples: nothing stored, the row stays generic
+    service.considerLocation(
+      { id: 2703097870, name: 'the home', lot_type: 'Residence', description: defaultLotDescription, is_generic: true },
+      lot,
+      '13 Acacia Avenue',
+    );
+    await flush();
+    expect(calls).toHaveLength(2);
+    expect(locations.size).toEqual(0);
+
+    // A clean third sample for another lot is stored as before
+    service.considerLocation(
+      { id: 2703097871, name: 'the home', lot_type: 'Residence', description: defaultLotDescription, is_generic: true },
+      lot,
+      '13 Acacia Avenue',
+    );
+    await flush();
+    expect(calls).toHaveLength(3);
+    expect(locations.get(2703097871)).toEqual(answers[2]);
   });
 
   it('drops an answer too short to be a description', async () => {
