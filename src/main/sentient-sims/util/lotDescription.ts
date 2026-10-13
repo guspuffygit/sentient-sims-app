@@ -74,6 +74,21 @@ export function venueKind(venue: string): string {
   return VENUE_KIND[venue] ?? venue.replace(/^venue_/, '').replace(/_/g, ' ');
 }
 
+// The app's Lot Type column, in the words the shipped defaults use ("Bar", "Library").
+const LOT_TYPE: Record<string, string> = {
+  venue_residential: 'Residence',
+  venue_rentable_cabin: 'Vacation Rental',
+};
+
+export function lotTypeLabel(venue: string): string {
+  const words =
+    LOT_TYPE[venue] ??
+    venueKind(venue)
+      .replace(/^(an?|the) /, '')
+      .replace(/^(public|private) /, '');
+  return words.charAt(0).toUpperCase() + words.slice(1).replace(/ (\w)/g, (_, c: string) => ` ${c.toUpperCase()}`);
+}
+
 /**
  * Whether the lot block says anything a description could be built from. Without it the
  * writer only has the repository's defaults ("the home", "Residence") and still writes

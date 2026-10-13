@@ -6,7 +6,7 @@ import { SentientSim } from '../models/SentientSim';
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { LotBlock } from '../models/SimStateReport';
 import { cleanupAIOutput, formatSentientSim } from '../formatter/PromptFormatter';
-import { lotFacts, lotHasFacts, placeDescriptionProblems } from '../util/lotDescription';
+import { lotFacts, lotHasFacts, lotTypeLabel, placeDescriptionProblems } from '../util/lotDescription';
 import {
   LOCATION_DESCRIPTION_SYSTEM_PROMPT as LOCATION_SYSTEM_PROMPT,
   SIM_DESCRIPTION_SYSTEM_PROMPT as SIM_SYSTEM_PROMPT,
@@ -138,7 +138,8 @@ export class DefaultDescriptionService {
     if (!description) {
       return;
     }
-    const stored = this.ctx.locationRepository.setDescriptionIfGeneric(location, description, zoneName);
+    const lotType = lot?.venue ? lotTypeLabel(lot.venue) : undefined;
+    const stored = this.ctx.locationRepository.setDescriptionIfGeneric(location, description, zoneName, lotType);
     log.info(`[DefaultDescription] location ${label}: ${stored ? 'stored' : 'skipped (already described)'}`);
   }
 

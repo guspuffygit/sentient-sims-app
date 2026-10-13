@@ -16,6 +16,7 @@ export class DbController {
       log.debug(`Loading database: ${databaseSession.sessionId} : ${databaseSession.saveId}`);
 
       this.ctx.db.loadDatabase(databaseSession);
+      void this.ctx.onlineLocationRepository.load();
       return res.json({ text: 'Db Loaded' });
     } catch (err) {
       log.error('Error loading database', err);
