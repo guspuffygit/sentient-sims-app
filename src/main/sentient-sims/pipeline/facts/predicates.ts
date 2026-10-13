@@ -11,6 +11,10 @@
 // against one of those strings a lint error (or worse, a silent type-only distinction).
 export const FactPredicate = {
   // attributes
+  // Free text the player wants the sim to always know ("Bosun is your dog"). Rendered
+  // into <KNOWN_FACTS> exactly as written, so it is the one predicate with no vocabulary
+  // of its own. First in the list because it is the one a player reaches for most.
+  NOTE: 'note',
   AGE_STAGE: 'age_stage',
   GENDER: 'gender',
   PRONOUNS: 'pronouns',
@@ -18,6 +22,9 @@ export const FactPredicate = {
   OCCULT_CURRENT: 'occult_current',
   ALIVE: 'alive',
   DEATH_TYPE: 'death_type',
+  // The game's Species name for a pet (DOG, CAT, SMALLDOG, FOX, HORSE). Learned from the
+  // state report, not the dossier, which never says what kind of creature a sim is.
+  SPECIES: 'species',
   HOUSEHOLD: 'household',
   TRAIT: 'trait',
   FEAR: 'fear',
@@ -28,6 +35,10 @@ export const FactPredicate = {
   SKILL: 'skill',
   // edges
   HOUSEHOLD_MEMBER: 'household_member',
+  // A household member with a species: the sim's dog, cat, fox or horse. Derived, never
+  // reported - the dossier lists a pet as just another member id, which is how a sim
+  // came to treat the family dog as a person (Anker and Bosun, 2026-10-12).
+  PET: 'pet',
   PARENT: 'parent',
   CHILD: 'child',
   SIBLING: 'sibling',
@@ -43,6 +54,7 @@ export type FactPredicate = (typeof FactPredicate)[keyof typeof FactPredicate];
 
 export const EDGE_PREDICATES: ReadonlySet<string> = new Set([
   FactPredicate.HOUSEHOLD_MEMBER,
+  FactPredicate.PET,
   FactPredicate.PARENT,
   FactPredicate.CHILD,
   FactPredicate.SIBLING,
@@ -67,6 +79,7 @@ export const SINGLE_VALUED_PREDICATES: ReadonlySet<string> = new Set([
   FactPredicate.OCCULT_CURRENT,
   FactPredicate.ALIVE,
   FactPredicate.DEATH_TYPE,
+  FactPredicate.SPECIES,
   FactPredicate.HOUSEHOLD,
   FactPredicate.ASPIRATION,
   FactPredicate.SPOUSE,
@@ -74,6 +87,48 @@ export const SINGLE_VALUED_PREDICATES: ReadonlySet<string> = new Set([
 ]);
 
 const KNOWN_PREDICATES: ReadonlySet<string> = new Set(Object.values(FactPredicate));
+
+// What each predicate means, in the player's words. Served with the vocabulary so the
+// Facts dialog can explain a row without hardcoding the list, and kept here because the
+// meaning of "household" is a fact about how the mod reads the game, not about the UI.
+export const FACT_PREDICATE_HELP: Record<FactPredicate, string> = {
+  note:
+    'Anything you want this Sim to always know. Write it to the Sim, like "Bosun is your dog" or ' +
+    '"You grew up in Brindleton Bay". It goes into every prompt exactly as written.',
+  age_stage: 'The life stage the game has the Sim in: infant, toddler, child, teen, young adult, adult or elder.',
+  gender: 'Male or female, as set in Create a Sim.',
+  pronouns: 'How the Sim is referred to (he/him, she/her, they/them). Other Sims use these when talking about them.',
+  occult:
+    'Every occult type this Sim is: vampire, spellcaster, werewolf, mermaid, alien, fairy... Human is listed too.',
+  occult_current: 'The form the Sim is in right now. A vampire in human form shows HUMAN here.',
+  alive: 'yes, or no for a ghost.',
+  death_type: 'How the Sim died, if they are a ghost.',
+  species:
+    'Which animal this Sim is: dog, cat, small dog, fox or horse. People have no species entry. ' +
+    'Learned from the game while the pet is on the lot.',
+  household:
+    'The name of the household this Sim belongs to, as shown in Manage Worlds (for example "Calloway"). ' +
+    'It is the family name on the mailbox, not a list of who lives there - see "household member" for the people.',
+  trait: 'A personality trait from Create a Sim, like Cheerful or Loner.',
+  fear: 'A fear the Sim has picked up, like a fear of fire.',
+  likes: 'Something the Sim likes: a colour, a music genre, an activity or a decor style.',
+  dislikes: 'Something the Sim dislikes: a colour, a music genre, an activity or a decor style.',
+  aspiration: 'The life goal the Sim is working towards.',
+  job: 'The career track and level the Sim is at. It is the career name, not the job title.',
+  skill: 'A skill the Sim is good at (level 3 or higher).',
+  household_member: 'Someone who lives in the same home as this Sim, people and pets alike.',
+  pet: 'An animal that lives with this Sim. The Sim knows it as their dog, cat, fox or horse, not as a person.',
+  parent: 'A parent of this Sim, from the family tree.',
+  child: 'A child of this Sim, from the family tree.',
+  sibling: 'A brother or sister of this Sim, from the family tree.',
+  grandparent: 'A grandparent of this Sim, from the family tree.',
+  spouse: 'The Sim this Sim is married to.',
+  fiance: 'The Sim this Sim is engaged to.',
+  steady: 'The Sim this Sim is in a committed relationship with (boyfriend or girlfriend).',
+  family_bit:
+    "The game's exact label for a family relationship. This is where step-, half- and in-law relations show up.",
+  knows: 'Someone this Sim has met at least once.',
+};
 
 export function isKnownPredicate(value: unknown): value is FactPredicate {
   return typeof value === 'string' && KNOWN_PREDICATES.has(value);

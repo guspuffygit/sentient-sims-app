@@ -22,8 +22,18 @@ export function factKey(fact: { predicate: string; objectText?: string; objectSi
   return `${fact.predicate}\u0000${fact.objectSimId ?? ''}\u0000${fact.objectText ?? ''}`;
 }
 
-export function dossierToFacts(dossier: SimDossier): DerivedFact[] {
+export type DossierToFactsOptions = {
+  // The species the app has learned for a sim from the state report (DOG, CAT, ...),
+  // undefined for a person or an unknown. The dossier lists a pet as a bare household
+  // member id and never says what it is, so this lookup is what turns "you live with
+  // Bosun" into "your dog Bosun".
+  speciesOf?: (simId: string) => string | undefined;
+};
+
+export function dossierToFacts(dossier: SimDossier, options: DossierToFactsOptions = {}): DerivedFact[] {
   const facts: DerivedFact[] = [];
+  const speciesOf = (simId: string) =>
+    dossier.species && simId === dossier.sim_id ? dossier.species : options.speciesOf?.(simId);
   const add = (predicate: string, objectText?: string, objectSimId?: string) => {
     if (!objectText && !objectSimId) {
       return;
@@ -37,12 +47,16 @@ export function dossierToFacts(dossier: SimDossier): DerivedFact[] {
     const p = dossier.pronouns;
     add(FactPredicate.PRONOUNS, `${p.subjective}/${p.objective}`);
   }
-  for (const occult of dossier.occult?.types ?? []) {
+  // The game files a pet's occult as HUMAN, which is the one thing a dog is not. A sim
+  // with a species gets its species instead and no human occult at all.
+  const isPet = Boolean(speciesOf(dossier.sim_id));
+  const notHumanIfPet = (occult: string) => !(isPet && occult.toUpperCase() === 'HUMAN');
+  for (const occult of (dossier.occult?.types ?? []).filter(notHumanIfPet)) {
     add(FactPredicate.OCCULT, occult);
   }
   // The form they are in right now is single-valued and can change (a vampire in human
   // form); the set of forms they ARE is multi-valued and rarely changes.
-  const current = dossier.occult?.current ?? [];
+  const current = (dossier.occult?.current ?? []).filter(notHumanIfPet);
   if (current.length > 0) {
     add(FactPredicate.OCCULT_CURRENT, current.join('+'));
   }
@@ -50,12 +64,20 @@ export function dossierToFacts(dossier: SimDossier): DerivedFact[] {
   if (dossier.death_type) {
     add(FactPredicate.DEATH_TYPE, dossier.death_type);
   }
+  // A species fact is kept in the derived set so the diff below does not retire it: it
+  // is game truth that reached the store by way of the state report, not the dossier.
+  add(FactPredicate.SPECIES, speciesOf(dossier.sim_id));
   if (dossier.household?.name || dossier.household?.id) {
     add(FactPredicate.HOUSEHOLD, dossier.household.name || dossier.household.id);
   }
   for (const memberId of dossier.household?.member_ids ?? []) {
     if (memberId !== dossier.sim_id) {
       add(FactPredicate.HOUSEHOLD_MEMBER, undefined, memberId);
+      // A housemate with a species is the sim's pet. Only a person keeps pets, so a pet's
+      // own dossier gets no pet edges to the people it lives with.
+      if (speciesOf(memberId) && !speciesOf(dossier.sim_id)) {
+        add(FactPredicate.PET, undefined, memberId);
+      }
     }
   }
 

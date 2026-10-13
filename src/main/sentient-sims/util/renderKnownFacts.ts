@@ -23,7 +23,13 @@
 //   career into mixing drinks at a bar.
 
 import { FactPredicate } from '../pipeline/facts/predicates';
+import { speciesWord } from './alsoPresent';
+import { aspirationWords, careerParts, factValueWords, familyBitWords } from './factWords';
 import { lifeStagePhrase } from './lifeStageWords';
+
+// The family-bit words live with the rest of the vocabulary now; re-exported because the
+// battery graders and the tests reach them through this module.
+export { familyBitWords };
 import { relationshipWords } from './relationshipWords';
 
 export type RenderableFact = {
@@ -59,6 +65,10 @@ export type RenderKnownFactsInput = {
   // A name can genuinely be missing (an unmet sim mentioned by id), so the fallbacks
   // below are real - the type has to admit it or the checker calls them dead code.
   names: Record<string, string | undefined>;
+  // The game's Species name (DOG, CAT, ...) for every pet among the ids above. A sim
+  // with no entry is a person. The dossier never says this, so "you live with Bosun"
+  // read as a person until the state report's species reached the block (2026-10-12).
+  species?: Record<string, string | undefined>;
   // Whether a dossier for this sim has been ingested. Absence lines are rendered only when
   // it has: "no parents on record" is a claim about the game's records, and a sim with no
   // dossier row has no records rather than empty ones.
@@ -75,19 +85,6 @@ export const DEFAULT_FACTS_MAX_CHARS = 2200;
 // 2026-09-23: a sim with seven friends at 100 lost her romantic interest off the list.
 export const MAX_LIFE_PEOPLE = 16;
 
-function pretty(value: string): string {
-  return value
-    .replace(/^trait_SimPreference_(Likes|Dislikes)_/, '')
-    .replace(/^trait_Fear_/, '')
-    .replace(/^trait_/, '')
-    .replace(/^career_(Adult|Teen)_/, '')
-    .replace(/^aspiration_/, '')
-    .replace(/^Track_/, '')
-    .replace(/_/g, ' ')
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .trim();
-}
-
 // "Travis Scott, Mackenzie Scott and Ariel Scott"
 function joinWords(values: string[], conjunction: 'and' | 'or'): string {
   if (values.length <= 1) {
@@ -96,58 +93,43 @@ function joinWords(values: string[], conjunction: 'and' | 'or'): string {
   return `${values.slice(0, -1).join(', ')} ${conjunction} ${values[values.length - 1]}`;
 }
 
-// 'family_Target_IsSonOrDaughterOf_Actor' -> 'their child'. The bit is written from the
-// ACTOR's side (the subject of the fact), so Target_Is<X>Of_Actor means the other sim is
-// the subject's <X>. Anything unrecognized falls back to a readable form of the raw name
-// rather than being dropped: a wrong-looking label is debuggable, a missing one is not.
-export function familyBitWords(bit: string): string {
-  const match = /family_Target_Is(.+?)Of_Actor/i.exec(bit);
-  const role = match ? match[1] : undefined;
-  if (!role) {
-    return pretty(bit.replace(/^family_/, ''));
-  }
-  const lowered = role.toLowerCase();
-  const table: Record<string, string> = {
-    sonordaughter: 'their child',
-    parent: 'their parent',
-    siblings: 'their sibling',
-    sibling: 'their sibling',
-    // The game's actual sibling bit is family_Target_IsBrotherSisterOf_Actor; it rendered
-    // as "your brother sister" in every live facts block until 2026-09-04
-    brothersister: 'their sibling',
-    brotherorsister: 'their sibling',
-    grandparent: 'their grandparent',
-    grandchild: 'their grandchild',
-    auntuncle: 'their aunt or uncle',
-    niecenephew: 'their niece or nephew',
-    cousin: 'their cousin',
-    spouse: 'their spouse',
-    // The game keeps step relations OUT of genealogy - a stepparent appears in nobody's
-    // family tree but their own - so the bit is the only record of one that exists. Live
-    // 2026-09-05: Alex Moyer read to her stepson Ehren as "you live together" and nothing
-    // more, while both his birth parents read as parents, and he spent the day guessing
-    // what she was to him ("my dads", "two moms", "Daddy Jonah and Alex").
-    stepparent: 'their stepparent',
-    stepchild: 'their stepchild',
-    stepsibling: 'their stepsibling',
-  };
-  return table[lowered] ?? `their ${pretty(role).toLowerCase()}`;
-}
-
 // The game stores a career as a tuning name plus the level the diff cares about
 // ('career_Adult_Culinary (level 4)'). The level's actual job title (Line Cook, Mixologist)
 // is a LocalizedString the mod cannot read without the string table, so the track is the
 // best available - said as a career rather than as a job title, which is what stopped a
 // Culinary sim from inventing a bartending job.
 export function jobWords(objectText: string): string {
-  const match = /^(.*?)\s*\(level (\d+)\)\s*$/.exec(objectText);
-  const track = pretty(match ? match[1] : objectText);
-  return match ? `you work in the ${track} career, level ${match[2]}` : `you work in the ${track} career`;
+  const { track, level } = careerParts(objectText);
+  if (track === objectText && !level) {
+    // Not a career tuning name: a job the player typed ("Pub Owner at The Gnome's Arms")
+    return `you work as ${track}`;
+  }
+  return level ? `you work in the ${track} career, level ${level}` : `you work in the ${track} career`;
 }
 
-function selfLine(fact: RenderableFact, names: Record<string, string | undefined>): string | undefined {
+type Species = Record<string, string | undefined>;
+
+// "dog", "cat", "small dog" - or "pet" when the species is unknown
+function petWord(simId: string | undefined, species: Species): string {
+  return (simId && speciesWord(species[simId])) || 'pet';
+}
+
+function selfLine(
+  fact: RenderableFact,
+  names: Record<string, string | undefined>,
+  species: Species = {},
+): string | undefined {
   const name = (id?: string) => (id ? (names[id] ?? `sim ${id}`) : undefined);
   switch (fact.predicate) {
+    case FactPredicate.NOTE:
+      // The player's own words, verbatim: this is the "always know this" field
+      return fact.objectText?.trim() || undefined;
+    case FactPredicate.SPECIES: {
+      const word = speciesWord(fact.objectText);
+      return word ? `you are a ${word}` : undefined;
+    }
+    case FactPredicate.PET:
+      return `${name(fact.objectSimId)} is your ${petWord(fact.objectSimId, species)}`;
     case FactPredicate.AGE_STAGE:
       return fact.objectText ? `you are ${lifeStagePhrase(fact.objectText)}` : undefined;
     case FactPredicate.GENDER:
@@ -157,9 +139,9 @@ function selfLine(fact: RenderableFact, names: Record<string, string | undefined
     case FactPredicate.OCCULT_CURRENT:
       return fact.objectText && fact.objectText !== 'HUMAN' ? `you are a ${fact.objectText.toLowerCase()}` : undefined;
     case FactPredicate.DEATH_TYPE:
-      return `you are dead (${pretty(fact.objectText ?? '')})`;
+      return `you are dead (${factValueWords(FactPredicate.DEATH_TYPE, fact.objectText ?? '')})`;
     case FactPredicate.ASPIRATION:
-      return fact.objectText ? `your aspiration is ${pretty(fact.objectText)}` : undefined;
+      return fact.objectText ? `your aspiration is ${aspirationWords(fact.objectText)}` : undefined;
     case FactPredicate.JOB:
       return fact.objectText ? jobWords(fact.objectText) : undefined;
     case FactPredicate.PARENT:
@@ -186,8 +168,13 @@ function selfLine(fact: RenderableFact, names: Record<string, string | undefined
 // people answered "who do you live with" with the household's name.
 function householdLine(facts: RenderableFact[], names: Record<string, string | undefined>): string | undefined {
   const household = facts.find((fact) => fact.predicate === FactPredicate.HOUSEHOLD)?.objectText;
+  // Pets are housemates too, but they get their own line: listed beside the people they
+  // were taken for people (Anker introduced his dog Bosun as a man, live 2026-10-12)
+  const pets = new Set(facts.filter((fact) => fact.predicate === FactPredicate.PET).map((fact) => fact.objectSimId));
   const members = facts
-    .filter((fact) => fact.predicate === FactPredicate.HOUSEHOLD_MEMBER && fact.objectSimId)
+    .filter(
+      (fact) => fact.predicate === FactPredicate.HOUSEHOLD_MEMBER && fact.objectSimId && !pets.has(fact.objectSimId),
+    )
     .map((fact) => names[fact.objectSimId as string] ?? `sim ${fact.objectSimId as string}`);
   if (members.length > 0) {
     return household
@@ -200,6 +187,25 @@ function householdLine(facts: RenderableFact[], names: Record<string, string | u
     return `you live with the ${household} household`;
   }
   return undefined;
+}
+
+// "your pets: Bosun the dog and Luna the cat". One line for all of them, after the
+// household line, so the people and the animals are never one list.
+function petsLine(
+  facts: RenderableFact[],
+  names: Record<string, string | undefined>,
+  species: Species,
+): string | undefined {
+  const pets = facts
+    .filter((fact) => fact.predicate === FactPredicate.PET && fact.objectSimId)
+    .map((fact) => {
+      const id = fact.objectSimId as string;
+      return `${names[id] ?? `sim ${id}`} the ${petWord(id, species)}`;
+    });
+  if (pets.length === 0) {
+    return undefined;
+  }
+  return pets.length === 1 ? `your pet: ${pets[0]}` : `your pets: ${joinWords(pets, 'and')}`;
 }
 
 const FAMILY_ROLE_LABELS: [string, string][] = [
@@ -237,7 +243,7 @@ function absenceLines(facts: RenderableFact[]): string[] {
 function collectList(facts: RenderableFact[], predicate: string): string[] {
   return facts
     .filter((fact) => fact.predicate === predicate && fact.objectText)
-    .map((fact) => pretty(fact.objectText as string));
+    .map((fact) => factValueWords(predicate, fact.objectText as string));
 }
 
 function joinList(values: string[], limit = 6): string {
@@ -273,9 +279,14 @@ function genderedRole(role: string, pronouns?: string): string {
   return role;
 }
 
-function personLine(person: RenderablePerson, names: Record<string, string | undefined>): string | undefined {
+function personLine(
+  person: RenderablePerson,
+  names: Record<string, string | undefined>,
+  species: Species = {},
+): string | undefined {
   const name = person.name ?? names[person.simId] ?? `sim ${person.simId}`;
   const parts: string[] = [];
+  const isPet = person.facts.some((fact) => fact.predicate === FactPredicate.PET);
   // The family bit is the precise word ("their child"), so it beats the score band
   const familyBit = person.facts.find((fact) => fact.predicate === FactPredicate.FAMILY_BIT)?.objectText;
   // With pronouns known the role gets its everyday word ("your brother"), which also
@@ -287,7 +298,7 @@ function personLine(person: RenderablePerson, names: Record<string, string | und
     parts.push(familyWords);
   }
   for (const fact of person.facts) {
-    const line = selfLine(fact, names);
+    const line = selfLine(fact, names, species);
     // reuse the self wording but from the other direction: "X is your parent"
     if (line && line.includes('your') && fact.predicate !== FactPredicate.FAMILY_BIT) {
       const role = line.replace(`${name} is `, '').replace('you are engaged to ', 'engaged to ');
@@ -296,7 +307,8 @@ function personLine(person: RenderablePerson, names: Record<string, string | und
       }
     }
   }
-  if (person.facts.some((fact) => fact.predicate === FactPredicate.HOUSEHOLD_MEMBER)) {
+  // "your dog" already says the dog lives here
+  if (!isPet && person.facts.some((fact) => fact.predicate === FactPredicate.HOUSEHOLD_MEMBER)) {
     parts.push('you live together');
   }
   if (person.relationship) {
@@ -307,8 +319,10 @@ function personLine(person: RenderablePerson, names: Record<string, string | und
     return undefined;
   }
   // Pronouns ride with the name rather than in the list of relationship words: they are
-  // how to SAY the name, not a fact about the relationship.
-  const label = person.pronouns ? `${name} (${person.pronouns})` : name;
+  // how to SAY the name, not a fact about the relationship. So does the species: "Bosun
+  // (dog, he/him)" is what keeps a pet from being written as a man.
+  const tags = [speciesWord(species[person.simId]), person.pronouns].filter(Boolean);
+  const label = tags.length > 0 ? `${name} (${tags.join(', ')})` : name;
   return `- ${label}: ${unique.join(', ')}`;
 }
 
@@ -319,13 +333,24 @@ export function renderKnownFacts(input: RenderKnownFactsInput): string {
   // section line says "your child, a good friend", the self line would say it again
   const describedElsewhere = new Set([...input.people, ...lifePeople].map((person) => person.simId));
 
+  const species = input.species ?? {};
   const selfLines: string[] = [];
+  const notes: string[] = [];
   for (const fact of input.selfFacts) {
     if (fact.objectSimId && describedElsewhere.has(fact.objectSimId)) {
       continue;
     }
-    const line = selfLine(fact, input.names);
-    if (line) {
+    // Pets are the pets line, whoever else describes them; notes go after the household
+    if (fact.predicate === FactPredicate.PET) {
+      continue;
+    }
+    const line = selfLine(fact, input.names, species);
+    if (!line) {
+      continue;
+    }
+    if (fact.predicate === FactPredicate.NOTE) {
+      notes.push(line);
+    } else {
       selfLines.push(line);
     }
   }
@@ -333,6 +358,13 @@ export function renderKnownFacts(input: RenderKnownFactsInput): string {
   if (household) {
     selfLines.push(household);
   }
+  const pets = petsLine(input.selfFacts, input.names, species);
+  if (pets) {
+    selfLines.push(pets);
+  }
+  // What the player wrote for this sim to always know, in the player's words, right
+  // after who they live with: that is where "Bosun is your dog" belongs.
+  selfLines.push(...notes);
   if (input.hasDossier) {
     selfLines.push(...absenceLines(input.selfFacts));
   }
@@ -353,7 +385,7 @@ export function renderKnownFacts(input: RenderKnownFactsInput): string {
   }
 
   const peopleLines = input.people
-    .map((person) => personLine(person, input.names))
+    .map((person) => personLine(person, input.names, species))
     .filter((line): line is string => Boolean(line));
   if (peopleLines.length > 0) {
     lines.push('About people here or mentioned:');
@@ -361,7 +393,7 @@ export function renderKnownFacts(input: RenderKnownFactsInput): string {
   }
 
   const lifeLines = lifePeople
-    .map((person) => personLine(person, input.names))
+    .map((person) => personLine(person, input.names, species))
     .filter((line): line is string => Boolean(line));
   if (lifeLines.length > 0) {
     lines.push('People in your life:');

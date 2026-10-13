@@ -263,4 +263,88 @@ describe('renderKnownFacts', () => {
     });
     expect(ehren).toContain('- Ehren Alder (he/him): your stepson, you live together');
   });
+
+  it('lists a pet as a pet, not among the people the sim lives with', () => {
+    // Live 2026-10-12: Anker's household line named his dog Bosun beside his wife, and he
+    // introduced Bosun as a man. The dog gets its own line with its species.
+    const block = render({
+      selfFacts: [
+        ...summerFacts,
+        fact(FactPredicate.HOUSEHOLD_MEMBER, undefined, '700'),
+        fact(FactPredicate.PET, undefined, '700'),
+      ],
+      names: { ...names, '700': 'Bosun' },
+      species: { '700': 'DOG' },
+    });
+    expect(block).toContain('you live with Travis Scott, Mackenzie Scott and Ariel Scott (the BFF household)');
+    expect(block).toContain('- your pet: Bosun the dog');
+    expect(block).not.toContain('Ariel Scott and Bosun');
+  });
+
+  it('joins several pets on one line and says "pet" when the species is unknown', () => {
+    const block = render({
+      selfFacts: [
+        ...summerFacts,
+        fact(FactPredicate.PET, undefined, '700'),
+        fact(FactPredicate.PET, undefined, '701'),
+        fact(FactPredicate.PET, undefined, '702'),
+      ],
+      names: { ...names, '700': 'Bosun', '701': 'Luna', '702': 'Mystery' },
+      species: { '700': 'SMALLDOG', '701': 'CAT' },
+    });
+    expect(block).toContain('- your pets: Bosun the small dog, Luna the cat and Mystery the pet');
+  });
+
+  it('tags a pet with its species when it is present, and calls it the sim dog', () => {
+    const block = render({
+      names: { ...names, '700': 'Bosun' },
+      species: { '700': 'DOG' },
+      people: [
+        {
+          simId: '700',
+          name: 'Bosun',
+          facts: [fact(FactPredicate.HOUSEHOLD_MEMBER, undefined, '700'), fact(FactPredicate.PET, undefined, '700')],
+          relationship: { hasMet: true, friendship: 80 },
+          pronouns: 'he/him',
+        },
+      ],
+    });
+    expect(block).toContain('- Bosun (dog, he/him): your dog, a good friend');
+    // "your dog" already says he lives here
+    expect(block).not.toContain('you live together');
+  });
+
+  it('says what a pet is in its own facts', () => {
+    const block = render({ selfFacts: [fact(FactPredicate.SPECIES, 'CAT')], hasDossier: false });
+    expect(block).toContain('- you are a cat');
+  });
+
+  it('carries a player note word for word, after the household', () => {
+    const block = render({
+      selfFacts: [
+        ...summerFacts,
+        {
+          predicate: FactPredicate.NOTE,
+          objectText: 'You grew up in Brindleton Bay.',
+          source: 'player',
+          confidence: 0.9,
+        },
+        {
+          predicate: FactPredicate.NOTE,
+          objectText: '  Bosun is your dog, not a person  ',
+          source: 'player',
+          confidence: 0.9,
+        },
+      ],
+    });
+    const lines = block.split('\n');
+    const household = lines.findIndex((line) => line.startsWith('- you live with'));
+    const first = lines.indexOf('- You grew up in Brindleton Bay.');
+    const second = lines.indexOf('- Bosun is your dog, not a person');
+    expect(household).toBeGreaterThan(0);
+    expect(first).toBe(household + 1);
+    expect(second).toBe(household + 2);
+    // and before the trait list, which is what a sim skims last
+    expect(lines.findIndex((line) => line.startsWith('- your personality'))).toBeGreaterThan(second);
+  });
 });

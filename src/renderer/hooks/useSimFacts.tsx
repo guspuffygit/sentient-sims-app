@@ -10,6 +10,7 @@ export type SimFactsHook = {
   isLoading: boolean;
   error?: string;
   addFact: (request: AddFactRequest) => void;
+  editFact: (factId: number, objectText: string) => void;
   retireFact: (factId: number) => void;
 };
 
@@ -37,12 +38,18 @@ export function useSimFacts(simId?: string, history = false): SimFactsHook {
     onSuccess: invalidate,
   });
 
+  const edit = useMutation({
+    mutationFn: ({ factId, objectText }: { factId: number; objectText: string }) =>
+      client.simFacts.editFact(simId as string, factId, { objectText }),
+    onSuccess: invalidate,
+  });
+
   const retire = useMutation({
     mutationFn: (factId: number) => client.simFacts.retireFact(simId as string, factId),
     onSuccess: invalidate,
   });
 
-  const failure = error ?? add.error ?? retire.error;
+  const failure = error ?? add.error ?? edit.error ?? retire.error;
 
   return {
     data,
@@ -51,17 +58,27 @@ export function useSimFacts(simId?: string, history = false): SimFactsHook {
     addFact: (request: AddFactRequest) => {
       add.mutate(request);
     },
+    editFact: (factId: number, objectText: string) => {
+      edit.mutate({ factId, objectText });
+    },
     retireFact: (factId: number) => {
       retire.mutate(factId);
     },
   };
 }
 
+export type FactVocabulary = {
+  // The predicates whose value is plain text: the ones a player can type a value for
+  attributes: string[];
+  // What every predicate (edges included) means, in the player's words
+  help: Record<string, string>;
+};
+
 /**
- * The predicates whose value is plain text, served by the app so the UI never hardcodes
- * them. Cached for the session: unlike facts, the list only changes when the app itself does.
+ * The fact vocabulary, served by the app so the UI never hardcodes it. Cached for the
+ * session: unlike facts, the list only changes when the app itself does.
  */
-export function useAttributePredicates(enabled = true): string[] {
+export function useFactVocabulary(enabled = true): FactVocabulary {
   const { data } = useQuery({
     queryKey: ['factPredicates'],
     queryFn: () => client.simFacts.getPredicates(),
@@ -70,6 +87,9 @@ export function useAttributePredicates(enabled = true): string[] {
   });
   return useMemo(() => {
     const edges = new Set(data?.edges ?? []);
-    return (data?.predicates ?? []).filter((predicate) => !edges.has(predicate));
+    return {
+      attributes: (data?.predicates ?? []).filter((predicate) => !edges.has(predicate)),
+      help: data?.help ?? {},
+    };
   }, [data]);
 }

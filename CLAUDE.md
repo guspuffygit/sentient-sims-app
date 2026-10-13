@@ -84,6 +84,21 @@ player line to a silenced sim gets a thought back and opens no PlayerConversatio
 one system-prompt clause and drops the sim's lines from paced playback; wants of a silenced sim are generated unvoiced.
 The mod sends everything already (is_pet, age, report species); nothing changes there.
 
+Pets and player notes in the facts store (2026-10-12): the dossier lists a pet as a bare household member id and
+never says what it is, so the app learns species from the state report (self.species on a reported pet, species on a
+perceived one) via SemanticMemoryService.recordSpeciesFromReport (wired in ApiContext.onReport): a `species` game fact
+on the pet and a `pet` edge from every housemate whose dossier lists it; dossierToFacts derives the same edge on the
+next ingest (speciesOf lookup) so the diff keeps it, and retires it when the pet leaves the household. renderKnownFacts
+takes pets out of "you live with ..." and adds "your pet: Bosun the dog"; a present pet is labelled "Bosun (dog, he/him):
+your dog". The `note` predicate is the player's free-text "always know" field (rendered verbatim right after the
+household line); FACT_PREDICATE_HELP explains every predicate and is served by GET /facts/predicates for the Facts
+dialog's tooltips. Tests: FactVocabulary, RenderKnownFacts, SemanticMemory, SimFactRoutes.
+The store keeps the game's identifiers (trait_Pet_Glutton_Dog, trait_SimPreference_Likes_Activities_Cooking); util/factWords
+says them in plain words ("Glutton (Dog)", "Cooking", "Hip Hop music", "Nanny", "Popularity") for BOTH the prompt and the
+Facts dialog, so never prettify in one place only. A pet gets no HUMAN occult (dossierToFacts drops it when the species is
+known; recordSpecies retires one already stored). PUT /sims/:id/facts/:factId rewords a non-game fact: new row, old row
+retired with supersededBy (SemanticMemoryService.editFact); the dialog's Edit button on player facts uses it.
+
 Mod log lines (2026-09-22): every `log` message from the mod is appended to Mods/sentient-sims/logs.txt under
 modsDirectory (util/format formatLog, timestamps in UTC) and, at INFO and above, mirrored into electron-log's
 main.log as `[Mod] <LEVEL> <message>` (util/modLogMirror), so the mod's game-thread stall watchdog lines

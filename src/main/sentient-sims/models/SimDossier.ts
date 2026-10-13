@@ -34,6 +34,10 @@ export type SimDossier = {
   occult?: { types?: string[]; current?: string[] };
   is_ghost?: boolean;
   death_type?: string;
+  // The game's Species name for a pet (DOG, CAT, SMALLDOG, FOX, HORSE). Not sent by any
+  // mod build yet: the app learns species from the state report and accepts it here so a
+  // future dossier can carry it without an app change.
+  species?: string;
   household?: { id?: string; name?: string; member_ids?: string[] };
   family?: {
     parents?: string[];

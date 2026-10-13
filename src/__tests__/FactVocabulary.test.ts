@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { dossierToFacts, factKey } from 'main/sentient-sims/pipeline/facts/dossierFacts';
-import { canSupersede, FactPredicate, isSingleValued } from 'main/sentient-sims/pipeline/facts/predicates';
+import {
+  canSupersede,
+  FACT_PREDICATE_HELP,
+  FactPredicate,
+  isSingleValued,
+} from 'main/sentient-sims/pipeline/facts/predicates';
 import { familyBitWords, renderKnownFacts } from 'main/sentient-sims/util/renderKnownFacts';
 import { friendshipWord, relationshipWords, romanceWord } from 'main/sentient-sims/util/relationshipWords';
 import { SimDossier } from 'main/sentient-sims/models/SimDossier';
@@ -91,6 +96,48 @@ describe('dossier to facts', () => {
     expect(ghost.some((fact) => fact.predicate === FactPredicate.ALIVE && fact.objectText === 'no')).toBe(true);
     expect(ghost.some((fact) => fact.predicate === FactPredicate.DEATH_TYPE)).toBe(true);
   });
+
+  it('files a pet by its species, never as a human occult', () => {
+    const bosun = dossierToFacts(
+      { sim_id: '700', name: 'Bosun', occult: { types: ['HUMAN'], current: ['HUMAN'] } },
+      { speciesOf: () => 'DOG' },
+    );
+    expect(bosun.some((fact) => fact.predicate === FactPredicate.OCCULT)).toBe(false);
+    expect(bosun.some((fact) => fact.predicate === FactPredicate.OCCULT_CURRENT)).toBe(false);
+    expect(bosun.find((fact) => fact.predicate === FactPredicate.SPECIES)?.objectText).toBe('DOG');
+    // A person keeps theirs
+    expect(has(FactPredicate.OCCULT, 'HUMAN')).toBe(true);
+  });
+
+  it('calls a housemate with a species a pet, and never a person', () => {
+    // The dossier lists the dog as a bare member id; the species comes from the state
+    // report. Anker introduced his dog Bosun as a man until this edge existed (2026-10-12).
+    const withDog = dossierToFacts(
+      { ...dossier, household: { id: '900', name: 'BFF', member_ids: ['100', '200', '700'] } },
+      { speciesOf: (id) => (id === '700' ? 'DOG' : undefined) },
+    );
+    expect(withDog.some((fact) => fact.predicate === FactPredicate.PET && fact.objectSimId === '700')).toBe(true);
+    expect(withDog.some((fact) => fact.predicate === FactPredicate.PET && fact.objectSimId === '200')).toBe(false);
+    // Still a housemate as well
+    expect(
+      withDog.some((fact) => fact.predicate === FactPredicate.HOUSEHOLD_MEMBER && fact.objectSimId === '700'),
+    ).toBe(true);
+    // No lookup, no pets: an older app state is unchanged
+    expect(facts.some((fact) => fact.predicate === FactPredicate.PET)).toBe(false);
+  });
+
+  it('keeps a pet own species in its derived facts so a dossier ingest does not retire it', () => {
+    const bosun = dossierToFacts(
+      { sim_id: '700', name: 'Bosun', household: { id: '900', member_ids: ['100', '700'] } },
+      { speciesOf: (id) => (id === '700' ? 'DOG' : undefined) },
+    );
+    expect(bosun.some((fact) => fact.predicate === FactPredicate.SPECIES && fact.objectText === 'DOG')).toBe(true);
+    // A dog does not keep the people it lives with as pets
+    expect(bosun.some((fact) => fact.predicate === FactPredicate.PET)).toBe(false);
+    // A dossier that one day carries species itself wins over the lookup
+    const sent = dossierToFacts({ sim_id: '700', species: 'CAT' }, { speciesOf: () => 'DOG' });
+    expect(sent.find((fact) => fact.predicate === FactPredicate.SPECIES)?.objectText).toBe('CAT');
+  });
 });
 
 describe('fact trust rules', () => {
@@ -110,6 +157,18 @@ describe('fact trust rules', () => {
     expect(isSingleValued(FactPredicate.PARENT)).toBe(false);
     expect(isSingleValued(FactPredicate.TRAIT)).toBe(false);
     expect(isSingleValued(FactPredicate.STEADY)).toBe(false);
+    // A sim is one kind of creature, has any number of pets, and can be told many things
+    expect(isSingleValued(FactPredicate.SPECIES)).toBe(true);
+    expect(isSingleValued(FactPredicate.PET)).toBe(false);
+    expect(isSingleValued(FactPredicate.NOTE)).toBe(false);
+  });
+
+  it('explains every predicate in the player words', () => {
+    for (const predicate of Object.values(FactPredicate)) {
+      expect(FACT_PREDICATE_HELP[predicate], predicate).toBeTruthy();
+    }
+    // The question that prompted the help: "household" is the family name, not the people
+    expect(FACT_PREDICATE_HELP.household).toContain('not a list of who lives there');
   });
 });
 
@@ -171,7 +230,7 @@ describe('KNOWN_FACTS rendering', () => {
       names: {},
     });
     expect(block).toContain('your personality: Geek, Outgoing');
-    expect(block).toContain('you like: Music Hip Hop');
+    expect(block).toContain('you like: Hip Hop music');
   });
 
   it('flags hearsay as possibly untrue and attributes it', () => {
