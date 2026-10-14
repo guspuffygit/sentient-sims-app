@@ -1,4 +1,10 @@
-import { lotFacts, lotHasFacts, placeDescriptionProblems, venueKind } from 'main/sentient-sims/util/lotDescription';
+import {
+  lotFacts,
+  lotHasFacts,
+  lotTypeLabel,
+  placeDescriptionProblems,
+  venueKind,
+} from 'main/sentient-sims/util/lotDescription';
 import { defaultLotDescription } from 'main/sentient-sims/descriptions/locationDescriptions';
 import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
 
@@ -154,5 +160,16 @@ describe('placeDescriptionProblems', () => {
   it('rejects an answer that is not 1-4 sentences', () => {
     expect(placeDescriptionProblems('', 'venue_gym')).toEqual(['length']);
     expect(placeDescriptionProblems('One. Two. Three. Four. Five.', 'venue_gym')).toEqual(['length']);
+  });
+});
+
+describe('lotTypeLabel', () => {
+  it('names the venue the way the Lot Type column does', () => {
+    expect(lotTypeLabel('venue_residential')).toEqual('Residence');
+    expect(lotTypeLabel('venue_retail')).toEqual('Shop');
+    expect(lotTypeLabel('venue_library')).toEqual('Library');
+    expect(lotTypeLabel('venue_karaoke')).toEqual('Karaoke Bar');
+    expect(lotTypeLabel('venue_rentable_cabin')).toEqual('Vacation Rental');
+    expect(lotTypeLabel('venue_dance_hall')).toEqual('Dance Hall');
   });
 });

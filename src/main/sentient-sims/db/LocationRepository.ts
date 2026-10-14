@@ -1,94 +1,152 @@
 import { defaultLocationDescriptions, defaultLotDescription } from '../descriptions/locationDescriptions';
 import { DeleteLocationRequest } from '../models/DeleteLocationRequest';
 import { GetLocationRequest } from '../models/GetLocationRequest';
+import { DbService } from '../services/DbService';
 import { Repository } from './Repository';
-import { LocationEntity } from './entities/LocationEntity';
+import { LocationDefault, LocationEntity } from './entities/LocationEntity';
+import { OnlineLocationSource } from './OnlineLocationRepository';
 
+const PLACEHOLDER_NAME = 'the home';
+const PLACEHOLDER_LOT_TYPE = 'Residence';
+
+function isStock(description?: string | null): boolean {
+  return !description || description.trim().length === 0 || description === defaultLotDescription;
+}
+
+function chooseLotType(current: string | undefined, reported: string | undefined): string {
+  if (reported && (!current || current === PLACEHOLDER_LOT_TYPE)) {
+    return reported;
+  }
+  return current || PLACEHOLDER_LOT_TYPE;
+}
+
+// A location resolves, highest first: the description in this save (typed by the player),
+// the shared online default, the built-in default, the stock placeholder. A description the
+// app generated sits with the save's rows but yields to any default, since nobody chose it.
+// A row still holding the stock text is the same as no row.
 export class LocationRepository extends Repository {
-  /**
-   * Retrieves a location by their ID. If the location is not found in the
-   * database, it returns the default lot description.
+  private readonly online?: OnlineLocationSource;
 
-   * @returns {Promise<ParticipantEntity>} A promise that resolves to the location entity.
+  constructor(dbService: DbService, online?: OnlineLocationSource) {
+    super(dbService);
+    this.online = online;
+  }
+
+  /**
+   * The default a location falls back to: the shared online description, else the built-in
+   * one. Undefined when neither actually describes the place.
    */
-  getLocation(locationRequest: GetLocationRequest): LocationEntity {
-    const results = this.dbService
-      .getDb()
-      .prepare('SELECT * FROM location WHERE id = ?')
-      .all([locationRequest.id]) as LocationEntity[];
-    if (results.length > 0) {
-      return results[0];
+  getDefault(id: number | string): LocationDefault | undefined {
+    const online = this.online?.peek().get(String(id));
+    if (online && !isStock(online.description)) {
+      return { name: online.name, lot_type: online.lot_type, description: online.description, source: 'online' };
+    }
+    const builtIn = defaultLocationDescriptions.get(String(id));
+    if (builtIn && !isStock(builtIn.description)) {
+      return { name: builtIn.name, lot_type: builtIn.lot_type, description: builtIn.description, source: 'built-in' };
+    }
+    return undefined;
+  }
+
+  private readRow(id: number): LocationEntity | undefined {
+    const results = this.dbService.getDb().prepare('SELECT * FROM location WHERE id = ?').all([id]) as LocationEntity[];
+    return results[0];
+  }
+
+  private resolve(id: number, row: LocationEntity | undefined): LocationEntity {
+    const fallback = this.getDefault(id);
+    const ownDescription = row && !isStock(row.description);
+    const generated = row?.description_generated === 1;
+
+    if (row && ownDescription && !(generated && fallback)) {
+      return {
+        ...row,
+        is_generic: false,
+        source: generated ? 'generated' : 'save',
+        ...(fallback ? { default: fallback } : {}),
+      };
     }
 
-    const locationEntity = defaultLocationDescriptions.get(locationRequest.id.toString());
-    const defaultLocation = {
-      id: locationRequest.id,
-      name: 'the home',
-      lot_type: 'Residence',
+    if (fallback) {
+      return {
+        id,
+        name: fallback.name || row?.name || PLACEHOLDER_NAME,
+        lot_type: fallback.lot_type || row?.lot_type || PLACEHOLDER_LOT_TYPE,
+        description: fallback.description,
+        is_generic: false,
+        is_default: true,
+        source: fallback.source,
+        default: fallback,
+      };
+    }
+
+    // A built-in entry can carry only a name and the stock text (The Inked Inlet)
+    const builtIn = defaultLocationDescriptions.get(String(id));
+    return {
+      id,
+      name: row?.name || builtIn?.name || PLACEHOLDER_NAME,
+      lot_type: row?.lot_type || builtIn?.lot_type || PLACEHOLDER_LOT_TYPE,
       description: defaultLotDescription,
       is_generic: true,
-    };
-
-    if (!locationEntity) {
-      return defaultLocation;
-    }
-
-    return {
-      id: locationRequest.id,
-      name: locationEntity.name || defaultLocation.name,
-      lot_type: locationEntity.lot_type || defaultLocation.lot_type,
-      description: locationEntity.description || defaultLocation.description,
-      is_generic: locationEntity.description === defaultLocation.description,
+      source: 'stock',
     };
   }
 
-  // V-6: store a GENERATED description for a lot that only ever had the stock default.
-  // Guarded like the participant path: re-read first, and never replace a description the
-  // player (or an earlier generation) already put there.
-  setDescriptionIfGeneric(location: LocationEntity, description: string, zoneName?: string): boolean {
-    const existing = this.dbService
-      .getDb()
-      .prepare('SELECT * FROM location WHERE id = ?')
-      .all([location.id]) as LocationEntity[];
+  getLocation(locationRequest: GetLocationRequest): LocationEntity {
+    const { id } = locationRequest;
+    return this.resolve(id, this.readRow(id));
+  }
 
-    if (existing.length > 0 && existing[0].description && existing[0].description !== defaultLotDescription) {
+  // V-6: store a GENERATED description for a lot nothing else describes. Re-reads first and
+  // never replaces a description a person (or an earlier generation) put there, nor writes
+  // one for a lot that has gained a default since the generation started.
+  // A lot type the game reported replaces only the placeholder, never one a person set.
+  setDescriptionIfGeneric(location: LocationEntity, description: string, zoneName?: string, lotType?: string): boolean {
+    const existing = this.readRow(location.id);
+    if ((existing && !isStock(existing.description)) || this.getDefault(location.id)) {
       return false;
     }
 
-    this.updateLocation({
-      id: location.id,
-      name: zoneName || existing[0]?.name || location.name,
-      lot_type: existing[0]?.lot_type || location.lot_type,
-      description,
-    });
+    this.updateLocation(
+      {
+        id: location.id,
+        name: zoneName || existing?.name || location.name,
+        lot_type: chooseLotType(existing?.lot_type || location.lot_type, lotType),
+        description,
+      },
+      { generated: true },
+    );
     return true;
   }
 
   /**
    * Updates an existing location or inserts a new location if it does not exist in the database.
-   *
-   * @param {ParticipantEntity} location - The location entity to update or insert.
+   * Anything written without `generated` is the player's own description.
    */
-  updateLocation(location: LocationEntity) {
+  updateLocation(location: LocationEntity, options: { generated?: boolean } = {}) {
     return this.dbService
       .getDb()
-      .prepare('INSERT OR REPLACE INTO location(id, name, lot_type, description) VALUES(?, ?, ?, ?)')
-      .run([location.id, location.name, location.lot_type, location.description]);
+      .prepare(
+        'INSERT OR REPLACE INTO location(id, name, lot_type, description, description_generated) VALUES(?, ?, ?, ?, ?)',
+      )
+      .run([location.id, location.name, location.lot_type, location.description, options.generated ? 1 : 0]);
   }
 
+  // Also how a player restores the default: with the row gone the location resolves to it
   deleteLocation(location: DeleteLocationRequest) {
     return this.dbService.getDb().prepare('DELETE FROM location WHERE id = ?').run([location.id]);
   }
 
   getAllLocations(): LocationEntity[] {
-    const locations = new Map(defaultLocationDescriptions);
-    const results = this.getModifiedLocations();
+    const rows = new Map<string, LocationEntity>();
+    this.getModifiedLocations().forEach((row) => rows.set(String(row.id), row));
 
-    results.forEach((location) => {
-      locations.set(location.id.toString(), location);
-    });
-
-    return Array.from(locations.values());
+    const ids = new Set<string>([
+      ...defaultLocationDescriptions.keys(),
+      ...(this.online?.peek().keys() ?? []),
+      ...rows.keys(),
+    ]);
+    return Array.from(ids).map((id) => this.resolve(Number(id), rows.get(id)));
   }
 
   getModifiedLocations(): LocationEntity[] {
@@ -96,6 +154,9 @@ export class LocationRepository extends Repository {
   }
 
   getDefaultLocations(): LocationEntity[] {
-    return Array.from(defaultLocationDescriptions.values());
+    const ids = new Set<string>([...defaultLocationDescriptions.keys(), ...(this.online?.peek().keys() ?? [])]);
+    return Array.from(ids)
+      .map((id) => this.resolve(Number(id), undefined))
+      .filter((location) => location.source !== 'stock');
   }
 }

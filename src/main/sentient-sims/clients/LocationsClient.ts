@@ -56,4 +56,27 @@ export class LocationsClient extends ApiClient {
     const response = await axiosClient.delete<{ text: string }>(`${this.apiUrl}/locations/${locationId}`);
     return response.data;
   }
+
+  /**
+   * POST /locations/online
+   * Publishes a location's description as the shared default (mappers only). Resolves to
+   * the names from the save that held it back, empty when it was published.
+   */
+  async publishLocation(location: LocationEntity, force = false): Promise<string[]> {
+    const response = await axiosClient.post<{ text?: string; names?: string[] }>(
+      `${this.apiUrl}/locations/online`,
+      { ...location, ...(force ? { force: true } : {}) },
+      { validateStatus: (status) => status < 300 || status === 422 },
+    );
+    return response.status === 422 ? (response.data.names ?? ['a name from your save']) : [];
+  }
+
+  /**
+   * DELETE /locations/online/:locationId
+   * Removes a location's shared default (mappers only).
+   */
+  async unpublishLocation(locationId: number): Promise<{ text: string }> {
+    const response = await axiosClient.delete<{ text: string }>(`${this.apiUrl}/locations/online/${locationId}`);
+    return response.data;
+  }
 }

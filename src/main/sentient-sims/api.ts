@@ -54,6 +54,8 @@ export function runApi(ctx: ApiContext) {
   expressApp.get('/locations/modified', ctx.controller.locations.getModifiedLocations);
   expressApp.get('/locations/:locationId', ctx.controller.locations.getLocation);
   expressApp.post('/locations', ctx.controller.locations.updateLocation);
+  expressApp.post('/locations/online', ctx.controller.locations.publishLocation);
+  expressApp.delete('/locations/online/:locationId', ctx.controller.locations.unpublishLocation);
   expressApp.delete('/locations/:locationId', ctx.controller.locations.deleteLocation);
 
   expressApp.get('/paintings', ctx.controller.paintings.getPaintingsManifest);
