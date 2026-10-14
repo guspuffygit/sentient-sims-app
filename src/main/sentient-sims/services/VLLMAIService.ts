@@ -1,7 +1,7 @@
 import log from 'electron-log';
 import { ChatCompletion, ResponseFormatJSONSchema } from 'openai/resources/index.mjs';
 import { RawAxiosRequestHeaders } from 'axios';
-import { GenerationService } from './GenerationService';
+import { GenerationCallControl, GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { AIModel, AIModelResponse, responseToAIModels } from '../models/AIModel';
@@ -80,7 +80,10 @@ export class VLLMAIService implements GenerationService {
     }
   }
 
-  async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
+  async sentientSimsGenerate(
+    request: OpenAICompatibleRequest,
+    control?: GenerationCallControl,
+  ): Promise<SimsGenerateResponse> {
     const model = request.model ?? this.getModel();
     const apiType = request.apiType ?? this.modelSettingsApiType();
     const modelSettings = await this.ctx.modelSettings.getModelSettings(model, apiType);
@@ -140,7 +143,8 @@ export class VLLMAIService implements GenerationService {
       method: 'POST',
       data: completionRequest,
       baseURL: this.serviceUrl(),
-      timeout: this.ctx.settings.generationTimeoutSeconds * 1000,
+      timeout: control?.timeoutMs ?? this.ctx.settings.generationTimeoutSeconds * 1000,
+      signal: control?.signal,
       headers: this.getAuthorizationHeaders(),
     });
 

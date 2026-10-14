@@ -25,6 +25,24 @@ export type InteractionFinalizeRequest = {
 
 export type PrefetchStatus = 'queued' | 'fallback' | 'duplicate' | 'noop';
 
+export type RunExclusiveOptions = {
+  priority?: boolean;
+  // The game is blocked on this job's answer (its 80 s clock is already running). While it
+  // waits in the queue, a scene deciding whether to queue another round yields to it.
+  blocking?: boolean;
+  // Speculative work nobody is waiting on (a continuation round). When a blocking job
+  // arrives and has to wait behind it, its `yielded` signal fires so it can stop at once.
+  yieldsToBlocking?: boolean;
+};
+
+// What a queued job learns when it starts: when the request reached the queue, so a
+// blocking job can measure its deadline from the game's clock rather than its own start,
+// and the signal that fires if the job should give the slot up
+export type QueuedJobContext = {
+  arrivedAt: number;
+  yielded: AbortSignal;
+};
+
 export type PrefetchAck = {
   status: PrefetchStatus;
   pre_action_text?: string;
@@ -86,6 +104,10 @@ export class GenerationQueueService {
 
   private cognitionActive = 0;
 
+  private blockedWaiting = 0;
+
+  private readonly runningYieldable = new Set<AbortController>();
+
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
   }
@@ -131,7 +153,9 @@ export class GenerationQueueService {
     this.pruneExpired();
     const entry = this.entries.get(request.correlation_id);
     if (!entry) {
-      const result = await this.enqueue(() => this.ctx.ai.interactionEvent(request.event));
+      const result = await this.enqueue(({ arrivedAt }) => this.ctx.ai.interactionEvent(request.event, { arrivedAt }), {
+        blocking: true,
+      });
       result.result_source = 'synchronous';
       return { result, play: () => {} };
     }
@@ -208,8 +232,13 @@ export class GenerationQueueService {
   // top of a prefetched one. Priority tasks (a player waiting on a chat reply) go to the
   // front of the queue instead of behind speculative prefetch work — they still wait for
   // running generations, but never for queued ones.
-  runExclusive<T>(task: () => Promise<T>, options?: { priority?: boolean }): Promise<T> {
-    return this.enqueue(task, options?.priority ?? false);
+  runExclusive<T>(task: (job: QueuedJobContext) => Promise<T>, options?: RunExclusiveOptions): Promise<T> {
+    return this.enqueue(task, options);
+  }
+
+  /** A job the game is blocked on is queued and has not started yet. */
+  hasBlockedRequestWaiting(): boolean {
+    return this.blockedWaiting > 0;
   }
 
   // V-2: speech-lane variant of runExclusive
@@ -378,16 +407,35 @@ export class GenerationQueueService {
     });
   }
 
-  private enqueue<T>(task: () => Promise<T>, priority = false): Promise<T> {
+  private enqueue<T>(task: (job: QueuedJobContext) => Promise<T>, options: RunExclusiveOptions = {}): Promise<T> {
     return new Promise<T>((resolve, reject) => {
+      const arrivedAt = Date.now();
+      const blocking = options.blocking ?? false;
+      const yielded = new AbortController();
+      if (blocking) {
+        this.blockedWaiting += 1;
+        if (this.activeCount >= this.concurrency()) {
+          this.runningYieldable.forEach((running) => {
+            running.abort();
+          });
+        }
+      }
       const job = async () => {
+        if (blocking) {
+          this.blockedWaiting -= 1;
+        }
+        if (options.yieldsToBlocking) {
+          this.runningYieldable.add(yielded);
+        }
         try {
-          resolve(await task());
+          resolve(await task({ arrivedAt, yielded: yielded.signal }));
         } catch (error) {
           reject(error instanceof Error ? error : new Error(String(error)));
+        } finally {
+          this.runningYieldable.delete(yielded);
         }
       };
-      if (priority) {
+      if (options.priority) {
         this.priorityJobs.push(job);
       } else {
         this.jobs.push(job);
@@ -396,8 +444,12 @@ export class GenerationQueueService {
     });
   }
 
+  private concurrency(): number {
+    return Math.max(1, this.ctx.settings.generationConcurrency);
+  }
+
   private drain() {
-    const concurrency = Math.max(1, this.ctx.settings.generationConcurrency);
+    const concurrency = this.concurrency();
     // V-2: speech first, always
     while (this.activeCount < concurrency && this.speechJobs.length > 0) {
       const job = this.speechJobs.shift();

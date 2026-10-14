@@ -128,11 +128,15 @@ export class AIExchangeLogService {
     responseText: string;
     durationMs: number;
     error?: string;
+    // The caller cut the call short (the scene ended); the provider did not fail
+    cancelled?: boolean;
   }): number {
     const context = this.labelContext.getStore();
     const id = this.nextId;
     this.nextId += 1;
-    this.trackHealth(params.error);
+    if (!params.cancelled) {
+      this.trackHealth(params.error);
+    }
 
     const promptChars = params.request.messages.reduce((total, message) => total + message.content.length, 0);
     const responsePreview = params.responseText.replace(/\s+/g, ' ').trim().slice(0, PREVIEW_CHARS);

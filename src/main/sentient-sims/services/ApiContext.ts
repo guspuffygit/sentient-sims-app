@@ -51,7 +51,7 @@ import { PaintingMountService } from './PaintingMountService';
 import { GeminiEmbeddingService } from './GeminiEmbeddingService';
 import { GeminiService } from './GeminiService';
 import { GenerationQueueService } from './GenerationQueueService';
-import { GenerationService } from './GenerationService';
+import { GenerationCallControl, GenerationService } from './GenerationService';
 import { ImageGenerationService } from './ImageGenerationService';
 import { ImageProviderConfigService } from './ImageProviderConfigService';
 import { InteractionService } from './InteractionService';
@@ -763,10 +763,10 @@ export class ApiContext {
     }
 
     const exchangeLog = this._aiExchangeLogService;
-    const loggedGenerate = async (request: OpenAICompatibleRequest) => {
+    const loggedGenerate = async (request: OpenAICompatibleRequest, control?: GenerationCallControl) => {
       const startedAt = Date.now();
       try {
-        const response = await service.sentientSimsGenerate(request);
+        const response = await service.sentientSimsGenerate(request, control);
         exchangeLog.record({ request, responseText: response.text, durationMs: Date.now() - startedAt });
         return response;
       } catch (err) {
@@ -775,6 +775,7 @@ export class ApiContext {
           responseText: '',
           durationMs: Date.now() - startedAt,
           error: err instanceof Error ? err.message : String(err),
+          cancelled: control?.signal?.aborted,
         });
         throw err;
       }

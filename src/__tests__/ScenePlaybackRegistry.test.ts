@@ -43,6 +43,16 @@ describe('ScenePlaybackRegistry', () => {
     expect(notifySceneEnded).toHaveBeenCalledWith(SCENE, 'finished');
   });
 
+  it('aborts the signal a generating round holds when the scene stops', () => {
+    const { registry } = harness;
+    registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.'));
+    const signal = registry.generationStarted(SCENE);
+
+    expect(signal?.aborted).toBe(false);
+    registry.stop(SCENE, 'left_lot', 'hard');
+    expect(signal?.aborted).toBe(true);
+  });
+
   it('does not report finished while a queued round is still to play', () => {
     const { registry, notifySceneEnded } = harness;
     registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('One.'));

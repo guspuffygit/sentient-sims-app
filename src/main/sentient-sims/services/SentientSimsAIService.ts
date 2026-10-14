@@ -9,6 +9,7 @@ import { ImageGenerationRequest, ImageGenerationResponse } from '../models/Image
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { ImageGenerationService } from './ImageGenerationService';
+import { GenerationCallControl } from './GenerationService';
 import { notifyRefreshAuth } from '../util/notifyRenderer';
 
 const tokenRefreshWaitMs = 10000;
@@ -124,8 +125,11 @@ export class SentientSimsAIService extends VLLMAIService implements ImageGenerat
     }
   }
 
-  async sentientSimsGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateResponse> {
-    return this.withAuthRetry(() => super.sentientSimsGenerate(request));
+  async sentientSimsGenerate(
+    request: OpenAICompatibleRequest,
+    control?: GenerationCallControl,
+  ): Promise<SimsGenerateResponse> {
+    return this.withAuthRetry(() => super.sentientSimsGenerate(request, control));
   }
 
   async generateImage(request: ImageGenerationRequest): Promise<ImageGenerationResponse> {

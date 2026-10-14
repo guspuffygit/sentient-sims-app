@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import * as fs from 'fs';
+import log from 'electron-log';
+import { OneShotOptions } from 'main/sentient-sims/services/AIService';
+import { SceneAbortedError } from 'main/sentient-sims/exceptions/SceneAbortedError';
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 import { NoopEmbeddingService } from 'main/sentient-sims/services/EmbeddingService';
 import { InteractionEventStatus } from 'main/sentient-sims/models/InteractionEventResult';
@@ -57,8 +60,13 @@ const SCORES_WANTING_MORE = JSON.stringify({
   'Bella Goth': { memory: 5, action: 1, action_reason: '', unfinished: true, continue: 10 },
 });
 
-// A scene whose scorer asks for another round after every round, so only the cap ends it
-function sceneThatNeverLands(sessionId: string, sceneMaxRounds?: number) {
+// A scene whose scorer asks for another round after every round, so only the cap ends it.
+// `stage` runs before each mocked call and may stop the scene or occupy the queue.
+function sceneThatNeverLands(
+  sessionId: string,
+  sceneMaxRounds?: number,
+  stage?: (label: string, options?: OneShotOptions) => void,
+) {
   const ctx: ApiContext = mockApiContext();
   fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
   ctx.db.loadDatabase({ sessionId, saveId: '1' });
@@ -77,8 +85,15 @@ function sceneThatNeverLands(sessionId: string, sceneMaxRounds?: number) {
   });
 
   const labels: string[] = [];
-  vi.spyOn(ctx.ai, 'runOneShot').mockImplementation((label: string) => {
+  const calls: { label: string; options?: OneShotOptions }[] = [];
+  vi.spyOn(ctx.ai, 'runOneShot').mockImplementation((label: string, ...rest) => {
     labels.push(label);
+    const options = rest[6];
+    calls.push({ label, options });
+    if (options?.signal?.aborted) {
+      return Promise.reject(new SceneAbortedError(label));
+    }
+    stage?.(label, options);
     let text = 'SAY: Tell me more.\nTHINK: I want to hear the rest.';
     if (label === 'Scene Scores') {
       text = SCORES_WANTING_MORE;
@@ -105,7 +120,7 @@ function sceneThatNeverLands(sessionId: string, sceneMaxRounds?: number) {
   };
   const rounds = () => labels.filter((label) => label === 'Scene Scores').length;
 
-  return { play, rounds, labels };
+  return { ctx, play, rounds, labels, calls };
 }
 
 describe('the scene round cap', () => {
@@ -133,5 +148,91 @@ describe('the scene round cap', () => {
     await scene.play();
 
     expect(scene.rounds()).toBe(5);
+  });
+});
+
+describe('a scene round and the game', () => {
+  it('does not queue another round while an interaction is waiting on the queue', async () => {
+    let release!: () => void;
+    const scene = sceneThatNeverLands('scene-yields', undefined, (label) => {
+      if (label !== 'Scene Scores') {
+        return;
+      }
+      // The single slot is busy, so the interaction has to wait, as it did in the field
+      void scene.ctx.generationQueue.runExclusive(
+        () =>
+          new Promise<void>((resolve) => {
+            release = resolve;
+          }),
+      );
+      void scene.ctx.generationQueue.runExclusive(() => Promise.resolve(), { blocking: true });
+    });
+
+    const played = scene.play();
+    await vi.waitFor(() => {
+      expect(scene.labels).toContain('Scene Scores');
+    });
+    release();
+    await played;
+
+    expect(scene.labels).toEqual(ONE_ROUND);
+  });
+
+  it('hands every round the stop signal of its scene', async () => {
+    const scene = sceneThatNeverLands('scene-signal', 2);
+
+    await scene.play();
+
+    const firstRound = scene.calls.slice(0, ONE_ROUND.length);
+    const secondRound = scene.calls.slice(ONE_ROUND.length);
+    expect(firstRound.every((call) => call.options?.signal === undefined)).toBe(true);
+    expect(secondRound.length).toBe(ONE_ROUND.length);
+    expect(secondRound.every((call) => call.options?.signal instanceof AbortSignal)).toBe(true);
+  });
+
+  it('gives up a running round the moment an interaction has to wait behind it', async () => {
+    const info = vi.spyOn(log, 'info');
+    const warn = vi.spyOn(log, 'warn');
+    let briefings = 0;
+    let abortedOnEnqueue: boolean | undefined;
+    const scene = sceneThatNeverLands('scene-yields-mid-round', undefined, (label, options) => {
+      if (label !== 'Director Briefing') {
+        return;
+      }
+      briefings += 1;
+      if (briefings === 2) {
+        void scene.ctx.generationQueue.runExclusive(() => Promise.resolve(), { blocking: true });
+        abortedOnEnqueue = options?.signal?.aborted;
+      }
+    });
+
+    await scene.play();
+
+    expect(abortedOnEnqueue).toBe(true);
+    expect(scene.labels).toEqual([...ONE_ROUND, 'Director Briefing']);
+    expect(info.mock.calls.some(([message]) => String(message).includes('yielded to an interaction'))).toBe(true);
+    expect(warn.mock.calls.some(([message]) => String(message).includes('Scene round'))).toBe(false);
+  });
+
+  it('drops a round the game stopped mid-request without reporting a failure', async () => {
+    const warn = vi.spyOn(log, 'warn');
+    let briefings = 0;
+    let abortedOnStop: boolean | undefined;
+    const scene = sceneThatNeverLands('scene-stopped-mid-request', undefined, (label, options) => {
+      if (label !== 'Director Briefing') {
+        return;
+      }
+      briefings += 1;
+      if (briefings === 2) {
+        scene.ctx.scenePlayback.stopAll('left_lot');
+        abortedOnStop = options?.signal?.aborted;
+      }
+    });
+
+    await scene.play();
+
+    expect(abortedOnStop).toBe(true);
+    expect(scene.labels).toEqual([...ONE_ROUND, 'Director Briefing']);
+    expect(warn.mock.calls.some(([message]) => String(message).includes('Scene round'))).toBe(false);
   });
 });

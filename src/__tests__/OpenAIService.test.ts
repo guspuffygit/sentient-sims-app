@@ -69,7 +69,9 @@ describe('OpenAIService', () => {
   });
 
   function mockCreate(service: OpenAIService) {
-    const create = vi.fn<(params: SentRequest) => Promise<ChatCompletion>>().mockResolvedValue(completion('Hello'));
+    const create = vi
+      .fn<(params: SentRequest, options?: { signal?: AbortSignal; timeout?: number }) => Promise<ChatCompletion>>()
+      .mockResolvedValue(completion('Hello'));
     vi.spyOn(service, 'getOpenAIClient').mockReturnValue({
       chat: { completions: { create } },
     } as unknown as OpenAI);
@@ -89,6 +91,18 @@ describe('OpenAIService', () => {
 
     expect(create).toHaveBeenCalledOnce();
     expect(create.mock.calls[0][0].reasoning).toBeUndefined();
+  });
+
+  it('passes the call control through to the request as its signal and timeout', async () => {
+    const service = new OpenAIService(ctx);
+    const create = mockCreate(service);
+    const abort = new AbortController();
+
+    await service.sentientSimsGenerate(request, { signal: abort.signal, timeoutMs: 5_000 });
+    await service.sentientSimsGenerate(request);
+
+    expect(create.mock.calls[0][1]).toEqual({ signal: abort.signal, timeout: 5_000 });
+    expect(create.mock.calls[1][1]).toEqual({});
   });
 
   it('names the cause when a model reasons to the reply limit and writes nothing', () => {

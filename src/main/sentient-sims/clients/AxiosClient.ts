@@ -51,7 +51,7 @@ axiosClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
-    if (error.code === 'ECONNABORTED') {
+    if (error.code === 'ECONNABORTED' || error.code === 'ERR_CANCELED') {
       throw error;
     }
     if (error.response) {

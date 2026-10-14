@@ -111,6 +111,13 @@ export function sceneLineReadingHoldMs(text: string): number {
 // starting new AI calls past this point so a classic single-call fallback still fits.
 export const directedSceneBudgetMs = 50_000;
 
+// A request the game is blocked on has this long from reaching the queue, whatever it waited
+// behind, before the mod gives up on it at 80 seconds
+export const interactionDeadlineMs = 70_000;
+
+// With less than this left on its deadline a generation cannot finish in time, so it is skipped
+export const minimumGenerationMs = 12_000;
+
 export const rendererWebsocketPort = 25146;
 export const modWebsocketPort = 25145;
 export const appApiPort = 25148;

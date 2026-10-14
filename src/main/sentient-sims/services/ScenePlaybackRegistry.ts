@@ -48,6 +48,9 @@ type SceneEntry = {
   generating: number;
   stopped: boolean;
   stoppedAt?: number;
+  // Fires when the scene stops, so a round mid-request to the provider lets go of the
+  // queue at once instead of finishing a call nobody will hear
+  abort: AbortController;
   touchedAt: number;
   // The shared memory row for this scene, once it lands. The mod writes it with
   // round 1's transcript, and the scene's close rewrites it to what was heard.
@@ -128,13 +131,15 @@ export class ScenePlaybackRegistry {
     }
   }
 
-  /** A continuation round has started generating. */
-  generationStarted(sceneId: string) {
+  /** A continuation round has started generating. The signal fires if the scene stops. */
+  generationStarted(sceneId: string): AbortSignal | undefined {
     const entry = this.scenes.get(sceneId);
-    if (entry) {
-      entry.generating += 1;
-      entry.touchedAt = Date.now();
+    if (!entry) {
+      return undefined;
     }
+    entry.generating += 1;
+    entry.touchedAt = Date.now();
+    return entry.abort.signal;
   }
 
   /** A continuation round has finished generating (aired, failed, or bailed). */
@@ -182,6 +187,7 @@ export class ScenePlaybackRegistry {
     entry.stopped = true;
     entry.stoppedAt = Date.now();
     entry.pendingRounds = 0;
+    entry.abort.abort();
     log.info(`[Scene] ${sceneId} stopped (${mode}): ${reason}`);
     try {
       this.deps.notifyStop({ sceneId, mode });
@@ -248,6 +254,7 @@ export class ScenePlaybackRegistry {
       pendingRounds: 0,
       generating: 0,
       stopped: false,
+      abort: new AbortController(),
       touchedAt: Date.now(),
       openingLines: [],
       openingStart: 0,
