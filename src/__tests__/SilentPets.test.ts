@@ -66,7 +66,7 @@ const SCORES = JSON.stringify({
   'Skipper Solheim': { memory: 6, action: 1, action_reason: '', done: true },
 });
 
-function sceneContext(sessionId: string, petsSpeak: boolean) {
+function sceneContext(sessionId: string, petsSpeak: boolean, stage: { review?: string } = {}) {
   const ctx: ApiContext = mockApiContext();
   fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
   ctx.db.loadDatabase({ sessionId, saveId: '1' });
@@ -88,7 +88,9 @@ function sceneContext(sessionId: string, petsSpeak: boolean) {
     let text = 'SAY: Who is a good boy?\nTHINK: He always knows when I am sad.';
     if (label === 'Scene Scores') {
       text = SCORES;
-    } else if (label === 'Director Briefing' || label === 'Director Review') {
+    } else if (label === 'Director Review') {
+      text = stage.review ?? '';
+    } else if (label === 'Director Briefing') {
       text = '';
     } else if (label.startsWith('Actor: ') && !label.includes('Anker')) {
       // A silenced actor is told to think only; a talking one answers in both tags
@@ -142,6 +144,20 @@ describe('silent pets', () => {
       .map((call) => call[0].memory)
       .filter((memory) => memory.event_type === 'monologue');
     expect(monologues.map((memory) => memory.content)).toContain('Ball. Ball. Ball.');
+  });
+
+  it('a line the reviewer invents for the silenced dog never airs', async () => {
+    // Two reviewed lines for one delivered: the truncation keeps the first, which would
+    // have been the dog's and dropped the human's real line
+    const { ctx, voicedSpeakers } = sceneContext('silent-pets-reviewer', false, {
+      review: 'Bosun Solheim: Woof, I love you.\nAnker Solheim: Who is the best boy?',
+    });
+
+    await ctx.ai.runDirectedGeneration(sceneEvent([ANKER, BOSUN]), {
+      action: 'Anker Solheim plays with Bosun Solheim.',
+    });
+
+    expect(voicedSpeakers()).toEqual(['Anker Solheim']);
   });
 
   it('switched off, two pets alone keep their thoughts to themselves: stored, never voiced', async () => {

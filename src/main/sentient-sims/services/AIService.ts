@@ -2007,8 +2007,10 @@ ${factsBlock}
 
         // A chat reply is the answer to a line the player already spoke; if the reviewer echoes
         // that line back it would air (and be remembered) twice
+        // ...and only a speaker's: a line the reviewer invents for a silenced sim would
+        // otherwise survive the truncation below in place of a real one
         reviewedLines = parseReviewedLines(compiled.text, simNames).filter(
-          (line) => !playerLine || line.speaker !== playerLine.speaker,
+          (line) => speakerNames.includes(line.speaker) && (!playerLine || line.speaker !== playerLine.speaker),
         );
         // The reviewer is an editor, not a writer: it may keep or repair the delivered lines,
         // never extend the scene. If it continued the conversation anyway, everything past the
