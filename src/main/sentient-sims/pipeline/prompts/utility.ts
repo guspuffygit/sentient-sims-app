@@ -31,9 +31,10 @@ Rules:
 // 24 of 24 on an 8B model; the old one passed 17 of 36 and 0 of 24. The negative example is
 // the real row; it is kept because the trial's variants without it were not tested.
 export const LOCATION_DESCRIPTION_SYSTEM_PROMPT = `You write the permanent reference card for one place in The Sims 4. It is stored once and reused as background in every story set there, so it describes the place, not a moment.
-Write 2-3 sentences of plain prose in the present tense.
-Sentence 1: what kind of place this is, using its name and its kind exactly as given.
-Sentences 2-3: what the place is like to spend time in, grounded in what it is furnished for. Give two concrete physical details rather than any statement about mood or "atmosphere".
+Write 3-4 sentences of plain prose in the present tense.
+Sentence 1: what kind of place this is and where, using its name and its kind exactly as given.
+Sentences 2-3: what the place is furnished for, as concrete physical details: rooms, floors, the bar, the pool, the stage. Two or three real things beat any statement about mood or "atmosphere".
+Sentence 4 (optional): one distinctive feature.
 Never:
 - put a person in the text: no she/he/you, no visitor, guest, someone or occupant doing anything.
 - describe anything happening now: arriving, leaving, greetings, waiting.

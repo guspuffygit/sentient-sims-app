@@ -21,6 +21,7 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import RestoreOutlinedIcon from '@mui/icons-material/RestoreOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
+import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import AppCard from './AppCard';
 import { EmptyState } from './components/EmptyState';
@@ -75,6 +76,7 @@ export default function LocationsPage() {
   const [namesFromSave, setNamesFromSave] = useState<string[]>([]);
   const [confirmingUnpublish, setConfirmingUnpublish] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [writing, setWriting] = useState(false);
   const { status } = useWebsocket();
   const { userAttributes } = useAuth();
   const { showMessage } = useSnackBar();
@@ -229,6 +231,31 @@ export default function LocationsPage() {
     setPublishing(false);
   }
 
+  // A draft from what the game reported about the lot, into the editor: Save keeps it as this
+  // save's own text, Save as Default for Everyone publishes it. Nothing happens on its own.
+  async function handleWriteWithAi() {
+    if (!editedLocation) {
+      return;
+    }
+    setWriting(true);
+    try {
+      const written = await client.locations.describeLocation(editedLocation.location.id);
+      if (!written) {
+        showMessage('Visit this lot in game first, then try again', 'warning');
+      } else {
+        setEditedLocation((previousLocation) =>
+          previousLocation
+            ? { ...previousLocation, location: { ...previousLocation.location, description: written.description } }
+            : previousLocation,
+        );
+      }
+    } catch (error) {
+      showMessage(`Could not write a description for ${editedLocation.location.name}`, 'error');
+      log.error('Writing a location description failed', error);
+    }
+    setWriting(false);
+  }
+
   const handleNameEdit = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setEditedLocation((previousLocation) =>
       previousLocation
@@ -304,6 +331,23 @@ export default function LocationsPage() {
               >
                 Cancel
               </Button>
+              <Tooltip
+                title="Drafts a description from what the game reports about this lot. Edit it, then Save, or Save as Default for Everyone."
+                placement="top"
+              >
+                <span>
+                  <Button
+                    loading={writing}
+                    variant="outlined"
+                    startIcon={<AutoAwesomeOutlinedIcon />}
+                    onClick={() => {
+                      void handleWriteWithAi();
+                    }}
+                  >
+                    Write with AI
+                  </Button>
+                </span>
+              </Tooltip>
               {isMapper && (
                 <Tooltip
                   title="Sets the default description every player gets. Players who wrote their own keep it."
@@ -377,6 +421,10 @@ export default function LocationsPage() {
           forceShow
           value={location.description}
         />
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+          Write it as a card: 3 to 4 sentences in the present tense, what kind of place it is and where, then the real
+          things in it. No people, no names. Write with AI drafts one from the lot you have visited this session.
+        </Typography>
         {ownText && fallback && differsFromDefault && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="caption" color="text.secondary">

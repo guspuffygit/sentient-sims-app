@@ -1,5 +1,5 @@
 import log from 'electron-log';
-import { SimStateEntry, SimStateReport } from '../models/SimStateReport';
+import { LotBlock, SimStateEntry, SimStateReport } from '../models/SimStateReport';
 import { PerceptionSnapshot } from '../models/PerceptionSnapshot';
 
 // Report cadence on the mod side is 5s; past 3 missed windows the stream is stale —
@@ -21,6 +21,10 @@ export class SimStateCache {
 
   private readonly simEntries = new Map<string, SimStateEntry>();
 
+  // Every lot the game has reported this app run, by lot id: the Locations page's
+  // "Write with AI" works for any lot visited since the app started, not only the current one
+  private readonly lotBlocks = new Map<string, { lot: LotBlock; seenAt: number }>();
+
   private readonly listeners: StateListener[] = [];
 
   onReport(listener: StateListener) {
@@ -37,6 +41,9 @@ export class SimStateCache {
     this.lastSeq = Math.max(this.lastSeq, report.seq);
     this.latestReport = report;
     this.receivedAt = Date.now();
+    if (report.lot?.lot_id) {
+      this.lotBlocks.set(report.lot.lot_id, { lot: report.lot, seenAt: this.receivedAt });
+    }
     (report.sims ?? []).forEach((entry) => {
       if (entry.sim_id) {
         this.simEntries.set(entry.sim_id, entry);
@@ -87,6 +94,10 @@ export class SimStateCache {
     return [...this.simEntries.keys()];
   }
 
+  getLotBlock(lotId: string | number): LotBlock | undefined {
+    return this.lotBlocks.get(String(lotId))?.lot;
+  }
+
   isPaused(): boolean {
     return Boolean(this.latestReport?.paused || this.latestReport?.lot?.clock?.paused);
   }
@@ -100,5 +111,6 @@ export class SimStateCache {
     this.receivedAt = 0;
     this.lastSeq = 0;
     this.simEntries.clear();
+    this.lotBlocks.clear();
   }
 }

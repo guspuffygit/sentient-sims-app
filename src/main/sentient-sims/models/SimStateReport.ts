@@ -52,6 +52,13 @@ export type LotBlock = {
   // Context-gated lot verbs (pay_bills when due, hire_repair_service when broken, ...);
   // the mod resolves their targets, the app only offers/validates
   action_keys?: string[];
+  // What the game itself says about the lot, from the zone's saved record: its blurb, the
+  // bedroom and bathroom counts and the lot traits. Facts for the description writer
+  // (Write with AI); absent on older mod builds.
+  description?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  lot_traits?: string[];
 };
 
 export type SimCareer = {

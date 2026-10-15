@@ -160,6 +160,10 @@ describe('placeDescriptionProblems', () => {
   it('rejects an answer that is not 1-4 sentences', () => {
     expect(placeDescriptionProblems('', 'venue_gym')).toEqual(['length']);
     expect(placeDescriptionProblems('One. Two. Three. Four. Five.', 'venue_gym')).toEqual(['length']);
+    // Four sentences on the mountain, not five
+    expect(
+      placeDescriptionProblems('A bar on Mt. Komorebi. It has a bar. It has tables. It has a view.', 'venue_bar'),
+    ).toEqual([]);
   });
 });
 
@@ -171,5 +175,38 @@ describe('lotTypeLabel', () => {
     expect(lotTypeLabel('venue_karaoke')).toEqual('Karaoke Bar');
     expect(lotTypeLabel('venue_rentable_cabin')).toEqual('Vacation Rental');
     expect(lotTypeLabel('venue_dance_hall')).toEqual('Dance Hall');
+  });
+});
+
+describe('lotFacts from the zone record', () => {
+  it('passes the blurb, the bedroom and bathroom counts and the lot traits to the writer', () => {
+    const facts = lotFacts(
+      genericRow,
+      {
+        venue: 'venue_residential',
+        owned: {},
+        description: 'This cozy home is perfect for a small family.',
+        bedrooms: 2,
+        bathrooms: 1,
+        lot_traits: ['Great Acoustics', 'Homey'],
+      },
+      '13 Acacia Avenue',
+    );
+    expect(facts).toEqual(
+      [
+        'Name: 13 Acacia Avenue',
+        'Kind of place: a private home',
+        'The game describes it as: This cozy home is perfect for a small family.',
+        'Bedrooms: 2, bathrooms: 1',
+        'Lot traits: Great Acoustics, Homey',
+      ].join('\n'),
+    );
+  });
+
+  it('keeps bedroom counts off a venue and says nothing for an older mod build', () => {
+    expect(
+      lotFacts(genericRow, { venue: 'venue_gym', owned: {}, bedrooms: 0, bathrooms: 2 }, 'Pectoral Fitness'),
+    ).toEqual(['Name: Pectoral Fitness', 'Kind of place: a gym'].join('\n'));
+    expect(lotFacts(genericRow, { venue: 'venue_gym', owned: {} }, 'Pectoral Fitness')).not.toContain('describes');
   });
 });

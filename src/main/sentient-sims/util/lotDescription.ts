@@ -9,7 +9,9 @@ import { LotBlock } from '../models/SimStateReport';
 // in every scene prompt set on that lot, so it may only carry what is permanent about the
 // place: its kind, whose home it is, and what it is furnished for. The live situations, the
 // repair state and the bathroom inventory are moments or noise and never reach the writer.
-// Trial and judging behind every rule: the "Lot Description Trial" artifact, 2026-10-12.
+// Trial and judging behind every rule: the "Lot Description Trial" artifact, 2026-10-12. The
+// 3-4 sentence card shape itself won the "Lot Description Shapes" experiment of 2026-10-15
+// (360 scenes, six shapes, blind judge): best grounding, fewest invented people, 92 tokens.
 
 // The mod reports the venue tuning name; the writer gets plain words. Anything unmapped is
 // de-prefixed ("venue_rentable_cabin" -> "rentable cabin") rather than dropped.
@@ -135,6 +137,17 @@ export function lotFacts(location: LocationEntity, lot: LotBlock | undefined, zo
   if (beds > 0 && lot?.venue === 'venue_residential') {
     facts.push(`Sleeps: ${beds}`);
   }
+  // The zone's own record (mod builds from 2026-10-15): the game's blurb often names the
+  // residents, so the prompt's no-people rules apply to it like anything else
+  if (lot?.description?.trim()) {
+    facts.push(`The game describes it as: ${lot.description.trim()}`);
+  }
+  if (lot?.venue === 'venue_residential' && ((lot.bedrooms ?? 0) > 0 || (lot.bathrooms ?? 0) > 0)) {
+    facts.push(`Bedrooms: ${lot.bedrooms ?? 0}, bathrooms: ${lot.bathrooms ?? 0}`);
+  }
+  if (lot?.lot_traits && lot.lot_traits.length > 0) {
+    facts.push(`Lot traits: ${lot.lot_traits.join(', ')}`);
+  }
   return facts.join('\n');
 }
 
@@ -154,7 +167,8 @@ const VENUE_AS_RESIDENCE =
 /**
  * Why a generated lot description must not be stored, as a list of tags; empty means it may.
  * This is the safety net behind the prompt and the facts, not the fix: in the trial the fixed
- * prompt passed it 36 of 36 times on the production model.
+ * prompt passed it 36 of 36 times on the production model. The length gate allows 1-4
+ * sentences: the card shape is 3-4, and a shorter card is still a card.
  */
 export function placeDescriptionProblems(text: string, venue?: string): string[] {
   const problems: string[] = [];
@@ -167,8 +181,10 @@ export function placeDescriptionProblems(text: string, venue?: string): string[]
   if (venue !== 'venue_residential' && VENUE_AS_RESIDENCE.test(text)) {
     problems.push('venue_as_residence');
   }
+  // "Mt. Komorebi" is one word of a sentence, not the end of one
   const sentences = text
     .trim()
+    .replace(/\bMt\.\s/g, 'Mt ')
     .split(/(?<=[.!?])\s+/)
     .filter((sentence) => sentence.length > 0);
   if (sentences.length < 1 || sentences.length > 4) {

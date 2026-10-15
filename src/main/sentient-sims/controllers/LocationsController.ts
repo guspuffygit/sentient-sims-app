@@ -6,6 +6,7 @@ import { notifyLocationChanged } from '../util/notifyRenderer';
 import { ApiContext } from '../services/ApiContext';
 import { InteractionService } from '../services/InteractionService';
 import { OnlineLocation } from '../db/OnlineLocationRepository';
+import { lotHasFacts } from '../util/lotDescription';
 
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
@@ -101,6 +102,30 @@ export class LocationsController {
     } catch (err) {
       log.error('Error deleting location', err);
       return res.json({ error: errorMessage(err) });
+    }
+  };
+
+  // "Write with AI" on the Locations page: a card for a lot the game has reported this app
+  // run, written from the same facts as the fallback writer. Nothing is stored; the editor
+  // gets the text and Save is the player's. 409 until the lot has been visited.
+  describeLocation = async (req: Request, res: Response) => {
+    try {
+      const { locationId } = req.params;
+      const lot = this.ctx.simStateCache.getLotBlock(String(locationId));
+      if (!lotHasFacts(lot)) {
+        res.status(409).json({ error: 'Visit this lot in game first' });
+        return;
+      }
+      const location = this.ctx.locationRepository.getLocation({ id: Number(locationId) });
+      const written = await this.ctx.defaultDescriptions.describeLocation(location, lot, lot?.lot_name);
+      if (!written) {
+        res.status(502).json({ error: 'The writer produced nothing usable; try again' });
+        return;
+      }
+      res.json(written);
+    } catch (err) {
+      log.error('Error writing a location description', err);
+      res.status(500).json({ error: errorMessage(err) });
     }
   };
 

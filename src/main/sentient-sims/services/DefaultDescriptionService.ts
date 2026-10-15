@@ -131,15 +131,36 @@ export class DefaultDescriptionService {
     log.info(`[DefaultDescription] sim ${name}: ${stored ? 'stored' : 'skipped (already described)'}`);
   }
 
-  private async generateLocationDescription(location: LocationEntity, lot?: LotBlock, zoneName?: string) {
+  /**
+   * A card for one lot from the facts the game reported about it, for the Locations page's
+   * "Write with AI". Nothing is stored: the text goes into the editor, and the player's Save
+   * (or Save as Default for Everyone) is what keeps it. Undefined when the writer gave
+   * nothing that passes the gate.
+   */
+  async describeLocation(
+    location: LocationEntity,
+    lot: LotBlock | undefined,
+    zoneName?: string,
+  ): Promise<{ description: string; facts: string } | undefined> {
     const facts = lotFacts(location, lot, zoneName);
     const label = zoneName || location.name || 'this place';
     const description = await this.writeLocationDescription(label, facts, lot?.venue);
-    if (!description) {
+    return description ? { description, facts } : undefined;
+  }
+
+  private async generateLocationDescription(location: LocationEntity, lot?: LotBlock, zoneName?: string) {
+    const written = await this.describeLocation(location, lot, zoneName);
+    if (!written) {
       return;
     }
+    const label = zoneName || location.name || 'this place';
     const lotType = lot?.venue ? lotTypeLabel(lot.venue) : undefined;
-    const stored = this.ctx.locationRepository.setDescriptionIfGeneric(location, description, zoneName, lotType);
+    const stored = this.ctx.locationRepository.setDescriptionIfGeneric(
+      location,
+      written.description,
+      zoneName,
+      lotType,
+    );
     log.info(`[DefaultDescription] location ${label}: ${stored ? 'stored' : 'skipped (already described)'}`);
   }
 
