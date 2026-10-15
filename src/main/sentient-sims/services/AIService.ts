@@ -31,6 +31,7 @@ import {
 import { voiceTypeForTTS } from '../models/VoiceType';
 import { markScenePaced } from '../util/pacedScenes';
 import { applySimAliasNames } from '../util/simAliases';
+import { canSpeak } from '../util/speechCapability';
 import { SceneAbortedError } from '../exceptions/SceneAbortedError';
 import { GenerationCallControl } from './GenerationService';
 import { GenerationOptions, PromptRequestBuilderOptions } from './PromptRequestBuilderService';
@@ -412,6 +413,9 @@ type PlaybackOptions = {
   // playback) instead of suppressing it with the unpaced memory block — for solo
   // player-directed generations that should still show on screen.
   pacedSubtitles?: boolean;
+  // Nothing is voiced: the actor cannot speak (util/speechCapability), so the output is
+  // kept as text only
+  silent?: boolean;
   // V-2: play this scene next (front of the renderer's scene queue) — the reply to
   // something the player just said
   priority?: boolean;
@@ -998,6 +1002,7 @@ ${factsBlock}
         // Wants are the actor's own first-person voice — speak them as the actor so the
         // sim's cast/pinned ElevenLabs voice is used instead of the global default
         ttsSpeaker: event.sentient_sims[0]?.name,
+        silent: event.sentient_sims.length > 0 && !canSpeak(this.ctx, event.sentient_sims[0]),
       },
     );
   }
@@ -1195,6 +1200,13 @@ ${factsBlock}
     };
 
     let promptRequest = await this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
+    // Speech switched off for pets and infants: the narrator never gives them a line
+    const silentNames = event.sentient_sims.filter((sim) => !canSpeak(this.ctx, sim)).map((sim) => sim.name);
+    if (silentNames.length > 0) {
+      promptRequest.systemPrompt = `${promptRequest.systemPrompt}\n${silentNames.join(' and ')} cannot speak: never write a spoken line for ${
+        silentNames.length === 1 ? 'this character' : 'these characters'
+      }, only what they do and feel.`;
+    }
 
     // save memory before any model specific formatting
     const newMemory: MemoryEntity = {
@@ -1306,7 +1318,9 @@ ${factsBlock}
       if (!directedScenes) {
         newMemory.content = output;
         // Classic playback: one narrator utterance, no per-speaker parsing or voice casting
-        this.playTtsLines([{ speaker: 'Narrator', text: output }]);
+        if (!playbackOptions.silent) {
+          this.playTtsLines([{ speaker: 'Narrator', text: output }]);
+        }
         return {
           status: InteractionEventStatus.GENERATED,
           text: output,
@@ -1347,7 +1361,9 @@ ${factsBlock}
       newMemory.content = output;
 
       const play = once(() => {
-        if (playbackOptions.pacedSubtitles) {
+        if (playbackOptions.silent) {
+          // Text only: the memory row shows it, nobody voices it
+        } else if (playbackOptions.pacedSubtitles) {
           // Same paced pipeline as directed scenes: the memory block's subtitle is
           // suppressed (paced flag on memory_created) and each line reaches the mod
           // as it starts playing
@@ -1357,7 +1373,7 @@ ${factsBlock}
               output,
               event.sentient_sims.map((sim) => sim.name),
             ),
-          );
+          ).filter((line) => !silentNames.includes(line.speaker));
           this.playTtsLines(lines, event.sentient_sims, { paced: true, pacedText: output });
         } else if (playbackOptions.ttsSpeaker) {
           this.playTtsLines([{ speaker: playbackOptions.ttsSpeaker, text: output }], event.sentient_sims);
@@ -1654,6 +1670,11 @@ ${factsBlock}
     // The player's line is already spoken, so that sim takes no turn — everyone else replies to it
     const performers = event.sentient_sims.filter((sim) => !playerLine || sim.name !== playerLine.speaker);
     const performerNames = performers.map((sim) => sim.name);
+    // A pet or an infant with speech switched off (util/speechCapability) takes its turn
+    // in thought only: briefed, scored and remembered like anyone else, no line aired
+    const speakers = performers.filter((sim) => canSpeak(this.ctx, sim));
+    const speakerNames = speakers.map((sim) => sim.name);
+    const silentNames = performerNames.filter((name) => !speakerNames.includes(name));
     // Player-facing: a reply to a line the player typed or said (chat window, voice,
     // conscience, Twitch). Full-length straight answers, the sim's live status in the
     // prompt, the thread as context, and a reply that may act on what was said.
@@ -1718,7 +1739,8 @@ ${factsBlock}
 
     // A lone sim runs the same pipeline with the dialogue stage NULLed: director, then
     // inner monologue only, then scores. There is no narrator — a solo beat is a thought.
-    const monologueOnly = performers.length === 1 && !playerLine;
+    // So is a beat whose performers can none of them speak.
+    const monologueOnly = speakers.length === 0 || (performers.length === 1 && !playerLine);
 
     const exchanges: LLMExchange[] = [];
     // The mod abandons an interaction request after 80 seconds, so each stage checks the
@@ -1749,6 +1771,7 @@ ${factsBlock}
       monologueOnly,
       playerFacing,
       statusBlock: directorStatus || undefined,
+      silentNames,
     });
 
     // A failed briefing is recoverable � actors fall back to the raw scene context below
@@ -1842,10 +1865,11 @@ ${factsBlock}
       if (actorFacts) {
         factsBySim.set(sim.name, actorFacts);
       }
+      const thinkOnly = monologueOnly || silentNames.includes(sim.name);
       const actorSystemPrompt = buildSpeechSystemPrompt({
         simName: sim.name,
         actorPrompt: actorPrompts.get(sim.name) ?? '',
-        monologueOnly,
+        monologueOnly: thinkOnly,
         factsBlock: actorFacts,
         playerFacing,
         statusBlock: playerFacing ? this.selfStatusBlock(sim.sim_id) || undefined : undefined,
@@ -1881,8 +1905,8 @@ ${factsBlock}
         const parsed = parseActorPerformance(performance.text, simNames, { multiLineSay: playerFacing });
         // In a solo beat everything the actor produced is thought — an untagged reply
         // (parsed as say) is still the monologue
-        let say = monologueOnly ? '' : parsed.say;
-        let think = parsed.think || (monologueOnly ? parsed.say : '');
+        let say = thinkOnly ? '' : parsed.say;
+        let think = parsed.think || (thinkOnly ? parsed.say : '');
         // The actor wrote somebody else's line (typically the player's next line in a
         // continued voice scene) — drop it rather than air it as this sim's own words
         // The player's own label is in the set too: with a custom name set, "Robin: ..."
@@ -1919,8 +1943,9 @@ ${factsBlock}
 
     if (monologueOnly) {
       return this.finishMonologueScene(event, options, playbackOptions, {
-        performer: performers[0],
-        think: monologueBySim.get(performers[0].sim_id),
+        performances: performers.map((sim) => ({ performer: sim, think: monologueBySim.get(sim.sim_id) })),
+        // A silent cast keeps its thoughts to itself; a lone speaker voices theirs
+        aloud: speakers.length > 0,
         sharedScene,
         sceneAction,
         displayAction,
@@ -1945,8 +1970,9 @@ ${factsBlock}
       performerNames,
       hasPlayerLine: Boolean(playerLine),
       playerLineSpeaker: playerLine?.speaker,
-      performerNamesList: formatListToString(performerNames),
+      performerNamesList: formatListToString(speakerNames),
       factsBySim,
+      speakerNames,
     });
 
     // The review pass is a polish step: without time or on failure, the actors' lines air as delivered
@@ -2085,7 +2111,7 @@ ${factsBlock}
     // conversation forward" — and the actor obliged by writing the player's next line
     // as their own thought (live 2026-08-17: "The Voice: Let's just say I've been
     // watching…" aired as Ehren's inner monologue). The player speaks next, not the sim.
-    const partnerless = Boolean(playerLine) && performers.length === 1;
+    const partnerless = Boolean(playerLine) && speakers.length === 1;
     // (a monologue-only beat returned above, so it never reaches this gate)
     // An interaction the game is blocked on is already queued: the next round would hold
     // the queue for most of the mod's 80 s and the interaction would time out behind it.
@@ -2331,19 +2357,19 @@ ${factsBlock}
     };
   }
 
-  // Completion path for a monologue-only (solo) directed scene: no dialogue, no reviewer.
-  // The thought IS the scene — scored by the reflection stage, spoken aloud in the sim's
-  // own voice and subtitled as "<Name> (to self):" via the paced scene-line stream. The
-  // memory row still records it as a thought ("<Name> (thinking):"), typed 'monologue' so
-  // it stays out of shared scene history, and the memories POST stamps single-participant
-  // monologue rows with their owner.
+  // Completion path for a directed scene with no dialogue: no reviewer. The thought IS the
+  // scene — scored by the reflection stage and recorded as a thought ("<Name> (thinking):"),
+  // typed 'monologue' so it stays out of shared scene history, with the memories POST
+  // stamping single-participant monologue rows with their owner. A lone sim who can speak
+  // (`aloud`) also says it in their own voice, subtitled as "<Name> (to self):" via the
+  // paced scene-line stream; a cast with speech switched off keeps it to text.
   private async finishMonologueScene(
     event: SSEvent,
     options: DirectedGenerationOptions,
     playbackOptions: PlaybackOptions,
     scene: {
-      performer: SentientSim;
-      think?: string;
+      performances: { performer: SentientSim; think?: string }[];
+      aloud: boolean;
       sharedScene: string;
       sceneAction: string;
       // The beat without the actors' scaffolding — what the memory row may show
@@ -2352,45 +2378,59 @@ ${factsBlock}
       exchanges: LLMExchange[];
     },
   ): Promise<InteractionEventResult> {
-    const { performer, think, sharedScene, sceneAction, displayAction, directorDirection, exchanges } = scene;
-    if (!think || think.length <= 1) {
-      log.error(`No inner monologue produced for ${performer.name}`);
+    const { aloud, sharedScene, sceneAction, displayAction, directorDirection, exchanges } = scene;
+    const thoughts = scene.performances.filter((entry): entry is { performer: SentientSim; think: string } =>
+      Boolean(entry.think && entry.think.length > 1),
+    );
+    if (thoughts.length === 0) {
+      log.error(
+        `No inner monologue produced for ${scene.performances.map((entry) => entry.performer.name).join(', ')}`,
+      );
       return { status: InteractionEventStatus.NOOP, exchanges };
     }
 
     const sceneScores = await this.runSceneScores(
       sharedScene || sceneAction,
       '',
-      [{ name: performer.name, think }],
+      thoughts.map(({ performer, think }) => ({ name: performer.name, think })),
       options.directorModel,
       actionTypeForEvent(event.event_type),
     );
     if (sceneScores.exchange) {
       exchanges.push(sceneScores.exchange);
     }
-    const score = sceneScores.scores.get(performer.name);
-    if (score) {
-      log.info(
-        `[Pipeline] Scene scores — ${performer.name}: memory ${score.memory}, action ${score.action}${
-          score.action_reason ? ` (${score.action_reason})` : ''
-        }`,
-      );
+    if (sceneScores.scores.size > 0) {
+      const summary = [...sceneScores.scores.entries()]
+        .map(
+          ([name, score]) =>
+            `${name}: memory ${score.memory}, action ${score.action}${score.action_reason ? ` (${score.action_reason})` : ''}`,
+        )
+        .join('; ');
+      log.info(`[Pipeline] Scene scores — ${summary}`);
     }
-    this.armCognitionDesires(event, sceneScores.scores, new Map([[performer.name, think]]));
+    this.armCognitionDesires(
+      event,
+      sceneScores.scores,
+      new Map(thoughts.map(({ performer, think }) => [performer.name, think])),
+    );
 
-    const finalText = `${performer.name} (thinking): ${think}`;
-    const newMemory: MemoryEntity = {
-      content: finalText,
-      location_id: event.environment.location_id,
-      event_type: 'monologue',
-      // The beat that drove the thought heads the row in the memories window — the bare
-      // beat, never the director's instructions to the actor
-      action: displayAction ?? sceneAction,
-    };
     const interactionName = (event as Partial<InteractionEvent>).interaction_name;
-    if (interactionName) {
-      newMemory.interaction_name = interactionName;
-    }
+    const rows = thoughts.map(({ performer, think }) => {
+      const text = `${performer.name} (thinking): ${think}`;
+      const memory: MemoryEntity = {
+        content: text,
+        location_id: event.environment.location_id,
+        event_type: 'monologue',
+        // The beat that drove the thought heads the row in the memories window — the bare
+        // beat, never the director's instructions to the actor
+        action: displayAction ?? sceneAction,
+      };
+      if (interactionName) {
+        memory.interaction_name = interactionName;
+      }
+      return { performer, think, text, memory };
+    });
+    const finalText = rows.map((row) => row.text).join('\n');
 
     this.recordTrace([finalText, formatSceneForChatWindow(finalText)], {
       pipeline: 'directed_scene',
@@ -2399,38 +2439,45 @@ ${factsBlock}
     });
 
     // A solo beat is the same inner voice the cognition tick produces, so it keeps to the
-    // same bar: routine narration ("I put the seed in the ground") is thought and spoken
-    // aloud, but never written down. Without this a sim alone filed a memory row for every
-    // chore she finished, burying the real beats and feeding her own small talk back
-    // through recall.
-    const memoryScore = score?.memory;
-    const storable = memoryScore === undefined || memoryScore >= thoughtMemoryFloor;
-    if (!storable) {
-      log.info(`[Pipeline] ${performer.name}'s thought scored ${memoryScore}; not stored`);
-    }
-    if (options.saveMemory && storable) {
-      const participants = this.ctx.participantRepository.getParticipants([
-        { id: performer.sim_id, fullName: performer.name },
-      ]);
-      // The monologue row reaches the mod's memories window live as the sim's thought;
-      // the mod keeps monologue rows off the subtitle/pause path.
-      this.ctx.memoryRepository.createMemory({
-        memory: newMemory,
-        participants,
-        index: { owner: performer.sim_id, importance: score?.memory },
-      });
-    }
+    // same bar: routine narration ("I put the seed in the ground") is thought, but never
+    // written down. Without this a sim alone filed a memory row for every chore she
+    // finished, burying the real beats and feeding her own small talk back through recall.
+    rows.forEach(({ performer, memory }) => {
+      const score = this.findScore(sceneScores.scores, performer);
+      const memoryScore = score?.memory;
+      const storable = memoryScore === undefined || memoryScore >= thoughtMemoryFloor;
+      if (!storable) {
+        log.info(`[Pipeline] ${performer.name}'s thought scored ${memoryScore}; not stored`);
+      }
+      if (options.saveMemory && storable) {
+        const participants = this.ctx.participantRepository.getParticipants([
+          { id: performer.sim_id, fullName: performer.name },
+        ]);
+        // The monologue row reaches the mod's memories window live as the sim's thought;
+        // the mod keeps monologue rows off the subtitle/pause path.
+        this.ctx.memoryRepository.createMemory({
+          memory,
+          participants,
+          index: { owner: performer.sim_id, importance: score?.memory },
+        });
+      }
+    });
 
-    // The thought plays aloud as a self-directed aside: marking the scene paced suppresses
+    // Aloud, the thought plays as a self-directed aside: marking the scene paced suppresses
     // the memory block's "(thinking)" subtitle when the mod POSTs the memory back, and the
     // renderer streams one "(to self)" line to the game timed to the sim's own voice. Only
     // the on-screen delivery changes — the memory row above still remembers it as a thought.
+    // Silent, the memory row is the whole delivery.
     const play = once(() => {
-      markScenePaced(finalText);
-      this.playTtsLines([{ speaker: `${performer.name} (to self)`, text: think }], event.sentient_sims, {
-        paced: true,
-        pacedText: finalText,
-      });
+      if (aloud) {
+        const [{ performer, think }] = rows;
+        markScenePaced(finalText);
+        this.playTtsLines([{ speaker: `${performer.name} (to self)`, text: think }], event.sentient_sims, {
+          paced: true,
+          pacedText: finalText,
+        });
+      }
+      return true;
     });
     if (playbackOptions.deferPlayback) {
       playbackOptions.onPlaybackReady?.(play);
@@ -2442,7 +2489,7 @@ ${factsBlock}
       status: InteractionEventStatus.GENERATED,
       text: formatSceneForChatWindow(finalText),
       exchanges,
-      memory: newMemory,
+      memory: rows[0].memory,
     };
   }
 
@@ -2519,7 +2566,9 @@ ${factsBlock}
     if (!playerLine || options.standalone) {
       return undefined;
     }
-    const performers = event.sentient_sims.filter((sim) => sim.name !== playerLine.speaker);
+    // Only a sim who can answer aloud holds a thread; a pet with speech off replies in
+    // thought once and there is nothing for the scorer to close
+    const performers = event.sentient_sims.filter((sim) => sim.name !== playerLine.speaker && canSpeak(this.ctx, sim));
     if (performers.length === 0) {
       return undefined;
     }

@@ -78,4 +78,10 @@ describe('Settings', () => {
     ctx.settings.aiApiType = ApiType.ElevenLabs;
     expect(ctx.settings.aiApiType).toEqual(ApiType.ElevenLabs);
   });
+
+  it('pets, babies and infants speak unless the player switches them off', () => {
+    expect(ctx.settings.nonControllableSimsSpeak).toBe(true);
+    ctx.settings.set(SettingsEnum.NON_CONTROLLABLE_SIMS_SPEAK, false);
+    expect(ctx.settings.nonControllableSimsSpeak).toBe(false);
+  });
 });
