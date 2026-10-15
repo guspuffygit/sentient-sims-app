@@ -26,14 +26,26 @@ export type BriefingPromptContext = {
   // director invented a "want for this scene" and the Sim had nothing definite to say
   // when asked what they want.
   statusBlock?: string;
+  // Performers who cannot speak (a pet or an infant with speech switched off): briefed
+  // for their inner life only, while the others carry the dialogue
+  silentNames?: string[];
 };
 
 export function buildBriefingSystemPrompt(context: BriefingPromptContext): string {
   const { simNames, performerNames, monologueOnly, playerFacing, statusBlock } = context;
+  const silentNames = context.silentNames ?? [];
   const sceneContext = statusBlock ? `${context.sceneContext}\n${statusBlock}` : context.sceneContext;
-  const soloNote = monologueOnly
-    ? `\n\nThis is a SOLO beat: ${performerNames[0]} is alone with what they are doing — there is no conversation, and the actor will deliver only private inner monologue. The Inner life direction carries the whole scene.`
-    : '';
+  const allSilent = silentNames.length > 0 && performerNames.every((name) => silentNames.includes(name));
+  let soloNote = '';
+  if (allSilent) {
+    soloNote = `\n\nThis is a SILENT beat: ${silentNames.join(' and ')} cannot speak — there is no dialogue, and every actor will deliver only private inner monologue. The Inner life direction carries the whole scene.`;
+  } else if (monologueOnly) {
+    soloNote = `\n\nThis is a SOLO beat: ${performerNames[0]} is alone with what they are doing — there is no conversation, and the actor will deliver only private inner monologue. The Inner life direction carries the whole scene.`;
+  } else if (silentNames.length > 0) {
+    soloNote = `\n\n${silentNames.join(' and ')} cannot speak: ${
+      silentNames.length === 1 ? 'this character' : 'these characters'
+    } will deliver only private inner monologue, so their private briefing directs the Inner life alone — no line to say — and the other actors carry the dialogue, never speaking for them.`;
+  }
   const lengthRule = playerFacing
     ? `- Direct them to answer FULLY and PLAINLY: this is someone talking to the character directly, and a dodge, a question back instead of an answer, or a bare "I don't know" is a failed performance. A real answer with its reasons can run several sentences.
 - The Want line must come from the character's <STATUS> and <TODAYS_PLAN> blocks when they are present (their current wants, needs and today's goals), never invented. When asked what they want, that is what they answer with.`
@@ -189,10 +201,19 @@ export type SceneReviewPromptContext = {
   // her father, Ariel her sister) and "I'm seeing someone" (no partner on record) both
   // passed review untouched. Absent or empty, the prompt is byte-identical to before.
   factsBySim?: Map<string, string>;
+  // The performers who may speak; absent, every performer does
+  speakerNames?: string[];
 };
 
 export function buildSceneReviewSystemPrompt(context: SceneReviewPromptContext): string {
   const { simNames, hasPlayerLine, playerLineSpeaker, performerNamesList, factsBySim } = context;
+  // Two speakers or more must each keep their turn; a lone speaker (the others silent) is
+  // not a collapsed scene
+  const speakerCount = (context.speakerNames ?? context.performerNames).length;
+  const shapeRule =
+    speakerCount >= 2
+      ? '- Both characters must speak — never collapse the scene to a single line\n- Keep it to two to four lines total, each one short'
+      : '- Keep it to one to three lines total, each one short';
 
   // A reply to the player is answered at whatever length the answer needs; a dodge is the
   // defect there, not the length. Sim-to-sim banter keeps the trim.
@@ -241,7 +262,7 @@ ${factsCheck}Respond with the final scene as one line per row in exactly this fo
 ${
   hasPlayerLine
     ? `- ${playerLineSpeaker}'s line was already spoken and is there only as the line being replied to — never return it\n- Return only ${performerNamesList}'s delivered lines, at the length they were delivered — never shorten a full answer`
-    : '- Both characters must speak — never collapse the scene to a single line\n- Keep it to two to four lines total, each one short'
+    : shapeRule
 }
 - Return exactly the delivered lines, kept or repaired — never lines from "Previously in this scene", and never new lines of your own`;
 }
