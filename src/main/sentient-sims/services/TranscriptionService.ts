@@ -8,7 +8,7 @@ import { ApiType } from '../models/ApiType';
 import { VoiceInputProvider, voiceInputProviderName } from '../models/VoiceInputProvider';
 import { isOpenRouterEndpoint, openrouterAttributionHeaders } from '../models/OpenRouterModels';
 import { VOICE_INPUT_LANGUAGES } from '../models/VoiceInputLanguages';
-import { buildTranscriptionPrompt } from '../util/nameCorrection';
+import { buildTranscriptionPrompt, isPromptEcho } from '../util/nameCorrection';
 import { getRandomItem } from '../util/getRandomItem';
 
 export class TranscriptionError extends Error {
@@ -135,10 +135,12 @@ export class TranscriptionService {
       let locations: string[] = [];
       try {
         const lotId = report?.lot?.zone_id;
-        locations = this.ctx.locationRepository
-          .getAllLocations()
-          .filter((location) => lotId === undefined || String(location.id) === String(lotId))
-          .map((location) => location.name);
+        if (lotId !== undefined) {
+          locations = this.ctx.locationRepository
+            .getAllLocations()
+            .filter((location) => String(location.id) === String(lotId))
+            .map((location) => location.name);
+        }
       } catch {
         locations = [];
       }
@@ -158,15 +160,18 @@ export class TranscriptionService {
     const { provider } = this;
 
     try {
+      let text: string;
       if (provider === ApiType.SentientSimsAI) {
         const format = mimeType.split(';')[0].split('/')[1] ?? 'webm';
-        const text = await this.ctx.sentientSimsTranscription.transcribe(Buffer.from(audio), format, language, prompt);
-        return text.trim();
+        text = (
+          await this.ctx.sentientSimsTranscription.transcribe(Buffer.from(audio), format, language, prompt)
+        ).trim();
+      } else if (provider === ApiType.Gemini) {
+        text = await this.transcribeWithGemini(audio, mimeType, language, prompt);
+      } else {
+        text = await this.transcribeOpenAICompatible(provider, audio, mimeType, language, prompt);
       }
-      if (provider === ApiType.Gemini) {
-        return await this.transcribeWithGemini(audio, mimeType, language, prompt);
-      }
-      return await this.transcribeOpenAICompatible(provider, audio, mimeType, language, prompt);
+      return isPromptEcho(text, prompt) ? '' : text;
     } catch (error) {
       log.error(`Voice transcription failed (${voiceInputProviderName(provider)}):`, error);
       throw error instanceof TranscriptionError ? error : new TranscriptionError(errorMessage(error));

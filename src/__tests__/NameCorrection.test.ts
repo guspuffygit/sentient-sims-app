@@ -3,6 +3,7 @@ import {
   buildTranscriptionPrompt,
   correctNames,
   correctPlaces,
+  isPromptEcho,
   levenshtein,
 } from '../main/sentient-sims/util/nameCorrection';
 
@@ -84,6 +85,16 @@ describe('STT dictionary (V-7)', () => {
     );
     const many = Array.from({ length: 200 }, (_, index) => `Person Number${index}`);
     expect(buildTranscriptionPrompt([many])?.length).toBeLessThanOrEqual(720);
+  });
+
+  it('treats the prompt handed back as the transcript as nothing heard', () => {
+    const prompt = buildTranscriptionPrompt([['Jasmine Groves']]);
+    expect(isPromptEcho('Names in this scene: Jasmine Groves.', prompt)).toBe(true);
+    expect(isPromptEcho('names in this scene jasmine groves', prompt)).toBe(true);
+    expect(isPromptEcho('Names in this scene: Willow Creek Archive, The Blue Velvet.', prompt)).toBe(true);
+    expect(isPromptEcho('Hello, Jasmine.', prompt)).toBe(false);
+    expect(isPromptEcho('Names in this scene: Jasmine Groves.', undefined)).toBe(false);
+    expect(isPromptEcho('', prompt)).toBe(false);
   });
 
   it('levenshtein basics', () => {

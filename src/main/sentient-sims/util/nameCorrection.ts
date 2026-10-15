@@ -57,6 +57,21 @@ export function buildTranscriptionPrompt(nameGroups: (string | null | undefined)
   return prompt;
 }
 
+// Whisper hands the prompt back as the transcript when the recording holds no speech
+// (live 10-14: "Names in this scene: Jasmine Groves." reached the sim as the player's line)
+export function isPromptEcho(transcript: string, prompt: string | undefined): boolean {
+  if (!prompt || !transcript) {
+    return false;
+  }
+  const normalize = (text: string) =>
+    text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  const heard = normalize(transcript);
+  return heard === normalize(prompt) || heard.startsWith('names in this scene');
+}
+
 // Loose phonetic normalization so "Lily" and "Lillie" (or "Meika"/"Mika") compare close:
 // doubled letters collapse, y/ie -> i, ph -> f, ck -> k, silent-w wr -> r ("Wren" is
 // heard as "Ren"/"Rin", live 08-27), and a silent final e drops ("Adrienne" for Adrian,
