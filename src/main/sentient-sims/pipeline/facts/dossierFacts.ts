@@ -8,6 +8,7 @@
 // rendered live into <KNOWN_FACTS> through the same word bands the tick prompt uses.
 
 import { SimDossier } from '../../models/SimDossier';
+import { businessText, careerBranchWords } from '../../util/factWords';
 import { FactPredicate } from './predicates';
 
 export type DerivedFact = {
@@ -20,6 +21,18 @@ export type DerivedFact = {
 // predicate and object all match.
 export function factKey(fact: { predicate: string; objectText?: string; objectSimId?: string }): string {
   return `${fact.predicate}\u0000${fact.objectSimId ?? ''}\u0000${fact.objectText ?? ''}`;
+}
+
+// 'romantic-Broken_Up' -> 'broke up', 'romantic-Divorced' -> 'divorced'; undefined when
+// the pair never ended anything
+export function exPartnerWords(bits: string[]): string | undefined {
+  if (bits.some((bit) => /^romantic-Divorced$/i.test(bit))) {
+    return 'divorced';
+  }
+  if (bits.some((bit) => /^romantic-Broken_?Up$/i.test(bit))) {
+    return 'broke up';
+  }
+  return undefined;
 }
 
 export type DossierToFactsOptions = {
@@ -112,6 +125,17 @@ export function dossierToFacts(dossier: SimDossier, options: DossierToFactsOptio
   for (const trait of dossier.traits ?? []) {
     add(FactPredicate.TRAIT, trait);
   }
+  // Reward traits were sent from the first dossier build and ignored here until
+  // 2026-10-13: Alex Moyer's Business Savvy never reached her facts
+  // Every reward the mod sends. A first draft filtered these through the descriptions'
+  // `ignored` flag, which is a list of traits not worth a sentence in a scene and marks
+  // Top-Notch Infant and Inspired Explorer - rewards the player sees on the panel.
+  for (const trait of dossier.reward_traits ?? []) {
+    add(FactPredicate.REWARD_TRAIT, trait);
+  }
+  for (const phase of dossier.phases ?? []) {
+    add(FactPredicate.PHASE, phase);
+  }
   for (const fear of dossier.fears ?? []) {
     add(FactPredicate.FEAR, fear);
   }
@@ -126,14 +150,23 @@ export function dossierToFacts(dossier: SimDossier, options: DossierToFactsOptio
   }
   for (const career of dossier.careers ?? []) {
     if (career.career) {
-      // The level is part of the claim: a promotion should read as a new fact and retire
-      // the old one, which is exactly what a diff over this string does.
-      add(FactPredicate.JOB, career.level ? `${career.career} (level ${career.level})` : career.career);
+      // The level and the branch are part of the claim: a promotion or a branch choice
+      // should read as a new fact and retire the old one, which is exactly what a diff
+      // over this string does. The starting track adds nothing, so it is left off and a
+      // sim who has not branched keeps the claim an older mod build sent.
+      const name = careerBranchWords(career.track) ? `${career.career}/${career.track as string}` : career.career;
+      add(FactPredicate.JOB, career.level ? `${name} (level ${career.level})` : name);
     }
   }
-  // Only skills a sim would actually mention. Level 1 in everything is noise.
+  for (const business of dossier.businesses ?? []) {
+    if (business.name) {
+      add(FactPredicate.BUSINESS, businessText(business.name, business.type));
+    }
+  }
+  // Every skill the mod reports (its top 8 by level). Level 1 used to be dropped as
+  // noise, but what a sim is bad at informs a reply as much as what it is good at.
   for (const skill of dossier.top_skills ?? []) {
-    if (skill.skill && (skill.level ?? 0) >= 3) {
+    if (skill.skill && (skill.level ?? 0) >= 1) {
       add(FactPredicate.SKILL, `${skill.skill} (level ${skill.level})`);
     }
   }
@@ -141,6 +174,12 @@ export function dossierToFacts(dossier: SimDossier, options: DossierToFactsOptio
   for (const edge of dossier.relationships ?? []) {
     if (edge.has_met) {
       add(FactPredicate.KNOWS, undefined, edge.sim_id);
+    }
+    // An ex is a fact (Lillie and Jake broke up), even though the score that remains is
+    // not. The bit is the game's own record of it.
+    const ex = exPartnerWords(edge.bits ?? []);
+    if (ex) {
+      add(FactPredicate.EX_PARTNER, ex, edge.sim_id);
     }
   }
 

@@ -18,6 +18,7 @@ import { useOnDatabaseLoaded } from './hooks/useOnDatabaseLoaded';
 import { useActiveVoiceType } from './hooks/useActiveVoiceType';
 import { useWebsocket } from './providers/WebsocketProvider';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
+import { TIER } from './tiers/index';
 
 type SelectedSim = {
   sim: ParticipantDTO;
@@ -326,6 +327,8 @@ export default function SimsPage() {
                 initialState={{
                   pagination: { paginationModel: { page: 0, pageSize: -1 } },
                   sorting: { sortModel: [{ field: 'name', sort: 'asc' }] },
+                  // The game id is a developer's number; a player can still show the column
+                  columns: { columnVisibilityModel: { id: TIER === 'dev' } },
                 }}
                 slots={{
                   footer: BlankDataGridFooterComponent,

@@ -87,6 +87,13 @@ describe('renderKnownFacts', () => {
     expect(jobWords('career_Adult_TechGuru (level 2)')).toBe('you work in the Tech Guru career, level 2');
   });
 
+  it('says a business owner owns it, and is not jobless', () => {
+    const block = render({ selfFacts: [...summerFacts, fact(FactPredicate.BUSINESS, 'Vale Curios')] });
+    expect(block).toContain('you own a small business, Vale Curios');
+    expect(block).not.toContain('you are retired');
+    expect(block).not.toContain('you have no job');
+  });
+
   it('names the people the sim lives with, not just the household', () => {
     // Live 2026-09-03: asked who she lived with, Summer answered "BFF" - the household name
     // was the only name anywhere in her prompt
@@ -312,6 +319,60 @@ describe('renderKnownFacts', () => {
     expect(block).toContain('- Bosun (dog, he/him): your dog, a good friend');
     // "your dog" already says he lives here
     expect(block).not.toContain('you live together');
+  });
+
+  it('names an ex in the sim life', () => {
+    const block = render({
+      selfFacts: [fact(FactPredicate.EX_PARTNER, 'broke up', '500')],
+      hasDossier: false,
+    });
+    expect(block).toContain('- Liberty Lee is your ex (you broke up)');
+  });
+
+  it('puts reward traits with the personality and a child phase on its own line', () => {
+    const block = render({
+      selfFacts: [
+        fact(FactPredicate.TRAIT, 'trait_Insane'),
+        fact(FactPredicate.REWARD_TRAIT, 'trait_Business_Savvy'),
+        fact(FactPredicate.PHASE, 'trait_ChildhoodPhase_Clingy'),
+        fact(FactPredicate.PHASE, 'trait_ChildConfidence_High'),
+        // The game types this WickedWhims trait as a PHASE; it is a trait, not a phase
+        fact(FactPredicate.PHASE, 'TURBODRIVER:WickedWhims_Trait_FertilityIssues'),
+      ],
+      hasDossier: false,
+    });
+    expect(block).toContain('- your personality: Erratic, Business Savvy, Hypofertile');
+    expect(block).toContain('- right now: you are going through a clingy phase, your confidence is high');
+    expect(block).not.toContain('Hypofertile phase');
+  });
+
+  it('lists skills highest first, level 1 included', () => {
+    const block = render({
+      selfFacts: [
+        fact(FactPredicate.SKILL, 'AdultMajor_HomestyleCooking (level 1)'),
+        fact(FactPredicate.SKILL, 'AdultMajor_Charisma (level 9)'),
+        fact(FactPredicate.SKILL, 'Fitness (level 4)'),
+      ],
+      hasDossier: false,
+    });
+    expect(block).toContain('- your skills: Charisma (level 9), Fitness (level 4), Cooking (level 1)');
+  });
+
+  it('lists turn-ons and turn-offs apart from likes and dislikes', () => {
+    const block = render({
+      selfFacts: [
+        fact(FactPredicate.LIKES, 'trait_SimPreference_Likes_Activities_Cooking'),
+        fact(FactPredicate.LIKES, 'trait_Attraction_Activities_Broke_TurnOn'),
+        fact(FactPredicate.DISLIKES, 'trait_SimPreference_Dislikes_Music_Metal'),
+        fact(FactPredicate.DISLIKES, 'trait_Attraction_HairColor_Green_TurnOff'),
+      ],
+      hasDossier: false,
+    });
+    expect(block).toContain('- you like: Cooking');
+    expect(block).toContain('- you dislike: Metal music');
+    expect(block).toContain('- your turn-ons: Broke');
+    expect(block).toContain('- your turn-offs: Green hair');
+    expect(block).not.toContain('Cooking, Broke');
   });
 
   it('says what a pet is in its own facts', () => {

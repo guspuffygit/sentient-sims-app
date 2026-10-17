@@ -9,6 +9,8 @@ export type SimFactsResponse = {
   names: Record<string, string>;
   // The game's Species name (DOG, CAT, ...) for each named sim that is a pet
   species?: Record<string, string>;
+  // The live relationship with each sim met (scores and the game's bits), for sorting
+  relationships?: Record<string, { friendship?: number; romance?: number; bits?: string[] }>;
   facts: SimFactRecord[];
 };
 

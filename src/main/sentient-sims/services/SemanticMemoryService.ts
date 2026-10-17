@@ -62,6 +62,8 @@ const FAMILY_AND_PARTNER_PREDICATES: ReadonlySet<string> = new Set([
   FactPredicate.SPOUSE,
   FactPredicate.FIANCE,
   FactPredicate.STEADY,
+  // An ex is in a sim's life whether or not they still speak
+  FactPredicate.EX_PARTNER,
   // The family dog belongs in a sim's life as surely as a sibling does
   FactPredicate.PET,
 ]);

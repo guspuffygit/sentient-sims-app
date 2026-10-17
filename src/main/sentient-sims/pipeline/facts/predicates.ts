@@ -27,11 +27,20 @@ export const FactPredicate = {
   SPECIES: 'species',
   HOUSEHOLD: 'household',
   TRAIT: 'trait',
+  // A reward trait: earned from an aspiration (Business Savvy), a childhood (Top-Notch
+  // Infant) or a child's skills (Headstrong). Stays with the sim for life.
+  REWARD_TRAIT: 'reward_trait',
+  // A childhood phase (Clingy, Rebellious) or a child's confidence level: what a child
+  // is going through right now rather than who they are
+  PHASE: 'phase',
   FEAR: 'fear',
   LIKES: 'likes',
   DISLIKES: 'dislikes',
   ASPIRATION: 'aspiration',
   JOB: 'job',
+  // A business the sim owns: the name, with the kind after it unless it is a small
+  // business ('Vale Curios', 'Chez Vale (restaurant)')
+  BUSINESS: 'business',
   SKILL: 'skill',
   // edges
   HOUSEHOLD_MEMBER: 'household_member',
@@ -46,6 +55,9 @@ export const FactPredicate = {
   SPOUSE: 'spouse',
   FIANCE: 'fiance',
   STEADY: 'steady',
+  // A former partner: the game's romantic-Broken_Up / romantic-Divorced bit on the
+  // relationship. objectText carries which ('broke up', 'divorced').
+  EX_PARTNER: 'ex_partner',
   FAMILY_BIT: 'family_bit',
   KNOWS: 'knows',
 } as const;
@@ -62,6 +74,7 @@ export const EDGE_PREDICATES: ReadonlySet<string> = new Set([
   FactPredicate.SPOUSE,
   FactPredicate.FIANCE,
   FactPredicate.STEADY,
+  FactPredicate.EX_PARTNER,
   FactPredicate.FAMILY_BIT,
   FactPredicate.KNOWS,
 ]);
@@ -110,11 +123,15 @@ export const FACT_PREDICATE_HELP: Record<FactPredicate, string> = {
     'The name of the household this Sim belongs to, as shown in Manage Worlds (for example "Calloway"). ' +
     'It is the family name on the mailbox, not a list of who lives there - see "household member" for the people.',
   trait: 'A personality trait from Create a Sim, like Cheerful or Loner.',
+  reward_trait:
+    "A trait the Sim earned and keeps: from an aspiration, from a well-raised childhood, or from a child's skills.",
+  phase: 'What a child is going through right now: a childhood phase like Clingy, or their confidence level.',
   fear: 'A fear the Sim has picked up, like a fear of fire.',
   likes: 'Something the Sim likes: a colour, a music genre, an activity or a decor style.',
   dislikes: 'Something the Sim dislikes: a colour, a music genre, an activity or a decor style.',
   aspiration: 'The life goal the Sim is working towards.',
-  job: 'The career track and level the Sim is at. It is the career name, not the job title.',
+  job: 'The career the Sim is in, its branch once they have picked one, and their level. Not the job title.',
+  business: 'A business the Sim owns: a small business, retail store, restaurant or vet clinic.',
   skill: 'A skill the Sim is good at (level 3 or higher).',
   household_member: 'Someone who lives in the same home as this Sim, people and pets alike.',
   pet: 'An animal that lives with this Sim. The Sim knows it as their dog, cat, fox or horse, not as a person.',
@@ -125,6 +142,7 @@ export const FACT_PREDICATE_HELP: Record<FactPredicate, string> = {
   spouse: 'The Sim this Sim is married to.',
   fiance: 'The Sim this Sim is engaged to.',
   steady: 'The Sim this Sim is in a committed relationship with (boyfriend or girlfriend).',
+  ex_partner: 'A Sim this Sim used to be with: broken up or divorced.',
   family_bit:
     "The game's exact label for a family relationship. This is where step-, half- and in-law relations show up.",
   knows: 'Someone this Sim has met at least once.',

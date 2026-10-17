@@ -98,6 +98,51 @@ says them in plain words ("Glutton (Dog)", "Cooking", "Hip Hop music", "Nanny", 
 Facts dialog, so never prettify in one place only. A pet gets no HUMAN occult (dossierToFacts drops it when the species is
 known; recordSpecies retires one already stored). PUT /sims/:id/facts/:factId rewords a non-game fact: new row, old row
 retired with supersededBy (SemanticMemoryService.editFact); the dialog's Edit button on player facts uses it.
+The dialog's layout is util/factGroups.groupFacts (pure, tested in FactGroups.test.ts): a summary line (age, gender,
+species or occult, ghost, household, job, aspiration), then "Custom (Player Added)" first in the info colour (always
+shown, even empty; the add box is its own component so typing never re-renders the rows), then categories A to Z
+with rows A to Z, one Accordion each,
+"People met" folded, Likes/Dislikes/Turn-ons/Turn-offs split under sub-headings (factWords.preferenceParts: Colors,
+Activities, Conversation Topics, Types of Sims...), pets inside "Household Members", exes in Partners marked "(ex)"
+from the romantic-Divorced bit. The dialog adds only `note` facts (shown as "Custom (Player Added)"); the route still
+takes any predicate for the bench. Skills: every one the mod sends (its top 8), level 1 included, and the prompt has a
+"your skills:" line since 2026-10-13. NLS = Natural Living (factWords ABBREVIATIONS).
+Traits beyond Create a Sim (2026-10-13): the dossier's `reward_traits` (aspiration rewards like Business Savvy, child
+skill rewards, Top-Notch Infant/Toddler) become `reward_trait` facts and ride the prompt's personality line; `phases`
+(childhood phases and a child's confidence level, mod builds from 2026-10-13) become `phase` facts and a "right now:"
+line. The mod's dossier builder (sentient-sims-code-subtitles ss_sim_dossier.build_trait_groups) keeps PERSONALITY, FEAR,
+ASPIRATION, CHILD_REWARD, PHASE, name-matched TopNotch/Reward traits, and the WickedWhims MAJOR personality archetype
+(Lover, Sinister...) as a personality trait. On-screen names: trait_Insane is "Erratic", Characteristic_Idealist is
+"Artsy", HomestyleCooking is "Cooking", Bartending is "Mixology" (factWords TRAIT_NAMES / CHARACTERISTIC_NAMES / SKILL_NAMES - every on-screen alias lives in those three tables and is
+pinned by FactWords.test.ts; Lovestruck=Lovebug, Temperature_IceMan=Iceproof, BurningMan=Heatproof, TheKnack=Handy).
+WickedWhims archetypes read as the bare word, major or minor. The Sims page ID column is hidden outside the dev build.
+Exes: `ex_partner` edge from the dossier relationship bits romantic-Broken_Up / romantic-Divorced (objectText 'broke up' /
+'divorced'), in the prompt's life people and the dialog's Partners below the current ones. GET /sims/:id/facts also returns
+`relationships` (live scores + bits from the stored dossier) so the dialog's "Sims Met" splits into Best Friends / Good
+Friends / Friends / Acquaintances / On Bad Terms by the friendship bit. The mod sends every GAMEPLAY-typed trait minus a
+six-fragment plumbing list and both WickedWhims archetype tiers; the app keeps every reward it gets (the descriptions'
+`ignored` flag is NOT a reward filter - it marks Top-Notch Infant).
+Lovestruck turn-ons/turn-offs (trait_Attraction_*_TurnOn/Off, filed under likes/dislikes by the
+mod) are their own categories and their own prompt lines ("your turn-ons: ...", factWords.preferenceKind).
+Aspirations, career branches, businesses (2026-10-13): the base game names aspiration tracks by letter
+(Track_Family_A = Successful Lineage; factWords ASPIRATION_NAMES, read as the bare name "Successful Lineage"
+with no category after it; an unknown letter falls back to the category alone). The dialog's summary tags carry a heading each (Age, Gender,
+Household, Career, Business, Aspiration; FactSummaryItem.title) and there is no Aspiration category. The mod
+sends `track` per career (Athletic_Track3_BodyBuilder; mod builds from 2026-10-13) and the claim becomes
+`career_Adult_Athletic/Athletic_Track3_BodyBuilder (level 10)` ONLY once a branch is chosen (careerBranchWords
+ignores Track1 and NPC tracks), read as "Bodybuilder (Athletic, level 10)" and "the Athletic career
+(Bodybuilder branch)". `business` facts come from the mod's `businesses` (BusinessService.get_business_manager_for_sim
+for a Businesses & Hobbies small business, named by itself; get_business_managers_for_household for a retail
+store, restaurant or vet clinic, named after its lot): objectText is the name, with "(restaurant)" etc. after
+it unless it is a small business (businessText/businessParts); the prompt says "you own a small business,
+Vale Curios" and a business owner is never told "you have no job". Fears read as the panel names them
+(FEAR_NAMES: The Dark, Unfulfilled Dreams, Dead-End Job); WickedWhims rewards drop their system prefix
+(TURBODRIVER:WickedWhims_Trait_Nudity_NoSweat_Reward -> "Doesn't Sweat"). trait_Legendary is Beloved and
+trait_NosyNeighbor is Confidante on the panel. The game types WickedWhims' FertilityIssues ("Hypofertile") as a
+PHASE: factWords.isChildPhase tells a real childhood phase/confidence from it, and a non-child `phase` fact is
+shown and prompted as a plain personality trait. Turn-on/turn-off sub-headings follow the Lovestruck panel
+(ATTRACTION_GROUPS: Way of Life, Characteristics, Fashion, Hair Color, Outfit Color, Skills, Romance Styles;
+Performer is filed under Way of Life although the files put it in SkillArchetypes). Likes keep "Types of Sims".
 
 Mod log lines (2026-09-22): every `log` message from the mod is appended to Mods/sentient-sims/logs.txt under
 modsDirectory (util/format formatLog, timestamps in UTC) and, at INFO and above, mirrored into electron-log's

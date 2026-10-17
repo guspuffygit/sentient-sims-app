@@ -60,7 +60,13 @@ export class SimFactsController {
     const names = this.nameMap(ids);
     // Which of the named sims are animals, so the dialog can say "Bosun (dog)"
     const species = this.ctx.semanticMemory.speciesForIds(ids);
-    return res.json({ simId, names, species, facts: filtered });
+    // The live scores and bits per sim met, from the stored dossier: not facts (they
+    // drift), but the Facts window sorts the Sims met by them
+    const relationships: Record<string, { friendship?: number; romance?: number; bits?: string[] }> = {};
+    for (const edge of this.ctx.semanticMemory.readDossier(simId)?.relationships ?? []) {
+      relationships[edge.sim_id] = { friendship: edge.friendship, romance: edge.romance, bits: edge.bits };
+    }
+    return res.json({ simId, names, species, relationships, facts: filtered });
   };
 
   // GET /sims/:id/facts/path/:otherId — the chain of edges connecting two sims

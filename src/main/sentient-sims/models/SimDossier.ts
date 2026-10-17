@@ -55,15 +55,31 @@ export type SimDossier = {
   traits?: string[];
   fears?: string[];
   reward_traits?: string[];
+  // Childhood phases and a child's confidence level (trait_type PHASE); mod builds from
+  // 2026-10-13 send them, older ones omit the field
+  phases?: string[];
   likes?: string[];
   dislikes?: string[];
   aspiration?: { track?: string; aspiration?: string; objective?: string };
-  // `career` is the track's tuning class name (career_Adult_Culinary) and `level` the
-  // user-facing level. The job TITLE for that level (Line Cook, Mixologist) is a
-  // LocalizedString the mod cannot resolve without the game's string table, so the track
-  // is as specific as the app can get - rendered as "the Culinary career, level 4" rather
-  // than as a job title, since a sim handed a bare "Culinary (level 4)" invented one.
-  careers?: { career?: string; level?: number; performance?: number; at_work?: boolean; next_shift?: string }[];
+  // `career` is the career's tuning name (career_Adult_Culinary), `track` the branch track
+  // the sim is on (Athletic_Track3_BodyBuilder; Athletic_Track1 before the branch choice;
+  // mod builds from 2026-10-13) and `level` the user-facing level. The job TITLE for that
+  // level (Line Cook, Mixologist) is a LocalizedString the mod cannot resolve without the
+  // game's string table, so career and branch are as specific as the app can get -
+  // rendered as "the Culinary career, level 4" rather than as a job title, since a sim
+  // handed a bare "Culinary (level 4)" invented one.
+  careers?: {
+    career?: string;
+    track?: string;
+    level?: number;
+    performance?: number;
+    at_work?: boolean;
+    next_shift?: string;
+  }[];
+  // Businesses the sim owns (mod builds from 2026-10-13): a small business is owned by a
+  // sim and carries its own name; a retail store, restaurant or vet clinic is owned by the
+  // household and is named after its lot. `type` is the game's BusinessType name.
+  businesses?: { name?: string; type?: string; zone_id?: string; owner?: 'sim' | 'household' }[];
   top_skills?: { skill?: string; level?: number; raw?: number }[];
   relationships?: DossierRelationship[];
 };

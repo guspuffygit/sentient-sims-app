@@ -24,7 +24,16 @@
 
 import { FactPredicate } from '../pipeline/facts/predicates';
 import { speciesWord } from './alsoPresent';
-import { aspirationWords, careerParts, factValueWords, familyBitWords } from './factWords';
+import {
+  aspirationWords,
+  attractionWords,
+  businessParts,
+  careerParts,
+  factValueWords,
+  familyBitWords,
+  isChildPhase,
+  preferenceKind,
+} from './factWords';
 import { lifeStagePhrase } from './lifeStageWords';
 
 // The family-bit words live with the rest of the vocabulary now; re-exported because the
@@ -99,12 +108,20 @@ function joinWords(values: string[], conjunction: 'and' | 'or'): string {
 // best available - said as a career rather than as a job title, which is what stopped a
 // Culinary sim from inventing a bartending job.
 export function jobWords(objectText: string): string {
-  const { track, level } = careerParts(objectText);
+  const { track, branch, level } = careerParts(objectText);
   if (track === objectText && !level) {
     // Not a career tuning name: a job the player typed ("Pub Owner at The Gnome's Arms")
     return `you work as ${track}`;
   }
-  return level ? `you work in the ${track} career, level ${level}` : `you work in the ${track} career`;
+  const career = branch ? `the ${track} career (${branch} branch)` : `the ${track} career`;
+  return level ? `you work in ${career}, level ${level}` : `you work in ${career}`;
+}
+
+// 'Vale Curios' -> 'you own a small business, Vale Curios';
+// 'Chez Vale (restaurant)' -> 'you own a restaurant, Chez Vale'
+export function businessWords(objectText: string): string {
+  const { name, kind } = businessParts(objectText);
+  return `you own a ${kind}, ${name}`;
 }
 
 type Species = Record<string, string | undefined>;
@@ -144,6 +161,8 @@ function selfLine(
       return fact.objectText ? `your aspiration is ${aspirationWords(fact.objectText)}` : undefined;
     case FactPredicate.JOB:
       return fact.objectText ? jobWords(fact.objectText) : undefined;
+    case FactPredicate.BUSINESS:
+      return fact.objectText ? businessWords(fact.objectText) : undefined;
     case FactPredicate.PARENT:
       return `${name(fact.objectSimId)} is your parent`;
     case FactPredicate.CHILD:
@@ -158,6 +177,8 @@ function selfLine(
       return `you are engaged to ${name(fact.objectSimId)}`;
     case FactPredicate.STEADY:
       return `${name(fact.objectSimId)} is your partner`;
+    case FactPredicate.EX_PARTNER:
+      return `${name(fact.objectSimId)} is your ex (you ${fact.objectText ?? 'broke up'})`;
     default:
       return undefined;
   }
@@ -229,13 +250,28 @@ function absenceLines(facts: RenderableFact[]): string[] {
   if (!PARTNER_PREDICATES.some(has)) {
     lines.push('you are not married or seeing anyone');
   }
-  if (!has(FactPredicate.JOB)) {
+  if (!has(FactPredicate.JOB) && !has(FactPredicate.BUSINESS)) {
     // An elder with no career has retired rather than never worked, and that is the word
-    // a person uses for it
+    // a person uses for it. A sim who owns a business is not jobless either.
     const stage = facts.find((fact) => fact.predicate === FactPredicate.AGE_STAGE)?.objectText?.toUpperCase();
     lines.push(stage === 'ELDER' ? 'you are retired' : 'you have no job');
   }
   return lines;
+}
+
+// 'trait_ChildhoodPhase_Clingy' -> 'you are going through a clingy phase';
+// 'trait_ChildConfidence_High' -> 'your confidence is high'
+export function phaseWords(raw: string): string {
+  const confidence = /ChildConfidence_(.+)$/i.exec(raw);
+  if (confidence) {
+    return `your confidence is ${factValueWords(FactPredicate.PHASE, raw)
+      .replace(/ Confidence$/, '')
+      .toLowerCase()}`;
+  }
+  if (/ChildhoodPhase_/i.test(raw)) {
+    return `you are going through a ${factValueWords(FactPredicate.PHASE, raw).toLowerCase()} phase`;
+  }
+  return factValueWords(FactPredicate.PHASE, raw);
 }
 
 // Traits, likes, dislikes and fears are lists, so they read far better collapsed into one
@@ -368,15 +404,65 @@ export function renderKnownFacts(input: RenderKnownFactsInput): string {
   if (input.hasDossier) {
     selfLines.push(...absenceLines(input.selfFacts));
   }
-  for (const [predicate, label] of [
-    [FactPredicate.TRAIT, 'your personality'],
-    [FactPredicate.FEAR, 'you are afraid of'],
-    [FactPredicate.LIKES, 'you like'],
-    [FactPredicate.DISLIKES, 'you dislike'],
+  // Reward traits ride with the personality: Business Savvy is as much who Alex is as
+  // Materialistic. A child's phase is its own line because it is what they are going
+  // through now, not who they are.
+  const phaseFacts = input.selfFacts.filter((fact) => fact.predicate === FactPredicate.PHASE && fact.objectText);
+  const personality = [
+    ...collectList(input.selfFacts, FactPredicate.TRAIT),
+    ...collectList(input.selfFacts, FactPredicate.REWARD_TRAIT),
+    // A grown sim's "phase" (WickedWhims' Hypofertile) is a trait, not something passing
+    ...phaseFacts
+      .filter((fact) => !isChildPhase(fact.objectText as string))
+      .map((fact) => factValueWords(FactPredicate.PHASE, fact.objectText as string)),
+  ];
+  if (personality.length > 0) {
+    selfLines.push(`your personality: ${joinList(personality, 10)}`);
+  }
+  const phases = phaseFacts
+    .filter((fact) => isChildPhase(fact.objectText as string))
+    .map((fact) => phaseWords(fact.objectText as string));
+  if (phases.length > 0) {
+    selfLines.push(`right now: ${joinList(phases)}`);
+  }
+  const fears = collectList(input.selfFacts, FactPredicate.FEAR);
+  if (fears.length > 0) {
+    selfLines.push(`you are afraid of: ${joinList(fears)}`);
+  }
+  // Skills, highest first. Never rendered before 2026-10-13; a sim with Charisma 9 and
+  // Cooking 1 should know which is which.
+  const skills = input.selfFacts
+    .filter((fact) => fact.predicate === FactPredicate.SKILL && fact.objectText)
+    .map((fact) => ({
+      text: factValueWords(FactPredicate.SKILL, fact.objectText as string),
+      level: Number(/\(level (\d+)\)/.exec(fact.objectText as string)?.[1] ?? 0),
+    }))
+    .sort((a, b) => b.level - a.level)
+    .map((skill) => skill.text);
+  if (skills.length > 0) {
+    selfLines.push(`your skills: ${joinList(skills, 8)}`);
+  }
+  // Likes and dislikes split from turn-ons and turn-offs: the store files Lovestruck
+  // attraction under the same predicates, and "you like: Cooking, Broke (turn-on)" read
+  // as if the sim liked being broke.
+  const preferences: Record<string, string[]> = { 'likes': [], 'dislikes': [], 'turn-on': [], 'turn-off': [] };
+  for (const fact of input.selfFacts) {
+    if ((fact.predicate === FactPredicate.LIKES || fact.predicate === FactPredicate.DISLIKES) && fact.objectText) {
+      const kind = preferenceKind(fact.objectText, fact.predicate === FactPredicate.LIKES ? 'likes' : 'dislikes');
+      const isAttraction = kind === 'turn-on' || kind === 'turn-off';
+      preferences[kind].push(
+        isAttraction ? attractionWords(fact.objectText) : factValueWords(fact.predicate, fact.objectText),
+      );
+    }
+  }
+  for (const [kind, label] of [
+    ['likes', 'you like'],
+    ['dislikes', 'you dislike'],
+    ['turn-on', 'your turn-ons'],
+    ['turn-off', 'your turn-offs'],
   ] as const) {
-    const values = collectList(input.selfFacts, predicate);
-    if (values.length > 0) {
-      selfLines.push(`${label}: ${joinList(values)}`);
+    if (preferences[kind].length > 0) {
+      selfLines.push(`${label}: ${joinList(preferences[kind])}`);
     }
   }
   if (selfLines.length > 0) {
