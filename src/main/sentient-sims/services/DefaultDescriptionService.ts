@@ -5,8 +5,18 @@ import { AIActionType } from '../models/AIActionType';
 import { SentientSim } from '../models/SentientSim';
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { LotBlock } from '../models/SimStateReport';
+import { ApiType } from '../models/ApiType';
+import { MessageImage } from '../models/OpenAIMessage';
 import { cleanupAIOutput, formatSentientSim } from '../formatter/PromptFormatter';
-import { lotFacts, lotHasFacts, lotTypeLabel, placeDescriptionProblems } from '../util/lotDescription';
+import {
+  lotFacts,
+  lotFurnishingNames,
+  lotHasFacts,
+  lotTypeLabel,
+  lotVenue,
+  placeDescriptionProblems,
+} from '../util/lotDescription';
+import { furnishingWords } from '../util/lotFurnishings';
 import {
   LOCATION_DESCRIPTION_SYSTEM_PROMPT as LOCATION_SYSTEM_PROMPT,
   SIM_DESCRIPTION_SYSTEM_PROMPT as SIM_SYSTEM_PROMPT,
@@ -24,6 +34,23 @@ import {
 // A generated description is a one-shot per entity per app run: a miss that fails (no API
 // key, provider down, refusal) must not re-queue on every single prompt build.
 const MAX_DESCRIPTION_TOKENS = 220;
+
+// Providers that can be sent screenshots (the OpenAI-compatible ones and Gemini); the model
+// chosen there still has to be one that sees images
+const SCREENSHOT_PROVIDERS = new Set<ApiType>([ApiType.OpenAI, ApiType.OpenRouter, ApiType.Gemini]);
+export const MAX_SCREENSHOTS = 4;
+
+const SCREENSHOT_NOTE =
+  'Screenshots of this lot are attached. Describe what they show of the building, its rooms and its furnishings. Ignore any sims in them, the game interface, the time of day and the weather.';
+
+export class ScreenshotProviderError extends Error {
+  constructor() {
+    super(
+      'Screenshots need OpenAI, Gemini or OpenRouter, with a model that can see images, as the Default Description AI (Settings)',
+    );
+    this.name = 'ScreenshotProviderError';
+  }
+}
 
 function isBlank(text?: string | null): boolean {
   return !text || text.trim().length === 0;
@@ -133,19 +160,40 @@ export class DefaultDescriptionService {
 
   /**
    * A card for one lot from the facts the game reported about it, for the Locations page's
-   * "Write with AI". Nothing is stored: the text goes into the editor, and the player's Save
-   * (or Save as Default for Everyone) is what keeps it. Undefined when the writer gave
-   * nothing that passes the gate.
+   * "Auto-Generate Description", with the lot type the game's venue gives. Nothing is
+   * stored: the text goes into the editor, and the player's Save (or Save as Default for
+   * Everyone) is what keeps it. Undefined when the writer gave nothing that passes the gate.
+   * Screenshots, when given, go to the writer with the facts; they need a provider that can
+   * see them (ScreenshotProviderError otherwise).
    */
   async describeLocation(
     location: LocationEntity,
     lot: LotBlock | undefined,
     zoneName?: string,
-  ): Promise<{ description: string; facts: string } | undefined> {
+    screenshots: MessageImage[] = [],
+  ): Promise<{ description: string; facts: string; lotType?: string } | undefined> {
+    if (screenshots.length > 0) {
+      const provider = this.ctx.providerConfigs.getConfigForDirectedStage(AIActionType.DESCRIPTION_DEFAULT);
+      if (!SCREENSHOT_PROVIDERS.has(provider.apiType)) {
+        throw new ScreenshotProviderError();
+      }
+    }
     const facts = lotFacts(location, lot, zoneName);
     const label = zoneName || location.name || 'this place';
-    const description = await this.writeLocationDescription(label, facts, lot?.venue);
-    return description ? { description, facts } : undefined;
+    const unmapped = furnishingWords(lotFurnishingNames(lot), { isHome: false }).unmapped;
+    if (unmapped.length > 0) {
+      log.info(`[DefaultDescription] ${label}: furnishings with no plain words: ${unmapped.join(', ')}`);
+    }
+    log.info(`[DefaultDescription] ${label}: facts for the writer:\n${facts}`);
+    const venue = lotVenue(lot);
+    const description = await this.writeLocationDescription(
+      label,
+      screenshots.length > 0 ? `${facts}\n${SCREENSHOT_NOTE}` : facts,
+      venue,
+      screenshots.slice(0, MAX_SCREENSHOTS),
+    );
+    const lotType = venue ? lotTypeLabel(venue) : undefined;
+    return description ? { description, facts, lotType } : undefined;
   }
 
   private async generateLocationDescription(location: LocationEntity, lot?: LotBlock, zoneName?: string) {
@@ -154,12 +202,11 @@ export class DefaultDescriptionService {
       return;
     }
     const label = zoneName || location.name || 'this place';
-    const lotType = lot?.venue ? lotTypeLabel(lot.venue) : undefined;
     const stored = this.ctx.locationRepository.setDescriptionIfGeneric(
       location,
       written.description,
       zoneName,
-      lotType,
+      written.lotType,
     );
     log.info(`[DefaultDescription] location ${label}: ${stored ? 'stored' : 'skipped (already described)'}`);
   }
@@ -168,7 +215,12 @@ export class DefaultDescriptionService {
   // a venue called a residence means ONE fresh sample, and a second miss keeps the stock text
   // (the row stays generic, so a later app run tries again). The gate is the safety net behind
   // the prompt and the facts, not the fix; see util/lotDescription.ts.
-  private async writeLocationDescription(label: string, facts: string, venue?: string): Promise<string | undefined> {
+  private async writeLocationDescription(
+    label: string,
+    facts: string,
+    venue?: string,
+    images: MessageImage[] = [],
+  ): Promise<string | undefined> {
     for (let attempt = 1; attempt <= 2; attempt += 1) {
       const oneShot = await this.ctx.ai.runOneShot(
         `Default Description: ${label}`,
@@ -178,7 +230,7 @@ export class DefaultDescriptionService {
         undefined,
         AIActionType.DESCRIPTION_DEFAULT,
         undefined,
-        { stageId: StageId.DESCRIPTION_DEFAULT },
+        { stageId: StageId.DESCRIPTION_DEFAULT, images },
       );
       const description = cleanupAIOutput(oneShot.text).trim();
       if (description.length < 20) {

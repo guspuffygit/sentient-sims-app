@@ -22,7 +22,7 @@ export class SimStateCache {
   private readonly simEntries = new Map<string, SimStateEntry>();
 
   // Every lot the game has reported this app run, by lot id: the Locations page's
-  // "Write with AI" works for any lot visited since the app started, not only the current one
+  // "Auto-Generate Description" works for any lot visited since the app started, not only the current one
   private readonly lotBlocks = new Map<string, { lot: LotBlock; seenAt: number }>();
 
   private readonly listeners: StateListener[] = [];

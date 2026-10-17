@@ -12,7 +12,8 @@ import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
 // the first version wrote into the save (2026-10-12) and to the trial that replaced it.
 
 const genericRow: LocationEntity = {
-  id: 2703097870,
+  // A lot the neighborhood table does not know
+  id: 999,
   name: 'the home',
   lot_type: 'Residence',
   description: defaultLotDescription,
@@ -20,7 +21,7 @@ const genericRow: LocationEntity = {
 };
 
 describe('lotFacts', () => {
-  it('writes the kind of place in plain words and groups the furnishings by what they are for', () => {
+  it('writes the kind of place in plain words and the furnishings as kinds, never counts', () => {
     const facts = lotFacts(
       genericRow,
       {
@@ -36,13 +37,12 @@ describe('lotFacts', () => {
       [
         'Name: 13 Acacia Avenue',
         'Kind of place: a private home',
-        'Furnished for: art (three easels); music (a piano); reading and study (four bookshelves, a computer)',
-        'Sleeps: 2',
+        'Furnished with: computers, bookshelves, a piano, easels',
       ].join('\n'),
     );
-    // The moment and the bathroom never reach the writer
+    // The moment and a home's bathroom never reach the writer
     expect(facts).not.toContain('Situation');
-    expect(facts).not.toContain('toilet');
+    expect(facts).not.toContain('restrooms');
     expect(facts).not.toContain('Residence');
   });
 
@@ -52,14 +52,32 @@ describe('lotFacts', () => {
       {
         venue: 'venue_gym',
         owned: { shower: 4, toilet: 4, bookshelf: 2, stereo: 1 },
+        furnishings: [
+          'object_shower_public',
+          'object_toilet_stall',
+          'object_Locker_GP01',
+          'swimmingPool',
+          'object_Mailbox',
+        ],
+        floors: [0, 1],
+        styles: { Style_Contemporary: 40, Style_Basics: 30, Style_Industrial: 3 },
+        music: ['StereoStation_Pop'],
+        world_name: 'Del Sol Valley',
         situations: ['Situation_VenueGeneric'],
       },
       'Pectoral Fitness',
     );
-    expect(facts).toContain('Kind of place: a gym');
-    expect(facts).not.toContain('Residence');
-    expect(facts).not.toContain('Sleeps');
-    expect(facts).toContain('music (a stereo); reading and study (two bookshelves)');
+    expect(facts).toEqual(
+      [
+        'Name: Pectoral Fitness',
+        'Kind of place: a gym',
+        'Neighborhood: Starlight Boulevard, Del Sol Valley',
+        'Floors: two stories',
+        'Furnished with: a swimming pool, lockers, showers, restrooms',
+        'Decor style: Contemporary',
+        'The speakers play: Pop',
+      ].join('\n'),
+    );
   });
 
   it('keeps a lot_type a person set, drops the repository fallback, and drops the repair state', () => {
@@ -73,7 +91,7 @@ describe('lotFacts', () => {
     expect(
       lotFacts(hand, { owned: { fridge: 1 }, conditions: [{ object_id: '1', name: 'Sink', conditions: ['broken'] }] }),
     ).toEqual(
-      ['Name: Campground', 'Kind of place: Campground', 'Furnished for: nothing notable beyond the basics'].join('\n'),
+      ['Name: Campground', 'Kind of place: Campground', 'Furnished with: nothing notable beyond the basics'].join('\n'),
     );
     expect(lotFacts(genericRow, undefined)).toEqual('Name: the home');
     expect(lotFacts(genericRow, { is_home: true, owned: { bed: 1, fridge: 1 } }, 'Inner Circle')).not.toContain(
@@ -169,8 +187,13 @@ describe('placeDescriptionProblems', () => {
 
 describe('lotTypeLabel', () => {
   it('names the venue the way the Lot Type column does', () => {
-    expect(lotTypeLabel('venue_residential')).toEqual('Residence');
-    expect(lotTypeLabel('venue_retail')).toEqual('Shop');
+    expect(lotTypeLabel('venue_residential')).toEqual('Residential');
+    expect(lotTypeLabel('venue_cafe')).toEqual('Café');
+    expect(lotTypeLabel('venue_RecCenter')).toEqual('Recreation Center');
+    expect(lotTypeLabel('venue_residential_TinyHome')).toEqual('Tiny Home Residential');
+    expect(lotTypeLabel('venue_retail')).toEqual('Retail');
+    expect(lotTypeLabel('venue_ForestPark')).toEqual('National Park');
+    expect(lotTypeLabel('venue_ChaletGardens')).toEqual('Chalet Gardens');
     expect(lotTypeLabel('venue_library')).toEqual('Library');
     expect(lotTypeLabel('venue_karaoke')).toEqual('Karaoke Bar');
     expect(lotTypeLabel('venue_rentable_cabin')).toEqual('Vacation Rental');
@@ -198,7 +221,7 @@ describe('lotFacts from the zone record', () => {
         'Kind of place: a private home',
         'The game describes it as: This cozy home is perfect for a small family.',
         'Bedrooms: 2, bathrooms: 1',
-        'Lot traits: Great Acoustics, Homey',
+        'Lot traits (game effects): Great Acoustics, Homey',
       ].join('\n'),
     );
   });
@@ -208,5 +231,44 @@ describe('lotFacts from the zone record', () => {
       lotFacts(genericRow, { venue: 'venue_gym', owned: {}, bedrooms: 0, bathrooms: 2 }, 'Pectoral Fitness'),
     ).toEqual(['Name: Pectoral Fitness', 'Kind of place: a gym'].join('\n'));
     expect(lotFacts(genericRow, { venue: 'venue_gym', owned: {} }, 'Pectoral Fitness')).not.toContain('describes');
+  });
+});
+
+describe('lotFacts neighborhood', () => {
+  it("names a shipped lot's neighborhood, and a lot the table does not know by the reported world", () => {
+    const blueVelvet = { ...genericRow, id: 90369424 };
+    expect(lotFacts(blueVelvet, { venue: 'venue_bar' }, 'The Blue Velvet')).toContain(
+      'Neighborhood: Crawdad Quarter, Willow Creek',
+    );
+    expect(lotFacts(genericRow, { venue: 'venue_bar', world_name: 'San Myshuno' }, 'New Bar')).toContain(
+      'World: San Myshuno',
+    );
+  });
+});
+
+describe('lotFacts at a park whose active venue is Generic (Ward Park, 2026-10-16)', () => {
+  const wardPark = { ...genericRow, id: 562561093 };
+
+  it('names the lot type it is set to, calls its seating benches, and says nothing of one story', () => {
+    const facts = lotFacts(
+      wardPark,
+      {
+        venue: 'venue_Generic',
+        venue_type: 'venue_ForestPark',
+        furnishings: ['object_sitLove_parkWood', 'object_picnicTable', 'object_Trashcan_Outdoor_NoLid'],
+        floor_furnishings: { '0': ['object_sitLove_parkWood', 'object_picnicTable'] },
+        lot_traits: ['lotTrait_Generic_PeaceAndQuiet'],
+      },
+      'Ward Park',
+    );
+    expect(facts).toContain('Kind of place: a national park');
+    expect(facts).toContain('Furnished with: benches, picnic tables');
+    expect(facts).not.toContain('sofas');
+    expect(facts).not.toContain('Floors');
+    expect(facts).toContain('Lot traits (game effects): Peace And Quiet');
+  });
+
+  it('leaves the kind of place out when the only venue reported is Generic', () => {
+    expect(lotFacts(wardPark, { venue: 'venue_Generic', owned: { bed: 0 } }, 'Ward Park')).not.toContain('Generic');
   });
 });

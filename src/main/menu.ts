@@ -13,9 +13,7 @@ export default class MenuBuilder {
   }
 
   buildMenu(): Menu {
-    if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
-      this.setupDevelopmentEnvironment();
-    }
+    this.setupContextMenu(process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true');
 
     const template = process.platform === 'darwin' ? this.buildDarwinTemplate() : this.buildDefaultTemplate();
 
@@ -25,18 +23,49 @@ export default class MenuBuilder {
     return menu;
   }
 
-  setupDevelopmentEnvironment(): void {
+  // Right-click: spelling suggestions for a misspelled word, the usual edit actions in a text
+  // field, and Inspect element in development
+  setupContextMenu(development: boolean): void {
     this.mainWindow.webContents.on('context-menu', (_, props) => {
-      const { x, y } = props;
-
-      Menu.buildFromTemplate([
-        {
+      const { webContents } = this.mainWindow;
+      const items: MenuItemConstructorOptions[] = [];
+      if (props.misspelledWord) {
+        props.dictionarySuggestions.forEach((suggestion) => {
+          items.push({
+            label: suggestion,
+            click: () => {
+              webContents.replaceMisspelling(suggestion);
+            },
+          });
+        });
+        if (props.dictionarySuggestions.length === 0) {
+          items.push({ label: 'No suggestions', enabled: false });
+        }
+        items.push({
+          label: 'Add to Dictionary',
+          click: () => webContents.session.addWordToSpellCheckerDictionary(props.misspelledWord),
+        });
+        items.push({ type: 'separator' });
+      }
+      if (props.isEditable) {
+        items.push({ role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' });
+      } else if (props.selectionText) {
+        items.push({ role: 'copy' });
+      }
+      if (development) {
+        if (items.length > 0) {
+          items.push({ type: 'separator' });
+        }
+        items.push({
           label: 'Inspect element',
           click: () => {
-            this.mainWindow.webContents.inspectElement(x, y);
+            webContents.inspectElement(props.x, props.y);
           },
-        },
-      ]).popup({ window: this.mainWindow });
+        });
+      }
+      if (items.length > 0) {
+        Menu.buildFromTemplate(items).popup({ window: this.mainWindow });
+      }
     });
   }
 

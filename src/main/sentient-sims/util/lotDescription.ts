@@ -1,5 +1,15 @@
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { LotBlock } from '../models/SimStateReport';
+import { lotNeighborhood } from '../descriptions/lotNeighborhoods';
+import {
+  floorLines,
+  floorsPhrase,
+  furnishingWords,
+  musicWords,
+  plainName,
+  roomFloors,
+  styleWords,
+} from './lotFurnishings';
 
 // The facts a generated lot description is written from, and the gate it has to pass before
 // it is stored. Both exist because of what the first version wrote into the save
@@ -7,88 +17,103 @@ import { LotBlock } from '../models/SimStateReport';
 // home's occupant", "Pectoral Fitness is a residence that also serves as a gym", and ten rows
 // named "the home" written from no facts at all. A description is stored ONCE and then rides
 // in every scene prompt set on that lot, so it may only carry what is permanent about the
-// place: its kind, whose home it is, and what it is furnished for. The live situations, the
-// repair state and the bathroom inventory are moments or noise and never reach the writer.
+// place: its kind, where it is, and what it is furnished with. The live situations and the
+// repair state are moments and never reach the writer.
 // Trial and judging behind every rule: the "Lot Description Trial" artifact, 2026-10-12. The
 // 3-4 sentence card shape itself won the "Lot Description Shapes" experiment of 2026-10-15
 // (360 scenes, six shapes, blind judge): best grounding, fewest invented people, 92 tokens.
 
-// The mod reports the venue tuning name; the writer gets plain words. Anything unmapped is
-// de-prefixed ("venue_rentable_cabin" -> "rentable cabin") rather than dropped.
-export const VENUE_KIND: Record<string, string> = {
-  venue_residential: 'a private home',
-  venue_gym: 'a gym',
-  venue_cemetery: 'a cemetery',
-  venue_library: 'a public library',
-  venue_museum: 'a museum',
-  venue_park: 'a public park',
-  venue_bar: 'a bar',
-  venue_lounge: 'a lounge',
-  venue_club: 'a nightclub',
-  venue_pool: 'a public pool',
-  venue_cafe: 'a cafe',
-  venue_restaurant: 'a restaurant',
-  venue_retail: 'a shop',
-  venue_rentable_cabin: 'a rentable vacation cabin',
-  venue_karaoke: 'a karaoke bar',
-  venue_artscenter: 'an arts center',
-  venue_spa: 'a spa',
-  venue_vet: 'a veterinary clinic',
-  venue_hospital: 'a hospital',
-  venue_police_station: 'a police station',
-  venue_science_lab: 'a science lab',
-  venue_acting_studio: 'a film studio',
-  venue_university_student_commons: 'a university student commons',
-  venue_national_park: 'a national park',
-  venue_hidden_glade: 'a hidden glade',
-  venue_ruins: 'ruins',
+// The lot type, as the writer's kind of place and as the Lot Type column. Keys are the venue
+// tuning names lowercased (the game mixes case: venue_gym, venue_ForestPark); labels are the
+// names Manage Worlds shows. A venue with no entry is matched by pattern, else de-prefixed and
+// split ("venue_ChaletGardens" -> "Chalet Gardens") rather than dropped.
+const VENUES: Partial<Record<string, { kind: string; label: string }>> = {
+  venue_residential: { kind: 'a private home', label: 'Residential' },
+  venue_gym: { kind: 'a gym', label: 'Gym' },
+  venue_cemetery: { kind: 'a cemetery', label: 'Cemetery' },
+  venue_library: { kind: 'a public library', label: 'Library' },
+  venue_museum: { kind: 'a museum', label: 'Museum' },
+  venue_park: { kind: 'a public park', label: 'Park' },
+  venue_bar: { kind: 'a bar', label: 'Bar' },
+  venue_lounge: { kind: 'a lounge', label: 'Lounge' },
+  venue_club: { kind: 'a nightclub', label: 'Nightclub' },
+  venue_pool: { kind: 'a public pool', label: 'Pool' },
+  venue_cafe: { kind: 'a café', label: 'Café' },
+  venue_reccenter: { kind: 'a recreation center', label: 'Recreation Center' },
+  venue_playground: { kind: 'a playground', label: 'Playground' },
+  venue_restaurant: { kind: 'a restaurant', label: 'Restaurant' },
+  venue_retail: { kind: 'a shop', label: 'Retail' },
+  venue_karaoke: { kind: 'a karaoke bar', label: 'Karaoke Bar' },
+  venue_artscenter: { kind: 'an arts center', label: 'Arts Center' },
+  venue_spa: { kind: 'a spa', label: 'Spa' },
+  venue_vet: { kind: 'a veterinary clinic', label: 'Vet Clinic' },
+  venue_hospital: { kind: 'a hospital', label: 'Hospital' },
+  venue_doctorclinic: { kind: 'a hospital', label: 'Hospital' },
+  venue_police_station: { kind: 'a police station', label: 'Police Station' },
+  venue_policestation: { kind: 'a police station', label: 'Police Station' },
+  venue_science_lab: { kind: 'a science lab', label: 'Science Lab' },
+  venue_scientistlab: { kind: 'a science lab', label: 'Science Lab' },
+  venue_acting_studio: { kind: 'a film studio', label: 'Film Studio' },
+  venue_actingstudio: { kind: 'a film studio', label: 'Film Studio' },
+  venue_university_student_commons: { kind: 'a university student commons', label: 'Student Commons' },
+  venue_forestpark: { kind: 'a national park', label: 'National Park' },
+  venue_national_park: { kind: 'a national park', label: 'National Park' },
+  venue_rentable_cabin: { kind: 'a rentable vacation cabin', label: 'Vacation Rental' },
+  venue_rentable_vacation_generic: { kind: 'a vacation rental', label: 'Vacation Rental' },
+  venue_onsen: { kind: 'an onsen bathhouse', label: 'Onsen Bathhouse' },
+  venue_mountainexcursion: { kind: 'a stage of the mountain climb', label: 'Mountain Excursion' },
+  venue_hiddenglade: { kind: 'a hidden glade', label: 'Hidden Glade' },
+  venue_hidden_glade: { kind: 'a hidden glade', label: 'Hidden Glade' },
+  venue_hiddencave: { kind: 'a hidden cave', label: 'Hidden Cave' },
+  venue_hiddenalienworld: { kind: 'an alien world', label: 'Alien Planet' },
+  venue_hermit: { kind: 'a cabin deep in the woods', label: 'Deep Woods' },
+  venue_grimlot: { kind: 'the Grim Reaper offices', label: 'Netherworld' },
+  venue_ruins: { kind: 'ruins', label: 'Ruins' },
 };
 
-// Object ownership classes the mod counts (perception/ss_lot_state.py OWNERSHIP_CLASSES),
-// grouped into what they say the place is FOR. Fridge, toilet, shower and mailbox are on
-// every lot and said nothing but "toilets and a stereo seem out of place among the
-// gravestones", so they are deliberately absent.
-const THEMES: Array<[string, string[]]> = [
-  ['art', ['easel']],
-  ['music', ['piano', 'guitar', 'violin', 'stereo']],
-  ['reading and study', ['bookshelf', 'computer']],
+// Lot types whose tuning names are not known yet, by what the name has to contain
+const VENUE_PATTERNS: Array<[RegExp, { kind: string; label: string }]> = [
+  [/haunt/i, { kind: 'a haunted house', label: 'Haunted House Residential' }],
+  [/tiny/i, { kind: 'a tiny home', label: 'Tiny Home Residential' }],
+  [/wedding/i, { kind: 'a wedding venue', label: 'Wedding Venue' }],
+  [/playground/i, { kind: 'a playground', label: 'Playground' }],
+  [/rec_?center|recreation/i, { kind: 'a recreation center', label: 'Recreation Center' }],
 ];
-const PLURAL: Record<string, string> = {
-  easel: 'easels',
-  piano: 'pianos',
-  guitar: 'guitars',
-  violin: 'violins',
-  stereo: 'stereos',
-  bookshelf: 'bookshelves',
-  computer: 'computers',
-};
-const COUNT_WORDS = ['', 'a', 'two', 'three', 'four', 'five', 'six'];
 
-function countPhrase(kind: string, count: number): string {
-  if (count === 1) {
-    return `a ${kind}`;
+// Lots that are mostly outdoors: their sofas are park benches
+const OUTDOOR_VENUE = /park|playground|cemetery|glade|ruins|bluff|forest|woods|hermit|campground|excursion/i;
+
+function venueEntry(venue: string): { kind: string; label: string } {
+  const known = VENUES[venue.toLowerCase()] ?? VENUE_PATTERNS.find(([pattern]) => pattern.test(venue))?.[1];
+  if (known) {
+    return known;
   }
-  const word = count < COUNT_WORDS.length ? COUNT_WORDS[count] : String(count);
-  return `${word} ${PLURAL[kind] ?? `${kind}s`}`;
+  const words = plainName(venue, /^venue_/i);
+  return { kind: words.toLowerCase(), label: words.replace(/\b(\w)/g, (letter) => letter.toUpperCase()) };
 }
 
 export function venueKind(venue: string): string {
-  return VENUE_KIND[venue] ?? venue.replace(/^venue_/, '').replace(/_/g, ' ');
+  return venueEntry(venue).kind;
 }
 
-// The app's Lot Type column, in the words the shipped defaults use ("Bar", "Library").
-const LOT_TYPE: Record<string, string> = {
-  venue_residential: 'Residence',
-  venue_rentable_cabin: 'Vacation Rental',
-};
-
 export function lotTypeLabel(venue: string): string {
-  const words =
-    LOT_TYPE[venue] ??
-    venueKind(venue)
-      .replace(/^(an?|the) /, '')
-      .replace(/^(public|private) /, '');
-  return words.charAt(0).toUpperCase() + words.slice(1).replace(/ (\w)/g, (_, c: string) => ` ${c.toUpperCase()}`);
+  return venueEntry(venue).label;
+}
+
+// Plain, haunted and tiny homes alike
+function isResidential(venue: string | undefined): boolean {
+  return venue !== undefined && lotTypeLabel(venue).endsWith('Residential');
+}
+
+/**
+ * The lot's type: the one it is set to in Manage Worlds, else the active venue unless that
+ * is only Generic (Ward Park, a National Park, reported venue_Generic as its active venue).
+ */
+export function lotVenue(lot: LotBlock | undefined): string | undefined {
+  if (lot?.venue_type) {
+    return lot.venue_type;
+  }
+  return lot?.venue && !/generic$/i.test(lot.venue) ? lot.venue : undefined;
 }
 
 /**
@@ -100,53 +125,91 @@ export function lotHasFacts(lot?: LotBlock): boolean {
   if (!lot) {
     return false;
   }
-  if (lot.venue) {
+  if (lot.venue || lot.venue_type || (lot.furnishings?.length ?? 0) > 0) {
     return true;
   }
   return Object.values(lot.owned ?? {}).some((count) => count > 0);
 }
 
+// The mod's full furnishing list, or on a mod build without one the ownership classes it counts
+export function lotFurnishingNames(lot: LotBlock | undefined): string[] {
+  if (lot?.furnishings) {
+    return lot.furnishings;
+  }
+  return Object.entries(lot?.owned ?? {})
+    .filter(([, count]) => count > 0)
+    .map(([kind]) => (kind === 'tv' ? 'television' : kind));
+}
+
+// "lotTrait_Generic_GreatAcoustics" -> "Great Acoustics"
+const TRAIT_CATEGORY = /^(generic|challenge|residential|venue|lot|ep\d+|gp\d+|sp\d+) /i;
+
+export function lotTraitName(trait: string): string {
+  let words = plainName(trait, /^lot_?traits?_?/i);
+  while (TRAIT_CATEGORY.test(words)) {
+    words = words.replace(TRAIT_CATEGORY, '');
+  }
+  return words;
+}
+
 export function lotFacts(location: LocationEntity, lot: LotBlock | undefined, zoneName?: string): string {
   const facts: string[] = [];
   facts.push(`Name: ${zoneName || location.name || 'unnamed lot'}`);
-  if (lot?.venue) {
-    facts.push(`Kind of place: ${venueKind(lot.venue)}`);
+  const venue = lotVenue(lot);
+  if (venue) {
+    facts.push(`Kind of place: ${venueKind(venue)}`);
   } else if (location.lot_type && !location.is_generic) {
     // The repository's fallback row says 'Residence' for ANY unknown lot; only a lot_type a
     // person or the game actually set is worth repeating
     facts.push(`Kind of place: ${location.lot_type}`);
   }
+  const where = lotNeighborhood(location.id);
+  if (where?.neighborhood) {
+    facts.push(`Neighborhood: ${where.neighborhood}, ${where.world}`);
+  } else if (where?.world || lot?.world_name) {
+    facts.push(`World: ${where?.world ?? lot?.world_name}`);
+  }
   if (lot?.is_home) {
     facts.push("This is the household's own home.");
   }
-  const owned = lot?.owned ?? {};
-  const themes: string[] = [];
-  THEMES.forEach(([theme, kinds]) => {
-    const parts = kinds.filter((kind) => owned[kind] > 0).map((kind) => countPhrase(kind, owned[kind]));
-    if (parts.length > 0) {
-      themes.push(`${theme} (${parts.join(', ')})`);
-    }
-  });
-  if (themes.length > 0) {
-    facts.push(`Furnished for: ${themes.join('; ')}`);
-  } else if (Object.values(owned).some((count) => count > 0)) {
-    facts.push('Furnished for: nothing notable beyond the basics');
+  const options = {
+    isHome: isResidential(venue) || lot?.is_home === true,
+    outdoors: venue !== undefined && OUTDOOR_VENUE.test(venue),
+  };
+  const levels = lot?.floor_furnishings ? roomFloors(lot.floor_furnishings) : lot?.floors;
+  const floors = floorsPhrase(levels);
+  if (floors) {
+    facts.push(`Floors: ${floors}`);
   }
-  // Typed as a number by the record, absent at runtime on a lot with no bed
-  const beds = owned.bed > 0 ? owned.bed : 0;
-  if (beds > 0 && lot?.venue === 'venue_residential') {
-    facts.push(`Sleeps: ${beds}`);
+  // Floor by floor when there is more than one, as a person would show someone round
+  const perFloor = floorLines(lot?.floor_furnishings, options);
+  const furnishings = lotFurnishingNames(lot);
+  const { words } = furnishingWords(furnishings, options);
+  if (perFloor.length > 0) {
+    facts.push(...perFloor);
+  } else if (words.length > 0) {
+    facts.push(`Furnished with: ${words.join(', ')}`);
+  } else if (furnishings.length > 0) {
+    facts.push('Furnished with: nothing notable beyond the basics');
+  }
+  const styles = styleWords(lot?.styles);
+  if (styles.length > 0) {
+    facts.push(`Decor style: ${styles.join(', ')}`);
+  }
+  const music = musicWords(lot?.music);
+  if (music.length > 0) {
+    facts.push(`The speakers play: ${music.join(', ')}`);
   }
   // The zone's own record (mod builds from 2026-10-15): the game's blurb often names the
   // residents, so the prompt's no-people rules apply to it like anything else
   if (lot?.description?.trim()) {
     facts.push(`The game describes it as: ${lot.description.trim()}`);
   }
-  if (lot?.venue === 'venue_residential' && ((lot.bedrooms ?? 0) > 0 || (lot.bathrooms ?? 0) > 0)) {
-    facts.push(`Bedrooms: ${lot.bedrooms ?? 0}, bathrooms: ${lot.bathrooms ?? 0}`);
+  if (options.isHome && ((lot?.bedrooms ?? 0) > 0 || (lot?.bathrooms ?? 0) > 0)) {
+    facts.push(`Bedrooms: ${lot?.bedrooms ?? 0}, bathrooms: ${lot?.bathrooms ?? 0}`);
   }
   if (lot?.lot_traits && lot.lot_traits.length > 0) {
-    facts.push(`Lot traits: ${lot.lot_traits.join(', ')}`);
+    facts.push(`Lot traits (game effects): ${lot.lot_traits.map(lotTraitName).join(', ')}`);
   }
   return facts.join('\n');
 }
@@ -178,7 +241,7 @@ export function placeDescriptionProblems(text: string, venue?: string): string[]
   if (PRESENT_MOMENT.test(text)) {
     problems.push('present_moment');
   }
-  if (venue !== 'venue_residential' && VENUE_AS_RESIDENCE.test(text)) {
+  if (!isResidential(venue) && VENUE_AS_RESIDENCE.test(text)) {
     problems.push('venue_as_residence');
   }
   // "Mt. Komorebi" is one word of a sentence, not the end of one

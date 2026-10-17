@@ -17,6 +17,7 @@ import { getRandomItem } from '../util/getRandomItem';
 import { GeminiKeysNotSetError } from '../exceptions/GeminiKeyNotSetError';
 import { isApiError } from '../exceptions/GeminiAPIError';
 import { ApiContext } from './ApiContext';
+import { withoutImageData } from '../models/OpenAIMessage';
 import { ApiType } from '../models/ApiType';
 import { geminiDefaultImageModel } from '../constants';
 import { ImageGenerationService } from './ImageGenerationService';
@@ -91,11 +92,14 @@ export class GeminiService implements GenerationService, ImageGenerationService 
         .filter((msg) => msg.role !== 'system')
         .map((msg) => ({
           role: msg.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: msg.content }],
+          parts: [
+            { text: msg.content },
+            ...(msg.images ?? []).map((image) => ({ inlineData: { mimeType: image.mimeType, data: image.data } })),
+          ],
         })),
     };
 
-    log.debug(`Full Gemini Request: ${JSON.stringify(generateRequest, null, 2)}`);
+    log.debug(`Full Gemini Request: ${JSON.stringify(withoutImageData(request), null, 2)}`);
 
     let text = await this.generate(generateRequest);
 

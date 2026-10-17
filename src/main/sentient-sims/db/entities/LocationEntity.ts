@@ -24,4 +24,6 @@ export type LocationEntity = {
   description_generated?: number | null;
   source?: LocationSource;
   default?: LocationDefault;
+  // "Starlight Boulevard, Del Sol Valley" for a shipped lot, else the world the game reported
+  neighborhood?: string;
 };

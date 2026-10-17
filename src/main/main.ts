@@ -126,6 +126,8 @@ const createWindow = async () => {
       // Players keep the app minimized behind the game; throttled timers would stall
       // the renderer's TTS scene queue and websocket-driven UI updates
       backgroundThrottling: false,
+      // Red underline under misspelled words in text fields; right-click offers suggestions
+      spellcheck: true,
       preload: preloadPath,
     },
   });

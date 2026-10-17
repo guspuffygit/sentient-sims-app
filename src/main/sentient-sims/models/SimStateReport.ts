@@ -54,11 +54,26 @@ export type LotBlock = {
   action_keys?: string[];
   // What the game itself says about the lot, from the zone's saved record: its blurb, the
   // bedroom and bathroom counts and the lot traits. Facts for the description writer
-  // (Write with AI); absent on older mod builds.
+  // (Auto-Generate Description); absent on older mod builds.
   description?: string;
   bedrooms?: number;
   bathrooms?: number;
   lot_traits?: string[];
+  // Where it is and what it is furnished with, for the same writer (mod builds from
+  // 2026-10-16): the world's display name, the street tuning name, the object tuning names
+  // on the lot, the floor levels in use (-1 is a basement), catalog style tag -> object
+  // count, and the stereo station state names
+  world_name?: string;
+  street?: string;
+  furnishings?: string[];
+  // Earlier mod builds: every level with objects on it, roof included
+  floors?: number[];
+  // Mod builds from 2026-10-16: the tuning names on each level ("-1" is a basement), and the
+  // lot type set in Manage Worlds, which the active venue can differ from (venue_Generic)
+  floor_furnishings?: Record<string, string[]>;
+  venue_type?: string;
+  styles?: Record<string, number>;
+  music?: string[];
 };
 
 export type SimCareer = {

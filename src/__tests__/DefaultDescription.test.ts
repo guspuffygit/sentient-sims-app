@@ -228,7 +228,7 @@ describe('DefaultDescriptionService', () => {
     expect(prompts[0]).toContain('Garden Essence');
     expect(prompts[0]).toContain('Kind of place: a private home');
     expect(prompts[0]).toContain("This is the household's own home.");
-    expect(prompts[0]).toContain('reading and study (two computers)');
+    expect(prompts[0]).toContain('Furnished with: computers');
     // A moment is not a fact about the place (2026-10-12): the broken sink and the party
     // never reach the writer, and neither does the repository's 'Residence' placeholder
     expect(prompts[0]).not.toContain('Sink');

@@ -1,6 +1,7 @@
 import { ApiClient } from './ApiClient';
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { axiosClient } from './AxiosClient';
+import { MessageImage } from '../models/OpenAIMessage';
 
 export class LocationsClient extends ApiClient {
   /**
@@ -50,19 +51,27 @@ export class LocationsClient extends ApiClient {
 
   /**
    * POST /locations/:locationId/describe
-   * Writes a description from what the game has reported about the lot, for the editor.
-   * Resolves undefined when the lot has not been visited this app run (409).
+   * Writes a description from what the game has reported about the lot and any screenshots,
+   * for the editor. Resolves { error } when it cannot: no visit and no screenshot (409), or
+   * screenshots without a provider that can see them (400).
    */
-  async describeLocation(locationId: number): Promise<{ description: string; facts: string } | undefined> {
-    const response = await axiosClient.post<{ description?: string; facts?: string }>(
+  async describeLocation(
+    locationId: number,
+    screenshots: MessageImage[] = [],
+  ): Promise<{ description: string; facts: string; lotType?: string } | { error: string }> {
+    const response = await axiosClient.post<{ description?: string; facts?: string; lotType?: string; error?: string }>(
       `${this.apiUrl}/locations/${locationId}/describe`,
-      undefined,
-      { validateStatus: (status) => status < 300 || status === 409 },
+      { screenshots },
+      { validateStatus: (status) => status < 300 || status === 409 || status === 400 },
     );
-    if (response.status === 409 || !response.data.description) {
-      return undefined;
+    if (!response.data.description) {
+      return { error: response.data.error ?? 'Visit this lot in game first, or add a screenshot' };
     }
-    return { description: response.data.description, facts: response.data.facts ?? '' };
+    return {
+      description: response.data.description,
+      facts: response.data.facts ?? '',
+      lotType: response.data.lotType,
+    };
   }
 
   /**

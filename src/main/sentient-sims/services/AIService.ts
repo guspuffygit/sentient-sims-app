@@ -56,6 +56,7 @@ import {
   OpenAIRequestBuilder,
 } from '../models/OpenAIRequestBuilder';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
+import { MessageImage } from '../models/OpenAIMessage';
 import { promptFor } from '../pipeline/prompts';
 import { StageId } from '../pipeline/stages';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
@@ -395,6 +396,7 @@ export type OneShotOptions = {
   stageId?: StageId;
   signal?: AbortSignal;
   deadlineAt?: number;
+  images?: MessageImage[];
 };
 
 export type DeferredInteractionResult = {
@@ -1494,7 +1496,8 @@ ${factsBlock}
     // honours an override set on the interaction (see getConfigForDirectedStage)
     interactionActionType?: AIActionType,
     // Which pipeline stage this call IS. An options bag rather than a ninth positional:
-    // 3.2 adds simId here so a stage can resolve against one Sim's Sentience.
+    // 3.2 adds simId here so a stage can resolve against one Sim's Sentience. Images ride on
+    // the user message (lot screenshots); only providers that can see them are given any.
     options?: OneShotOptions,
   ): Promise<{ exchange: LLMExchange; text: string }> {
     if (options?.signal?.aborted) {
@@ -1526,6 +1529,10 @@ ${factsBlock}
     // An explicit model (scenario tester's per-stage picks) wins over the action's provider config
     openAIRequest.model = resolvedModel;
     openAIRequest.apiType = providerConfig.apiType;
+    const userMessage = openAIRequest.messages.findLast((message) => message.role === 'user');
+    if (userMessage && options?.images?.length) {
+      userMessage.images = options.images;
+    }
     const control: GenerationCallControl = {
       signal: options?.signal,
       timeoutMs: this.callTimeoutMs(options?.deadlineAt),

@@ -22,6 +22,9 @@ import RestoreOutlinedIcon from '@mui/icons-material/RestoreOutlined';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { MessageImage } from 'main/sentient-sims/models/OpenAIMessage';
+import { LotScreenshots } from './components/LotScreenshots';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import AppCard from './AppCard';
 import { EmptyState } from './components/EmptyState';
@@ -38,28 +41,24 @@ type SelectedLocation = {
   index: number;
 };
 
+// A lot nothing describes shows no source at all
 const SOURCE_LABELS: Record<LocationSource, string> = {
-  'save': 'Yours',
+  'save': 'Custom',
   'generated': 'Written by AI',
   'online': 'Default',
   'built-in': 'Default',
-  'stock': 'Not described',
+  'stock': '',
 };
-
-function sourceLabel(location: LocationEntity): string {
-  const label = SOURCE_LABELS[location.source ?? 'stock'];
-  const ownText = location.source === 'save' || location.source === 'generated';
-  return ownText && location.default ? `${label} (default available)` : label;
-}
 
 const columns: GridColDef[] = [
   { field: 'name', headerName: 'Name', width: 250 },
   { field: 'lot_type', headerName: 'Lot Type', width: 150 },
+  { field: 'neighborhood', headerName: 'Neighborhood', width: 260 },
   {
     field: 'source',
     headerName: 'Source',
     width: 210,
-    valueGetter: (_value: never, row: LocationEntity) => sourceLabel(row),
+    valueGetter: (_value: never, row: LocationEntity) => SOURCE_LABELS[row.source ?? 'stock'],
   },
   {
     field: 'description',
@@ -70,6 +69,15 @@ const columns: GridColDef[] = [
 
 const client = new SentientSimsAppClient();
 
+const HOW_TO = [
+  'Visit the lot in game or add screenshots of it, then press Auto-Generate Description for a draft, or write your own.',
+  'Write 3 to 4 sentences in the present tense: what the place is and where, the real things in it floor by floor (the bar, the pool, the stage), then what the place is like and who it is for.',
+  'Leave out: people doing things (visitors, staff, she/he/you), names, anything happening right now, counts ("six computers"), lists of every object, and stock phrases like vibrant or nestled.',
+];
+
+// The repository's lot type for a lot nobody has typed one for
+const PLACEHOLDER_LOT_TYPE = 'Residence';
+
 export default function LocationsPage() {
   const [locations, setLocations] = useState<LocationEntity[]>([]);
   const [editedLocation, setEditedLocation] = useState<SelectedLocation | null | undefined>();
@@ -77,6 +85,13 @@ export default function LocationsPage() {
   const [confirmingUnpublish, setConfirmingUnpublish] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [writing, setWriting] = useState(false);
+  // Screenshots belong to the lot they were added for: a new selection starts with none
+  const [lotScreenshots, setLotScreenshots] = useState<{ id?: number; images: MessageImage[] }>({ images: [] });
+  const editedId = editedLocation?.location.id;
+  const screenshots = lotScreenshots.id === editedId ? lotScreenshots.images : [];
+  const setScreenshots = (images: MessageImage[]) => {
+    setLotScreenshots({ id: editedId, images });
+  };
   const { status } = useWebsocket();
   const { userAttributes } = useAuth();
   const { showMessage } = useSnackBar();
@@ -233,21 +248,28 @@ export default function LocationsPage() {
 
   // A draft from what the game reported about the lot, into the editor: Save keeps it as this
   // save's own text, Save as Default for Everyone publishes it. Nothing happens on its own.
-  async function handleWriteWithAi() {
+  // The game's lot type fills Lot Type unless the player already typed one of their own.
+  async function handleAutoGenerate() {
     if (!editedLocation) {
       return;
     }
     setWriting(true);
     try {
-      const written = await client.locations.describeLocation(editedLocation.location.id);
-      if (!written) {
-        showMessage('Visit this lot in game first, then try again', 'warning');
+      const written = await client.locations.describeLocation(editedLocation.location.id, screenshots);
+      if ('error' in written) {
+        showMessage(written.error, 'warning');
       } else {
-        setEditedLocation((previousLocation) =>
-          previousLocation
-            ? { ...previousLocation, location: { ...previousLocation.location, description: written.description } }
-            : previousLocation,
-        );
+        setEditedLocation((previousLocation) => {
+          if (!previousLocation) {
+            return previousLocation;
+          }
+          const current = previousLocation.location.lot_type.trim();
+          const lotType = written.lotType && (!current || current === PLACEHOLDER_LOT_TYPE) ? written.lotType : current;
+          return {
+            ...previousLocation,
+            location: { ...previousLocation.location, description: written.description, lot_type: lotType },
+          };
+        });
       }
     } catch (error) {
       showMessage(`Could not write a description for ${editedLocation.location.name}`, 'error');
@@ -332,7 +354,7 @@ export default function LocationsPage() {
                 Cancel
               </Button>
               <Tooltip
-                title="Drafts a description from what the game reports about this lot. Edit it, then Save, or Save as Default for Everyone."
+                title="Drafts a description from what the game reports about this lot, and from any screenshots you added."
                 placement="top"
               >
                 <span>
@@ -341,10 +363,10 @@ export default function LocationsPage() {
                     variant="outlined"
                     startIcon={<AutoAwesomeOutlinedIcon />}
                     onClick={() => {
-                      void handleWriteWithAi();
+                      void handleAutoGenerate();
                     }}
                   >
-                    Write with AI
+                    Auto-Generate Description
                   </Button>
                 </span>
               </Tooltip>
@@ -412,19 +434,47 @@ export default function LocationsPage() {
           </CardActions>
         }
       >
-        <MemoryEditInput label="Name" rows={1} handleEdit={handleNameEdit} forceShow value={location.name} />
-        <MemoryEditInput label="Lot Type" rows={1} handleEdit={handleLotTypeEdit} forceShow value={location.lot_type} />
-        <MemoryEditInput
-          label="Description"
-          handleEdit={handleDescriptionEdit}
-          rows={5}
-          forceShow
-          value={location.description}
-        />
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-          Write it as a card: 3 to 4 sentences in the present tense, what kind of place it is and where, then the real
-          things in it. No people, no names. Write with AI drafts one from the lot you have visited this session.
-        </Typography>
+        <LotScreenshots screenshots={screenshots} onChange={setScreenshots}>
+          <MemoryEditInput label="Name" rows={1} handleEdit={handleNameEdit} forceShow value={location.name} />
+          <MemoryEditInput
+            label="Lot Type"
+            rows={1}
+            handleEdit={handleLotTypeEdit}
+            forceShow
+            value={location.lot_type}
+          />
+          <MemoryEditInput
+            label="Description"
+            handleEdit={handleDescriptionEdit}
+            rows={5}
+            forceShow
+            value={location.description}
+          />
+          {location.neighborhood && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Neighborhood: {location.neighborhood}
+            </Typography>
+          )}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1 }}>
+            <Typography variant="caption" color="text.secondary">
+              3 to 4 sentences: what the place is and where, then the real things in it. No people, no names.
+            </Typography>
+            <Tooltip
+              placement="top"
+              title={
+                <Box>
+                  {HOW_TO.map((line) => (
+                    <Typography key={line} variant="body2" sx={{ mb: 0.5 }}>
+                      {line}
+                    </Typography>
+                  ))}
+                </Box>
+              }
+            >
+              <InfoOutlinedIcon fontSize="small" color="action" aria-label="How to write a lot description" />
+            </Tooltip>
+          </Box>
+        </LotScreenshots>
         {ownText && fallback && differsFromDefault && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="caption" color="text.secondary">

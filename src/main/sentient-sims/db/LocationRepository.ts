@@ -1,4 +1,5 @@
 import { defaultLocationDescriptions, defaultLotDescription } from '../descriptions/locationDescriptions';
+import { neighborhoodLabel } from '../descriptions/lotNeighborhoods';
 import { DeleteLocationRequest } from '../models/DeleteLocationRequest';
 import { GetLocationRequest } from '../models/GetLocationRequest';
 import { DbService } from '../services/DbService';
@@ -6,7 +7,7 @@ import { Repository } from './Repository';
 import { LocationDefault, LocationEntity } from './entities/LocationEntity';
 import { OnlineLocationSource } from './OnlineLocationRepository';
 
-const PLACEHOLDER_NAME = 'the home';
+export const PLACEHOLDER_NAME = 'the home';
 const PLACEHOLDER_LOT_TYPE = 'Residence';
 
 function isStock(description?: string | null): boolean {
@@ -54,6 +55,11 @@ export class LocationRepository extends Repository {
   }
 
   private resolve(id: number, row: LocationEntity | undefined): LocationEntity {
+    const neighborhood = neighborhoodLabel(id);
+    return neighborhood ? { ...this.resolveText(id, row), neighborhood } : this.resolveText(id, row);
+  }
+
+  private resolveText(id: number, row: LocationEntity | undefined): LocationEntity {
     const fallback = this.getDefault(id);
     const ownDescription = row && !isStock(row.description);
     const generated = row?.description_generated === 1;

@@ -31,15 +31,16 @@ const MODE = process.env.LOT_FORMAT_EXPERIMENT;
 const OUT_DIR = process.env.LOT_OUT ?? path.join(os.tmpdir(), 'lot-format');
 const MODEL = process.env.LOT_MODEL ?? 'meta-llama/llama-3.3-70b-instruct:nitro';
 
-type FormatName = 'stock' | 'minimal' | 'card' | 'long' | 'flowery' | 'kv';
-const FORMATS: FormatName[] = ['stock', 'minimal', 'card', 'long', 'flowery', 'kv'];
+// auto/jaz/cardmood (2026-10-16): the app's Auto-Generate text, Jaz's own, and the card with one mood sentence
+type FormatName = 'stock' | 'minimal' | 'card' | 'long' | 'flowery' | 'kv' | 'auto' | 'jaz' | 'cardmood';
+const FORMATS: FormatName[] = ['stock', 'minimal', 'card', 'long', 'flowery', 'kv', 'auto', 'jaz', 'cardmood'];
 
 type Lot = {
   key: string;
   id: number;
   name: string;
   lot_type: string;
-  variants: Record<Exclude<FormatName, 'stock'>, string>;
+  variants: Partial<Record<Exclude<FormatName, 'stock'>, string>>;
 };
 
 const LOTS: Lot[] = [
@@ -114,10 +115,42 @@ const LOTS: Lot[] = [
       kv: 'Kind: multi-level public gym.\nSetting: harbour side of Windenburg.\nInside: a white-tiled lobby with a long blue reception desk, red and green locker rooms with showers downstairs, treadmills and weight machines on the upper floors, a mat-floored room with punching bags overlooking the town, a red and white kitchen and bar with small tables.\nOutside: an open-roofed pool with a small seating area.\nMood: busy, bright, echoing.',
     },
   },
+  {
+    key: 'pectoral',
+    id: 2841378864,
+    name: 'Pectoral Fitness',
+    lot_type: 'Gym',
+    variants: {
+      auto: 'Pectoral Fitness is a gym located in Starlight Boulevard, Del Sol Valley. The gym is furnished with a swimming pool, treadmills, and workout machines on its multiple floors, as well as punching bags for boxing practice, and a locker room with showers and restrooms. The four-story building, which also includes a basement, features various amenities such as sofas, bookshelves, and dining tables, and is decorated with paintings and sculptures. A distinctive feature of Pectoral Fitness is its mix of fitness equipment and luxurious decor, reflecting its location in the upscale Starlight Boulevard area.',
+      jaz: 'Pectoral Fitness is a two-story gym located in the Del Sol Valley, frequented by celebrities. The main floor has lockers, changing areas, a study, and a large pool for swimming laps. The upper floor has a large open workout area, complete with exercise equipment such as treadmills, workout machines, and punching bags, a dedicated room for yoga classes, and another small study with a bookshelf and computer. Sims come here to achieve a strong physical appearance.',
+      card: 'Pectoral Fitness is a two-story gym on Starlight Boulevard in Del Sol Valley. The main floor has a large pool for swimming laps, a locker room with changing areas, and a small study. Upstairs is a big open workout floor with treadmills, weight machines and punching bags, a separate yoga room, and a second small study with a bookshelf and a computer.',
+      cardmood:
+        'Pectoral Fitness is a two-story gym on Starlight Boulevard in Del Sol Valley. The main floor has a large pool for swimming laps, a locker room with changing areas, and a small study. Upstairs is a big open workout floor with treadmills, weight machines and punching bags, a separate yoga room, and a second small study with a bookshelf and a computer. The whole place feels sleek, polished and a little showy.',
+    },
+  },
+  {
+    key: 'studio',
+    id: 579403848,
+    name: 'Studio PBP',
+    lot_type: 'Lounge',
+    variants: {
+      auto: 'Studio PBP is a lounge located in Starlight Boulevard, Del Sol Valley. The lounge is furnished with restrooms, a fountain, sofas, bar stools, TVs, a violin, a microphone stand, and speakers, as well as decorative paintings and sculptures, and dining tables on its two stories. The bar area and seating areas with sofas and dining tables are arranged to accommodate patrons, while restrooms are also available. A distinctive feature of Studio PBP is its fountain.',
+      jaz: 'Studio PBP is a two-story lounge located in the heart of the Del Sol Valley. It is furnished with a violin, microphone, and stage for performing sims. Studio PBP has a strict entry policy, only the hottest celebrities can enter, enforced by a bouncer who carefully selects the clientele. There is a bar on the main floor. Comfortable seating is available throughout, creating a cozy yet refined atmosphere. A regal fountain sits in the center of the main floor.',
+      card: 'Studio PBP is a two-story lounge on Starlight Boulevard in Del Sol Valley, with a velvet rope at the door. A regal fountain stands in the center of the main floor, beside the bar and a small stage with a violin and a microphone. Comfortable sofas and chairs run through both floors.',
+      cardmood:
+        'Studio PBP is a two-story lounge on Starlight Boulevard in Del Sol Valley, with a velvet rope at the door. A regal fountain stands in the center of the main floor, beside the bar and a small stage with a violin and a microphone. Comfortable sofas and chairs run through both floors. It feels cozy yet refined, and very exclusive.',
+    },
+  },
 ];
 
 export function variantText(lot: Lot, format: FormatName): string {
-  return format === 'stock' ? defaultLotDescription : lot.variants[format];
+  const text = format === 'stock' ? defaultLotDescription : lot.variants[format];
+  if (text === undefined) throw new Error(`${lot.key} has no ${format} variant`);
+  return text;
+}
+
+function hasVariant(lot: Lot, format: FormatName): boolean {
+  return format === 'stock' || lot.variants[format] !== undefined;
 }
 
 function locationFor(lot: Lot, format: FormatName): LocationEntity {
@@ -444,7 +477,7 @@ describeExperiment('Lot description format experiment', () => {
     'dry run: the director sees the exact LOCATION line per lot and format, and a player line briefs one performer',
     async () => {
       for (const lot of lots) {
-        for (const format of formats) {
+        for (const format of formats.filter((candidate) => hasVariant(lot, candidate))) {
           for (const event of ['chat', 'ask_place'] as EventKind[]) {
             const ctx = freshContext(`lot-dry-${lot.key}-${format}-${event}`, lot, format, false);
             const { timings, systemPrompts } = timeStages(ctx, (label) => {
@@ -498,7 +531,9 @@ describeExperiment('Lot description format experiment', () => {
         lots.forEach((lot) => {
           formats.forEach((format) => {
             events.forEach((event) => {
-              if (!done.has(jobKey(lot, format, event, sample))) jobs.push({ lot, format, event, sample });
+              if (hasVariant(lot, format) && !done.has(jobKey(lot, format, event, sample))) {
+                jobs.push({ lot, format, event, sample });
+              }
             });
           });
         });

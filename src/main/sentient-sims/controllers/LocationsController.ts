@@ -7,6 +7,9 @@ import { ApiContext } from '../services/ApiContext';
 import { InteractionService } from '../services/InteractionService';
 import { OnlineLocation } from '../db/OnlineLocationRepository';
 import { lotHasFacts } from '../util/lotDescription';
+import { PLACEHOLDER_NAME } from '../db/LocationRepository';
+import { MessageImage } from '../models/OpenAIMessage';
+import { ScreenshotProviderError } from '../services/DefaultDescriptionService';
 
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
@@ -36,7 +39,11 @@ export class LocationsController {
   getAllLocations = async (req: Request, res: Response) => {
     try {
       await this.ctx.onlineLocationRepository.load();
-      const result = this.ctx.locationRepository.getAllLocations();
+      // A lot the neighborhood table does not know is placed by the world the game reported
+      const result = this.ctx.locationRepository.getAllLocations().map((location) => {
+        const world = location.neighborhood ? undefined : this.ctx.simStateCache.getLotBlock(location.id)?.world_name;
+        return world ? { ...location, neighborhood: world } : location;
+      });
       return res.json(result);
     } catch (err) {
       log.error('Error getting all locations', err);
@@ -105,25 +112,38 @@ export class LocationsController {
     }
   };
 
-  // "Write with AI" on the Locations page: a card for a lot the game has reported this app
-  // run, written from the same facts as the fallback writer. Nothing is stored; the editor
-  // gets the text and Save is the player's. 409 until the lot has been visited.
+  // "Auto-Generate Description" on the Locations page: a card for a lot the game has
+  // reported this app run, written from the same facts as the fallback writer, with the lot
+  // type. Screenshots in the body ({ screenshots: [{ mimeType, data }] }) go to the writer
+  // too and stand in for a visit. Nothing is stored; the editor gets the text and Save is the
+  // player's. 409 for a lot with neither a visit this app run nor a screenshot.
   describeLocation = async (req: Request, res: Response) => {
     try {
       const { locationId } = req.params;
+      const sent = (req.body as { screenshots?: Array<Partial<MessageImage>> } | undefined)?.screenshots ?? [];
+      const screenshots = sent.filter(
+        (image): image is MessageImage => typeof image.data === 'string' && /^image\//.test(image.mimeType ?? ''),
+      );
       const lot = this.ctx.simStateCache.getLotBlock(String(locationId));
-      if (!lotHasFacts(lot)) {
-        res.status(409).json({ error: 'Visit this lot in game first' });
+      if (!lotHasFacts(lot) && screenshots.length === 0) {
+        res.status(409).json({ error: 'Visit this lot in game first, or add a screenshot' });
         return;
       }
       const location = this.ctx.locationRepository.getLocation({ id: Number(locationId) });
-      const written = await this.ctx.defaultDescriptions.describeLocation(location, lot, lot?.lot_name);
+      // The app's name for the lot (a shipped name, or the player's) over the in-game one,
+      // which keeps any rename made in game
+      const name = location.name && location.name !== PLACEHOLDER_NAME ? location.name : lot?.lot_name;
+      const written = await this.ctx.defaultDescriptions.describeLocation(location, lot, name, screenshots);
       if (!written) {
         res.status(502).json({ error: 'The writer produced nothing usable; try again' });
         return;
       }
       res.json(written);
     } catch (err) {
+      if (err instanceof ScreenshotProviderError) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
       log.error('Error writing a location description', err);
       res.status(500).json({ error: errorMessage(err) });
     }

@@ -41,4 +41,10 @@ describe('findSavedNames', () => {
     expect(findSavedNames('{actor.0} waves at C.J. (Doe)', ['C.J. (Doe)'])).toEqual(['C.J. (Doe)']);
     expect(findSavedNames('{actor.0} waves at CXJX Doe', ['C.J. (Doe)'])).toEqual([]);
   });
+
+  it('lets an everyday word through even when a townie is called it', () => {
+    const townies = ['Story Bright', 'Blue Street'];
+    expect(findSavedNames('A two-story house with a bright blue door on a quiet street.', townies)).toEqual([]);
+    expect(findSavedNames('The study belongs to Story Bright.', townies)).toEqual(['Story Bright']);
+  });
 });

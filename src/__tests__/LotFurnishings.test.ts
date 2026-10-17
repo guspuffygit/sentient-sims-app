@@ -1,0 +1,116 @@
+import {
+  floorLines,
+  floorsPhrase,
+  furnishingWords,
+  musicWords,
+  roomFloors,
+  styleWords,
+} from 'main/sentient-sims/util/lotFurnishings';
+
+const venue = { isHome: false };
+
+describe('furnishingWords', () => {
+  it('names each kind once, in a fixed order, and keeps the names it has no words for', () => {
+    expect(
+      furnishingWords(
+        [
+          'object_Locker_GP01',
+          'object_locker_tall',
+          'object_fountain_large',
+          'object_sofa_modern',
+          'object_Easter_Egg',
+        ],
+        venue,
+      ),
+    ).toEqual({ words: ['lockers', 'a fountain', 'sofas'], unmapped: ['object_Easter_Egg'] });
+  });
+
+  it('reads the narrow fragment before the broad one', () => {
+    expect(furnishingWords(['object_weightBench_GP01', 'object_PoolTable', 'object_bench_park'], venue).words).toEqual([
+      'a pool table',
+      'workout machines',
+      'benches',
+    ]);
+  });
+
+  it("leaves a home's showers and toilets out and keeps a venue's", () => {
+    const names = ['object_shower_tub', 'object_toilet_basic', 'object_piano_upright'];
+    expect(furnishingWords(names, { isHome: true }).words).toEqual(['a piano']);
+    expect(furnishingWords(names, venue).words).toEqual(['showers', 'restrooms', 'a piano']);
+  });
+
+  it('calls outdoor seating benches, and never reports doors, lights or plants as unknown', () => {
+    expect(furnishingWords(['object_sitLove_parkWood'], { isHome: false, outdoors: true }).words).toEqual(['benches']);
+    expect(
+      furnishingWords(['object_door_double', 'object_light_wall', 'object_plant_non_gardening_generic'], venue)
+        .unmapped,
+    ).toEqual([]);
+  });
+
+  it('knows the lounge and gym pieces seen at Studio PBP and Pectoral Fitness (2026-10-16)', () => {
+    expect(
+      furnishingWords(
+        ['object_barProC4x1_01', 'object_Door_VIPRope', 'lighting_Spotlight', 'objcet_tableCoffee'],
+        venue,
+      ).words,
+    ).toEqual(['a velvet rope at the door', 'stage lights', 'a bar', 'coffee tables']);
+  });
+});
+
+describe('roomFloors', () => {
+  it('counts a level only when it holds real furnishings, not a roof of vents', () => {
+    expect(
+      roomFloors({
+        '0': ['swimmingPool', 'object_Locker_GP01', 'object_light_wall'],
+        '1': ['object_treadmill', 'object_punchingBag', 'object_computer_desk'],
+        '2': ['object_vent_roof', 'object_light_wall'],
+        '3': ['object_duct_exhaust', 'object_sitDining_01'],
+      }),
+    ).toEqual([0, 1]);
+  });
+});
+
+describe('floorsPhrase', () => {
+  it('counts the stories above ground, names a basement, and says nothing for a single story', () => {
+    expect(floorsPhrase([0])).toBeUndefined();
+    expect(floorsPhrase([0, 1])).toEqual('two stories');
+    expect(floorsPhrase([-1, 0, 1])).toEqual('two stories and a basement');
+    expect(floorsPhrase(undefined)).toBeUndefined();
+  });
+});
+
+describe('floorLines', () => {
+  it('lists what is on each room floor of a lot with more than one', () => {
+    expect(
+      floorLines(
+        {
+          '0': ['swimmingPool', 'object_Locker_GP01'],
+          '1': ['object_treadmill', 'object_punchingBag'],
+          '2': ['object_vent_roof'],
+        },
+        venue,
+      ),
+    ).toEqual(['Main floor: a swimming pool, lockers', 'Second floor: treadmills, punching bags']);
+    expect(floorLines({ '0': ['object_bench_park', 'object_fountain'] }, venue)).toEqual([]);
+  });
+});
+
+describe('styleWords', () => {
+  it('keeps the one or two styles most of the lot is in and skips Basics', () => {
+    expect(styleWords({ Style_Basics: 50, Style_Vintage: 20, Style_ShabbyChic: 12, Style_Island: 2 })).toEqual([
+      'Vintage',
+      'Shabby Chic',
+    ]);
+    expect(styleWords(undefined)).toEqual([]);
+  });
+});
+
+describe('musicWords', () => {
+  it('reads the station off the state name', () => {
+    expect(musicWords(['StereoStation_Retro', 'Stereo_Station_Retro', 'StereoStation_Off'])).toEqual(['Retro']);
+    expect(musicWords(['StereoChannel_Lullabies', 'StereoChannel_ElectronicaDance'])).toEqual([
+      'Lullabies',
+      'Electronica Dance',
+    ]);
+  });
+});

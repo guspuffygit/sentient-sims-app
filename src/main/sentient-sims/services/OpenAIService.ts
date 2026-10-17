@@ -1,7 +1,10 @@
 import log from 'electron-log';
 import OpenAI from 'openai';
 import { ChatCompletion, ResponseFormatJSONSchema } from 'openai/resources/index.js';
-import { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions.js';
+import {
+  ChatCompletionCreateParamsNonStreaming,
+  ChatCompletionMessageParam,
+} from 'openai/resources/chat/completions.js';
 import { GenerationCallControl, GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
@@ -9,6 +12,7 @@ import { AIModel } from '../models/AIModel';
 import { openaiDefaultEndpoint } from '../constants';
 import { buildOpenRouterModels, isOpenRouterEndpoint, openrouterAttributionHeaders } from '../models/OpenRouterModels';
 import { ApiContext } from './ApiContext';
+import { OpenAIMessage, withoutImageData } from '../models/OpenAIMessage';
 
 // OpenRouter's reasoning control. The SDK types lack it, but the SDK sends extra body
 // fields through untouched.
@@ -22,6 +26,23 @@ const mandatoryReasoningHeadroomTokens = 1024;
 
 function isReasoningRejection(error: unknown): boolean {
   return error instanceof OpenAI.APIError && error.status === 400 && /reasoning/i.test(error.message);
+}
+
+// A user message with screenshots goes as content parts: the text, then each image
+function toChatMessage(message: OpenAIMessage): ChatCompletionMessageParam {
+  if (message.role === 'user' && message.images?.length) {
+    return {
+      role: 'user',
+      content: [
+        { type: 'text', text: message.content },
+        ...message.images.map((image) => ({
+          type: 'image_url' as const,
+          image_url: { url: `data:${image.mimeType};base64,${image.data}` },
+        })),
+      ],
+    };
+  }
+  return { role: message.role, content: message.content };
 }
 
 export class OpenAIKeyNotSetError extends Error {
@@ -135,12 +156,7 @@ export class OpenAIService implements GenerationService {
     const completionRequest: ChatCompletionCreateParamsNonStreaming = {
       model: request.model ?? this.getOpenAIModel(),
       max_tokens: request.maxResponseTokens,
-      messages: request.messages.map((message) => {
-        return {
-          role: message.role,
-          content: message.content,
-        };
-      }),
+      messages: request.messages.map((message) => toChatMessage(message)),
     };
 
     if (request.guidedChoice && this.supportsJsonSchema()) {
@@ -166,7 +182,8 @@ export class OpenAIService implements GenerationService {
       completionRequest.response_format = schema;
     }
 
-    log.debug(`OpenAI Request:\n${JSON.stringify(completionRequest, null, 2)}`);
+    const logged = { ...completionRequest, messages: withoutImageData(request).messages };
+    log.debug(`OpenAI Request:\n${JSON.stringify(logged, null, 2)}`);
 
     const result = await this.createCompletion(completionRequest, request.maxResponseTokens, control);
     let text = this.getOutputFromGeneration(result);

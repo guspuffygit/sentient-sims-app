@@ -3,6 +3,7 @@ import log from 'electron-log';
 import { AIActionType } from '../models/AIActionType';
 import { AIExchangeDetail, AIExchangeSummary } from '../models/AIExchangeLog';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
+import { withoutImageData } from '../models/OpenAIMessage';
 import { StageId } from '../pipeline/stages';
 import { notifyProviderHealth } from '../util/notifyRenderer';
 
@@ -153,7 +154,7 @@ export class AIExchangeLogService {
       promptChars,
       responsePreview,
       responseText: params.responseText,
-      request: params.request,
+      request: withoutImageData(params.request),
       promptOverflow: params.request.promptOverflow,
       error: params.error,
     };
