@@ -40,6 +40,7 @@ import {
   PlayerVoicePersona,
 } from 'main/sentient-sims/models/PlayerVoicePersona';
 import HelpButton from 'renderer/components/HelpButton';
+import VoiceHotkeySelect from './VoiceHotkeySelect';
 import { rendererTiers } from '../../tiers/merge';
 
 // AUTONOMY: the command chord, only in a build that can carry an order out
@@ -179,17 +180,11 @@ export default function VoiceInputSettingsComponent() {
         <Stack spacing={2} sx={{ maxWidth: 640 }}>
           <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
             <Typography sx={{ minWidth: 110 }}>Hotkey:</Typography>
-            <Select
-              size="small"
+            <VoiceHotkeySelect
               value={hotkey.value}
-              onChange={(change) => void hotkey.setSetting(change.target.value)}
-            >
-              {hotkeyPresets.map((preset) => (
-                <MenuItem key={preset.value} value={preset.value}>
-                  {preset.label}
-                </MenuItem>
-              ))}
-            </Select>
+              presets={hotkeyPresets}
+              onChange={(chord) => void hotkey.setSetting(chord)}
+            />
             <Select
               size="small"
               value={hotkeyMode.value}
