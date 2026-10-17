@@ -60,7 +60,6 @@ describe('lotFacts', () => {
           'object_Mailbox',
         ],
         floors: [0, 1],
-        styles: { Style_Contemporary: 40, Style_Basics: 30, Style_Industrial: 3 },
         music: ['StereoStation_Pop'],
         world_name: 'Del Sol Valley',
         situations: ['Situation_VenueGeneric'],
@@ -74,7 +73,6 @@ describe('lotFacts', () => {
         'Neighborhood: Starlight Boulevard, Del Sol Valley',
         'Floors: two stories',
         'Furnished with: a swimming pool, lockers, showers, restrooms',
-        'Decor style: Contemporary',
         'The speakers play: Pop',
       ].join('\n'),
     );
@@ -187,10 +185,10 @@ describe('placeDescriptionProblems', () => {
 
 describe('lotTypeLabel', () => {
   it('names the venue the way the Lot Type column does', () => {
-    expect(lotTypeLabel('venue_residential')).toEqual('Residential');
+    expect(lotTypeLabel('venue_residential')).toEqual('Residence');
     expect(lotTypeLabel('venue_cafe')).toEqual('Café');
     expect(lotTypeLabel('venue_RecCenter')).toEqual('Recreation Center');
-    expect(lotTypeLabel('venue_residential_TinyHome')).toEqual('Tiny Home Residential');
+    expect(lotTypeLabel('venue_residential_TinyHome')).toEqual('Tiny Home Residence');
     expect(lotTypeLabel('venue_retail')).toEqual('Retail');
     expect(lotTypeLabel('venue_ForestPark')).toEqual('National Park');
     expect(lotTypeLabel('venue_ChaletGardens')).toEqual('Chalet Gardens');

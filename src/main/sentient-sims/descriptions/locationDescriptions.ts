@@ -300,7 +300,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2473787395,
       is_default: true,
       name: "It's A Good House",
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "It's A Good House is a restored mid-century home in Sable Square, Brindleton Bay, with white siding, a brown shingle roof and a white picket fence.",
         'Downstairs has a living room with a brick fireplace, a small kitchen and an office with an easel.',
@@ -311,7 +311,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2886467601,
       is_default: true,
       name: 'Domus Familiaris',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Domus Familiaris is a two-storey house in Sable Square, Brindleton Bay, with blue siding, a slate-grey shingle roof and a railed front porch.',
         'The ground floor has a living room with glass-top tables and a rug.',
@@ -322,7 +322,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3041853450,
       is_default: true,
       name: 'Sporting Space',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "Sporting Space is an empty lot in Sable Square, Brindleton Bay: open grass with three trees and nothing built on it, a short walk from the neighbourhood's park and clinic.",
       ].join(' '),
@@ -331,7 +331,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3421044741,
       is_default: true,
       name: 'Chateau Frise',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Chateau Frise is a large Dutch Colonial house in Cavalier Cove, Brindleton Bay, with dormer windows, wraparound porches and a backyard swimming pool, with a view of the Brindleton lighthouse across the bay.',
         'The ground floor has a big living room opening onto the kitchen and an office with a medicine crafting table.',
@@ -342,7 +342,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1187053577,
       is_default: true,
       name: 'Bedlington Boathouse',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Bedlington Boathouse is a small blue-sided cottage in Cavalier Cove, Brindleton Bay, between the trees and the beach, with a white-railed front porch.',
         'The ground floor has a modest kitchen and dining area, a living room and a bathroom on wooden floors.',
@@ -353,7 +353,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2064580676,
       is_default: true,
       name: "Hound's Head",
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "Hound's Head is a large shoreline house in Cavalier Cove, Brindleton Bay, with blue-grey siding, white balconies and gabled roofs.",
         'It has four bedrooms, a living room with a piano, a dining room with a bar and a big kitchen.',
@@ -364,7 +364,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1192493066,
       is_default: true,
       name: "Dachshund's Creek",
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "Dachshund's Creek is an empty lot in Cavalier Cove, Brindleton Bay: a stretch of grass between a creek and a wooded hillside, with a narrow path down to the water.",
         'A single bench on the hill above looks out over the meadows and trees.',
@@ -374,7 +374,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1162739717,
       is_default: true,
       name: 'Hindquarter Hideaway',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Hindquarter Hideaway is an empty wooded lot in Cavalier Cove, Brindleton Bay, with nothing built on it.',
         'Tall trees ring the grass, and a fishing pond sits just beside it.',
@@ -417,7 +417,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 397672454,
       is_default: true,
       name: 'Catscratch Cottage',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "Catscratch Cottage is a small two-storey wooden house in Whiskerman's Wharf, Brindleton Bay, blue-grey with hanging flower pots and a white picket fence.",
         'The ground floor has a living room full of cat-themed decor opening into a modest kitchen.',
@@ -428,7 +428,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 422707207,
       is_default: true,
       name: 'Ragdoll Refurb',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "Ragdoll Refurb is a converted brick warehouse in Whiskerman's Wharf, Brindleton Bay, once part of the pet food cannery next door, with tall windows and open-roofed sections on both floors.",
         'The ground floor is an open kitchen and living area with a small fenced backyard.',
@@ -439,7 +439,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1435500562,
       is_default: true,
       name: "Tail's End",
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "Tail's End is an empty hilltop lot in Whiskerman's Wharf, Brindleton Bay, with nothing built on it.",
         'Trees and shrubs border one side, a cobblestone path runs along the other, and the grass looks out over Club Calico and the harbour.',
@@ -581,7 +581,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2197487620,
       is_default: true,
       name: '2-4-3 Wakabamori',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '2-4-3 Wakabamori is a small modern starter home in the Wakaba neighbourhood at the foot of Mt. Komorebi.',
         'Inside it is bright and uncluttered, with an open living space and a tidy kitchen.',
@@ -603,7 +603,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3664445447,
       is_default: true,
       name: 'Torres Amanecer',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Torres Amanecer is a two-level penthouse in Nuevo Corazón overlooking the leafy streets and purple-flowering trees of Ciudad Enamorada.',
         'The main floor has a compact kitchen, a dining nook and a television area with bookshelves, houseplants, colourful art and an aquarium; one bedroom downstairs is pink with leopard-print flooring and a canopy bed, and the quieter bedroom upstairs has dark blue botanical wallpaper and wooden furniture.',
@@ -614,7 +614,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2262171653,
       is_default: true,
       name: 'Fern & Frond Wading Pond',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Fern & Frond Wading Pond is a broad, undeveloped stretch of Sprucederry Grove in Innisgreen, centred on a large shallow pond thick with lily pads, reeds and tiny pink and yellow blooms.',
         'The water is ringed by dense grasses, scattered stones, old trees and flowering branches, and most of the land around it is open and wild.',
@@ -678,7 +678,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3031564292,
       is_default: true,
       name: 'Inner Circle',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Inner Circle is a modest one-bedroom home tucked behind a fenced yard in Del Sol Valley.',
         'Terracotta tile runs through its open kitchen, dining area and living room, while a blue-walled bedroom adds a little colour.',
@@ -700,7 +700,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1662175776,
       is_default: true,
       name: 'Nookstone',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Nookstone is a stark, compact one-bedroom home in Bedrock Strait, Oasis Springs, tucked against the rocky desert landscape and the winding river.',
         'The open-plan kitchen, dining and living area holds only the basics: dark counters, cheap appliances, a small table and a sparse sitting area around an old television, with cool grey walls and black flooring.',
@@ -711,7 +711,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3149332487,
       is_default: true,
       name: 'Oak Alcove',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Oak Alcove is a small cabin-like home in a wooded corner of Newcrest, more the edge of a campsite than a suburban address.',
         'Mature trees, thick greenery, wildflowers and a shaded front path surround it.',
@@ -745,7 +745,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2046492677,
       is_default: true,
       name: 'Rustic Residence',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Rustic Residence is a modest three-bedroom home in the quieter countryside of Windenburg, surrounded by grass, trees and open air.',
         'Each bedroom has its own look, the open kitchen and living area is shared, and a broad front deck has room for a gathering or a small party.',
@@ -756,7 +756,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2891968416,
       is_default: true,
       name: 'Sandtrap Flat',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Sandtrap Flat is a walled compound in Oasis Springs that grew out of a modest starter home.',
         'The single storey above ground holds warm, practical living spaces, while the enclosed yard is crowded with a rocket, satellite equipment, experimental machinery and a small playground.',
@@ -789,7 +789,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 994751168,
       is_default: true,
       name: 'Streamlet Single',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Streamlet Single is a modest little starter house in Foundry Cove, Willow Creek, with a small living space, a kitchen and one bedroom.',
         'A lovely stream winds through the backyard.',
@@ -799,7 +799,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1792802856,
       is_default: true,
       name: 'The Cozy Casket House',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'The Cozy Casket House is a narrow, slightly crooked gothic home in the misty wilderness of Ravenwood.',
         'Dark wood floors, faded wallpaper, carved panelling and a steep central staircase give it the feel of an old funeral parlour converted into a cramped residence.',
@@ -824,7 +824,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1239220332,
       is_default: true,
       name: 'Calle de la Promesa',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Calle de la Promesa is a three-story, three-bedroom, two-bathroom house on the outskirts of Vista Hermosa, Ciudad Enamorada.',
         'It looks out over wide, stunning views, the breeze runs across the lot, and the rooms carry sound well.',
@@ -835,7 +835,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1228931179,
       is_default: true,
       name: 'Casita del Amor',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Casita del Amor is a small two-story starter home in Vista Hermosa, Ciudad Enamorada, with one bedroom and one bathroom.',
         "It is full of natural light, and the Laguna del Abrazo lounge is a few minutes' walk away.",
@@ -846,7 +846,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3656581125,
       is_default: true,
       name: 'La Suite del Flechazo',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'La Suite del Flechazo is a three-story luxury penthouse high above Nuevo Corazón, Ciudad Enamorada, with three bedrooms and three bathrooms.',
         'Its rooftop is planted with Mexican-inspired greenery and looks out over sky-high views of the city, and an upper floor has an open study with no door.',
@@ -857,7 +857,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1050673249,
       is_default: true,
       name: 'Laguna del Abrazo',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Laguna del Abrazo is a dim-lit neighborhood lounge in the center of Vista Hermosa, Ciudad Enamorada.',
         'It has a small stage and a wall of pictures facing the tables, with smooth music under low lights.',
@@ -869,7 +869,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1087373410,
       is_default: true,
       name: 'Mansión de la Pasión',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Mansión de la Pasión is a two-story, three-bedroom, three-bathroom home in Vista Hermosa, Ciudad Enamorada.',
         'Its whole design is built around curved walls, and the heart of the neighborhood is a short walk away.',
@@ -926,7 +926,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1642594307,
       is_default: true,
       name: 'Bailey-Moon Manor',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Bailey-Moon Manor is a high-tech celebrity mansion in The Pinnacles, Del Sol Valley, with three bedrooms and four bathrooms.',
         'It is fitted with nothing but the best and most high-tech gadgets.',
@@ -937,7 +937,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1300824067,
       is_default: true,
       name: 'Chateau Peak',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Chateau Peak is a three-story celebrity mansion in The Pinnacles, Del Sol Valley, on the tallest hill and the largest lot in the valley.',
         'It has two bedrooms with en-suites, one fitted with two sleeping pods and the other with a large luxury bed, and three bathrooms in all.',
@@ -993,7 +993,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1556217859,
       is_default: true,
       name: 'The Ward Den',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'The Ward Den is an old-money celebrity mansion in The Pinnacles, Del Sol Valley, with two bedrooms and four bathrooms.',
         'It is the most valuable home in Del Sol Valley.',
@@ -1004,7 +1004,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2099838979,
       is_default: true,
       name: 'Upland Place',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Upland Place is a small starter home in Mirage Park, Del Sol Valley, with one bedroom and one bathroom.',
         "It sits on Mirage Park's dead-end street near the playground, small but with everything needed.",
@@ -1062,7 +1062,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1182334983,
       is_default: true,
       name: '14 Nettle Lane',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '14 Nettle Lane is an old two-story home deep in The Bramblewood, Henford-on-Bagley, with two bedrooms and three bathrooms.',
         'Foxes, birds and rabbits live in the forest all around it.',
@@ -1074,7 +1074,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2794127375,
       is_default: true,
       name: '3 Cobblebottom Street',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '3 Cobblebottom Street is a cozy two-story cottage in the heart of Finchwick, Henford-on-Bagley, with two bedrooms and three bathrooms.',
         'It has a sunroom for dining, an office, a main bedroom with its own bathroom and a nursery.',
@@ -1086,7 +1086,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3886743559,
       is_default: true,
       name: '3 Olde Mill Lane',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '3 Olde Mill Lane is a sizable two-story riverside home in Old New Henford, Henford-on-Bagley, with three bedrooms and three bathrooms.',
         'It has lots of land for growing crops or keeping animals, bright natural light inside and wild foxes about.',
@@ -1097,7 +1097,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3887071240,
       is_default: true,
       name: '4 Olde Mill Lane',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '4 Olde Mill Lane is an old barn refurbished into a two-story cottage in Old New Henford, Henford-on-Bagley, with one bedroom and two bathrooms.',
         'It sits privately between the edge of the Bramblewood and the River Bagley, with a quaint garden around it.',
@@ -1108,7 +1108,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3887857669,
       is_default: true,
       name: '5 Cobblebottom Street',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '5 Cobblebottom Street is a practical two-story starter cottage in Finchwick, Henford-on-Bagley, with two bedrooms and one bathroom.',
         "It stands directly across the street from Finchwick's garden walkways.",
@@ -1119,7 +1119,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1199570952,
       is_default: true,
       name: "Cordelia's Secret Cottage",
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "Cordelia's Secret Cottage is a small cottage near the top of Cordelia Falls in The Bramblewood, Henford-on-Bagley, with one bedroom and one bathroom.",
         'It is reached by a hike up the falls, with fishing water and the forest close by.',
@@ -1142,7 +1142,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3885563909,
       is_default: true,
       name: 'Olde Mill Hill',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Olde Mill Hill is a large two-story farm estate at the top of Olde Mill Hill in Old New Henford, Henford-on-Bagley, with four bedrooms and three bathrooms.',
         'It is the centerpiece of the neighborhood, with sprawling gardens, crop land and room for many animals.',
@@ -1164,7 +1164,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 980090978,
       is_default: true,
       name: '1 Mari Shores Road',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '1 Mari Shores Road is a two-story starter home in Coast of Adhmor, Innisgreen, with one bedroom and one bathroom.',
         'It is the smallest house in Innisgreen, with fast internet, a short walk from the coast and the museum in the colorful seaside village.',
@@ -1175,7 +1175,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 219807785,
       is_default: true,
       name: '42 Normfair Drive',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '42 Normfair Drive is a simple, modern two-bedroom, three-bathroom house near the center of the Coast of Adhmor, Innisgreen.',
         'It has views of the ocean, and one bedroom is full of plants.',
@@ -1186,7 +1186,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 183894035,
       is_default: true,
       name: '8 Gnome Coast Street',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '8 Gnome Coast Street is a one-bedroom, two-bathroom house by the sea in the heart of the Coast of Adhmor village, Innisgreen.',
         'Gnomes stand all around it, the decor is quirky, and there is plenty of space for gardening and crafting.',
@@ -1197,7 +1197,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2026701128,
       is_default: true,
       name: 'Bard Boulevard',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Bard Boulevard is a whimsical two-bedroom, one-bathroom cottage at the edge of the wood in Everdew, Innisgreen, up near the treetops.',
         'The plot is small and cozy, with a fine view, and the cottage holds everything a bard could need.',
@@ -1208,7 +1208,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 313458714,
       is_default: true,
       name: 'Crannamor Residential',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Crannamor Residential is a small two-bedroom, one-bathroom home built into the trunk of one of the largest trees in the forest, on the outskirts of Everdew, Innisgreen.',
         'The scenery around the tree is breathtaking, deep in the enchanted fairy woods.',
@@ -1219,7 +1219,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 395313183,
       is_default: true,
       name: 'Gimmley Gardensbrook',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Gimmley Gardensbrook is a storybook one-bedroom, one-bathroom cottage partly built into a hill in Sprucederry Grove, Innisgreen.',
         'Around it is an English cottage garden on sloping ground, full of lush plots, greenery, carvings and plenty of gnomes.',
@@ -1231,7 +1231,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 270073869,
       is_default: true,
       name: 'Greenwood Hamlet Residence',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Greenwood Hamlet Residence is a two-bedroom, one-bathroom village house in Sprucederry Grove, Innisgreen.',
         "It is a short walk from the local park, the Clover's Seeds and Supplies garden shop and the apothecary stalls.",
@@ -1253,7 +1253,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2259157008,
       is_default: true,
       name: 'Puckitt Hall',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Puckitt Hall is a fairy chateau among the trees in Everdew, Innisgreen, the biggest and most opulent home in Innisgreen.',
         'It has two bedrooms and two bathrooms, generous space indoors and out, and plenty of natural light, and the Starseed Teleporter stands nearby.',
@@ -1333,7 +1333,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2754674701,
       is_default: true,
       name: '2-5-1 Wakabamori',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '2-5-1 Wakabamori is a large three-bedroom, two-bathroom estate in Wakaba, Mt. Komorebi, a traditional manor turned contemporary showpiece.',
         'Inside are sunken rooms and a sunken genkan, a formal living room with a grand piano, and a covered walkway around a courtyard.',
@@ -1345,7 +1345,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 4056219655,
       is_default: true,
       name: '5-3-1 Shinrinyoku',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '5-3-1 Shinrinyoku is a large three-bedroom, two-bathroom traditional Japanese house in Senbamachi, Mt. Komorebi.',
         'A spacious backyard gives room for relaxing and entertaining.',
@@ -1356,7 +1356,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 4055105540,
       is_default: true,
       name: '5-6-1 Shinrinyoku',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '5-6-1 Shinrinyoku is a two-bedroom, two-bathroom traditional Japanese house at the base of Mt. Komorebi, in Senbamachi.',
         'Planting pots stand out front.',
@@ -1367,7 +1367,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 4054450179,
       is_default: true,
       name: '6-4-1 Hanamigawa',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '6-4-1 Hanamigawa is a small two-bedroom, one-bathroom traditional Japanese house in the Hanamigawa part of Senbamachi, Mt. Komorebi.',
         'The area\'s name means "treasured flower looking down the river." A modest starter house for a growing household.',
@@ -1423,7 +1423,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2484376288,
       is_default: true,
       name: 'Affluista Mansion',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Affluista Mansion is a modern, lavish two-story mansion in Acquisition Butte, Oasis Springs, set among desert canyons behind tall fences and tall palm trees.',
         'Inside are a large living room, a business meeting room and an office.',
@@ -1435,7 +1435,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1662145536,
       is_default: true,
       name: 'Agave Abode',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Agave Abode is a small one-story starter home in Bedrock Strait, Oasis Springs, on a lot with almost no yard.',
         'Inside it is roomier than it looks, with two bedrooms, a kitchen and a living and dining area.',
@@ -1447,7 +1447,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2984780224,
       is_default: true,
       name: 'Cacti Casa',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Cacti Casa is a large one-story house in Parched Prospect, Oasis Springs, the priciest in the neighborhood.',
         'Its four bedrooms sit around an indoor garden courtyard at the center of the living space, with columns, a raised kitchen and colorful 60s and 70s mid-century decor.',
@@ -1471,7 +1471,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1804118928,
       is_default: true,
       name: 'Granada Place',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Granada Place is a classic two-story house in the gated community of Skyward Palms, Oasis Springs.',
         'It has three bedrooms, three bathrooms and large living, cooking and dining rooms, with a front courtyard, a back balcony and a patio with desert plants.',
@@ -1483,7 +1483,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1802576896,
       is_default: true,
       name: 'Raffia Quinta',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Raffia Quinta is a small, stylish one-story house in Parched Prospect, Oasis Springs.',
         'It has two bedrooms, two bathrooms, a living space and a kitchen, with an outdoor patio and a barbecue.',
@@ -1494,7 +1494,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1804000064,
       is_default: true,
       name: 'Rio Verde',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Rio Verde is a two-story mansion in Skyward Palms, Oasis Springs, the largest and priciest house in the gated community.',
         'Downstairs are two living spaces, a dining room and a kitchen; upstairs are five bedrooms.',
@@ -1506,7 +1506,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2880306736,
       is_default: true,
       name: 'Slipshod Mesquite',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Slipshod Mesquite is a one-story trailer home on a large lot in Bedrock Strait, Oasis Springs, the costliest house in the neighborhood.',
         'Inside are one bedroom, a living room with a raised platform stage and a big kitchen with a dinette.',
@@ -1518,7 +1518,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1802486336,
       is_default: true,
       name: 'Springscape',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Springscape is a one-story house in Parched Prospect, Oasis Springs.',
         'It has three bedrooms, two bathrooms, a kitchen and a living and dining space, with a fenced patio and lawn facing the street.',
@@ -1530,7 +1530,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1804109472,
       is_default: true,
       name: 'Sultry Springside',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Sultry Springside is a two-story house in the gated community of Skyward Palms, Oasis Springs, with columns, white trim, brick walls and a fountain in the front yard.',
         'The main floor has an open-plan living and dining area with a modern kitchen; upstairs are three bedrooms.',
@@ -1542,7 +1542,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1802450800,
       is_default: true,
       name: 'Vista Quarry',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Vista Quarry is a one-story house in Parched Prospect, Oasis Springs.',
         'It has two bedrooms, one bathroom, a study, a living area, a kitchen and a landscaped backyard.',
@@ -1553,7 +1553,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 687165520,
       is_default: true,
       name: 'Yuma Heights',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Yuma Heights is a three-story luxury house in a classic Spanish style in Acquisition Butte, Oasis Springs, a wealthy rocky overlook above the desert.',
         'It has four bedrooms and four bathrooms, and the top-floor bedroom opens onto a large balcony with a view.',
@@ -1589,7 +1589,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3175284742,
       is_default: true,
       name: "Crow's Perch",
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "Crow's Perch is a historic two-story house at the highest point of Crow's Crossing, Ravenwood.",
         'It has three bedrooms, one bathroom, nicely furnished rooms and plenty of outdoor space.',
@@ -1625,7 +1625,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2219311191,
       is_default: true,
       name: 'Moppy Manor',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "Moppy Manor is a historic two-story house in Crow's Crossing, Ravenwood, originally built for a goat.",
         'It has one bedroom, one bathroom, goat-themed architecture throughout, a goat statue whose eyes glow at night and a generous backyard.',
@@ -1637,7 +1637,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2178482227,
       is_default: true,
       name: 'Mourning Mist Manor',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Mourning Mist Manor is a two-story manor with elaborate aged architecture in central Mourningvale, Ravenwood.',
         'It has two bedrooms, two bathrooms and a colorful, plant-filled interior, and an attached greenhouse with broken panes serves as a breakfast nook overlooking the central plaza.',
@@ -1649,7 +1649,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3407872018,
       is_default: true,
       name: 'Old Ravenwood Estate',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "Old Ravenwood Estate is a huge, derelict three-story mansion of light masonry with a rooftop level in Crow's Crossing, Ravenwood, one of the oldest buildings in the village.",
         'It has six bedrooms, seven bathrooms and stately but sparsely decorated rooms, with flickering lights and odd sounds.',
@@ -1661,7 +1661,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3165585413,
       is_default: true,
       name: 'Specter Family Manor',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "Specter Family Manor is a grey masonry two-story manor with a hidden basement in Crow's Crossing, Ravenwood, perched on high ground.",
         'It has three bedrooms, three bathrooms and reaper-themed decor inside.',
@@ -1673,7 +1673,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2523725892,
       is_default: true,
       name: 'Teardrop Cottage',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Teardrop Cottage is a large two-story cottage on the river shore in Whispering Glen, Ravenwood, facing the Ancestor cliff.',
         'It has two bedrooms, two bathrooms, a wrap-around porch and beautiful landscaping, and the lot has great acoustics and bracing breezes.',
@@ -1697,7 +1697,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2512977983,
       is_default: true,
       name: 'The Marigold Chateau',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'The Marigold Chateau is a spacious, rustic three-floor chateau in the rolling countryside of Whispering Glen, Ravenwood, over a century old.',
         'It has been renovated with a lot of pink, with two bedrooms, two bathrooms and big, lavish rooms.',
@@ -1709,7 +1709,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2703097870,
       is_default: true,
       name: '13 Acacia Avenue',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '13 Acacia Avenue is a two-story suburban house with a modern twist in Gilbert Gardens, San Sequoia, across the street from the park and its lake.',
         'Outside it has dark woods, stone and wood facades and metal roofs; inside are an open living, dining and kitchen area with an upright piano and a bar, a master bedroom opening onto the back patio, a space-themed nursery and an office.',
@@ -1721,7 +1721,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 154140678,
       is_default: true,
       name: '36 Bayani Place',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '36 Bayani Place is a modern single-story suburban house with large A-shaped windows in Hopewell Hills, San Sequoia.',
         'It has three bedrooms and looks over the water, beside a park with a statue and a pond.',
@@ -1732,7 +1732,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 4137287685,
       is_default: true,
       name: '7 Eucalyptus Lane',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         '7 Eucalyptus Lane is an upscale two-story Craftsman-style house in Hopewell Hills, San Sequoia, painted blue with white windows and columns, on a tree-lined street with bay views.',
         'It has three bedrooms, two bathrooms, a small gaming room and a home office.',
@@ -1780,7 +1780,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2205351941,
       is_default: true,
       name: 'Parkside Place',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Parkside Place is a single-story Craftsman-style starter home in Gilbert Gardens, San Sequoia.',
         'It has a spacious interior with modern accents, two bedrooms, one bathroom and a quiet patio made for barbecues.',
@@ -1792,7 +1792,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1359609861,
       is_default: true,
       name: 'Robles Point',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Robles Point is a large two-story house in Anchorpoint Wharf, San Sequoia, added onto over the years so that traditional and modern parts stand side by side.',
         'The older wing holds the kitchen and a bedroom with its own staircase, the newer wing is upstairs, and the house has four bedrooms and three bathrooms in all, with chess and puzzle decor throughout.',
@@ -1804,7 +1804,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 157614088,
       is_default: true,
       name: 'Sequoia Cottage',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Sequoia Cottage is a two-story suburban cottage in Hopewell Hills, San Sequoia.',
         'Downstairs are the master bedroom, a bathroom and a nursery; upstairs are two more bedrooms and a second bathroom.',
@@ -1816,7 +1816,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1087874032,
       is_default: true,
       name: 'Brook Bungalow',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Brook Bungalow is a two-story colonial house in Courtyard Lane, Willow Creek, built for outdoor living with a wraparound porch and balconies.',
         'Upstairs are three bedrooms and a study landing.',
@@ -1828,7 +1828,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 7505088,
       is_default: true,
       name: 'Cypress Terrace',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Cypress Terrace is a three-story modern mansion on a wooded hill in Sage Estates, Willow Creek, with its own driveway.',
         'Its minimalist interior is shaped by raised walls, columns and platforms, with an indoor greenhouse, five bedrooms and five bathrooms; a grand piano and an easel sit on the top floor.',
@@ -1840,7 +1840,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 961654864,
       is_default: true,
       name: 'Daisy Hovel',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Daisy Hovel is a small one-story, one-bedroom house in Foundry Cove, Willow Creek.',
         'The open-plan front holds the living room and kitchen, with the bedroom and bathroom at the back.',
@@ -1852,7 +1852,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 961473792,
       is_default: true,
       name: 'Garden Essence',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Garden Essence is a sprawling one-story colonial in Foundry Cove, Willow Creek, the largest house in the neighborhood.',
         'A front porch leads into an open living, kitchen and dining area, three bedrooms and one bathroom with double sinks.',
@@ -1864,7 +1864,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 4267281792,
       is_default: true,
       name: 'Oakenstead',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Oakenstead is a classically styled two-story Southern mansion in Sage Estates, Willow Creek, on the largest lot in town.',
         'It has four bedrooms, three bathrooms, a large front porch, balconies and a walled backyard with a gazebo, a grill and planters.',
@@ -1876,7 +1876,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1989072208,
       is_default: true,
       name: 'Ophelia Villa',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Ophelia Villa is a three-story Gothic mansion in Pendula View, Willow Creek, with three bedrooms and two bathrooms.',
         'A grand foyer with expensive art and knight statues opens onto a living room with a statement fireplace and a grand piano, a balcony holds a telescope, and the third floor has a dark, moody office.',
@@ -1888,7 +1888,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1073501008,
       is_default: true,
       name: 'Parkshore',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Parkshore is a large traditional two-story house in Pendula View, Willow Creek, with verandas and balconies all around and a porch wrapping the front.',
         'Inside are four bedrooms, two of them decorated for children, and three bathrooms.',
@@ -1900,7 +1900,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 573143552,
       is_default: true,
       name: 'Pique Hearth',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Pique Hearth is a contemporary two-story house with a basement in Courtyard Lane, Willow Creek.',
         'It has a front porch, a sunroom, second-floor balconies, a home office, three bedrooms and three bathrooms, and the basement holds a bar, a TV, a jukebox and workout equipment.',
@@ -1912,7 +1912,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 572688432,
       is_default: true,
       name: 'Rindle Rose',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Rindle Rose is a cozy one-story cottage on a small lot in Courtyard Lane, Willow Creek, with the river on two sides.',
         'A landscaped front yard and a welcoming front porch lead into a combined living room and kitchen, two bedrooms and one bathroom.',
@@ -1923,7 +1923,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 573229280,
       is_default: true,
       name: 'Riverside Roost',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Riverside Roost is a two-story modified double shotgun house in Courtyard Lane, Willow Creek, laid out long and sideways.',
         'It has two bedrooms, two bathrooms, two porches and an upstairs balcony.',
@@ -1947,7 +1947,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2085060112,
       is_default: true,
       name: 'Umbrage Manor',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Umbrage Manor is a huge two-story colonial in Pendula View, Willow Creek, on lovely grounds with a fence around the whole lot.',
         'It has three bedrooms, two bathrooms, and porches and balconies front and back.',
@@ -1959,7 +1959,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1975058435,
       is_default: true,
       name: 'Coorinberg Cottage',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Coorinberg Cottage is a large one-story country cottage in Windslar, Windenburg.',
         'It has three bedrooms, one bathroom and a kitchen and dining area, with a separate outbuilding holding a living room and play objects.',
@@ -1971,7 +1971,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 1871314947,
       is_default: true,
       name: 'Cottage Am See',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Cottage Am See is a small two-story cottage by a lake in Windslar, Windenburg.',
         'It has a kitchen, a living room, two bedrooms and one bathroom, with very little outdoor space.',
@@ -1982,7 +1982,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3377201155,
       is_default: true,
       name: 'Dock Den',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "Dock Den is a small, modern one-story house on The Crumbling Isle, Windenburg's private island with no roads.",
         'It has two bedrooms, one bathroom, a kitchen, a living area and an outdoor patio, with beaches, bonfires and fishing spots nearby.',
@@ -1993,7 +1993,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2057895943,
       is_default: true,
       name: 'Dresden House',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Dresden House is a two-story country estate in Windslar, Windenburg, on the biggest lot in the neighborhood.',
         'The house has three bedrooms, two bathrooms, a kitchen, living space and a home gym, set in a very big stretch of countryside.',
@@ -2004,7 +2004,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 162529387,
       is_default: true,
       name: 'Factory One',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Factory One is a converted old factory in Olde Platz, Windenburg, turned into a two-story party house.',
         'It has four bedrooms, one large bathroom and a huge open kitchen and living room with workout machines and a DJ booth.',
@@ -2016,7 +2016,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2514681861,
       is_default: true,
       name: 'Pier Palace',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Pier Palace is a contemporary two-story house on The Crumbling Isle, Windenburg.',
         'It has three bedrooms, two bathrooms and a rooftop terrace, with very little yard.',
@@ -2027,7 +2027,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 3407880,
       is_default: true,
       name: "Proprietor's Square",
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         "Proprietor's Square is an affordable two-story starter home in Olde Platz, Windenburg, overlooking the old town.",
         'Downstairs are the living area and a decent-sized kitchen; upstairs is an open bedroom with a small bathroom.',
@@ -2039,7 +2039,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2478374916,
       is_default: true,
       name: 'The Lighthouse',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'The Lighthouse is a modern two-story house on The Crumbling Isle, Windenburg.',
         'It has three bedrooms, two bathrooms, a kitchen and a living and dining area.',
@@ -2051,7 +2051,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 2463563779,
       is_default: true,
       name: 'Von-Windenburg Estate',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Von-Windenburg Estate is a two-story island mansion on The Crumbling Isle, Windenburg, the most expensive house in town.',
         'It has a kitchen, generous living space and bedrooms for a large household, set in a very big outdoor area with a pool.',
@@ -2063,7 +2063,7 @@ export const defaultLocationDescriptions: Map<string, LocationEntity> = new Map(
       id: 4282253317,
       is_default: true,
       name: 'Waterlock Redoubt',
-      lot_type: 'Residential',
+      lot_type: 'Residence',
       description: [
         'Waterlock Redoubt is a two-story old-town house in Olde Platz, Windenburg.',
         'It has two bedrooms, one bathroom, a large kitchen and a living room with a DJ booth, and one bedroom has a motion gaming console.',

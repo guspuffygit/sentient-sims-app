@@ -1,6 +1,6 @@
 import { ChatCompletionMessageRole } from './ChatCompletionMessageRole';
 
-// A picture sent with a message (a lot screenshot), base64 without the data: prefix
+// A picture sent with a message, base64 without the data: prefix
 export type MessageImage = {
   mimeType: string;
   data: string;

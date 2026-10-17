@@ -61,8 +61,7 @@ export type LotBlock = {
   lot_traits?: string[];
   // Where it is and what it is furnished with, for the same writer (mod builds from
   // 2026-10-16): the world's display name, the street tuning name, the object tuning names
-  // on the lot, the floor levels in use (-1 is a basement), catalog style tag -> object
-  // count, and the stereo station state names
+  // on the lot, the floor levels in use (-1 is a basement) and the stereo station state names
   world_name?: string;
   street?: string;
   furnishings?: string[];
@@ -72,7 +71,6 @@ export type LotBlock = {
   // lot type set in Manage Worlds, which the active venue can differ from (venue_Generic)
   floor_furnishings?: Record<string, string[]>;
   venue_type?: string;
-  styles?: Record<string, number>;
   music?: string[];
 };
 

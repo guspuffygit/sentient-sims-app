@@ -4,7 +4,6 @@ import {
   furnishingWords,
   musicWords,
   roomFloors,
-  styleWords,
 } from 'main/sentient-sims/util/lotFurnishings';
 
 const venue = { isHome: false };
@@ -55,6 +54,61 @@ describe('furnishingWords', () => {
       ).words,
     ).toEqual(['a velvet rope at the door', 'stage lights', 'a bar', 'coffee tables']);
   });
+
+  it('knows the furnishings main.log listed with no plain words (2026-10-17)', () => {
+    const names = [
+      'object_bar',
+      'object_triviaBox',
+      'object_CoffeeMaker_Low',
+      'object_stove_electric',
+      'object_stoveHood',
+      'object_Urnstone_Float',
+      'object_GardeningSoil',
+      'object_bonsai',
+      'object_CostumeBox',
+      'object_chair_dining',
+      'object_Ottoman',
+      'object_bathtub_EP10BATHboxy',
+      'object_dresser_StandardRoute',
+      'object_TableNightstand',
+    ];
+    expect(furnishingWords(names, venue)).toEqual({
+      words: [
+        'a bar',
+        'a trivia box',
+        'a coffee maker',
+        'a kitchen',
+        'gravestones',
+        'garden planters',
+        'a bonsai tree',
+        'a costume trunk',
+        'dining tables',
+        'ottomans',
+        'a bathtub',
+        'dressers',
+        'nightstands',
+      ],
+      unmapped: [],
+    });
+    expect(furnishingWords(names, { isHome: true }).words).not.toContain('a kitchen');
+    expect(furnishingWords(['object_barrel_wine'], venue).words).toEqual([]);
+  });
+
+  it('never reports alarms, gates, ladders or a closet as unknown', () => {
+    expect(
+      furnishingWords(
+        [
+          'fire_alarm',
+          'object_gate',
+          'object_buildLadders',
+          'object_closetVenue',
+          'object_fire_ash',
+          'object_tableGeneric',
+        ],
+        venue,
+      ).unmapped,
+    ).toEqual([]);
+  });
 });
 
 describe('roomFloors', () => {
@@ -92,16 +146,6 @@ describe('floorLines', () => {
       ),
     ).toEqual(['Main floor: a swimming pool, lockers', 'Second floor: treadmills, punching bags']);
     expect(floorLines({ '0': ['object_bench_park', 'object_fountain'] }, venue)).toEqual([]);
-  });
-});
-
-describe('styleWords', () => {
-  it('keeps the one or two styles most of the lot is in and skips Basics', () => {
-    expect(styleWords({ Style_Basics: 50, Style_Vintage: 20, Style_ShabbyChic: 12, Style_Island: 2 })).toEqual([
-      'Vintage',
-      'Shabby Chic',
-    ]);
-    expect(styleWords(undefined)).toEqual([]);
   });
 });
 

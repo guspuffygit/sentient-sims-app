@@ -15,6 +15,7 @@ import { castVoicesForLines } from '../formatter/VoiceCasting';
 import { SentientSim } from '../models/SentientSim';
 import { VoiceType } from '../models/VoiceType';
 import { consumePacedScene } from './pacedScenes';
+import { plainProviderError } from './providerErrorWords';
 
 function notifyAllWindows(message: string, ...args: unknown[]) {
   getAllBrowserWindows().forEach((wnd) => {
@@ -25,17 +26,22 @@ function notifyAllWindows(message: string, ...args: unknown[]) {
 }
 
 // O-6: dead-pipeline health signal. The renderer shows a badge; the game gets ONE
-// non-pausing toast (message, never error — an error notification pauses the clock)
+// non-pausing toast (message, never error — an error notification pauses the clock). Both
+// say what the error means; the provider's own text goes to main.log.
 export function notifyProviderHealth(health: { down: boolean; failures: number; lastError?: string }) {
-  notifyAllWindows('provider-health', health);
+  const plain = health.lastError ? plainProviderError(health.lastError).plain : undefined;
+  if (health.lastError) {
+    log.warn(`[ProviderHealth] ${health.failures} failures in a row, last: ${health.lastError}`);
+  }
+  notifyAllWindows('provider-health', { ...health, lastError: plain });
   if (health.down) {
     sendModNotification({
       type: ModWebsocketMessageType.NOTIFICATION,
       notification: {
         title: 'Sentient Sims',
-        message: `The AI provider has failed ${health.failures} times in a row${
-          health.lastError ? ` (${health.lastError})` : ''
-        }. Sims will keep playing on their own until it recovers.`,
+        message: `The AI provider has failed ${health.failures} times in a row.${
+          plain ? ` ${plain}` : ''
+        } Sims will keep playing on their own until it recovers.`,
         message_type: ModWebsocketNotificationType.MESSAGE,
       },
     });

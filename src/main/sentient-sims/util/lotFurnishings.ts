@@ -1,10 +1,11 @@
 // The mod reports what a lot is furnished with as object tuning names per floor
-// (object_Locker_GP01, object_fountain_large), the catalog style tags and the stereo
-// stations. This turns them into the plain words the description writer gets. Kinds only,
-// never counts: "lockers", not "eleven lockers".
+// (object_Locker_GP01, object_fountain_large) and the stereo stations. This turns them into
+// the plain words the description writer gets. Kinds only, never counts: "lockers", not
+// "eleven lockers".
 
 // [name fragments, plain words]. First match wins, so the narrow fragments come first
-// ("weightbench" before "bench", "pooltable" before "pool", "barstool" before "bar").
+// ("weightbench" before "bench", "pooltable" before "pool", "barstool" before "bar"). A
+// fragment ending in $ has to end the name ("object_bar", never "object_barrel").
 const FURNISHING_WORDS: Array<[string[], string]> = [
   [['pooltable', 'billiard'], 'a pool table'],
   [['hottub'], 'a hot tub'],
@@ -26,7 +27,10 @@ const FURNISHING_WORDS: Array<[string[], string]> = [
   [['sofa', 'couch', 'loveseat', 'sectional', 'sitlove'], 'sofas'],
   [['armchair', 'chairliving', 'livingchair', 'loungechair', 'chairlounge', 'sitliving'], 'armchairs'],
   [['barstool'], 'bar stools'],
-  [['bartend', 'object_bar_', 'barpro', 'barcounter', 'minibar'], 'a bar'],
+  [['bartend', 'object_bar_', 'object_bar$', 'barpro', 'barcounter', 'minibar'], 'a bar'],
+  [['triviabox'], 'a trivia box'],
+  [['coffeemaker', 'espresso'], 'a coffee maker'],
+  [['stove', 'oven'], 'a kitchen'],
   [['television', 'object_tv'], 'TVs'],
   [['computer'], 'computers'],
   [['bookshelf', 'bookcase'], 'bookshelves'],
@@ -58,12 +62,18 @@ const FURNISHING_WORDS: Array<[string[], string]> = [
   [['firepit', 'campfire'], 'a fire pit'],
   [['fireplace'], 'a fireplace'],
   [['aquarium', 'fishtank'], 'an aquarium'],
-  [['gravestone', 'tombstone'], 'gravestones'],
-  [['planter', 'gardenplot'], 'garden planters'],
+  [['gravestone', 'tombstone', 'urnstone'], 'gravestones'],
+  [['planter', 'gardenplot', 'gardeningsoil'], 'garden planters'],
+  [['bonsai'], 'a bonsai tree'],
+  [['costumebox', 'costumetrunk'], 'a costume trunk'],
   [['tablecoffee', 'coffeetable'], 'coffee tables'],
-  [['tabledining', 'diningtable', 'sitdining'], 'dining tables'],
+  [['tabledining', 'diningtable', 'sitdining', 'chair_dining', 'diningchair'], 'dining tables'],
+  [['ottoman'], 'ottomans'],
   [['desk'], 'desks'],
+  [['bathtub'], 'a bathtub'],
   [['object_bed', 'beddouble', 'bedsingle'], 'beds'],
+  [['dresser'], 'dressers'],
+  [['nightstand'], 'nightstands'],
 ];
 
 // Structure, lighting and small decor: on every lot, so they say nothing about it and no
@@ -103,10 +113,18 @@ const STRUCTURAL = [
   'trash',
   'shelf',
   'clock',
+  'fire_alarm',
+  'firealarm',
+  'smokedetector',
+  'fire_ash',
+  'gate',
+  'ladder',
+  'closet',
+  'tablegeneric',
 ];
 
 // Every home has these; on a venue they say what the place is for (a gym's showers)
-const HOME_BASICS = new Set(['showers', 'restrooms', 'beds']);
+const HOME_BASICS = new Set(['showers', 'restrooms', 'beds', 'a bathtub', 'a kitchen', 'dressers', 'nightstands']);
 
 // A level holds a room when it has at least this many kinds of real furnishing; a roof with
 // vents and a stray chair does not count as a story
@@ -114,7 +132,9 @@ const MIN_ROOM_WORDS_PER_FLOOR = 2;
 
 function furnishingWord(tuningName: string): string | undefined {
   const lowered = tuningName.toLowerCase();
-  return FURNISHING_WORDS.find(([fragments]) => fragments.some((fragment) => lowered.includes(fragment)))?.[1];
+  const matches = (fragment: string) =>
+    fragment.endsWith('$') ? lowered.endsWith(fragment.slice(0, -1)) : lowered.includes(fragment);
+  return FURNISHING_WORDS.find(([fragments]) => fragments.some(matches))?.[1];
 }
 
 function isStructural(tuningName: string): boolean {
@@ -197,37 +217,12 @@ export function floorLines(
     .filter(Boolean);
 }
 
-// Words for the catalog's style tags; anything else is de-prefixed and split
-const STYLE_WORDS: Record<string, string> = {
-  Style_Shabby: 'Shabby Chic',
-  Style_ShabbyChic: 'Shabby Chic',
-  Style_MidCentury: 'Mid-Century',
-  Style_Modern: 'Modern',
-  Style_Mission: 'Mission',
-  Style_Cosmolux: 'Cosmolux',
-};
-const IGNORED_STYLES = new Set(['Style_Basics', 'Style_Basic']);
-// A style has to cover this share of the styled objects to say anything about the place
-const STYLE_SHARE = 0.15;
-const MAX_STYLES = 2;
-
 export function plainName(name: string, prefix: RegExp): string {
   return name
     .replace(prefix, '')
     .replace(/_/g, ' ')
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .trim();
-}
-
-/** The one or two decor styles most of the lot is furnished in. */
-export function styleWords(styles: Record<string, number> | undefined): string[] {
-  const entries = Object.entries(styles ?? {}).filter(([name]) => !IGNORED_STYLES.has(name));
-  const total = entries.reduce((sum, [, count]) => sum + count, 0);
-  return entries
-    .filter(([, count]) => total > 0 && count / total >= STYLE_SHARE)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, MAX_STYLES)
-    .map(([name]) => STYLE_WORDS[name] ?? plainName(name, /^style_/i));
 }
 
 /** The stations the lot's stereos are tuned to ("StereoChannel_Lullabies" -> "Lullabies"). */

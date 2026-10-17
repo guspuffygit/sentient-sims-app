@@ -28,7 +28,7 @@ function isReasoningRejection(error: unknown): boolean {
   return error instanceof OpenAI.APIError && error.status === 400 && /reasoning/i.test(error.message);
 }
 
-// A user message with screenshots goes as content parts: the text, then each image
+// A user message with images goes as content parts: the text, then each image
 function toChatMessage(message: OpenAIMessage): ChatCompletionMessageParam {
   if (message.role === 'user' && message.images?.length) {
     return {

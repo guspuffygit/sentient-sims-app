@@ -397,6 +397,8 @@ export type OneShotOptions = {
   signal?: AbortSignal;
   deadlineAt?: number;
   images?: MessageImage[];
+  // The player pressed a button and sees the result, so it is left out of provider health
+  interactive?: boolean;
 };
 
 export type DeferredInteractionResult = {
@@ -1497,7 +1499,7 @@ ${factsBlock}
     interactionActionType?: AIActionType,
     // Which pipeline stage this call IS. An options bag rather than a ninth positional:
     // 3.2 adds simId here so a stage can resolve against one Sim's Sentience. Images ride on
-    // the user message (lot screenshots); only providers that can see them are given any.
+    // the user message; only providers that can see them are given any.
     options?: OneShotOptions,
   ): Promise<{ exchange: LLMExchange; text: string }> {
     if (options?.signal?.aborted) {
@@ -1544,6 +1546,7 @@ ${factsBlock}
         actionType,
         () => this.ctx.getGenerationService(providerConfig.apiType).sentientSimsGenerate(openAIRequest, control),
         options?.stageId,
+        { health: !options?.interactive },
       );
     } catch (err) {
       if (options?.signal?.aborted) {

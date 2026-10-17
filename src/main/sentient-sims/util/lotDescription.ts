@@ -1,15 +1,7 @@
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { LotBlock } from '../models/SimStateReport';
 import { lotNeighborhood } from '../descriptions/lotNeighborhoods';
-import {
-  floorLines,
-  floorsPhrase,
-  furnishingWords,
-  musicWords,
-  plainName,
-  roomFloors,
-  styleWords,
-} from './lotFurnishings';
+import { floorLines, floorsPhrase, furnishingWords, musicWords, plainName, roomFloors } from './lotFurnishings';
 
 // The facts a generated lot description is written from, and the gate it has to pass before
 // it is stored. Both exist because of what the first version wrote into the save
@@ -28,7 +20,7 @@ import {
 // names Manage Worlds shows. A venue with no entry is matched by pattern, else de-prefixed and
 // split ("venue_ChaletGardens" -> "Chalet Gardens") rather than dropped.
 const VENUES: Partial<Record<string, { kind: string; label: string }>> = {
-  venue_residential: { kind: 'a private home', label: 'Residential' },
+  venue_residential: { kind: 'a private home', label: 'Residence' },
   venue_gym: { kind: 'a gym', label: 'Gym' },
   venue_cemetery: { kind: 'a cemetery', label: 'Cemetery' },
   venue_library: { kind: 'a public library', label: 'Library' },
@@ -73,8 +65,8 @@ const VENUES: Partial<Record<string, { kind: string; label: string }>> = {
 
 // Lot types whose tuning names are not known yet, by what the name has to contain
 const VENUE_PATTERNS: Array<[RegExp, { kind: string; label: string }]> = [
-  [/haunt/i, { kind: 'a haunted house', label: 'Haunted House Residential' }],
-  [/tiny/i, { kind: 'a tiny home', label: 'Tiny Home Residential' }],
+  [/haunt/i, { kind: 'a haunted house', label: 'Haunted House Residence' }],
+  [/tiny/i, { kind: 'a tiny home', label: 'Tiny Home Residence' }],
   [/wedding/i, { kind: 'a wedding venue', label: 'Wedding Venue' }],
   [/playground/i, { kind: 'a playground', label: 'Playground' }],
   [/rec_?center|recreation/i, { kind: 'a recreation center', label: 'Recreation Center' }],
@@ -102,7 +94,7 @@ export function lotTypeLabel(venue: string): string {
 
 // Plain, haunted and tiny homes alike
 function isResidential(venue: string | undefined): boolean {
-  return venue !== undefined && lotTypeLabel(venue).endsWith('Residential');
+  return venue !== undefined && lotTypeLabel(venue).endsWith('Residence');
 }
 
 /**
@@ -191,10 +183,6 @@ export function lotFacts(location: LocationEntity, lot: LotBlock | undefined, zo
     facts.push(`Furnished with: ${words.join(', ')}`);
   } else if (furnishings.length > 0) {
     facts.push('Furnished with: nothing notable beyond the basics');
-  }
-  const styles = styleWords(lot?.styles);
-  if (styles.length > 0) {
-    facts.push(`Decor style: ${styles.join(', ')}`);
   }
   const music = musicWords(lot?.music);
   if (music.length > 0) {

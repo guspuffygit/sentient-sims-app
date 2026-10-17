@@ -33,7 +33,9 @@ export interface ExchangePersistence {
   prune(keep: number): void;
 }
 
-type LabelContext = { label: string; actionType?: AIActionType; stageId?: StageId };
+// health false: a call the player started from an editor (Auto-Generate Description), whose
+// failure they see right there; it never counts toward the dead-pipeline toast
+type LabelContext = { label: string; actionType?: AIActionType; stageId?: StageId; health?: boolean };
 
 type Entry = AIExchangeDetail;
 
@@ -120,8 +122,9 @@ export class AIExchangeLogService {
     actionType: AIActionType | undefined,
     fn: () => Promise<T>,
     stageId?: StageId,
+    options?: { health?: boolean },
   ): Promise<T> {
-    return this.labelContext.run({ label, actionType, stageId }, fn);
+    return this.labelContext.run({ label, actionType, stageId, health: options?.health }, fn);
   }
 
   record(params: {
@@ -135,7 +138,7 @@ export class AIExchangeLogService {
     const context = this.labelContext.getStore();
     const id = this.nextId;
     this.nextId += 1;
-    if (!params.cancelled) {
+    if (!params.cancelled && context?.health !== false) {
       this.trackHealth(params.error);
     }
 

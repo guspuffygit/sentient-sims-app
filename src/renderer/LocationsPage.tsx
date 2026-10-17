@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import log from 'electron-log';
 import { LocationEntity, LocationSource } from 'main/sentient-sims/db/entities/LocationEntity';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
@@ -23,8 +24,6 @@ import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { MessageImage } from 'main/sentient-sims/models/OpenAIMessage';
-import { LotScreenshots } from './components/LotScreenshots';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import AppCard from './AppCard';
 import { EmptyState } from './components/EmptyState';
@@ -70,7 +69,7 @@ const columns: GridColDef[] = [
 const client = new SentientSimsAppClient();
 
 const HOW_TO = [
-  'Visit the lot in game or add screenshots of it, then press Auto-Generate Description for a draft, or write your own.',
+  'Visit the lot in game, then press Auto-Generate Description for a draft, or write your own.',
   'Write 3 to 4 sentences in the present tense: what the place is and where, the real things in it floor by floor (the bar, the pool, the stage), then what the place is like and who it is for.',
   'Leave out: people doing things (visitors, staff, she/he/you), names, anything happening right now, counts ("six computers"), lists of every object, and stock phrases like vibrant or nestled.',
 ];
@@ -85,16 +84,10 @@ export default function LocationsPage() {
   const [confirmingUnpublish, setConfirmingUnpublish] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [writing, setWriting] = useState(false);
-  // Screenshots belong to the lot they were added for: a new selection starts with none
-  const [lotScreenshots, setLotScreenshots] = useState<{ id?: number; images: MessageImage[] }>({ images: [] });
-  const editedId = editedLocation?.location.id;
-  const screenshots = lotScreenshots.id === editedId ? lotScreenshots.images : [];
-  const setScreenshots = (images: MessageImage[]) => {
-    setLotScreenshots({ id: editedId, images });
-  };
   const { status } = useWebsocket();
   const { userAttributes } = useAuth();
   const { showMessage } = useSnackBar();
+  const navigate = useNavigate();
   const isMapper = new PatreonUser(userAttributes).isMapper();
 
   function getLocations() {
@@ -255,9 +248,15 @@ export default function LocationsPage() {
     }
     setWriting(true);
     try {
-      const written = await client.locations.describeLocation(editedLocation.location.id, screenshots);
+      const written = await client.locations.describeLocation(editedLocation.location.id);
       if ('error' in written) {
-        showMessage(written.error, 'warning');
+        const openSettings = {
+          label: 'Open Settings',
+          onClick: () => {
+            void navigate('/settings');
+          },
+        };
+        showMessage(written.error, 'warning', written.inSettings ? openSettings : undefined);
       } else {
         setEditedLocation((previousLocation) => {
           if (!previousLocation) {
@@ -353,10 +352,7 @@ export default function LocationsPage() {
               >
                 Cancel
               </Button>
-              <Tooltip
-                title="Drafts a description from what the game reports about this lot, and from any screenshots you added."
-                placement="top"
-              >
+              <Tooltip title="Drafts a description from what the game reports about this lot." placement="top">
                 <span>
                   <Button
                     loading={writing}
@@ -434,7 +430,7 @@ export default function LocationsPage() {
           </CardActions>
         }
       >
-        <LotScreenshots screenshots={screenshots} onChange={setScreenshots}>
+        <>
           <MemoryEditInput label="Name" rows={1} handleEdit={handleNameEdit} forceShow value={location.name} />
           <MemoryEditInput
             label="Lot Type"
@@ -474,7 +470,7 @@ export default function LocationsPage() {
               <InfoOutlinedIcon fontSize="small" color="action" aria-label="How to write a lot description" />
             </Tooltip>
           </Box>
-        </LotScreenshots>
+        </>
         {ownText && fallback && differsFromDefault && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="caption" color="text.secondary">
