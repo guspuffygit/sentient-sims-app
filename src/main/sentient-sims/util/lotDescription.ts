@@ -133,11 +133,12 @@ export function lotFurnishingNames(lot: LotBlock | undefined): string[] {
     .map(([kind]) => (kind === 'tv' ? 'television' : kind));
 }
 
-// "lotTrait_Generic_GreatAcoustics" -> "Great Acoustics"
-const TRAIT_CATEGORY = /^(generic|challenge|residential|venue|lot|ep\d+|gp\d+|sp\d+) /i;
+// "zoneModifier_lotTrait_GreatAcoustics" (the game's name) -> "Great Acoustics"; apartment
+// traits are zoneModifier_pro_Quiet / zoneModifier_con_Haunted, pet lots zoneModifier_PetWorld_CatFriendly
+const TRAIT_CATEGORY = /^(generic|challenge|residential|venue|lot|pro|con|pet world|ep\d+|gp\d+|sp\d+) /i;
 
 export function lotTraitName(trait: string): string {
-  let words = plainName(trait, /^lot_?traits?_?/i);
+  let words = plainName(trait, /^(zone_?modifier_)?(lot_?traits?_?)?/i);
   while (TRAIT_CATEGORY.test(words)) {
     words = words.replace(TRAIT_CATEGORY, '');
   }

@@ -255,7 +255,12 @@ describe('lotFacts at a park whose active venue is Generic (Ward Park, 2026-10-1
         venue_type: 'venue_ForestPark',
         furnishings: ['object_sitLove_parkWood', 'object_picnicTable', 'object_Trashcan_Outdoor_NoLid'],
         floor_furnishings: { '0': ['object_sitLove_parkWood', 'object_picnicTable'] },
-        lot_traits: ['lotTrait_Generic_PeaceAndQuiet'],
+        lot_traits: [
+          'lotTrait_Generic_PeaceAndQuiet',
+          'zoneModifier_lotTrait_FreshAir',
+          'zoneModifier_pro_Quiet',
+          'zoneModifier_PetWorld_CatFriendly',
+        ],
       },
       'Ward Park',
     );
@@ -263,7 +268,7 @@ describe('lotFacts at a park whose active venue is Generic (Ward Park, 2026-10-1
     expect(facts).toContain('Furnished with: benches, picnic tables');
     expect(facts).not.toContain('sofas');
     expect(facts).not.toContain('Floors');
-    expect(facts).toContain('Lot traits (game effects): Peace And Quiet');
+    expect(facts).toContain('Lot traits (game effects): Peace And Quiet, Fresh Air, Quiet, Cat Friendly');
   });
 
   it('leaves the kind of place out when the only venue reported is Generic', () => {

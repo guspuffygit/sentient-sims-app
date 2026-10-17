@@ -59,6 +59,8 @@ export type LotBlock = {
   bedrooms?: number;
   bathrooms?: number;
   lot_traits?: string[];
+  /** The lot challenges among lot_traits (Heist Havoc, Gremlins...), as the game names them */
+  lot_challenges?: string[];
   // Where it is and what it is furnished with, for the same writer (mod builds from
   // 2026-10-16): the world's display name, the street tuning name, the object tuning names
   // on the lot, the floor levels in use (-1 is a basement) and the stereo station state names
