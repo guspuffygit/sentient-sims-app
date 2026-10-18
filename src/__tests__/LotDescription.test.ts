@@ -267,7 +267,8 @@ describe('lotFacts with rooms (mod builds from 2026-10-17)', () => {
     expect(facts).toContain(
       'Main floor: a kitchen with bar stools and a coffee maker; outside: a patio with an easel and a grill',
     );
-    expect(facts).toContain('Second floor: a bedroom with a punching bag; a bathroom');
+    expect(facts).toContain('Second floor: a bedroom with a punching bag');
+    expect(facts).not.toContain('a bathroom');
     expect(facts).toContain('Bedrooms: 2, bathrooms: 1');
     expect(facts).not.toContain('a bar');
     expect(facts).not.toContain('easels');

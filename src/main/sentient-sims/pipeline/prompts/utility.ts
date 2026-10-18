@@ -35,7 +35,7 @@ Write 3-4 sentences of plain prose in the present tense.
 Sentence 1: what kind of place this is and where, using its name, its kind and its neighborhood or world exactly as given; say how many stories only when the facts give a number.
 Sentences 2-3: what is there, as concrete physical things, floor by floor when the facts list floors (the main floor has the pool and the lockers; upstairs is the workout floor). When the facts name rooms (a kitchen with bar stools; a bedroom with a desk; outside: a grill), keep those names, keep inside and outside apart, and never move a thing into another room. Group things the way they sit together (a locker room with showers, a stage with a violin and a microphone) and pick the ones that say what the place is for; leave out what every place has. What the speakers play is worth a phrase when given.
 Sentence 4: what the place is like and who it is for, in a few plain words (a celebrity hangout with a strict door; a quiet spot for laps and yoga). This is what sims pick up on most, so make it specific to this place.
-Lot traits are game effects, not things to see: use one only if it says something about the place's character, and never invent a sound or a smell from one.
+Lot traits are game effects, not things to see: use one only if it says something about the place's character, in your own plain words rather than the trait's name, and never invent a sound, a smell or music from one.
 Never:
 - put a person in the text: no she/he/you, no visitor, guest, someone or occupant doing anything.
 - describe anything happening now: arriving, leaving, greetings, waiting.

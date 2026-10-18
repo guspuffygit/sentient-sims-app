@@ -59,7 +59,7 @@ const callePromesa: LotRoom[] = [
   room(1, 23, { object_toilet_basic: 1, object_shower_tub: 1, object_sink_bath: 1 }),
   room(1, 24, { object_bookshelf_tall: 4, object_desk_basic: 1, object_speaker_wall: 1 }),
   room(2, 31, { object_bedDouble: 1, object_painting_portrait: 2 }),
-  room(2, 32, { object_telescope: 1, object_sculpture_bust: 2 }),
+  room(2, 32, { object_telescope: 1, object_chessTable: 1 }),
   room(3, 0, { object_vent_roof: 2 }, true),
 ];
 
@@ -111,11 +111,26 @@ describe('floorRoomsPhrase', () => {
     );
     expect(text).toBe(
       'a kitchen with bar stools, a coffee maker, kitchen islands and a dining table; ' +
-        'a living room with sofas, armchairs, a TV, a bookshelf, speakers, paintings and a coffee table; ' +
-        'outside: a patio with an easel, a sculpture, a grill, gravestones, garden planters and a dining table',
+        'a living room with sofas, armchairs, a TV, a bookshelf, speakers and a coffee table; ' +
+        'outside: a patio with an easel, a grill, gravestones, garden planters and a dining table',
     );
     expect(groups).toBe(3);
     expect(named).toBe(2);
+  });
+
+  it('reads the rooms that say most first, keeps a venue restroom, and drops a bare bathroom at a home', () => {
+    const rooms = [
+      room(0, 1, { object_toilet: 1 }),
+      room(0, 2, { object_desk: 1, object_computer: 1 }),
+      room(0, 3, { object_stove: 1, object_tableDining: 1 }),
+      room(0, 4, { object_toilet: 1, object_hotTub: 1 }),
+    ];
+    expect(floorRoomsPhrase(rooms, home).text).toBe(
+      'a kitchen with a dining table; a study; a bathroom with a hot tub',
+    );
+    expect(floorRoomsPhrase([room(0, 1, { object_toilet: 2 }), room(0, 2, { object_bar_: 1 })], venue).text).toBe(
+      'a bar; a restroom',
+    );
   });
 
   it('collapses same-name rooms to a count word and describes the ones with extras', () => {
@@ -124,18 +139,16 @@ describe('floorRoomsPhrase', () => {
         callePromesa.filter((entry) => entry.level === 1),
         home,
       ).text,
-    ).toBe(
-      'two bedrooms, one with a punching bag, a computer and a desk; a bathroom; a library with a stereo and a desk',
-    );
+    ).toBe('two bedrooms, one with a punching bag, a computer and a desk; a library with a stereo and a desk');
   });
 
-  it('shows a room nothing defines only when it holds two kinds, and a telescope room is one', () => {
+  it('shows a room nothing defines only when it holds two kinds, and lists no paintings at a home', () => {
     expect(
       floorRoomsPhrase(
         callePromesa.filter((entry) => entry.level === 2),
         home,
       ).text,
-    ).toBe('a bedroom with paintings; a room with sculptures and a telescope');
+    ).toBe('a bedroom; a room with a chess table and a telescope');
     expect(floorRoomsPhrase([room(0, 5, { object_painting: 1 })], home)).toEqual({ text: '', groups: 0, named: 0 });
   });
 
@@ -169,10 +182,10 @@ describe('roomLines and roomLevels', () => {
     expect(roomLevels(callePromesa)).toEqual([0, 1, 2]);
     expect(roomLines(callePromesa, home)).toEqual([
       'Main floor: a kitchen with bar stools, a coffee maker, kitchen islands and a dining table; ' +
-        'a living room with sofas, armchairs, a TV, a bookshelf, speakers, paintings and a coffee table; ' +
-        'outside: a patio with an easel, a sculpture, a grill, gravestones, garden planters and a dining table',
-      'Second floor: two bedrooms, one with a punching bag, a computer and a desk; a bathroom; a library with a stereo and a desk',
-      'Third floor: a bedroom with paintings; a room with sculptures and a telescope',
+        'a living room with sofas, armchairs, a TV, a bookshelf, speakers and a coffee table; ' +
+        'outside: a patio with an easel, a grill, gravestones, garden planters and a dining table',
+      'Second floor: two bedrooms, one with a punching bag, a computer and a desk; a library with a stereo and a desk',
+      'Third floor: a bedroom; a room with a chess table and a telescope',
     ]);
   });
 

@@ -188,6 +188,34 @@ export function roomLevels(rooms: LotRoom[]): number[] {
     .sort((a, b) => a - b);
 }
 
+// Rooms on a floor read in this order, the ones that say most about the place first; a bare
+// bathroom at a home says nothing the bedroom and bathroom counts do not, so it is left out
+const ROOM_ORDER = [
+  'an open-plan kitchen and living room',
+  'a kitchen',
+  'a living room',
+  'a dining room',
+  'a dining area',
+  'a bar',
+  'a bedroom',
+  'a nursery',
+  'a study',
+  'a library',
+  'a home gym',
+  'a workout room',
+  'a studio',
+  'an indoor pool',
+  'a sauna',
+  'a locker room',
+  'a bathroom',
+  'a restroom',
+];
+
+function roomOrder(label: RoomLabel): number {
+  const index = ROOM_ORDER.indexOf(label[0]);
+  return index < 0 ? ROOM_ORDER.length : index;
+}
+
 function listJoin(words: string[]): string {
   if (words.length <= 1) {
     return words.join('');
@@ -223,7 +251,12 @@ export function floorRoomsPhrase(rooms: LotRoom[], options: Options): { text: st
         unnamed.push(`a room with ${listJoin(words)}`);
       }
     });
-  labelled.forEach(({ label, items }) => {
+  const ordered = Array.from(labelled.values()).sort((a, b) => roomOrder(a.label) - roomOrder(b.label));
+  ordered.forEach(({ label, items: every }) => {
+    const items = options.isHome && label[0] === 'a bathroom' ? every.filter((words) => words.length > 0) : every;
+    if (items.length === 0) {
+      return;
+    }
     named += 1;
     if (items.length === 1) {
       parts.push(items[0].length > 0 ? `${label[0]} with ${listJoin(items[0])}` : label[0]);

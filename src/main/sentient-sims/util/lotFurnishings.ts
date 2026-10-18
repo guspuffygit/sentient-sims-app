@@ -172,9 +172,20 @@ const USUALLY_ONE = new Set([
   'a changing table',
 ]);
 
-// Every home has these; on a venue they say what the place is for (a gym's showers). Only
-// the flat list is filtered this way: a room's own name hides them (see lotRooms)
-const HOME_BASICS = new Set(['a shower', 'a restroom', 'a bed', 'a bathtub', 'a kitchen', 'a dresser', 'a nightstand']);
+// Every home has these, and paintings and sculptures hang in every room of one; on a venue
+// they say what the place is for (a gym's showers, a museum's sculptures). Applied to the
+// flat list and to each room alike
+const HOME_BASICS = new Set([
+  'a shower',
+  'a restroom',
+  'a bed',
+  'a bathtub',
+  'a kitchen',
+  'a dresser',
+  'a nightstand',
+  'a painting',
+  'a sculpture',
+]);
 
 // A level holds a room when it has at least this many kinds of real furnishing; a roof with
 // vents and a stray chair does not count as a story
