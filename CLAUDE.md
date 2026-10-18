@@ -73,6 +73,17 @@ a layer through ctx.ext (actOnConversation); with no layer it is dropped. Long r
 (util/airingChunks, `continues` on DialogueLine → 150 ms gap, mouth stays open in the mod). Sim-to-sim scenes
 keep the short-line rules.
 
+Pets, babies and infants can be kept quiet (2026-10-15): setting nonControllableSimsSpeak (default true, checkbox
+on the Settings page next to Directed Scenes). Off, util/speechCapability.canSpeak says no for a pet (event is_pet, the
+report's self.species or the fact store - a Twitch ask is built as a human adult, so the report outranks the event) and
+for BABY/INFANT (lifeStageOf, else the event age); toddlers up, occults and ghosts always speak, unknown fails open. In
+runDirectedGeneration a silent performer still gets a director briefing (silentNames), an actor turn in the THINK-only
+format, a score and a monologue row; no line of theirs airs, the reviewer no longer demands both voices (speakerNames),
+and a cast with no speaker runs finishMonologueScene with aloud=false - stored "(thinking)" rows, no "(to self)" TTS. A
+player line to a silenced sim gets a thought back and opens no PlayerConversation thread. The classic narrator path adds
+one system-prompt clause and drops the sim's lines from paced playback; wants of a silenced sim are generated unvoiced.
+The mod sends everything already (is_pet, age, report species); nothing changes there.
+
 Mod log lines (2026-09-22): every `log` message from the mod is appended to Mods/sentient-sims/logs.txt under
 modsDirectory (util/format formatLog, timestamps in UTC) and, at INFO and above, mirrored into electron-log's
 main.log as `[Mod] <LEVEL> <message>` (util/modLogMirror), so the mod's game-thread stall watchdog lines

@@ -113,3 +113,52 @@ About Travis Scott: your father
     expect(without).not.toContain('Fact check');
   });
 });
+
+// Pets with speech switched off (2026-10-15): the director briefs them for their inner life
+// only, and the reviewer no longer demands a line from both characters when one is silent.
+describe('scene prompts with a silent performer', () => {
+  const performerNames = ['Anker Solheim', 'Bosun Solheim'];
+
+  it('tells the director who cannot speak and that the others carry the dialogue', () => {
+    const prompt = buildBriefingSystemPrompt({
+      simNames: performerNames,
+      performerNames,
+      sceneContext: '',
+      monologueOnly: false,
+      silentNames: ['Bosun Solheim'],
+    });
+    expect(prompt).toContain('Bosun Solheim cannot speak');
+    expect(prompt).toContain('the other actors carry the dialogue');
+    expect(prompt).not.toContain('SOLO beat');
+  });
+
+  it('calls a beat where nobody can speak a silent beat', () => {
+    const prompt = buildBriefingSystemPrompt({
+      simNames: performerNames,
+      performerNames,
+      sceneContext: '',
+      monologueOnly: true,
+      silentNames: performerNames,
+    });
+    expect(prompt).toContain('SILENT beat');
+    expect(prompt).not.toContain('SOLO beat');
+  });
+
+  it('is byte-identical without silent names', () => {
+    const base = { simNames: performerNames, performerNames, sceneContext: '', monologueOnly: false };
+    expect(buildBriefingSystemPrompt({ ...base, silentNames: [] })).toBe(buildBriefingSystemPrompt(base));
+  });
+
+  it('asks the reviewer for both voices only when two can speak', () => {
+    const base = {
+      simNames: performerNames,
+      performerNames,
+      hasPlayerLine: false,
+      performerNamesList: 'Anker Solheim',
+    };
+    expect(buildSceneReviewSystemPrompt(base)).toContain('Both characters must speak');
+    const oneSpeaker = buildSceneReviewSystemPrompt({ ...base, speakerNames: ['Anker Solheim'] });
+    expect(oneSpeaker).not.toContain('Both characters must speak');
+    expect(oneSpeaker).toContain('one to three lines');
+  });
+});

@@ -365,6 +365,10 @@ export function defaultStore(cwd?: string) {
         // desire for the next cognition tick
         default: true,
       },
+      [SettingsEnum.NON_CONTROLLABLE_SIMS_SPEAK.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
       [SettingsEnum.CONVERSATION_ACTION_SCORE_THRESHOLD.toString()]: {
         type: 'number',
         // Above the tick's 6: on the 09-22 stream 78 of 119 player-facing beats crossed
@@ -1300,6 +1304,10 @@ export class SettingsService {
 
   get conversationActionsEnabled(): boolean {
     return this.get(SettingsEnum.CONVERSATION_ACTIONS_ENABLED) !== false;
+  }
+
+  get nonControllableSimsSpeak(): boolean {
+    return this.get(SettingsEnum.NON_CONTROLLABLE_SIMS_SPEAK) !== false;
   }
 
   get conversationActionScoreThreshold(): number {

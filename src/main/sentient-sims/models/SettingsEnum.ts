@@ -111,6 +111,9 @@ export enum SettingsEnum {
   // The scorer's action verdict a reply must reach before it may act (its own bar, above
   // the tick's: a chat is not an invitation to go do chores)
   CONVERSATION_ACTION_SCORE_THRESHOLD = 'conversationActionScoreThreshold',
+  // Pets, babies and infants (the sims the player cannot control) take speaking turns.
+  // Off: they still think, as a private monologue row, but never say a line aloud
+  NON_CONTROLLABLE_SIMS_SPEAK = 'nonControllableSimsSpeak',
   // V-6: write a first description for undescribed sims/lots instead of the stock default
   GENERATED_DEFAULT_DESCRIPTIONS = 'generatedDefaultDescriptions',
   GAME_APP_PATH = 'gameAppPath',
