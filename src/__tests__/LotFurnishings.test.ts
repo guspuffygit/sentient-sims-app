@@ -38,12 +38,23 @@ describe('furnishingWords', () => {
     expect(furnishingWords(names, venue).words).toEqual(['showers', 'restrooms', 'a piano']);
   });
 
-  it('calls outdoor seating benches, and never reports doors, lights or plants as unknown', () => {
+  it('calls outdoor seating benches, and never reports doors, lights, plants or effects as unknown', () => {
     expect(furnishingWords(['object_sitLove_parkWood'], { isHome: false, outdoors: true }).words).toEqual(['benches']);
     expect(
-      furnishingWords(['object_door_double', 'object_light_wall', 'object_plant_non_gardening_generic'], venue)
-        .unmapped,
+      furnishingWords(
+        [
+          'object_door_double',
+          'object_light_wall',
+          'object_plant_non_gardening_generic',
+          'object_Ponds_VFXObject_Lilypad_1x1',
+        ],
+        venue,
+      ).unmapped,
     ).toEqual([]);
+  });
+
+  it("reads a park's restroom building as a restroom (Hanamigawa Koen, 2026-10-18)", () => {
+    expect(furnishingWords(['object_PublicBathroom_EP10GEN'], venue)).toEqual({ words: ['restrooms'], unmapped: [] });
   });
 
   it('knows the lounge and gym pieces seen at Studio PBP and Pectoral Fitness (2026-10-16)', () => {

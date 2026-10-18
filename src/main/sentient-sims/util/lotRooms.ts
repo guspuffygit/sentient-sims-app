@@ -97,12 +97,21 @@ export function classifyRoom(kinds: Record<string, number>, options: Options): R
   if (has(CRIB)) {
     return { label: ['a nursery', 'nurseries'], hidden: [CRIB, BEDROOM_FURNITURE] };
   }
+  // Lockers along a pool hall's wall do not make it a locker room (Pectoral Fitness, live 2026-10-18)
+  if (has(POOL)) {
+    return { label: ['an indoor pool', 'indoor pools'], hidden: [POOL] };
+  }
   if (has(LOCKER)) {
     return { label: ['a locker room', 'locker rooms'], hidden: [LOCKER] };
   }
   if (has(TOILET) || has(SHOWER) || has(BATHTUB)) {
     if (!options.isHome && !has(SHOWER) && !has(BATHTUB)) {
       return { label: ['a restroom', 'restrooms'], hidden: [TOILET] };
+    }
+    // The game walls a gym's shower stalls into rooms of their own, so they never share a
+    // room with the lockers: at a venue a shower and nothing else is a shower room
+    if (!options.isHome && !has(TOILET) && !has(BATHTUB)) {
+      return { label: ['a shower room', 'shower rooms'], hidden: [SHOWER] };
     }
     return { label: ['a bathroom', 'bathrooms'], hidden: [TOILET, SHOWER, BATHTUB] };
   }
@@ -132,9 +141,6 @@ export function classifyRoom(kinds: Record<string, number>, options: Options): R
   }
   if (has(SAUNA)) {
     return { label: ['a sauna', 'saunas'], hidden: [SAUNA] };
-  }
-  if (has(POOL)) {
-    return { label: ['an indoor pool', 'indoor pools'], hidden: [POOL] };
   }
   if (has(DINING)) {
     return {
@@ -207,6 +213,7 @@ const ROOM_ORDER = [
   'an indoor pool',
   'a sauna',
   'a locker room',
+  'a shower room',
   'a bathroom',
   'a restroom',
 ];

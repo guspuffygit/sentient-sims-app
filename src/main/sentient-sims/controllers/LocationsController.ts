@@ -14,6 +14,17 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
+// A space left at the end of a name ("Pectoral Fitness ") would otherwise be saved, and
+// published, as part of it (live 2026-10-18)
+function trimmed(body: LocationEntity): OnlineLocation {
+  return {
+    id: body.id,
+    name: body.name.trim(),
+    lot_type: body.lot_type.trim(),
+    description: body.description.trim(),
+  };
+}
+
 export class LocationsController {
   private readonly ctx: ApiContext;
 
@@ -70,7 +81,7 @@ export class LocationsController {
 
   updateLocation = (req: Request, res: Response) => {
     try {
-      const { id, name, lot_type: lotType, description } = req.body as LocationEntity;
+      const { id, name, lot_type: lotType, description } = trimmed(req.body as LocationEntity);
       const location = { id, name, lot_type: lotType, description };
       // An editor saved with the default untouched (the in-game dialog's OK) keeps following it
       const fallback = this.ctx.locationRepository.getDefault(id);
@@ -148,12 +159,7 @@ export class LocationsController {
   // shared default every player gets; a player's own description still wins in their save.
   publishLocation = async (req: Request, res: Response) => {
     const body = req.body as LocationEntity & { force?: boolean };
-    const location: OnlineLocation = {
-      id: body.id,
-      name: body.name,
-      lot_type: body.lot_type,
-      description: body.description,
-    };
+    const location: OnlineLocation = trimmed(body);
     try {
       // Text from this save on its way to everyone: refuse and name the words, as the mapping
       // browser does, unless the publisher has seen them and pressed again

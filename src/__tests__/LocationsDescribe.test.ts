@@ -120,4 +120,18 @@ describe('POST /locations/:locationId/describe', () => {
     expect(prompts.at(-1)).toContain('Name: The Blue Velvet');
     expect(prompts.at(-1)).not.toContain('Jazz Hands');
   });
+
+  // A space left after the name in the editor was saved, and published, as part of it (2026-10-18)
+  it('saves the editor text without the spaces around it', async () => {
+    const response = await fetch(`${apiUrl}/locations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: 2841378864, name: 'Pectoral Fitness ', lot_type: ' Gym', description: ' A gym. ' }),
+    });
+    expect(response.status).toBe(200);
+    const saved = ctx.locationRepository.getLocation({ id: 2841378864 });
+    expect(saved.name).toBe('Pectoral Fitness');
+    expect(saved.lot_type).toBe('Gym');
+    expect(saved.description).toBe('A gym.');
+  });
 });

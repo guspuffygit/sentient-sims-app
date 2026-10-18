@@ -94,6 +94,18 @@ describe('classifyRoom', () => {
     expect(lockers.hidden.some((signal) => signal.any.includes('shower'))).toBe(false);
   });
 
+  // Pectoral Fitness, live 2026-10-18: the game walls each shower stall into its own room, and
+  // the pool hall has lockers along its wall
+  it("calls a venue's walled-off shower a shower room and a pool hall with lockers a pool", () => {
+    const stall = classifyRoom({ object_shower_gym: 1 }, venue);
+    expect(stall.label?.[0]).toBe('a shower room');
+    expect(stall.hidden.some((signal) => signal.any.includes('shower'))).toBe(true);
+    expect(classifyRoom({ object_shower_gym: 1 }, home).label?.[0]).toBe('a bathroom');
+    const hall = classifyRoom({ object_swimmingPool_gym: 1, object_Locker_GP01: 6, object_sofa: 2 }, venue);
+    expect(hall.label?.[0]).toBe('an indoor pool');
+    expect(hall.hidden.some((signal) => signal.any.includes('locker'))).toBe(false);
+  });
+
   it('calls a gym room by the lot and leaves the machines in view', () => {
     expect(classifyRoom({ object_treadmill: 2 }, home)).toEqual({ label: ['a home gym', 'home gyms'], hidden: [] });
     expect(classifyRoom({ object_treadmill: 2 }, venue).label?.[0]).toBe('a workout room');
