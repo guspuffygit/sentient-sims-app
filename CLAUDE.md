@@ -84,6 +84,71 @@ player line to a silenced sim gets a thought back and opens no PlayerConversatio
 one system-prompt clause and drops the sim's lines from paced playback; wants of a silenced sim are generated unvoiced.
 The mod sends everything already (is_pet, age, report species); nothing changes there.
 
+Lot descriptions (2026-10-15 to 2026-10-18): every scene prompt carries one LOCATION line, `{name} ({type}),
+{description}`. The shipped defaults (descriptions/locationDescriptions.ts, 181 lots + 2 stock; lots that ship empty,
+every Newcrest lot included, have none, and a player's own builds never belong there) are in the CARD shape: 3-4
+present-tense sentences, what kind of place and where, then the real things in it, nobody in the text. The shape won a
+360-scene blind-judged experiment against stock/minimal/long/flowery/key-value (harness
+src/__tests__/LotFormatExperiment.test.ts, gated on LOT_FORMAT_EXPERIMENT); the stock "suburban residence" placeholder
+was the worst of all, so an undescribed lot costs more than any shape choice. BuiltInDescriptions.test.ts holds every
+built-in to util/lotDescription.placeDescriptionProblems (1-4 sentences, "Mt." and "!" inside a name are not sentence
+ends, no person, no moment) and a no-people scrub; edit the file directly.
+
+"Auto-Generate Description" on the Locations page: POST /locations/:id/describe (LocationsController.describeLocation
+-> DefaultDescriptionService.describeLocation, the same facts and writer as the fire-and-forget fallback) returns
+{description, versions, facts, lotType} and stores nothing (the page fills Lot Type when it is empty or the Residence
+placeholder); 409 until the lot has been reported this app run (SimStateCache.getLotBlock keeps every reported lot
+block by lot id). A press writes THREE drafts in parallel, each through the gate, and `versions` holds them in
+util/lotDescription.orderDrafts order (first-try passes before retries, then the card closest to four sentences;
+description is versions[0]); a "Draft 1 of 3" stepper under the Description field swaps them and asks before
+dropping an edit. There is NO ranking call: in LotTraitExperiment's rank mode (14 lots, 3 judged drafts each) a
+llama-3.3-70b ranker matched a sonnet-4.5 blind judge's top pick 36% / 50% depending on the order shown vs 43% for the
+first draft, and the judge agreed with its own other-order pick on only 50% of lots - the drafts are near-equal, so the
+player chooses. The fallback writer asks for one draft. The button's calls are runOneShot `interactive`: logged, but
+outside provider health (AIExchangeLogService LabelContext.health), so failed presses never raise the in-game
+"provider has failed" toast. Provider errors reach the player in plain words (util/providerErrorWords
+.plainProviderError: the editor's message, with "Open Settings" when the fix is there, the health chip and the mod
+toast); the raw text stays in main.log. Gemini thinking counts against maxOutputTokens (a 220-token description spent
+209 thinking), so GeminiService sends thinkingBudget 0, else thinkingLevel LOW, else nothing, the last two with 1024
+tokens of headroom, and remembers per model which one it accepted. Publishing refuses text naming a sim in the save
+(findSavedNames); everyday words a townie is called (savedNames COMMON_WORDS: story, blue, white, house, street,
+bright, someone) only count inside a full name. The button names the lot by the app's name, not the in-game one, so a
+rename made in game never leaks into a shared default; names are saved and published trimmed.
+
+The facts the writer sees come from the mod's lot block: the zone record's `description` (EA blurb), `bedrooms`,
+`bathrooms`, `lot_traits` and `lot_challenges` (zone modifiers; mod builds from 2026-10-17), `world_name`, `street`,
+`furnishings` (every object tuning name on the lot), `floor_furnishings`, `music` (StereoChannel_* stereo states),
+`venue_type` (the lot type set in Manage Worlds, preferred over the active venue: Ward Park's active venue is
+venue_Generic) and `rooms` (level, the game's room id from build_buy.get_room_id, 0 outdoors, tuning name -> count;
+capped at 40 rooms x 60 kinds). util/lotRooms names each room from what is in it (a bed makes a bedroom whatever else
+is there; appliances a kitchen, with sofa + TV an open-plan kitchen and living room; a pool outranks lockers; a toilet
+a bathroom at home and a restroom at a venue; a venue's lone shower stall a shower room; desk + computer a study; 3+
+bookshelves a library; machines a home gym / workout room), hides what the name already says, merges a level's
+outdoor groups into "outside: ...", shows an undefined room as "a room with ..." only when it holds 2+ kinds, collapses
+same-name rooms ("two bedrooms, one with a desk"), reads kitchen and living room first and bathrooms last, and leaves a
+bare bathroom out at a home. Paintings and sculptures are home decor: never listed at a home, kept at a venue. lotFacts
+writes one line per room floor, or a single "Rooms:" line on a one-story lot; a lot with no named room keeps
+"Furnished with:" (util/lotFurnishings plain words: kinds, never counts, singular or plural by count; a venue keeps
+its showers and restrooms, a home does not; names no rule knows are logged as "furnishings with no plain words", and
+furnishingWords takes an overrides map that wins over FURNISHING_WORDS by exact name). util/lotFurnishings.roomFloors
+counts a level only with 2+ real furnishing kinds, and one story is never mentioned. The place is named by
+descriptions/lotNeighborhoods.ts (lot id -> neighborhood + world), else the reported world (the Locations page's
+Neighborhood column; LocationEntity.neighborhood). Lot types read as Manage Worlds names them (util/lotDescription
+VENUES + VENUE_PATTERNS: Café, National Park for venue_ForestPark, Recreation Center...), except homes, which read
+Residence / Haunted House Residence / Tiny Home Residence, so a home's lot type never changes. Lot traits:
+util/lotTraitWords maps the tuning name (prefixes, creator, WickedWhims plumbing and pro/con/PetWorld category words
+stripped) to the Build mode panel name and a short clause (FreshAir = "Bracing Breezes (oodles of fresh air, bracing
+for exercise)", BurglarTime = Heist Havoc, CelebrityHangOut_LowFame = Up-and-Coming Hotspot; names from the Sims wiki
+"Lot traits and challenges" page); an unknown name falls back to its tuning words. The facts line is `Lot traits: Name
+(clause), ...; lot challenges: Heist Havoc (clause)`, and the clause says what the place is like, never a mechanic (the
+prompt lets a trait colour the last sentence lightly and forbids explaining a game rule). Harness
+src/__tests__/LotTraitExperiment.test.ts (gated on LOT_TRAIT_EXPERIMENT=dry|live|rank), 15 lots x none / names / names
+with clause on llama-3.3-70b, 45 runs each: the trait's character reached the card 51% / 98% / 100% of the time, a
+game rule was explained 0 / 0 / 2%. The writer goes floor by floor and ends on what the place is like and who it is
+for: in a 160-scene test no reply named a furnishing, but a place's character ("only celebrities get in") did carry
+into dialogue. Tests: LotDescription, LotRooms, LotFurnishings, LotTraitWords, BuiltInDescriptions,
+DefaultDescription, LocationsDescribe.
+
 Mod log lines (2026-09-22): every `log` message from the mod is appended to Mods/sentient-sims/logs.txt under
 modsDirectory (util/format formatLog, timestamps in UTC) and, at INFO and above, mirrored into electron-log's
 main.log as `[Mod] <LEVEL> <message>` (util/modLogMirror), so the mod's game-thread stall watchdog lines
