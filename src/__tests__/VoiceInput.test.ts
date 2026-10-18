@@ -181,7 +181,7 @@ describe('VoiceHotkeyService', () => {
 describe('voice hotkey presets', () => {
   it('spells a captured key the way the overlay parses it', () => {
     const key = (code: string, mods: Partial<Parameters<typeof voiceHotkeyFromKey>[0]> = {}) =>
-      voiceHotkeyFromKey({ code, ctrlKey: false, altKey: false, shiftKey: false, ...mods });
+      voiceHotkeyFromKey({ code, ctrlKey: false, altKey: false, shiftKey: false, metaKey: false, ...mods });
     expect(key('KeyV', { altKey: true })).toBe('Alt+V');
     expect(key('Digit7', { ctrlKey: true, shiftKey: true })).toBe('Ctrl+Shift+7');
     expect(key('F7')).toBe('F7');
@@ -189,6 +189,7 @@ describe('voice hotkey presets', () => {
     expect(key('Space', { ctrlKey: true, altKey: true })).toBe('Ctrl+Alt+Space');
     expect(key('ControlLeft', { ctrlKey: true })).toBeUndefined();
     expect(key('MediaPlayPause')).toBeUndefined();
+    expect(key('KeyV', { metaKey: true })).toBeUndefined();
   });
 
   it('defaults to a chord macOS leaves alone on a Mac', () => {
