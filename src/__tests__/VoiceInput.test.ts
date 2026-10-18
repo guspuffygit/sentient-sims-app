@@ -84,7 +84,7 @@ import {
   openrouterDefaultTranscriptionModel,
 } from 'main/sentient-sims/constants';
 
-import { voiceHotkeyLabel, voiceHotkeyPresets } from 'main/sentient-sims/models/VoiceHotkeyPresets';
+import { voiceHotkeyFromKey, voiceHotkeyLabel, voiceHotkeyPresets } from 'main/sentient-sims/models/VoiceHotkeyPresets';
 
 import { SentientSimsAIService } from 'main/sentient-sims/services/SentientSimsAIService';
 
@@ -179,6 +179,19 @@ describe('VoiceHotkeyService', () => {
 });
 
 describe('voice hotkey presets', () => {
+  it('spells a captured key the way the overlay parses it', () => {
+    const key = (code: string, mods: Partial<Parameters<typeof voiceHotkeyFromKey>[0]> = {}) =>
+      voiceHotkeyFromKey({ code, ctrlKey: false, altKey: false, shiftKey: false, metaKey: false, ...mods });
+    expect(key('KeyV', { altKey: true })).toBe('Alt+V');
+    expect(key('Digit7', { ctrlKey: true, shiftKey: true })).toBe('Ctrl+Shift+7');
+    expect(key('F7')).toBe('F7');
+    expect(key('Numpad0')).toBe('Numpad0');
+    expect(key('Space', { ctrlKey: true, altKey: true })).toBe('Ctrl+Alt+Space');
+    expect(key('ControlLeft', { ctrlKey: true })).toBeUndefined();
+    expect(key('MediaPlayPause')).toBeUndefined();
+    expect(key('KeyV', { metaKey: true })).toBeUndefined();
+  });
+
   it('defaults to a chord macOS leaves alone on a Mac', () => {
     expect(defaultVoiceInputHotkeyFor(true)).toBe('Alt+V');
     expect(defaultVoiceInputHotkeyFor(false)).toBe('Ctrl+Space');
