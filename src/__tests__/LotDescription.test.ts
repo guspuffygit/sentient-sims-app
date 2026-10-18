@@ -7,6 +7,7 @@ import {
 } from 'main/sentient-sims/util/lotDescription';
 import { defaultLotDescription } from 'main/sentient-sims/descriptions/locationDescriptions';
 import { LocationEntity } from 'main/sentient-sims/db/entities/LocationEntity';
+import { LotRoom } from 'main/sentient-sims/models/SimStateReport';
 
 // The facts and the gate behind a generated lot description. Every rule here traces to a row
 // the first version wrote into the save (2026-10-12) and to the trial that replaced it.
@@ -229,6 +230,97 @@ describe('lotFacts from the zone record', () => {
       lotFacts(genericRow, { venue: 'venue_gym', owned: {}, bedrooms: 0, bathrooms: 2 }, 'Pectoral Fitness'),
     ).toEqual(['Name: Pectoral Fitness', 'Kind of place: a gym'].join('\n'));
     expect(lotFacts(genericRow, { venue: 'venue_gym', owned: {} }, 'Pectoral Fitness')).not.toContain('describes');
+  });
+});
+
+describe('lotFacts with rooms (mod builds from 2026-10-17)', () => {
+  const home = { ...genericRow, id: 29017407 };
+
+  it('writes a line per room floor, the rooms named from what is in them', () => {
+    const facts = lotFacts(
+      home,
+      {
+        venue: 'venue_residential',
+        is_home: true,
+        bedrooms: 2,
+        bathrooms: 1,
+        furnishings: ['object_fridge', 'object_barstool', 'object_bedDouble', 'object_punchingBag', 'object_toilet'],
+        floor_furnishings: {
+          '0': ['object_fridge', 'object_barstool', 'object_grill'],
+          '1': ['object_bedDouble', 'object_punchingBag', 'object_toilet'],
+        },
+        rooms: [
+          { level: 0, room: 0, outdoors: true, kinds: { object_grill: 1, object_easel: 1 } },
+          {
+            level: 0,
+            room: 4,
+            outdoors: false,
+            kinds: { object_fridge: 1, object_barstool: 3, object_CoffeeMaker: 1 },
+          },
+          { level: 1, room: 7, outdoors: false, kinds: { object_bedDouble: 1, object_punchingBag: 1 } },
+          { level: 1, room: 8, outdoors: false, kinds: { object_toilet: 1, object_shower: 1 } },
+        ],
+      },
+      'Calle de la Promesa',
+    );
+    expect(facts).toContain('Floors: two stories');
+    expect(facts).toContain(
+      'Main floor: a kitchen with bar stools and a coffee maker; outside: a patio with an easel and a grill',
+    );
+    expect(facts).toContain('Second floor: a bedroom with a punching bag; a bathroom');
+    expect(facts).toContain('Bedrooms: 2, bathrooms: 1');
+    expect(facts).not.toContain('a bar');
+    expect(facts).not.toContain('easels');
+  });
+
+  it('writes one Rooms line for a single story with named rooms, and a flat list for a lot with none', () => {
+    const rooms: LotRoom[] = [
+      { level: 0, room: 0, outdoors: true, kinds: { object_grill: 1 } },
+      {
+        level: 0,
+        room: 4,
+        outdoors: false,
+        kinds: { object_stove: 1, object_sofa: 1, object_tv: 1, object_tableDining: 1 },
+      },
+    ];
+    expect(lotFacts(home, { venue: 'venue_residential', rooms }, 'Tiny')).toContain(
+      'Rooms: an open-plan kitchen and living room with a sofa, a TV and a dining table; outside: a patio with a grill',
+    );
+    const park = lotFacts(
+      { ...genericRow, id: 562561093 },
+      {
+        venue: 'venue_Generic',
+        venue_type: 'venue_ForestPark',
+        rooms: [{ level: 0, room: 0, outdoors: true, kinds: { object_sitLove_parkWood: 4, object_picnicTable: 2 } }],
+      },
+      'Ward Park',
+    );
+    expect(park).toContain('Furnished with: benches, picnic tables');
+    expect(park).not.toContain('Rooms:');
+    expect(park).not.toContain('patio');
+  });
+
+  it("reads a mod's trait without its creator prefix and sets the lot challenges apart", () => {
+    const facts = lotFacts(
+      home,
+      {
+        venue: 'venue_residential',
+        lot_traits: [
+          'zoneModifier_lotTrait_GreatAcoustics',
+          'zoneModifier_lotTrait_FreshAir',
+          'TURBODRIVER:WickedWhims_ZoneModifier_LotTrait_Nudity_CasualNudity',
+          'zoneModifier_lotTrait_BurglarTime',
+        ],
+        lot_challenges: ['zoneModifier_lotTrait_BurglarTime'],
+      },
+      'Calle de la Promesa',
+    );
+    expect(facts).toContain(
+      'Lot traits (game effects): Great Acoustics, Fresh Air, Casual Nudity; lot challenges: Burglar Time',
+    );
+    expect(
+      lotFacts(home, { venue: 'venue_residential', lot_traits: ['x_Gremlins'], lot_challenges: ['x_Gremlins'] }, 'Lot'),
+    ).toContain('Lot challenges (game effects): x Gremlins');
   });
 });
 

@@ -30,6 +30,17 @@ export type LotCondition = {
   conditions: string[]; // broken | dirty | clogged | burnt
 };
 
+/**
+ * One of the game's rooms (mod builds from 2026-10-17): the level, the game's opaque room id
+ * (0 outdoors, null when the lookup failed), and object tuning name -> count
+ */
+export type LotRoom = {
+  level: number;
+  room: number | null;
+  outdoors: boolean;
+  kinds: Record<string, number>;
+};
+
 export type LotBlock = {
   zone_id?: number | string;
   // The app keys locations by LOT id (what events and outcomes carry); zone_id is the
@@ -74,6 +85,8 @@ export type LotBlock = {
   floor_furnishings?: Record<string, string[]>;
   venue_type?: string;
   music?: string[];
+  // Mod builds from 2026-10-17: the same objects grouped by the game's room ids, with counts
+  rooms?: LotRoom[];
 };
 
 export type SimCareer = {

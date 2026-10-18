@@ -2,6 +2,7 @@ import { LocationEntity } from '../db/entities/LocationEntity';
 import { LotBlock } from '../models/SimStateReport';
 import { lotNeighborhood } from '../descriptions/lotNeighborhoods';
 import { floorLines, floorsPhrase, furnishingWords, musicWords, plainName, roomFloors } from './lotFurnishings';
+import { floorRoomsPhrase, mergedKinds, roomLevels, roomLines } from './lotRooms';
 
 // The facts a generated lot description is written from, and the gate it has to pass before
 // it is stored. Both exist because of what the first version wrote into the save
@@ -134,11 +135,13 @@ export function lotFurnishingNames(lot: LotBlock | undefined): string[] {
 }
 
 // "zoneModifier_lotTrait_GreatAcoustics" (the game's name) -> "Great Acoustics"; apartment
-// traits are zoneModifier_pro_Quiet / zoneModifier_con_Haunted, pet lots zoneModifier_PetWorld_CatFriendly
+// traits are zoneModifier_pro_Quiet / zoneModifier_con_Haunted, pet lots zoneModifier_PetWorld_CatFriendly,
+// and a mod's carry its creator (TURBODRIVER:WickedWhims_ZoneModifier_LotTrait_Nudity_CasualNudity)
+const TRAIT_PREFIX = /^([a-z0-9]+:)?(wicked_?whims_)?(zone_?modifier_)?(lot_?traits?_?)?(nudity_)?/i;
 const TRAIT_CATEGORY = /^(generic|challenge|residential|venue|lot|pro|con|pet world|ep\d+|gp\d+|sp\d+) /i;
 
 export function lotTraitName(trait: string): string {
-  let words = plainName(trait, /^(zone_?modifier_)?(lot_?traits?_?)?/i);
+  let words = plainName(trait, TRAIT_PREFIX);
   while (TRAIT_CATEGORY.test(words)) {
     words = words.replace(TRAIT_CATEGORY, '');
   }
@@ -169,17 +172,23 @@ export function lotFacts(location: LocationEntity, lot: LotBlock | undefined, zo
     isHome: isResidential(venue) || lot?.is_home === true,
     outdoors: venue !== undefined && OUTDOOR_VENUE.test(venue),
   };
-  const levels = lot?.floor_furnishings ? roomFloors(lot.floor_furnishings) : lot?.floors;
+  const rooms = lot?.rooms && lot.rooms.length > 0 ? lot.rooms : undefined;
+  const levels = rooms ? roomLevels(rooms) : lot?.floor_furnishings ? roomFloors(lot.floor_furnishings) : lot?.floors;
   const floors = floorsPhrase(levels);
   if (floors) {
     facts.push(`Floors: ${floors}`);
   }
-  // Floor by floor when there is more than one, as a person would show someone round
-  const perFloor = floorLines(lot?.floor_furnishings, options);
+  // Room by room when the mod names rooms, floor by floor when there is more than one, as a
+  // person would show someone round; a lot with no room worth a name keeps the flat list
   const furnishings = lotFurnishingNames(lot);
-  const { words } = furnishingWords(furnishings, options);
+  const onFloor = rooms && levels?.length === 1 ? rooms.filter((room) => room.level === levels[0]) : rooms;
+  const perFloor = onFloor ? roomLines(onFloor, options) : floorLines(lot?.floor_furnishings, options);
+  const roomsLine = onFloor ? floorRoomsPhrase(onFloor, options) : undefined;
+  const { words } = furnishingWords(onFloor ? mergedKinds(onFloor) : furnishings, options);
   if (perFloor.length > 0) {
     facts.push(...perFloor);
+  } else if (roomsLine && (roomsLine.groups >= 2 || roomsLine.named >= 1)) {
+    facts.push(`Rooms: ${roomsLine.text}`);
   } else if (words.length > 0) {
     facts.push(`Furnished with: ${words.join(', ')}`);
   } else if (furnishings.length > 0) {
@@ -197,8 +206,17 @@ export function lotFacts(location: LocationEntity, lot: LotBlock | undefined, zo
   if (options.isHome && ((lot?.bedrooms ?? 0) > 0 || (lot?.bathrooms ?? 0) > 0)) {
     facts.push(`Bedrooms: ${lot?.bedrooms ?? 0}, bathrooms: ${lot?.bathrooms ?? 0}`);
   }
+  // Lot challenges (Burglar Time, Gremlins) are set apart from the traits so the writer
+  // knows which ones are hazards
   if (lot?.lot_traits && lot.lot_traits.length > 0) {
-    facts.push(`Lot traits (game effects): ${lot.lot_traits.map(lotTraitName).join(', ')}`);
+    const challenges = new Set(lot.lot_challenges ?? []);
+    const traits = lot.lot_traits.filter((trait) => !challenges.has(trait)).map(lotTraitName);
+    const hazards = Array.from(challenges).map(lotTraitName).join(', ');
+    if (traits.length > 0) {
+      facts.push(`Lot traits (game effects): ${traits.join(', ')}${hazards ? `; lot challenges: ${hazards}` : ''}`);
+    } else {
+      facts.push(`Lot challenges (game effects): ${hazards}`);
+    }
   }
   return facts.join('\n');
 }

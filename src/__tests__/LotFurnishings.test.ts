@@ -66,7 +66,6 @@ describe('furnishingWords', () => {
       'object_GardeningSoil',
       'object_bonsai',
       'object_CostumeBox',
-      'object_chair_dining',
       'object_Ottoman',
       'object_bathtub_EP10BATHboxy',
       'object_dresser_StandardRoute',
@@ -82,7 +81,6 @@ describe('furnishingWords', () => {
         'garden planters',
         'a bonsai tree',
         'a costume trunk',
-        'dining tables',
         'ottomans',
         'a bathtub',
         'dressers',
@@ -92,6 +90,25 @@ describe('furnishingWords', () => {
     });
     expect(furnishingWords(names, { isHome: true }).words).not.toContain('a kitchen');
     expect(furnishingWords(['object_barrel_wine'], venue).words).toEqual([]);
+  });
+
+  it('speaks in the singular or the plural by count, and in the plural when it has no counts', () => {
+    expect(
+      furnishingWords(
+        { object_easel: 1, object_Locker_GP01: 8, object_locker_tall: 3, object_sofa_a: 1, object_sofa_b: 1 },
+        venue,
+      ).words,
+    ).toEqual(['lockers', 'sofas', 'an easel']);
+    expect(furnishingWords({ object_sitLove_parkWood: 1 }, { isHome: false, outdoors: true }).words).toEqual([
+      'a bench',
+    ]);
+    expect(furnishingWords(['object_easel'], venue).words).toEqual(['easels']);
+    expect(furnishingWords({ object_bathtub: 1, object_piano: 1 }, { isHome: true }).words).toEqual(['a piano']);
+  });
+
+  it('files dining chairs with their table, never as a kind of their own', () => {
+    expect(furnishingWords(['object_chair_dining', 'object_sitDining_01'], venue)).toEqual({ words: [], unmapped: [] });
+    expect(furnishingWords({ object_tableDining: 1, object_chair_dining: 6 }, venue).words).toEqual(['a dining table']);
   });
 
   it('never reports alarms, gates, ladders or a closet as unknown', () => {
