@@ -177,6 +177,12 @@ describe('placeDescriptionProblems', () => {
   it('rejects an answer that is not 1-4 sentences', () => {
     expect(placeDescriptionProblems('', 'venue_gym')).toEqual(['length']);
     expect(placeDescriptionProblems('One. Two. Three. Four. Five.', 'venue_gym')).toEqual(['length']);
+    expect(
+      placeDescriptionProblems(
+        'Planet Honey Pop! is a karaoke bar in San Myshuno. It has a bar. Upstairs are karaoke rooms. It is lively.',
+        'venue_karaoke',
+      ),
+    ).toEqual([]);
     // Four sentences on the mountain, not five
     expect(
       placeDescriptionProblems('A bar on Mt. Komorebi. It has a bar. It has tables. It has a view.', 'venue_bar'),
@@ -220,7 +226,7 @@ describe('lotFacts from the zone record', () => {
         'Kind of place: a private home',
         'The game describes it as: This cozy home is perfect for a small family.',
         'Bedrooms: 2, bathrooms: 1',
-        'Lot traits (game effects): Great Acoustics, Homey',
+        'Lot traits: Great Acoustics (the acoustics are perfect, a good place to play music), Homey (a homey feel that suits cooking, fixing things and gardening)',
       ].join('\n'),
     );
   });
@@ -301,7 +307,7 @@ describe('lotFacts with rooms (mod builds from 2026-10-17)', () => {
     expect(park).not.toContain('patio');
   });
 
-  it("reads a mod's trait without its creator prefix and sets the lot challenges apart", () => {
+  it("reads traits by their panel names with a clause each, a mod's without its creator prefix, and sets the lot challenges apart", () => {
     const facts = lotFacts(
       home,
       {
@@ -311,17 +317,23 @@ describe('lotFacts with rooms (mod builds from 2026-10-17)', () => {
           'zoneModifier_lotTrait_FreshAir',
           'TURBODRIVER:WickedWhims_ZoneModifier_LotTrait_Nudity_CasualNudity',
           'zoneModifier_lotTrait_BurglarTime',
+          'zoneModifiers_lotTrait_CelebrityHomeLotTrait',
         ],
         lot_challenges: ['zoneModifier_lotTrait_BurglarTime'],
       },
       'Calle de la Promesa',
     );
     expect(facts).toContain(
-      'Lot traits (game effects): Great Acoustics, Fresh Air, Casual Nudity; lot challenges: Burglar Time',
+      'Lot traits: Great Acoustics (the acoustics are perfect, a good place to play music), Bracing Breezes (oodles of fresh air, bracing for exercise), Casual Nudity, Celebrity Home (a celebrity home on the tour routes, with restricted access at the door); lot challenges: Heist Havoc (burglars like this lot, and the alarms have a mind of their own)',
     );
+    expect(facts).not.toContain('zone Modifiers');
+    // A challenge only the mod flagged, and one only the table knows
     expect(
-      lotFacts(home, { venue: 'venue_residential', lot_traits: ['x_Gremlins'], lot_challenges: ['x_Gremlins'] }, 'Lot'),
-    ).toContain('Lot challenges (game effects): x Gremlins');
+      lotFacts(home, { venue: 'venue_residential', lot_traits: ['x_Quirk'], lot_challenges: ['x_Quirk'] }, 'Lot'),
+    ).toContain('Lot challenges: x Quirk');
+    expect(
+      lotFacts(home, { venue: 'venue_residential', lot_traits: ['zoneModifier_lotTrait_Gremlins'] }, 'Lot'),
+    ).toContain('Lot challenges: Gremlins (things break overnight, as if tiny goblins came out after dark)');
   });
 });
 
@@ -361,7 +373,9 @@ describe('lotFacts at a park whose active venue is Generic (Ward Park, 2026-10-1
     expect(facts).toContain('Furnished with: benches, picnic tables');
     expect(facts).not.toContain('sofas');
     expect(facts).not.toContain('Floors');
-    expect(facts).toContain('Lot traits (game effects): Peace And Quiet, Fresh Air, Quiet, Cat Friendly');
+    expect(facts).toContain(
+      'Lot traits: Peace and Quiet (peaceful, good for reading; tension drains away), Bracing Breezes (oodles of fresh air, bracing for exercise), Quiet (never noisy, whatever the neighbors do), Cat Friendly (cats and their owners come by)',
+    );
   });
 
   it('leaves the kind of place out when the only venue reported is Generic', () => {

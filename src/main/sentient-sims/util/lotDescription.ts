@@ -2,6 +2,7 @@ import { LocationEntity } from '../db/entities/LocationEntity';
 import { LotBlock } from '../models/SimStateReport';
 import { lotNeighborhood } from '../descriptions/lotNeighborhoods';
 import { floorLines, floorsPhrase, furnishingWords, musicWords, plainName, roomFloors } from './lotFurnishings';
+import { lotTraitLine } from './lotTraitWords';
 import { floorRoomsPhrase, mergedKinds, roomLevels, roomLines } from './lotRooms';
 
 // The facts a generated lot description is written from, and the gate it has to pass before
@@ -134,20 +135,6 @@ export function lotFurnishingNames(lot: LotBlock | undefined): string[] {
     .map(([kind]) => (kind === 'tv' ? 'television' : kind));
 }
 
-// "zoneModifier_lotTrait_GreatAcoustics" (the game's name) -> "Great Acoustics"; apartment
-// traits are zoneModifier_pro_Quiet / zoneModifier_con_Haunted, pet lots zoneModifier_PetWorld_CatFriendly,
-// and a mod's carry its creator (TURBODRIVER:WickedWhims_ZoneModifier_LotTrait_Nudity_CasualNudity)
-const TRAIT_PREFIX = /^([a-z0-9]+:)?(wicked_?whims_)?(zone_?modifier_)?(lot_?traits?_?)?(nudity_)?/i;
-const TRAIT_CATEGORY = /^(generic|challenge|residential|venue|lot|pro|con|pet world|ep\d+|gp\d+|sp\d+) /i;
-
-export function lotTraitName(trait: string): string {
-  let words = plainName(trait, TRAIT_PREFIX);
-  while (TRAIT_CATEGORY.test(words)) {
-    words = words.replace(TRAIT_CATEGORY, '');
-  }
-  return words;
-}
-
 export function lotFacts(location: LocationEntity, lot: LotBlock | undefined, zoneName?: string): string {
   const facts: string[] = [];
   facts.push(`Name: ${zoneName || location.name || 'unnamed lot'}`);
@@ -206,17 +193,11 @@ export function lotFacts(location: LocationEntity, lot: LotBlock | undefined, zo
   if (options.isHome && ((lot?.bedrooms ?? 0) > 0 || (lot?.bathrooms ?? 0) > 0)) {
     facts.push(`Bedrooms: ${lot?.bedrooms ?? 0}, bathrooms: ${lot?.bathrooms ?? 0}`);
   }
-  // Lot challenges (Burglar Time, Gremlins) are set apart from the traits so the writer
-  // knows which ones are hazards
-  if (lot?.lot_traits && lot.lot_traits.length > 0) {
-    const challenges = new Set(lot.lot_challenges ?? []);
-    const traits = lot.lot_traits.filter((trait) => !challenges.has(trait)).map(lotTraitName);
-    const hazards = Array.from(challenges).map(lotTraitName).join(', ');
-    if (traits.length > 0) {
-      facts.push(`Lot traits (game effects): ${traits.join(', ')}${hazards ? `; lot challenges: ${hazards}` : ''}`);
-    } else {
-      facts.push(`Lot challenges (game effects): ${hazards}`);
-    }
+  // Panel names with a clause each (util/lotTraitWords); the lot challenges (Heist Havoc,
+  // Gremlins) are set apart so the writer knows which ones are hazards
+  const traitLine = lotTraitLine(lot?.lot_traits ?? [], lot?.lot_challenges);
+  if (traitLine) {
+    facts.push(traitLine);
   }
   return facts.join('\n');
 }
@@ -251,11 +232,12 @@ export function placeDescriptionProblems(text: string, venue?: string): string[]
   if (!isResidential(venue) && VENUE_AS_RESIDENCE.test(text)) {
     problems.push('venue_as_residence');
   }
-  // "Mt. Komorebi" is one word of a sentence, not the end of one
+  // "Mt. Komorebi" is one word of a sentence, not the end of one, and neither is the "!" in
+  // "Planet Honey Pop! is a karaoke bar": a sentence ends where a capital follows
   const sentences = text
     .trim()
     .replace(/\bMt\.\s/g, 'Mt ')
-    .split(/(?<=[.!?])\s+/)
+    .split(/(?<=[.!?])\s+(?=["'(A-Z0-9])/)
     .filter((sentence) => sentence.length > 0);
   if (sentences.length < 1 || sentences.length > 4) {
     problems.push('length');

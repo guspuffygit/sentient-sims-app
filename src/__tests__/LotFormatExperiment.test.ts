@@ -31,9 +31,22 @@ const MODE = process.env.LOT_FORMAT_EXPERIMENT;
 const OUT_DIR = process.env.LOT_OUT ?? path.join(os.tmpdir(), 'lot-format');
 const MODEL = process.env.LOT_MODEL ?? 'meta-llama/llama-3.3-70b-instruct:nitro';
 
-// auto/jaz/cardmood (2026-10-16): the app's Auto-Generate text, Jaz's own, and the card with one mood sentence
-type FormatName = 'stock' | 'minimal' | 'card' | 'long' | 'flowery' | 'kv' | 'auto' | 'jaz' | 'cardmood';
-const FORMATS: FormatName[] = ['stock', 'minimal', 'card', 'long', 'flowery', 'kv', 'auto', 'jaz', 'cardmood'];
+// auto/jaz/cardmood (2026-10-16): the app's Auto-Generate text, Jaz's own, and the card with one mood sentence.
+// cardtrait (2026-10-18): the writer's own card from facts that carried the lot's traits with a clause each
+// (LotTraitExperiment flavor variant), to see whether the trait sentence reaches dialogue
+type FormatName = 'stock' | 'minimal' | 'card' | 'long' | 'flowery' | 'kv' | 'auto' | 'jaz' | 'cardmood' | 'cardtrait';
+const FORMATS: FormatName[] = [
+  'stock',
+  'minimal',
+  'card',
+  'long',
+  'flowery',
+  'kv',
+  'auto',
+  'jaz',
+  'cardmood',
+  'cardtrait',
+];
 
 type Lot = {
   key: string;
@@ -56,6 +69,8 @@ const LOTS: Lot[] = [
       flowery:
         "Salty Paws Saloon, cradled by the ripples of the harbour and the whispers of the sea breeze, was a quaint establishment whose wooden deck and twinkling lights adorned the pier of Whiskerman's Wharf. It was a place where the air seemed to hum with stories, where fishermen, travellers and locals gathered to share tales over the clink of glasses. Inside, the intimate room was warm and inviting, its well-worn wooden tables and unpretentious bar promising libations to warm both body and soul, and the bartender greeted every guest with a nod and a story of their own. Outside, guests sat at tables beneath the stars while the scent of the ocean and the sizzle of the barbecues added flavour to the night air. The upper floor housed the public bathrooms, and as one ascended the stairs they could feel the echoes of the sea and the camaraderie that filled the space. Here, laughter resounded and glasses were raised in friendship. It was a sanctuary where the simple act of sharing a drink could forge bonds that transcended the tides.",
       kv: "Kind: small wooden bar.\nSetting: on the pier at Whiskerman's Wharf, Brindleton Bay, strung with lights.\nInside: worn wooden tables, a plain bar counter, stairs up to the public restrooms.\nOutside: a deck over the water with tables and barbecue grills.\nMood: scruffy, salty, unhurried.",
+      cardtrait:
+        "Salty Paws Saloon is a bar in Whiskerman's Wharf, Brindleton Bay. The main floor has a bar with bar stools, a jukebox, and dining tables, as well as a restroom; outside, a deck features dining tables and grills. Upstairs, there are two restrooms. Salty Paws Saloon is a welcoming spot for dogs and their owners to socialize in a cozy, conversational atmosphere.",
     },
   },
   {
@@ -126,6 +141,8 @@ const LOTS: Lot[] = [
       card: 'Pectoral Fitness is a two-story gym on Starlight Boulevard in Del Sol Valley. The main floor has a large pool for swimming laps, a locker room with changing areas, and a small study. Upstairs is a big open workout floor with treadmills, weight machines and punching bags, a separate yoga room, and a second small study with a bookshelf and a computer.',
       cardmood:
         'Pectoral Fitness is a two-story gym on Starlight Boulevard in Del Sol Valley. The main floor has a large pool for swimming laps, a locker room with changing areas, and a small study. Upstairs is a big open workout floor with treadmills, weight machines and punching bags, a separate yoga room, and a second small study with a bookshelf and a computer. The whole place feels sleek, polished and a little showy.',
+      cardtrait:
+        "Pectoral Fitness is a gym located in Starlight Boulevard, Del Sol Valley, with two stories. The main floor features a dining area, three locker rooms, one of which has a swimming pool, and outdoors, sculptures are on display. Upstairs, the workout room is equipped with punching bags and treadmills, and a stereo plays Pop music. Pectoral Fitness is a trendy spot for celebrities and aspiring stars to work out and see and be seen, with a lively atmosphere that hints at its reputation as a place to be before it's cool.",
     },
   },
   {
