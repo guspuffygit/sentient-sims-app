@@ -7,11 +7,13 @@ import { LocationEntity } from '../db/entities/LocationEntity';
 import { LotBlock } from '../models/SimStateReport';
 import { cleanupAIOutput, formatSentientSim } from '../formatter/PromptFormatter';
 import {
+  DraftCandidate,
   lotFacts,
   lotFurnishingNames,
   lotHasFacts,
   lotTypeLabel,
   lotVenue,
+  orderDrafts,
   placeDescriptionProblems,
 } from '../util/lotDescription';
 import { furnishingWords } from '../util/lotFurnishings';
@@ -32,6 +34,14 @@ import {
 // A generated description is a one-shot per entity per app run: a miss that fails (no API
 // key, provider down, refusal) must not re-queue on every single prompt build.
 const MAX_DESCRIPTION_TOKENS = 220;
+
+// description is versions[0]; the editor offers the rest
+export type DescribedLocation = {
+  description: string;
+  versions: string[];
+  facts: string;
+  lotType?: string;
+};
 
 function isBlank(text?: string | null): boolean {
   return !text || text.trim().length === 0;
@@ -140,10 +150,12 @@ export class DefaultDescriptionService {
   }
 
   /**
-   * A card for one lot from the facts the game reported about it, for the Locations page's
-   * "Auto-Generate Description", with the lot type the game's venue gives. Nothing is
-   * stored: the text goes into the editor, and the player's Save (or Save as Default for
-   * Everyone) is what keeps it. Undefined when the writer gave nothing that passes the gate.
+   * Cards for one lot from the facts the game reported about it, with the lot type the game's
+   * venue gives. `versions` drafts are written in parallel, each gated, and come back in
+   * orderDrafts order (no ranking call: see there). Nothing is stored: the fire-and-forget
+   * fallback stores the one draft it asks for, and the Locations page's "Auto-Generate
+   * Description" (three drafts) hands them to the editor, where the player's Save (or Save as
+   * Default for Everyone) is what keeps one. Undefined when no draft passes the gate.
    * interactive: the player pressed the button, so a failure is theirs to see and stays out
    * of provider health.
    */
@@ -151,8 +163,8 @@ export class DefaultDescriptionService {
     location: LocationEntity,
     lot: LotBlock | undefined,
     zoneName?: string,
-    options: { interactive?: boolean } = {},
-  ): Promise<{ description: string; facts: string; lotType?: string } | undefined> {
+    options: { interactive?: boolean; versions?: number } = {},
+  ): Promise<DescribedLocation | undefined> {
     const facts = lotFacts(location, lot, zoneName);
     const label = zoneName || location.name || 'this place';
     const unmapped = furnishingWords(lotFurnishingNames(lot), { isHome: false }).unmapped;
@@ -161,9 +173,18 @@ export class DefaultDescriptionService {
     }
     log.info(`[DefaultDescription] ${label}: facts for the writer:\n${facts}`);
     const venue = lotVenue(lot);
-    const description = await this.writeLocationDescription(label, facts, venue, options.interactive === true);
+    const interactive = options.interactive === true;
+    const wanted = Math.max(options.versions ?? 1, 1);
+    const written = await Promise.all(
+      Array.from({ length: wanted }, () => this.writeLocationDescription(label, facts, venue, interactive)),
+    );
+    const drafts = written.filter((draft): draft is DraftCandidate => draft !== undefined);
+    if (drafts.length === 0) {
+      return undefined;
+    }
+    const versions = orderDrafts(drafts).map((draft) => draft.text);
     const lotType = venue ? lotTypeLabel(venue) : undefined;
-    return description ? { description, facts, lotType } : undefined;
+    return { description: versions[0], versions, facts, lotType };
   }
 
   private async generateLocationDescription(location: LocationEntity, lot?: LotBlock, zoneName?: string) {
@@ -190,7 +211,7 @@ export class DefaultDescriptionService {
     facts: string,
     venue?: string,
     interactive = false,
-  ): Promise<string | undefined> {
+  ): Promise<DraftCandidate | undefined> {
     for (let attempt = 1; attempt <= 2; attempt += 1) {
       const oneShot = await this.ctx.ai.runOneShot(
         `Default Description: ${label}`,
@@ -209,7 +230,7 @@ export class DefaultDescriptionService {
       }
       const problems = placeDescriptionProblems(description, venue);
       if (problems.length === 0) {
-        return description;
+        return { text: description, attempt };
       }
       log.warn(
         `[DefaultDescription] location ${label}: attempt ${attempt} rejected (${problems.join(', ')}): ${description.slice(0, 160)}`,

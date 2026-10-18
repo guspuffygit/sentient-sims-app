@@ -3,7 +3,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { LOCATION_DESCRIPTION_SYSTEM_PROMPT } from 'main/sentient-sims/pipeline/prompts/utility';
-import { placeDescriptionProblems } from 'main/sentient-sims/util/lotDescription';
+import { orderDrafts, placeDescriptionProblems } from 'main/sentient-sims/util/lotDescription';
 import { lotTraitLine, lotTraitWords } from 'main/sentient-sims/util/lotTraitWords';
 
 // Lot trait experiment (2026-10-18): does a lot trait on the facts line reach the written
@@ -14,6 +14,17 @@ import { lotTraitLine, lotTraitWords } from 'main/sentient-sims/util/lotTraitWor
 //
 //   LOT_TRAIT_EXPERIMENT=dry   no model: asserts the facts per (lot, variant)
 //   LOT_TRAIT_EXPERIMENT=live  real OpenRouter calls, resumable JSONL + summary.md in LOT_OUT
+//   LOT_TRAIT_EXPERIMENT=rank  the ranker check for "three drafts, best one first": per lot,
+//                              the gate-passing samples of one variant from LOT_RUNS (a live
+//                              run's runs.jsonl) are ranked blind by the judge and by the
+//                              ranking prompt below on the writer model, each in two orders;
+//                              ranking.jsonl + ranking.md in LOT_OUT say how often the ranker,
+//                              the first draft and orderDrafts pick the judge's best. Result
+//                              2026-10-18 (14 lots, llama-3.3-70b ranking, sonnet-4.5 judging):
+//                              ranker 36% / 50% by order, first draft 43%, and the ranker took
+//                              position B 19 of 27 times while the judge agreed with its own
+//                              other-order pick on 50% of lots; so no ranking call ships and
+//                              the player chooses among the three
 //
 // Filters: LOT_LOTS=calle,salty  LOT_VARIANTS=none,flavor  LOT_SAMPLES=3  LOT_LANES=4
 // LOT_MODEL (writer) and LOT_JUDGE (judge). Key: OPENROUTER_KEY or the app's config.json (never printed).
@@ -393,6 +404,115 @@ function summarize(runs: Run[]): string {
   return lines.join('\n');
 }
 
+// The ranking call that was checked and not shipped (see the header): the rules of the card,
+// drafts lettered, a JSON order with a reason each
+const RANKING_RULES = `You pick the best of several draft reference cards for one place in The Sims 4. The facts about the place come first, then the drafts, lettered. Judge every draft against the facts and these rules, most important first:
+1. Nothing invented: every room, thing, floor and the kind of place come from the facts; no added sound, smell, music, owner, history or view.
+2. No person in the text, nothing happening now, no counts of things, no stock phrases (vibrant, nestled, a testament to, a sanctuary), no inventory list.
+3. The shape: 3-4 plain present-tense sentences; what the place is and where, the real things in it kept to their rooms and floors, then what the place is like and who it is for, specific to this place.
+4. Reads well and says nothing twice.
+`;
+
+const RANKING_PROMPT = `${RANKING_RULES}Reply with JSON only, in this exact shape, best draft first, and one short plain reason per draft (a few words a player can read, naming what that draft got right or wrong):
+{"ranking":["B","A","C"],"reasons":{"A":"...","B":"...","C":"..."}}`;
+
+// The judge ranks by the same rules, with room to check every draft against the facts first
+const JUDGE_RANK_PROMPT = `${RANKING_RULES}First go through every draft against the facts, in a "notes" field: each thing it names that the facts do not give, each rule it breaks. Then rank. Reply with JSON only, best draft first:
+{"notes":"...","ranking":["B","A","C"],"reasons":{"A":"...","B":"...","C":"..."}}`;
+
+const DRAFT_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+function rankingRequest(label: string, facts: string, texts: string[]): string {
+  const drafts = texts.map((text, index) => `Draft ${DRAFT_LETTERS[index]}:\n${text}`).join('\n\n');
+  return `Facts about ${label}:\n${facts}\n\n${drafts}`;
+}
+
+// The reply's order as draft positions; a letter left out or repeated is tolerated
+function parseRanking(text: string, count: number): number[] | undefined {
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) return undefined;
+  let parsed: { ranking?: unknown };
+  try {
+    parsed = JSON.parse(match[0]) as { ranking?: unknown };
+  } catch {
+    return undefined;
+  }
+  if (!Array.isArray(parsed.ranking)) return undefined;
+  const order: number[] = [];
+  for (const item of parsed.ranking) {
+    const index = typeof item === 'string' ? DRAFT_LETTERS.indexOf(item.trim().toUpperCase()) : -1;
+    if (index >= 0 && index < count && !order.includes(index)) order.push(index);
+  }
+  return order.length > 0 ? order : undefined;
+}
+
+type RankRun = {
+  lot: string;
+  texts: string[];
+  judge: number[][];
+  ranker: number[][];
+  judgeRaw: string[];
+  rankerRaw: string[];
+  fallbackTop: number;
+};
+
+// A ranking given over the drafts in `shown` order (indexes into the lot's texts), as indexes
+async function rankIn(
+  key: string,
+  model: string,
+  system: string,
+  label: string,
+  facts: string,
+  texts: string[],
+  shown: number[],
+): Promise<{ order: number[]; raw: string }> {
+  const raw = await chat(
+    key,
+    model,
+    system,
+    rankingRequest(
+      label,
+      facts,
+      shown.map((index) => texts[index]),
+    ),
+    800,
+  );
+  const order = parseRanking(raw, shown.length);
+  return { order: order ? order.map((position) => shown[position]) : [], raw: raw.slice(0, 1200) };
+}
+
+function rankSummary(runs: RankRun[]): string {
+  const rankOf = (order: number[], index: number) =>
+    order.indexOf(index) >= 0 ? order.indexOf(index) + 1 : order.length;
+  const pct = (count: number, total: number) => (total ? `${Math.round((100 * count) / total)}%` : '-');
+  const consistent = runs.filter((run) => run.judge[0].length > 0 && run.judge[0][0] === run.judge[1][0]);
+  const rows: [string, (run: RankRun) => number | undefined][] = [
+    ['ranker (forward order)', (run) => run.ranker[0][0]],
+    ['ranker (reversed order)', (run) => run.ranker[1][0]],
+    ['first draft', () => 0],
+    ['orderDrafts (sentences)', (run) => run.fallbackTop],
+  ];
+  const lines: string[] = [];
+  lines.push(
+    `judge agrees with itself across the two orders: ${pct(consistent.length, runs.length)} of ${runs.length} lots`,
+  );
+  lines.push(
+    `ranker agrees with itself across the two orders: ${pct(runs.filter((run) => run.ranker[0].length > 0 && run.ranker[0][0] === run.ranker[1][0]).length, runs.length)}`,
+  );
+  lines.push('');
+  lines.push('| pick | = judge top (all lots) | = judge top (judge self-consistent) | mean judge rank of pick |');
+  lines.push('|---|---|---|---|');
+  for (const [name, pick] of rows) {
+    const hitsAll = runs.filter((run) => pick(run) === run.judge[0][0]).length;
+    const hitsConsistent = consistent.filter((run) => pick(run) === run.judge[0][0]).length;
+    const meanRank = runs.length
+      ? (runs.reduce((sum, run) => sum + rankOf(run.judge[0], pick(run) ?? -1), 0) / runs.length).toFixed(2)
+      : '-';
+    lines.push(`| ${name} | ${pct(hitsAll, runs.length)} | ${pct(hitsConsistent, consistent.length)} | ${meanRank} |`);
+  }
+  return lines.join('\n');
+}
+
 const describeExperiment = MODE ? describe : describe.skip;
 
 describeExperiment('Lot trait experiment', () => {
@@ -424,6 +544,84 @@ describeExperiment('Lot trait experiment', () => {
       expect(names).not.toMatch(/zone ?Modifier|lotTrait|_/);
     }
   });
+
+  if (MODE === 'rank') {
+    it(
+      'checks the ranker against the judge on the drafts of a live run',
+      async () => {
+        const key = loadOpenRouterKey();
+        expect(key, 'No OpenRouter key: set OPENROUTER_KEY or the app OpenRouter setting').toBeTruthy();
+        const runsPath = process.env.LOT_RUNS ?? path.join(OUT_DIR, 'runs.jsonl');
+        const variant = (process.env.LOT_RANK_VARIANT ?? 'flavor') as Variant;
+        const prior = fs
+          .readFileSync(runsPath, 'utf8')
+          .split('\n')
+          .filter(Boolean)
+          .map((line) => JSON.parse(line) as Run);
+        fs.mkdirSync(OUT_DIR, { recursive: true });
+        const outPath = path.join(OUT_DIR, 'ranking.jsonl');
+        const done = new Map<string, RankRun>();
+        if (fs.existsSync(outPath)) {
+          for (const line of fs.readFileSync(outPath, 'utf8').split('\n').filter(Boolean)) {
+            const run = JSON.parse(line) as RankRun;
+            done.set(run.lot, run);
+          }
+        }
+        const jobs = lots.filter((lot) => !done.has(lot.key));
+        process.stdout.write(
+          `[rank] ${done.size} done, ${jobs.length} lots to rank: ranker ${MODEL}, judge ${JUDGE}\n`,
+        );
+        let next = 0;
+        const worker = async () => {
+          while (next < jobs.length) {
+            const lot = jobs[next];
+            next += 1;
+            const texts = prior
+              .filter((run) => run.lot === lot.key && run.variant === variant && run.problems.length === 0)
+              .sort((a, b) => a.sample - b.sample)
+              .map((run) => run.description);
+            if (texts.length < 2) {
+              process.stdout.write(`[rank] ${lot.key}: only ${texts.length} draft(s) passed the gate, skipped\n`);
+              continue;
+            }
+            const facts = factsFor(lot, variant);
+            const forward = texts.map((_text, index) => index);
+            const reversed = [...forward].reverse();
+            const [judgeF, judgeR, rankerF, rankerR] = await Promise.all([
+              rankIn(key as string, JUDGE, JUDGE_RANK_PROMPT, lot.name, facts, texts, forward),
+              rankIn(key as string, JUDGE, JUDGE_RANK_PROMPT, lot.name, facts, texts, reversed),
+              rankIn(key as string, MODEL, RANKING_PROMPT, lot.name, facts, texts, forward),
+              rankIn(key as string, MODEL, RANKING_PROMPT, lot.name, facts, texts, reversed),
+            ]);
+            const run: RankRun = {
+              lot: lot.key,
+              texts,
+              judge: [judgeF.order, judgeR.order],
+              ranker: [rankerF.order, rankerR.order],
+              judgeRaw: [judgeF.raw, judgeR.raw],
+              rankerRaw: [rankerF.raw, rankerR.raw],
+              fallbackTop: orderDrafts(texts.map((text, index) => ({ text, attempt: 1, index })))[0].index,
+            };
+            done.set(lot.key, run);
+            fs.appendFileSync(outPath, `${JSON.stringify(run)}\n`);
+            process.stdout.write(
+              `[rank] ${lot.key}: judge ${judgeF.order.join('')}/${judgeR.order.join('')} ranker ${rankerF.order.join('')}/${rankerR.order.join('')}\n`,
+            );
+          }
+        };
+        await Promise.all(Array.from({ length: Math.min(lanes, jobs.length) }, worker));
+        const runs = Array.from(done.values()).filter((run) => lots.some((lot) => lot.key === run.lot));
+        const summary = rankSummary(runs);
+        fs.writeFileSync(
+          path.join(OUT_DIR, 'ranking.md'),
+          `# Ranker check\n\nranker ${MODEL}, judge ${JUDGE}, variant ${variant}, ${runs.length} lots\n\n${summary}\n`,
+        );
+        process.stdout.write(`\n${summary}\n\nruns: ${outPath}\n`);
+        expect(runs.length).toBeGreaterThan(0);
+      },
+      60 * 60 * 1000,
+    );
+  }
 
   if (MODE === 'live') {
     it(

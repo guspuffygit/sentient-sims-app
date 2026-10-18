@@ -111,10 +111,10 @@ export class LocationsController {
     }
   };
 
-  // "Auto-Generate Description" on the Locations page: a card for a lot the game has
+  // "Auto-Generate Description" on the Locations page: three cards for a lot the game has
   // reported this app run, written from the same facts as the fallback writer, with the lot
-  // type. Nothing is stored; the editor gets the text and Save is the player's. 409 for a lot
-  // the game has not reported this app run.
+  // type. Nothing is stored; the editor gets the drafts and Save is the player's. 409 for a
+  // lot the game has not reported this app run.
   describeLocation = async (req: Request, res: Response) => {
     try {
       const { locationId } = req.params;
@@ -127,7 +127,10 @@ export class LocationsController {
       // The app's name for the lot (a shipped name, or the player's) over the in-game one,
       // which keeps any rename made in game
       const name = location.name && location.name !== PLACEHOLDER_NAME ? location.name : lot?.lot_name;
-      const written = await this.ctx.defaultDescriptions.describeLocation(location, lot, name, { interactive: true });
+      const written = await this.ctx.defaultDescriptions.describeLocation(location, lot, name, {
+        interactive: true,
+        versions: 3,
+      });
       if (!written) {
         res.status(502).json({ error: 'The writer produced nothing usable; try again' });
         return;

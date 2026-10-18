@@ -5,8 +5,8 @@ import { runApi } from 'main/sentient-sims/api';
 import { SimStateReport } from 'main/sentient-sims/models/SimStateReport';
 import { mockApiContext, mockEnvironment } from './util';
 
-// "Auto-Generate Description" on the Locations page: POST /locations/:id/describe writes a card from the
-// lot block the game reported, hands it to the editor, and stores nothing. A lot the game has
+// "Auto-Generate Description" on the Locations page: POST /locations/:id/describe writes three cards from the
+// lot block the game reported, hands them to the editor, and stores nothing. A lot the game has
 // not reported this app run is a 409, not a description written from no facts; a provider error comes back in plain words.
 describe('POST /locations/:locationId/describe', () => {
   const { directoryService, settingsService } = mockEnvironment();
@@ -22,7 +22,16 @@ describe('POST /locations/:locationId/describe', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({}),
     });
-    return { status: response.status, body: (await response.json()) as Record<string, string> };
+    return {
+      status: response.status,
+      body: (await response.json()) as {
+        description?: string;
+        versions?: string[];
+        facts?: string;
+        error?: string;
+        inSettings?: boolean;
+      },
+    };
   }
 
   beforeAll(() => {
@@ -64,10 +73,13 @@ describe('POST /locations/:locationId/describe', () => {
     });
   });
 
-  it('writes from the reported lot block and stores nothing', async () => {
+  it('writes three drafts from the reported lot block and stores nothing', async () => {
     const { status, body } = await describeLot('2841378864');
     expect(status).toBe(200);
     expect(body.description).toContain('Pectoral Fitness is a gym');
+    expect(body.versions).toHaveLength(3);
+    expect(body.versions?.[0]).toEqual(body.description);
+    expect(writer).toHaveBeenCalledTimes(3);
     expect(body.facts).toContain('Kind of place: a gym');
     expect(prompts[0]).toContain('Name: Pectoral Fitness');
     // The row is untouched: the editor holds the text until the player saves it

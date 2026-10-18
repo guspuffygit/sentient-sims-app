@@ -1,7 +1,9 @@
 import {
+  countSentences,
   lotFacts,
   lotHasFacts,
   lotTypeLabel,
+  orderDrafts,
   placeDescriptionProblems,
   venueKind,
 } from 'main/sentient-sims/util/lotDescription';
@@ -380,5 +382,26 @@ describe('lotFacts at a park whose active venue is Generic (Ward Park, 2026-10-1
 
   it('leaves the kind of place out when the only venue reported is Generic', () => {
     expect(lotFacts(wardPark, { venue: 'venue_Generic', owned: { bed: 0 } }, 'Ward Park')).not.toContain('Generic');
+  });
+});
+
+describe('orderDrafts', () => {
+  it('counts sentences the way the gate does', () => {
+    expect(countSentences('A gym in Mt. Komorebi. Treadmills fill it. Planet Honey Pop! is next door.')).toBe(3);
+    expect(countSentences('')).toBe(0);
+  });
+
+  it('puts first-try passes first, then the card closest to four sentences, then as written', () => {
+    const one = 'One. Two.';
+    const four = 'One. Two. Three. Four.';
+    const three = 'One. Two. Three.';
+    const ordered = orderDrafts([
+      { text: one, attempt: 1 },
+      { text: four, attempt: 2 },
+      { text: three, attempt: 1 },
+      { text: three, attempt: 1, later: true },
+    ]);
+    expect(ordered.map((draft) => draft.text)).toEqual([three, three, one, four]);
+    expect(ordered[0]).not.toHaveProperty('later');
   });
 });

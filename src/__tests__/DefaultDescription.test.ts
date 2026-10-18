@@ -303,4 +303,71 @@ describe('DefaultDescriptionService', () => {
     await flush();
     expect(participants.size).toEqual(0);
   });
+
+  // "Auto-Generate Description" (2026-10-18): three drafts per press, each through the gate,
+  // no ranking call (a writer-model ranker picked by position in the check, no better than the
+  // first draft), ordered first-try passes first and then the card closest to four sentences
+  describe('drafts for the editor', () => {
+    const row: LocationEntity = {
+      id: 2841378864,
+      name: 'Pectoral Fitness',
+      lot_type: 'Gym',
+      description: defaultLotDescription,
+      is_generic: true,
+    };
+    const lot = { venue: 'venue_gym', owned: { punchingbag: 2, treadmill: 4 } };
+
+    function stubAnswers(answers: string[]) {
+      const { ctx, calls } = stubContext('');
+      (ctx.ai as unknown as { runOneShot: unknown }).runOneShot = (label: string) => {
+        calls.push(label);
+        return Promise.resolve({ exchange: {}, text: answers[calls.length - 1] ?? '' });
+      };
+      return { ctx, calls };
+    }
+
+    it('writes the drafts in parallel and returns them all, the first as the description', async () => {
+      const answers = [
+        'Pectoral Fitness is a gym in Del Sol Valley. Treadmills line the main room. Punching bags hang at the back. A place for sims who want to be seen sweating.',
+        'Pectoral Fitness is a gym in Del Sol Valley with treadmills and punching bags. It is a place for celebrities in training.',
+        'Pectoral Fitness is a gym in Del Sol Valley. The main room holds treadmills and punching bags. It suits anyone chasing a famous physique.',
+      ];
+      const { ctx, calls } = stubAnswers(answers);
+      const service = new DefaultDescriptionService(ctx);
+
+      const written = await service.describeLocation(row, lot, 'Pectoral Fitness', { interactive: true, versions: 3 });
+      expect(calls).toEqual(Array(3).fill('Default Description: Pectoral Fitness'));
+      expect(written?.versions).toEqual([answers[0], answers[2], answers[1]]);
+      expect(written?.description).toEqual(answers[0]);
+      expect(written?.lotType).toEqual('Gym');
+    });
+
+    it('puts a first-try pass before a retry, drops a draft that fails twice, and is undefined when none pass', async () => {
+      const person = 'She walks into Pectoral Fitness, a gym in Del Sol Valley, and waits by the treadmills.';
+      const clean =
+        'Pectoral Fitness is a gym in Del Sol Valley. Treadmills fill the main room. Punching bags hang at the back.';
+      const retried =
+        'Pectoral Fitness is a gym in Del Sol Valley with treadmills and punching bags. It suits anyone training hard.';
+      // Three writers start together (calls 1-3); the first and third retry (calls 4-5)
+      const { ctx, calls } = stubAnswers([person, clean, person, retried, person]);
+      const service = new DefaultDescriptionService(ctx);
+
+      const written = await service.describeLocation(row, lot, 'Pectoral Fitness', { versions: 3 });
+      expect(calls).toHaveLength(5);
+      expect(written?.versions).toEqual([clean, retried]);
+
+      const none = await service.describeLocation(row, lot, 'Pectoral Fitness', { versions: 2 });
+      expect(none).toBeUndefined();
+    });
+
+    it('asks for one draft when nothing says otherwise, as the fallback writer does', async () => {
+      const { ctx, calls } = stubAnswers([
+        'Pectoral Fitness is a gym in Del Sol Valley. Treadmills fill the main room. Punching bags hang at the back.',
+      ]);
+      const service = new DefaultDescriptionService(ctx);
+      const written = await service.describeLocation(row, lot, 'Pectoral Fitness');
+      expect(calls).toHaveLength(1);
+      expect(written?.versions).toHaveLength(1);
+    });
+  });
 });

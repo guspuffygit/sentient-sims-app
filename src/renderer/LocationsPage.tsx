@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  IconButton,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -24,6 +25,8 @@ import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import AppCard from './AppCard';
 import { EmptyState } from './components/EmptyState';
@@ -37,6 +40,13 @@ import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAp
 
 type SelectedLocation = {
   location: LocationEntity;
+  index: number;
+};
+
+// The drafts the last Auto-Generate press wrote for one lot, and which one is in the editor
+type Drafts = {
+  locationId: number;
+  texts: string[];
   index: number;
 };
 
@@ -69,7 +79,7 @@ const columns: GridColDef[] = [
 const client = new SentientSimsAppClient();
 
 const HOW_TO = [
-  'Visit the lot in game, then press Auto-Generate Description for a draft, or write your own.',
+  'Visit the lot in game, then press Auto-Generate Description for three drafts to choose from, or write your own.',
   'Write 3 to 4 sentences in the present tense: what the place is and where, the real things in it floor by floor (the bar, the pool, the stage), then what the place is like and who it is for.',
   'Leave out: people doing things (visitors, staff, she/he/you), names, anything happening right now, counts ("six computers"), lists of every object, and stock phrases like vibrant or nestled.',
 ];
@@ -84,6 +94,8 @@ export default function LocationsPage() {
   const [confirmingUnpublish, setConfirmingUnpublish] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [writing, setWriting] = useState(false);
+  const [drafts, setDrafts] = useState<Drafts | undefined>();
+  const [pendingDraft, setPendingDraft] = useState<number | undefined>();
   const { status } = useWebsocket();
   const { userAttributes } = useAuth();
   const { showMessage } = useSnackBar();
@@ -239,9 +251,10 @@ export default function LocationsPage() {
     setPublishing(false);
   }
 
-  // A draft from what the game reported about the lot, into the editor: Save keeps it as this
-  // save's own text, Save as Default for Everyone publishes it. Nothing happens on its own.
-  // The game's lot type fills Lot Type unless the player already typed one of their own.
+  // Three drafts from what the game reported about the lot, the first into the editor and the
+  // rest a step away: Save keeps what is in the box as this save's own text, Save as Default
+  // for Everyone publishes it. Nothing happens on its own. The game's lot type fills Lot Type
+  // unless the player already typed one of their own.
   async function handleAutoGenerate() {
     if (!editedLocation) {
       return;
@@ -258,6 +271,7 @@ export default function LocationsPage() {
         };
         showMessage(written.error, 'warning', written.inSettings ? openSettings : undefined);
       } else {
+        setDrafts({ locationId: editedLocation.location.id, texts: written.versions, index: 0 });
         setEditedLocation((previousLocation) => {
           if (!previousLocation) {
             return previousLocation;
@@ -266,7 +280,7 @@ export default function LocationsPage() {
           const lotType = written.lotType && (!current || current === PLACEHOLDER_LOT_TYPE) ? written.lotType : current;
           return {
             ...previousLocation,
-            location: { ...previousLocation.location, description: written.description, lot_type: lotType },
+            location: { ...previousLocation.location, description: written.versions[0], lot_type: lotType },
           };
         });
       }
@@ -275,6 +289,30 @@ export default function LocationsPage() {
       log.error('Writing a location description failed', error);
     }
     setWriting(false);
+  }
+
+  function showDraft(index: number) {
+    if (!drafts) {
+      return;
+    }
+    setDrafts({ ...drafts, index });
+    setEditedLocation((previousLocation) =>
+      previousLocation
+        ? { ...previousLocation, location: { ...previousLocation.location, description: drafts.texts[index] } }
+        : previousLocation,
+    );
+  }
+
+  // Stepping away from a draft the player has changed would drop those changes: ask first
+  function handleDraftStep(index: number) {
+    if (!drafts || !editedLocation) {
+      return;
+    }
+    if (editedLocation.location.description !== drafts.texts[drafts.index]) {
+      setPendingDraft(index);
+    } else {
+      showDraft(index);
+    }
   }
 
   const handleNameEdit = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -352,7 +390,7 @@ export default function LocationsPage() {
               >
                 Cancel
               </Button>
-              <Tooltip title="Drafts a description from what the game reports about this lot." placement="top">
+              <Tooltip title="Writes three drafts from what the game reports about this lot." placement="top">
                 <span>
                   <Button
                     loading={writing}
@@ -446,6 +484,39 @@ export default function LocationsPage() {
             forceShow
             value={location.description}
           />
+          {drafts && drafts.locationId === location.id && drafts.texts.length > 1 && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
+              <IconButton
+                size="small"
+                aria-label="Previous draft"
+                disabled={drafts.index === 0}
+                onClick={() => {
+                  handleDraftStep(drafts.index - 1);
+                }}
+              >
+                <ChevronLeftIcon fontSize="small" />
+              </IconButton>
+              <Typography variant="caption" color="text.secondary">
+                Draft {drafts.index + 1} of {drafts.texts.length}
+              </Typography>
+              <IconButton
+                size="small"
+                aria-label="Next draft"
+                disabled={drafts.index >= drafts.texts.length - 1}
+                onClick={() => {
+                  handleDraftStep(drafts.index + 1);
+                }}
+              >
+                <ChevronRightIcon fontSize="small" />
+              </IconButton>
+              <Tooltip
+                placement="top"
+                title="Three drafts from the same facts, not ranked. Pick the one you like and edit it; Save keeps what is in the box."
+              >
+                <InfoOutlinedIcon fontSize="small" color="action" aria-label="About the drafts" />
+              </Tooltip>
+            </Box>
+          )}
           {location.neighborhood && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               Neighborhood: {location.neighborhood}
@@ -570,6 +641,38 @@ export default function LocationsPage() {
             }}
           >
             Publish anyway
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={pendingDraft !== undefined}
+        onClose={() => {
+          setPendingDraft(undefined);
+        }}
+      >
+        <DialogTitle>Switch drafts?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>You changed this draft. Showing another one drops those changes.</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setPendingDraft(undefined);
+            }}
+          >
+            Keep my changes
+          </Button>
+          <Button
+            color="warning"
+            onClick={() => {
+              if (pendingDraft !== undefined) {
+                showDraft(pendingDraft);
+              }
+              setPendingDraft(undefined);
+            }}
+          >
+            Switch draft
           </Button>
         </DialogActions>
       </Dialog>

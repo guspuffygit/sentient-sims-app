@@ -232,15 +232,36 @@ export function placeDescriptionProblems(text: string, venue?: string): string[]
   if (!isResidential(venue) && VENUE_AS_RESIDENCE.test(text)) {
     problems.push('venue_as_residence');
   }
-  // "Mt. Komorebi" is one word of a sentence, not the end of one, and neither is the "!" in
-  // "Planet Honey Pop! is a karaoke bar": a sentence ends where a capital follows
-  const sentences = text
-    .trim()
-    .replace(/\bMt\.\s/g, 'Mt ')
-    .split(/(?<=[.!?])\s+(?=["'(A-Z0-9])/)
-    .filter((sentence) => sentence.length > 0);
-  if (sentences.length < 1 || sentences.length > 4) {
+  const sentences = countSentences(text);
+  if (sentences < 1 || sentences > 4) {
     problems.push('length');
   }
   return problems;
+}
+
+// "Mt. Komorebi" is one word of a sentence, not the end of one, and neither is the "!" in
+// "Planet Honey Pop! is a karaoke bar": a sentence ends where a capital follows
+export function countSentences(text: string): number {
+  return text
+    .trim()
+    .replace(/\bMt\.\s/g, 'Mt ')
+    .split(/(?<=[.!?])\s+(?=["'(A-Z0-9])/)
+    .filter((sentence) => sentence.length > 0).length;
+}
+
+export type DraftCandidate = { text: string; attempt: number };
+
+/**
+ * Drafts for the editor, best bet first: a first-try pass before a retry, then the card
+ * closest to four sentences, then as written. A ranking call was checked instead
+ * (2026-10-18, LotTraitExperiment rank mode): the writer model picked by position (B, 19 of
+ * 27 times) and matched a blind judge's choice less often than the first draft did, while
+ * the judge agreed with itself only half the time, so the drafts are near-equal and the
+ * player's eye decides.
+ */
+export function orderDrafts<T extends DraftCandidate>(drafts: T[]): T[] {
+  return drafts
+    .map((draft, index) => ({ draft, index, off: Math.abs(countSentences(draft.text) - 4) }))
+    .sort((a, b) => a.draft.attempt - b.draft.attempt || a.off - b.off || a.index - b.index)
+    .map((entry) => entry.draft);
 }
