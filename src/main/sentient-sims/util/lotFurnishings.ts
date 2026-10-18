@@ -192,24 +192,46 @@ const HOME_BASICS = new Set([
 // vents and a stray chair does not count as a story
 const MIN_ROOM_WORDS_PER_FLOOR = 2;
 
+/** A player's words for one tuning name; null says nothing about it, like structure. */
+export type FurnishingWord = { one: string; many: string };
+export type PlayerFurnishingWords = Record<string, FurnishingWord | null>;
+
+// Words the dev build's Lot Words panel saved, by lowercased exact tuning name; they win
+// over the table
+let playerWords = new Map<string, FurnishingWord | null>();
+
+export function setPlayerFurnishingWords(words: PlayerFurnishingWords) {
+  playerWords = new Map(Object.entries(words).map(([name, word]) => [name.toLowerCase(), word]));
+}
+
 /** Whether a lowercased tuning name carries a fragment; a trailing $ anchors it to the end. */
 export function nameMatches(lowered: string, fragment: string): boolean {
   return fragment.endsWith('$') ? lowered.endsWith(fragment.slice(0, -1)) : lowered.includes(fragment);
 }
 
-function ruleIndex(tuningName: string): number {
-  const lowered = tuningName.toLowerCase();
-  return FURNISHING_WORDS.findIndex(([fragments]) => fragments.some((fragment) => nameMatches(lowered, fragment)));
-}
+// A furnishing's words and where they sort (table order, player words after it); null for
+// structure, decor and names a player left out; undefined when nothing knows the name
+type Resolved = { one: string; many: string; order: number };
 
-function isStructural(tuningName: string): boolean {
+function resolve(tuningName: string): Resolved | null | undefined {
   const lowered = tuningName.toLowerCase();
-  return STRUCTURAL.some((fragment) => lowered.includes(fragment));
+  if (playerWords.has(lowered)) {
+    const word = playerWords.get(lowered);
+    return word ? { ...word, order: FURNISHING_WORDS.length } : null;
+  }
+  const rule = FURNISHING_WORDS.findIndex(([fragments]) =>
+    fragments.some((fragment) => nameMatches(lowered, fragment)),
+  );
+  if (rule >= 0) {
+    const [, one, many] = FURNISHING_WORDS[rule];
+    return { one, many, order: rule };
+  }
+  return STRUCTURAL.some((fragment) => lowered.includes(fragment)) ? null : undefined;
 }
 
 /** The number of kinds of real furnishing among these names (structure and decor are none). */
 export function kindCount(tuningNames: string[]): number {
-  return new Set(tuningNames.map(ruleIndex).filter((rule) => rule >= 0)).size;
+  return new Set(tuningNames.map((name) => resolve(name)?.one).filter(Boolean)).size;
 }
 
 /** Tuning names alone (counts unknown) or tuning name -> count. */
@@ -228,23 +250,25 @@ export function furnishingWords(
   const entries: Array<[string, number]> = Array.isArray(names)
     ? names.map((name) => [name, 1])
     : Object.entries(names ?? {});
-  const totals = new Map<number, number>();
+  // By the singular word, so a player's "a bar" adds to the table's bars
+  const totals = new Map<string, Resolved & { total: number }>();
   const unmapped: string[] = [];
   entries.forEach(([name, count]) => {
-    const rule = ruleIndex(name);
-    if (rule < 0) {
-      if (!isStructural(name)) {
-        unmapped.push(name);
-      }
+    const word = resolve(name);
+    if (word === undefined) {
+      unmapped.push(name);
       return;
     }
-    totals.set(rule, (totals.get(rule) ?? 0) + count);
+    if (word === null) {
+      return;
+    }
+    const seen = totals.get(word.one);
+    totals.set(word.one, seen ? { ...seen, total: seen.total + count } : { ...word, total: count });
   });
-  const words = Array.from(totals.entries())
-    .sort(([a], [b]) => a - b)
-    .filter(([rule]) => !(options.isHome && HOME_BASICS.has(FURNISHING_WORDS[rule][1])))
-    .map(([rule, total]) => {
-      const [, one, many] = FURNISHING_WORDS[rule];
+  const words = Array.from(totals.values())
+    .sort((a, b) => a.order - b.order)
+    .filter(({ one }) => !(options.isHome && HOME_BASICS.has(one)))
+    .map(({ one, many, total }) => {
       const single = counted ? total === 1 : USUALLY_ONE.has(one);
       if (options.outdoors && one === 'a sofa') {
         return single ? 'a bench' : 'benches';

@@ -40,6 +40,9 @@ const electronHandler = {
   selectGameApp: (): Promise<string | null> => {
     return ipcRenderer.invoke('dialog:selectGameApp') as Promise<string | null>;
   },
+  openLogFolder: (): Promise<string> => {
+    return ipcRenderer.invoke('open-log-folder') as Promise<string>;
+  },
   isMac: process.platform === 'darwin',
   setSetting: (setting: SettingsEnum, value: any) => {
     ipcRenderer.send('set-setting', setting, value);

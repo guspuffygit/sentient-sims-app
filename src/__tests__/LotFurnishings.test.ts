@@ -2,8 +2,10 @@ import {
   floorLines,
   floorsPhrase,
   furnishingWords,
+  kindCount,
   musicWords,
   roomFloors,
+  setPlayerFurnishingWords,
 } from 'main/sentient-sims/util/lotFurnishings';
 
 const venue = { isHome: false };
@@ -136,6 +138,36 @@ describe('furnishingWords', () => {
         venue,
       ).unmapped,
     ).toEqual([]);
+  });
+});
+
+// The dev build's Lot Words panel: a player's words for an exact tuning name win over the table
+describe('player furnishing words', () => {
+  afterEach(() => {
+    setPlayerFurnishingWords({});
+  });
+
+  it('words a name the table does not know, singular or plural by count, after the table', () => {
+    setPlayerFurnishingWords({ object_dish_stack: { one: 'a dish rack', many: 'dish racks' } });
+    expect(furnishingWords({ object_piano: 1, object_Dish_Stack: 3 }, venue)).toEqual({
+      words: ['a piano', 'dish racks'],
+      unmapped: [],
+    });
+    expect(furnishingWords({ object_dish_stack: 1 }, venue).words).toEqual(['a dish rack']);
+    expect(kindCount(['object_dish_stack', 'object_piano'])).toBe(2);
+  });
+
+  it('says nothing about a name left out, even one the table knows', () => {
+    setPlayerFurnishingWords({ object_dish_stack: null, object_bench_park: null });
+    expect(furnishingWords(['object_dish_stack', 'object_bench_park', 'object_piano'], venue)).toEqual({
+      words: ['a piano'],
+      unmapped: [],
+    });
+  });
+
+  it('adds to the table kind a player word repeats', () => {
+    setPlayerFurnishingWords({ object_tikiBar: { one: 'a bar', many: 'bars' } });
+    expect(furnishingWords({ object_tikiBar: 1, object_bar_EP07: 1 }, venue).words).toEqual(['bars']);
   });
 });
 
