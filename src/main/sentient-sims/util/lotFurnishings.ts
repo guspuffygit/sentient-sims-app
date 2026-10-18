@@ -26,7 +26,11 @@ const FURNISHING_WORDS: Array<[string[], string, string]> = [
   [['spotlight', 'stagelight'], 'a stage light', 'stage lights'],
   [['bench'], 'a bench', 'benches'],
   [['sofa', 'couch', 'loveseat', 'sectional', 'sitlove'], 'a sofa', 'sofas'],
-  [['armchair', 'chairliving', 'livingchair', 'loungechair', 'chairlounge', 'sitliving'], 'an armchair', 'armchairs'],
+  [
+    ['armchair', 'chairliving', 'chair_living', 'livingchair', 'loungechair', 'chairlounge', 'sitliving'],
+    'an armchair',
+    'armchairs',
+  ],
   [['barstool'], 'a bar stool', 'bar stools'],
   [['bartend', 'object_bar_', 'object_bar$', 'barpro', 'barcounter', 'minibar'], 'a bar', 'bars'],
   [['triviabox'], 'a trivia box', 'trivia boxes'],
@@ -82,8 +86,8 @@ const FURNISHING_WORDS: Array<[string[], string, string]> = [
   [['nightstand'], 'a nightstand', 'nightstands'],
 ];
 
-// Structure, lighting and small decor: on every lot, so they say nothing about it and no
-// rule needs to be written for them. Dining chairs go with their table.
+// Structure, lighting, appliances and small decor: on every lot, so they say nothing about
+// it and no rule needs to be written for them. Dining chairs go with their table.
 const STRUCTURAL = [
   'door',
   'stairs',
@@ -116,6 +120,8 @@ const STRUCTURAL = [
   'deco',
   'mailbox',
   'fridge',
+  'dishwasher',
+  'collectible',
   'trash',
   'shelf',
   'clock',

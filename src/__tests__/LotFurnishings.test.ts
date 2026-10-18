@@ -124,6 +124,15 @@ describe('furnishingWords', () => {
     expect(furnishingWords({ object_tableDining: 1, object_chair_dining: 6 }, venue).words).toEqual(['a dining table']);
   });
 
+  it('reads a living chair as an armchair and says nothing of dishwashers or collectibles', () => {
+    expect(
+      furnishingWords(
+        { object_chair_living: 2, object_Dishwasher_MedQuality_1: 1, object_Collectible_Crystal_jet: 1 },
+        venue,
+      ),
+    ).toEqual({ words: ['armchairs'], unmapped: [] });
+  });
+
   it('never reports alarms, gates, ladders or a closet as unknown', () => {
     expect(
       furnishingWords(
