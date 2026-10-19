@@ -49,6 +49,40 @@ export class LocationsClient extends ApiClient {
   }
 
   /**
+   * POST /locations/:locationId/describe
+   * Writes drafts from what the game has reported about the lot, for the editor: description
+   * is the first of versions. Resolves { error } in plain words when it cannot (no visit this
+   * app run, a provider error), with inSettings when the fix is in Settings > AI Providers.
+   */
+  async describeLocation(
+    locationId: number,
+  ): Promise<
+    | { description: string; versions: string[]; facts: string; lotType?: string }
+    | { error: string; inSettings?: boolean }
+  > {
+    const response = await axiosClient.post<{
+      description?: string;
+      versions?: string[];
+      facts?: string;
+      lotType?: string;
+      error?: string;
+      inSettings?: boolean;
+    }>(`${this.apiUrl}/locations/${locationId}/describe`, {}, { validateStatus: () => true });
+    if (!response.data.description) {
+      return {
+        error: response.data.error ?? 'The description could not be written; try again',
+        inSettings: response.data.inSettings,
+      };
+    }
+    return {
+      description: response.data.description,
+      versions: response.data.versions?.length ? response.data.versions : [response.data.description],
+      facts: response.data.facts ?? '',
+      lotType: response.data.lotType,
+    };
+  }
+
+  /**
    * DELETE /locations/:locationId
    * Deletes a location by ID.
    */

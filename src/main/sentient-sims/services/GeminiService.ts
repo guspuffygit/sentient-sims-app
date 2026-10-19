@@ -7,6 +7,8 @@ import {
   HarmCategory,
   Modality,
   Model,
+  ThinkingConfig,
+  ThinkingLevel,
 } from '@google/genai';
 import { GenerationService } from './GenerationService';
 import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
@@ -17,14 +19,36 @@ import { getRandomItem } from '../util/getRandomItem';
 import { GeminiKeysNotSetError } from '../exceptions/GeminiKeyNotSetError';
 import { isApiError } from '../exceptions/GeminiAPIError';
 import { ApiContext } from './ApiContext';
+import { withoutImageData } from '../models/OpenAIMessage';
 import { ApiType } from '../models/ApiType';
 import { geminiDefaultImageModel } from '../constants';
 import { ImageGenerationService } from './ImageGenerationService';
 
 const maxRetries = 3;
 
+// Thinking tokens count against maxOutputTokens: with no setting, a 220-token lot description
+// on gemini-3.8-flash spent 209 thinking and returned "Pectoral Fitness is a two" (2026-10-17).
+// Each model gets the first setting it accepts: thinking off (2.5 Flash, 3.8 Flash), else low
+// (the 3 family that cannot turn it off), else its default; the last two get room for the
+// thoughts on top of the reply, as OpenAIService does for mandatory reasoning.
+const thinkingHeadroomTokens = 1024;
+const thinkingSteps: Array<{ thinkingConfig?: ThinkingConfig; headroom: number }> = [
+  { thinkingConfig: { thinkingBudget: 0 }, headroom: 0 },
+  { thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }, headroom: thinkingHeadroomTokens },
+  { headroom: thinkingHeadroomTokens },
+];
+
+// "Budget 0 is invalid. This model only works in thinking mode.", "Thinking level MINIMAL is
+// not supported for this model"
+function isThinkingRejection(error: unknown): boolean {
+  return isApiError(error) && error.status === 400 && /think|budget/i.test(error.message);
+}
+
 export class GeminiService implements GenerationService, ImageGenerationService {
   private readonly ctx: ApiContext;
+
+  // The thinking step each model accepted, so a rejection costs one call per model per run
+  private readonly thinkingStepByModel = new Map<string, number>();
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
@@ -91,13 +115,16 @@ export class GeminiService implements GenerationService, ImageGenerationService 
         .filter((msg) => msg.role !== 'system')
         .map((msg) => ({
           role: msg.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: msg.content }],
+          parts: [
+            { text: msg.content },
+            ...(msg.images ?? []).map((image) => ({ inlineData: { mimeType: image.mimeType, data: image.data } })),
+          ],
         })),
     };
 
-    log.debug(`Full Gemini Request: ${JSON.stringify(generateRequest, null, 2)}`);
+    log.debug(`Full Gemini Request: ${JSON.stringify(withoutImageData(request), null, 2)}`);
 
-    let text = await this.generate(generateRequest);
+    let text = await this.generateWithThinkingCapped(generateRequest);
 
     if (this.ctx.settings.localizationEnabled && text) {
       const language = this.ctx.settings.localizationLanguage;
@@ -115,7 +142,7 @@ export class GeminiService implements GenerationService, ImageGenerationService 
 
         log.debug(`Gemini Translation Request: ${JSON.stringify(translationRequest, null, 2)}`);
 
-        text = await this.generate(translationRequest);
+        text = await this.generateWithThinkingCapped(translationRequest);
       }
     }
 
@@ -127,7 +154,7 @@ export class GeminiService implements GenerationService, ImageGenerationService 
 
   async healthCheck(): Promise<{ status?: string; error?: string }> {
     try {
-      const text = await this.generate({
+      const text = await this.generateWithThinkingCapped({
         model: this.getGeminiModel(),
         config: {
           maxOutputTokens: 5,
@@ -220,6 +247,31 @@ export class GeminiService implements GenerationService, ImageGenerationService 
     return result.text;
   }
 
+  private async generateWithThinkingCapped(request: GenerateContentParameters): Promise<string | undefined> {
+    const maxOutputTokens = request.config?.maxOutputTokens;
+    let step = this.thinkingStepByModel.get(request.model) ?? 0;
+    for (;;) {
+      const { thinkingConfig, headroom } = thinkingSteps[step];
+      try {
+        return await this.generate({
+          ...request,
+          config: {
+            ...request.config,
+            thinkingConfig,
+            maxOutputTokens: maxOutputTokens === undefined ? undefined : maxOutputTokens + headroom,
+          },
+        });
+      } catch (error: unknown) {
+        if (!thinkingConfig || !isThinkingRejection(error)) {
+          throw error;
+        }
+        step += 1;
+        this.thinkingStepByModel.set(request.model, step);
+        log.info(`Gemini model ${request.model} rejected ${JSON.stringify(thinkingConfig)}, trying the next setting`);
+      }
+    }
+  }
+
   async generateImage(request: ImageGenerationRequest): Promise<ImageGenerationResponse> {
     const model = request.model ?? geminiDefaultImageModel;
 
@@ -258,6 +310,10 @@ export class GeminiService implements GenerationService, ImageGenerationService 
       try {
         return await genAI.models.generateContent(request);
       } catch (error: unknown) {
+        // The caller moves on to the next thinking setting; retrying this one cannot help
+        if (isThinkingRejection(error)) {
+          throw error;
+        }
         let message = 'Unknown error';
         if (isApiError(error)) {
           message = error.message;

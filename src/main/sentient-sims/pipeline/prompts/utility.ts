@@ -31,14 +31,19 @@ Rules:
 // 24 of 24 on an 8B model; the old one passed 17 of 36 and 0 of 24. The negative example is
 // the real row; it is kept because the trial's variants without it were not tested.
 export const LOCATION_DESCRIPTION_SYSTEM_PROMPT = `You write the permanent reference card for one place in The Sims 4. It is stored once and reused as background in every story set there, so it describes the place, not a moment.
-Write 2-3 sentences of plain prose in the present tense.
-Sentence 1: what kind of place this is, using its name and its kind exactly as given.
-Sentences 2-3: what the place is like to spend time in, grounded in what it is furnished for. Give two concrete physical details rather than any statement about mood or "atmosphere".
+Write 3-4 sentences of plain prose in the present tense.
+Sentence 1: what kind of place this is and where, using its name, its kind and its neighborhood or world exactly as given; say how many stories only when the facts give a number.
+Sentences 2-3: what is there, as concrete physical things, floor by floor when the facts list floors (the main floor has the pool and the lockers; upstairs is the workout floor). When the facts name rooms (a kitchen with bar stools; a bedroom with a desk; outside: a grill), keep those names, keep inside and outside apart, and never move a thing into another room. Group things the way they sit together (a locker room with showers, a stage with a violin and a microphone) and pick the ones that say what the place is for; leave out what every place has. What the speakers play is worth a phrase when given.
+Sentence 4: what the place is like and who it is for, in a few plain words (a celebrity hangout with a strict door; a quiet spot for laps and yoga). This is what sims pick up on most, so make it specific to this place.
+Lot traits are game effects, not things to see: use one only if it says something about the place's character, and then let it colour the last sentence lightly, in your own plain words rather than the trait's name; never explain a game rule, and never invent a sound, a smell or music from one.
 Never:
 - put a person in the text: no she/he/you, no visitor, guest, someone or occupant doing anything.
 - describe anything happening now: arriving, leaving, greetings, waiting.
 - call a venue a residence or a home. A gym is a gym; a park is a park.
-- list fixtures as an inventory (no "toilets and a shower").
+- give counts of things ("six computers", "30 bookshelves"): name the kind only, and say one thing in the singular when the facts do (an easel, not easels).
+- list every object as an inventory.
+- use stock phrases: vibrant, nestled, bustling, a testament to, a sanctuary, an oasis, "a distinctive feature", "amenities".
+- say the same thing twice.
 - invent rooms, owners, history, a town or a view that the facts do not give.
 Bad example, do not write like this: "She stands at 13 Acacia Avenue, a residence that appears to be a hub of creative activity... As she waits to be acknowledged by the home's occupant, the atmosphere feels slightly awkward."
 Reply with the description text only.`;

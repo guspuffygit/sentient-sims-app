@@ -105,3 +105,18 @@ describe('SimStateCache', () => {
     expect(cache.isStale()).toBe(true);
   });
 });
+
+describe('SimStateCache lot blocks', () => {
+  it('remembers every lot reported this app run by lot id, and forgets them on reset', () => {
+    const cache = new SimStateCache();
+    cache.ingest(report(1, { lot: { zone_id: 1, lot_id: '90336000', venue: 'venue_gym' } }));
+    cache.ingest(report(2, { lot: { zone_id: 2, lot_id: '2703097870', venue: 'venue_residential' } }));
+    expect(cache.getLotBlock('90336000')?.venue).toBe('venue_gym');
+    expect(cache.getLotBlock(2703097870)?.venue).toBe('venue_residential');
+    expect(cache.getLotBlock('1')).toBeUndefined();
+    cache.ingest(report(3, { lot: { zone_id: 3 } }));
+    expect(cache.getLotBlock('90336000')?.venue).toBe('venue_gym');
+    cache.reset();
+    expect(cache.getLotBlock('90336000')).toBeUndefined();
+  });
+});

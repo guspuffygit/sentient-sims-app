@@ -30,6 +30,17 @@ export type LotCondition = {
   conditions: string[]; // broken | dirty | clogged | burnt
 };
 
+/**
+ * One of the game's rooms (mod builds from 2026-10-17): the level, the game's opaque room id
+ * (0 outdoors, null when the lookup failed), and object tuning name -> count
+ */
+export type LotRoom = {
+  level: number;
+  room: number | null;
+  outdoors: boolean;
+  kinds: Record<string, number>;
+};
+
 export type LotBlock = {
   zone_id?: number | string;
   // The app keys locations by LOT id (what events and outcomes carry); zone_id is the
@@ -52,6 +63,30 @@ export type LotBlock = {
   // Context-gated lot verbs (pay_bills when due, hire_repair_service when broken, ...);
   // the mod resolves their targets, the app only offers/validates
   action_keys?: string[];
+  // What the game itself says about the lot, from the zone's saved record: its blurb, the
+  // bedroom and bathroom counts and the lot traits. Facts for the description writer
+  // (Auto-Generate Description); absent on older mod builds.
+  description?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  lot_traits?: string[];
+  /** The lot challenges among lot_traits (Heist Havoc, Gremlins...), as the game names them */
+  lot_challenges?: string[];
+  // Where it is and what it is furnished with, for the same writer (mod builds from
+  // 2026-10-16): the world's display name, the street tuning name, the object tuning names
+  // on the lot, the floor levels in use (-1 is a basement) and the stereo station state names
+  world_name?: string;
+  street?: string;
+  furnishings?: string[];
+  // Earlier mod builds: every level with objects on it, roof included
+  floors?: number[];
+  // Mod builds from 2026-10-16: the tuning names on each level ("-1" is a basement), and the
+  // lot type set in Manage Worlds, which the active venue can differ from (venue_Generic)
+  floor_furnishings?: Record<string, string[]>;
+  venue_type?: string;
+  music?: string[];
+  // Mod builds from 2026-10-17: the same objects grouped by the game's room ids, with counts
+  rooms?: LotRoom[];
 };
 
 export type SimCareer = {

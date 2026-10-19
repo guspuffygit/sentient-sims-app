@@ -1,4 +1,5 @@
 import { IpcMainEvent, clipboard, dialog, ipcMain, shell } from 'electron';
+import path from 'path';
 import log from 'electron-log';
 import { SettingsEnum } from './models/SettingsEnum';
 import { notifySettingChanged, sendSceneLineEndedToMod, sendSceneLineToMod } from './util/notifyRenderer';
@@ -61,6 +62,8 @@ export default function ipcHandlers(ctx: ApiContext, voiceInput: VoiceInputServi
   ipcMain.on('open-browser-link', (_event: IpcMainEvent, link: string) => {
     void shell.openExternal(link);
   });
+  // The folder that holds main.log; an empty string back means it opened
+  ipcMain.handle('open-log-folder', () => shell.openPath(path.dirname(log.transports.file.getFile().path)));
   // The renderer owns playback timing: it reports each scene line as it starts playing
   // so the in-game subtitle stays in step with the voices
   ipcMain.on(

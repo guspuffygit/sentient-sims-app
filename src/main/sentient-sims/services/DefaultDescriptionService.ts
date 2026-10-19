@@ -6,7 +6,17 @@ import { SentientSim } from '../models/SentientSim';
 import { LocationEntity } from '../db/entities/LocationEntity';
 import { LotBlock } from '../models/SimStateReport';
 import { cleanupAIOutput, formatSentientSim } from '../formatter/PromptFormatter';
-import { lotFacts, lotHasFacts, lotTypeLabel, placeDescriptionProblems } from '../util/lotDescription';
+import {
+  DraftCandidate,
+  lotFacts,
+  lotFurnishingNames,
+  lotHasFacts,
+  lotTypeLabel,
+  lotVenue,
+  orderDrafts,
+  placeDescriptionProblems,
+} from '../util/lotDescription';
+import { furnishingWords } from '../util/lotFurnishings';
 import {
   LOCATION_DESCRIPTION_SYSTEM_PROMPT as LOCATION_SYSTEM_PROMPT,
   SIM_DESCRIPTION_SYSTEM_PROMPT as SIM_SYSTEM_PROMPT,
@@ -24,6 +34,14 @@ import {
 // A generated description is a one-shot per entity per app run: a miss that fails (no API
 // key, provider down, refusal) must not re-queue on every single prompt build.
 const MAX_DESCRIPTION_TOKENS = 220;
+
+// description is versions[0]; the editor offers the rest
+export type DescribedLocation = {
+  description: string;
+  versions: string[];
+  facts: string;
+  lotType?: string;
+};
 
 function isBlank(text?: string | null): boolean {
   return !text || text.trim().length === 0;
@@ -131,15 +149,56 @@ export class DefaultDescriptionService {
     log.info(`[DefaultDescription] sim ${name}: ${stored ? 'stored' : 'skipped (already described)'}`);
   }
 
-  private async generateLocationDescription(location: LocationEntity, lot?: LotBlock, zoneName?: string) {
+  /**
+   * Cards for one lot from the facts the game reported about it, with the lot type the game's
+   * venue gives. `versions` drafts are written in parallel, each gated, and come back in
+   * orderDrafts order (no ranking call: see there). Nothing is stored: the fire-and-forget
+   * fallback stores the one draft it asks for, and the Locations page's "Auto-Generate
+   * Description" (three drafts) hands them to the editor, where the player's Save (or Save as
+   * Default for Everyone) is what keeps one. Undefined when no draft passes the gate.
+   * interactive: the player pressed the button, so a failure is theirs to see and stays out
+   * of provider health.
+   */
+  async describeLocation(
+    location: LocationEntity,
+    lot: LotBlock | undefined,
+    zoneName?: string,
+    options: { interactive?: boolean; versions?: number } = {},
+  ): Promise<DescribedLocation | undefined> {
     const facts = lotFacts(location, lot, zoneName);
     const label = zoneName || location.name || 'this place';
-    const description = await this.writeLocationDescription(label, facts, lot?.venue);
-    if (!description) {
+    const unmapped = furnishingWords(lotFurnishingNames(lot), { isHome: false }).unmapped;
+    if (unmapped.length > 0) {
+      log.info(`[DefaultDescription] ${label}: furnishings with no plain words: ${unmapped.join(', ')}`);
+    }
+    log.info(`[DefaultDescription] ${label}: facts for the writer:\n${facts}`);
+    const venue = lotVenue(lot);
+    const interactive = options.interactive === true;
+    const wanted = Math.max(options.versions ?? 1, 1);
+    const written = await Promise.all(
+      Array.from({ length: wanted }, () => this.writeLocationDescription(label, facts, venue, interactive)),
+    );
+    const drafts = written.filter((draft): draft is DraftCandidate => draft !== undefined);
+    if (drafts.length === 0) {
+      return undefined;
+    }
+    const versions = orderDrafts(drafts).map((draft) => draft.text);
+    const lotType = venue ? lotTypeLabel(venue) : undefined;
+    return { description: versions[0], versions, facts, lotType };
+  }
+
+  private async generateLocationDescription(location: LocationEntity, lot?: LotBlock, zoneName?: string) {
+    const written = await this.describeLocation(location, lot, zoneName);
+    if (!written) {
       return;
     }
-    const lotType = lot?.venue ? lotTypeLabel(lot.venue) : undefined;
-    const stored = this.ctx.locationRepository.setDescriptionIfGeneric(location, description, zoneName, lotType);
+    const label = zoneName || location.name || 'this place';
+    const stored = this.ctx.locationRepository.setDescriptionIfGeneric(
+      location,
+      written.description,
+      zoneName,
+      written.lotType,
+    );
     log.info(`[DefaultDescription] location ${label}: ${stored ? 'stored' : 'skipped (already described)'}`);
   }
 
@@ -147,7 +206,12 @@ export class DefaultDescriptionService {
   // a venue called a residence means ONE fresh sample, and a second miss keeps the stock text
   // (the row stays generic, so a later app run tries again). The gate is the safety net behind
   // the prompt and the facts, not the fix; see util/lotDescription.ts.
-  private async writeLocationDescription(label: string, facts: string, venue?: string): Promise<string | undefined> {
+  private async writeLocationDescription(
+    label: string,
+    facts: string,
+    venue?: string,
+    interactive = false,
+  ): Promise<DraftCandidate | undefined> {
     for (let attempt = 1; attempt <= 2; attempt += 1) {
       const oneShot = await this.ctx.ai.runOneShot(
         `Default Description: ${label}`,
@@ -157,7 +221,7 @@ export class DefaultDescriptionService {
         undefined,
         AIActionType.DESCRIPTION_DEFAULT,
         undefined,
-        { stageId: StageId.DESCRIPTION_DEFAULT },
+        { stageId: StageId.DESCRIPTION_DEFAULT, interactive },
       );
       const description = cleanupAIOutput(oneShot.text).trim();
       if (description.length < 20) {
@@ -166,7 +230,7 @@ export class DefaultDescriptionService {
       }
       const problems = placeDescriptionProblems(description, venue);
       if (problems.length === 0) {
-        return description;
+        return { text: description, attempt };
       }
       log.warn(
         `[DefaultDescription] location ${label}: attempt ${attempt} rejected (${problems.join(', ')}): ${description.slice(0, 160)}`,

@@ -14,6 +14,10 @@
 // called "Bo" must not make "bother" unpublishable
 const MIN_NAME_LENGTH = 3;
 
+// Townies carry names that are everyday words ("a two-story house on a bright street");
+// alone they say nothing about anyone. A full name with one of them in it still counts.
+const COMMON_WORDS = new Set(['story', 'blue', 'white', 'house', 'street', 'bright', 'someone']);
+
 function escapeForRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -29,7 +33,7 @@ function candidates(names: string[]): string[] {
     }
     full
       .split(/\s+/)
-      .filter((part) => part.length >= MIN_NAME_LENGTH)
+      .filter((part) => part.length >= MIN_NAME_LENGTH && !COMMON_WORDS.has(part.toLowerCase()))
       .forEach((part) => parts.add(part));
   });
   return Array.from(parts).sort((a, b) => b.length - a.length);

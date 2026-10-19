@@ -9,6 +9,32 @@ import { OpenAIService } from 'main/sentient-sims/services/OpenAIService';
 import { mockApiContext } from './util';
 
 describe('AIExchangeLogService', () => {
+  it('leaves calls made from an editor out of provider health', async () => {
+    const log = new AIExchangeLogService();
+    const fail = () => {
+      log.record({
+        request: { messages: [{ role: 'user', content: 'x', tokens: 1 }], maxResponseTokens: 1 },
+        responseText: '',
+        durationMs: 1,
+        error: '404 No endpoints found that support image input',
+      });
+      return Promise.resolve();
+    };
+
+    await log.runLabeled('Default Description: Ward Park', AIActionType.DESCRIPTION_DEFAULT, fail, undefined, {
+      health: false,
+    });
+    await log.runLabeled('Default Description: Ward Park', AIActionType.DESCRIPTION_DEFAULT, fail, undefined, {
+      health: false,
+    });
+    expect(log.getProviderHealth()).toEqual({ down: false, consecutiveFailures: 0 });
+    // Still logged for the AI Log page
+    expect(log.list()).toHaveLength(2);
+
+    await log.runLabeled('Cognition: Alice', AIActionType.COGNITION, fail);
+    expect(log.getProviderHealth().consecutiveFailures).toBe(1);
+  });
+
   it('labels concurrent calls independently', async () => {
     const log = new AIExchangeLogService();
 

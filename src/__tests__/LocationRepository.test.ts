@@ -32,6 +32,15 @@ describe('LocationRepository', () => {
     expect(defaultResult.name).toEqual('The Futures Past');
   });
 
+  it('places a shipped lot in its neighborhood and leaves an unknown lot unplaced', () => {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
+    ctx.db.loadDatabase({ sessionId: '1237633', saveId: '2' });
+
+    expect(ctx.locationRepository.getLocation({ id: 254110336 }).neighborhood).toEqual('Mirage Canyon, Oasis Springs');
+    expect(ctx.locationRepository.getLocation({ id: 11111 }).neighborhood).toBeUndefined();
+  });
+
   it('CRUD', () => {
     const ctx = mockApiContext();
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {
@@ -142,28 +151,30 @@ describe('LocationRepository', () => {
     });
 
     it('a generated description yields to a default; the player editing it makes it theirs', () => {
+      // Newcrest ships empty, so no built-in describes it
+      const FERN_PARK = 3137142788;
       const shared = new Map<string, OnlineLocation>();
       const ctx = mockApiContext();
       fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
       ctx.db.loadDatabase({ sessionId: 'loc-23', saveId: '23' });
       const repo = new LocationRepository(ctx.db, { peek: () => shared });
       expect(
-        repo.setDescriptionIfGeneric(repo.getLocation({ id: CLOTHIERS }), 'An AI guess.', 'JF&S Clothiers', 'Shop'),
+        repo.setDescriptionIfGeneric(repo.getLocation({ id: FERN_PARK }), 'An AI guess.', 'Fern Park', 'Residential'),
       ).toBeTruthy();
-      expect(repo.getLocation({ id: CLOTHIERS })).toMatchObject({ source: 'generated', lot_type: 'Shop' });
+      expect(repo.getLocation({ id: FERN_PARK })).toMatchObject({ source: 'generated', lot_type: 'Residential' });
 
       // The shared default lands later: it replaces the guess without anyone pressing anything
-      shared.set(String(CLOTHIERS), sharedClothiers);
+      shared.set(String(FERN_PARK), { ...sharedClothiers, id: FERN_PARK });
       const later = repo;
-      expect(later.getLocation({ id: CLOTHIERS })).toMatchObject({ source: 'online' });
+      expect(later.getLocation({ id: FERN_PARK })).toMatchObject({ source: 'online' });
 
       later.updateLocation({
-        id: CLOTHIERS,
-        name: 'JF&S Clothiers',
-        lot_type: 'Shop',
+        id: FERN_PARK,
+        name: 'Fern Park',
+        lot_type: 'Residential',
         description: 'An AI guess, edited.',
       });
-      expect(later.getLocation({ id: CLOTHIERS })).toMatchObject({ source: 'save' });
+      expect(later.getLocation({ id: FERN_PARK })).toMatchObject({ source: 'save' });
     });
 
     it('never generates over a default or a description a person wrote', () => {

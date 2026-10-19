@@ -6,9 +6,23 @@ import { notifyLocationChanged } from '../util/notifyRenderer';
 import { ApiContext } from '../services/ApiContext';
 import { InteractionService } from '../services/InteractionService';
 import { OnlineLocation } from '../db/OnlineLocationRepository';
+import { lotHasFacts } from '../util/lotDescription';
+import { PLACEHOLDER_NAME } from '../db/LocationRepository';
+import { plainProviderError } from '../util/providerErrorWords';
 
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+// A space left at the end of a name ("Pectoral Fitness ") would otherwise be saved, and
+// published, as part of it (live 2026-10-18)
+function trimmed(body: LocationEntity): OnlineLocation {
+  return {
+    id: body.id,
+    name: body.name.trim(),
+    lot_type: body.lot_type.trim(),
+    description: body.description.trim(),
+  };
 }
 
 export class LocationsController {
@@ -35,7 +49,11 @@ export class LocationsController {
   getAllLocations = async (req: Request, res: Response) => {
     try {
       await this.ctx.onlineLocationRepository.load();
-      const result = this.ctx.locationRepository.getAllLocations();
+      // A lot the neighborhood table does not know is placed by the world the game reported
+      const result = this.ctx.locationRepository.getAllLocations().map((location) => {
+        const world = location.neighborhood ? undefined : this.ctx.simStateCache.getLotBlock(location.id)?.world_name;
+        return world ? { ...location, neighborhood: world } : location;
+      });
       return res.json(result);
     } catch (err) {
       log.error('Error getting all locations', err);
@@ -63,7 +81,7 @@ export class LocationsController {
 
   updateLocation = (req: Request, res: Response) => {
     try {
-      const { id, name, lot_type: lotType, description } = req.body as LocationEntity;
+      const { id, name, lot_type: lotType, description } = trimmed(req.body as LocationEntity);
       const location = { id, name, lot_type: lotType, description };
       // An editor saved with the default untouched (the in-game dialog's OK) keeps following it
       const fallback = this.ctx.locationRepository.getDefault(id);
@@ -104,16 +122,44 @@ export class LocationsController {
     }
   };
 
+  // "Auto-Generate Description" on the Locations page: three cards for a lot the game has
+  // reported this app run, written from the same facts as the fallback writer, with the lot
+  // type. Nothing is stored; the editor gets the drafts and Save is the player's. 409 for a
+  // lot the game has not reported this app run.
+  describeLocation = async (req: Request, res: Response) => {
+    try {
+      const { locationId } = req.params;
+      const lot = this.ctx.simStateCache.getLotBlock(String(locationId));
+      if (!lotHasFacts(lot)) {
+        res.status(409).json({ error: 'Visit this lot in game first' });
+        return;
+      }
+      const location = this.ctx.locationRepository.getLocation({ id: Number(locationId) });
+      // The app's name for the lot (a shipped name, or the player's) over the in-game one,
+      // which keeps any rename made in game
+      const name = location.name && location.name !== PLACEHOLDER_NAME ? location.name : lot?.lot_name;
+      const written = await this.ctx.defaultDescriptions.describeLocation(location, lot, name, {
+        interactive: true,
+        versions: 3,
+      });
+      if (!written) {
+        res.status(502).json({ error: 'The writer produced nothing usable; try again' });
+        return;
+      }
+      res.json(written);
+    } catch (err) {
+      log.error('Error writing a location description', err);
+      // The player reads what the provider's error means, and where to fix it
+      const { plain, inSettings } = plainProviderError(errorMessage(err));
+      res.status(500).json({ error: plain, inSettings });
+    }
+  };
+
   // Mappers only (the page shows the button to them, the server enforces it). Sets the
   // shared default every player gets; a player's own description still wins in their save.
   publishLocation = async (req: Request, res: Response) => {
     const body = req.body as LocationEntity & { force?: boolean };
-    const location: OnlineLocation = {
-      id: body.id,
-      name: body.name,
-      lot_type: body.lot_type,
-      description: body.description,
-    };
+    const location: OnlineLocation = trimmed(body);
     try {
       // Text from this save on its way to everyone: refuse and name the words, as the mapping
       // browser does, unless the publisher has seen them and pressed again
