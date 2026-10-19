@@ -28,7 +28,7 @@ import {
   sendChatGeneration,
   sendSceneLineToMod,
 } from '../util/notifyRenderer';
-import { voiceTypeForTTS } from '../models/VoiceType';
+import { VoiceType, voiceTypeForTTS } from '../models/VoiceType';
 import { markScenePaced } from '../util/pacedScenes';
 import { applySimAliasNames } from '../util/simAliases';
 import { canSpeak } from '../util/speechCapability';
@@ -2962,9 +2962,14 @@ Write me a buff description based on the conversation so that ${buffRequest.name
       return { voiceType };
     }
 
+    // The mood-tag switch lives with the ElevenLabs settings; it is the only provider
+    // whose models read the tag, so it is the only one whose setting is consulted
+    const moodTags =
+      voiceType === VoiceType.ElevenLabs ? (this.ctx.settings.elevenLabsTtsSettings.moodTags ?? true) : true;
     try {
       return {
         voiceType,
+        moodTags,
         voiceOverrides: this.ctx.participantRepository.getParticipantVoices(
           sims.map((sim) => sim.sim_id),
           voiceType,
@@ -2972,7 +2977,7 @@ Write me a buff description based on the conversation so that ${buffRequest.name
       };
     } catch (err) {
       log.warn('Unable to look up per-sim voice overrides', err);
-      return { voiceType };
+      return { voiceType, moodTags };
     }
   }
 }
