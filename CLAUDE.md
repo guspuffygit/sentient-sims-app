@@ -112,3 +112,11 @@ hold exactly, so treat every id as an opaque string everywhere — JSON, websock
 entity types. Only the SQLite layer touches the real integer: read INTEGER id columns with
 .safeIntegers() and convert to string with .toString(), and bind ids in queries with BigInt(id).
 Never pass an id through Number() or parseInt — it silently rounds and the id stops matching.
+
+ElevenLabs mood delivery (2026-10-03): an automatically cast voice is scored on the sim's traits only
+(CastableVoice), so an unpinned sim keeps one voice all day; the mood shapes the delivery instead. playTTSLines
+gives each line a deliveryNote from the speaker's current mood (util/moodDeliveryTags: Anxious -> nervous, Happy
+-> cheerful...) unless the line already has one from the screenplay, and v3/v4 send it as a leading `[tag]`
+(elevenLabsLineText); other models ignore it. Tag words are voice qualities only, since v4 plays a noun tag as a
+sound effect, and bookkeeping moods (fine, asleep, possessed, recharging, hyper) get none. Switch: moodTags on
+the ElevenLabs settings (checkbox on the ElevenLabs tab, on by default). Tests: moodDeliveryTags, PlayTTS.

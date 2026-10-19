@@ -220,6 +220,42 @@ describe('playTTSLines', () => {
     expect(seqs[2]).toBeGreaterThan(seqs[1]);
   });
 
+  it('delivers a line in the speaker mood on by default, and not for a bookkeeping mood', () => {
+    const sadRicky = makeSim({ ...ricky, moods: ['Mood_Sad'] });
+    const fineBella = makeSim({ ...bella, moods: ['Mood_Fine'] });
+    playTTSLines(
+      [
+        { speaker: 'Ricky Rickerson', text: 'Been fishing here for years.' },
+        { speaker: 'Bella Goth', text: 'Maybe next weekend.' },
+      ],
+      [sadRicky, fineBella],
+      { voiceType: VoiceType.ElevenLabs },
+    );
+
+    const lines = sentVoiceLines();
+    expect(lines[0].deliveryNote).toEqual('quietly sad');
+    expect(lines[1].deliveryNote).toBeUndefined();
+  });
+
+  it('keeps a delivery note the line arrived with over the mood', () => {
+    const sadRicky = makeSim({ ...ricky, moods: ['Mood_Sad'] });
+    playTTSLines([{ speaker: 'Ricky Rickerson', text: 'Fine.', deliveryNote: 'sarcastic' }], [sadRicky], {
+      voiceType: VoiceType.ElevenLabs,
+    });
+
+    expect(sentVoiceLines()[0].deliveryNote).toEqual('sarcastic');
+  });
+
+  it('attaches no mood when the switch is off', () => {
+    const sadRicky = makeSim({ ...ricky, moods: ['Mood_Sad'] });
+    playTTSLines([{ speaker: 'Ricky Rickerson', text: 'Been fishing here for years.' }], [sadRicky], {
+      voiceType: VoiceType.ElevenLabs,
+      moodTags: false,
+    });
+
+    expect(sentVoiceLines()[0].deliveryNote).toBeUndefined();
+  });
+
   it('prefers a pinned kokoro blend over the automatic cast', () => {
     playTTSLines([{ speaker: 'Ricky Rickerson', text: 'Been fishing here for years.' }], [ricky], {
       voiceType: VoiceType.Kokoro,

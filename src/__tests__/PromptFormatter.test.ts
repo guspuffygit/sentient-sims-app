@@ -236,6 +236,14 @@ describe('Output', () => {
       expect(castElevenLabsVoice(sim)).toEqual(castElevenLabsVoice(sim));
     });
 
+    it('keeps one voice whatever the mood', () => {
+      const angry = makeSim({ name: 'Ricky Rickerson', traits: ['trait_Cheerful'], moods: ['Mood_Angry'] });
+      const flirty = makeSim({ name: 'Ricky Rickerson', traits: ['trait_Cheerful'], moods: ['Mood_Flirty'] });
+      const sad = makeSim({ name: 'Ricky Rickerson', traits: ['trait_Cheerful'], moods: ['Mood_Sad'] });
+      expect(castElevenLabsVoice(flirty)).toEqual(castElevenLabsVoice(angry));
+      expect(castElevenLabsVoice(sad)).toEqual(castElevenLabsVoice(angry));
+    });
+
     it('casts a matching gender', () => {
       const male = makeSim({ name: 'Ricky', gender: 'Male' });
       const female = makeSim({ name: 'Bella', gender: 'Female' });

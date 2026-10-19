@@ -9,11 +9,14 @@ export type CastableVoice = {
   name: string;
   gender: VoiceGender;
   age: VoiceAge;
-  // Personality/intonation qualities of the voice, matched against sim traits and moods
+  // Personality/intonation qualities of the voice, matched against sim traits
   tags: string[];
 };
 
-// Sim trait/mood key fragments (case-insensitive) mapped to the voice qualities they suggest
+// Sim trait key fragments (case-insensitive) mapped to the voice qualities they suggest.
+// Moods are deliberately NOT scored: an unpinned sim's voice used to change whenever
+// their mood did (angry at breakfast, flirty by lunch: two voices for one sim). A mood
+// shapes the DELIVERY instead, as an audio tag (util/moodDeliveryTags).
 const traitTagAffinities: [string, string[]][] = [
   ['evil', ['intense', 'gruff', 'deep']],
   ['mean', ['intense', 'gruff']],
@@ -76,7 +79,7 @@ export function simAgeToVoiceAge(age: SimAge): VoiceAge {
 export const voiceAgeOrder: VoiceAge[] = ['child', 'young', 'middle', 'old'];
 
 function desiredTagsForSim(sim: SentientSim): string[] {
-  const descriptors = [...sim.traits, ...sim.moods].map((key) => key.toLowerCase());
+  const descriptors = sim.traits.map((key) => key.toLowerCase());
   const tags: string[] = [];
   traitTagAffinities.forEach(([fragment, affinityTags]) => {
     if (descriptors.some((descriptor) => descriptor.includes(fragment))) {
@@ -88,7 +91,7 @@ function desiredTagsForSim(sim: SentientSim): string[] {
 
 /**
  * Ranks a voice catalog for a sim based on who they are: gender is a hard filter, age
- * closeness and trait/mood-derived voice qualities are scored. Returns every voice tied
+ * closeness and trait-derived voice qualities are scored. Returns every voice tied
  * for the best score so callers can break the tie deterministically per sim.
  */
 export function bestVoicesForSim(sim: SentientSim, catalog: CastableVoice[]): CastableVoice[] {

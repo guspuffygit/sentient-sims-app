@@ -11,7 +11,7 @@ import { ClockState } from '../models/ModLogWebsocketMessage';
 import { OnlineMappingType } from '../models/MappingSource';
 import { getAllBrowserWindows } from './browserWindows';
 import { DialogueLine, parseDialogueLines } from '../formatter/PromptFormatter';
-import { castVoicesForLines } from '../formatter/VoiceCasting';
+import { attachMoodDeliveryNotes, castVoicesForLines } from '../formatter/VoiceCasting';
 import { SentientSim } from '../models/SentientSim';
 import { VoiceType } from '../models/VoiceType';
 import { consumePacedScene } from './pacedScenes';
@@ -152,6 +152,9 @@ export type PlayTTSVoiceOptions = {
   voiceType?: VoiceType;
   // Voice ids the user pinned to specific sims, keyed by sim id
   voiceOverrides?: Map<string, string>;
+  // Deliver each line in the speaker's current mood (an audio tag on v3/v4). Undefined
+  // means on; the ElevenLabs settings tab has the switch.
+  moodTags?: boolean;
 };
 
 // Monotonic dispatch counter: the renderer orders queued scenes by it, so a scene
@@ -176,6 +179,14 @@ export function playTTSLines(
   let castLines = lines;
   if (sims && sims.length > 0 && options?.voiceType) {
     castLines = castVoicesForLines(lines, sims, options.voiceType, options.voiceOverrides);
+    if (options.moodTags !== false) {
+      castLines = attachMoodDeliveryNotes(castLines, sims);
+      castLines
+        .filter((line) => line.deliveryNote)
+        .forEach((line) => {
+          log.debug(`[TTS] ${line.speaker} delivery: [${line.deliveryNote}]`);
+        });
+    }
   }
   notifyAllWindows('on-voice', castLines, {
     seq: ++voiceDispatchSeq,
