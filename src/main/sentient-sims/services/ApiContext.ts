@@ -468,6 +468,11 @@ export class ApiContext {
         return {};
       }
     });
+    // Which reported sims are pets: the state report is the only channel that says
+    // species, and the facts block needs it to call the family dog a dog
+    this._simStateCache.onReport((report) => {
+      this._semanticMemoryService.recordSpeciesFromReport(report);
+    });
     this._memoryRepository.setGameDayProvider(() => {
       try {
         return this._simStateCache.getReport()?.lot?.clock?.absolute_day;

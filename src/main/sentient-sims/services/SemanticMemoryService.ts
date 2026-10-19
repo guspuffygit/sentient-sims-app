@@ -1,6 +1,7 @@
 import log from 'electron-log';
 import { SimFactRecord, SimFactRepository } from '../db/SimFactRepository';
 import { SimDossier } from '../models/SimDossier';
+import { SimStateReport } from '../models/SimStateReport';
 import { dossierNames, dossierToFacts, factKey } from '../pipeline/facts/dossierFacts';
 import { canSupersede, FactPredicate, FactSource, isSingleValued } from '../pipeline/facts/predicates';
 import { MAX_LIFE_PEOPLE, renderKnownFacts } from '../util/renderKnownFacts';
@@ -61,6 +62,10 @@ const FAMILY_AND_PARTNER_PREDICATES: ReadonlySet<string> = new Set([
   FactPredicate.SPOUSE,
   FactPredicate.FIANCE,
   FactPredicate.STEADY,
+  // An ex is in a sim's life whether or not they still speak
+  FactPredicate.EX_PARTNER,
+  // The family dog belongs in a sim's life as surely as a sibling does
+  FactPredicate.PET,
 ]);
 
 // Single-valued facts about WHO a sim is. A new value for one of these is not a detail
@@ -136,7 +141,7 @@ export class SemanticMemoryService {
     const simId = dossier.sim_id;
     const day = options.day;
 
-    const derived = dossierToFacts(dossier);
+    const derived = dossierToFacts(dossier, { speciesOf: (id) => this.speciesFor(id) });
     const derivedKeys = new Set(derived.map(factKey));
     const current = this.facts.getCurrentFacts(simId).filter((fact) => fact.source === 'game');
     const currentKeys = new Map(current.map((fact) => [factKey(fact), fact]));
@@ -192,6 +197,130 @@ export class SemanticMemoryService {
       updatedAt: new Date().toISOString(),
     });
     return { inserted, retired, skipped: inserted === 0 && retired === 0, identityChanged };
+  }
+
+  /**
+   * Learn what kind of creature each reported sim is. The state report is the only channel
+   * that says species (self.species for a reported pet, species on a perceived one); the
+   * dossier lists a pet as a bare household member id. Each new species becomes a `game`
+   * fact on the pet and a `pet` edge from everyone it lives with, so the owner's facts
+   * block says "your dog Bosun" rather than naming the dog beside the people.
+   *
+   * Runs on every report, so it must be cheap: one indexed read per sim that has a
+   * species, which is the handful of pets on the lot, and writes only on first sight.
+   */
+  recordSpeciesFromReport(report: SimStateReport): number {
+    if (!this.isLoaded()) {
+      return 0;
+    }
+    const day = report.lot?.clock?.absolute_day;
+    const seen = new Map<string, string>();
+    for (const entry of report.sims ?? []) {
+      if (entry.sim_id && entry.self?.species) {
+        seen.set(entry.sim_id, entry.self.species);
+      }
+      for (const perceived of entry.sims) {
+        if (perceived.sim_id && perceived.species && !seen.has(perceived.sim_id)) {
+          seen.set(perceived.sim_id, perceived.species);
+        }
+      }
+    }
+    let learned = 0;
+    for (const [simId, species] of seen) {
+      try {
+        if (this.recordSpecies(simId, species, day)) {
+          learned += 1;
+        }
+      } catch (err) {
+        log.error(`[Facts] could not record species for ${simId}`, err);
+      }
+    }
+    return learned;
+  }
+
+  // One sim's species as a game fact, plus the pet edges it implies. Returns true when the
+  // species was news to the store.
+  recordSpecies(simId: string, species: string, day?: number): boolean {
+    const normalized = species.trim().toUpperCase();
+    if (!normalized || normalized === 'HUMAN') {
+      return false;
+    }
+    const current = this.facts.getCurrentFacts(simId, { predicate: FactPredicate.SPECIES });
+    if (current.some((fact) => fact.source === 'game' && fact.objectText === normalized)) {
+      return false;
+    }
+    const id = this.facts.insert({
+      subjectSimId: simId,
+      predicate: FactPredicate.SPECIES,
+      objectText: normalized,
+      source: 'game',
+      confidence: DEFAULT_CONFIDENCE.game,
+      validFromDay: day,
+      createdAt: new Date().toISOString(),
+    });
+    this.retireContradicting(simId, FactPredicate.SPECIES, normalized, undefined, id, day);
+    // The pet's dossier, ingested before anyone knew it was a dog, filed it as a HUMAN
+    // occult. Retired here so the Facts window stops calling the dog human the moment
+    // the species is known; the next dossier ingest derives no human occult for a pet.
+    for (const predicate of [FactPredicate.OCCULT, FactPredicate.OCCULT_CURRENT]) {
+      for (const human of this.facts.getCurrentFacts(simId, { predicate })) {
+        if (human.id !== undefined && human.source === 'game' && human.objectText?.toUpperCase() === 'HUMAN') {
+          this.facts.invalidate(human.id, day, id);
+        }
+      }
+    }
+    // Everyone whose dossier lists this sim as a housemate now has a pet. The dossier is
+    // not re-sent for this (nothing structural changed on the mod's side), so the edge is
+    // written here; the next dossier ingest derives the same edge and keeps it.
+    for (const edge of this.facts.getFactsMentioning(simId)) {
+      if (edge.predicate !== FactPredicate.HOUSEHOLD_MEMBER || edge.source !== 'game') {
+        continue;
+      }
+      const owner = edge.subjectSimId;
+      if (this.speciesFor(owner)) {
+        continue;
+      }
+      const already = this.facts
+        .getCurrentFacts(owner, { about: simId, predicate: FactPredicate.PET })
+        .some((fact) => fact.source === 'game');
+      if (!already) {
+        this.facts.insert({
+          subjectSimId: owner,
+          predicate: FactPredicate.PET,
+          objectSimId: simId,
+          source: 'game',
+          confidence: DEFAULT_CONFIDENCE.game,
+          validFromDay: day,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    }
+    return true;
+  }
+
+  // The species the store has for a sim (DOG, CAT, ...), from any source; undefined for a
+  // person or a sim it knows nothing about.
+  speciesFor(simId: string): string | undefined {
+    if (!this.isLoaded() || !simId) {
+      return undefined;
+    }
+    try {
+      return this.facts.getCurrentFacts(simId, { predicate: FactPredicate.SPECIES }).at(-1)?.objectText;
+    } catch {
+      return undefined;
+    }
+  }
+
+  // Species for a set of ids, for the facts dialog and the renderer. Only ids with one.
+  speciesForIds(simIds: string[]): Record<string, string> {
+    const species: Record<string, string> = {};
+    for (const simId of new Set(simIds.filter(Boolean))) {
+      const found = this.speciesFor(simId);
+      if (found) {
+        species[simId] = found;
+      }
+    }
+    return species;
   }
 
   private retireContradicting(
@@ -263,6 +392,40 @@ export class SemanticMemoryService {
   }
 
   /**
+   * Change the wording of a fact somebody entered. Invalidate-never-delete still holds:
+   * the old row is retired and points at the new one, so the history shows what was
+   * believed before the edit. Returns the new row id, or undefined when the fact does not
+   * exist, belongs to another sim, or came from the game.
+   */
+  editFact(
+    subjectSimId: string,
+    factId: number,
+    changes: { objectText?: string; objectSimId?: string },
+    day?: number,
+  ): number | undefined {
+    if (!this.isLoaded()) {
+      return undefined;
+    }
+    const existing = this.facts.getFact(factId);
+    if (!existing || existing.subjectSimId !== subjectSimId || existing.source === 'game') {
+      return undefined;
+    }
+    const id = this.facts.insert({
+      subjectSimId,
+      predicate: existing.predicate,
+      objectText: changes.objectText ?? existing.objectText,
+      objectSimId: changes.objectSimId ?? existing.objectSimId,
+      source: existing.source,
+      confidence: existing.confidence,
+      validFromDay: day ?? existing.validFromDay,
+      provenanceMemoryId: existing.provenanceMemoryId,
+      createdAt: new Date().toISOString(),
+    });
+    this.facts.invalidate(factId, day, id);
+    return id;
+  }
+
+  /**
    * What this sim knows, as a <KNOWN_FACTS> block. Empty string when there is nothing to
    * say, so a caller can concatenate it unconditionally and the prompt is byte-identical
    * to today's when the store is empty.
@@ -303,10 +466,16 @@ export class SemanticMemoryService {
       // answered from nothing (live 2026-09-03).
       const lifeIds = this.lifePeopleIds(simId, selfFacts, dossier, new Set(mentioned));
       const names = { ...dossierNames(dossier ?? { sim_id: simId }) };
-      const missing = [...mentioned, ...lifeIds].filter((id) => !names[id]);
+      // Housemates are named in the household line whether or not they made a people
+      // section, and a pet's name lives in the participant table, not the dossier
+      const housemates = selfFacts
+        .filter((fact) => fact.predicate === FactPredicate.HOUSEHOLD_MEMBER || fact.predicate === FactPredicate.PET)
+        .map((fact) => fact.objectSimId as string);
+      const missing = [...mentioned, ...lifeIds, ...housemates].filter((id) => id && !names[id]);
       if (missing.length > 0) {
         Object.assign(names, this.namesFor(missing));
       }
+      const species = this.speciesForIds([simId, ...mentioned, ...lifeIds, ...housemates]);
 
       const describe = (otherId: string) => ({
         simId: otherId,
@@ -335,6 +504,7 @@ export class SemanticMemoryService {
         lifePeople,
         told,
         names,
+        species,
         // Absence is only worth stating when the game's record of this sim was actually
         // read. No dossier row means no records, which is not the same as empty ones.
         hasDossier: Boolean(dossier),

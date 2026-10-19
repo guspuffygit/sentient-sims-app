@@ -4,6 +4,7 @@ import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 import { DirectoryService } from 'main/sentient-sims/services/DirectoryService';
 import { SettingsService } from 'main/sentient-sims/services/SettingsService';
 import { SimDossier } from 'main/sentient-sims/models/SimDossier';
+import { SimStateReport } from 'main/sentient-sims/models/SimStateReport';
 import { FactPredicate } from 'main/sentient-sims/pipeline/facts/predicates';
 import { mockApiContext, mockEnvironment } from './util';
 
@@ -161,6 +162,121 @@ describe('semantic memory', () => {
       .find((f) => f.predicate === FactPredicate.SPOUSE && f.source === 'game');
     expect(game?.objectSimId).toBe('300');
     expect(game?.validToDay).toBeUndefined();
+  });
+
+  // A state report naming the household dog, the way the mod sends one: the pet is a
+  // reported sim with self.species, and the people perceive it in the room.
+  function reportWithDog(): SimStateReport {
+    return {
+      seq: 1,
+      lot: { clock: { absolute_day: 12 } },
+      sims: [
+        { sim_id: '100', sim_name: 'Travis Scott', self: { age: 'ELDER' }, sims: [] },
+        {
+          sim_id: '700',
+          sim_name: 'Bosun',
+          self: { age: 'ADULT', species: 'DOG' },
+          sims: [{ sim_id: '100', tier: 'same_room', name: 'Travis Scott' }],
+        },
+      ],
+    } as unknown as SimStateReport;
+  }
+
+  it('learns from the state report which housemate is a dog', () => {
+    ctx.semanticMemory.ingestDossier(
+      dossier({ household: { id: '900', name: 'BFF', member_ids: ['100', '200', '700'] } }),
+      { day: 10 },
+    );
+    ctx.participantRepository.updateParticipant({ id: '700', name: 'Bosun' });
+    // Before the report: Bosun is a bare housemate, and reads as a person
+    expect(ctx.semanticMemory.recall('100')).toContain('you live with Mackenzie Scott and Bosun');
+
+    expect(ctx.semanticMemory.recordSpeciesFromReport(reportWithDog())).toBe(1);
+    const species = ctx.semanticMemory.getCurrentFacts('700').find((f) => f.predicate === FactPredicate.SPECIES);
+    expect(species?.objectText).toBe('DOG');
+    expect(species?.source).toBe('game');
+    expect(species?.validFromDay).toBe(12);
+    const pet = ctx.semanticMemory.getCurrentFacts('100').find((f) => f.predicate === FactPredicate.PET);
+    expect(pet?.objectSimId).toBe('700');
+    expect(pet?.source).toBe('game');
+
+    const block = ctx.semanticMemory.recall('100');
+    expect(block).toContain('you live with Mackenzie Scott (the BFF household)');
+    expect(block).toContain('your pet: Bosun the dog');
+    // The dog is in the sim's life, labelled as a dog
+    expect(block).toContain('- Bosun (dog): your dog');
+
+    // The same report every five seconds writes nothing more
+    const before = ctx.simFactRepository.count();
+    expect(ctx.semanticMemory.recordSpeciesFromReport(reportWithDog())).toBe(0);
+    expect(ctx.simFactRepository.count()).toBe(before);
+  });
+
+  it('keeps the dog through a dossier re-send, and retires it when the dog moves out', () => {
+    const withDog = dossier({ household: { id: '900', name: 'BFF', member_ids: ['100', '200', '700'] } });
+    ctx.semanticMemory.ingestDossier(withDog, { day: 10 });
+    ctx.semanticMemory.recordSpeciesFromReport(reportWithDog());
+    // The pet's own dossier (the mod builds one for every household sim) says nothing
+    // about species; ingesting it must not retire what the report said
+    ctx.semanticMemory.ingestDossier(
+      {
+        sim_id: '700',
+        name: 'Bosun',
+        age: 'ADULT',
+        household: { id: '900', name: 'BFF', member_ids: ['100', '200', '700'] },
+      },
+      { day: 12 },
+    );
+    expect(ctx.semanticMemory.speciesFor('700')).toBe('DOG');
+    // A dog keeps no pets
+    expect(ctx.semanticMemory.getCurrentFacts('700').some((f) => f.predicate === FactPredicate.PET)).toBe(false);
+
+    const again = ctx.semanticMemory.ingestDossier(withDog, { day: 13 });
+    expect(again.skipped).toBe(true);
+    expect(ctx.semanticMemory.getCurrentFacts('100').some((f) => f.predicate === FactPredicate.PET)).toBe(true);
+
+    ctx.semanticMemory.ingestDossier(dossier(), { day: 14 });
+    const pets = ctx.semanticMemory.getHistory('100').filter((f) => f.predicate === FactPredicate.PET);
+    expect(pets).toHaveLength(1);
+    expect(pets[0].validToDay).toBe(14);
+  });
+
+  it('stops calling a pet human once its species is known', () => {
+    // The pet's dossier arrives first and files it as a HUMAN occult, like every sim
+    ctx.semanticMemory.ingestDossier(
+      { sim_id: '700', name: 'Bosun', occult: { types: ['HUMAN'], current: ['HUMAN'] } },
+      { day: 10 },
+    );
+    expect(ctx.semanticMemory.getCurrentFacts('700').some((f) => f.predicate === FactPredicate.OCCULT)).toBe(true);
+    ctx.semanticMemory.recordSpeciesFromReport(reportWithDog());
+    const current = ctx.semanticMemory.getCurrentFacts('700');
+    expect(current.some((f) => f.predicate === FactPredicate.OCCULT)).toBe(false);
+    expect(current.some((f) => f.predicate === FactPredicate.OCCULT_CURRENT)).toBe(false);
+    expect(current.find((f) => f.predicate === FactPredicate.SPECIES)?.objectText).toBe('DOG');
+    // ...and the next dossier does not bring the human occult back
+    const again = ctx.semanticMemory.ingestDossier(
+      { sim_id: '700', name: 'Bosun', occult: { types: ['HUMAN'], current: ['HUMAN'] } },
+      { day: 11 },
+    );
+    expect(again.inserted).toBe(0);
+    expect(ctx.semanticMemory.getCurrentFacts('700').some((f) => f.predicate === FactPredicate.OCCULT)).toBe(false);
+  });
+
+  it('learns a species from a perceived sim too, and ignores people', () => {
+    const report = {
+      seq: 2,
+      sims: [
+        {
+          sim_id: '100',
+          sim_name: 'Travis Scott',
+          self: { age: 'ELDER', species: 'HUMAN' },
+          sims: [{ sim_id: '800', tier: 'same_room', name: 'Mayor Whiskers', species: 'CAT' }],
+        },
+      ],
+    } as unknown as SimStateReport;
+    expect(ctx.semanticMemory.recordSpeciesFromReport(report)).toBe(1);
+    expect(ctx.semanticMemory.speciesFor('800')).toBe('CAT');
+    expect(ctx.semanticMemory.speciesFor('100')).toBeUndefined();
   });
 
   it('renders what the sim knows into a KNOWN_FACTS block', () => {
