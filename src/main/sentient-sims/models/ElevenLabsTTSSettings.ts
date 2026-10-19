@@ -41,6 +41,9 @@ export type ElevenLabsTTSSettings = {
   output_format: ElevenLabsOutputFormat;
   // Optional because settings stored by older app versions predate this field
   voice_settings?: ElevenLabsVoiceSettings;
+  // Prefix each line with an audio tag for the speaker's current mood on models that
+  // read tags (v3/v4). Undefined means on.
+  moodTags?: boolean;
 };
 
 export const defaultElevenLabsVoiceSettings: ElevenLabsVoiceSettings = {

@@ -1,6 +1,7 @@
 import { SentientSim } from '../models/SentientSim';
 import { VoiceType } from '../models/VoiceType';
 import { getSimAliases } from '../util/simAliases';
+import { moodDeliveryTag } from '../util/moodDeliveryTags';
 import { castElevenLabsVoice } from './ElevenLabsVoiceCasting';
 import { castKokoroVoice } from './KokoroVoiceCasting';
 import { DialogueLine } from './PromptFormatter';
@@ -9,7 +10,7 @@ export function castVoiceForSim(sim: SentientSim, voiceType: VoiceType): string 
   return voiceType === VoiceType.Kokoro ? castKokoroVoice(sim) : castElevenLabsVoice(sim);
 }
 
-function findSimForSpeaker(speaker: string, sims: SentientSim[]): SentientSim | undefined {
+export function findSimForSpeaker(speaker: string, sims: SentientSim[]): SentientSim | undefined {
   // A delivery label on the speaker ("Jasmine (to self)") never changes whose voice it is
   const speakerLower = speaker.replace(/\s*\([^)]*\)\s*$/, '').toLowerCase();
   // Exact full-name match beats first-name prefix, and an AMBIGUOUS prefix match casts
@@ -34,6 +35,23 @@ function findSimForSpeaker(speaker: string, sims: SentientSim[]): SentientSim | 
     return aliasLower === speakerLower || aliasLower.startsWith(`${speakerLower} `);
   });
   return alias ? sims.find((sim) => sim.sim_id === alias.simId) : undefined;
+}
+
+/**
+ * Gives each line whose speaker resolves to a sim in a tagged mood a delivery note for
+ * that mood, unless the line already carries one (the classic screenplay path lets the
+ * LLM write `(nervous)` and that wins). Only v3/v4 turn the note into an audio tag
+ * (elevenLabsLineText); every other model and provider ignores it.
+ */
+export function attachMoodDeliveryNotes(lines: DialogueLine[], sims: SentientSim[]): DialogueLine[] {
+  return lines.map((line) => {
+    if (line.deliveryNote) {
+      return line;
+    }
+    const sim = findSimForSpeaker(line.speaker, sims);
+    const tag = sim ? moodDeliveryTag(sim.moods) : undefined;
+    return tag ? { ...line, deliveryNote: tag } : line;
+  });
 }
 
 /**

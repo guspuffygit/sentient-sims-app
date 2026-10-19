@@ -8,6 +8,7 @@
 // rendered live into <KNOWN_FACTS> through the same word bands the tick prompt uses.
 
 import { SimDossier } from '../../models/SimDossier';
+import { businessText, careerBranchWords } from '../../util/factWords';
 import { FactPredicate } from './predicates';
 
 export type DerivedFact = {
@@ -22,8 +23,30 @@ export function factKey(fact: { predicate: string; objectText?: string; objectSi
   return `${fact.predicate}\u0000${fact.objectSimId ?? ''}\u0000${fact.objectText ?? ''}`;
 }
 
-export function dossierToFacts(dossier: SimDossier): DerivedFact[] {
+// 'romantic-Broken_Up' -> 'broke up', 'romantic-Divorced' -> 'divorced'; undefined when
+// the pair never ended anything
+export function exPartnerWords(bits: string[]): string | undefined {
+  if (bits.some((bit) => /^romantic-Divorced$/i.test(bit))) {
+    return 'divorced';
+  }
+  if (bits.some((bit) => /^romantic-Broken_?Up$/i.test(bit))) {
+    return 'broke up';
+  }
+  return undefined;
+}
+
+export type DossierToFactsOptions = {
+  // The species the app has learned for a sim from the state report (DOG, CAT, ...),
+  // undefined for a person or an unknown. The dossier lists a pet as a bare household
+  // member id and never says what it is, so this lookup is what turns "you live with
+  // Bosun" into "your dog Bosun".
+  speciesOf?: (simId: string) => string | undefined;
+};
+
+export function dossierToFacts(dossier: SimDossier, options: DossierToFactsOptions = {}): DerivedFact[] {
   const facts: DerivedFact[] = [];
+  const speciesOf = (simId: string) =>
+    dossier.species && simId === dossier.sim_id ? dossier.species : options.speciesOf?.(simId);
   const add = (predicate: string, objectText?: string, objectSimId?: string) => {
     if (!objectText && !objectSimId) {
       return;
@@ -37,12 +60,16 @@ export function dossierToFacts(dossier: SimDossier): DerivedFact[] {
     const p = dossier.pronouns;
     add(FactPredicate.PRONOUNS, `${p.subjective}/${p.objective}`);
   }
-  for (const occult of dossier.occult?.types ?? []) {
+  // The game files a pet's occult as HUMAN, which is the one thing a dog is not. A sim
+  // with a species gets its species instead and no human occult at all.
+  const isPet = Boolean(speciesOf(dossier.sim_id));
+  const notHumanIfPet = (occult: string) => !(isPet && occult.toUpperCase() === 'HUMAN');
+  for (const occult of (dossier.occult?.types ?? []).filter(notHumanIfPet)) {
     add(FactPredicate.OCCULT, occult);
   }
   // The form they are in right now is single-valued and can change (a vampire in human
   // form); the set of forms they ARE is multi-valued and rarely changes.
-  const current = dossier.occult?.current ?? [];
+  const current = (dossier.occult?.current ?? []).filter(notHumanIfPet);
   if (current.length > 0) {
     add(FactPredicate.OCCULT_CURRENT, current.join('+'));
   }
@@ -50,12 +77,20 @@ export function dossierToFacts(dossier: SimDossier): DerivedFact[] {
   if (dossier.death_type) {
     add(FactPredicate.DEATH_TYPE, dossier.death_type);
   }
+  // A species fact is kept in the derived set so the diff below does not retire it: it
+  // is game truth that reached the store by way of the state report, not the dossier.
+  add(FactPredicate.SPECIES, speciesOf(dossier.sim_id));
   if (dossier.household?.name || dossier.household?.id) {
     add(FactPredicate.HOUSEHOLD, dossier.household.name || dossier.household.id);
   }
   for (const memberId of dossier.household?.member_ids ?? []) {
     if (memberId !== dossier.sim_id) {
       add(FactPredicate.HOUSEHOLD_MEMBER, undefined, memberId);
+      // A housemate with a species is the sim's pet. Only a person keeps pets, so a pet's
+      // own dossier gets no pet edges to the people it lives with.
+      if (speciesOf(memberId) && !speciesOf(dossier.sim_id)) {
+        add(FactPredicate.PET, undefined, memberId);
+      }
     }
   }
 
@@ -90,6 +125,17 @@ export function dossierToFacts(dossier: SimDossier): DerivedFact[] {
   for (const trait of dossier.traits ?? []) {
     add(FactPredicate.TRAIT, trait);
   }
+  // Reward traits were sent from the first dossier build and ignored here until
+  // 2026-10-13: Alex Moyer's Business Savvy never reached her facts
+  // Every reward the mod sends. A first draft filtered these through the descriptions'
+  // `ignored` flag, which is a list of traits not worth a sentence in a scene and marks
+  // Top-Notch Infant and Inspired Explorer - rewards the player sees on the panel.
+  for (const trait of dossier.reward_traits ?? []) {
+    add(FactPredicate.REWARD_TRAIT, trait);
+  }
+  for (const phase of dossier.phases ?? []) {
+    add(FactPredicate.PHASE, phase);
+  }
   for (const fear of dossier.fears ?? []) {
     add(FactPredicate.FEAR, fear);
   }
@@ -104,14 +150,23 @@ export function dossierToFacts(dossier: SimDossier): DerivedFact[] {
   }
   for (const career of dossier.careers ?? []) {
     if (career.career) {
-      // The level is part of the claim: a promotion should read as a new fact and retire
-      // the old one, which is exactly what a diff over this string does.
-      add(FactPredicate.JOB, career.level ? `${career.career} (level ${career.level})` : career.career);
+      // The level and the branch are part of the claim: a promotion or a branch choice
+      // should read as a new fact and retire the old one, which is exactly what a diff
+      // over this string does. The starting track adds nothing, so it is left off and a
+      // sim who has not branched keeps the claim an older mod build sent.
+      const name = careerBranchWords(career.track) ? `${career.career}/${career.track as string}` : career.career;
+      add(FactPredicate.JOB, career.level ? `${name} (level ${career.level})` : name);
     }
   }
-  // Only skills a sim would actually mention. Level 1 in everything is noise.
+  for (const business of dossier.businesses ?? []) {
+    if (business.name) {
+      add(FactPredicate.BUSINESS, businessText(business.name, business.type));
+    }
+  }
+  // Every skill the mod reports (its top 8 by level). Level 1 used to be dropped as
+  // noise, but what a sim is bad at informs a reply as much as what it is good at.
   for (const skill of dossier.top_skills ?? []) {
-    if (skill.skill && (skill.level ?? 0) >= 3) {
+    if (skill.skill && (skill.level ?? 0) >= 1) {
       add(FactPredicate.SKILL, `${skill.skill} (level ${skill.level})`);
     }
   }
@@ -119,6 +174,12 @@ export function dossierToFacts(dossier: SimDossier): DerivedFact[] {
   for (const edge of dossier.relationships ?? []) {
     if (edge.has_met) {
       add(FactPredicate.KNOWS, undefined, edge.sim_id);
+    }
+    // An ex is a fact (Lillie and Jake broke up), even though the score that remains is
+    // not. The bit is the game's own record of it.
+    const ex = exPartnerWords(edge.bits ?? []);
+    if (ex) {
+      add(FactPredicate.EX_PARTNER, ex, edge.sim_id);
     }
   }
 

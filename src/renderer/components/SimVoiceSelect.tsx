@@ -39,7 +39,7 @@ export function SimVoiceSelect({ voiceId, voiceName, onChange }: SimVoiceSelectP
   // A voice the user removed from My Voices still plays, so keep it selectable
   const isMissingFromCollection = selected !== defaultVoiceValue && !cache.voices.some((v) => v.voiceId === selected);
 
-  let helperText = 'Default casts a voice automatically from the sim’s age, gender, traits and mood.';
+  let helperText = 'Default casts a voice automatically from the sim’s age, gender and traits.';
   if (error) {
     helperText = error;
   } else if (isMissingFromCollection) {

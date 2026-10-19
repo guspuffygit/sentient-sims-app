@@ -216,6 +216,45 @@ describe('sim fact routes', () => {
     expect(ctx.semanticMemory.getHistory('100').some((fact) => fact.id === id)).toBe(true);
   });
 
+  it('rewords a player fact, keeping the old wording as history', async () => {
+    const added = await send('POST', '/sims/100/facts', {
+      predicate: FactPredicate.NOTE,
+      objectText: 'Bosun is your dog',
+      source: 'player',
+    });
+    const oldId = added.body.id as unknown as number;
+    const edited = await send('PUT', `/sims/100/facts/${oldId}`, { objectText: 'Bosun is your old dog' });
+    expect(edited.status).toBe(200);
+    const newId = edited.body.id as unknown as number;
+    expect(newId).not.toBe(oldId);
+    const current = await get('/sims/100/facts');
+    const notes = (current.body.facts as unknown as { id: number; objectText?: string; source: string }[]).filter(
+      (fact) => fact.objectText?.startsWith('Bosun'),
+    );
+    expect(notes).toHaveLength(1);
+    expect(notes[0].id).toBe(newId);
+    expect(notes[0].objectText).toBe('Bosun is your old dog');
+    expect(notes[0].source).toBe('player');
+    const history = await get('/sims/100/facts?all=1');
+    const old = (history.body.facts as unknown as { id: number; validToDay?: number; supersededBy?: number }[]).find(
+      (fact) => fact.id === oldId,
+    );
+    expect(old?.validToDay).toBeDefined();
+    expect(old?.supersededBy).toBe(newId);
+    // Edited again through the retired row: refused, the live row is the one to edit
+    expect((await send('PUT', `/sims/100/facts/${oldId}`, { objectText: 'x' })).status).toBe(400);
+    expect((await send('PUT', `/sims/100/facts/${newId}`, { objectText: '   ' })).status).toBe(400);
+    expect((await send('PUT', `/sims/200/facts/${newId}`, { objectText: 'x' })).status).toBe(404);
+  });
+
+  it('refuses to edit a game fact', async () => {
+    const { body } = await get('/sims/100/facts');
+    const game = (body.facts as unknown as { id: number; source: string }[]).find((fact) => fact.source === 'game');
+    expect(game).toBeDefined();
+    const { status } = await send('PUT', `/sims/100/facts/${game?.id}`, { objectText: 'forgery' });
+    expect(status).toBe(400);
+  });
+
   it('refuses to retire a fact through another sim', async () => {
     const id = ctx.semanticMemory.addFact({
       subjectSimId: '200',
@@ -246,5 +285,55 @@ describe('sim fact routes', () => {
     const edges = body.edges as unknown as string[];
     expect(edges).toContain(FactPredicate.PARENT);
     expect(edges).not.toContain(FactPredicate.LIKES);
+    // ...and what each word means, for the dialog's tooltips
+    const help = body.help as unknown as Record<string, string>;
+    expect(help[FactPredicate.HOUSEHOLD]).toContain('Manage Worlds');
+    expect(help[FactPredicate.NOTE]).toBeTruthy();
+  });
+
+  it('accepts a free-text note the sim will always know', async () => {
+    const added = await send('POST', '/sims/100/facts', {
+      predicate: FactPredicate.NOTE,
+      objectText: 'Bosun is your dog.',
+      source: 'player',
+    });
+    expect(added.status).toBe(200);
+    expect(ctx.semanticMemory.recall('100')).toContain('- Bosun is your dog.');
+  });
+
+  it('learns a pet from a posted state report, end to end', async () => {
+    ctx.participantRepository.updateParticipant({ id: '710', name: 'Luna' });
+    ctx.semanticMemory.ingestDossier(
+      { sim_id: '110', name: 'Anker Scott', household: { id: '910', name: 'Scott', member_ids: ['110', '710'] } },
+      { day: 10 },
+    );
+    const posted = await send('POST', '/cognition/state', {
+      type: 'state_report',
+      seq: 5,
+      lot: { clock: { absolute_day: 11 } },
+      sims: [
+        { sim_id: '110', sim_name: 'Anker Scott', self: { age: 'ADULT' }, sims: [] },
+        { sim_id: '710', sim_name: 'Luna', self: { age: 'ADULT', species: 'CAT' }, sims: [] },
+      ],
+    });
+    expect(posted.status).toBe(200);
+    const { body } = await get('/sims/110/facts');
+    expect((body.species as unknown as Record<string, string>)['710']).toBe('CAT');
+    const facts = body.facts as unknown as { predicate: string; objectSimId?: string }[];
+    expect(facts.some((fact) => fact.predicate === FactPredicate.PET && fact.objectSimId === '710')).toBe(true);
+    expect(ctx.semanticMemory.recall('110')).toContain('your pet: Luna the cat');
+  });
+
+  it('says which named sims are animals', async () => {
+    ctx.participantRepository.updateParticipant({ id: '700', name: 'Bosun' });
+    ctx.semanticMemory.recordSpecies('700', 'DOG', 10);
+    ctx.semanticMemory.ingestDossier(
+      { ...dossier, household: { id: '900', name: 'Scott', member_ids: ['100', '200', '700'] } },
+      { day: 10 },
+    );
+    const { body } = await get('/sims/100/facts');
+    expect((body.species as unknown as Record<string, string>)['700']).toBe('DOG');
+    const facts = body.facts as unknown as { predicate: string; objectSimId?: string }[];
+    expect(facts.some((fact) => fact.predicate === FactPredicate.PET && fact.objectSimId === '700')).toBe(true);
   });
 });

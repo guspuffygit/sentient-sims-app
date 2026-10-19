@@ -3,6 +3,7 @@ import { ApiContext } from '../services/ApiContext';
 import { CatchErrors } from './decorators/CatchError';
 import {
   EDGE_PREDICATES,
+  FACT_PREDICATE_HELP,
   FactPredicate,
   isEdgePredicate,
   isKnownPredicate,
@@ -55,8 +56,17 @@ export class SimFactsController {
       ? this.ctx.semanticMemory.getHistory(simId)
       : this.ctx.semanticMemory.getCurrentFacts(simId, { about });
     const filtered = all && about ? facts.filter((fact) => fact.objectSimId === about) : facts;
-    const names = this.nameMap([simId, ...filtered.map((fact) => fact.objectSimId ?? '')]);
-    return res.json({ simId, names, facts: filtered });
+    const ids = [simId, ...filtered.map((fact) => fact.objectSimId ?? '')];
+    const names = this.nameMap(ids);
+    // Which of the named sims are animals, so the dialog can say "Bosun (dog)"
+    const species = this.ctx.semanticMemory.speciesForIds(ids);
+    // The live scores and bits per sim met, from the stored dossier: not facts (they
+    // drift), but the Facts window sorts the Sims met by them
+    const relationships: Record<string, { friendship?: number; romance?: number; bits?: string[] }> = {};
+    for (const edge of this.ctx.semanticMemory.readDossier(simId)?.relationships ?? []) {
+      relationships[edge.sim_id] = { friendship: edge.friendship, romance: edge.romance, bits: edge.bits };
+    }
+    return res.json({ simId, names, species, relationships, facts: filtered });
   };
 
   // GET /sims/:id/facts/path/:otherId — the chain of edges connecting two sims
@@ -165,6 +175,49 @@ export class SimFactsController {
     return res.json({ ok: true, id, fact: this.ctx.semanticMemory.getFact(id) });
   };
 
+  // PUT /sims/:id/facts/:factId — reword a fact somebody entered. The old row is retired
+  // and points at the new one; a game fact is refused, the next dossier would restore it.
+  @CatchErrors()
+  editFact = (req: Request, res: Response) => {
+    const simId = SimFactsController.param(req.params.id);
+    const factId = Number(SimFactsController.param(req.params.factId));
+    if (!Number.isFinite(factId)) {
+      return res.status(400).json({ error: 'factId must be a number' });
+    }
+    const body = req.body as { objectText?: string; objectSimId?: string };
+    const fact = this.ctx.semanticMemory.getFact(factId);
+    if (!fact || fact.subjectSimId !== simId) {
+      return res.status(404).json({ error: `no fact ${factId} for sim ${simId}` });
+    }
+    if (fact.source === 'game') {
+      return res.status(400).json({ error: 'a game fact cannot be edited, the next dossier asserts it again' });
+    }
+    if (fact.validToDay !== undefined) {
+      return res.status(400).json({ error: 'a retired fact cannot be edited; add a new one' });
+    }
+    const objectText = body.objectText?.trim();
+    if (isEdgePredicate(fact.predicate)) {
+      if (!body.objectSimId) {
+        return res.status(400).json({ error: `${fact.predicate} is a relationship and needs objectSimId` });
+      }
+    } else if (!objectText) {
+      return res.status(400).json({ error: `${fact.predicate} needs objectText` });
+    }
+    if (objectText && objectText.length > MAX_OBJECT_TEXT_LENGTH) {
+      return res.status(400).json({ error: `objectText is limited to ${MAX_OBJECT_TEXT_LENGTH} characters` });
+    }
+    const id = this.ctx.semanticMemory.editFact(
+      simId,
+      factId,
+      { objectText, objectSimId: body.objectSimId },
+      this.ctx.simStateCache.getReport()?.lot?.clock?.absolute_day,
+    );
+    if (id === undefined) {
+      return res.status(409).json({ error: 'no save loaded' });
+    }
+    return res.json({ ok: true, id, replaced: factId, fact: this.ctx.semanticMemory.getFact(id) });
+  };
+
   // DELETE /sims/:id/facts/:factId — retire, never remove. The row stays as history.
   @CatchErrors()
   retireFact = (req: Request, res: Response) => {
@@ -184,8 +237,9 @@ export class SimFactsController {
     return res.json({ ok: true, retired: factId });
   };
 
-  // GET /facts/predicates — the vocabulary, so the UI and the tools do not hardcode it
+  // GET /facts/predicates — the vocabulary and what each word means, so the UI and the
+  // tools do not hardcode either
   @CatchErrors()
   getPredicates = (_req: Request, res: Response) =>
-    res.json({ predicates: Object.values(FactPredicate), edges: [...EDGE_PREDICATES] });
+    res.json({ predicates: Object.values(FactPredicate), edges: [...EDGE_PREDICATES], help: FACT_PREDICATE_HELP });
 }
