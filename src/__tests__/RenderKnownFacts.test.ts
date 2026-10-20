@@ -100,6 +100,13 @@ describe('renderKnownFacts', () => {
     expect(render()).toContain('you live with Travis Scott, Mackenzie Scott and Ariel Scott (the BFF household)');
   });
 
+  it('says where the sim lives before anything else', () => {
+    const block = render({
+      selfFacts: [...summerFacts, fact(FactPredicate.HOME, 'Inner Circle, Mirage Park, Del Sol Valley')],
+    });
+    expect(block).toContain('About you:\n- your home is Inner Circle, Mirage Park, Del Sol Valley\n');
+  });
+
   it('falls back to the household name when the members are unknown', () => {
     const block = render({
       selfFacts: [fact(FactPredicate.HOUSEHOLD, 'BFF')],

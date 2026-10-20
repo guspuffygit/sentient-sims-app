@@ -26,6 +26,8 @@ export const FactPredicate = {
   // state report, not the dossier, which never says what kind of creature a sim is.
   SPECIES: 'species',
   HOUSEHOLD: 'household',
+  // Where the household lives: 'Inner Circle, Mirage Park, Del Sol Valley'
+  HOME: 'home',
   TRAIT: 'trait',
   // A reward trait: earned from an aspiration (Business Savvy), a childhood (Top-Notch
   // Infant) or a child's skills (Headstrong). Stays with the sim for life.
@@ -94,6 +96,7 @@ export const SINGLE_VALUED_PREDICATES: ReadonlySet<string> = new Set([
   FactPredicate.DEATH_TYPE,
   FactPredicate.SPECIES,
   FactPredicate.HOUSEHOLD,
+  FactPredicate.HOME,
   FactPredicate.ASPIRATION,
   FactPredicate.SPOUSE,
   FactPredicate.FIANCE,
@@ -122,6 +125,7 @@ export const FACT_PREDICATE_HELP: Record<FactPredicate, string> = {
   household:
     'The name of the household this Sim belongs to, as shown in Manage Worlds (for example "Calloway"). ' +
     'It is the family name on the mailbox, not a list of who lives there - see "household member" for the people.',
+  home: 'The lot the household lives on, with its neighborhood and world, like "Inner Circle, Mirage Park, Del Sol Valley".',
   trait: 'A personality trait from Create a Sim, like Cheerful or Loner.',
   reward_trait:
     "A trait the Sim earned and keeps: from an aspiration, from a well-raised childhood, or from a child's skills.",

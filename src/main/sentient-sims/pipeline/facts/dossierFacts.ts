@@ -7,6 +7,7 @@
 // or freeze a stale value into a sim's beliefs. Scores stay in sim_dossier.json and are
 // rendered live into <KNOWN_FACTS> through the same word bands the tick prompt uses.
 
+import { neighborhoodLabel } from '../../descriptions/lotNeighborhoods';
 import { SimDossier } from '../../models/SimDossier';
 import { businessText, careerBranchWords } from '../../util/factWords';
 import { FactPredicate } from './predicates';
@@ -16,6 +17,16 @@ export type DerivedFact = {
   objectText?: string;
   objectSimId?: string;
 };
+
+// 'Inner Circle, Mirage Park, Del Sol Valley': the lot, then the neighborhood from the shipped
+// lot table, else the world the mod reported
+export function homeText(home: NonNullable<SimDossier['household']>['home']): string | undefined {
+  if (!home) {
+    return undefined;
+  }
+  const where = (home.lot_id && neighborhoodLabel(home.lot_id)) || home.world;
+  return [home.name, where].filter(Boolean).join(', ') || undefined;
+}
 
 // Identity of a fact for diffing: two facts are the same claim if subject (implied),
 // predicate and object all match.
@@ -83,6 +94,7 @@ export function dossierToFacts(dossier: SimDossier, options: DossierToFactsOptio
   if (dossier.household?.name || dossier.household?.id) {
     add(FactPredicate.HOUSEHOLD, dossier.household.name || dossier.household.id);
   }
+  add(FactPredicate.HOME, homeText(dossier.household?.home));
   for (const memberId of dossier.household?.member_ids ?? []) {
     if (memberId !== dossier.sim_id) {
       add(FactPredicate.HOUSEHOLD_MEMBER, undefined, memberId);

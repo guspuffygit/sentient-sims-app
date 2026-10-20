@@ -8,6 +8,7 @@ import { VoiceType } from 'main/sentient-sims/models/VoiceType';
 import SportsEsportsOutlinedIcon from '@mui/icons-material/SportsEsportsOutlined';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import AppCard from './AppCard';
 import { EmptyState } from './components/EmptyState';
 import { MemoryEditInput } from './components/MemoryEditInput';
@@ -56,12 +57,15 @@ export default function SimsPage() {
       {
         field: 'facts',
         headerName: 'Facts',
-        width: 110,
+        width: 130,
         sortable: false,
         filterable: false,
         renderCell: (params: { row: ParticipantDTO }) => (
           <Button
             size="small"
+            variant="outlined"
+            startIcon={<FactCheckOutlinedIcon />}
+            sx={{ py: 0.25 }}
             onClick={() => {
               setFactsSim(params.row);
             }}

@@ -233,6 +233,7 @@ export function groupFacts<F extends GroupableFact>(input: {
   if (household) {
     add('Household', household, FactPredicate.HOUSEHOLD);
   }
+  add('Home', one(FactPredicate.HOME), FactPredicate.HOME);
   const job = one(FactPredicate.JOB);
   if (job) {
     // "Bodybuilder (Athletic, level 10)" once the sim has branched, "Athletic, level 3" before
@@ -350,8 +351,9 @@ export function groupFacts<F extends GroupableFact>(input: {
       }
       case FactPredicate.ASPIRATION:
       case FactPredicate.HOUSEHOLD:
-        // The aspiration and the household's name are on the summary line; the
-        // household category is who lives there
+      case FactPredicate.HOME:
+        // The aspiration, the household's name and its home are on the summary line;
+        // the household category is who lives there
         break;
       case FactPredicate.HOUSEHOLD_MEMBER:
       case FactPredicate.PET:

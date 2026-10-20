@@ -390,6 +390,11 @@ export function renderKnownFacts(input: RenderKnownFactsInput): string {
       selfLines.push(line);
     }
   }
+  // Where they live comes first: it is the most basic thing a sim knows about themselves
+  const home = input.selfFacts.find((fact) => fact.predicate === FactPredicate.HOME)?.objectText;
+  if (home) {
+    selfLines.unshift(`your home is ${home}`);
+  }
   const household = householdLine(input.selfFacts, input.names);
   if (household) {
     selfLines.push(household);

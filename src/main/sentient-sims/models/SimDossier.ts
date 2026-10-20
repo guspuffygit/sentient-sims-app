@@ -38,7 +38,14 @@ export type SimDossier = {
   // mod build yet: the app learns species from the state report and accepts it here so a
   // future dossier can carry it without an app change.
   species?: string;
-  household?: { id?: string; name?: string; member_ids?: string[] };
+  // `home` is the household's home lot: lot id (the id locations are keyed by), the lot's
+  // name and the world. Absent for a household with no home, and before mod builds of 2026-10-19.
+  household?: {
+    id?: string;
+    name?: string;
+    member_ids?: string[];
+    home?: { lot_id?: string; name?: string; world?: string };
+  };
   family?: {
     parents?: string[];
     siblings?: string[];
