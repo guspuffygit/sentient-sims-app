@@ -209,6 +209,23 @@ shown and prompted as a plain personality trait. Turn-on/turn-off sub-headings f
 (ATTRACTION_GROUPS: Way of Life, Characteristics, Fashion, Hair Color, Outfit Color, Skills, Romance Styles;
 Performer is filed under Way of Life although the files put it in SkillArchetypes). Likes keep "Types of Sims".
 
+Mapping review (2026-10-21): after Test in the interaction and animation mapping dialogs, the renderer POSTs
+/mappings/review (MappingController.reviewMapping -> MappingReviewService.review) with the token-form template, the
+three narrated samples, and the cast (name + gender); MappingReviewPanel shows the answer above the samples. The
+review informs and never blocks Save. Two layers: util/mappingLint runs without a model (unknown or out-of-range
+tokens against PromptFormatter ACTOR_WORD_PAIRS / MAPPING_SCENE_TOKENS, the dialog's own prefill, unclosed braces,
+`{actor.N.his/her}'s`, bare pronouns, pasted tuning identifiers, directive phrases, names from the loaded save via
+InteractionService.namesFromSaveIn, length), then one runOneShot on AIActionType / StageId MAPPING_REVIEW
+(`interactive`, so a failed review never raises the provider-health toast) reads the template AND the samples for
+what the checks cannot see (UNWARRANTED_CONTEXT, NON_ENGLISH) and offers a one-sentence rewrite. Flags are the
+guideline's: AI_DIRECTIVE, UNWARRANTED_CONTEXT, HARDCODED_NAME, RAW_PRONOUN, NON_ENGLISH, BROKEN, VERBOSE, each
+high/medium/low (models/MappingReview.ts). mergeFindings keeps a check over an AI finding with the same flag;
+mappingVerdict is bad on any high BROKEN/AI_DIRECTIVE/HARDCODED_NAME/RAW_PRONOUN/NON_ENGLISH, needs_work on anything
+else, good when empty. A suggestion that fails a high non-VERBOSE check, or equals the original, is dropped; the
+dialog's "Use it" converts it to sim-name form. A provider error becomes plainProviderError text with "Open Settings"
+(aiError / inSettings) and the checks still answer; an empty mapping never calls the model. The ACTOR_WORD_PAIRS table
+is the one list of gendered actor words formatAction fills. Tests: MappingLint, MappingReview.
+
 Mod log lines (2026-09-22): every `log` message from the mod is appended to Mods/sentient-sims/logs.txt under
 modsDirectory (util/format formatLog, timestamps in UTC) and, at INFO and above, mirrored into electron-log's
 main.log as `[Mod] <LEVEL> <message>` (util/modLogMirror), so the mod's game-thread stall watchdog lines

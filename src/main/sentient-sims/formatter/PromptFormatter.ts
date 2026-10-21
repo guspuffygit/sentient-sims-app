@@ -247,6 +247,34 @@ export function formatSentientSim(sentientSim: SentientSim, options?: { traitCon
   return prompt.join(' ');
 }
 
+// Every gendered word a mapping may ask for, as {actor.N.<token>}. The mapping lint reads the
+// same table, so a word added here is accepted there.
+export const ACTOR_WORD_PAIRS: ReadonlyArray<{ token: string; male: string; female: string }> = [
+  { token: 'he/she', male: 'he', female: 'she' },
+  { token: 'him/her', male: 'him', female: 'her' },
+  { token: 'his/her', male: 'his', female: 'her' },
+  { token: 'himself/herself', male: 'himself', female: 'herself' },
+  { token: 'uncle/aunt', male: 'uncle', female: 'aunt' },
+  { token: 'brother/sister', male: 'brother', female: 'sister' },
+  { token: 'husband/wife', male: 'husband', female: 'wife' },
+  { token: 'nephew/niece', male: 'nephew', female: 'niece' },
+  { token: 'son/daughter', male: 'son', female: 'daughter' },
+  { token: 'dad/mom', male: 'dad', female: 'mom' },
+  { token: 'father/mother', male: 'father', female: 'mother' },
+];
+
+// The tokens a mapping may use that are not about one actor
+export const MAPPING_SCENE_TOKENS: ReadonlyArray<string> = [
+  'participants',
+  'non_initiator_participants',
+  'location',
+  'location_type',
+  'location_description',
+  'postures',
+  'sex_category',
+  'sex_location',
+];
+
 export function formatAction(
   action: string,
   sentientSims: SentientSim[],
@@ -277,31 +305,10 @@ export function formatAction(
   for (let i = 0; i < sentientSims.length; i++) {
     formattedAction = formattedAction.replaceAll(`{actor.${i}}`, sentientSims[i].name);
 
-    if (sentientSims[i].gender === 'Male') {
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.he/she}`, 'he');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.him/her}`, 'him');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.his/her}`, 'his');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.himself/herself}`, 'himself');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.uncle/aunt}`, 'uncle');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.brother/sister}`, 'brother');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.husband/wife}`, 'husband');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.nephew/niece}`, 'nephew');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.son/daughter}`, 'son');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.dad/mom}`, 'dad');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.father/mother}`, 'father');
-    } else {
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.he/she}`, 'she');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.him/her}`, 'her');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.his/her}`, 'her');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.himself/herself}`, 'herself');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.uncle/aunt}`, 'aunt');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.brother/sister}`, 'sister');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.husband/wife}`, 'wife');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.nephew/niece}`, 'niece');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.son/daughter}`, 'daughter');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.dad/mom}`, 'mom');
-      formattedAction = formattedAction.replaceAll(`{actor.${i}.father/mother}`, 'mother');
-    }
+    const male = sentientSims[i].gender === 'Male';
+    ACTOR_WORD_PAIRS.forEach((pair) => {
+      formattedAction = formattedAction.replaceAll(`{actor.${i}.${pair.token}}`, male ? pair.male : pair.female);
+    });
 
     // Category 0 is TEASING ("foreplay"), so a falsy check left {sex_category} in the prompt
     if (typeof sexCategoryType === 'number') {

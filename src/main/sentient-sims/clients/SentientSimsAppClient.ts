@@ -6,6 +6,7 @@ import { FilesClient } from './FilesClient';
 import { OptionsClient } from './OptionsClient';
 import { InteractionClient } from './InteractionClient';
 import { LocationsClient } from './LocationsClient';
+import { MappingClient } from './MappingClient';
 import { MemoriesClient } from './MemoriesClient';
 import { ParticipantClient } from './ParticipantClient';
 import { SentientSimsAiApiClient } from './SentientSimsAiApiClient';
@@ -35,6 +36,7 @@ export class SentientSimsAppClient {
   private readonly _files: FilesClient;
   private readonly _options: OptionsClient;
   private readonly _simFacts: SimFactsClient;
+  private readonly _mapping: MappingClient;
 
   constructor(apiUrl?: string) {
     const url = apiUrl ?? appApiUrl;
@@ -56,6 +58,11 @@ export class SentientSimsAppClient {
     this._files = new FilesClient(url);
     this._options = new OptionsClient(url);
     this._simFacts = new SimFactsClient(url);
+    this._mapping = new MappingClient(url);
+  }
+
+  get mapping(): MappingClient {
+    return this._mapping;
   }
 
   get simFacts(): SimFactsClient {

@@ -55,6 +55,7 @@ export enum StageId {
   // Utilities that are not part of any Sim's mind.
   VOICE_COMMAND = 'voice_command',
   DESCRIPTION_DEFAULT = 'description_default',
+  MAPPING_REVIEW = 'mapping_review',
   CLASSIFICATION = 'classification',
   BUFF = 'buff',
   // Not a brain part — the world. Turn order, round caps, pacing. No LLM.
@@ -236,6 +237,14 @@ export const STAGES: StageDefinition[] = [
     job: 'A first description for a Sim or a lot that has none',
     legacyActionType: AIActionType.DESCRIPTION_DEFAULT,
     defaultMaxResponseTokens: 220,
+    usesLLM: true,
+  },
+  {
+    id: StageId.MAPPING_REVIEW,
+    brainName: 'Utility',
+    job: 'Feedback on a tested interaction or animation mapping',
+    legacyActionType: AIActionType.MAPPING_REVIEW,
+    defaultMaxResponseTokens: 600,
     usesLLM: true,
   },
   {
