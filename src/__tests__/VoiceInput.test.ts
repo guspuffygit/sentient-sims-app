@@ -48,6 +48,7 @@ vi.mock('@google/genai', async (importOriginal) => ({
 
 const notifyMocks = vi.hoisted(() => ({
   sendPlayerVoiceMessageToMod: vi.fn(),
+  sendPlayerVoiceDraftToMod: vi.fn(),
   sendPlayerVoiceStatusToMod: vi.fn(),
   sendPopUpNotification: vi.fn(),
   sendVoiceHotkeysToMod: vi.fn(),
@@ -164,6 +165,21 @@ describe('VoiceHotkeyService', () => {
     service.onKey({ id: 'command', down: true });
     expect(command.onDown).toHaveBeenCalledTimes(1);
     expect(talk.onDown).not.toHaveBeenCalled();
+  });
+
+  it('holds the dictate button in toggle mode too, and keeps it through disarm', () => {
+    const service = new VoiceHotkeyService();
+    const dictate = callbackSpies();
+    service.arm('F13', 'toggle', callbackSpies());
+    service.armDictate(dictate);
+    service.disarm();
+
+    service.onKey({ id: 'dictate', down: true });
+    service.onKey({ id: 'dictate', down: false });
+
+    expect(dictate.onDown).toHaveBeenCalledTimes(1);
+    expect(dictate.onUp).toHaveBeenCalledTimes(1);
+    expect(dictate.onToggle).not.toHaveBeenCalled();
   });
 
   it('does nothing once disarmed', () => {
@@ -837,6 +853,49 @@ describe('VoiceInputService', () => {
     expect(text).toBe('Hello Bella');
     expect(notifyMocks.sendPlayerVoiceMessageToMod).toHaveBeenCalledWith('Hello Bella');
     expect(windowSend).toHaveBeenCalledWith('voice-transcript', 'Hello Bella');
+  });
+
+  it('sends a dictation back as a draft, never to the sim', async () => {
+    const { service, hotkey, transcribe } = voiceInputContext();
+    notifyMocks.sendPlayerVoiceDraftToMod.mockReset();
+    transcribe.mockResolvedValue('Hello Bella');
+
+    hotkey.onKey({ id: 'dictate', down: true });
+    expect(notifyMocks.sendPlayerVoiceStatusToMod).toHaveBeenCalledWith(
+      'listening',
+      undefined,
+      expect.objectContaining({ mode: 'dictate' }),
+    );
+    hotkey.onKey({ id: 'dictate', down: false });
+    expect(notifyMocks.sendPlayerVoiceStatusToMod).toHaveBeenCalledWith('transcribing');
+
+    await service.handleAudio(bigAudio());
+    expect(notifyMocks.sendPlayerVoiceDraftToMod).toHaveBeenCalledWith('Hello Bella');
+    expect(notifyMocks.sendPlayerVoiceMessageToMod).not.toHaveBeenCalled();
+  });
+
+  it('answers a dictation too short to hear with an empty draft', async () => {
+    const { service, hotkey } = voiceInputContext();
+    notifyMocks.sendPlayerVoiceDraftToMod.mockReset();
+
+    hotkey.onKey({ id: 'dictate', down: true });
+    hotkey.onKey({ id: 'dictate', down: false });
+    await service.handleAudio(new ArrayBuffer(8));
+
+    expect(notifyMocks.sendPlayerVoiceDraftToMod).toHaveBeenCalledWith('');
+  });
+
+  it('tells the dictate button that voice input is off', () => {
+    const { hotkey } = voiceInputContext({ enabled: false });
+
+    hotkey.onKey({ id: 'dictate', down: true });
+
+    expect(notifyMocks.sendPlayerVoiceStatusToMod).toHaveBeenCalledWith(
+      'error',
+      expect.stringContaining('Voice input is off'),
+      expect.objectContaining({ mode: 'dictate' }),
+    );
+    expect(windowSend).not.toHaveBeenCalledWith('voice-record-start');
   });
 
   it('ignores a second start while already recording', () => {

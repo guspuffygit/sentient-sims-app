@@ -14,8 +14,9 @@ export type ModLogWebsocketMessage = {
 };
 
 export type VoiceKeyEvent = {
-  // 'talk' = speak to the sim; 'command' (V-8) = an order
-  id: 'talk' | 'command';
+  // 'talk' = speak to the sim; 'command' (V-8) = an order; 'dictate' = the memories
+  // window's hold-to-talk button (always hold, the transcript comes back as a draft)
+  id: 'talk' | 'command' | 'dictate';
   down: boolean;
 };
 

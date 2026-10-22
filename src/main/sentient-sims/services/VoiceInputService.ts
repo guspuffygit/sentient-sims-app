@@ -5,7 +5,12 @@ import { ApiContext } from './ApiContext';
 import { VoiceHotkeyService } from './VoiceHotkeyService';
 import { SettingsEnum } from '../models/SettingsEnum';
 import { voiceInputMaxRecordMs, voiceInputMinAudioBytes } from '../constants';
-import { sendPlayerVoiceMessageToMod, sendPlayerVoiceStatusToMod, sendPopUpNotification } from '../util/notifyRenderer';
+import {
+  sendPlayerVoiceDraftToMod,
+  sendPlayerVoiceMessageToMod,
+  sendPlayerVoiceStatusToMod,
+  sendPopUpNotification,
+} from '../util/notifyRenderer';
 import { isWebSocketConnected, setVoiceKeySink } from '../websocketServer';
 import { getAllBrowserWindows } from '../util/browserWindows';
 
@@ -26,7 +31,9 @@ function notifyAllWindows(message: string, ...args: unknown[]) {
 // Hold-to-talk orchestration: the hotkey (heard by the game overlay, relayed by the
 // mod) starts/stops a renderer MediaRecorder over IPC, the audio comes back for
 // transcription, and the transcript goes to the mod over the websocket as the active
-// sim's spoken line. The mic is only hot between record-start and record-stop.
+// sim's spoken line. The memories window's hold-to-talk button records the same way but
+// its transcript comes back as a draft the player edits and sends from the window.
+// The mic is only hot between record-start and record-stop.
 export class VoiceInputService {
   private readonly ctx: ApiContext;
 
@@ -46,10 +53,20 @@ export class VoiceInputService {
   initialize() {
     setVoiceKeySink(this.hotkey);
     this.armHotkey();
+    this.hotkey.armDictate({
+      onDown: () => {
+        this.startListening('dictate');
+      },
+      onUp: () => {
+        this.stopListening();
+      },
+      onToggle: () => {},
+    });
   }
 
   shutdown() {
     setVoiceKeySink(undefined);
+    this.hotkey.armDictate(undefined);
     this.hotkey.shutdown();
     this.reset();
   }
@@ -108,11 +125,19 @@ export class VoiceInputService {
     });
   }
 
-  // V-8: what the current capture IS — talk to the sim, or an order for the sim
-  private captureMode: 'chat' | 'command' = 'chat';
+  // V-8: what the current capture IS — talk to the sim, an order for the sim, or a
+  // draft for the memories window
+  private captureMode: 'chat' | 'command' | 'dictate' = 'chat';
 
-  startListening(mode: 'chat' | 'command' = 'chat') {
-    if (!this.ctx.settings.voiceInputEnabled || this.state !== 'idle') {
+  startListening(mode: 'chat' | 'command' | 'dictate' = 'chat') {
+    if (!this.ctx.settings.voiceInputEnabled) {
+      // The button is always on screen, so it says why nothing happened
+      if (mode === 'dictate') {
+        sendPlayerVoiceStatusToMod('error', 'Voice input is off. Turn it on in the app settings.', { mode });
+      }
+      return;
+    }
+    if (this.state !== 'idle') {
       return;
     }
     this.captureMode = mode;
@@ -151,6 +176,9 @@ export class VoiceInputService {
     try {
       // Shorter than any word: an accidental hotkey tap, dropped without ceremony
       if (audio.byteLength < voiceInputMinAudioBytes) {
+        if (this.captureMode === 'dictate') {
+          sendPlayerVoiceDraftToMod('');
+        }
         return '';
       }
       const raw = await this.ctx.transcription.transcribe(audio, mimeType);
@@ -165,8 +193,12 @@ export class VoiceInputService {
       if (text !== raw) {
         log.info(`Voice input transcript corrected: "${raw}" -> "${text}"`);
       }
-      log.info(`Voice input transcript${this.captureMode === 'command' ? ' (command)' : ''}: ${text}`);
+      log.info(`Voice input transcript${this.captureMode === 'chat' ? '' : ` (${this.captureMode})`}: ${text}`);
       notifyAllWindows('voice-transcript', text);
+      if (this.captureMode === 'dictate') {
+        sendPlayerVoiceDraftToMod(text);
+        return text;
+      }
       if (this.captureMode === 'command') {
         // V-8: an order, not talk — mapped to an offered action and dispatched; the
         // chat event is skipped entirely

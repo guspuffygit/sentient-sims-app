@@ -31,6 +31,9 @@ export class VoiceHotkeyService {
 
   private mode: 'hold' | 'toggle' = 'hold';
 
+  // The memories window's hold-to-talk button: no chord, so disarm() leaves it alone
+  private dictateCallbacks?: HotkeyCallbacks;
+
   arm(hotkey: string, mode: 'hold' | 'toggle', callbacks: HotkeyCallbacks) {
     this.talkHotkey = hotkey;
     this.mode = mode;
@@ -68,6 +71,10 @@ export class VoiceHotkeyService {
     return { talk: this.talkHotkey, command: this.commandHotkey };
   }
 
+  armDictate(callbacks: HotkeyCallbacks | undefined) {
+    this.dictateCallbacks = callbacks;
+  }
+
   // A mod that just connected has no bindings yet
   onModConnected() {
     this.publish();
@@ -77,6 +84,15 @@ export class VoiceHotkeyService {
   // auto-repeat and releases held chords when the game loses focus, so every event is
   // one press or one release.
   onKey(event: VoiceKeyEvent) {
+    // The button is pressed and released with the mouse, whatever the hotkey mode
+    if (event.id === 'dictate') {
+      if (event.down) {
+        this.dictateCallbacks?.onDown();
+      } else {
+        this.dictateCallbacks?.onUp();
+      }
+      return;
+    }
     const callbacks = event.id === 'command' ? this.commandCallbacks : this.callbacks;
     if (!callbacks) {
       return;

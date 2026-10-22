@@ -29,6 +29,9 @@ export enum ModWebsocketMessageType {
   // Recording lifecycle so the game can show "Listening…" / mic errors while the app
   // is unfocused behind the game window
   PLAYER_VOICE_STATUS = 'player_voice_status',
+  // A dictation from the memories window's hold-to-talk button: the transcript goes
+  // into the window's text box for the player to edit and send, not to the sim
+  PLAYER_VOICE_DRAFT = 'player_voice_draft',
   // The chords the game overlay should listen for on the app's behalf; sent on every
   // mod connect and voice setting change (VoiceHotkeyService)
   VOICE_HOTKEYS = 'voice_hotkeys',
@@ -165,8 +168,9 @@ export type ModPlayerVoiceStatus = ModWebsocketMessage & {
   detail?: string;
   // V-3: the persona label the player speaks as (byte-identical to the reply's speaker)
   speaker?: string;
-  // V-8: 'command' = the utterance is an order the sim will act on, not talk
-  mode?: 'chat' | 'command';
+  // V-8: 'command' = the utterance is an order the sim will act on, not talk;
+  // 'dictate' = the memories window's talk button, whose transcript comes back as a draft
+  mode?: 'chat' | 'command' | 'dictate';
 };
 
 // Chord strings as the settings spell them ("Ctrl+Space", "F13"); '' clears a binding
