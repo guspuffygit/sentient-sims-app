@@ -10,7 +10,7 @@ import {
 } from 'main/sentient-sims/formatter/PromptFormatter';
 import { WWEventType, WWInteractionEvent } from 'main/sentient-sims/models/InteractionEvents';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState } from 'react';
 import { JSX } from 'react/jsx-runtime';
 import { InteractionEventResult } from 'main/sentient-sims/models/InteractionEventResult';
 import log from 'electron-log';
@@ -18,6 +18,8 @@ import { appApiUrl } from 'main/sentient-sims/constants';
 import { CreateMemoryRequest } from 'main/sentient-sims/models/GetMemoryRequest';
 import SpaceBetweenDiv from './SpaceBetweenDiv';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
+import { MappingReview } from 'main/sentient-sims/models/MappingReview';
+import { MappingReviewPanel } from './MappingReviewPanel';
 
 type SimMappingRowProperties = {
   sentientSim: SentientSim;
@@ -200,8 +202,19 @@ export function AnimationMappingComponent() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [testResults, setTestResults] = useState<InteractionEventResult[]>([]);
+  const [review, setReview] = useState<MappingReview | undefined>();
+  const [reviewLoading, setReviewLoading] = useState(false);
+  // Which review is current, so one that lands after Edit or Cancel is dropped
+  const reviewRunRef = useRef(0);
+
+  const clearReview = () => {
+    reviewRunRef.current += 1;
+    setReview(undefined);
+    setReviewLoading(false);
+  };
 
   const onClose = () => {
+    clearReview();
     setTestResults([]);
     setEvent(null);
     setInput('');
@@ -329,6 +342,42 @@ export function AnimationMappingComponent() {
     onClose();
   }
 
+  async function runReview(action: string, results: InteractionEventResult[]) {
+    if (!event) {
+      return;
+    }
+    reviewRunRef.current += 1;
+    const run = reviewRunRef.current;
+    setReview(undefined);
+    setReviewLoading(true);
+    try {
+      const reviewed = await client.mapping.review({
+        kind: 'animation',
+        name: `${event.animation_author}: ${event.animation_name} - ${event.animation_identifier}`,
+        action,
+        samples: results.map((result) => result.text ?? ''),
+        sims: event.sentient_sims.map((sim) => ({ name: sim.name, gender: sim.gender })),
+      });
+      if (run === reviewRunRef.current) {
+        setReview(reviewed);
+      }
+    } catch (error) {
+      log.error('An error occurred reviewing the mapping:', error);
+    }
+    if (run === reviewRunRef.current) {
+      setReviewLoading(false);
+    }
+  }
+
+  function applySuggestion() {
+    if (!event || !review?.suggestion) {
+      return;
+    }
+    setInput(replaceActorStringWithSimNames(review.suggestion, getMappingStringReplacementPairs(event.sentient_sims)));
+    clearReview();
+    setTestResults([]);
+  }
+
   async function handleTest() {
     if (!event) {
       return;
@@ -356,6 +405,7 @@ export function AnimationMappingComponent() {
       ]);
 
       setTestResults(results);
+      void runReview(testOutput.actionString, results);
     } catch (error) {
       log.error('An error occurred:', error);
     }
@@ -376,6 +426,19 @@ export function AnimationMappingComponent() {
   let testOutcome: ReactNode;
   if (testResults.length > 0) {
     const items: ReactNode[] = [];
+    items.push(
+      <MappingReviewPanel
+        key="review"
+        review={review}
+        loading={reviewLoading}
+        suggestionText={
+          review?.suggestion && event
+            ? replaceActorStringWithSimNames(review.suggestion, getMappingStringReplacementPairs(event.sentient_sims))
+            : undefined
+        }
+        onUseSuggestion={applySuggestion}
+      />,
+    );
     testResults.forEach((result, index) => {
       const itemKey = `${index}-${result.text ?? ''}`;
       items.push(
@@ -497,6 +560,7 @@ export function AnimationMappingComponent() {
                     color="secondary"
                     variant="outlined"
                     onClick={() => {
+                      clearReview();
                       setTestResults([]);
                     }}
                   >

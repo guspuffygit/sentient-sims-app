@@ -103,6 +103,7 @@ export function runApi(ctx: ApiContext) {
   expressApp.post('/traits/export', ctx.controller.mapping.exportTraits);
   expressApp.get('/moods', ctx.controller.mapping.getMoods);
   expressApp.get('/moods/unmapped', ctx.controller.mapping.getUnmappedMoods);
+  expressApp.post('/mappings/review', ctx.controller.mapping.reviewMapping);
 
   expressApp.post('/interactions/save-locally', ctx.controller.interactionDescription.saveInteractionLocally);
   expressApp.delete('/interactions/local', ctx.controller.interactionDescription.deleteLocalInteraction);

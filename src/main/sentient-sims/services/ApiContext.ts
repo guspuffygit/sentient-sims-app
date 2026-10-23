@@ -42,6 +42,7 @@ import { AIService } from './AIService';
 import { AnimationsService } from './AnimationsService';
 import { DbService } from './DbService';
 import { DefaultDescriptionService } from './DefaultDescriptionService';
+import { MappingReviewService } from './MappingReviewService';
 import { DirectoryService } from './DirectoryService';
 import { ElevenLabsVoicesService } from './ElevenLabsVoicesService';
 import { EmbeddingProviderConfigService } from './EmbeddingProviderConfigService';
@@ -286,6 +287,7 @@ export class ApiContext {
   private readonly _playerConversationService: PlayerConversationService;
 
   private _defaultDescriptionService?: DefaultDescriptionService;
+  private _mappingReviewService?: MappingReviewService;
   private readonly _simStateCache: SimStateCache;
   private readonly _openAIEmbeddingService: OpenAIEmbeddingService;
   private readonly _sentientSimsEmbeddingService: SentientSimsEmbeddingService;
@@ -589,6 +591,13 @@ export class ApiContext {
       this._defaultDescriptionService = new DefaultDescriptionService(this);
     }
     return this._defaultDescriptionService;
+  }
+
+  get mappingReview(): MappingReviewService {
+    if (!this._mappingReviewService) {
+      this._mappingReviewService = new MappingReviewService(this);
+    }
+    return this._mappingReviewService;
   }
 
   get simStateCache(): SimStateCache {
