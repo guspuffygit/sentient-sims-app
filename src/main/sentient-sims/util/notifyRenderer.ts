@@ -211,6 +211,12 @@ export function notifySceneStop(payload: { sceneId: string; mode: 'soft' | 'hard
   notifyAllWindows('scene-stop', payload);
 }
 
+// The lot is going away: the renderer stops the line playing now and drops every queued
+// scene, whether or not it carries a scene id.
+export function notifySceneStopAll() {
+  notifyAllWindows('scene-stop-all');
+}
+
 // Called as each scene line starts playing so the in-game subtitle appears in step
 // with the voice playback; the preamble (the scene's driving action) heads each
 // line's subtitle section in-game

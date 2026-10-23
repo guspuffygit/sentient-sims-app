@@ -314,6 +314,18 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
     };
   }, [stop]);
 
+  // The lot is going away (the mod's zone unload): nothing from it may play over the
+  // loading screen or onto the next lot, scene id or not.
+  useEffect(() => {
+    const removeListener = window.electron.onSceneStopAll(() => {
+      log.info('[TTS] the game is leaving the lot: stopping the current line, flushing the scene queue');
+      stop();
+    });
+    return () => {
+      removeListener();
+    };
+  }, [stop]);
+
   // The game ended a conversation: a sim walked out of the room, or left the lot.
   // Soft lets the line being spoken finish and drops the rest; hard cuts it off now.
   useEffect(() => {
