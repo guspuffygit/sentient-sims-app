@@ -182,6 +182,12 @@ const electronHandler = {
 
     return () => ipcRenderer.removeListener('scene-stop', callback);
   },
+  // The lot is going away: stop whatever is playing and drop every queued scene
+  onSceneStopAll: (callback: IpcCallback) => {
+    ipcRenderer.on('scene-stop-all', callback);
+
+    return () => ipcRenderer.removeListener('scene-stop-all', callback);
+  },
   onClockState: (callback: IpcCallback) => {
     ipcRenderer.on('clock-state', callback);
 
