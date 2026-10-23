@@ -285,13 +285,21 @@ export function sendPlayerVoiceMessageToMod(text: string) {
   });
 }
 
+// The memories window's dictation: the transcript fills its text box ('' = nothing heard)
+export function sendPlayerVoiceDraftToMod(text: string) {
+  sendModNotification({
+    type: ModWebsocketMessageType.PLAYER_VOICE_DRAFT,
+    text,
+  });
+}
+
 // `speaker` (V-3) is the player's persona label; the mod echoes the heard line under it,
 // so it MUST equal the speaker the reply is generated with (playerSpeakerLabel).
 // `mode` (V-8): 'chat' = talk to the sim, 'command' = an order the sim will act on.
 export function sendPlayerVoiceStatusToMod(
   status: 'listening' | 'transcribing' | 'cancelled' | 'error',
   detail?: string,
-  extra?: { speaker?: string; mode?: 'chat' | 'command' },
+  extra?: { speaker?: string; mode?: 'chat' | 'command' | 'dictate' },
 ) {
   sendModNotification({
     type: ModWebsocketMessageType.PLAYER_VOICE_STATUS,
