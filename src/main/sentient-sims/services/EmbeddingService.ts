@@ -12,7 +12,9 @@ export const OPENAI_EMBEDDING_MODEL = openaiDefaultEmbeddingModel;
 export interface EmbeddingService {
   readonly model: string;
   isAvailable(): boolean;
-  embed(texts: string[]): Promise<(Float32Array | undefined)[]>;
+  // purpose names the caller for the Sentient Sims AI server's usage records; other
+  // providers ignore it
+  embed(texts: string[], purpose?: string): Promise<(Float32Array | undefined)[]>;
 }
 
 export function embeddingToBuffer(embedding: Float32Array): Buffer {

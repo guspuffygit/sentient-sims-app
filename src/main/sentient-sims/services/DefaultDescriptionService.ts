@@ -138,7 +138,7 @@ export class DefaultDescriptionService {
       undefined,
       AIActionType.DESCRIPTION_DEFAULT,
       undefined,
-      { stageId: StageId.DESCRIPTION_DEFAULT },
+      { stageId: StageId.DESCRIPTION_DEFAULT, purpose: 'sim_description' },
     );
     const description = cleanupAIOutput(oneShot.text).trim();
     if (description.length < 20) {
@@ -221,7 +221,7 @@ export class DefaultDescriptionService {
         undefined,
         AIActionType.DESCRIPTION_DEFAULT,
         undefined,
-        { stageId: StageId.DESCRIPTION_DEFAULT, interactive },
+        { stageId: StageId.DESCRIPTION_DEFAULT, interactive, purpose: 'location_description' },
       );
       const description = cleanupAIOutput(oneShot.text).trim();
       if (description.length < 20) {

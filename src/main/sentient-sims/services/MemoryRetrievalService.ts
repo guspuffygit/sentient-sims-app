@@ -191,7 +191,7 @@ export class MemoryRetrievalService {
     if (!queryText || !embedder.isAvailable()) {
       return undefined;
     }
-    const [vector] = await embedder.embed([queryText]);
+    const [vector] = await embedder.embed([queryText], 'embedding_memory_query');
     return vector;
   }
 }

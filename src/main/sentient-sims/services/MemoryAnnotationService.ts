@@ -93,7 +93,7 @@ export class MemoryAnnotationService {
     // vector index with 111 near-identical "X tried Y" rows. They keep an importance rating
     // (recency+importance retrieval still sees them) but never enter similarity search.
     if (text && memory.event_type !== 'outcome') {
-      const [vector] = await this.ctx.embedding.embed([text]);
+      const [vector] = await this.ctx.embedding.embed([text], 'embedding_memory');
       if (vector) {
         embedding = embeddingToBuffer(vector);
         embeddingModel = this.ctx.embedding.model;
@@ -242,7 +242,10 @@ export class MemoryAnnotationService {
       return 0;
     }
 
-    const vectors = await this.ctx.embedding.embed(textable.map((memory) => memoryRecallText(memory)));
+    const vectors = await this.ctx.embedding.embed(
+      textable.map((memory) => memoryRecallText(memory)),
+      'embedding_memory_backfill',
+    );
     if (this.ctx.db.sessionKey !== session) {
       log.debug('[Annotation] database changed during backfill batch, dropping results');
       return 0;

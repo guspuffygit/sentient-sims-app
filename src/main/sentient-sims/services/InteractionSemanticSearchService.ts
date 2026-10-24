@@ -61,7 +61,7 @@ export class InteractionSemanticSearchService {
       this.indexing = undefined;
     }
 
-    const [queryVector] = await this.ctx.embedding.embed([trimmedQuery]);
+    const [queryVector] = await this.ctx.embedding.embed([trimmedQuery], 'embedding_interaction_query');
     if (!queryVector) {
       return { available: false, results: [] };
     }
@@ -101,7 +101,10 @@ export class InteractionSemanticSearchService {
     let embeddedAny = false;
     for (let start = 0; start < missing.length; start += EMBED_BATCH_SIZE) {
       const batch = missing.slice(start, start + EMBED_BATCH_SIZE);
-      const vectors = await this.ctx.embedding.embed(batch.map(([, text]) => text));
+      const vectors = await this.ctx.embedding.embed(
+        batch.map(([, text]) => text),
+        'embedding_interaction_index',
+      );
       // A plain loop, not forEach: TypeScript does not track assignments made inside a
       // callback, so `embeddedAny` would stay narrowed to false for the check below
       for (let index = 0; index < batch.length; index += 1) {

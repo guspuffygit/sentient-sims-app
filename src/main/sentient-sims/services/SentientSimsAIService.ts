@@ -11,6 +11,7 @@ import { SimsGenerateResponse } from '../models/SimsGenerateResponse';
 import { ImageGenerationService } from './ImageGenerationService';
 import { GenerationCallControl } from './GenerationService';
 import { notifyRefreshAuth } from '../util/notifyRenderer';
+import { usageHeaders } from './UsageHeaders';
 
 const tokenRefreshWaitMs = 10000;
 const tokenRefreshPollMs = 250;
@@ -36,10 +37,11 @@ export class SentientSimsAIService extends VLLMAIService implements ImageGenerat
     return this.ctx.settings.sentientSimsAIEndpoint;
   }
 
-  getAuthorizationHeaders(): RawAxiosRequestHeaders {
+  getAuthorizationHeaders(purpose?: string): RawAxiosRequestHeaders {
     return {
       Authentication: this.ctx.settings.accessToken,
       ...this.ctx.version.getVersionHeaders(),
+      ...(purpose ? usageHeaders(this.ctx, purpose) : {}),
     };
   }
 
@@ -144,7 +146,7 @@ export class SentientSimsAIService extends VLLMAIService implements ImageGenerat
         data: { model, prompt: request.prompt },
         baseURL: this.serviceUrl(),
         timeout: imageGenerationTimeoutMs,
-        headers: this.getAuthorizationHeaders(),
+        headers: this.getAuthorizationHeaders('image'),
       }),
     );
 
@@ -174,7 +176,7 @@ export class SentientSimsAIService extends VLLMAIService implements ImageGenerat
         },
         baseURL: this.serviceUrl(),
         timeout: transcriptionTimeoutMs,
-        headers: this.getAuthorizationHeaders(),
+        headers: this.getAuthorizationHeaders('stt'),
       }),
     );
 

@@ -44,6 +44,7 @@ export function useVoiceTestPlayback() {
           'Content-Type': 'application/json',
           'Authentication': sentientSimsAITokenSetting.value,
           'sentient-sims-model': sentientSimsAITTSSettings.value.model,
+          'X-Sentient-Sims-Purpose': 'tts_voice_test',
         },
         body: JSON.stringify({
           model: sentientSimsAITTSSettings.value.model,

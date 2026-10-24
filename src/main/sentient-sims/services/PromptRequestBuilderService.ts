@@ -44,6 +44,8 @@ export type GenerationOptions = {
   maxResponseTokens?: number;
   // Air the scene as generated, without runDirectorReview
   skipReview?: boolean;
+  // Usage purpose when the event's action type does not say enough (prefetch)
+  purpose?: string;
 };
 
 const maxGroupSizeLength = 1700;

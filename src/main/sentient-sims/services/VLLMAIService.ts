@@ -32,7 +32,8 @@ export class VLLMAIService implements GenerationService {
     return this.ctx.settings.vllmEndpoint;
   }
 
-  getAuthorizationHeaders(): RawAxiosRequestHeaders {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getAuthorizationHeaders(_purpose?: string): RawAxiosRequestHeaders {
     return {
       Authorization: `Bearer ${this.ctx.settings.vllmApiKey}`,
     };
@@ -48,7 +49,7 @@ export class VLLMAIService implements GenerationService {
     return ApiType.VLLM;
   }
 
-  async getBreakStringTokens(model: string, apiType?: ApiType): Promise<number[]> {
+  async getBreakStringTokens(model: string, apiType?: ApiType, purpose?: string): Promise<number[]> {
     try {
       const modelSettings = await this.ctx.modelSettings.getModelSettings(
         model,
@@ -66,7 +67,7 @@ export class VLLMAIService implements GenerationService {
 
       const breakString = modelSettings.breakTokenString || tokenizerBreakString;
 
-      const tokenizeResponse = await this.tokenize(model, breakString);
+      const tokenizeResponse = await this.tokenize(model, breakString, purpose);
 
       this.breakStringTokens.set(model, tokenizeResponse.tokens);
 
@@ -89,8 +90,8 @@ export class VLLMAIService implements GenerationService {
     const modelSettings = await this.ctx.modelSettings.getModelSettings(model, apiType);
 
     const [messageTokens, breakTokens] = await Promise.all([
-      this.tokenizeMessages(model, request.messages, apiType),
-      this.getBreakStringTokens(model, apiType),
+      this.tokenizeMessages(model, request.messages, apiType, request.purpose),
+      this.getBreakStringTokens(model, apiType, request.purpose),
     ]);
 
     const messages = truncateMessages(modelSettings.max_tokens, breakTokens, messageTokens.tokens, request.messages);
@@ -145,7 +146,7 @@ export class VLLMAIService implements GenerationService {
       baseURL: this.serviceUrl(),
       timeout: control?.timeoutMs ?? this.ctx.settings.generationTimeoutSeconds * 1000,
       signal: control?.signal,
-      headers: this.getAuthorizationHeaders(),
+      headers: this.getAuthorizationHeaders(request.purpose),
     });
 
     const result = response.data;
@@ -163,7 +164,7 @@ export class VLLMAIService implements GenerationService {
     };
   }
 
-  async tokenize(model: string, text: string): Promise<VLLMRTokenizeResponse> {
+  async tokenize(model: string, text: string, purpose?: string): Promise<VLLMRTokenizeResponse> {
     const tokenizeRequest: VLLMTokenizeTextRequest = {
       model,
       prompt: text,
@@ -174,13 +175,18 @@ export class VLLMAIService implements GenerationService {
       method: 'POST',
       data: tokenizeRequest,
       baseURL: this.serviceUrl(),
-      headers: this.getAuthorizationHeaders(),
+      headers: this.getAuthorizationHeaders(purpose),
     });
 
     return response.data;
   }
 
-  async tokenizeMessages(model: string, messages: OpenAIMessage[], apiType?: ApiType): Promise<VLLMRTokenizeResponse> {
+  async tokenizeMessages(
+    model: string,
+    messages: OpenAIMessage[],
+    apiType?: ApiType,
+    purpose?: string,
+  ): Promise<VLLMRTokenizeResponse> {
     const modelSettings = await this.ctx.modelSettings.getModelSettings(model, apiType ?? this.modelSettingsApiType());
     const breakString = modelSettings.breakTokenString || tokenizerBreakString;
 
@@ -199,7 +205,7 @@ export class VLLMAIService implements GenerationService {
       method: 'POST',
       data: tokenizeRequest,
       baseURL: this.serviceUrl(),
-      headers: this.getAuthorizationHeaders(),
+      headers: this.getAuthorizationHeaders(purpose),
     });
 
     const result = tokenizeRequestResponse.data;

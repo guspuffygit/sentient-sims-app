@@ -4,6 +4,7 @@ import { axiosClient } from '../clients/AxiosClient';
 import { ApiType } from '../models/ApiType';
 import { ApiContext } from './ApiContext';
 import { EmbeddingService } from './EmbeddingService';
+import { usageHeaders } from './UsageHeaders';
 
 // Wire shape of the OpenAI-compatible /v1/embeddings response the Sentient Sims AI server returns.
 type EmbeddingsResponse = {
@@ -33,7 +34,7 @@ export class SentientSimsEmbeddingService implements EmbeddingService {
     return Boolean(this.ctx.settings.accessToken);
   }
 
-  async embed(texts: string[]): Promise<(Float32Array | undefined)[]> {
+  async embed(texts: string[], purpose = 'embedding'): Promise<(Float32Array | undefined)[]> {
     if (texts.length === 0 || !this.isAvailable()) {
       return texts.map(() => undefined);
     }
@@ -51,6 +52,7 @@ export class SentientSimsEmbeddingService implements EmbeddingService {
         headers: {
           Authentication: this.ctx.settings.accessToken,
           ...this.ctx.version.getVersionHeaders(),
+          ...usageHeaders(this.ctx, purpose),
         },
       });
       // Results may arrive out of order; index maps each embedding back to its input

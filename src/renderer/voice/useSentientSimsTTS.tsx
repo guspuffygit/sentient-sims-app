@@ -80,6 +80,7 @@ export function useSentientSimsTTS(): TTSHook {
               'Content-Type': 'application/json',
               'Authentication': sentientSimsAITokenSetting.value,
               'sentient-sims-model': requestBody.model,
+              'X-Sentient-Sims-Purpose': 'tts',
             },
             body: JSON.stringify(requestBody),
           });

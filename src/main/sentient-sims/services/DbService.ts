@@ -34,6 +34,13 @@ export class DbService {
     return `${this.databaseSession.sessionId}:${this.databaseSession.saveId}`;
   }
 
+  get sessionId(): string | undefined {
+    if (!this.db || !this.databaseSession) {
+      return undefined;
+    }
+    return this.databaseSession.sessionId;
+  }
+
   loadDatabase(databaseSession: DatabaseSession) {
     // The mod requests a load both on zone load and on websocket open, which at game
     // boot arrive back to back. If this exact session is already open, the second

@@ -13,6 +13,8 @@ export type OpenAICompatibleRequest = {
   // directed-scene tester to run the director and each actor on different models).
   model?: string;
   apiType?: ApiType;
+  // What the request is for, sent to the Sentient Sims AI server as X-Sentient-Sims-Purpose
+  purpose?: string;
   // Set by the request builder when the prompt did not fit its token budget and the user
   // message had to be cut. Surfaces on the AI exchange log so an oversized prompt is visible
   // instead of silently degrading the reply.
