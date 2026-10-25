@@ -4,7 +4,7 @@ import { parseJsonResponse } from 'main/sentient-sims/clients/jsonResponse';
 import { AIHealthCheckResponse, AITestStatus } from 'main/sentient-sims/models/AIHealthCheckResponse';
 import { ApiType, ApiTypeFromValue, ApiTypeName } from 'main/sentient-sims/models/ApiType';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { createContext, ReactNode, use, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, use, useEffect, useMemo, useRef, useState } from 'react';
 import useSetting, { SettingsHook } from 'renderer/hooks/useSetting';
 
 interface AISettingsContextType {
@@ -20,6 +20,8 @@ interface AISettingsContextType {
   aiStatus: AITestStatus;
   testAI: (openAIKey?: string) => Promise<void>;
 }
+
+const NO_STATUS: AITestStatus = { status: '', error: '', loading: false };
 
 const AISettingsContext = createContext<AISettingsContextType | undefined>(undefined);
 
@@ -41,8 +43,10 @@ export function AISettingsProvider({ children }: AISettingsProviderProps) {
     error: '',
     loading: false,
   });
+  const [testedApiType, setTestedApiType] = useState<ApiType>();
 
   const testAI = async (openAIKey?: string) => {
+    setTestedApiType(aiApiTypeRef.current);
     setAIStatus({
       status: '',
       error: '',
@@ -94,10 +98,17 @@ export function AISettingsProvider({ children }: AISettingsProviderProps) {
 
   const ttsApiType = ApiTypeFromValue(ttsApiTypeSetting.value);
 
+  // A result belongs to the provider it tested; it would read as the new one's otherwise
+  const aiApiTypeRef = useRef(aiApiType);
+  useEffect(() => {
+    aiApiTypeRef.current = aiApiType;
+  });
+  const shownStatus: AITestStatus = aiStatus.loading || testedApiType === aiApiType ? aiStatus : NO_STATUS;
+
   const contextValue = useMemo(() => {
     return {
       aiApiType,
-      aiStatus,
+      aiStatus: shownStatus,
       ttsApiType,
       ttsEnabled: ttsEnabledSetting.value,
       ttsVolume: ttsVolumeSetting.value,
@@ -108,7 +119,7 @@ export function AISettingsProvider({ children }: AISettingsProviderProps) {
       aiApiName: ApiTypeName(aiApiType),
       testAI,
     };
-  }, [aiApiType, aiStatus, ttsApiType, ttsEnabledSetting, ttsVolumeSetting, aiApiTypeSetting, ttsApiTypeSetting]);
+  }, [aiApiType, shownStatus, ttsApiType, ttsEnabledSetting, ttsVolumeSetting, aiApiTypeSetting, ttsApiTypeSetting]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

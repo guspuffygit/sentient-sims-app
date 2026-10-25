@@ -35,23 +35,21 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import CloseIcon from '@mui/icons-material/Close';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
-import { AIStatusComponent } from 'renderer/AIStatusComponent';
-import { ApiType, ApiTypeFromValue } from 'main/sentient-sims/models/ApiType';
+import { ApiType, ApiTypeFromValue, ApiTypeName } from 'main/sentient-sims/models/ApiType';
 import { ProviderConnectionPanel } from 'renderer/settings/ProviderConnectionPanel';
+import ApiKeyAIComponent from 'renderer/ApiKeyAIComponent';
 import { useWebsocket } from 'renderer/providers/WebsocketProvider';
 import useSetting from 'renderer/hooks/useSetting';
 import { WizardPage } from 'main/sentient-sims/models/WizardPage';
 import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import { useAuth } from 'renderer/providers/AuthProvider';
-import { useModUpdate } from 'renderer/providers/ModUpdateProvider';
+import { ModInstallOutcome, useModUpdate } from 'renderer/providers/ModUpdateProvider';
 import { appApiUrl, defaultVoiceInputHotkeyFor, patreonMembershipUrl } from 'main/sentient-sims/constants';
 import { voiceHotkeyLabel } from 'main/sentient-sims/models/VoiceHotkeyPresets';
 import { ElevenLabsKeySetup } from 'renderer/settings/voice/ElevenLabsKeySetup';
 import { VoiceHotkeyRow } from 'renderer/settings/voice/VoiceInputSettingsComponent';
-import { PatreonButton } from 'renderer/PatreonComponent';
+import { getPatreonOauthUrl, PatreonActionButton } from 'renderer/PatreonComponent';
 import { LoginComponent } from './LoginComponent';
-import { PatreonLinkingComponent } from './PatreonLinkingComponent';
-import { PatreonSubscribingComponent } from './PatreonSubscribingComponent';
 import { QuickstartList } from './QuickstartCard';
 
 const optionsClient = new SentientSimsAppClient();
@@ -136,7 +134,7 @@ function PlumbobLogo({ size }: { size: number }) {
 const WHAT_IT_DOES = [
   'Your Sims talk to each other out loud, about their lives, moods and the people around them.',
   'You can talk to them too: type, or just hold a key and speak.',
-  'They remember what happened and act on it, so every household tells its own story.',
+  'They remember what happened, so every household tells its own story.',
 ];
 
 function InitialSetupPage({ setPage }: PageProps) {
@@ -150,7 +148,7 @@ function InitialSetupPage({ setPage }: PageProps) {
             setPage(WizardPage.MOD_SETUP);
           }}
         >
-          Get Started
+          Get Started!
         </Button>
       }
     >
@@ -172,9 +170,23 @@ function InitialSetupPage({ setPage }: PageProps) {
             </ListItem>
           ))}
         </List>
-        <Typography variant="body2" sx={{ color: 'text.secondary', marginTop: 1, maxWidth: 460 }}>
-          This takes a couple of minutes: we install the mod, connect an AI, turn on voices and get you into the game.
-          If anything ever stops working, run this wizard again from the home screen or Settings.
+        <Typography
+          variant="h6"
+          sx={{
+            marginTop: 2,
+            maxWidth: 480,
+            fontWeight: 800,
+            lineHeight: 1.4,
+            letterSpacing: '-0.01em',
+            background: (theme) =>
+              `linear-gradient(90deg, ${theme.palette.success.light}, ${theme.palette.primary.light}, #f78fb3)`,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          Setup takes just a few minutes. We&apos;ll install the mod and connect their AI &quot;brain&quot;, so you can
+          start playing!
         </Typography>
       </Box>
     </WizardStep>
@@ -282,22 +294,8 @@ interface CardData {
   }[];
 }
 
+// The options shown under the Patreon card, for players not subscribing
 const cardData: CardData[] = [
-  {
-    header: 'Sentient Sims AI',
-    page: WizardPage.SENTIENT_SIMS_AI_SETUP,
-    recommended: true,
-    data: [
-      {
-        header: 'Cost',
-        points: ['Patreon, $5 monthly', 'Unlimited requests'],
-      },
-      {
-        header: 'Features',
-        points: ['No API key needed', 'Voices included', 'Uncensored, supports WickedWhims'],
-      },
-    ],
-  },
   {
     header: 'OpenAI',
     page: WizardPage.OPEN_AI_SETUP,
@@ -356,6 +354,21 @@ const cardData: CardData[] = [
   },
 ];
 
+// What the account is for, above every sign-in form in the wizard
+function AccountNote() {
+  return (
+    <Box sx={{ textAlign: 'center', marginBottom: 1.5 }}>
+      <Typography variant="body2">
+        Create your free Sentient Sims account. It&apos;s what downloads and updates the mod.
+      </Typography>
+      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        Subscribed on Patreon? You&apos;ll link Patreon in a later step. This account is just for your Sentient Sims
+        mod.
+      </Typography>
+    </Box>
+  );
+}
+
 // Installs the mod on its own once the player is signed in: a progress bar,
 // then a green "Mod installed!"
 function InstallModPage({ setPage }: PageProps) {
@@ -363,17 +376,23 @@ function InstallModPage({ setPage }: PageProps) {
   const { newVersionAvailable, busy, checkForUpdates, installUpdate } = useModUpdate();
   const { authStatus } = useAuth();
   const [attempted, setAttempted] = useState(false);
+  const [outcome, setOutcome] = useState<ModInstallOutcome>();
 
   const modVersionRef = useRef(versions.mod.version);
+  const refreshVersionsRef = useRef(versions.refresh);
   useEffect(() => {
     modVersionRef.current = versions.mod.version;
+    refreshVersionsRef.current = versions.refresh;
   });
 
   const install = async () => {
+    setAttempted(false);
+    setOutcome(undefined);
     const available = await checkForUpdates();
     if (available || modVersionRef.current === 'none') {
-      await installUpdate();
+      setOutcome(await installUpdate());
     }
+    await refreshVersionsRef.current();
     setAttempted(true);
   };
 
@@ -391,12 +410,10 @@ function InstallModPage({ setPage }: PageProps) {
   let body: ReactNode;
   if (authStatus === 'unauthenticated') {
     body = (
-      <>
-        <Typography variant="body2" align="center" sx={{ marginBottom: 2 }}>
-          Sign in or create a free account to download the mod.
-        </Typography>
-        <LoginComponent />
-      </>
+      <Box sx={{ width: '100%', maxWidth: 460, marginX: 'auto' }}>
+        <AccountNote />
+        <LoginComponent initialState="signUp" />
+      </Box>
     );
   } else if (authStatus !== 'authenticated' || busy || !attempted) {
     body = (
@@ -428,10 +445,19 @@ function InstallModPage({ setPage }: PageProps) {
       </Box>
     );
   } else {
+    const gameOpen =
+      (outcome && 'skipped' in outcome && outcome.skipped === 'game-running') ||
+      (outcome && 'error' in outcome && outcome.error.includes('Close The Sims 4'));
+    let reason = "The mod didn't install. Please try again.";
+    if (gameOpen) {
+      reason = 'The Sims 4 is open. Close the game, then try again.';
+    } else if (outcome && 'error' in outcome) {
+      reason = `The mod didn't install: ${outcome.error}`;
+    }
     body = (
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, marginTop: 2 }}>
         <Typography variant="body2" align="center">
-          The mod didn&apos;t install. Make sure The Sims 4 is closed, then try again.
+          {reason}
         </Typography>
         <Button
           variant="outlined"
@@ -447,8 +473,10 @@ function InstallModPage({ setPage }: PageProps) {
 
   return (
     <WizardStep
-      title="Installing the mod"
-      description="The app keeps the mod up to date for you from now on."
+      title={authStatus === 'unauthenticated' ? 'Your Sentient Sims account' : 'Installing the mod'}
+      description={
+        authStatus === 'unauthenticated' ? undefined : 'The app keeps the mod up to date for you from now on.'
+      }
       actions={
         <>
           <Button
@@ -462,7 +490,7 @@ function InstallModPage({ setPage }: PageProps) {
           </Button>
           <Button
             variant="contained"
-            disabled={busy}
+            disabled={busy || !installed}
             onClick={() => {
               setPage(WizardPage.ENABLE_MODS);
             }}
@@ -753,18 +781,99 @@ function ConnectModPage({ setPage, finish }: PageProps) {
   );
 }
 
-// Voices on by default: who speaks (Sentient Sims AI or ElevenLabs) and the
-// key the player holds to talk
+// Speech to text for each AI: the player's microphone uses the provider they just set up
+const TRANSCRIPTION_FOR_AI: Partial<Record<ApiType, ApiType>> = {
+  [ApiType.SentientSimsAI]: ApiType.SentientSimsAI,
+  [ApiType.OpenAI]: ApiType.OpenAI,
+  [ApiType.Gemini]: ApiType.Gemini,
+  [ApiType.OpenRouter]: ApiType.OpenRouter,
+};
+
+// Voices: a Patreon member gets Sentient Sims AI voices with nothing to set up; anyone
+// else starts with voices off and can turn them on with their own ElevenLabs key
 function VoiceSetupPage({ setPage }: PageProps) {
   const { isMac } = window.electron;
   const aiSettings = useAISettings();
-  const { userAttributes } = useAuth();
+  const { userAttributes, authStatus, loading: authLoading } = useAuth();
   const isMember = new PatreonUser(userAttributes).isMember();
   const voiceInput = useSetting<boolean>(SettingsEnum.VOICE_INPUT_ENABLED, true);
+  const voiceInputProvider = useSetting<string>(SettingsEnum.VOICE_INPUT_PROVIDER, ApiType.SentientSimsAI);
   const hotkey = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY, defaultVoiceInputHotkeyFor(isMac));
   const hotkeyMode = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY_MODE, 'hold');
   const key = voiceHotkeyLabel(hotkey.value, isMac);
   const usesElevenLabs = aiSettings.ttsApiType === ApiType.ElevenLabs;
+  const transcription = TRANSCRIPTION_FOR_AI[aiSettings.aiApiType];
+
+  // Waits for the membership and settings to load, then sets the page up once
+  const membershipKnown = authStatus === 'unauthenticated' || (!!userAttributes && !authLoading);
+  const settingsLoaded =
+    !aiSettings.aiApiTypeSetting.isLoading && !aiSettings.ttsApiTypeSetting.isLoading && !voiceInput.isLoading;
+  const preparedRef = useRef(false);
+  useEffect(() => {
+    if (preparedRef.current || !membershipKnown || !settingsLoaded) {
+      return;
+    }
+    preparedRef.current = true;
+    if (transcription) {
+      void voiceInputProvider.setSetting(transcription);
+    } else {
+      void voiceInput.setSetting(false);
+    }
+    if (isMember) {
+      return;
+    }
+    if (!usesElevenLabs) {
+      void aiSettings.ttsEnabledSetting.setSetting(false);
+    }
+  });
+
+  const setVoices = (on: boolean) => {
+    if (on && !isMember) {
+      void aiSettings.ttsApiTypeSetting.setSetting(ApiType.ElevenLabs);
+    }
+    void aiSettings.ttsEnabledSetting.setSetting(on);
+  };
+
+  let voiceDetails: ReactNode;
+  if (!aiSettings.ttsEnabled) {
+    voiceDetails = (
+      <Typography variant="body2" sx={{ color: 'text.secondary', paddingLeft: 6, marginBottom: 2 }}>
+        {isMember
+          ? "Your Sims' words show as subtitles only. You can turn voices on any time in Settings, Voice."
+          : "Your Sims' words show as subtitles. Want to hear them? Sentient Sims AI voices come with a Patreon membership, or turn this on to use your own ElevenLabs key."}
+      </Typography>
+    );
+  } else if (isMember) {
+    voiceDetails = (
+      <Box sx={{ paddingLeft: 6, marginBottom: 2 }}>
+        <Select
+          size="small"
+          value={usesElevenLabs ? ApiType.ElevenLabs : ApiType.SentientSimsAI}
+          sx={{ minWidth: 300, marginBottom: 1 }}
+          onChange={(change) => void aiSettings.ttsApiTypeSetting.setSetting(ApiTypeFromValue(change.target.value))}
+        >
+          <MenuItem value={ApiType.SentientSimsAI}>Sentient Sims AI voices (Patreon)</MenuItem>
+          <MenuItem value={ApiType.ElevenLabs}>ElevenLabs (your own key)</MenuItem>
+        </Select>
+        {usesElevenLabs ? (
+          <ElevenLabsKeySetup />
+        ) : (
+          <Typography variant="body2" sx={{ color: 'success.main' }}>
+            Voices come with your Patreon membership. Nothing else to set up.
+          </Typography>
+        )}
+      </Box>
+    );
+  } else {
+    voiceDetails = (
+      <Box sx={{ paddingLeft: 6, marginBottom: 2 }}>
+        <Typography variant="body2" sx={{ marginBottom: 1 }}>
+          Voices use your own ElevenLabs key. (Sentient Sims AI voices come with a Patreon membership.)
+        </Typography>
+        <ElevenLabsKeySetup />
+      </Box>
+    );
+  }
 
   return (
     <WizardStep
@@ -785,7 +894,7 @@ function VoiceSetupPage({ setPage }: PageProps) {
           <Button
             variant="contained"
             onClick={() => {
-              setPage(WizardPage.VOICE_SETUP);
+              setPage(WizardPage.CONNECT_MOD);
             }}
           >
             Next
@@ -798,39 +907,13 @@ function VoiceSetupPage({ setPage }: PageProps) {
         control={
           <Switch
             checked={aiSettings.ttsEnabled}
-            onChange={(change) => void aiSettings.ttsEnabledSetting.setSetting(change.target.checked)}
+            onChange={(change) => {
+              setVoices(change.target.checked);
+            }}
           />
         }
       />
-      {aiSettings.ttsEnabled ? (
-        <Box sx={{ paddingLeft: 6, marginBottom: 2 }}>
-          <Select
-            size="small"
-            value={usesElevenLabs ? ApiType.ElevenLabs : ApiType.SentientSimsAI}
-            sx={{ minWidth: 300, marginBottom: 1 }}
-            onChange={(change) => void aiSettings.ttsApiTypeSetting.setSetting(ApiTypeFromValue(change.target.value))}
-          >
-            <MenuItem value={ApiType.SentientSimsAI}>Sentient Sims AI voices (Patreon)</MenuItem>
-            <MenuItem value={ApiType.ElevenLabs}>ElevenLabs (your own key)</MenuItem>
-          </Select>
-          {usesElevenLabs ? <ElevenLabsKeySetup /> : null}
-          {!usesElevenLabs && isMember ? (
-            <Typography variant="body2" sx={{ color: 'success.main' }}>
-              Voices come with your Patreon membership. Nothing else to set up.
-            </Typography>
-          ) : null}
-          {!usesElevenLabs && !isMember ? (
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Sentient Sims AI voices come with a Patreon membership. Without one, your Sims&apos; words show as
-              subtitles.
-            </Typography>
-          ) : null}
-        </Box>
-      ) : (
-        <Typography variant="body2" sx={{ color: 'text.secondary', paddingLeft: 6, marginBottom: 2 }}>
-          Your Sims&apos; words show as subtitles only. You can turn voices on any time in Settings, Voice.
-        </Typography>
-      )}
+      {voiceDetails}
       <FormControlLabel
         label={<Typography variant="subtitle1">Talk to your Sims with your microphone</Typography>}
         control={
@@ -845,9 +928,107 @@ function VoiceSetupPage({ setPage }: PageProps) {
               ? `In the game, press ${key} to start talking and press it again when you're done.`
               : `In the game, hold ${key} while you talk and let go when you're done.`}
           </Typography>
+          {transcription ? (
+            <Typography variant="body2" sx={{ color: 'text.secondary', marginTop: 0.5 }}>
+              Your voice is turned into text by {ApiTypeName(transcription)}, the AI you just set up.
+            </Typography>
+          ) : null}
         </Box>
-      ) : null}
+      ) : (
+        <Typography variant="body2" sx={{ color: 'text.secondary', paddingLeft: 6 }}>
+          {transcription
+            ? 'You can type to your Sims instead, or turn this on any time in Settings, Voice.'
+            : 'Talking needs Sentient Sims AI, OpenAI or Gemini to turn your voice into text. You can set one up later in Settings, Voice, and type to your Sims until then.'}
+        </Typography>
+      )}
     </WizardStep>
+  );
+}
+
+const PATREON_PERKS = [
+  'Premium, fast Sentient Sims AI',
+  'Uncensored, WickedWhims supported',
+  'Unlimited use, no API keys or usage bills',
+  'Voices included',
+  'The easiest setup: subscribe, connect, play',
+];
+
+// The eye-catching Sentient Sims AI offer at the top of "Choose your AI"
+function PatreonPlug({ onSelect }: { onSelect: () => void }) {
+  return (
+    <Card
+      onClick={onSelect}
+      sx={{
+        'cursor': 'pointer',
+        'border': '1.5px solid',
+        'borderColor': 'primary.main',
+        'background': (theme) =>
+          `linear-gradient(135deg, ${theme.palette.primary.main}2e, ${theme.palette.success.main}1f 60%, transparent)`,
+        'boxShadow': (theme) => `0 6px 32px ${theme.palette.primary.main}33`,
+        'transition': 'box-shadow 120ms ease, transform 120ms ease',
+        '&:hover': {
+          boxShadow: (theme) => `0 8px 40px ${theme.palette.primary.main}55`,
+          transform: 'translateY(-2px)',
+        },
+      }}
+    >
+      <CardContent
+        sx={{
+          'display': 'flex',
+          'flexWrap': 'wrap',
+          'alignItems': 'center',
+          'gap': 3,
+          'padding': 2.5,
+          '&:last-child': { paddingBottom: 2.5 },
+        }}
+      >
+        <Box sx={{ flex: '1 1 420px', minWidth: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginBottom: 0.5 }}>
+            <PlumbobLogo size={28} />
+            <Typography variant="h6" component="div" sx={{ fontWeight: 800 }}>
+              Sentient Sims AI
+            </Typography>
+            <Chip
+              label="Recommended"
+              size="small"
+              sx={{
+                backgroundColor: (theme) => `${theme.palette.success.main}33`,
+                color: 'success.light',
+                fontWeight: 600,
+              }}
+            />
+          </Box>
+          <List
+            dense
+            disablePadding
+            sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, columnGap: 2 }}
+          >
+            {PATREON_PERKS.map((perk) => (
+              <ListItem key={perk} disablePadding disableGutters>
+                <ListItemIcon sx={{ minWidth: 26 }}>
+                  <CheckCircleOutlineIcon sx={{ fontSize: 18, color: 'success.main' }} />
+                </ListItemIcon>
+                <ListItemText primary={perk} slotProps={{ primary: { variant: 'body2' } }} />
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+        <Box sx={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, lineHeight: 1 }}>
+            $5
+            <Typography component="span" variant="body1" sx={{ color: 'text.secondary', marginLeft: 0.5 }}>
+              /month
+            </Typography>
+          </Typography>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            on Patreon
+          </Typography>
+          <Button variant="contained" size="large">
+            Set up Sentient Sims AI
+          </Button>
+        </Box>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -855,7 +1036,7 @@ function AIProviderPage({ setPage }: PageProps) {
   return (
     <WizardStep
       title="Choose your AI"
-      description="The AI writes everything your Sims say and do. Not sure what an API key is? Pick Sentient Sims AI: join on Patreon and it just works, voices included. The other choices use your own API key from another company and take a few more steps. You can change this later in Settings."
+      description="The Sentient Sims mod itself is free, and always will be! You can choose which AI model it connects with in order to make your Sims come alive."
       maxWidth={880}
       actions={
         <Button
@@ -869,6 +1050,18 @@ function AIProviderPage({ setPage }: PageProps) {
         </Button>
       }
     >
+      <PatreonPlug
+        onSelect={() => {
+          setPage(WizardPage.SENTIENT_SIMS_AI_SETUP);
+        }}
+      />
+      <Typography variant="subtitle1" align="center" sx={{ marginTop: 2.5, fontWeight: 600 }}>
+        Not ready to subscribe? Here are some other options
+      </Typography>
+      <Typography variant="body2" align="center" sx={{ color: 'text.secondary', marginBottom: 2 }}>
+        These use your own API key from another company and take a few more steps. You can change this later in
+        Settings.
+      </Typography>
       <Grid
         container
         spacing={2}
@@ -878,7 +1071,7 @@ function AIProviderPage({ setPage }: PageProps) {
         }}
       >
         {cardData.map((card) => (
-          <Grid key={card.header} size={{ xs: 12, sm: 6 }}>
+          <Grid key={card.header} size={{ xs: 12, sm: 4 }}>
             <Card
               sx={{
                 'height': '100%',
@@ -986,32 +1179,124 @@ function AIProviderPage({ setPage }: PageProps) {
 }
 
 function SentientSimsAISetupPage({ setPage }: PageProps) {
-  const { aiStatus, aiApiTypeSetting } = useAISettings();
+  const { aiApiTypeSetting } = useAISettings();
   const { setSetting: setAiApiType } = aiApiTypeSetting;
-  const { userAttributes } = useAuth();
+  const { userAttributes, refreshUserAttributes } = useAuth();
   const patreonUser = new PatreonUser(userAttributes);
+  const [connecting, setConnecting] = useState(false);
 
   useEffect(() => {
     void setAiApiType(ApiType.SentientSimsAI);
   }, [setAiApiType]);
 
   const isLoggedIn = !!userAttributes;
-  const isPatreonLinked = !!userAttributes && patreonUser.isPatreonLinked();
-  const isSubscriber = !!userAttributes && patreonUser.isPatreonLinked() && patreonUser.isSubscriber();
+  const isPatreonLinked = isLoggedIn && patreonUser.isPatreonLinked();
+  const isMember = isLoggedIn && patreonUser.isMember();
 
-  // Join, sign in, connect: the first step not done yet is the active one
-  const steps = [isSubscriber, isLoggedIn, isPatreonLinked];
+  // A subscription made in the browser reaches the account on the server's next
+  // look at Patreon, so a linked non-member is checked again until it shows
+  useEffect(() => {
+    if (!isPatreonLinked || isMember) {
+      return undefined;
+    }
+    const intervalId = setInterval(() => {
+      void refreshUserAttributes();
+    }, 10000);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [isPatreonLinked, isMember, refreshUserAttributes]);
+
+  // Sign in, subscribe, connect: the first step not done yet is the active one
+  const steps = [isLoggedIn, isMember, isPatreonLinked];
   const firstOpen = steps.findIndex((done) => !done);
   const activeStep = firstOpen === -1 ? steps.length : firstOpen;
 
-  const joinPatreon = (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 2 }}>
-      <Typography variant="body2" align="center">
-        Step 1: join Sentient Sims on Patreon ($5 a month). Already a member? Go on to step 2.
-      </Typography>
-      <PatreonButton url={patreonMembershipUrl} />
-    </Box>
+  const connectButton = (label: string, variant: 'contained' | 'outlined' = 'contained') => (
+    <PatreonActionButton
+      url={getPatreonOauthUrl()}
+      label={label}
+      variant={variant}
+      onClick={() => {
+        setConnecting(true);
+      }}
+    />
   );
+
+  const connectingNote = connecting ? (
+    <Typography variant="body2" align="center" sx={{ color: 'text.secondary', marginTop: 1 }}>
+      A browser window opened. Finish there and this page updates by itself.
+    </Typography>
+  ) : null;
+
+  let body: ReactNode;
+  if (!isLoggedIn) {
+    body = (
+      <Box sx={{ width: '100%', maxWidth: 460, marginX: 'auto' }}>
+        <AccountNote />
+        <LoginComponent initialState="signUp" />
+      </Box>
+    );
+  } else if (!isPatreonLinked) {
+    body = (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Card>
+          <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Step 1: Subscribe on Patreon
+            </Typography>
+            <Typography variant="body2" align="center" sx={{ color: 'text.secondary' }}>
+              $5 a month. Already subscribed? Skip to step 2.
+            </Typography>
+            <PatreonActionButton url={patreonMembershipUrl} label="Subscribe on Patreon" variant="outlined" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Step 2: Link your Patreon account
+            </Typography>
+            <Typography variant="body2" align="center" sx={{ color: 'text.secondary' }}>
+              Sign in on Patreon with the account you subscribed with, then press Allow.
+            </Typography>
+            {connectButton('Link my Patreon account')}
+            {connectingNote}
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  } else if (!isMember) {
+    body = (
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+        <Alert severity="warning" sx={{ width: '100%' }}>
+          A Patreon account is linked, but it has no Sentient Sims membership yet. Just subscribed? It can take a minute
+          to show, and this page checks again by itself.
+        </Alert>
+        <PatreonActionButton url={patreonMembershipUrl} label="Subscribe on Patreon" />
+        <Typography variant="body2" align="center" sx={{ color: 'text.secondary', maxWidth: 520 }}>
+          Linked the wrong Patreon account? Your browser may have signed you in as someone else. Sign out on
+          patreon.com, then link again with the account you subscribed with.
+        </Typography>
+        {connectButton('Link a different Patreon account', 'outlined')}
+        {connectingNote}
+      </Box>
+    );
+  } else {
+    body = (
+      <Box
+        sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          display: 'flex',
+          gap: 1,
+          paddingY: 6,
+        }}
+      >
+        <CheckCircleOutlineIcon sx={{ color: 'success.main' }} />
+        <Typography variant="body1">All set! Your Patreon membership is connected.</Typography>
+      </Box>
+    );
+  }
 
   return (
     <WizardStep
@@ -1022,7 +1307,6 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
           <Button
             variant="outlined"
             color="secondary"
-            loading={aiStatus.loading}
             onClick={() => {
               setPage(WizardPage.AI_PROVIDER_SETUP);
             }}
@@ -1031,7 +1315,7 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
           </Button>
           <Button
             variant="contained"
-            loading={aiStatus.loading}
+            disabled={!isMember}
             onClick={() => {
               setPage(WizardPage.VOICE_SETUP);
             }}
@@ -1042,13 +1326,6 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
       }
     >
       <Stepper activeStep={activeStep} sx={{ marginBottom: 3 }}>
-        <Step key="subscribe-patreon" completed={isSubscriber}>
-          <StepLabel>
-            <Typography variant="body2" color={isSubscriber ? 'success.main' : undefined}>
-              {isSubscriber ? 'Patreon member' : 'Join on Patreon'}
-            </Typography>
-          </StepLabel>
-        </Step>
         <Step key="login" completed={isLoggedIn}>
           <StepLabel>
             <Typography variant="body2" color={isLoggedIn ? 'success.main' : undefined}>
@@ -1056,54 +1333,129 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
             </Typography>
           </StepLabel>
         </Step>
+        <Step key="subscribe-patreon" completed={isMember}>
+          <StepLabel>
+            <Typography variant="body2" color={isMember ? 'success.main' : undefined}>
+              {isMember ? 'Patreon member' : 'Subscribe on Patreon'}
+            </Typography>
+          </StepLabel>
+        </Step>
         <Step key="link-patreon" completed={isPatreonLinked}>
           <StepLabel>
             <Typography variant="body2" color={isPatreonLinked ? 'success.main' : undefined}>
-              {isPatreonLinked ? 'Patreon connected' : 'Connect Patreon'}
+              {isPatreonLinked ? 'Patreon linked' : 'Link Patreon'}
             </Typography>
           </StepLabel>
         </Step>
       </Stepper>
-      {!isLoggedIn && (
-        <>
-          {joinPatreon}
-          <Typography variant="body2" align="center" sx={{ marginBottom: 2 }}>
-            Step 2: sign in, or create a free account.
-          </Typography>
-          <LoginComponent />
-        </>
-      )}
-      {isLoggedIn && !isPatreonLinked && (
-        <>
-          {joinPatreon}
-          <Typography variant="body2" align="center">
-            Step 2: connect the Patreon account you joined with.
-          </Typography>
-          <PatreonLinkingComponent />
-        </>
-      )}
-      {isPatreonLinked && !isSubscriber && <PatreonSubscribingComponent />}
-      {isSubscriber && (
-        <Box
-          sx={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            display: 'flex',
-            gap: 1,
-            paddingY: 6,
-          }}
-        >
-          <CheckCircleOutlineIcon sx={{ color: 'success.main' }} />
-          <Typography variant="body1">All set! Your Patreon membership is connected.</Typography>
-        </Box>
-      )}
+      {body}
+      {isLoggedIn && !isMember ? (
+        <Typography variant="caption" component="p" align="center" sx={{ color: 'text.secondary', marginTop: 2 }}>
+          Next unlocks once your membership shows here.
+        </Typography>
+      ) : null}
     </WizardStep>
   );
 }
 
+type KeyCheck = { state: 'idle' | 'testing' | 'ok' | 'failed'; message?: string };
+
+// The wizard's own connection test for one provider: refuses an empty key, waits
+// for the typed key to be saved (settings save 600 ms after the last keystroke),
+// then tests THAT provider, not whichever one the app was set to before. A result
+// counts only for the key it tested, so editing the key locks Next again
+function useKeyCheck(apiType: ApiType, key: string | undefined) {
+  const signature = `${apiType}:${key?.trim() ?? ''}`;
+  const [result, setResult] = useState<{ signature: string; check: KeyCheck }>();
+  const testedRef = useRef<string | undefined>(undefined);
+  const seqRef = useRef(0);
+
+  const run = async (force = false) => {
+    if (key !== undefined && !key.trim()) {
+      testedRef.current = undefined;
+      setResult({ signature, check: { state: 'failed', message: 'Paste your key first.' } });
+      return;
+    }
+    if (!force && testedRef.current === signature) {
+      return;
+    }
+    testedRef.current = signature;
+    seqRef.current += 1;
+    const seq = seqRef.current;
+    setResult({ signature, check: { state: 'testing' } });
+    await new Promise((resolve) => {
+      setTimeout(resolve, 800);
+    });
+    let check: KeyCheck;
+    try {
+      const params = new URLSearchParams({ apiType });
+      const response = await fetch(`${appApiUrl}/debug/test-ai?${params.toString()}`);
+      const body = (await response.json()) as { status?: string; error?: string };
+      if (response.ok && body.status && !body.error) {
+        check = { state: 'ok', message: 'Connected! Your key works.' };
+      } else {
+        check = { state: 'failed', message: body.error || body.status || 'The key did not work.' };
+      }
+    } catch (err) {
+      check = { state: 'failed', message: err instanceof Error ? err.message : String(err) };
+    }
+    if (seq === seqRef.current) {
+      setResult({ signature, check });
+    }
+  };
+
+  // A pasted or typed key tests itself once it has settled
+  const runRef = useRef(run);
+  useEffect(() => {
+    runRef.current = run;
+  });
+  useEffect(() => {
+    if (!key?.trim() || testedRef.current === signature) {
+      return undefined;
+    }
+    const timer = setTimeout(() => {
+      void runRef.current();
+    }, 1500);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [key, signature]);
+
+  const check: KeyCheck = result?.signature === signature ? result.check : { state: 'idle' };
+  return { check, run };
+}
+
+function KeyCheckStatus({ check, onTest }: { check: KeyCheck; onTest: () => void }) {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, marginTop: 1 }}>
+      {check.state === 'ok' ? (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, color: 'success.main' }}>
+          <CheckCircleOutlineIcon fontSize="small" />
+          <Typography variant="body2">{check.message}</Typography>
+        </Box>
+      ) : null}
+      {check.state === 'failed' ? (
+        <Typography variant="body2" align="center" sx={{ color: 'error.main' }}>
+          {check.message}
+        </Typography>
+      ) : null}
+      <Button loading={check.state === 'testing'} onClick={onTest} color="primary" variant="outlined">
+        Test
+      </Button>
+      {check.state !== 'ok' ? (
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          Next unlocks once the test passes.
+        </Typography>
+      ) : null}
+    </Box>
+  );
+}
+
 function OpenAISetupPage({ setPage }: PageProps) {
-  const { testAI, aiStatus, aiApiTypeSetting } = useAISettings();
+  const { aiApiTypeSetting } = useAISettings();
   const { setSetting: setAiApiType } = aiApiTypeSetting;
+  const openaiKey = useSetting<string>(SettingsEnum.OPENAI_KEY, '');
+  const { check, run } = useKeyCheck(ApiType.OpenAI, openaiKey.value);
 
   useEffect(() => {
     void setAiApiType(ApiType.OpenAI);
@@ -1119,7 +1471,6 @@ function OpenAISetupPage({ setPage }: PageProps) {
           <Button
             variant="outlined"
             color="secondary"
-            loading={aiStatus.loading}
             onClick={() => {
               setPage(WizardPage.AI_PROVIDER_SETUP);
             }}
@@ -1128,7 +1479,7 @@ function OpenAISetupPage({ setPage }: PageProps) {
           </Button>
           <Button
             variant="contained"
-            loading={aiStatus.loading}
+            disabled={check.state !== 'ok'}
             onClick={() => {
               setPage(WizardPage.VOICE_SETUP);
             }}
@@ -1193,37 +1544,18 @@ function OpenAISetupPage({ setPage }: PageProps) {
         <ListItem sx={{ display: 'list-item', mb: 2 }}>
           <ListItemText primary="Click Copy to copy the API key, then paste it in the box here:" />
         </ListItem>
-        <ProviderConnectionPanel apiType={ApiType.OpenAI} hideEndpoint />
+        <ApiKeyAIComponent setting={SettingsEnum.OPENAI_KEY} aiName="OpenAI" onBlur={() => void run()} />
       </List>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'column',
-          gap: 1,
-          marginTop: 1,
-        }}
-      >
-        <AIStatusComponent />
-        <Button
-          loading={aiStatus.loading}
-          onClick={() => {
-            void testAI();
-          }}
-          color="primary"
-          variant="outlined"
-        >
-          Test
-        </Button>
-      </Box>
+      <KeyCheckStatus check={check} onTest={() => void run(true)} />
     </WizardStep>
   );
 }
 
 function GeminiSetupPage({ setPage }: PageProps) {
-  const { testAI, aiStatus, aiApiTypeSetting } = useAISettings();
+  const { aiApiTypeSetting } = useAISettings();
   const { setSetting: setAiApiType } = aiApiTypeSetting;
+  const geminiKeys = useSetting<string>(SettingsEnum.GEMINI_KEYS, '');
+  const { check, run } = useKeyCheck(ApiType.Gemini, geminiKeys.value);
 
   useEffect(() => {
     void setAiApiType(ApiType.Gemini);
@@ -1247,6 +1579,7 @@ function GeminiSetupPage({ setPage }: PageProps) {
           </Button>
           <Button
             variant="contained"
+            disabled={check.state !== 'ok'}
             onClick={() => {
               setPage(WizardPage.VOICE_SETUP);
             }}
@@ -1277,39 +1610,19 @@ function GeminiSetupPage({ setPage }: PageProps) {
         <ListItem sx={{ display: 'list-item', mb: 2 }}>
           <ListItemText primary="Copy the API key, then paste it in the box here:" />
         </ListItem>
-        <ProviderConnectionPanel apiType={ApiType.Gemini} hideEndpoint />
+        <ApiKeyAIComponent setting={SettingsEnum.GEMINI_KEYS} aiName="Gemini" onBlur={() => void run()} />
       </List>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'column',
-          gap: 1,
-          marginTop: 1,
-        }}
-      >
-        <AIStatusComponent />
-        <Button
-          loading={aiStatus.loading}
-          onClick={() => {
-            void testAI();
-          }}
-          color="primary"
-          variant="outlined"
-        >
-          Test
-        </Button>
-      </Box>
+      <KeyCheckStatus check={check} onTest={() => void run(true)} />
     </WizardStep>
   );
 }
 
 function SelfHostedSetupPage({ setPage }: PageProps) {
-  const { testAI, aiStatus, aiApiTypeSetting } = useAISettings();
+  const { aiApiTypeSetting } = useAISettings();
   const { setSetting: setAiApiType } = aiApiTypeSetting;
   const selected = ApiTypeFromValue(aiApiTypeSetting.value);
   const selfHostedType = selected === ApiType.VLLM ? ApiType.VLLM : ApiType.KoboldAI;
+  const { check, run } = useKeyCheck(selfHostedType, undefined);
 
   // Visiting this page selects a self hosted provider, mirroring how the
   // other provider setup pages select theirs on mount
@@ -1361,6 +1674,7 @@ function SelfHostedSetupPage({ setPage }: PageProps) {
           </Button>
           <Button
             variant="contained"
+            disabled={check.state !== 'ok'}
             onClick={() => {
               setPage(WizardPage.VOICE_SETUP);
             }}
@@ -1383,28 +1697,7 @@ function SelfHostedSetupPage({ setPage }: PageProps) {
         <MenuItem value={ApiType.VLLM}>VLLM</MenuItem>
       </Select>
       <ProviderConnectionPanel apiType={selfHostedType} />
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'column',
-          gap: 1,
-          marginTop: 1,
-        }}
-      >
-        <AIStatusComponent />
-        <Button
-          loading={aiStatus.loading}
-          onClick={() => {
-            void testAI();
-          }}
-          color="primary"
-          variant="outlined"
-        >
-          Test
-        </Button>
-      </Box>
+      <KeyCheckStatus check={check} onTest={() => void run(true)} />
     </WizardStep>
   );
 }

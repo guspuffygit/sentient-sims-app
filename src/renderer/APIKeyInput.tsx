@@ -13,9 +13,10 @@ interface ModalProps {
   aiName: string;
 
   optional?: boolean;
+  onBlur?: () => void;
 }
 
-export default function APIKeyInput({ setting, aiName, optional = false }: ModalProps) {
+export default function APIKeyInput({ setting, aiName, optional = false, onBlur }: ModalProps) {
   const [keyVisibility, setKeyVisibility] = useState(false);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,6 +49,7 @@ export default function APIKeyInput({ setting, aiName, optional = false }: Modal
       label={label}
       value={setting.value}
       onChange={handleInputChange}
+      onBlur={onBlur}
       size="small"
       fullWidth
       required={!optional}

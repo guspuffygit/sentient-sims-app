@@ -9,7 +9,7 @@ import {
   SignUpInput,
 } from 'aws-amplify/auth';
 import { useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Divider, Typography } from '@mui/material';
 import { GoogleLoginButton } from './GoogleLoginButton';
 
 // Usernames should not depend on case. New accounts are made lowercase; a
@@ -39,7 +39,12 @@ const authServices = {
     withUsernameCase(input.username, (username) => resetPassword({ ...input, username })),
 };
 
-export function LoginComponent() {
+type LoginComponentProps = {
+  // A new player has no account yet, so the setup wizard opens on Create Account
+  initialState?: 'signIn' | 'signUp';
+};
+
+export function LoginComponent({ initialState = 'signIn' }: LoginComponentProps) {
   const [authInProgress, setAuthInProgress] = useState<boolean>(false);
 
   const onClick = () => {
@@ -79,8 +84,11 @@ export function LoginComponent() {
 
   const loginAuthenticator = (
     <>
-      <Authenticator socialProviders={[]} services={authServices} />
       <GoogleLoginButton onClick={onClick} />
+      <Divider flexItem sx={{ color: 'text.secondary', fontSize: 13 }}>
+        or
+      </Divider>
+      <Authenticator initialState={initialState} socialProviders={[]} services={authServices} />
     </>
   );
 
@@ -92,7 +100,7 @@ export function LoginComponent() {
         alignItems: 'center',
         display: 'flex',
         flexDirection: 'column',
-        gap: 2,
+        gap: 1.5,
       }}
     >
       {authInProgress ? cancelGoogleAuthProgress : loginAuthenticator}

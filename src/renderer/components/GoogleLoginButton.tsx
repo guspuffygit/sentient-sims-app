@@ -62,11 +62,10 @@ export function GoogleLoginButton({ onClick }: GoogleLoginButtonProps) {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 3,
       }}
     >
       <GoogleButton startIcon={<AssetsImage name="google-logo.png" width={25} height={25} />} onClick={onClick}>
-        Sign in with Google
+        Continue with Google
       </GoogleButton>
     </Box>
   );

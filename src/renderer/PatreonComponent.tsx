@@ -33,6 +33,38 @@ export function PatreonButton({ url, onClick }: PatreonButtonProps) {
   );
 }
 
+interface PatreonActionButtonProps extends PatreonButtonProps {
+  label: string;
+  variant?: 'contained' | 'outlined';
+}
+
+// A Patreon button that says what it does, for pages with more than one
+export function PatreonActionButton({ url, onClick, label, variant = 'contained' }: PatreonActionButtonProps) {
+  const patreonCoral = '#FF424D';
+  return (
+    <Button
+      href={url}
+      target="_blank"
+      onClick={onClick}
+      variant={variant}
+      size="large"
+      startIcon={
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+          <circle cx="15" cy="9.5" r="7.5" />
+          <rect x="2" y="2" width="4" height="20" />
+        </svg>
+      }
+      sx={
+        variant === 'contained'
+          ? { 'backgroundColor': patreonCoral, 'color': '#ffffff', '&:hover': { backgroundColor: '#e63a44' } }
+          : { 'borderColor': patreonCoral, 'color': patreonCoral, '&:hover': { borderColor: patreonCoral } }
+      }
+    >
+      {label}
+    </Button>
+  );
+}
+
 function CenteredBox({ children }: PropsWithChildren) {
   return (
     <Box
