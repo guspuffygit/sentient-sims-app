@@ -16,6 +16,9 @@ import { SentientSim } from '../models/SentientSim';
 import { VoiceType } from '../models/VoiceType';
 import { consumePacedScene } from './pacedScenes';
 import { plainProviderError } from './providerErrorWords';
+import type { SettingsService } from '../services/SettingsService';
+import { ApiTypeName } from '../models/ApiType';
+import { SettingsEnum } from '../models/SettingsEnum';
 
 function notifyAllWindows(message: string, ...args: unknown[]) {
   getAllBrowserWindows().forEach((wnd) => {
@@ -46,6 +49,23 @@ export function notifyProviderHealth(health: { down: boolean; failures: number; 
       },
     });
   }
+}
+
+// A player with voices off may never learn their Sims can talk: one popup in
+// the app and one notification in the game say where to turn them on
+export function notifyVoicesOff() {
+  log.info('Voices are off while a scene airs; telling the player once');
+  sendModNotification({
+    type: ModWebsocketMessageType.NOTIFICATION,
+    notification: {
+      title: 'Your Sims can talk!',
+      message: 'Voices are off, so you only see their words. Turn them on in the Sentient Sims app: Settings, Voice.',
+      message_type: ModWebsocketNotificationType.MESSAGE,
+    },
+  });
+  sendPopUpNotification(
+    "Your Sims can talk! Voices are off right now, so you only see their words in the game. Turn them on in Settings, Voice tab, 'Enable Text to Speech'. Sentient Sims AI voices come with a Patreon membership, or you can use your own ElevenLabs key.",
+  );
 }
 
 // V-1: game clock -> renderer playback clock
@@ -342,6 +362,35 @@ export function playTTS(text: string, sims?: SentientSim[], options?: PlayTTSVoi
   }
 
   playTTSLines(lines, sims, options);
+}
+
+// The settings that change what the in-game status tab says about the app
+export const APP_STATUS_SETTINGS: string[] = [
+  SettingsEnum.TTS_ENABLED,
+  SettingsEnum.TTS_API_TYPE,
+  SettingsEnum.VOICE_INPUT_ENABLED,
+  SettingsEnum.VOICE_INPUT_HOTKEY_MODE,
+  SettingsEnum.AI_API_TYPE,
+  SettingsEnum.AI_PROVIDER_CONFIGS,
+  SettingsEnum.DEFAULT_AI_PROVIDER_CONFIG_ID,
+];
+
+// Runs inside the mod's connect handler, so a failure is logged, never thrown
+export function sendAppStatusToMod(settings: SettingsService) {
+  try {
+    const configs = settings.aiProviderConfigs;
+    const config = configs.find((c) => c.id === settings.defaultAiProviderConfigId) ?? configs.at(0);
+    sendModNotification({
+      type: ModWebsocketMessageType.APP_STATUS,
+      tts_enabled: settings.ttsEnabled,
+      tts_provider: ApiTypeName(settings.ttsApiType),
+      voice_input_enabled: settings.voiceInputEnabled,
+      voice_input_mode: settings.voiceInputHotkeyMode,
+      ai_provider: ApiTypeName(config ? config.apiType : settings.aiApiType),
+    });
+  } catch (err) {
+    log.error('Unable to send the app status to the mod', err);
+  }
 }
 
 export function sendPopUpNotification(message?: string) {

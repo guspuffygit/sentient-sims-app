@@ -114,6 +114,26 @@ const theme = createTheme({
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(255, 255, 255, 0.18) transparent',
         },
+
+        // Native fields draw light-on-dark everywhere: plain inputs, the login
+        // form, dropdown lists, and text the browser autofills
+        ':root': {
+          colorScheme: 'dark',
+        },
+        'input, textarea, select': {
+          color: colors.textPrimary,
+          caretColor: colors.textPrimary,
+        },
+        'input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, textarea:-webkit-autofill, select:-webkit-autofill':
+          {
+            WebkitTextFillColor: colors.textPrimary,
+            WebkitBoxShadow: `0 0 0 1000px ${colors.bgPaper} inset`,
+            caretColor: colors.textPrimary,
+          },
+        'input::placeholder, textarea::placeholder': {
+          color: colors.textDisabled,
+          opacity: 1,
+        },
       },
     },
     MuiButton: {

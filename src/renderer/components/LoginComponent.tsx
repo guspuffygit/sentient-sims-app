@@ -1,8 +1,43 @@
 import { Authenticator, Button } from '@aws-amplify/ui-react';
-import { signInWithRedirect } from 'aws-amplify/auth';
+import {
+  resetPassword,
+  ResetPasswordInput,
+  signIn,
+  SignInInput,
+  signInWithRedirect,
+  signUp,
+  SignUpInput,
+} from 'aws-amplify/auth';
 import { useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { GoogleLoginButton } from './GoogleLoginButton';
+
+// Usernames should not depend on case. New accounts are made lowercase; a
+// sign-in or reset tries the name as typed (older mixed-case accounts) and
+// then lowercase, so either spelling finds the account.
+function isUserNotFound(err: unknown): boolean {
+  return err instanceof Error && err.name === 'UserNotFoundException';
+}
+
+async function withUsernameCase<T>(username: string, attempt: (name: string) => Promise<T>): Promise<T> {
+  const typed = username.trim();
+  const lower = typed.toLowerCase();
+  try {
+    return await attempt(typed);
+  } catch (err) {
+    if (lower !== typed && isUserNotFound(err)) {
+      return attempt(lower);
+    }
+    throw err;
+  }
+}
+
+const authServices = {
+  handleSignIn: (input: SignInInput) => withUsernameCase(input.username, (username) => signIn({ ...input, username })),
+  handleSignUp: (input: SignUpInput) => signUp({ ...input, username: input.username.trim().toLowerCase() }),
+  handleForgotPassword: (input: ResetPasswordInput) =>
+    withUsernameCase(input.username, (username) => resetPassword({ ...input, username })),
+};
 
 export function LoginComponent() {
   const [authInProgress, setAuthInProgress] = useState<boolean>(false);
@@ -44,7 +79,7 @@ export function LoginComponent() {
 
   const loginAuthenticator = (
     <>
-      <Authenticator socialProviders={[]} />
+      <Authenticator socialProviders={[]} services={authServices} />
       <GoogleLoginButton onClick={onClick} />
     </>
   );

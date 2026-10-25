@@ -25,7 +25,6 @@ import {
 } from 'main/sentient-sims/models/ElevenLabsTTSSettings';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { useMemo } from 'react';
-import APIKeyInput from 'renderer/APIKeyInput';
 import { TestVoiceButton } from 'renderer/components/VoiceTestButton';
 import useSetting from 'renderer/hooks/useSetting';
 import handleOpenExternalLink from 'renderer/hooks/handleOpenExternalLink';
@@ -33,6 +32,7 @@ import { useTTS } from 'renderer/providers/AudioContextProvider';
 import { ElevenLabsVoiceInfo } from 'main/sentient-sims/clients/ElevenLabsVoiceRequest';
 import { isElevenLabsV4, supportsAudioTags } from 'main/sentient-sims/clients/ElevenLabsTTSRequest';
 import { useElevenLabsVoiceInfo } from 'renderer/voice/useElevenLabsVoiceInfo';
+import { ElevenLabsKeySetup } from './ElevenLabsKeySetup';
 
 const voiceLibraryUrl = 'https://elevenlabs.io/app/voice-library';
 
@@ -87,8 +87,6 @@ export function ElevenLabsVoiceSettingsComponent() {
     SettingsEnum.ELEVENLABS_TTS_SETTINGS,
     defaultElevenLabsTTSSettings,
   );
-
-  const elevenlabsKeySetting = useSetting<string>(SettingsEnum.ELEVENLABS_KEY, '');
 
   const modelMenuItems = useMemo(() => {
     return Object.values(ElevenLabsSpeechModel).map((model) => (
@@ -228,7 +226,7 @@ export function ElevenLabsVoiceSettingsComponent() {
         </FormHelperText>
       </Box>
       <Divider sx={{ marginBottom: 2.5 }} />
-      <APIKeyInput setting={elevenlabsKeySetting} aiName="ElevenLabs" />
+      <ElevenLabsKeySetup />
     </Box>
   );
 }

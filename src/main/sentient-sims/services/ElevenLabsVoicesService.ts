@@ -1,6 +1,7 @@
 import log from 'electron-log';
 import { ElevenLabsVoicesCache, toElevenLabsVoices } from '../models/ElevenLabsVoice';
 import { ApiContext } from './ApiContext';
+import { elevenLabsErrorMessage } from '../clients/ElevenLabsError';
 
 export class ElevenLabsKeyNotSetError extends Error {
   constructor() {
@@ -40,7 +41,8 @@ export class ElevenLabsVoicesService {
 
     if (!response.ok) {
       const body = await response.text().catch(() => '');
-      throw new Error(`Unable to load ElevenLabs voices: ${response.status} ${body.slice(0, 500)}`);
+      log.warn(`Unable to load ElevenLabs voices: ${response.status} ${body.slice(0, 500)}`);
+      throw new Error(elevenLabsErrorMessage(response.status, body));
     }
 
     const voices = toElevenLabsVoices(await response.json());

@@ -2,7 +2,12 @@ import { IpcMainEvent, clipboard, dialog, ipcMain, shell } from 'electron';
 import path from 'path';
 import log from 'electron-log';
 import { SettingsEnum } from './models/SettingsEnum';
-import { notifySettingChanged, sendSceneLineEndedToMod, sendSceneLineToMod } from './util/notifyRenderer';
+import {
+  notifySettingChanged,
+  notifyVoicesOff,
+  sendSceneLineEndedToMod,
+  sendSceneLineToMod,
+} from './util/notifyRenderer';
 import { unmarkScenePaced } from './util/pacedScenes';
 import { redactSettingValue } from './util/redactSetting';
 import { DialogueLine } from './formatter/PromptFormatter';
@@ -80,6 +85,17 @@ export default function ipcHandlers(ctx: ApiContext, voiceInput: VoiceInputServi
       // Counted so a conversation cut short can trim its memory row to what was heard
       ctx.scenePlayback.lineShown(line.sceneId);
       sendSceneLineToMod(line);
+      // The first spoken line that aired silent because voices are off tells the
+      // player their Sims can talk; finishing the setup wizard re-arms it
+      if (
+        line.voiced === false &&
+        line.speaker &&
+        !ctx.settings.ttsEnabled &&
+        !ctx.settings.get(SettingsEnum.VOICES_OFF_NUDGE_SHOWN)
+      ) {
+        ctx.settings.set(SettingsEnum.VOICES_OFF_NUDGE_SHOWN, true);
+        notifyVoicesOff();
+      }
     },
   );
   // ...and as each one's audio finishes, so the speaker's mouth stops with the voice

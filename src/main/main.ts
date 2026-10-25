@@ -22,7 +22,7 @@ import { DirectoryService } from './sentient-sims/services/DirectoryService';
 import { appApiPort } from './sentient-sims/constants';
 import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { disableDebugLogging, enableDebugLogging } from './sentient-sims/util/debugLog';
-import { notifySettingChanged } from './sentient-sims/util/notifyRenderer';
+import { APP_STATUS_SETTINGS, notifySettingChanged, sendAppStatusToMod } from './sentient-sims/util/notifyRenderer';
 import { publishClockState } from './sentient-sims/websocketServer';
 import { setSimAliases } from './sentient-sims/util/simAliases';
 import { SettingsEnum } from './sentient-sims/models/SettingsEnum';
@@ -176,7 +176,10 @@ const startServices = () => {
   const settingsService = new SettingsService();
   settingsService.runMigrations();
 
-  const directoryService = new DirectoryService(settingsService);
+  const directoryService = new DirectoryService(settingsService, app.getPath('documents'));
+  // Finds the game's Mods folder (OneDrive, a localized folder name) before
+  // anything reads it, so a fresh install never has to pick it by hand
+  directoryService.detectModsDirectory();
   const ctx = new ApiContext({
     getAssetPath,
     port: appApiPort,
@@ -203,6 +206,9 @@ const startServices = () => {
     ctx.memoryAnnotation.onSettingChanged();
     if (key === (SettingsEnum.PLAYBACK_FOLLOWS_GAME_CLOCK as string)) {
       publishClockState(ctx);
+    }
+    if (APP_STATUS_SETTINGS.includes(key)) {
+      sendAppStatusToMod(settingsService);
     }
     for (const tier of ctx.tiers) {
       tier.onSettingChanged?.(ctx, key);

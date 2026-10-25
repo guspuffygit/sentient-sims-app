@@ -36,6 +36,7 @@ import { VOICE_INPUT_LANGUAGES, normalizeVoiceInputLanguage } from 'main/sentien
 import useSetting from 'renderer/hooks/useSetting';
 import {
   PLAYER_VOICE_PERSONAS,
+  PLAYER_VOICE_PERSONA_FLAVOR,
   PLAYER_VOICE_PERSONA_LABELS,
   PlayerVoicePersona,
 } from 'main/sentient-sims/models/PlayerVoicePersona';
@@ -48,9 +49,53 @@ const VoiceCommandRow = rendererTiers.voiceCommandRow;
 
 const testRecordMs = 3000;
 
+// The talk key and how it works (hold or press), shared with the setup wizard
+export function VoiceHotkeyRow() {
+  const { isMac } = window.electron;
+  const hotkey = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY, defaultVoiceInputHotkeyFor(isMac));
+  const hotkeyMode = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY_MODE, 'hold');
+  const hotkeyPresets = voiceHotkeyPresets(isMac, hotkey.value);
+
+  return (
+    <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
+      <Typography sx={{ minWidth: 110 }}>Hotkey:</Typography>
+      <VoiceHotkeySelect
+        value={hotkey.value}
+        presets={hotkeyPresets}
+        onChange={(chord) => void hotkey.setSetting(chord)}
+      />
+      <Select
+        size="small"
+        value={hotkeyMode.value}
+        onChange={(change) => void hotkeyMode.setSetting(change.target.value)}
+      >
+        <MenuItem value="hold">Hold to talk</MenuItem>
+        <MenuItem value="toggle">Press to start/stop</MenuItem>
+      </Select>
+    </Stack>
+  );
+}
+
+// Voices and subtitles pause with the game and speed up with it
+export function PlaybackFollowsClockSetting() {
+  const followsClock = useSetting<boolean>(SettingsEnum.PLAYBACK_FOLLOWS_GAME_CLOCK, true);
+
+  return (
+    <FormControlLabel
+      label="Voices and subtitles follow the game clock (pause with the game, faster on speed 2/3)"
+      control={
+        <Checkbox
+          checked={followsClock.value}
+          onChange={(change) => void followsClock.setSetting(change.target.checked)}
+        />
+      }
+    />
+  );
+}
+
 export default function VoiceInputSettingsComponent() {
   const { isMac } = window.electron;
-  const enabled = useSetting<boolean>(SettingsEnum.VOICE_INPUT_ENABLED, false);
+  const enabled = useSetting<boolean>(SettingsEnum.VOICE_INPUT_ENABLED, true);
   const providerSetting = useSetting<string>(SettingsEnum.VOICE_INPUT_PROVIDER, ApiType.SentientSimsAI);
   const endpoint = useSetting<string>(SettingsEnum.VOICE_INPUT_ENDPOINT, openaiDefaultEndpoint);
   const apiKey = useSetting<string>(SettingsEnum.VOICE_INPUT_KEY, '');
@@ -60,15 +105,17 @@ export default function VoiceInputSettingsComponent() {
   const openrouterKey = useSetting<string>(SettingsEnum.OPENROUTER_KEY, '');
   const geminiKeys = useSetting<string>(SettingsEnum.GEMINI_KEYS, '');
   const hotkey = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY, defaultVoiceInputHotkeyFor(isMac));
-  const hotkeyMode = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY_MODE, 'hold');
   const language = useSetting<string>(SettingsEnum.VOICE_INPUT_LANGUAGE, '');
   const deviceId = useSetting<string>(SettingsEnum.VOICE_INPUT_DEVICE_ID, '');
   const persona = useSetting<string>(SettingsEnum.PLAYER_VOICE_PERSONA, 'voice');
   const personaBio = useSetting<string>(SettingsEnum.PLAYER_VOICE_PERSONA_BIO, '');
   const personaName = useSetting<string>(SettingsEnum.PLAYER_VOICE_PERSONA_NAME, '');
-  const followsClock = useSetting<boolean>(SettingsEnum.PLAYBACK_FOLLOWS_GAME_CLOCK, true);
 
   const provider = voiceInputProviderFromValue(providerSetting.value);
+  // What the sim is told about the player when "About you" is blank
+  const personaFlavor = (PLAYER_VOICE_PERSONAS as readonly string[]).includes(persona.value)
+    ? PLAYER_VOICE_PERSONA_FLAVOR[persona.value as PlayerVoicePersona]
+    : PLAYER_VOICE_PERSONA_FLAVOR.voice;
   const hotkeyPresets = voiceHotkeyPresets(isMac, hotkey.value);
 
   // The main AI settings hold the key each hosted provider signs its requests with
@@ -178,22 +225,7 @@ export default function VoiceInputSettingsComponent() {
       </Box>
       {enabled.value ? (
         <Stack spacing={2} sx={{ maxWidth: 640 }}>
-          <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
-            <Typography sx={{ minWidth: 110 }}>Hotkey:</Typography>
-            <VoiceHotkeySelect
-              value={hotkey.value}
-              presets={hotkeyPresets}
-              onChange={(chord) => void hotkey.setSetting(chord)}
-            />
-            <Select
-              size="small"
-              value={hotkeyMode.value}
-              onChange={(change) => void hotkeyMode.setSetting(change.target.value)}
-            >
-              <MenuItem value="hold">Hold to talk</MenuItem>
-              <MenuItem value="toggle">Press to start/stop</MenuItem>
-            </Select>
-          </Stack>
+          <VoiceHotkeyRow />
           {VoiceCommandRow ? <VoiceCommandRow talkHotkey={hotkey.value} presets={hotkeyPresets} /> : null}
           <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
             <Typography sx={{ minWidth: 110 }}>You are:</Typography>
@@ -224,20 +256,11 @@ export default function VoiceInputSettingsComponent() {
             fullWidth
             multiline
             minRows={2}
-            label="About you"
+            label="About you (optional)"
             value={personaBio.value}
-            placeholder="Sam is the creator of this world and watches over the household from above."
-            helperText="One to three short sentences about you, written in third person. Your sims are told this every time you speak, so keep it brief."
+            placeholder={`Your Sims already know you as ${personaFlavor}.`}
+            helperText="Leave it blank and your Sims know you by the description above. To add more, write one to three short sentences about you in third person."
             onChange={(change) => void personaBio.setSetting(change.target.value)}
-          />
-          <FormControlLabel
-            label="Voices and subtitles follow the game clock (pause with the game, faster on speed 2/3)"
-            control={
-              <Checkbox
-                checked={followsClock.value}
-                onChange={(change) => void followsClock.setSetting(change.target.checked)}
-              />
-            }
           />
           <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
             <Typography sx={{ minWidth: 110 }}>Transcription:</Typography>

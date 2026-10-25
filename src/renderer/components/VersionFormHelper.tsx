@@ -1,29 +1,20 @@
-import { FormHelperText } from '@mui/material';
+import { FormHelperText, Tooltip } from '@mui/material';
 import { Version } from 'main/sentient-sims/services/VersionService';
-import { JSX } from 'react';
 
 export type VersionFormHelperProps = {
   text: string;
   version: Version;
 };
 
+// A missing version is normal before setup (no mod installed yet), so it reads
+// as "not found" with the details on hover rather than as an error
 export function VersionFormHelper({ text, version }: VersionFormHelperProps) {
   if (version.error) {
-    const errors = version.error.split('\n');
-    const elements: JSX.Element[] = [];
-    for (let i = 0; i < errors.length; i += 1) {
-      if (i === 0) {
-        elements.push(
-          <FormHelperText error>
-            {text}: {errors[i]}
-          </FormHelperText>,
-        );
-      } else {
-        elements.push(<FormHelperText error>{errors[i]}</FormHelperText>);
-      }
-    }
-
-    return <>{elements}</>;
+    return (
+      <Tooltip title={version.error} placement="bottom-start">
+        <FormHelperText sx={{ cursor: 'help' }}>{text}: not found</FormHelperText>
+      </Tooltip>
+    );
   }
 
   return (

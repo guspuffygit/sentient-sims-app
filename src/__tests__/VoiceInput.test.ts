@@ -238,7 +238,7 @@ describe('voice hotkey presets', () => {
 describe('voice input settings', () => {
   it('has working defaults', () => {
     const { settingsService } = mockEnvironment();
-    expect(settingsService.voiceInputEnabled).toBe(false);
+    expect(settingsService.voiceInputEnabled).toBe(true);
     expect(settingsService.voiceInputProvider).toBe(ApiType.SentientSimsAI);
     expect(settingsService.voiceInputEndpoint).toBe('https://api.openai.com/v1');
     expect(settingsService.voiceInputModel).toBe('whisper-1');

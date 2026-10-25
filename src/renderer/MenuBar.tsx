@@ -12,6 +12,7 @@ import handleOpenExternalLink from './hooks/handleOpenExternalLink';
 import LogoutButton from './components/LogoutButton';
 import { useLoginModal } from './providers/LoginModalProvider';
 import { rendererTiers } from './tiers/merge';
+import { ConnectionChip } from './components/ConnectionChip';
 
 export type MenuBarProperties = {
   hideSideBar: boolean;
@@ -148,6 +149,9 @@ function MenuBar({ hideSideBar, setHideSideBar }: MenuBarProperties) {
                 Wiki
               </Button>
             </Tooltip>
+            <Box sx={{ marginLeft: 1 }}>
+              <ConnectionChip />
+            </Box>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', rowGap: 0.5 }}>
             {debugMode.isEnabled ? DEBUG_NAV_ITEMS.map((item) => <NavButton key={item.id} {...item} />) : null}

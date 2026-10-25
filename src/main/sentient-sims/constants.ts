@@ -217,7 +217,7 @@ export const retiredGeminiModels = new Set(
   ].flatMap((name) => [name, `models/${name}`]),
 );
 export const geminiDefaultEndpoint = 'https://generativelanguage.googleapis.com/v1beta';
-export const defaultTTSEnabled = false;
+export const defaultTTSEnabled = true;
 export const defaultTTSVolume = 0.75;
 export const defaultMaxResponseTokens = 90;
 export const defaultGenerationTimeoutSeconds = 60;

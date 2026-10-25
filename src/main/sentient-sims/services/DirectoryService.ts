@@ -29,8 +29,12 @@ export type StrayModFileCleanup = {
 export class DirectoryService {
   readonly settingsService: SettingsService;
 
-  constructor(settingsService: SettingsService) {
+  // Electron's Documents folder, passed in so this service never imports electron
+  readonly documentsFolder?: string;
+
+  constructor(settingsService: SettingsService, documentsFolder?: string) {
     this.settingsService = settingsService;
+    this.documentsFolder = documentsFolder;
   }
 
   getModsFolder(): string {
@@ -123,6 +127,66 @@ export class DirectoryService {
       }
     });
     return result;
+  }
+
+  // A Mods folder counts when the game's own GameVersion.txt sits beside it;
+  // the Mods folder itself may not exist yet on a fresh install
+  static isModsDirectory(modsDirectory: string): boolean {
+    return !!modsDirectory && fs.existsSync(path.join(path.resolve(modsDirectory, '..'), 'GameVersion.txt'));
+  }
+
+  // Every Documents folder the game may write to: Electron's (the shell's known
+  // folder), the plain one, and OneDrive's, which Windows redirects Documents into
+  static documentsCandidates(extraDocuments: string[] = []): string[] {
+    const home = process.env.USERPROFILE || process.env.HOME || os.homedir();
+    const roots = [
+      ...extraDocuments,
+      path.join(home, 'Documents'),
+      process.env.OneDrive ? path.join(process.env.OneDrive, 'Documents') : '',
+      process.env.OneDriveConsumer ? path.join(process.env.OneDriveConsumer, 'Documents') : '',
+      process.env.OneDriveCommercial ? path.join(process.env.OneDriveCommercial, 'Documents') : '',
+      path.join(home, 'OneDrive', 'Documents'),
+    ];
+    return [...new Set(roots.filter((root) => !!root).map((root) => path.resolve(root)))];
+  }
+
+  // Candidate Mods folders, most likely first. A localized game names its
+  // folder in the player's language ("Die Sims 4"), so every folder under
+  // Electronic Arts counts and isModsDirectory decides.
+  static modsDirectoryCandidates(extraDocuments: string[] = []): string[] {
+    const candidates: string[] = [];
+    DirectoryService.documentsCandidates(extraDocuments).forEach((documents) => {
+      const eaFolder = path.join(documents, 'Electronic Arts');
+      candidates.push(path.join(eaFolder, 'The Sims 4', 'Mods'));
+      try {
+        fs.readdirSync(eaFolder, { withFileTypes: true })
+          .filter((entry) => entry.isDirectory())
+          .forEach((entry) => candidates.push(path.join(eaFolder, entry.name, 'Mods')));
+      } catch {
+        // No Electronic Arts folder under this Documents
+      }
+    });
+    return [...new Set(candidates)];
+  }
+
+  // Keeps the stored Mods folder when it is valid, else finds the game's and
+  // stores it. Returns the folder in use, or undefined when none was found.
+  detectModsDirectory(): string | undefined {
+    const current = this.getModsFolder();
+    if (DirectoryService.isModsDirectory(current)) {
+      return current;
+    }
+    const extra = this.documentsFolder ? [this.documentsFolder] : [];
+    const found = DirectoryService.modsDirectoryCandidates(extra).find((candidate) =>
+      DirectoryService.isModsDirectory(candidate),
+    );
+    if (found) {
+      log.info(`Mods folder detected at ${found} (was ${current})`);
+      this.settingsService.modsDirectory = found;
+      return found;
+    }
+    log.warn(`No Sims 4 Mods folder found (stored: ${current})`);
+    return undefined;
   }
 
   createDirectoryIfNotExist(directoryPath: string) {

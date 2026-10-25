@@ -118,6 +118,7 @@ export function runApi(ctx: ApiContext) {
 
   expressApp.get('/options/status', ctx.controller.options.getOptionsStatus);
   expressApp.post('/options/fix', ctx.controller.options.fixOptions);
+  expressApp.post('/options/detect-mods', ctx.controller.options.detectModsDirectory);
 
   expressApp.post('/cognition/outcome', ctx.controller.cognition.postOutcome);
   expressApp.post('/cognition/perception', ctx.controller.cognition.postPerception);

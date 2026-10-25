@@ -232,6 +232,24 @@ export function defaultStore(cwd?: string) {
         type: 'string',
         default: WizardPage.INIT,
       },
+      // Finished the setup wizard once; until then the wizard opens on its own
+      [SettingsEnum.SETUP_COMPLETE.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
+      [SettingsEnum.SETUP_COMPLETE_SEEDED.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
+      [SettingsEnum.QUICKSTART_DISMISSED.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
+      // The "your Sims can talk" hint was shown; finishing the wizard clears it
+      [SettingsEnum.VOICES_OFF_NUDGE_SHOWN.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
       [SettingsEnum.PATREON_LINKING.toString()]: {
         type: 'boolean',
         default: false,
@@ -307,7 +325,7 @@ export function defaultStore(cwd?: string) {
       },
       [SettingsEnum.VOICE_INPUT_ENABLED.toString()]: {
         type: 'boolean',
-        default: false,
+        default: true,
       },
       [SettingsEnum.PLAYBACK_FOLLOWS_GAME_CLOCK.toString()]: {
         type: 'boolean',
@@ -1445,6 +1463,17 @@ export class SettingsService {
   }
 
   runMigrations() {
+    // One time: a player who used the app before the wizard opened on its own is
+    // already set up. Their provider configs were seeded on an earlier run; a
+    // fresh store has none yet (seeded below).
+    if (!this.get(SettingsEnum.SETUP_COMPLETE_SEEDED)) {
+      if (this.aiProviderConfigs.length > 0) {
+        log.info('Existing install: marking setup complete');
+        this.set(SettingsEnum.SETUP_COMPLETE, true);
+      }
+      this.set(SettingsEnum.SETUP_COMPLETE_SEEDED, true);
+    }
+
     // Before 4.5.3 the voice provider was openai for every OpenAI-compatible server, told
     // apart by its endpoint. The pinned model moves with it so a working setup stays put.
     const savedVoiceProvider = this.get(SettingsEnum.VOICE_INPUT_PROVIDER);
