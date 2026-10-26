@@ -10,6 +10,7 @@ import { isOpenRouterEndpoint, openrouterAttributionHeaders } from '../models/Op
 import { VOICE_INPUT_LANGUAGES } from '../models/VoiceInputLanguages';
 import { buildTranscriptionPrompt, isPromptEcho } from '../util/nameCorrection';
 import { getRandomItem } from '../util/getRandomItem';
+import { plainKeyTestError } from '../util/providerErrorWords';
 
 export class TranscriptionError extends Error {
   constructor(message: string) {
@@ -258,7 +259,7 @@ export class TranscriptionService {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       log.error('Error testing transcription endpoint:', error);
-      return { error: `not working, ${message}` };
+      return { error: plainKeyTestError(message) };
     }
   }
 }

@@ -1,4 +1,14 @@
-import { Box, Button, Divider, FormHelperText, Tab, Typography } from '@mui/material';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Divider,
+  FormHelperText,
+  Tab,
+  Typography,
+} from '@mui/material';
 
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiTypeFromValue } from 'main/sentient-sims/models/ApiType';
@@ -7,6 +17,7 @@ import { AIActionOverrides, AIActionType } from 'main/sentient-sims/models/AIAct
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { SyntheticEvent, useMemo, useState } from 'react';
 import ConstructionIcon from '@mui/icons-material/Construction';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AppCard from './AppCard';
 import DebugLogsSettingsComponent from './settings/DebugLogsSettingsComponent';
 import DirectedScenesSettingsComponent from './settings/DirectedScenesSettingsComponent';
@@ -22,6 +33,7 @@ import { ProviderConfigsComponent } from './settings/ProviderConfigsComponent';
 import { ProviderConnectionSettingsComponent } from './settings/ProviderConnectionSettingsComponent';
 import LocalizationSettingsComponent from './settings/LocalizationSettingsComponent';
 import useSetting from './hooks/useSetting';
+import { PlaybackFollowsClockSetting } from './settings/voice/VoiceInputSettingsComponent';
 import { rendererTiers } from './tiers/merge';
 
 enum SettingsTabSelectionValue {
@@ -93,33 +105,41 @@ export default function SettingsPage() {
           </Box>
           <TabPanel value={SettingsTabSelectionValue.Settings}>
             <ModsDirectoryComponent />
-            <GameAppPathComponent />
-            <DirectedScenesSettingsComponent />
-            <PetsSpeakSettingsComponent />
-            {tierRows()}
-            <DebugLogsSettingsComponent />
-            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-            <Typography variant="h5">AI Providers</Typography>
-            <FormHelperText sx={{ marginBottom: 2 }}>
-              Connections are the shared layer: set up each provider&apos;s API key or endpoint once, then any text,
-              image, or embedding configuration can use it.
-            </FormHelperText>
-            <ProviderConnectionSettingsComponent />
             <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
             <ProviderConfigsComponent capability="text" />
-            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-            <ProviderConfigsComponent capability="image" />
-            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-            <ProviderConfigsComponent capability="embedding" />
-            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-            <Typography variant="h6">Localization</Typography>
-            <FormHelperText sx={{ marginBottom: 1 }}>
-              Translates AI output. Applies when the provider handling an action is OpenAI or Gemini.
-            </FormHelperText>
-            <LocalizationSettingsComponent />
-            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-            <AnimationMappingSettingsComponent apiType={wickedWhimsApiType} />
-            <AiMaxResponseLengthSettingsComponent />
+            <Accordion disableGutters sx={{ marginTop: 3 }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Box>
+                  <Typography variant="h6">Advanced</Typography>
+                  <FormHelperText sx={{ margin: 0 }}>
+                    Fine tuning. Everything works without touching these.
+                  </FormHelperText>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <GameAppPathComponent />
+                <DirectedScenesSettingsComponent />
+                <PetsSpeakSettingsComponent />
+                <PlaybackFollowsClockSetting />
+                {tierRows()}
+                <DebugLogsSettingsComponent />
+                <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+                <ProviderConnectionSettingsComponent />
+                <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+                <ProviderConfigsComponent capability="image" />
+                <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+                <ProviderConfigsComponent capability="embedding" />
+                <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+                <Typography variant="h6">Localization</Typography>
+                <FormHelperText sx={{ marginBottom: 1 }}>
+                  Translates AI output. Applies when the provider handling an action is OpenAI or Gemini.
+                </FormHelperText>
+                <LocalizationSettingsComponent />
+                <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+                <AnimationMappingSettingsComponent apiType={wickedWhimsApiType} />
+                <AiMaxResponseLengthSettingsComponent />
+              </AccordionDetails>
+            </Accordion>
           </TabPanel>
           <TabPanel value={SettingsTabSelectionValue.Voice}>
             <VoiceSettingsComponent />

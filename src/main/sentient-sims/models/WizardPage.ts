@@ -9,6 +9,9 @@ export enum WizardPage {
   OPEN_AI_SETUP = 'open_ai_setup',
   GEMINI_SETUP = 'gemini_setup',
   SELF_HOSTED_SETUP = 'self_hosted_setup',
+  VOICE_SETUP = 'voice_setup',
+  MICROPHONE_SETUP = 'microphone_setup',
+  ABOUT_YOU = 'about_you',
 }
 
 export function toWizardPage(wizardPage?: string): WizardPage {

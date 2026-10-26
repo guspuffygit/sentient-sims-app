@@ -121,7 +121,7 @@ code {
   --amplify-components-authenticator-router-border-width: 0;
   --amplify-components-authenticator-router-box-shadow: none;
   --amplify-components-authenticator-container-width-max: 100%;
-  --amplify-components-authenticator-form-padding: 20px 4px 4px 4px;
+  --amplify-components-authenticator-form-padding: 12px 4px 0 4px;
   --amplify-components-authenticator-footer-padding-bottom: 0;
 
   --amplify-colors-background-primary: transparent;
@@ -181,6 +181,13 @@ code {
   --amplify-components-button-link-focus-color: #c3ccff;
 
   --amplify-components-fieldcontrol-color: #f2f3f7;
+
+  /* Every field type re-declares fieldcontrol-color from its own variable, and
+     those resolve on :root to a dark neutral; these are what reach typed text */
+  --amplify-components-input-color: #f2f3f7;
+  --amplify-components-textfield-color: #f2f3f7;
+  --amplify-components-passwordfield-color: #f2f3f7;
+  --amplify-components-phonenumberfield-color: #f2f3f7;
   --amplify-components-fieldcontrol-border-color: rgba(255, 255, 255, 0.14);
   --amplify-components-fieldcontrol-focus-border-color: #7c8aec;
   --amplify-components-fieldcontrol-focus-box-shadow: 0 0 0 1px #7c8aec;
@@ -191,6 +198,12 @@ code {
   --amplify-components-text-error-color: #f57373;
   --amplify-components-alert-error-background-color: rgba(240, 71, 71, 0.14);
   --amplify-components-alert-error-color: #f57373;
+}
+
+[data-amplify-authenticator] .amplify-input,
+[data-amplify-authenticator] .amplify-field-group__control {
+  color: #f2f3f7;
+  caret-color: #f2f3f7;
 }
 
 .gsi-material-button {

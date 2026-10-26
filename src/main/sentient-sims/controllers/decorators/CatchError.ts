@@ -7,6 +7,9 @@ const defaultStatusCode = 200;
 
 export type CatchErrorsParameters = {
   statusCode?: number;
+
+  // False for routes whose caller shows the error itself
+  popup?: boolean;
 };
 
 type Handler = (req: Request, res: Response, next?: NextFunction) => unknown;
@@ -25,14 +28,16 @@ export function CatchErrors(catchErrorsParameters?: CatchErrorsParameters) {
           try {
             res.status(statusCode).json({ error: message });
           } finally {
-            const caughtError: CaughtError = {
-              message,
-              statusCode,
-              body: req.body,
-              url: req.url,
-              method: req.method,
-            };
-            sendPopUpCaughtErrorNotification(caughtError);
+            if (catchErrorsParameters?.popup !== false) {
+              const caughtError: CaughtError = {
+                message,
+                statusCode,
+                body: req.body,
+                url: req.url,
+                method: req.method,
+              };
+              sendPopUpCaughtErrorNotification(caughtError);
+            }
           }
         }
       };

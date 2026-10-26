@@ -30,7 +30,8 @@ export class VoiceController {
     res.json(this.ctx.elevenLabsVoices.getVoices());
   };
 
-  @CatchErrors({ statusCode: 400 })
+  // The key check and the voice list show ElevenLabs' error inline
+  @CatchErrors({ statusCode: 400, popup: false })
   refreshElevenLabsVoices = async (req: Request, res: Response) => {
     res.json(await this.ctx.elevenLabsVoices.refreshVoices());
   };

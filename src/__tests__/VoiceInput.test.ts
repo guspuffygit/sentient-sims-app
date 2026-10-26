@@ -672,6 +672,7 @@ function sentientSimsTranscriptionContext(endpoint: string, onLotNames: string[]
   const ctx = {
     settings: settingsService,
     version: { getVersionHeaders: () => ({}) },
+    db: { sessionId: undefined },
     simStateCache: { getReport: () => ({ sims: onLotNames.map((name) => ({ sim_name: name, sims: [] })) }) },
   } as unknown as ApiContext;
   (ctx as { sentientSimsTranscription: unknown }).sentientSimsTranscription = new SentientSimsAIService(ctx);

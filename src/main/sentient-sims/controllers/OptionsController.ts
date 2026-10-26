@@ -11,6 +11,11 @@ export class OptionsController {
     this.ctx = ctx;
   }
 
+  detectModsDirectory = (_req: Request, res: Response) => {
+    const modsDirectory = this.ctx.directory.detectModsDirectory();
+    res.json({ found: !!modsDirectory, modsDirectory: modsDirectory ?? this.ctx.directory.getModsFolder() });
+  };
+
   getOptionsStatus = (_req: Request, res: Response) => {
     const optionsPath = path.join(this.ctx.directory.getSims4Folder(), 'Options.ini');
 

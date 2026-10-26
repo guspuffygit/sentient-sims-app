@@ -41,17 +41,26 @@ function SentientSimsConnectionPanel() {
 
 // Connection fields (API key, endpoint, account) for a single provider.
 // Stored once per provider type and shared by every configuration using it.
-export function ProviderConnectionPanel({ apiType }: { apiType: ApiType }): React.JSX.Element | null {
+// hideEndpoint keeps a hosted provider's endpoint out of the setup wizard.
+export function ProviderConnectionPanel({
+  apiType,
+  hideEndpoint = false,
+}: {
+  apiType: ApiType;
+  hideEndpoint?: boolean;
+}): React.JSX.Element | null {
   switch (apiType) {
     case ApiType.OpenAI:
       return (
         <>
           <ApiKeyAIComponent setting={SettingsEnum.OPENAI_KEY} aiName="OpenAI" />
-          <AIEndpointComponent
-            type={ApiType.OpenAI}
-            selectedApiType={ApiType.OpenAI}
-            settingsEnum={SettingsEnum.OPENAI_ENDPOINT}
-          />
+          {hideEndpoint ? null : (
+            <AIEndpointComponent
+              type={ApiType.OpenAI}
+              selectedApiType={ApiType.OpenAI}
+              settingsEnum={SettingsEnum.OPENAI_ENDPOINT}
+            />
+          )}
         </>
       );
     case ApiType.OpenRouter:
@@ -99,11 +108,13 @@ export function ProviderConnectionPanel({ apiType }: { apiType: ApiType }): Reac
       return (
         <>
           <ApiKeyAIComponent setting={SettingsEnum.GEMINI_KEYS} aiName="Gemini" />
-          <AIEndpointComponent
-            type={ApiType.Gemini}
-            selectedApiType={ApiType.Gemini}
-            settingsEnum={SettingsEnum.GEMINI_ENDPOINT}
-          />
+          {hideEndpoint ? null : (
+            <AIEndpointComponent
+              type={ApiType.Gemini}
+              selectedApiType={ApiType.Gemini}
+              settingsEnum={SettingsEnum.GEMINI_ENDPOINT}
+            />
+          )}
         </>
       );
     case ApiType.SentientSimsAI:

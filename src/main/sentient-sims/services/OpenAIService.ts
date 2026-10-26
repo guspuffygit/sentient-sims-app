@@ -13,6 +13,7 @@ import { openaiDefaultEndpoint } from '../constants';
 import { buildOpenRouterModels, isOpenRouterEndpoint, openrouterAttributionHeaders } from '../models/OpenRouterModels';
 import { ApiContext } from './ApiContext';
 import { OpenAIMessage, withoutImageData } from '../models/OpenAIMessage';
+import { plainKeyTestError } from '../util/providerErrorWords';
 
 // OpenRouter's reasoning control. The SDK types lack it, but the SDK sends extra body
 // fields through untouched.
@@ -144,7 +145,7 @@ export class OpenAIService implements GenerationService {
 
       const message = error instanceof Error ? error.message : String(error);
       return {
-        error: `not working, ${message}`,
+        error: plainKeyTestError(message),
       };
     }
   }

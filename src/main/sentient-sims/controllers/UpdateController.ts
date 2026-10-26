@@ -22,6 +22,11 @@ export class UpdateController {
     this.ctx = ctx;
   }
 
+  // The setup wizard's last page asks while it waits for the mod to connect
+  gameRunning = async (req: Request, res: Response) => {
+    res.json({ running: await isGameRunning() });
+  };
+
   updateMod = async (req: Request, res: Response) => {
     const modUpdate = req.body as ModUpdate;
     try {

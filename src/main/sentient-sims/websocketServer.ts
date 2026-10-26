@@ -3,7 +3,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import log from 'electron-log';
 import { ClockState, ModInfo, VoiceKeyEvent } from './models/ModLogWebsocketMessage';
 import { formatLog } from './util/format';
-import { notifyClockState } from './util/notifyRenderer';
+import { notifyClockState, sendAppStatusToMod } from './util/notifyRenderer';
 import { parseModMessage, rawDataToString } from './util/modWebsocketMessage';
 import { mirrorModLog } from './util/modLogMirror';
 import { onSceneControl } from './util/sceneControl';
@@ -123,6 +123,7 @@ export const startWebSocketServer = (ctx: ApiContext) => {
     lastModInfo = undefined;
     // The overlay starts with no voice chords bound
     voiceKeySink?.onModConnected();
+    sendAppStatusToMod(ctx.settings);
     notifyWebsocketStatus({
       type: 'mod',
       status: true,

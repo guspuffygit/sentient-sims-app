@@ -35,6 +35,9 @@ export enum ModWebsocketMessageType {
   // The chords the game overlay should listen for on the app's behalf; sent on every
   // mod connect and voice setting change (VoiceHotkeyService)
   VOICE_HOTKEYS = 'voice_hotkeys',
+  // What the in-game status tab shows about the app: voices, voice input and the AI in
+  // use; sent on every mod connect and when one of them changes
+  APP_STATUS = 'app_status',
 }
 
 export type ModWebsocketMessage = {
@@ -179,9 +182,18 @@ export type ModVoiceHotkeys = ModWebsocketMessage & {
   command: string;
 };
 
+export type ModAppStatus = ModWebsocketMessage & {
+  tts_enabled: boolean;
+  tts_provider: string;
+  voice_input_enabled: boolean;
+  voice_input_mode: string;
+  ai_provider: string;
+};
+
 export type WebsocketNotification =
   | ModWebsocketMessage
   | ModVoiceHotkeys
+  | ModAppStatus
   | ModWebsocketNotification
   | ModWebsocketNotificationMemoryEdited
   | ModWebsocketNotificationMemoryDeleted

@@ -43,6 +43,7 @@ export function runApi(ctx: ApiContext) {
   expressApp.get('/versions/game', ctx.controller.version.getGameVersion);
 
   expressApp.post('/update/mod', ctx.controller.update.updateMod);
+  expressApp.get('/update/game-running', ctx.controller.update.gameRunning);
 
   expressApp.get('/participants', ctx.controller.participants.getAllParticipants);
   expressApp.get('/participants/:participantId', ctx.controller.participants.getParticipant);
@@ -118,6 +119,7 @@ export function runApi(ctx: ApiContext) {
 
   expressApp.get('/options/status', ctx.controller.options.getOptionsStatus);
   expressApp.post('/options/fix', ctx.controller.options.fixOptions);
+  expressApp.post('/options/detect-mods', ctx.controller.options.detectModsDirectory);
 
   expressApp.post('/cognition/outcome', ctx.controller.cognition.postOutcome);
   expressApp.post('/cognition/perception', ctx.controller.cognition.postPerception);

@@ -1,4 +1,4 @@
-import { plainProviderError } from 'main/sentient-sims/util/providerErrorWords';
+import { plainKeyTestError, plainProviderError } from 'main/sentient-sims/util/providerErrorWords';
 
 // What a provider's error means for the player, by the raw texts seen live or documented
 describe('plainProviderError', () => {
@@ -48,5 +48,33 @@ describe('plainProviderError', () => {
       raw: 'something odd',
       inSettings: false,
     });
+  });
+});
+
+// The key test on the setup wizard and Settings, by the raw texts seen there (2026-10-26)
+describe('plainKeyTestError', () => {
+  it('says a made-up OpenAI key did not work, and never echoes it', () => {
+    const raw =
+      '401 Incorrect API key provided: sk-made-up-1234. You can find your API key at https://platform.openai.com/account/api-keys.';
+    const message = plainKeyTestError(raw);
+    expect(message).toBe("That key didn't work. Check that you copied all of it.");
+    expect(message).not.toContain('sk-made-up');
+  });
+
+  it("reads Gemini's JSON error as a refused key", () => {
+    const raw = JSON.stringify({
+      error: {
+        code: 400,
+        message: 'API key not valid. Please pass a valid API key.',
+        status: 'INVALID_ARGUMENT',
+        details: [{ reason: 'API_KEY_INVALID', domain: 'googleapis.com' }],
+      },
+    });
+    expect(plainKeyTestError(raw)).toBe("That key didn't work. Check that you copied all of it.");
+  });
+
+  it('keeps the plain words for anything that is not the key', () => {
+    expect(plainKeyTestError('getaddrinfo ENOTFOUND api.openai.com')).toContain('internet connection');
+    expect(plainKeyTestError('something odd')).toBe('The AI provider returned an error.');
   });
 });

@@ -8,9 +8,10 @@ export type ApiKeyAIComponentProperties = {
   aiName: string;
 
   optional?: boolean;
+  onBlur?: () => void;
 };
 
-export default function ApiKeyAIComponent({ setting, aiName, optional = false }: ApiKeyAIComponentProperties) {
+export default function ApiKeyAIComponent({ setting, aiName, optional = false, onBlur }: ApiKeyAIComponentProperties) {
   const apiKeySetting = useSetting(setting, '');
 
   return (
@@ -21,7 +22,7 @@ export default function ApiKeyAIComponent({ setting, aiName, optional = false }:
         marginBottom: 2,
       }}
     >
-      <APIKeyInput setting={apiKeySetting} aiName={aiName} optional={optional} />
+      <APIKeyInput setting={apiKeySetting} aiName={aiName} optional={optional} onBlur={onBlur} />
     </Box>
   );
 }

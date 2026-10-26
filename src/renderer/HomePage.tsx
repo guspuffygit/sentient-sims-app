@@ -1,39 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Box, Chip, Grid, Typography } from '@mui/material';
+import { Box, Button, Chip, Grid, Typography } from '@mui/material';
 import UpdateComponent from './UpdateComponent';
 import DebugCard from './DebugCard';
 import { ThankYouCardPatreon } from './ThankYouCard';
 import { MappingLeaderboardComponent } from './components/MappingLeaderboardComponent';
-import { useWebsocket } from './providers/WebsocketProvider';
-
-function ConnectionChip() {
-  const { status } = useWebsocket();
-  const connected = status.mod;
-
-  return (
-    <Chip
-      size="small"
-      variant="outlined"
-      label={connected ? 'Game connected' : 'Game not connected'}
-      icon={
-        <Box
-          sx={{
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
-            marginLeft: 1,
-            backgroundColor: connected ? 'success.main' : 'text.disabled',
-            boxShadow: connected ? (theme) => `0 0 6px ${theme.palette.success.main}` : 'none',
-          }}
-        />
-      }
-      sx={{
-        color: connected ? 'success.light' : 'text.secondary',
-        borderColor: connected ? (theme) => `${theme.palette.success.main}66` : 'divider',
-      }}
-    />
-  );
-}
+import { QuickstartCard } from './components/QuickstartCard';
+import { useSetupWizard } from './providers/SetupWizardProvider';
 
 // O-6: dead-pipeline badge — appears after 3 consecutive provider failures, clears on the
 // next success (main process decides; this only renders what it is told)
@@ -64,6 +36,8 @@ function ProviderHealthChip() {
 }
 
 function HomeHero() {
+  const setupWizard = useSetupWizard();
+
   return (
     <Box
       sx={{
@@ -95,7 +69,14 @@ function HomeHero() {
       </Box>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
         <ProviderHealthChip />
-        <ConnectionChip />
+        <Button
+          size="small"
+          onClick={() => {
+            setupWizard.setOpen(true);
+          }}
+        >
+          Having trouble? Run the Setup Wizard
+        </Button>
       </Box>
     </Box>
   );
@@ -107,6 +88,7 @@ export default function HomePage() {
       <HomeHero />
       <Grid container spacing={2}>
         <Grid size={6}>
+          <QuickstartCard />
           <UpdateComponent />
           <DebugCard />
           <MappingLeaderboardComponent />

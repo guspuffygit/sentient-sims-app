@@ -11,12 +11,17 @@ import { useSnackBar } from './SnackBarProvider';
 import { useVersions } from './VersionsProvider';
 import { isNewVersionAvailable } from '../versions';
 
+export type ModInstallOutcome =
+  | { ok: true }
+  | { skipped: 'game-running' | 'dev-mod' | 'signed-out' }
+  | { error: string };
+
 interface ModUpdateContextType {
   newVersionAvailable: boolean;
   lastChecked: string;
   busy: boolean;
   checkForUpdates: () => Promise<boolean>;
-  installUpdate: () => Promise<void>;
+  installUpdate: () => Promise<ModInstallOutcome>;
 }
 
 const ModUpdateContext = createContext<ModUpdateContextType | undefined>(undefined);
@@ -71,18 +76,26 @@ export function ModUpdateProvider({ children }: ModUpdateProviderProps) {
     refreshVersionsRef.current = versions.refresh;
   });
 
-  const installPromiseRef = useRef<Promise<void> | undefined>(undefined);
+  const installPromiseRef = useRef<{ auto: boolean; promise: Promise<ModInstallOutcome> } | undefined>(undefined);
+
+  // Checks can overlap (startup, wizard, post-install); only the newest one may set the state,
+  // or a check that began before an install can report the old version after it
+  const checkSeqRef = useRef(0);
 
   const checkForUpdates = useCallback(async (): Promise<boolean> => {
+    checkSeqRef.current += 1;
+    const seq = checkSeqRef.current;
     setPendingOps((count) => count + 1);
     try {
       const modVersion = await versionClient.getModVersion();
       log.debug(`modVersion: ${modVersion.version}`);
       const newVersionAvailable = await isNewVersionAvailable(modVersion.version, releaseType.value);
-      setUpdateState({
-        newVersionAvailable,
-        lastChecked: getCurrentTime(),
-      });
+      if (seq === checkSeqRef.current) {
+        setUpdateState({
+          newVersionAvailable,
+          lastChecked: getCurrentTime(),
+        });
+      }
       return newVersionAvailable;
     } catch (err) {
       log.error('Error checking for updates:', err);
@@ -93,49 +106,62 @@ export function ModUpdateProvider({ children }: ModUpdateProviderProps) {
   }, [releaseType.value]);
 
   const installUpdate = useCallback(
-    async (options?: { auto?: boolean }): Promise<void> => {
-      // A second caller (e.g. the wizard's button while the startup install is
-      // still running) joins the in-flight install instead of starting another
-      if (installPromiseRef.current) {
-        return installPromiseRef.current;
+    async (options?: { auto?: boolean }): Promise<ModInstallOutcome> => {
+      const auto = !!options?.auto;
+
+      // A second caller (e.g. the wizard while the startup install is still running)
+      // joins the in-flight install instead of starting another. An auto run may be
+      // skipped (dev build, game open) where a request would install, so a request
+      // that joined one runs its own once the auto run is done
+      const inFlight = installPromiseRef.current;
+      if (inFlight) {
+        const joined = await inFlight.promise;
+        if (auto || !inFlight.auto || !('skipped' in joined)) {
+          return joined;
+        }
+        if (installPromiseRef.current) {
+          return installPromiseRef.current.promise;
+        }
       }
 
-      const run = (async () => {
+      const run = (async (): Promise<ModInstallOutcome> => {
         setPendingOps((count) => count + 1);
         try {
           const authSession = await fetchAuthSession();
           if (!authSession.credentials) {
             log.info('Skipping mod update, not signed in');
-            if (!options?.auto) {
+            if (!auto) {
               showMessage('Sign in to install the mod', 'warning');
             }
-            return;
+            return { skipped: 'signed-out' };
           }
           const modUpdate: ModUpdate = {
             type: releaseType.value,
             credentials: authSession.credentials,
-            auto: options?.auto,
+            auto,
           };
           const response = await client.update.updateMod(modUpdate);
           if (response.error) {
             // The main process already showed a popup for manual updates
             log.error(`Mod update failed: ${response.error.message}`);
-            return;
+            return { error: response.error.message ?? 'Unknown error' };
           }
           if (response.skipped) {
             log.info(`Mod update skipped: ${response.skipped}`);
-            return;
+            return { skipped: response.skipped };
           }
           await checkForUpdates();
           await refreshVersionsRef.current();
+          return { ok: true };
         } catch (err) {
           log.error('Unable to request update to mod', err);
+          return { error: err instanceof Error ? err.message : String(err) };
         } finally {
           setPendingOps((count) => count - 1);
         }
       })();
 
-      installPromiseRef.current = run;
+      installPromiseRef.current = { auto, promise: run };
       const clear = () => {
         installPromiseRef.current = undefined;
       };

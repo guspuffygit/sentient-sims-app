@@ -41,7 +41,7 @@ export function ProviderConnectionSettingsComponent() {
 
   return (
     <Box sx={{ marginBottom: 2 }}>
-      <Typography variant="h6">Provider Connections</Typography>
+      <Typography variant="h6">API Keys and Connections</Typography>
       <FormHelperText sx={{ marginBottom: 1 }}>
         API keys and endpoints are set once per provider and shared by every configuration using that provider.
       </FormHelperText>
