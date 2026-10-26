@@ -686,7 +686,9 @@ export function ProviderConfigsComponent({
           </AccordionSummary>
           <AccordionDetails>
             <FormHelperText sx={{ marginBottom: 1 }}>
-              Route specific AI actions to a different provider configuration than the default.
+              Route specific AI actions to a different provider configuration than the default. A Wicked Whims override
+              runs every stage of those scenes (Director, Actor, Reviewer and Scores), ahead of any stage override
+              below.
             </FormHelperText>
             {OVERRIDE_ACTION_TYPES.map((action) => {
               const overrideId = overrides[action];

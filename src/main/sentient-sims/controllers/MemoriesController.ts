@@ -9,6 +9,16 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
+// ?exclude_event_types=outcome,chat (the mod's memories window), repeated params included
+function excludedEventTypes(query: unknown): string[] {
+  const values = Array.isArray(query) ? query : [query];
+  return values
+    .filter((value): value is string => typeof value === 'string')
+    .flatMap((value) => value.split(','))
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+}
+
 export class MemoriesController {
   private readonly ctx: ApiContext;
 
@@ -31,7 +41,7 @@ export class MemoriesController {
 
   getMemories = (req: Request, res: Response) => {
     try {
-      const result = this.ctx.memoryRepository.getMemories();
+      const result = this.ctx.memoryRepository.getMemories(excludedEventTypes(req.query.exclude_event_types));
       return res.json(result);
     } catch (err) {
       if (err instanceof DatabaseNotLoadedError) {

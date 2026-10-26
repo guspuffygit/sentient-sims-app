@@ -111,6 +111,53 @@ describe('MemoryRepository', () => {
     expect(throwsError).toThrow();
   });
 
+  it('applies excluded event types before the 100-row cap', () => {
+    const ctx = mockApiContext();
+    fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
+    ctx.db.loadDatabase({ sessionId: '4444444', saveId: '1' });
+    const participants: ParticipantDTO[] = [{ id: '128937674' }];
+
+    for (let i = 0; i < 120; i += 1) {
+      createMemory(ctx, {
+        memory: {
+          location_id: 1,
+          content: `Marisol Vega tried 'pay_bills' and it succeeded. (${i})`,
+          event_type: 'outcome',
+        },
+        participants,
+      });
+    }
+    createMemory(ctx, {
+      memory: {
+        location_id: 1,
+        content: 'Marisol Vega is asking Julio Brewer about their career.',
+        event_type: 'interaction',
+      },
+      participants,
+    });
+    // The newest 120 rows are outcomes, so the interaction row is beyond the unfiltered cap
+    for (let i = 0; i < 120; i += 1) {
+      createMemory(ctx, {
+        memory: {
+          location_id: 1,
+          content: `Marisol Vega tried 'take_shower' and it succeeded. (${i})`,
+          event_type: 'outcome',
+        },
+        participants,
+      });
+    }
+
+    const unfiltered = ctx.memoryRepository.getMemories();
+    expect(unfiltered).toHaveLength(100);
+    expect(unfiltered.every((memory) => memory.event_type === 'outcome')).toBe(true);
+
+    const filtered = ctx.memoryRepository.getMemories(['outcome']);
+    expect(filtered).toHaveLength(1);
+    expect(filtered[0].event_type).toEqual('interaction');
+
+    expect(ctx.memoryRepository.getMemories([])).toHaveLength(100);
+  });
+
   it('should never hand out a content-less memory in the memories list', () => {
     const ctx = mockApiContext();
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), {

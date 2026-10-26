@@ -10,7 +10,7 @@ import {
 } from 'main/sentient-sims/formatter/PromptFormatter';
 import { WWEventType, WWInteractionEvent } from 'main/sentient-sims/models/InteractionEvents';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
-import { Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState } from 'react';
+import { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 import { JSX } from 'react/jsx-runtime';
 import { InteractionEventResult } from 'main/sentient-sims/models/InteractionEventResult';
 import log from 'electron-log';
@@ -207,19 +207,19 @@ export function AnimationMappingComponent() {
   // Which review is current, so one that lands after Edit or Cancel is dropped
   const reviewRunRef = useRef(0);
 
-  const clearReview = () => {
+  const clearReview = useCallback(() => {
     reviewRunRef.current += 1;
     setReview(undefined);
     setReviewLoading(false);
-  };
+  }, []);
 
-  const onClose = () => {
+  const onClose = useCallback(() => {
     clearReview();
     setTestResults([]);
     setEvent(null);
     setInput('');
     setLoading(false);
-  };
+  }, [clearReview]);
 
   useEffect(() => {
     const removeListener = window.electron.onMapAnimation(
@@ -244,7 +244,7 @@ export function AnimationMappingComponent() {
     return () => {
       removeListener();
     };
-  }, []);
+  }, [onClose]);
 
   const rows: JSX.Element[] = [];
   if (event?.sentient_sims) {
