@@ -46,7 +46,6 @@ import {
   minimumGenerationMs,
   retiredSentientSimsAIModels,
   thoughtMemoryFloor,
-  wickedWhimsMaxResponseTokens,
 } from '../constants';
 import {
   BuffEventRequest,
@@ -103,12 +102,14 @@ import { assertDiaryIsProse, repairDiary } from '../util/diaryProse';
 import { SceneState } from './SceneService';
 import { isBelowChild, lifeStageOf } from '../util/simLifeStage';
 import {
+  INTIMATE_SCENE_FRAMING,
   intimateOutputProblem,
   isAdultAge,
   isRefusal,
   keepIntimateRowForDiary,
   namesOutsideAct,
 } from '../util/intimateScene';
+import { describeUnmappedAct } from '../util/unmappedAct';
 import { MemoryTrace } from '../models/MemoryTrace';
 import { pngToPaintingDds } from '../image/paintingDds';
 import { ImageGenerationRequest, ImageGenerationResponse } from '../models/ImageGeneration';
@@ -808,7 +809,7 @@ ${factsBlock}
       case SSEventType.INTERACTION:
         return this.handleInteraction(event as InteractionEvent, deadline);
       case SSEventType.WICKED_WHIMS:
-        return this.handleWickedWhims(event as WWInteractionEvent);
+        return this.handleWickedWhims(event as WWInteractionEvent, deadline);
       case SSEventType.WANTS:
         return this.handleWants(event);
       case SSEventType.CONTINUE:
@@ -1015,16 +1016,22 @@ ${factsBlock}
     );
   }
 
-  async handleWickedWhims(event: WWInteractionEvent) {
+  async handleWickedWhims(event: WWInteractionEvent, deadline: RequestDeadline = {}) {
+    const animationKey = `${event.animation_author}:${event.animation_identifier}`;
     if (!this.ctx.animations.isNsfwEnabled()) {
+      log.info(`[WickedWhims] ${event.ww_event_type} skipped: NSFW is off for an OpenAI stage`);
       return { status: InteractionEventStatus.NSFW_DISABLED };
     }
 
     if (!containsPlayerSim(event)) {
+      log.info(`[WickedWhims] ${event.ww_event_type} skipped: no player sim in it`);
       return { status: InteractionEventStatus.NOOP };
     }
 
     let preAction;
+    // Set when the animation has no mapping text and the player maps animations: the mod
+    // shows its "Help Map Animation" notice next to the scene
+    let unmappedAnimation = false;
 
     const animation = await this.ctx.animations.getAnimation(event.animation_author, event.animation_identifier);
 
@@ -1038,12 +1045,19 @@ ${factsBlock}
     } else if (event.ww_event_type === WWEventType.ACTIVE) {
       if (event.testing_action) {
         preAction = event.testing_action;
-      } else if (animation) {
+        // An online row can arrive with no act at all
+      } else if (animation && typeof (animation.act as unknown) === 'string' && animation.act.trim()) {
         preAction = animation.act;
-      } else if (this.ctx.animations.isAnimationMappingEnabled()) {
-        return { status: InteractionEventStatus.UNMAPPED_ANIMATION };
       } else {
-        return { status: InteractionEventStatus.NOOP };
+        // No mapping text: the act and the place stand in, as a synthesized line does for
+        // an unmapped interaction
+        preAction = describeUnmappedAct(
+          event.sentient_sims.map((sim) => sim.name),
+          event.sex_category,
+          event.sex_location,
+        );
+        unmappedAnimation = this.ctx.animations.isAnimationMappingEnabled();
+        log.info(`[WickedWhims] unmapped animation ${animationKey} "${event.animation_name}"; playing "${preAction}"`);
       }
     } else {
       if (animation?.act) {
@@ -1054,16 +1068,16 @@ ${factsBlock}
       return { status: InteractionEventStatus.MAPPING_ANIMATION };
     }
 
-    return this.runGeneration(event, {
-      preAction,
-      prePreAction: 'At {location} ({location_type}), {postures},',
-      sexCategoryType: event.sex_category,
-      sexLocationType: event.sex_location,
-      maxResponseTokens: wickedWhimsMaxResponseTokens,
-      // The review is told to cut physical beats and was stripping speaker names off WW
-      // scenes; the bench scored WW the same or worse with it
-      skipReview: true,
+    // Director, actors, reviewer and scores like every other scene; the intimate-act rules
+    // (performers only, no facts, the output guard, no continuation) apply inside
+    const result = await this.runDirectedGeneration(event, {
+      action: preAction,
+      deadlineAt: deadline.deadlineAt,
     });
+    if (result.status !== InteractionEventStatus.GENERATED) {
+      log.info(`[WickedWhims] ${event.ww_event_type} ${animationKey}: no scene (${result.status})`);
+    }
+    return unmappedAnimation ? { ...result, unmapped_animation: true } : result;
   }
 
   async handleDoSomething(doSomethingEvent: DoSomethingInteractionEvent, deadline: RequestDeadline = {}) {
@@ -1438,6 +1452,18 @@ ${factsBlock}
     return isRefusal(text) ? 'model refusal' : undefined;
   }
 
+  // The first problem among a directed sexual act's lines and thoughts, each judged alone
+  // (the refusal check is anchored to the start of a text)
+  private intimateSceneProblem(event: InteractionEvents, texts: string[]): string | undefined {
+    for (const text of texts) {
+      const problem = this.generatedOutputProblem(event, text);
+      if (problem) {
+        return problem;
+      }
+    }
+    return undefined;
+  }
+
   // A diary remembers a sexual act only its own adult author took part in
   // (util/intimateScene). Diaries below child were already off (J8, which ended Elliot
   // Jr's infant diaries narrating Lillie's nights); this covers a child or teen in the
@@ -1640,8 +1666,14 @@ ${factsBlock}
       AIActionType.DIRECTED_SCENE_DIRECTOR,
       interactionActionType,
     );
+
+    // A sexual act (WickedWhims) is told from its performers alone (util/intimateScene)
+    const intimateAct = event.event_type === SSEventType.WICKED_WHIMS;
+    const intimateEvent = intimateAct ? (event as WWInteractionEvent) : undefined;
     const promptOptions: PromptRequestBuilderOptions = {
       action: options.action,
+      sexCategoryType: intimateEvent?.sex_category,
+      sexLocationType: intimateEvent?.sex_location,
       apiType: directorConfig.apiType,
       modelSettings: await this.ctx.modelSettings.getModelSettings(directorConfig.model, directorConfig.apiType),
     };
@@ -1745,6 +1777,9 @@ ${factsBlock}
       const valenceClause = valenceFraming((event as { valence?: string }).valence);
       if (sceneAction && valenceClause) {
         sceneAction = `${sceneAction} ${valenceClause}`;
+      }
+      if (sceneAction && intimateAct) {
+        sceneAction = `${sceneAction} ${INTIMATE_SCENE_FRAMING}`;
       }
     }
 
@@ -1863,17 +1898,20 @@ ${factsBlock}
       const sim = performers[i];
       let actorFacts: string;
       try {
-        actorFacts = this.ctx.semanticMemory.recall(sim.sim_id, {
-          mentionedSimIds: performers.filter((other) => other !== sim).map((other) => other.sim_id),
-          // Anyone the briefing or the scene so far names gets their real fact line, so a
-          // solo introspection about Adrian cannot read Adrian's absence as nonexistence
-          mentionedText: [
-            actorPrompts.get(sim.name) ?? '',
-            previouslyBlock,
-            sceneAction,
-            toTranscript(sceneLines),
-          ].join('\n'),
-        });
+        // No facts in a sexual act: on 09-23 they were the household's toddler
+        actorFacts = intimateAct
+          ? ''
+          : this.ctx.semanticMemory.recall(sim.sim_id, {
+              mentionedSimIds: performers.filter((other) => other !== sim).map((other) => other.sim_id),
+              // Anyone the briefing or the scene so far names gets their real fact line, so a
+              // solo introspection about Adrian cannot read Adrian's absence as nonexistence
+              mentionedText: [
+                actorPrompts.get(sim.name) ?? '',
+                previouslyBlock,
+                sceneAction,
+                toTranscript(sceneLines),
+              ].join('\n'),
+            });
       } catch {
         // Speaking without facts is the pre-3.1 behaviour; a silent Sim is not
         actorFacts = '';
@@ -2054,6 +2092,15 @@ ${factsBlock}
     log.info(`[Pipeline] Final cut: ${useReviewerCut ? "reviewer's cut" : "actors' original lines"}`);
     const dialogueText = toTranscript(finalLines);
 
+    // Nothing that fails the guard is stored or voiced, its thoughts included
+    const intimateProblem = intimateAct
+      ? this.intimateSceneProblem(event, [...finalLines.map((line) => line.text), ...monologueBySim.values()])
+      : undefined;
+    if (intimateProblem) {
+      log.warn(`[Pipeline] Discarded ${event.event_type} scene (${intimateProblem}): ${dialogueText.slice(0, 160)}`);
+      return { status: InteractionEventStatus.NOOP, exchanges };
+    }
+
     // 4. Scores: per-character memory and action ratings for the scene that just played.
     //    Memory scores become each sim's importance on their private monologue row; action
     //    scores are the Full Autonomy trigger — over threshold, the sim graduates to an
@@ -2135,8 +2182,16 @@ ${factsBlock}
     // the queue for most of the mod's 80 s and the interaction would time out behind it.
     // The scene closes as idle instead; the interaction runs next with the time to itself.
     const gameWaiting = this.ctx.generationQueue.hasBlockedRequestWaiting();
+    // A sexual act never continues on its own: WickedWhims sends a fresh event for every
+    // animation, and a continuation round would air over the next one's scene
     const continueNext =
-      wantsMore && roundsAllowed && !overBudget() && !partnerless && !options.saveMemory && !gameWaiting;
+      wantsMore &&
+      roundsAllowed &&
+      !overBudget() &&
+      !partnerless &&
+      !options.saveMemory &&
+      !gameWaiting &&
+      !intimateAct;
     if (wantsMore && !continueNext) {
       log.info(
         `[Pipeline] Scene wants another round but ${
@@ -2148,7 +2203,9 @@ ${factsBlock}
                 ? 'the only other speaker is the player — waiting for them'
                 : gameWaiting
                   ? 'the game is waiting on an interaction — yielding to it'
-                  : 'this path does not continue'
+                  : intimateAct
+                    ? 'WickedWhims paces a sexual act by its animations'
+                    : 'this path does not continue'
         }`,
       );
     }
@@ -2185,7 +2242,7 @@ ${factsBlock}
       // an anonymous line of narration
       newMemory.action = toTranscript([playerLine]);
     }
-    const interactionName = (event as Partial<InteractionEvent>).interaction_name;
+    const interactionName = (event as Partial<InteractionEvent>).interaction_name ?? intimateEvent?.animation_name;
     if (interactionName) {
       newMemory.interaction_name = interactionName;
     }
@@ -2407,6 +2464,20 @@ ${factsBlock}
       return { status: InteractionEventStatus.NOOP, exchanges };
     }
 
+    const intimateEvent = event.event_type === SSEventType.WICKED_WHIMS ? (event as WWInteractionEvent) : undefined;
+    const intimateProblem = intimateEvent
+      ? this.intimateSceneProblem(
+          event,
+          thoughts.map(({ think }) => think),
+        )
+      : undefined;
+    if (intimateProblem) {
+      log.warn(
+        `[Pipeline] Discarded ${event.event_type} thought (${intimateProblem}): ${thoughts[0].think.slice(0, 160)}`,
+      );
+      return { status: InteractionEventStatus.NOOP, exchanges };
+    }
+
     const sceneScores = await this.runSceneScores(
       sharedScene || sceneAction,
       '',
@@ -2432,7 +2503,7 @@ ${factsBlock}
       new Map(thoughts.map(({ performer, think }) => [performer.name, think])),
     );
 
-    const interactionName = (event as Partial<InteractionEvent>).interaction_name;
+    const interactionName = (event as Partial<InteractionEvent>).interaction_name ?? intimateEvent?.animation_name;
     const rows = thoughts.map(({ performer, think }) => {
       const text = `${performer.name} (thinking): ${think}`;
       const memory: MemoryEntity = {

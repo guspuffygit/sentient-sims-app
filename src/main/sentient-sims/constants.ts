@@ -67,10 +67,6 @@ CHARACTER: (breathless) "[what they say]"
 
 Use each character's full name. No narration, no prose, no action descriptions outside the delivery notes.`;
 
-// A WW scene is written whole in one call; the 90-token default cut most of them off
-// mid-line (bench: 74% truncated at 90, 22% at 160 on Llama 3.3 70B)
-export const wickedWhimsMaxResponseTokens = 160;
-
 export const defaultSystemPrompt = `You are narrating a scene in The Sims involving {participants}. Follow the <DIRECTOR> block for tone and scene objective.
 
 Write dialogue with optional delivery notes — how a character feels or how they say the line, not what they are physically doing:

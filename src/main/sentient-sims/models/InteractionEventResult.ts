@@ -29,4 +29,7 @@ export type InteractionEventResult = {
   exchanges?: LLMExchange[];
   input?: any;
   result_source?: 'prefetch' | 'preaction_fallback' | 'synchronous';
+  // A WickedWhims animation played without mapping text while the player maps animations:
+  // the mod shows its "Help Map Animation" notice
+  unmapped_animation?: boolean;
 };

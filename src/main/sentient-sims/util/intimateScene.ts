@@ -78,6 +78,11 @@ export function isRefusal(text: string | undefined): boolean {
   return REFUSAL_OPENING.test(trimmed) || EXPLICIT_REFUSAL.test(trimmed);
 }
 
+// Closes a sexual act's beat for the director and the actors (model-only, never stored):
+// the everyday directed prompts know nothing about the scene being sexual
+export const INTIMATE_SCENE_FRAMING =
+  'This is an intimate adult scene between consenting adults: the characters talk to each other during it, explicit and uninhibited when the moment calls for it, each true to their personality and mood.';
+
 type Performer = { sim_id: string; name: string; age?: SimAge | number | string };
 
 // Everyone the state report names (reported sims and everyone they perceive, any tier)

@@ -9,6 +9,14 @@ import fs from 'fs';
 import path from 'path';
 import log from 'electron-log';
 
+// Every AI call a Wicked Whims scene makes (AIService.runDirectedGeneration)
+const WICKED_WHIMS_SCENE_STAGES = [
+  AIActionType.DIRECTED_SCENE_DIRECTOR,
+  AIActionType.DIRECTED_SCENE_ACTOR,
+  AIActionType.DIRECTED_SCENE_REVIEWER,
+  AIActionType.DIRECTED_SCENE_SCORES,
+];
+
 const FETCH_RETRY_COOLDOWN_MS = 60_000;
 const FETCH_TIMEOUT_MS = 15_000;
 
@@ -264,10 +272,13 @@ export class AnimationsService {
   }
 
   isNsfwEnabled(): boolean {
-    // OpenAI censors nsfw content, gate only applies to the provider that
-    // actually handles Wicked Whims generations
-    const wickedWhimsApiType = this.ctx.providerConfigs.getConfigForAction(AIActionType.WICKED_WHIMS).apiType;
-    if (wickedWhimsApiType !== ApiType.OpenAI) {
+    // OpenAI censors nsfw content, so the gate applies when any stage of a Wicked Whims
+    // scene would run on it
+    const onOpenAI = WICKED_WHIMS_SCENE_STAGES.some(
+      (stage) =>
+        this.ctx.providerConfigs.getConfigForDirectedStage(stage, AIActionType.WICKED_WHIMS).apiType === ApiType.OpenAI,
+    );
+    if (!onOpenAI) {
       return true;
     }
 

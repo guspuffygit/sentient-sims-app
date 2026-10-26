@@ -44,6 +44,11 @@ export class ProviderConfigService {
    */
   getConfigForDirectedStage(stage: AIActionType, interaction?: AIActionType): ResolvedProviderConfig {
     const overrides = this.ctx.settings.aiActionProviderOverrides;
+    // A sexual act stays on the provider picked for Wicked Whims at every stage: that pick
+    // is about who may write explicit content, which a stage's own pick never considered
+    if (interaction === AIActionType.WICKED_WHIMS && overrides[interaction]) {
+      return this.getResolvedConfig(overrides[interaction]);
+    }
     return this.getResolvedConfig(overrides[stage] ?? (interaction ? overrides[interaction] : undefined));
   }
 
