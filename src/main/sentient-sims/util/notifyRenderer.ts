@@ -51,23 +51,6 @@ export function notifyProviderHealth(health: { down: boolean; failures: number; 
   }
 }
 
-// A player with voices off may never learn their Sims can talk: one popup in
-// the app and one notification in the game say where to turn them on
-export function notifyVoicesOff() {
-  log.info('Voices are off while a scene airs; telling the player once');
-  sendModNotification({
-    type: ModWebsocketMessageType.NOTIFICATION,
-    notification: {
-      title: 'Your Sims can talk!',
-      message: 'Voices are off, so you only see their words. Turn them on in the Sentient Sims app: Settings, Voice.',
-      message_type: ModWebsocketNotificationType.MESSAGE,
-    },
-  });
-  sendPopUpNotification(
-    "Your Sims can talk! Voices are off right now, so you only see their words in the game. Turn them on in Settings, Voice tab, 'Enable Text to Speech'. Sentient Sims AI voices come with a Patreon membership, or you can use your own ElevenLabs key.",
-  );
-}
-
 // V-1: game clock -> renderer playback clock
 export function notifyClockState(state: ClockState) {
   notifyAllWindows('clock-state', state);

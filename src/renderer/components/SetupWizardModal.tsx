@@ -24,8 +24,9 @@ import {
   StepLabel,
   Alert,
   CircularProgress,
+  Stack,
 } from '@mui/material';
-import { Dispatch, Fragment, ReactNode, SetStateAction, useEffect, useRef, useState } from 'react';
+import { Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 import { useAISettings } from 'renderer/providers/AISettingsProvider';
@@ -47,7 +48,7 @@ import { ModInstallOutcome, useModUpdate } from 'renderer/providers/ModUpdatePro
 import { appApiUrl, defaultVoiceInputHotkeyFor, patreonMembershipUrl } from 'main/sentient-sims/constants';
 import { voiceHotkeyLabel } from 'main/sentient-sims/models/VoiceHotkeyPresets';
 import { ElevenLabsKeySetup } from 'renderer/settings/voice/ElevenLabsKeySetup';
-import { VoiceHotkeyRow } from 'renderer/settings/voice/VoiceInputSettingsComponent';
+import { AboutYouFields, MicrophoneSetup, VoiceHotkeyRow } from 'renderer/settings/voice/VoiceInputSettingsComponent';
 import { getPatreonOauthUrl, PatreonActionButton } from 'renderer/PatreonComponent';
 import { LoginComponent } from './LoginComponent';
 import { QuickstartList } from './QuickstartCard';
@@ -272,26 +273,13 @@ function ModSetupPage({ setPage }: PageProps) {
   );
 }
 
-type CardPoint =
-  | string
-  | {
-      preLinkText?: string;
-      linkUrl: string;
-      linkLabel: string;
-      postLinkText?: string;
-    };
-
 interface CardData {
   header: string;
   page: WizardPage;
-  advanced?: boolean;
   recommended?: boolean;
   // A free trial link; the card shows a "Start free trial" button when set
   freeTrialUrl?: string;
-  data: {
-    header?: string;
-    points: CardPoint[];
-  }[];
+  points: string[];
 }
 
 // The options shown under the Patreon card, for players not subscribing
@@ -299,58 +287,29 @@ const cardData: CardData[] = [
   {
     header: 'OpenAI',
     page: WizardPage.OPEN_AI_SETUP,
-    data: [
-      {
-        header: 'Cost',
-        points: ['Refillable credits', 'Usage based', 'Needs your own OpenAI API key'],
-      },
-      {
-        header: 'Features',
-        points: ['Censored', 'WickedWhims unsupported'],
-      },
+    points: [
+      'Refillable credits',
+      'Usage based',
+      'Needs your own OpenAI API key',
+      'Censored',
+      'WickedWhims unsupported',
     ],
   },
   {
     header: 'Gemini',
     page: WizardPage.GEMINI_SETUP,
-    data: [
-      {
-        header: 'Cost',
-        points: ['Pay-as-you-go', 'Small free tier (20 requests a day)', 'Needs your own Google API key'],
-      },
-      {
-        header: 'Features',
-        points: ['Censored', 'WickedWhims unsupported'],
-      },
+    points: [
+      'Pay-as-you-go',
+      'Small free tier (20 requests a day)',
+      'Needs your own Google API key',
+      'Censored',
+      'WickedWhims unsupported',
     ],
   },
   {
     header: 'Self Hosted',
     page: WizardPage.SELF_HOSTED_SETUP,
-    data: [
-      {
-        header: 'Cost',
-        points: ['Free', 'Requires RTX 3090/4090/5090 GPU', 'Advanced Setup'],
-      },
-      {
-        header: 'Features',
-        points: ['Uncensored', 'Supports WickedWhims'],
-      },
-      {
-        header: 'Supported Software',
-        points: [
-          {
-            linkUrl: 'https://github.com/LostRuins/koboldcpp',
-            linkLabel: 'koboldcpp',
-          },
-          {
-            preLinkText: '',
-            linkUrl: 'https://docs.vllm.ai/en/latest/',
-            linkLabel: 'vLLM',
-          },
-        ],
-      },
-    ],
+    points: ['Free', 'Requires RTX 3090/4090/5090 GPU', 'Advanced setup', 'Uncensored', 'Supports WickedWhims'],
   },
 ];
 
@@ -708,10 +667,65 @@ function EnableModsPage({ setPage }: PageProps) {
   );
 }
 
+// How long a game that was open before this page may take to connect before
+// the page asks for a restart, and how long a game opened from here may take
+const OPEN_BEFORE_GRACE_MS = 15000;
+const OPENED_HERE_GRACE_MS = 180000;
+
+// Asks the app every few seconds whether The Sims 4 is running, while waiting
+// for the mod. True once the game has been open long enough without connecting
+// that it needs a restart: it was open before the mod was installed or before
+// mods were switched on, and a running game never loads a new mod
+function useGameNeedsRestart(connected: boolean) {
+  const [needsRestart, setNeedsRestart] = useState(false);
+  const firstSeenRef = useRef<{ at: number; openBefore: boolean } | undefined>(undefined);
+  const polledRef = useRef(false);
+
+  useEffect(() => {
+    if (connected) {
+      return undefined;
+    }
+    let cancelled = false;
+    const poll = async () => {
+      let running = false;
+      try {
+        const response = await fetch(`${appApiUrl}/update/game-running`);
+        running = ((await response.json()) as { running?: boolean }).running === true;
+      } catch {
+        // An unanswered check reads as not running
+      }
+      if (cancelled) {
+        return;
+      }
+      const firstPoll = !polledRef.current;
+      polledRef.current = true;
+      if (!running) {
+        firstSeenRef.current = undefined;
+        setNeedsRestart(false);
+        return;
+      }
+      firstSeenRef.current ??= { at: Date.now(), openBefore: firstPoll };
+      const grace = firstSeenRef.current.openBefore ? OPEN_BEFORE_GRACE_MS : OPENED_HERE_GRACE_MS;
+      setNeedsRestart(Date.now() - firstSeenRef.current.at >= grace);
+    };
+    void poll();
+    const intervalId = setInterval(() => {
+      void poll();
+    }, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [connected]);
+
+  return needsRestart && !connected;
+}
+
 // The last step: start the game. Celebrates when the mod connects, then shows
-// how to play.
+// how to play. Finish waits for the game; "I'll do this later" leaves without it
 function ConnectModPage({ setPage, finish }: PageProps) {
   const { status } = useWebsocket();
+  const needsRestart = useGameNeedsRestart(status.mod);
 
   return (
     <WizardStep
@@ -722,7 +736,7 @@ function ConnectModPage({ setPage, finish }: PageProps) {
             variant="outlined"
             color="secondary"
             onClick={() => {
-              setPage(WizardPage.VOICE_SETUP);
+              setPage(WizardPage.ABOUT_YOU);
             }}
           >
             Back
@@ -730,6 +744,7 @@ function ConnectModPage({ setPage, finish }: PageProps) {
           <Button
             variant="contained"
             color={status.mod ? 'success' : 'primary'}
+            disabled={!status.mod}
             onClick={() => {
               finish?.();
             }}
@@ -771,10 +786,27 @@ function ConnectModPage({ setPage, finish }: PageProps) {
           <Typography variant="body1" sx={{ marginTop: 0.5 }}>
             That&apos;s it! This page lights up when your game connects.
           </Typography>
+          {needsRestart ? (
+            <Alert severity="info" sx={{ marginTop: 3, textAlign: 'left' }}>
+              The Sims 4 is open but the mod hasn&apos;t connected yet. A game that was already open before setup
+              can&apos;t load the mod: close The Sims 4 and open it again to finish.
+            </Alert>
+          ) : null}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginTop: 3, color: 'text.secondary' }}>
             <CircularProgress size={16} color="inherit" />
             <Typography variant="body2">Waiting for the game...</Typography>
           </Box>
+          <Link
+            component="button"
+            variant="body2"
+            color="text.secondary"
+            sx={{ marginTop: 3 }}
+            onClick={() => {
+              finish?.();
+            }}
+          >
+            I&apos;ll do this later
+          </Link>
         </Box>
       )}
     </WizardStep>
@@ -792,37 +824,23 @@ const TRANSCRIPTION_FOR_AI: Partial<Record<ApiType, ApiType>> = {
 // Voices: a Patreon member gets Sentient Sims AI voices with nothing to set up; anyone
 // else starts with voices off and can turn them on with their own ElevenLabs key
 function VoiceSetupPage({ setPage }: PageProps) {
-  const { isMac } = window.electron;
   const aiSettings = useAISettings();
   const { userAttributes, authStatus, loading: authLoading } = useAuth();
   const isMember = new PatreonUser(userAttributes).isMember();
-  const voiceInput = useSetting<boolean>(SettingsEnum.VOICE_INPUT_ENABLED, true);
-  const voiceInputProvider = useSetting<string>(SettingsEnum.VOICE_INPUT_PROVIDER, ApiType.SentientSimsAI);
-  const hotkey = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY, defaultVoiceInputHotkeyFor(isMac));
-  const hotkeyMode = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY_MODE, 'hold');
-  const key = voiceHotkeyLabel(hotkey.value, isMac);
   const usesElevenLabs = aiSettings.ttsApiType === ApiType.ElevenLabs;
-  const transcription = TRANSCRIPTION_FOR_AI[aiSettings.aiApiType];
+  const [elevenLabsKeyWorks, setElevenLabsKeyWorks] = useState(false);
+  const needsElevenLabsKey = aiSettings.ttsEnabled && usesElevenLabs && !elevenLabsKeyWorks;
 
   // Waits for the membership and settings to load, then sets the page up once
   const membershipKnown = authStatus === 'unauthenticated' || (!!userAttributes && !authLoading);
-  const settingsLoaded =
-    !aiSettings.aiApiTypeSetting.isLoading && !aiSettings.ttsApiTypeSetting.isLoading && !voiceInput.isLoading;
+  const settingsLoaded = !aiSettings.aiApiTypeSetting.isLoading && !aiSettings.ttsApiTypeSetting.isLoading;
   const preparedRef = useRef(false);
   useEffect(() => {
     if (preparedRef.current || !membershipKnown || !settingsLoaded) {
       return;
     }
     preparedRef.current = true;
-    if (transcription) {
-      void voiceInputProvider.setSetting(transcription);
-    } else {
-      void voiceInput.setSetting(false);
-    }
-    if (isMember) {
-      return;
-    }
-    if (!usesElevenLabs) {
+    if (!isMember && !usesElevenLabs) {
       void aiSettings.ttsEnabledSetting.setSetting(false);
     }
   });
@@ -856,7 +874,7 @@ function VoiceSetupPage({ setPage }: PageProps) {
           <MenuItem value={ApiType.ElevenLabs}>ElevenLabs (your own key)</MenuItem>
         </Select>
         {usesElevenLabs ? (
-          <ElevenLabsKeySetup />
+          <ElevenLabsKeySetup autoCheck onCheckedChange={setElevenLabsKeyWorks} />
         ) : (
           <Typography variant="body2" sx={{ color: 'success.main' }}>
             Voices come with your Patreon membership. Nothing else to set up.
@@ -870,7 +888,7 @@ function VoiceSetupPage({ setPage }: PageProps) {
         <Typography variant="body2" sx={{ marginBottom: 1 }}>
           Voices use your own ElevenLabs key. (Sentient Sims AI voices come with a Patreon membership.)
         </Typography>
-        <ElevenLabsKeySetup />
+        <ElevenLabsKeySetup autoCheck onCheckedChange={setElevenLabsKeyWorks} />
       </Box>
     );
   }
@@ -878,7 +896,7 @@ function VoiceSetupPage({ setPage }: PageProps) {
   return (
     <WizardStep
       title="Voices"
-      description="Your Sims can speak out loud, and you can talk back with your microphone."
+      description="Your Sims can speak out loud."
       maxWidth={620}
       actions={
         <>
@@ -893,8 +911,9 @@ function VoiceSetupPage({ setPage }: PageProps) {
           </Button>
           <Button
             variant="contained"
+            disabled={needsElevenLabsKey}
             onClick={() => {
-              setPage(WizardPage.CONNECT_MOD);
+              setPage(WizardPage.MICROPHONE_SETUP);
             }}
           >
             Next
@@ -914,26 +933,94 @@ function VoiceSetupPage({ setPage }: PageProps) {
         }
       />
       {voiceDetails}
+      {needsElevenLabsKey ? (
+        <Typography variant="caption" component="p" align="center" sx={{ color: 'text.secondary' }}>
+          Next unlocks once your ElevenLabs key works. Turn voices off to skip this.
+        </Typography>
+      ) : null}
+    </WizardStep>
+  );
+}
+
+// The microphone: switched on, a picker with a live level and a test that turns
+// three seconds of speech into text, and the talk key. Voice input follows the
+// AI set up earlier; with none that can transcribe, it stays off
+function MicrophoneSetupPage({ setPage }: PageProps) {
+  const { isMac } = window.electron;
+  const aiSettings = useAISettings();
+  const voiceInput = useSetting<boolean>(SettingsEnum.VOICE_INPUT_ENABLED, true);
+  const voiceInputProvider = useSetting<string>(SettingsEnum.VOICE_INPUT_PROVIDER, ApiType.SentientSimsAI);
+  const hotkey = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY, defaultVoiceInputHotkeyFor(isMac));
+  const hotkeyMode = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY_MODE, 'hold');
+  const key = voiceHotkeyLabel(hotkey.value, isMac);
+  const transcription = TRANSCRIPTION_FOR_AI[aiSettings.aiApiType];
+
+  // Waits for the settings to load, then points transcription at the AI once
+  const settingsLoaded = !aiSettings.aiApiTypeSetting.isLoading && !voiceInput.isLoading;
+  const preparedRef = useRef(false);
+  useEffect(() => {
+    if (preparedRef.current || !settingsLoaded) {
+      return;
+    }
+    preparedRef.current = true;
+    if (transcription) {
+      void voiceInputProvider.setSetting(transcription);
+    } else {
+      void voiceInput.setSetting(false);
+    }
+  });
+
+  return (
+    <WizardStep
+      title="Your microphone"
+      description="Talk to your Sims out loud: hold a key in the game and speak."
+      maxWidth={620}
+      actions={
+        <>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              setPage(WizardPage.VOICE_SETUP);
+            }}
+          >
+            Back
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setPage(WizardPage.ABOUT_YOU);
+            }}
+          >
+            Next
+          </Button>
+        </>
+      }
+    >
       <FormControlLabel
         label={<Typography variant="subtitle1">Talk to your Sims with your microphone</Typography>}
         control={
-          <Switch checked={voiceInput.value} onChange={(change) => void voiceInput.setSetting(change.target.checked)} />
+          <Switch
+            checked={voiceInput.value}
+            disabled={!transcription}
+            onChange={(change) => void voiceInput.setSetting(change.target.checked)}
+          />
         }
       />
       {voiceInput.value ? (
-        <Box sx={{ paddingLeft: 6 }}>
+        <Stack spacing={2} sx={{ paddingLeft: 6, marginTop: 1 }}>
+          <MicrophoneSetup showLevel />
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Speak and watch the level move. Press Test and say a few words to see them turned into text by{' '}
+            {transcription ? ApiTypeName(transcription) : 'your AI'}.
+          </Typography>
           <VoiceHotkeyRow />
-          <Typography variant="body2" sx={{ marginTop: 1 }}>
+          <Typography variant="body2">
             {hotkeyMode.value === 'toggle'
               ? `In the game, press ${key} to start talking and press it again when you're done.`
               : `In the game, hold ${key} while you talk and let go when you're done.`}
           </Typography>
-          {transcription ? (
-            <Typography variant="body2" sx={{ color: 'text.secondary', marginTop: 0.5 }}>
-              Your voice is turned into text by {ApiTypeName(transcription)}, the AI you just set up.
-            </Typography>
-          ) : null}
-        </Box>
+        </Stack>
       ) : (
         <Typography variant="body2" sx={{ color: 'text.secondary', paddingLeft: 6 }}>
           {transcription
@@ -941,6 +1028,44 @@ function VoiceSetupPage({ setPage }: PageProps) {
             : 'Talking needs Sentient Sims AI, OpenAI or Gemini to turn your voice into text. You can set one up later in Settings, Voice, and type to your Sims until then.'}
         </Typography>
       )}
+    </WizardStep>
+  );
+}
+
+// Who the player is to their Sims, so they know how to address them. Optional
+function AboutYouPage({ setPage }: PageProps) {
+  const next = () => {
+    setPage(WizardPage.CONNECT_MOD);
+  };
+
+  return (
+    <WizardStep
+      title="About you"
+      description="Tell your Sims who you are, so they know how to talk to you. This is optional, and you can change it any time in Settings, Voice."
+      maxWidth={620}
+      actions={
+        <>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              setPage(WizardPage.MICROPHONE_SETUP);
+            }}
+          >
+            Back
+          </Button>
+          <Button color="secondary" onClick={next}>
+            Skip
+          </Button>
+          <Button variant="contained" onClick={next}>
+            Next
+          </Button>
+        </>
+      }
+    >
+      <Stack spacing={2}>
+        <AboutYouFields />
+      </Stack>
     </WizardStep>
   );
 }
@@ -1121,54 +1246,21 @@ function AIProviderPage({ setPage }: PageProps) {
                     Start free trial
                   </Button>
                 ) : null}
-                {card.data.map((section) => (
-                  <Fragment key={section.header ?? card.header}>
-                    {section.header && (
-                      <Typography
-                        variant="overline"
-                        sx={{ color: 'text.secondary', letterSpacing: '0.08em', lineHeight: 2 }}
-                      >
-                        {section.header}
-                      </Typography>
-                    )}
-
-                    <List dense disablePadding sx={{ marginBottom: 1 }}>
-                      {section.points.map((point) => (
-                        <ListItem
-                          key={typeof point === 'string' ? point : point.linkLabel}
-                          disablePadding
-                          disableGutters
-                        >
-                          <ListItemIcon sx={{ minWidth: 20 }}>
-                            <FiberManualRecordIcon
-                              sx={{
-                                fontSize: '0.4rem',
-                                color: 'primary.light',
-                              }}
-                            />
-                          </ListItemIcon>
-                          {typeof point === 'string' ? (
-                            <ListItemText primary={point} slotProps={{ primary: { variant: 'body2' } }} />
-                          ) : (
-                            <ListItemText slotProps={{ primary: { variant: 'body2' } }}>
-                              {point.preLinkText}
-                              <Link
-                                href={point.linkUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                color="primary"
-                                sx={{ fontWeight: '500' }}
-                              >
-                                {point.linkLabel}
-                              </Link>
-                              {point.postLinkText}
-                            </ListItemText>
-                          )}
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Fragment>
-                ))}
+                <List dense disablePadding>
+                  {card.points.map((point) => (
+                    <ListItem key={point} disablePadding disableGutters>
+                      <ListItemIcon sx={{ minWidth: 20 }}>
+                        <FiberManualRecordIcon
+                          sx={{
+                            fontSize: '0.4rem',
+                            color: 'primary.light',
+                          }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText primary={point} slotProps={{ primary: { variant: 'body2' } }} />
+                    </ListItem>
+                  ))}
+                </List>
               </CardContent>
             </Card>
           </Grid>
@@ -1351,7 +1443,7 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
       {body}
       {isLoggedIn && !isMember ? (
         <Typography variant="caption" component="p" align="center" sx={{ color: 'text.secondary', marginTop: 2 }}>
-          Next unlocks once your membership shows here.
+          You can continue once your account is linked.
         </Typography>
       ) : null}
     </WizardStep>
@@ -1705,7 +1797,6 @@ function SelfHostedSetupPage({ setPage }: PageProps) {
 export function SetupWizardModal({ open, setOpen }: SetupWizardModalParameters) {
   const currentWizardPage = useSetting<WizardPage>(SettingsEnum.SETUP_WIZARD_PAGE, WizardPage.INIT);
   const setupComplete = useSetting<boolean>(SettingsEnum.SETUP_COMPLETE, false);
-  const voicesOffNudgeShown = useSetting<boolean>(SettingsEnum.VOICES_OFF_NUDGE_SHOWN, false);
   const setPage = (wizardPage: WizardPage) => {
     void currentWizardPage.setSetting(wizardPage);
   };
@@ -1728,12 +1819,12 @@ export function SetupWizardModal({ open, setOpen }: SetupWizardModalParameters) 
 
   const finish = () => {
     void setupComplete.setSetting(true);
-    void voicesOffNudgeShown.setSetting(false);
     close();
   };
 
+  // No onClose: a click outside the wizard or Escape leaves it open; only its X closes it
   return (
-    <Modal open={open} onClose={close}>
+    <Modal open={open}>
       <Box
         sx={{
           position: 'absolute',
@@ -1769,6 +1860,8 @@ export function SetupWizardModal({ open, setOpen }: SetupWizardModalParameters) 
         {currentWizardPage.value === WizardPage.GEMINI_SETUP && <GeminiSetupPage setPage={setPage} />}
         {currentWizardPage.value === WizardPage.SELF_HOSTED_SETUP && <SelfHostedSetupPage setPage={setPage} />}
         {currentWizardPage.value === WizardPage.VOICE_SETUP && <VoiceSetupPage setPage={setPage} />}
+        {currentWizardPage.value === WizardPage.MICROPHONE_SETUP && <MicrophoneSetupPage setPage={setPage} />}
+        {currentWizardPage.value === WizardPage.ABOUT_YOU && <AboutYouPage setPage={setPage} />}
         {currentWizardPage.value === WizardPage.CONNECT_MOD && <ConnectModPage setPage={setPage} finish={finish} />}
         {currentWizardPage.value === WizardPage.INSTALL_MOD && <InstallModPage setPage={setPage} />}
         {currentWizardPage.value === WizardPage.ENABLE_MODS && <EnableModsPage setPage={setPage} />}

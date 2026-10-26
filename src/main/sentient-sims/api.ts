@@ -43,6 +43,7 @@ export function runApi(ctx: ApiContext) {
   expressApp.get('/versions/game', ctx.controller.version.getGameVersion);
 
   expressApp.post('/update/mod', ctx.controller.update.updateMod);
+  expressApp.get('/update/game-running', ctx.controller.update.gameRunning);
 
   expressApp.get('/participants', ctx.controller.participants.getAllParticipants);
   expressApp.get('/participants/:participantId', ctx.controller.participants.getParticipant);

@@ -40,7 +40,7 @@ interface PatreonActionButtonProps extends PatreonButtonProps {
 
 // A Patreon button that says what it does, for pages with more than one
 export function PatreonActionButton({ url, onClick, label, variant = 'contained' }: PatreonActionButtonProps) {
-  const patreonCoral = '#FF424D';
+  const orange = '#F28A2E';
   return (
     <Button
       href={url}
@@ -56,8 +56,8 @@ export function PatreonActionButton({ url, onClick, label, variant = 'contained'
       }
       sx={
         variant === 'contained'
-          ? { 'backgroundColor': patreonCoral, 'color': '#ffffff', '&:hover': { backgroundColor: '#e63a44' } }
-          : { 'borderColor': patreonCoral, 'color': patreonCoral, '&:hover': { borderColor: patreonCoral } }
+          ? { 'backgroundColor': orange, 'color': '#ffffff', '&:hover': { backgroundColor: '#d9741c' } }
+          : { 'borderColor': orange, 'color': orange, '&:hover': { borderColor: orange } }
       }
     >
       {label}

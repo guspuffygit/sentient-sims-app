@@ -106,13 +106,6 @@ export default function SettingsPage() {
           <TabPanel value={SettingsTabSelectionValue.Settings}>
             <ModsDirectoryComponent />
             <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
-            <Typography variant="h5">AI Providers</Typography>
-            <FormHelperText sx={{ marginBottom: 2 }}>
-              Connections are the shared layer: set up each provider&apos;s API key or endpoint once, then any text,
-              image, or embedding configuration can use it.
-            </FormHelperText>
-            <ProviderConnectionSettingsComponent />
-            <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
             <ProviderConfigsComponent capability="text" />
             <Accordion disableGutters sx={{ marginTop: 3 }}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -130,6 +123,8 @@ export default function SettingsPage() {
                 <PlaybackFollowsClockSetting />
                 {tierRows()}
                 <DebugLogsSettingsComponent />
+                <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
+                <ProviderConnectionSettingsComponent />
                 <Divider sx={{ marginTop: 2, marginBottom: 2 }} />
                 <ProviderConfigsComponent capability="image" />
                 <Divider sx={{ marginTop: 2, marginBottom: 2 }} />

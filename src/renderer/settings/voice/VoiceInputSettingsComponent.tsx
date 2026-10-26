@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Autocomplete,
   Box,
@@ -7,6 +7,7 @@ import {
   Divider,
   FormControlLabel,
   FormHelperText,
+  LinearProgress,
   MenuItem,
   Select,
   Stack,
@@ -93,62 +94,141 @@ export function PlaybackFollowsClockSetting() {
   );
 }
 
-export default function VoiceInputSettingsComponent() {
-  const { isMac } = window.electron;
-  const enabled = useSetting<boolean>(SettingsEnum.VOICE_INPUT_ENABLED, true);
-  const providerSetting = useSetting<string>(SettingsEnum.VOICE_INPUT_PROVIDER, ApiType.SentientSimsAI);
-  const endpoint = useSetting<string>(SettingsEnum.VOICE_INPUT_ENDPOINT, openaiDefaultEndpoint);
-  const apiKey = useSetting<string>(SettingsEnum.VOICE_INPUT_KEY, '');
-  const model = useSetting<string>(SettingsEnum.VOICE_INPUT_MODEL, defaultVoiceInputModel);
-  const models = useSetting<Record<string, string>>(SettingsEnum.VOICE_INPUT_MODELS, {});
-  const openaiKey = useSetting<string>(SettingsEnum.OPENAI_KEY, '');
-  const openrouterKey = useSetting<string>(SettingsEnum.OPENROUTER_KEY, '');
-  const geminiKeys = useSetting<string>(SettingsEnum.GEMINI_KEYS, '');
-  const hotkey = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY, defaultVoiceInputHotkeyFor(isMac));
-  const language = useSetting<string>(SettingsEnum.VOICE_INPUT_LANGUAGE, '');
-  const deviceId = useSetting<string>(SettingsEnum.VOICE_INPUT_DEVICE_ID, '');
+// Who the player is to their Sims: a persona, a name, and an optional line
+// about them. Shared with the setup wizard
+export function AboutYouFields() {
   const persona = useSetting<string>(SettingsEnum.PLAYER_VOICE_PERSONA, 'voice');
   const personaBio = useSetting<string>(SettingsEnum.PLAYER_VOICE_PERSONA_BIO, '');
   const personaName = useSetting<string>(SettingsEnum.PLAYER_VOICE_PERSONA_NAME, '');
 
-  const provider = voiceInputProviderFromValue(providerSetting.value);
   // What the sim is told about the player when "About you" is blank
   const personaFlavor = (PLAYER_VOICE_PERSONAS as readonly string[]).includes(persona.value)
     ? PLAYER_VOICE_PERSONA_FLAVOR[persona.value as PlayerVoicePersona]
     : PLAYER_VOICE_PERSONA_FLAVOR.voice;
-  const hotkeyPresets = voiceHotkeyPresets(isMac, hotkey.value);
 
-  // The main AI settings hold the key each hosted provider signs its requests with
-  const providerKeys: Partial<Record<VoiceInputProvider, { set: boolean; label: string }>> = {
-    [ApiType.OpenAI]: { set: openaiKey.value.trim() !== '', label: 'OpenAI key' },
-    [ApiType.OpenRouter]: { set: openrouterKey.value.trim() !== '', label: 'OpenRouter key' },
-    [ApiType.Gemini]: { set: geminiKeys.value.trim() !== '', label: 'Gemini key' },
-  };
-  const providerKey = providerKeys[provider];
-  let providerKeyHelp: string | undefined;
-  if (providerKey) {
-    providerKeyHelp = providerKey.set
-      ? `Uses your ${providerKey.label} from the AI settings.`
-      : `Add your ${providerKey.label} under AI settings first.`;
+  return (
+    <>
+      <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
+        <Typography sx={{ minWidth: 110 }}>You are:</Typography>
+        <Select size="small" value={persona.value} onChange={(change) => void persona.setSetting(change.target.value)}>
+          {PLAYER_VOICE_PERSONAS.map((option) => (
+            <MenuItem key={option} value={option}>
+              {PLAYER_VOICE_PERSONA_LABELS[option]}
+            </MenuItem>
+          ))}
+        </Select>
+        <TextField
+          size="small"
+          fullWidth
+          label="Your name"
+          value={personaName.value}
+          slotProps={{ htmlInput: { maxLength: 40 } }}
+          placeholder={PLAYER_VOICE_PERSONA_LABELS[persona.value as PlayerVoicePersona]}
+          helperText="What your sims call you, in their memories and subtitles. Leave blank to use the persona above; one word reads best in game."
+          onChange={(change) => void personaName.setSetting(change.target.value)}
+        />
+      </Stack>
+      <TextField
+        size="small"
+        fullWidth
+        multiline
+        minRows={2}
+        label="About you (optional)"
+        value={personaBio.value}
+        placeholder={`Your Sims already know you as ${personaFlavor}.`}
+        helperText="Leave it blank and your Sims know you by the description above. To add more, write one to three short sentences about you in third person."
+        onChange={(change) => void personaBio.setSetting(change.target.value)}
+      />
+    </>
+  );
+}
+
+// How loud the microphone hears the room, live, so a player sees it works
+function MicrophoneLevel({ deviceId, onListening }: { deviceId: string; onListening: () => void }) {
+  const [level, setLevel] = useState(0);
+  const [error, setError] = useState<string>();
+
+  useEffect(() => {
+    // An object, so the async body reads the cleanup's write
+    const run = { stopped: false };
+    let stream: MediaStream | undefined;
+    let context: AudioContext | undefined;
+    let frame = 0;
+
+    void (async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+        });
+        if (run.stopped) {
+          stream.getTracks().forEach((track) => {
+            track.stop();
+          });
+          return;
+        }
+        context = new AudioContext();
+        const analyser = context.createAnalyser();
+        analyser.fftSize = 1024;
+        context.createMediaStreamSource(stream).connect(analyser);
+        const samples = new Float32Array(analyser.fftSize);
+        const tick = () => {
+          analyser.getFloatTimeDomainData(samples);
+          let sum = 0;
+          for (let i = 0; i < samples.length; i += 1) {
+            sum += samples[i] * samples[i];
+          }
+          const rms = Math.sqrt(sum / samples.length);
+          setLevel(Math.min(100, Math.round(rms * 400)));
+          frame = requestAnimationFrame(tick);
+        };
+        tick();
+        setError(undefined);
+        onListening();
+      } catch (err) {
+        if (!run.stopped) {
+          setError(err instanceof Error ? err.message : String(err));
+        }
+      }
+    })();
+
+    return () => {
+      run.stopped = true;
+      cancelAnimationFrame(frame);
+      stream?.getTracks().forEach((track) => {
+        track.stop();
+      });
+      void context?.close();
+    };
+  }, [deviceId, onListening]);
+
+  if (error) {
+    return <FormHelperText error>Can&apos;t hear the microphone: {error}</FormHelperText>;
   }
-  const providerModel = provider === customVoiceInputProvider ? model.value : (models.value[provider] ?? '');
-  const setProviderModel = (value: string) => {
-    if (provider === customVoiceInputProvider) {
-      void model.setSetting(value);
-    } else {
-      void models.setSetting({ ...models.value, [provider]: value });
-    }
-  };
+  return (
+    <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
+      <Typography sx={{ minWidth: 110 }}>Level:</Typography>
+      <LinearProgress
+        variant="determinate"
+        value={level}
+        color={level > 8 ? 'success' : 'primary'}
+        sx={{ flexGrow: 1, height: 10, borderRadius: 5 }}
+      />
+    </Stack>
+  );
+}
 
+// The microphone picker and a three second recording turned into text, plus a
+// live level when asked. Shared with the setup wizard
+export function MicrophoneSetup({ showLevel = false }: { showLevel?: boolean }) {
+  const deviceId = useSetting<string>(SettingsEnum.VOICE_INPUT_DEVICE_ID, '');
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [testState, setTestState] = useState<'idle' | 'recording' | 'transcribing'>('idle');
   const [testResult, setTestResult] = useState<string>();
   const [testError, setTestError] = useState<string>();
 
-  useEffect(() => {
-    if (!enabled.value) {
-      return;
-    }
+  // Device names only show once the microphone has been allowed, so the list
+  // is read again after a recording or the level meter starts
+  const listDevices = useCallback(() => {
     void (async () => {
       try {
         const all = await navigator.mediaDevices.enumerateDevices();
@@ -157,7 +237,11 @@ export default function VoiceInputSettingsComponent() {
         log.error('Unable to enumerate audio devices', err);
       }
     })();
-  }, [enabled.value, testState]);
+  }, []);
+
+  useEffect(() => {
+    listDevices();
+  }, [listDevices, testState]);
 
   async function runTest() {
     setTestResult(undefined);
@@ -205,6 +289,88 @@ export default function VoiceInputSettingsComponent() {
     }
   }
 
+  let testLabel = 'Test';
+  if (testState === 'recording') {
+    testLabel = 'Speak now…';
+  } else if (testState === 'transcribing') {
+    testLabel = 'Transcribing…';
+  }
+
+  return (
+    <>
+      <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
+        <Typography sx={{ minWidth: 110 }}>Microphone:</Typography>
+        <Select
+          size="small"
+          displayEmpty
+          value={deviceId.value}
+          onChange={(change) => void deviceId.setSetting(change.target.value)}
+          sx={{ minWidth: 260 }}
+        >
+          <MenuItem value="">System default</MenuItem>
+          {devices.map((device) => (
+            <MenuItem key={device.deviceId} value={device.deviceId}>
+              {device.label || `Microphone (${device.deviceId.slice(0, 8)})`}
+            </MenuItem>
+          ))}
+        </Select>
+        <Button
+          variant="outlined"
+          startIcon={<MicIcon />}
+          disabled={testState !== 'idle'}
+          onClick={() => void runTest()}
+        >
+          {testLabel}
+        </Button>
+      </Stack>
+      {showLevel && !deviceId.isLoading ? (
+        <MicrophoneLevel deviceId={deviceId.value} onListening={listDevices} />
+      ) : null}
+      {testResult ? <FormHelperText>Heard: “{testResult}”</FormHelperText> : null}
+      {testError ? <FormHelperText error>Error: {testError}</FormHelperText> : null}
+    </>
+  );
+}
+
+export default function VoiceInputSettingsComponent() {
+  const { isMac } = window.electron;
+  const enabled = useSetting<boolean>(SettingsEnum.VOICE_INPUT_ENABLED, true);
+  const providerSetting = useSetting<string>(SettingsEnum.VOICE_INPUT_PROVIDER, ApiType.SentientSimsAI);
+  const endpoint = useSetting<string>(SettingsEnum.VOICE_INPUT_ENDPOINT, openaiDefaultEndpoint);
+  const apiKey = useSetting<string>(SettingsEnum.VOICE_INPUT_KEY, '');
+  const model = useSetting<string>(SettingsEnum.VOICE_INPUT_MODEL, defaultVoiceInputModel);
+  const models = useSetting<Record<string, string>>(SettingsEnum.VOICE_INPUT_MODELS, {});
+  const openaiKey = useSetting<string>(SettingsEnum.OPENAI_KEY, '');
+  const openrouterKey = useSetting<string>(SettingsEnum.OPENROUTER_KEY, '');
+  const geminiKeys = useSetting<string>(SettingsEnum.GEMINI_KEYS, '');
+  const hotkey = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY, defaultVoiceInputHotkeyFor(isMac));
+  const language = useSetting<string>(SettingsEnum.VOICE_INPUT_LANGUAGE, '');
+
+  const provider = voiceInputProviderFromValue(providerSetting.value);
+  const hotkeyPresets = voiceHotkeyPresets(isMac, hotkey.value);
+
+  // The main AI settings hold the key each hosted provider signs its requests with
+  const providerKeys: Partial<Record<VoiceInputProvider, { set: boolean; label: string }>> = {
+    [ApiType.OpenAI]: { set: openaiKey.value.trim() !== '', label: 'OpenAI key' },
+    [ApiType.OpenRouter]: { set: openrouterKey.value.trim() !== '', label: 'OpenRouter key' },
+    [ApiType.Gemini]: { set: geminiKeys.value.trim() !== '', label: 'Gemini key' },
+  };
+  const providerKey = providerKeys[provider];
+  let providerKeyHelp: string | undefined;
+  if (providerKey) {
+    providerKeyHelp = providerKey.set
+      ? `Uses your ${providerKey.label} from the AI settings.`
+      : `Add your ${providerKey.label} under AI settings first.`;
+  }
+  const providerModel = provider === customVoiceInputProvider ? model.value : (models.value[provider] ?? '');
+  const setProviderModel = (value: string) => {
+    if (provider === customVoiceInputProvider) {
+      void model.setSetting(value);
+    } else {
+      void models.setSetting({ ...models.value, [provider]: value });
+    }
+  };
+
   return (
     <Box sx={{ width: '100%' }}>
       <Divider sx={{ marginY: 2 }} />
@@ -227,41 +393,7 @@ export default function VoiceInputSettingsComponent() {
         <Stack spacing={2} sx={{ maxWidth: 640 }}>
           <VoiceHotkeyRow />
           {VoiceCommandRow ? <VoiceCommandRow talkHotkey={hotkey.value} presets={hotkeyPresets} /> : null}
-          <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
-            <Typography sx={{ minWidth: 110 }}>You are:</Typography>
-            <Select
-              size="small"
-              value={persona.value}
-              onChange={(change) => void persona.setSetting(change.target.value)}
-            >
-              {PLAYER_VOICE_PERSONAS.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {PLAYER_VOICE_PERSONA_LABELS[option]}
-                </MenuItem>
-              ))}
-            </Select>
-            <TextField
-              size="small"
-              fullWidth
-              label="Your name"
-              value={personaName.value}
-              slotProps={{ htmlInput: { maxLength: 40 } }}
-              placeholder={PLAYER_VOICE_PERSONA_LABELS[persona.value as PlayerVoicePersona]}
-              helperText="What your sims call you, in their memories and subtitles. Leave blank to use the persona above; one word reads best in game."
-              onChange={(change) => void personaName.setSetting(change.target.value)}
-            />
-          </Stack>
-          <TextField
-            size="small"
-            fullWidth
-            multiline
-            minRows={2}
-            label="About you (optional)"
-            value={personaBio.value}
-            placeholder={`Your Sims already know you as ${personaFlavor}.`}
-            helperText="Leave it blank and your Sims know you by the description above. To add more, write one to three short sentences about you in third person."
-            onChange={(change) => void personaBio.setSetting(change.target.value)}
-          />
+          <AboutYouFields />
           <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
             <Typography sx={{ minWidth: 110 }}>Transcription:</Typography>
             <Select
@@ -345,33 +477,7 @@ export default function VoiceInputSettingsComponent() {
               ))}
             </Select>
           </Stack>
-          <Stack spacing={2} direction="row" sx={{ alignItems: 'center' }}>
-            <Typography sx={{ minWidth: 110 }}>Microphone:</Typography>
-            <Select
-              size="small"
-              displayEmpty
-              value={deviceId.value}
-              onChange={(change) => void deviceId.setSetting(change.target.value)}
-              sx={{ minWidth: 260 }}
-            >
-              <MenuItem value="">System default</MenuItem>
-              {devices.map((device) => (
-                <MenuItem key={device.deviceId} value={device.deviceId}>
-                  {device.label || `Microphone (${device.deviceId.slice(0, 8)})`}
-                </MenuItem>
-              ))}
-            </Select>
-            <Button
-              variant="outlined"
-              startIcon={<MicIcon />}
-              disabled={testState !== 'idle'}
-              onClick={() => void runTest()}
-            >
-              {testState === 'recording' ? 'Speak now…' : testState === 'transcribing' ? 'Transcribing…' : 'Test'}
-            </Button>
-          </Stack>
-          {testResult ? <FormHelperText>Heard: “{testResult}”</FormHelperText> : null}
-          {testError ? <FormHelperText error>Error: {testError}</FormHelperText> : null}
+          <MicrophoneSetup />
           <FormHelperText>
             Hold the hotkey while the game is focused, speak, and release — your words become your active Sim&apos;s
             spoken line to whoever they&apos;re talking to. The game&apos;s overlay listens for the key, so it works

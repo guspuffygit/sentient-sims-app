@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Box, Button, FormHelperText, Link, List, ListItem, ListItemText, Stack, Typography } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
@@ -12,32 +12,69 @@ const elevenLabsPricingUrl = 'https://elevenlabs.io/pricing';
 
 const voiceClient = new VoiceClient(appApiUrl);
 
+type ElevenLabsKeySetupProps = {
+  // Hears whether the key as typed has passed a check
+  onCheckedChange?: (ok: boolean) => void;
+
+  // Checks a saved key once on open
+  autoCheck?: boolean;
+};
+
 // The ElevenLabs key: where to get one, step by step, the key field, and a check
 // that loads the account's voices with it. ElevenLabs' own error is shown as
 // theirs, so a plan limit is never read as a Sentient Sims membership rule.
-export function ElevenLabsKeySetup() {
+// A result counts only for the key it checked.
+export function ElevenLabsKeySetup({ onCheckedChange, autoCheck = false }: ElevenLabsKeySetupProps) {
   const elevenlabsKeySetting = useSetting<string>(SettingsEnum.ELEVENLABS_KEY, '');
+  const key = elevenlabsKeySetting.value.trim();
   const [checking, setChecking] = useState(false);
-  const [result, setResult] = useState<{ ok: boolean; message: string }>();
+  const [result, setResult] = useState<{ key: string; ok: boolean; message: string }>();
+  const current = result?.key === key ? result : undefined;
+  const ok = current?.ok === true;
 
   const checkKey = async () => {
+    const checked = key;
     setChecking(true);
     setResult(undefined);
     try {
       const cache = await voiceClient.refreshElevenLabsVoices();
-      setResult({ ok: true, message: `Key works. Found ${cache.voices.length} voices on your ElevenLabs account.` });
+      setResult({
+        key: checked,
+        ok: true,
+        message: `Key works. Found ${cache.voices.length} voices on your ElevenLabs account.`,
+      });
     } catch (err) {
-      setResult({ ok: false, message: `ElevenLabs says: ${err instanceof Error ? err.message : String(err)}` });
+      setResult({
+        key: checked,
+        ok: false,
+        message: `ElevenLabs says: ${err instanceof Error ? err.message : String(err)}`,
+      });
     } finally {
       setChecking(false);
     }
   };
 
+  const onCheckedChangeRef = useRef(onCheckedChange);
+  useEffect(() => {
+    onCheckedChangeRef.current = onCheckedChange;
+  });
+  useEffect(() => {
+    onCheckedChangeRef.current?.(ok);
+  }, [ok]);
+
+  const autoCheckedRef = useRef(false);
+  useEffect(() => {
+    if (!autoCheck || autoCheckedRef.current || elevenlabsKeySetting.isLoading || !key) {
+      return;
+    }
+    autoCheckedRef.current = true;
+    void checkKey();
+  });
+
   return (
     <Box>
       <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 1 }}>
-        ElevenLabs only lets paid plans (Creator or higher) use its voices in other apps. That is ElevenLabs&apos; rule,
-        not a Sentient Sims membership.{' '}
+        ElevenLabs only lets paid plans (Creator or higher) use its voices in other apps.{' '}
         <Link href={elevenLabsPricingUrl} target="_blank" rel="noopener noreferrer">
           ElevenLabs plans
         </Link>
@@ -68,20 +105,14 @@ export function ElevenLabsKeySetup() {
       </List>
       <APIKeyInput setting={elevenlabsKeySetting} aiName="ElevenLabs" />
       <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', marginTop: 1 }}>
-        <Button
-          size="small"
-          variant="outlined"
-          loading={checking}
-          disabled={!elevenlabsKeySetting.value.trim()}
-          onClick={() => void checkKey()}
-        >
+        <Button size="small" variant="outlined" loading={checking} disabled={!key} onClick={() => void checkKey()}>
           Check key
         </Button>
-        {result?.ok ? <CheckCircleOutlineIcon sx={{ color: 'success.main' }} fontSize="small" /> : null}
+        {ok ? <CheckCircleOutlineIcon sx={{ color: 'success.main' }} fontSize="small" /> : null}
       </Stack>
-      {result ? (
-        <FormHelperText error={!result.ok} sx={{ color: result.ok ? 'success.main' : undefined }}>
-          {result.message}
+      {current ? (
+        <FormHelperText error={!current.ok} sx={{ color: current.ok ? 'success.main' : undefined }}>
+          {current.message}
         </FormHelperText>
       ) : null}
     </Box>

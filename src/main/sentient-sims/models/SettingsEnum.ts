@@ -44,7 +44,6 @@ export enum SettingsEnum {
   SETUP_COMPLETE = 'setupComplete',
   SETUP_COMPLETE_SEEDED = 'setupCompleteSeeded',
   QUICKSTART_DISMISSED = 'quickstartDismissed',
-  VOICES_OFF_NUDGE_SHOWN = 'voicesOffNudgeShown',
   PATREON_LINKING = 'patreonLinking',
   MAX_RESPONSE_TOKENS = 'maxResponseTokens',
   GENERATION_TIMEOUT_SECONDS = 'generationTimeoutSeconds',

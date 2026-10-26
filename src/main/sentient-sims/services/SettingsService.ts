@@ -245,11 +245,6 @@ export function defaultStore(cwd?: string) {
         type: 'boolean',
         default: false,
       },
-      // The "your Sims can talk" hint was shown; finishing the wizard clears it
-      [SettingsEnum.VOICES_OFF_NUDGE_SHOWN.toString()]: {
-        type: 'boolean',
-        default: false,
-      },
       [SettingsEnum.PATREON_LINKING.toString()]: {
         type: 'boolean',
         default: false,
