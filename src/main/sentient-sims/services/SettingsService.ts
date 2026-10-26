@@ -320,7 +320,7 @@ export function defaultStore(cwd?: string) {
       },
       [SettingsEnum.VOICE_INPUT_ENABLED.toString()]: {
         type: 'boolean',
-        default: true,
+        default: false,
       },
       [SettingsEnum.PLAYBACK_FOLLOWS_GAME_CLOCK.toString()]: {
         type: 'boolean',
@@ -1465,6 +1465,11 @@ export class SettingsService {
       if (this.aiProviderConfigs.length > 0) {
         log.info('Existing install: marking setup complete');
         this.set(SettingsEnum.SETUP_COMPLETE, true);
+      } else {
+        // Voices and the microphone start on for a new player only; the schema
+        // defaults stay off so an existing install keeps what it never chose
+        this.set(SettingsEnum.TTS_ENABLED, true);
+        this.set(SettingsEnum.VOICE_INPUT_ENABLED, true);
       }
       this.set(SettingsEnum.SETUP_COMPLETE_SEEDED, true);
     }

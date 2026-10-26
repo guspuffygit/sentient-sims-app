@@ -238,7 +238,7 @@ describe('voice hotkey presets', () => {
 describe('voice input settings', () => {
   it('has working defaults', () => {
     const { settingsService } = mockEnvironment();
-    expect(settingsService.voiceInputEnabled).toBe(true);
+    expect(settingsService.voiceInputEnabled).toBe(false);
     expect(settingsService.voiceInputProvider).toBe(ApiType.SentientSimsAI);
     expect(settingsService.voiceInputEndpoint).toBe('https://api.openai.com/v1');
     expect(settingsService.voiceInputModel).toBe('whisper-1');
@@ -672,6 +672,7 @@ function sentientSimsTranscriptionContext(endpoint: string, onLotNames: string[]
   const ctx = {
     settings: settingsService,
     version: { getVersionHeaders: () => ({}) },
+    db: { sessionId: undefined },
     simStateCache: { getReport: () => ({ sims: onLotNames.map((name) => ({ sim_name: name, sims: [] })) }) },
   } as unknown as ApiContext;
   (ctx as { sentientSimsTranscription: unknown }).sentientSimsTranscription = new SentientSimsAIService(ctx);

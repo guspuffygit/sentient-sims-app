@@ -98,7 +98,19 @@ describe('Setup complete migration', () => {
 
   it('voices and voice input are on for a new player', () => {
     const settings = newSettings();
+    settings.runMigrations();
     expect(settings.ttsEnabled).toBe(true);
     expect(settings.voiceInputEnabled).toBe(true);
+  });
+
+  it('an existing install keeps voices and voice input as they were', () => {
+    const settings = newSettings();
+    settings.runMigrations();
+    settings.set(SettingsEnum.SETUP_COMPLETE_SEEDED, false);
+    settings.set(SettingsEnum.TTS_ENABLED, false);
+    settings.set(SettingsEnum.VOICE_INPUT_ENABLED, false);
+    settings.runMigrations();
+    expect(settings.ttsEnabled).toBe(false);
+    expect(settings.voiceInputEnabled).toBe(false);
   });
 });

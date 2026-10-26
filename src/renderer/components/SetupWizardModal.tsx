@@ -1761,7 +1761,6 @@ function SelfHostedSetupPage({ setPage }: PageProps) {
           </Button>
           <Button
             variant="contained"
-            disabled={check.state !== 'ok'}
             onClick={() => {
               setPage(WizardPage.VOICE_SETUP);
             }}
@@ -1796,8 +1795,14 @@ export function SetupWizardModal({ open, setOpen }: SetupWizardModalParameters) 
     void currentWizardPage.setSetting(wizardPage);
   };
 
-  // A sign-in or Patreon link reloads the window; the wizard comes back where it was
+  // A sign-in or Patreon link reloads the window; the wizard comes back where it was.
+  // Once only, when the saved page first arrives, so the X can still close those pages.
+  const restoredRef = useRef(false);
   useEffect(() => {
+    if (restoredRef.current || currentWizardPage.isLoading) {
+      return;
+    }
+    restoredRef.current = true;
     if (
       !open &&
       (currentWizardPage.value === WizardPage.SENTIENT_SIMS_AI_SETUP ||
@@ -1805,7 +1810,7 @@ export function SetupWizardModal({ open, setOpen }: SetupWizardModalParameters) 
     ) {
       setOpen(true);
     }
-  }, [currentWizardPage.value, open, setOpen]);
+  }, [currentWizardPage.isLoading, currentWizardPage.value, open, setOpen]);
 
   const close = () => {
     setPage(WizardPage.INIT);

@@ -177,9 +177,10 @@ const startServices = () => {
   settingsService.runMigrations();
 
   const directoryService = new DirectoryService(settingsService, app.getPath('documents'));
-  // Finds the game's Mods folder (OneDrive, a localized folder name) before
-  // anything reads it, so a fresh install never has to pick it by hand
-  directoryService.detectModsDirectory();
+  // Not run at startup for now: detectModsDirectory replaces a stored Mods path that
+  // has no GameVersion.txt beside it, which a junction or a custom folder may lack,
+  // so a working setup could be repointed. The setup wizard still runs it on demand.
+  // directoryService.detectModsDirectory();
   const ctx = new ApiContext({
     getAssetPath,
     port: appApiPort,
