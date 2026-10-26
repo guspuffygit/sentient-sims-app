@@ -52,7 +52,7 @@ export class LocationsClient extends ApiClient {
    * POST /locations/:locationId/describe
    * Writes drafts from what the game has reported about the lot, for the editor: description
    * is the first of versions. Resolves { error } in plain words when it cannot (no visit this
-   * app run, a provider error), with inSettings when the fix is in Settings > AI Providers.
+   * app run, a provider error), with inSettings when the fix is in Settings.
    */
   async describeLocation(
     locationId: number,

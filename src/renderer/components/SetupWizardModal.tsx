@@ -877,7 +877,7 @@ function VoiceSetupPage({ setPage }: PageProps) {
           <ElevenLabsKeySetup autoCheck onCheckedChange={setElevenLabsKeyWorks} />
         ) : (
           <Typography variant="body2" sx={{ color: 'success.main' }}>
-            Voices come with your Patreon membership. Nothing else to set up.
+            Voices come with your Patreon membership.
           </Typography>
         )}
       </Box>
@@ -1534,11 +1534,6 @@ function KeyCheckStatus({ check, onTest }: { check: KeyCheck; onTest: () => void
       <Button loading={check.state === 'testing'} onClick={onTest} color="primary" variant="outlined">
         Test
       </Button>
-      {check.state !== 'ok' ? (
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-          Next unlocks once the test passes.
-        </Typography>
-      ) : null}
     </Box>
   );
 }

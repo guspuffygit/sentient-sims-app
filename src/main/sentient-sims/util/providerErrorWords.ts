@@ -5,9 +5,12 @@
 export type PlainProviderError = {
   plain: string;
   raw: string;
-  // The fix is in Settings > AI Providers (a key, a model, a provider choice)
+  // The fix is in Settings (a key, a model, a provider choice)
   inSettings: boolean;
 };
+
+const KEY_REFUSED =
+  /\b401\b|invalid api key|incorrect api key|invalid_api_key|api key not valid|unauthori[sz]ed|no .*key.* set/i;
 
 // First match wins: the narrow cases come before the status codes they share (an image-input
 // 404 before model-not-found, an exhausted quota before a plain 429, Gemini's disabled API
@@ -15,7 +18,7 @@ export type PlainProviderError = {
 const RULES: Array<[RegExp, string, boolean]> = [
   [
     /image input|support(?:s|ing)? images?|vision is not supported|image_url/i,
-    "The model you picked can't look at pictures. Pick one that can in Settings > AI Providers.",
+    "The model you picked can't look at pictures. Pick one that can in Settings > AI Model.",
     true,
   ],
   [
@@ -29,13 +32,13 @@ const RULES: Array<[RegExp, string, boolean]> = [
     true,
   ],
   [
-    /\b401\b|invalid api key|incorrect api key|invalid_api_key|api key not valid|unauthori[sz]ed|no .*key.* set/i,
-    "The AI provider didn't accept your API key. Check the key in Settings > AI Providers.",
+    KEY_REFUSED,
+    "The AI provider didn't accept your API key. Check the key in Settings > Advanced > API Keys and Connections.",
     true,
   ],
   [
     /\b403\b|permission denied|forbidden/i,
-    'The AI provider refused the request. Your key may not have access to this model; check it in Settings > AI Providers.',
+    'The AI provider refused the request. Your key may not have access to this model; check it in Settings > Advanced > API Keys and Connections.',
     true,
   ],
   [
@@ -45,7 +48,7 @@ const RULES: Array<[RegExp, string, boolean]> = [
   ],
   [
     /no endpoints found|model .*(?:not found|does not exist)|unknown model|\b404\b/i,
-    "The AI provider doesn't have the model you picked. Pick another model in Settings > AI Providers.",
+    "The AI provider doesn't have the model you picked. Pick another model in Settings > AI Model.",
     true,
   ],
   [
@@ -76,4 +79,13 @@ export function plainProviderError(raw: string): PlainProviderError {
     return { plain: 'The AI provider returned an error.', raw, inSettings: false };
   }
   return { plain: rule[1], raw, inSettings: rule[2] };
+}
+
+// A key test answers about the key the player just typed, so a refused key says so plainly.
+// The raw text can echo the key back, so it never reaches the page.
+export function plainKeyTestError(raw: string): string {
+  if (KEY_REFUSED.test(raw)) {
+    return "That key didn't work. Check that you copied all of it.";
+  }
+  return plainProviderError(raw).plain;
 }

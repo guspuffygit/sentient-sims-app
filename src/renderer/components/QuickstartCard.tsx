@@ -1,14 +1,4 @@
-import {
-  Box,
-  Button,
-  IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Button, IconButton, List, ListItem, ListItemIcon, ListItemText, Tooltip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import TouchAppOutlinedIcon from '@mui/icons-material/TouchAppOutlined';
 import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
@@ -105,12 +95,7 @@ export function QuickstartCard() {
         </Tooltip>
       }
     >
-      <Box>
-        <QuickstartList onOpenVoiceSettings={() => void navigate('/settings')} />
-        <Typography variant="body2" sx={{ color: 'text.secondary', marginTop: 1 }}>
-          Having any trouble at all? Run the Setup Wizard from Settings.
-        </Typography>
-      </Box>
+      <QuickstartList onOpenVoiceSettings={() => void navigate('/settings')} />
     </AppCard>
   );
 }

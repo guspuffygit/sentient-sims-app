@@ -16,6 +16,7 @@ import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { ImageGenerationRequest, ImageGenerationResponse } from '../models/ImageGeneration';
 import { AIModel } from '../models/AIModel';
 import { getRandomItem } from '../util/getRandomItem';
+import { plainKeyTestError } from '../util/providerErrorWords';
 import { GeminiKeysNotSetError } from '../exceptions/GeminiKeyNotSetError';
 import { isApiError } from '../exceptions/GeminiAPIError';
 import { ApiContext } from './ApiContext';
@@ -168,11 +169,8 @@ export class GeminiService implements GenerationService, ImageGenerationService 
 
       return { error: 'Gemini API returned no text' };
     } catch (error) {
-      if (error instanceof Error && error.message) {
-        return { error: `Gemini API not working: ${error.message}` };
-      }
-
-      return { error: `Gemini API not working, check logs` };
+      log.error('Error testing Gemini API:', error);
+      return { error: plainKeyTestError(error instanceof Error ? error.message : String(error)) };
     }
   }
 
