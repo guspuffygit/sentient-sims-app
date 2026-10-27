@@ -112,15 +112,15 @@ describe('VoiceHotkeyService', () => {
 
   it('publishes the chords to the mod when armed, re-armed, and on connect', () => {
     const service = new VoiceHotkeyService();
-    service.arm('Ctrl+Space', 'hold', callbackSpies());
-    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenLastCalledWith({ talk: 'Ctrl+Space', command: '' });
+    service.arm('Ctrl+S', 'hold', callbackSpies());
+    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenLastCalledWith({ talk: 'Ctrl+S', command: '' });
 
     service.armCommand('Alt+V', callbackSpies());
-    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenLastCalledWith({ talk: 'Ctrl+Space', command: 'Alt+V' });
+    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenLastCalledWith({ talk: 'Ctrl+S', command: 'Alt+V' });
 
     notifyMocks.sendVoiceHotkeysToMod.mockReset();
     service.onModConnected();
-    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenCalledWith({ talk: 'Ctrl+Space', command: 'Alt+V' });
+    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenCalledWith({ talk: 'Ctrl+S', command: 'Alt+V' });
 
     service.disarm();
     expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenLastCalledWith({ talk: '', command: '' });
@@ -156,7 +156,7 @@ describe('VoiceHotkeyService', () => {
     const service = new VoiceHotkeyService();
     const talk = callbackSpies();
     const command = callbackSpies();
-    service.arm('Ctrl+Space', 'hold', talk);
+    service.arm('Ctrl+S', 'hold', talk);
 
     service.onKey({ id: 'command', down: true });
     expect(command.onDown).not.toHaveBeenCalled();
@@ -210,7 +210,16 @@ describe('voice hotkey presets', () => {
 
   it('defaults to a chord macOS leaves alone on a Mac', () => {
     expect(defaultVoiceInputHotkeyFor(true)).toBe('Alt+V');
-    expect(defaultVoiceInputHotkeyFor(false)).toBe('Ctrl+Space');
+    expect(defaultVoiceInputHotkeyFor(false)).toBe('Ctrl+S');
+  });
+
+  it('offers no chord with Space, which The Sims 4 binds', () => {
+    for (const isMac of [true, false]) {
+      const values = voiceHotkeyPresets(isMac).map((preset) => preset.value);
+      expect(values.filter((value) => value.split('+').includes('Space'))).toEqual([]);
+      expect(values).toContain('Ctrl+S');
+    }
+    expect(voiceHotkeyPresets(false)[0]).toEqual({ value: 'Ctrl+S', label: 'Ctrl+S' });
   });
 
   it('names the Alt key Opt on a Mac and keeps the stored chord', () => {
@@ -231,6 +240,10 @@ describe('voice hotkey presets', () => {
 
   it('keeps a saved chord the platform list no longer offers', () => {
     expect(voiceHotkeyPresets(true, 'Ctrl+Space')).toContainEqual({ value: 'Ctrl+Space', label: 'Ctrl+Space' });
+    expect(voiceHotkeyPresets(false, 'Ctrl+Alt+Space')).toContainEqual({
+      value: 'Ctrl+Alt+Space',
+      label: 'Ctrl+Alt+Space',
+    });
     expect(voiceHotkeyPresets(true, 'Alt+V')).toHaveLength(voiceHotkeyPresets(true).length);
   });
 });
@@ -242,7 +255,7 @@ describe('voice input settings', () => {
     expect(settingsService.voiceInputProvider).toBe(ApiType.SentientSimsAI);
     expect(settingsService.voiceInputEndpoint).toBe('https://api.openai.com/v1');
     expect(settingsService.voiceInputModel).toBe('whisper-1');
-    expect(settingsService.voiceInputHotkey).toBe(process.platform === 'darwin' ? 'Alt+V' : 'Ctrl+Space');
+    expect(settingsService.voiceInputHotkey).toBe(process.platform === 'darwin' ? 'Alt+V' : 'Ctrl+S');
     expect(settingsService.voiceInputHotkeyMode).toBe('hold');
     expect(settingsService.voiceInputLanguage).toBe('');
   });

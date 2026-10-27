@@ -41,6 +41,7 @@ import {
   defaultSentientSimsAIHost,
   defaultGameAppPath,
   defaultVoiceInputHotkeyFor,
+  formerDefaultVoiceInputHotkey,
   defaultVoiceInputModel,
   defaultTwitchCommandWord,
   defaultTwitchChatVoiceId,
@@ -419,6 +420,10 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.VOICE_INPUT_HOTKEY_MODE.toString()]: {
         type: 'string',
         default: 'hold',
+      },
+      [SettingsEnum.VOICE_INPUT_HOTKEY_MIGRATED.toString()]: {
+        type: 'boolean',
+        default: false,
       },
       [SettingsEnum.VOICE_INPUT_LANGUAGE.toString()]: {
         type: 'string',
@@ -1472,6 +1477,22 @@ export class SettingsService {
         this.set(SettingsEnum.VOICE_INPUT_ENABLED, true);
       }
       this.set(SettingsEnum.SETUP_COMPLETE_SEEDED, true);
+    }
+
+    // One time: Ctrl+Space was the Windows default, and The Sims 4 binds Space. The store
+    // writes every schema default to disk, so a player who never touched the setting holds
+    // it too; they move to today's default. A chord picked later is left alone.
+    if (!this.get(SettingsEnum.VOICE_INPUT_HOTKEY_MIGRATED)) {
+      const hotkeyDefault = defaultVoiceInputHotkeyFor(process.platform === 'darwin');
+      if (this.voiceInputHotkey === formerDefaultVoiceInputHotkey) {
+        if (this.voiceCommandHotkey === hotkeyDefault) {
+          log.info(`Voice hotkey stays ${formerDefaultVoiceInputHotkey}: the command key is ${hotkeyDefault}`);
+        } else {
+          log.info(`Migrating voice hotkey ${formerDefaultVoiceInputHotkey} -> ${hotkeyDefault}`);
+          this.set(SettingsEnum.VOICE_INPUT_HOTKEY, hotkeyDefault);
+        }
+      }
+      this.set(SettingsEnum.VOICE_INPUT_HOTKEY_MIGRATED, true);
     }
 
     // Before 4.5.3 the voice provider was openai for every OpenAI-compatible server, told

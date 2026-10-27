@@ -34,8 +34,8 @@ export function QuickstartList({ onOpenVoiceSettings }: QuickstartListProps) {
           icon: <MicNoneOutlinedIcon fontSize="small" />,
           text:
             hotkeyMode.value === 'toggle'
-              ? `Press ${key} in the game to talk to your Sim, and press it again when you're done.`
-              : `Hold ${key} in the game and talk to your Sim. Let go when you're done.`,
+              ? `Press ${key} in the game to talk to your Sim, and press it again when you're done. (Change hotkey in Settings, Voice)`
+              : `Hold ${key} in the game and talk to your Sim. Let go when you're done. (Change hotkey in Settings, Voice)`,
         }
       : {
           icon: <MicNoneOutlinedIcon fontSize="small" />,

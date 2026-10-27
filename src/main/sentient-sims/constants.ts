@@ -260,8 +260,11 @@ export const openrouterDefaultTranscriptionModel = openrouterTranscriptionModels
 // Gemini has no dedicated speech endpoint: a text model is handed the audio inline.
 export const geminiTranscriptionModels = ['gemini-flash-latest', 'gemini-flash-lite-latest'];
 export const geminiDefaultTranscriptionModel = geminiTranscriptionModels[0];
-export const defaultVoiceInputHotkey = 'Ctrl+Space';
-// macOS takes Ctrl+Space to switch input sources before the game ever sees it
+// No Space in a voice chord: The Sims 4 binds Space, and the overlay only observes keys
+export const defaultVoiceInputHotkey = 'Ctrl+S';
+// The old Windows default; runMigrations moves a store still holding it to the current one
+export const formerDefaultVoiceInputHotkey = 'Ctrl+Space';
+// macOS takes Ctrl+Space to switch input sources, and leaves Opt+V to the game
 export const defaultVoiceInputHotkeyMac = 'Alt+V';
 export function defaultVoiceInputHotkeyFor(isMac: boolean): string {
   return isMac ? defaultVoiceInputHotkeyMac : defaultVoiceInputHotkey;

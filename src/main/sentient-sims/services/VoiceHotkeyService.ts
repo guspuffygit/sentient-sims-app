@@ -8,7 +8,7 @@ import { VoiceKeyEvent } from '../models/ModLogWebsocketMessage';
 // releases back over the websocket as `voice_key` events, which websocketServer hands
 // to onKey(). No OS keyboard hook: no Accessibility prompt on macOS, nothing to break on
 // Wayland, and the key only works while the game is focused, which is where the player
-// is when they talk. The chord string ("Ctrl+Space") is the overlay's to parse; the
+// is when they talk. The chord string ("Ctrl+S") is the overlay's to parse; the
 // key table lives in the mod's ui/voice_hotkey.cpp.
 
 export type HotkeyCallbacks = {

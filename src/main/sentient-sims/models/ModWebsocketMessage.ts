@@ -176,7 +176,7 @@ export type ModPlayerVoiceStatus = ModWebsocketMessage & {
   mode?: 'chat' | 'command' | 'dictate';
 };
 
-// Chord strings as the settings spell them ("Ctrl+Space", "F13"); '' clears a binding
+// Chord strings as the settings spell them ("Ctrl+S", "F13"); '' clears a binding
 export type ModVoiceHotkeys = ModWebsocketMessage & {
   talk: string;
   command: string;
