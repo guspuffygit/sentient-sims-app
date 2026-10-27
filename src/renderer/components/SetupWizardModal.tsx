@@ -1017,8 +1017,8 @@ function MicrophoneSetupPage({ setPage }: PageProps) {
           <VoiceHotkeyRow />
           <Typography variant="body2">
             {hotkeyMode.value === 'toggle'
-              ? `In the game, press ${key} to start talking and press it again when you're done.`
-              : `In the game, hold ${key} while you talk and let go when you're done.`}
+              ? `In the game, press ${key} to start talking and press it again when you're done. (Change hotkey above, or later in Settings, Voice)`
+              : `In the game, hold ${key} while you talk and let go when you're done. (Change hotkey above, or later in Settings, Voice)`}
           </Typography>
         </Stack>
       ) : (

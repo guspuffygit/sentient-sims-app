@@ -4,6 +4,7 @@ import path from 'path';
 import { DirectoryService } from 'main/sentient-sims/services/DirectoryService';
 import { SettingsService, defaultStore } from 'main/sentient-sims/services/SettingsService';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import { defaultVoiceInputHotkeyFor } from 'main/sentient-sims/constants';
 
 function tempRoot(): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'ss-fresh-install-'));
@@ -112,5 +113,43 @@ describe('Setup complete migration', () => {
     settings.runMigrations();
     expect(settings.ttsEnabled).toBe(false);
     expect(settings.voiceInputEnabled).toBe(false);
+  });
+});
+
+describe('Voice hotkey migration', () => {
+  const hotkeyDefault = defaultVoiceInputHotkeyFor(process.platform === 'darwin');
+
+  it('moves a store still on the old Ctrl+Space default, once', () => {
+    const settings = newSettings();
+    settings.set(SettingsEnum.VOICE_INPUT_HOTKEY, 'Ctrl+Space');
+    settings.runMigrations();
+    expect(settings.voiceInputHotkey).toBe(hotkeyDefault);
+    expect(settings.get(SettingsEnum.VOICE_INPUT_HOTKEY_MIGRATED)).toBe(true);
+
+    // Picked again afterwards, it stays
+    settings.set(SettingsEnum.VOICE_INPUT_HOTKEY, 'Ctrl+Space');
+    settings.runMigrations();
+    expect(settings.voiceInputHotkey).toBe('Ctrl+Space');
+  });
+
+  it('keeps any other chord', () => {
+    const settings = newSettings();
+    settings.set(SettingsEnum.VOICE_INPUT_HOTKEY, 'Ctrl+Shift+Space');
+    settings.runMigrations();
+    expect(settings.voiceInputHotkey).toBe('Ctrl+Shift+Space');
+  });
+
+  it('leaves the talk key when the command key already holds the new default', () => {
+    const settings = newSettings();
+    settings.set(SettingsEnum.VOICE_INPUT_HOTKEY, 'Ctrl+Space');
+    settings.set(SettingsEnum.VOICE_COMMAND_HOTKEY, hotkeyDefault);
+    settings.runMigrations();
+    expect(settings.voiceInputHotkey).toBe('Ctrl+Space');
+  });
+
+  it('a fresh store starts on the new default', () => {
+    const settings = newSettings();
+    settings.runMigrations();
+    expect(settings.voiceInputHotkey).toBe(hotkeyDefault);
   });
 });
