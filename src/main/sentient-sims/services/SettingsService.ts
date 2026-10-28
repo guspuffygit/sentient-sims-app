@@ -1,7 +1,7 @@
 import log from 'electron-log';
 import Store from 'electron-store';
 import path from 'path';
-import { DeprecatedSettingsEnum, SettingsEnum } from '../models/SettingsEnum';
+import { DeprecatedSettingsEnum, ScenePipelineMode, SettingsEnum } from '../models/SettingsEnum';
 import {
   PLAYER_VOICE_PERSONAS,
   PlayerVoicePersona,
@@ -359,6 +359,16 @@ export function defaultStore(cwd?: string) {
       [SettingsEnum.SCENE_MAX_ROUNDS.toString()]: {
         type: 'number',
         default: 3,
+      },
+      [SettingsEnum.SCENE_PIPELINE_MODE.toString()]: {
+        type: 'string',
+        default: 'lean',
+      },
+      [SettingsEnum.LEAN_NAME_FREE_RULES.toString()]: {
+        type: 'boolean',
+        // Series 3 (2026-10-27): name-free within 0.25/10 of named rules, beat kept on 10/11
+        // special scenes; watch words per line on the first stream (9.5 vs 9.0)
+        default: true,
       },
       [SettingsEnum.PLAYER_REPLY_MAX_TOKENS.toString()]: {
         type: 'number',
@@ -1301,6 +1311,15 @@ export class SettingsService {
 
   get generatedDefaultDescriptions(): boolean {
     return this.get(SettingsEnum.GENERATED_DEFAULT_DESCRIPTIONS) as boolean;
+  }
+
+  // 'lean' unless the setting says 'full': a typo cannot bring the four-stage pipeline back
+  get scenePipelineMode(): ScenePipelineMode {
+    return this.get(SettingsEnum.SCENE_PIPELINE_MODE) === 'full' ? 'full' : 'lean';
+  }
+
+  get leanNameFreeRules(): boolean {
+    return this.get(SettingsEnum.LEAN_NAME_FREE_RULES) === true;
   }
 
   get sceneMaxRounds(): number {

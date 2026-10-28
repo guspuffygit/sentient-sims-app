@@ -68,6 +68,8 @@ function sceneThatNeverLands(
   stage?: (label: string, options?: OneShotOptions) => void,
 ) {
   const ctx: ApiContext = mockApiContext();
+  // These tests mock the 4.6 pipeline by stage label; the default is lean (2026-10-27)
+  ctx.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
   fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
   ctx.db.loadDatabase({ sessionId, saveId: '1' });
   if (sceneMaxRounds !== undefined) {

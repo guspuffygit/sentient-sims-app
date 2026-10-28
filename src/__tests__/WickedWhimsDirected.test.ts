@@ -82,6 +82,8 @@ type Stage = {
 
 function wwContext(sessionId: string, stage: Stage = {}) {
   const ctx: ApiContext = mockApiContext();
+  // These tests mock the 4.6 pipeline by stage label; the default is lean (2026-10-27)
+  ctx.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
   fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
   ctx.db.loadDatabase({ sessionId, saveId: '1' });
   ctx.settings.set(SettingsEnum.GENERATED_DEFAULT_DESCRIPTIONS, false);
@@ -310,6 +312,10 @@ describe('the Wicked Whims provider', () => {
 
   function withConfigs(sessionId: string) {
     const ctx: ApiContext = mockApiContext();
+    // These tests mock the 4.6 pipeline by stage label; the default is lean (2026-10-27)
+    ctx.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
+    // These tests mock the 4.6 pipeline by stage label; the default is lean (2026-10-27)
+    ctx.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
     ctx.db.loadDatabase({ sessionId, saveId: '1' });
     ctx.settings.set(SettingsEnum.AI_PROVIDER_CONFIGS, [

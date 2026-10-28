@@ -99,12 +99,16 @@ describe('core without tiers', () => {
 
   it('leaves every capability slot empty', () => {
     const ctx = mockApiContext({ tiers: [] });
+    // These tests mock the 4.6 pipeline by stage label; the default is lean (2026-10-27)
+    ctx.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
     expect(ctx.tiers).toEqual([]);
     expect(ctx.ext).toEqual({});
   });
 
   it('writes the plain diary at a sleep boundary with no planner', async () => {
     const core = mockApiContext({ tiers: [] });
+    // These tests mock the 4.6 pipeline by stage label; the default is lean (2026-10-27)
+    core.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
     core.settings.set(SettingsEnum.DAILY_GOALS_ENABLED, true);
     const coreRun = sleepReflectionFixture(core);
     await core.ai.runSceneReflection(coreRun.scene, { simId: sim.sim_id, simName: sim.name }, 'sleep', {
@@ -124,6 +128,8 @@ describe('core without tiers', () => {
     'plans on that same fixture when the autonomy tier is present',
     async () => {
       const dev = mockApiContext();
+      // These tests mock the 4.6 pipeline by stage label; the default is lean (2026-10-27)
+      dev.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
       dev.settings.set(SettingsEnum.DAILY_GOALS_ENABLED, true);
       const devRun = sleepReflectionFixture(dev);
       await dev.ai.runSceneReflection(devRun.scene, { simId: sim.sim_id, simName: sim.name }, 'sleep', {
@@ -136,6 +142,8 @@ describe('core without tiers', () => {
 
   it('answers a solo request with the ordinary reply when nothing can act on it', async () => {
     const ctx = mockApiContext({ tiers: [] });
+    // These tests mock the 4.6 pipeline by stage label; the default is lean (2026-10-27)
+    ctx.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
     const promptRequest: PromptRequest = {
       location: '<LOCATION>A quiet living room.</LOCATION>',
       dateTime: 'It is midday.',

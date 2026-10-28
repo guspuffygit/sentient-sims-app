@@ -126,63 +126,203 @@ This is what you want and need right now, as the game records it. When asked wha
 ${withFacts}`
       : withFacts;
 
-  if (playerFacing && !monologueOnly) {
-    return `${actorPrompt}
+  return `${actorPrompt}
 
-How to respond — in this format:
-SAY: <the words ${simName} says out loud>
-THINK: <one short line of ${simName}'s private inner monologue in this moment>
+${speechRules(speechRuleKind(playerFacing, monologueOnly), { simName })}`;
+}
+
+// Which of the three response formats a performer answers in
+export type SpeechRuleKind = 'pair' | 'playerFacing' | 'monologue';
+
+export function speechRuleKind(playerFacing: boolean | undefined, monologueOnly: boolean): SpeechRuleKind {
+  if (monologueOnly) {
+    return 'monologue';
+  }
+  return playerFacing ? 'playerFacing' : 'pair';
+}
+
+export type SpeechRuleOptions = {
+  // The performer's name, interpolated into the rules as the 4.6 pipeline always did. Absent,
+  // the rules are NAME-FREE ("Stay in character at all times", "your character's voice"): one
+  // text shared by every Sim and every user, so a provider's prefix cache serves it whole.
+  simName?: string;
+  // The lean pipeline has no director, so "the tone your director set" becomes "the tone of
+  // the scene". Full mode keeps the 4.6 wording byte for byte.
+  lean?: boolean;
+};
+
+// The SAY/THINK answer format and the rules under it, the most load-bearing text in the
+// whole pipeline (series 2, 2026-10-27: without "ONE short line, ten words or so" lines ran
+// 8 -> 24 words, -1.3/10; without the SAY list, 29 words, -1.7). Shared by the 4.6 prompt
+// (buildSpeechSystemPrompt, output unchanged) and the lean prompt below.
+export function speechRules(kind: SpeechRuleKind, options: SpeechRuleOptions = {}): string {
+  const { simName, lean } = options;
+  // Subject and possessive: "Mara Vale" / "Mara Vale's", or "your character" / "your character's"
+  const who = simName ?? 'your character';
+  const whose = simName ? `${simName}'s` : "your character's";
+  const stay = simName ? `- Stay in character as ${simName} at all times.` : '- Stay in character at all times.';
+  const tone = lean ? 'in the tone of the scene' : 'in the tone your director set';
+
+  if (kind === 'playerFacing') {
+    return `How to respond — in this format:
+SAY: <the words ${who} says out loud>
+THINK: <one short line of ${whose} private inner monologue in this moment>
 
 Rules for SAY:
-- Stay in character as ${simName} at all times.
+${stay}
 - Only the words spoken out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no delivery notes, no commentary.
 - Say as much as you actually have to say. A full answer with your reasons can run several sentences; a one-liner is fine when that is all there is. Stop when you have answered.
 - When asked a direct question, answer it first, plainly and specifically: pick one, name it, give your reason. Never answer a question with a question, never "that's not the point", and never a bare "I don't know" — if you don't know, say what you DO know or what would decide it. If you are keeping something back, say that you are and why.
-- Talk like a real person in this conversation: a direct, natural reply to what was just said, in ${simName}'s voice and in the tone your director set.
+- Talk like a real person in this conversation: a direct, natural reply to what was just said, in ${whose} voice and ${tone}.
 - You may ask something back after you have answered, never instead of answering. Never repeat or rephrase anything already said.
 - If the conversation is already underway (anything under "Previously in this scene" or "The conversation so far"), jump straight in mid-flow — no greetings and no re-introductions.
 - If you have said what you have to say, you may wrap the conversation up naturally — a goodbye, a "let me think about it", getting back to what you were doing.
 - Do not mention physical actions, props, furniture, or locations.
 
 Rules for THINK:
-- First person, present tense — what is actually running through ${simName}'s head right now.
-- Private: nobody hears it, and it may differ from what ${simName} says out loud — but it is ${simName}'s real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.
+- First person, present tense — what is actually running through ${whose} head right now.
+- Private: nobody hears it, and it may differ from what ${who} says out loud — but it is ${whose} real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.
 - One short line. No physical actions, and never addressed to anyone.`;
   }
 
-  if (monologueOnly) {
-    return `${actorPrompt}
-
-How to respond — exactly one line, in this format:
-THINK: <one short sentence of ${simName}'s private inner monologue in this moment>
+  if (kind === 'monologue') {
+    return `How to respond — exactly one line, in this format:
+THINK: <one short sentence of ${whose} private inner monologue in this moment>
 
 Rules for THINK:
-- Stay in character as ${simName} at all times.
-- First person, present tense — what is actually running through ${simName}'s head right now, in the middle of what they are doing.
+${stay}
+- First person, present tense — what is actually running through ${whose} head right now, in the middle of what they are doing.
 - Private: nobody hears it. No spoken dialogue, no name tag, no quotation marks.
 - Grounded in this moment; never third person, never narration of physical actions.
-- It is ${simName}'s real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.`;
+- It is ${whose} real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.`;
   }
 
-  return `${actorPrompt}
-
-How to respond — exactly two lines, in this format:
-SAY: <the words ${simName} says out loud>
-THINK: <one short line of ${simName}'s private inner monologue in this moment>
+  return `How to respond — exactly two lines, in this format:
+SAY: <the words ${who} says out loud>
+THINK: <one short line of ${whose} private inner monologue in this moment>
 
 Rules for SAY:
-- Stay in character as ${simName} at all times.
+${stay}
 - Only the words spoken out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no delivery notes, no commentary.
 - ONE short line, ten words or so, the way people actually talk. Never a speech.
-- Talk like a real person in this conversation: your line must be a direct, natural reply to what was just said, in ${simName}'s voice and in the tone your director set. Not every line needs to be clever — a plain reply that keeps the conversation flowing beats a quip that does not connect.
+- Talk like a real person in this conversation: your line must be a direct, natural reply to what was just said, in ${whose} voice and ${tone}. Not every line needs to be clever — a plain reply that keeps the conversation flowing beats a quip that does not connect.
 - Move the conversation forward — answer questions that were asked, follow up on what the other person said, never repeat or rephrase anything already said.
 - If the conversation is already underway (anything under "Previously in this scene"), jump straight in mid-flow — no greetings and no re-introductions. When you are told to open the scene, the lines above were an earlier conversation: start this one.
 - Do not mention physical actions, props, furniture, or locations.
 
 Rules for THINK:
-- First person, present tense — what is actually running through ${simName}'s head right now.
-- Private: nobody hears it, and it may differ from what ${simName} says out loud — but it is ${simName}'s real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.
+- First person, present tense — what is actually running through ${whose} head right now.
+- Private: nobody hears it, and it may differ from what ${who} says out loud — but it is ${whose} real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.
 - One short line. No physical actions, and never addressed to anyone.`;
+}
+
+// ---------------------------------------------------------------------------------------
+// The lean pipeline (2026-10-27): one actor call per Sim per round, no director, no
+// reviewer, no per-round scores. Measured over three of Jaz's streams and two offline
+// series (.claude/voice-pipeline-tests in the mod repo): the director earned nothing a judge
+// could see on ordinary scenes, the reviewer changed 2-5% of rounds and broke the one it
+// touched, and the scorer said "continue" 92% of the time. What the director DID carry was
+// the beat into rounds 2-3, where the 4.6 actor message had only the transcript and "The
+// scene continues"; lean carries the beat itself (buildLeanActorUserMessage).
+//
+// Layout: stable text first, volatile text last, so a provider's prefix cache (vLLM, OpenAI
+// auto-caching, Parasail) serves [rules][identity][place][facts] on every later line of a
+// scene; the now-block (date, weather, postures) moves to the head of the USER message.
+// ---------------------------------------------------------------------------------------
+
+/**
+ * The Sim's own <CHARACTER_IN_INTERACTION> block out of the rendered participants, matched
+ * by its header line (formatSentientSim writes `<name> is a <gender> <age>.`), never by a
+ * mention inside another Sim's block. Empty when the Sim has none.
+ */
+export function ownCharacterBlock(name: string, participants: string): string {
+  const blockPattern = /<CHARACTER_IN_INTERACTION>\s*([\s\S]*?)\s*<\/CHARACTER_IN_INTERACTION>/g;
+  let match = blockPattern.exec(participants);
+  while (match) {
+    const firstLine = match[1].split('\n')[0].trim();
+    if (firstLine.startsWith(`${name} is `) || firstLine === name) {
+      return `<CHARACTER_IN_INTERACTION>\n${match[1].trim()}\n</CHARACTER_IN_INTERACTION>`;
+    }
+    match = blockPattern.exec(participants);
+  }
+  return '';
+}
+
+export type LeanActorSystemPromptContext = {
+  simName: string;
+  // The Sim's own <CHARACTER_IN_INTERACTION> block (ownCharacterBlock), or empty
+  characterBlock: string;
+  // <LOCATION>...</LOCATION>, or empty
+  locationBlock: string;
+  // The Sim's own <KNOWN_FACTS> block, computed on round 1 and reused on every later round
+  factsBlock?: string;
+  // Player-facing only: the live <STATUS>/<TODAYS_PLAN> block. Volatile, so it goes last.
+  statusBlock?: string;
+  playerFacing?: boolean;
+  monologueOnly: boolean;
+  // Name-free rules: see SpeechRuleOptions.simName
+  nameFreeRules?: boolean;
+};
+
+export function buildLeanActorSystemPrompt(context: LeanActorSystemPromptContext): string {
+  const { simName, characterBlock, locationBlock, factsBlock, statusBlock, playerFacing, monologueOnly } = context;
+  const rules = speechRules(speechRuleKind(playerFacing, monologueOnly), {
+    simName: context.nameFreeRules ? undefined : simName,
+    lean: true,
+  });
+  const identity = [`You are playing ${simName}.`, characterBlock.trim()]
+    .filter((part) => part.length > 0)
+    .join('\n\n');
+  const facts = factsBlock
+    ? `${factsBlock}
+These facts are what the game records about you right now. Where your character description disagrees with them, the facts are right.`
+    : '';
+  const status =
+    playerFacing && statusBlock
+      ? `${statusBlock}
+This is what you want and need right now, as the game records it. When asked what you want, answer from it.`
+      : '';
+  return [rules, identity, locationBlock.trim(), facts, status].filter((part) => part.length > 0).join('\n\n');
+}
+
+export type LeanActorUserMessageContext = {
+  // <DATE>, <SEASON>, <WEATHER> and the postures line, newline-joined; may be empty
+  nowBlock: string;
+  // "Previously in this scene:\n...\n\n" as the 4.6 pipeline builds it, or empty
+  previouslyBlock: string;
+  // This Sim's beat for this round, already framed (opener, valence, deception split on
+  // round 1; "This scene: ..." plus the continuation line on rounds 2+)
+  beat: string;
+  // This round's earlier lines, "Speaker: text" per line, or empty
+  conversationSoFar: string;
+};
+
+export function buildLeanActorUserMessage(context: LeanActorUserMessageContext): string {
+  const { nowBlock, previouslyBlock, beat, conversationSoFar } = context;
+  const now = nowBlock.trim();
+  return `${now ? `${now}\n\n` : ''}${previouslyBlock}${beat}${
+    conversationSoFar ? `\n\nThe conversation so far:\n${conversationSoFar}` : ''
+  }`;
+}
+
+// The two opener sentences the 4.6 beat carries on round 1 (AIService frames them); a beat
+// carried into round 2+ must not tell the actor to open the scene again.
+const OPENER_SENTENCES = [
+  ' Open the scene: the characters are just starting this conversation — the first line begins it. The lines above were an earlier conversation, not part of this one.',
+  ' Open the scene: the characters are just starting this conversation — the first line begins it, nothing was said before.',
+];
+
+export function stripOpener(beat: string): string {
+  return OPENER_SENTENCES.reduce((text, sentence) => text.split(sentence).join(''), beat).trim();
+}
+
+export const LEAN_CONTINUATION_LINE =
+  'The scene continues. Pick up the conversation exactly where it left off and move it forward — do not repeat or rephrase anything already said.';
+
+// Rounds 2+ of a lean scene: the Sim's own round-1 beat (their side of a deception, their
+// valence clause), opener removed, then the continuation instruction
+export function carriedBeat(roundOneBeat: string): string {
+  return `This scene: ${stripOpener(roundOneBeat)}\n\n${LEAN_CONTINUATION_LINE}`;
 }
 
 export type SceneReviewPromptContext = {
