@@ -174,6 +174,13 @@ describe('lean voice pipeline', () => {
     expect(calls[3].user).toContain('The conversation so far:\nAlex Doe: Line number 3 here.');
   });
 
+  it("(c2) every actor message ends with that Sim's turn, after the other Sim's lines", async () => {
+    const { calls, play } = leanScene('lean-c2');
+    await play(sceneEvent(), { action: 'Alex Doe chats with Bella Goth.' });
+    expect(calls[0].user.endsWith('\n\nNow respond as Alex Doe.')).toBe(true);
+    expect(calls[3].user.endsWith('Alex Doe: Line number 3 here.\n\nNow respond as Bella Goth.')).toBe(true);
+  });
+
   it("(d) a Sim's system prompt is identical across rounds; name-free rules share one prefix across Sims", async () => {
     const { calls, play } = leanScene('lean-d', { [SettingsEnum.LEAN_NAME_FREE_RULES]: true });
     await play(sceneEvent(), { action: 'Alex Doe chats with Bella Goth.' });
@@ -188,7 +195,7 @@ describe('lean voice pipeline', () => {
     expect(rules).toContain('in the tone of the scene');
     expect(rules).not.toContain('your director');
     // Identity follows the rules; the now-block heads the USER message, not the system prompt
-    expect(calls[0].system).toContain('You are playing Alex Doe.');
+    expect(calls[0].system).toContain('You are Alex Doe.');
     expect(calls[0].system).not.toContain('<DATE>');
     expect(calls[0].user.indexOf('<DATE>')).toBe(0);
   });
@@ -320,7 +327,7 @@ describe('lean prompt helpers', () => {
       monologueOnly: false,
       nameFreeRules: true,
     });
-    const order = ['How to respond', 'You are playing Mara Vale.', '<LOCATION>', '<KNOWN_FACTS>', '<STATUS>'].map(
+    const order = ['How to respond', 'You are Mara Vale.', '<LOCATION>', '<KNOWN_FACTS>', '<STATUS>'].map(
       (marker) => prompt.indexOf(marker),
     );
     expect(order.every((index) => index >= 0)).toBe(true);

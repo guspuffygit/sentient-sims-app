@@ -2032,7 +2032,7 @@ ${factsBlock}
 
       const conversationSoFar = toTranscript(sceneLines);
       const actorUserText = lean
-        ? buildLeanActorUserMessage({ nowBlock, previouslyBlock, beat: simBeat, conversationSoFar })
+        ? buildLeanActorUserMessage({ nowBlock, previouslyBlock, beat: simBeat, conversationSoFar, simName: sim.name })
         : `${previouslyBlock}${simBeat}${conversationSoFar ? `\n\nThe conversation so far:\n${conversationSoFar}` : ''}`;
       if (performedLines.length > 0 && overBudget()) {
         log.error('Directed scene ran out of time mid-performance, airing the lines delivered so far');

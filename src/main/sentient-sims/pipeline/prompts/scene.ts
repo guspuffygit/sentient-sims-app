@@ -270,7 +270,7 @@ export function buildLeanActorSystemPrompt(context: LeanActorSystemPromptContext
     simName: context.nameFreeRules ? undefined : simName,
     lean: true,
   });
-  const identity = [`You are playing ${simName}.`, characterBlock.trim()]
+  const identity = [`You are ${simName}.`, characterBlock.trim()]
     .filter((part) => part.length > 0)
     .join('\n\n');
   const facts = factsBlock
@@ -295,14 +295,22 @@ export type LeanActorUserMessageContext = {
   beat: string;
   // This round's earlier lines, "Speaker: text" per line, or empty
   conversationSoFar: string;
+  // The Sim this call plays
+  simName: string;
 };
 
+// Closes the message with whose turn it is: the system prompt names the Sim once, and a
+// transcript and beat that are all about the other Sim pulled Haiku into speaking as them.
+export function leanTurnLine(simName: string): string {
+  return `Now respond as ${simName}.`;
+}
+
 export function buildLeanActorUserMessage(context: LeanActorUserMessageContext): string {
-  const { nowBlock, previouslyBlock, beat, conversationSoFar } = context;
+  const { nowBlock, previouslyBlock, beat, conversationSoFar, simName } = context;
   const now = nowBlock.trim();
   return `${now ? `${now}\n\n` : ''}${previouslyBlock}${beat}${
     conversationSoFar ? `\n\nThe conversation so far:\n${conversationSoFar}` : ''
-  }`;
+  }\n\n${leanTurnLine(simName)}`;
 }
 
 // The two opener sentences the 4.6 beat carries on round 1 (AIService frames them); a beat
