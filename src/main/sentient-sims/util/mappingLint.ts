@@ -1,5 +1,6 @@
 import { ACTOR_WORD_PAIRS, MAPPING_SCENE_TOKENS } from '../formatter/PromptFormatter';
 import { MappingFinding, MappingVerdict } from '../models/MappingReview';
+import { SavedNameHit } from './savedNames';
 
 // The rules the app can check without a model: tokens that will not render, directives aimed
 // at the AI, pronouns written bare, names from the save, and length. The reviewer model reads
@@ -9,8 +10,8 @@ export type MappingLintOptions = {
   kind: 'interaction' | 'animation';
   // How many sims the interaction has, when known: {actor.N} past the last one never fills
   simCount?: number;
-  // Names from the loaded save found in the text (InteractionService.namesFromSaveIn)
-  savedNames?: string[];
+  // Names from the loaded save found in the text (InteractionService.nameHitsFromSaveIn)
+  savedNames?: SavedNameHit[];
 };
 
 const TOKEN = /\{([^{}]*)\}/g;
@@ -167,12 +168,16 @@ export function lintMapping(action: string, options: MappingLintOptions): Mappin
     }
   });
 
-  (options.savedNames ?? []).forEach((name) => {
+  // A full name is a sim; a lone first or last name may be a word that a townie is also
+  // called, so it is a question rather than a verdict
+  (options.savedNames ?? []).forEach((hit) => {
     findings.push({
       flag: 'HARDCODED_NAME',
-      confidence: 'high',
-      quote: name,
-      why: `${name} is a sim in your save. Everyone who uses this mapping would read that name; use {actor.N}.`,
+      confidence: hit.whole ? 'high' : 'medium',
+      quote: hit.name,
+      why: hit.whole
+        ? `${hit.name} is a sim in your save. Everyone who uses this mapping would read that name; use {actor.N}.`
+        : `A sim in your save is called ${hit.name}. If this means that sim, use {actor.N}; as a word it is fine.`,
       source: 'check',
     });
   });
