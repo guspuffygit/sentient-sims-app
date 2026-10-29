@@ -39,6 +39,12 @@ describe('intimate scene rules', () => {
         "Wren Calloway (diary): I can't create explicit content, but I'd be happy to help with other creative story ideas.",
       ),
     ).toBe(true);
+    expect(
+      isRefusal(
+        "Flora Ladipo (diary): I'm not going to write this diary entry, since it would mean narrating explicit sexual content involving Flora and Jake.",
+      ),
+    ).toBe(true);
+    expect(isRefusal("I'm not going to write that off as nothing. He meant it.")).toBe(true);
     expect(isRefusal("Adrian House: I can't help myself around you")).toBe(false);
     expect(isRefusal("I can't help but smile when she laughs")).toBe(false);
     expect(isRefusal('')).toBe(false);

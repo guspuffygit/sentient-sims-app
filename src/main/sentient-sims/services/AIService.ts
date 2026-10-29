@@ -72,6 +72,8 @@ import {
   LEAN_CONTINUATION_LINE,
   ownCharacterBlock,
   performersAlreadyTalking,
+  splitLeanOpening,
+  LEAN_ELSEWHERE_HEADING,
   withContentFreeHint,
 } from '../pipeline/prompts/scene';
 import { buildDiaryOnlySystemPrompt } from '../pipeline/prompts/consolidation';
@@ -651,10 +653,13 @@ export class AIService {
       const others = pov ? names.filter((name) => name !== pov.simName) : names;
       const namesList = others.length > 0 ? others.join(', ') : 'the people present';
 
-      const transcript = this.ctx.promptBuilder
-        .groupMemories(this.diaryTranscriptRows(sceneMemories, pov?.simId, stage))
-        .map((message) => message.content)
-        .join('\n');
+      const diaryRows = this.diaryTranscriptRows(sceneMemories, pov?.simId, stage);
+      const transcriptOf = (rows: MemoryEntity[]) =>
+        this.ctx.promptBuilder
+          .groupMemories(rows)
+          .map((message) => message.content)
+          .join('\n');
+      const transcript = transcriptOf(diaryRows);
 
       // What the sim actually knows, so a diary cannot invent a sibling. Only the pov
       // sim has a point of view to recall from; a povless reflection stays as it was.
@@ -686,17 +691,37 @@ ${factsBlock}
       const plan = boundary === 'sleep' && pov ? this.ctx.ext.sleepPlanner?.prepare(pov, sleepClock) : undefined;
       const systemPrompt = plan ? plan.systemPrompt(reflectionContext) : buildDiaryOnlySystemPrompt(reflectionContext);
 
-      const reflection = await this.runOneShot(
-        plan ? 'Scene Reflection + Daily Plan' : 'Scene Reflection',
-        systemPrompt,
-        transcript,
-        plan ? 900 : 160,
-        undefined,
-        plan ? AIActionType.DAILY_PLAN : AIActionType.REFLECTION,
-        undefined,
-        { stageId: plan ? StageId.CONSOLIDATION_PLAN : StageId.CONSOLIDATION_REFLECT },
-      );
-      this.logExchange(reflection.exchange);
+      const write = async (input: string) => {
+        const result = await this.runOneShot(
+          plan ? 'Scene Reflection + Daily Plan' : 'Scene Reflection',
+          systemPrompt,
+          input,
+          plan ? 900 : 160,
+          undefined,
+          plan ? AIActionType.DAILY_PLAN : AIActionType.REFLECTION,
+          undefined,
+          { stageId: plan ? StageId.CONSOLIDATION_PLAN : StageId.CONSOLIDATION_REFLECT },
+        );
+        this.logExchange(result.exchange);
+        return result;
+      };
+      let reflection = await write(transcript);
+      // A model that declines the day over a sexual act (Flora's diary on Haiku, 2026-10-29,
+      // stored as "I'm not going to write this diary entry...") writes it once more with the
+      // act left out; a refusal with nothing intimate in the day stores nothing.
+      if (isRefusal(cleanupAIOutput(reflection.text))) {
+        const chaste = diaryRows.filter((row) => row.event_type !== SSEventType.WICKED_WHIMS);
+        if (chaste.length === diaryRows.length) {
+          log.error(`[Reflection] model refused the diary for scene ${previousScene.sceneId}; dropping it`);
+          return;
+        }
+        log.warn(`[Reflection] model refused the diary over an intimate row; writing it again without the act`);
+        reflection = await write(transcriptOf(chaste));
+        if (isRefusal(cleanupAIOutput(reflection.text))) {
+          log.error(`[Reflection] model refused the diary twice for scene ${previousScene.sceneId}; dropping it`);
+          return;
+        }
+      }
 
       let text = cleanupAIOutput(reflection.text);
       if (plan) {
@@ -1719,11 +1744,23 @@ ${factsBlock}
     // the location's recent rows too, so 82-98% of continuation rounds carried ~8 lines of an
     // earlier, unrelated conversation, which is what the actors latched onto once the beat
     // was gone (three streams, 2026-10-27).
-    const previously =
-      lean && options.continueScene
-        ? carried
-        : [formatPreviouslyInScene(recentMemories), carried].filter(Boolean).join('\n');
-    const previouslyBlock = previously ? `Previously in this scene:\n${previously}\n\n` : '';
+    // A lean OPENING round sees this cast's own last beats and only the headers of the rest
+    // (splitLeanOpening); the 4.6 window handed it the lot's last rows whole.
+    const leanOpening =
+      lean && !options.continueScene
+        ? splitLeanOpening(
+            formatPreviouslyInScene(recentMemories),
+            event.sentient_sims
+              .map((sim) => sim.name)
+              .filter((name) => !options.playerLine || name !== options.playerLine.speaker),
+          )
+        : undefined;
+    const previously = lean
+      ? [options.continueScene ? '' : (leanOpening?.sameCast ?? ''), carried].filter(Boolean).join('\n')
+      : [formatPreviouslyInScene(recentMemories), carried].filter(Boolean).join('\n');
+    const previouslyBlock =
+      (previously ? `Previously in this scene:\n${previously}\n\n` : '') +
+      (leanOpening?.elsewhere ? `${LEAN_ELSEWHERE_HEADING}\n${leanOpening.elsewhere}\n\n` : '');
 
     // Continuing a scene re-uses the same event; driving it with the original action again
     // would just replay the same beat, so swap in a continuation instruction instead
@@ -2410,7 +2447,12 @@ ${factsBlock}
       // Inner monologue becomes each sim's own PRIVATE memory the moment the scene
       // actually airs — a canceled prefetch leaves no trace. The shared transcript row
       // still arrives via the mod's POST /memories when the interaction completes.
-      this.storeMonologues(event, performers, monologueBySim, sceneScores.scores);
+      // Lean runs every round as its own generation: the thought is stored on the opening
+      // round only, or a three-round chat left three near-identical thoughts per Sim
+      // (Jaz's test day, 2026-10-29).
+      if (!lean || !options.continueScene) {
+        this.storeMonologues(event, performers, monologueBySim, sceneScores.scores);
+      }
       markScenePaced(finalText);
       if (thread) {
         this.ctx.playerConversations.record(

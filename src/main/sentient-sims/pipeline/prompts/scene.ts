@@ -270,9 +270,7 @@ export function buildLeanActorSystemPrompt(context: LeanActorSystemPromptContext
     simName: context.nameFreeRules ? undefined : simName,
     lean: true,
   });
-  const identity = [`You are ${simName}.`, characterBlock.trim()]
-    .filter((part) => part.length > 0)
-    .join('\n\n');
+  const identity = [`You are ${simName}.`, characterBlock.trim()].filter((part) => part.length > 0).join('\n\n');
   const facts = factsBlock
     ? `${factsBlock}
 These facts are what the game records about you right now. Where your character description disagrees with them, the facts are right.`
@@ -566,6 +564,61 @@ export function deceptionFraming(
 // had been in it). The pair is underway only when some beat above carries dialogue from
 // every performer; a beat is the run of lines between two non-dialogue lines (a pre-action,
 // an interaction header).
+// Lean round 1 (2026-10-29): the 4.6 window put the location's last rows under "Previously in
+// this scene" whole, whoever was in them. Live on Jaz's test day, Miho's first line to Milo
+// followed his chats with Itzel, Lyra, Kaleigh, Deacon and Rhys (60 lines), and a pair kept
+// replaying an old joke two interactions on. Only the beats every performer spoke in are this
+// conversation, and only the last LEAN_SAME_CAST_BEATS of them are shown; every other beat is
+// reduced to its header line, so a Sim knows what happened around them without a transcript
+// to echo. A beat is the run of lines under one non-dialogue header.
+export const LEAN_SAME_CAST_BEATS = 2;
+export const LEAN_ELSEWHERE_HEADERS = 4;
+export const LEAN_ELSEWHERE_HEADING =
+  'Earlier here, other conversations (not this one; bring them up only when it fits):';
+const CONTINUATION_HEADER = 'Continue talking and interacting';
+
+type Beat = { header?: string; lines: string[]; speakers: Set<string> };
+
+export function splitLeanOpening(
+  previously: string,
+  performerNames: string[],
+): { sameCast: string; elsewhere: string } {
+  const beats: Beat[] = [];
+  let current: Beat | undefined;
+  previously.split('\n').forEach((raw) => {
+    const line = raw.trim();
+    if (!line) {
+      return;
+    }
+    if (!/^[^:]{1,60}:\s/.test(line)) {
+      current = { header: line === CONTINUATION_HEADER ? undefined : line, lines: [], speakers: new Set() };
+      beats.push(current);
+      return;
+    }
+    if (!current) {
+      current = { lines: [], speakers: new Set() };
+      beats.push(current);
+    }
+    current.lines.push(line);
+    const speaker = performerNames.find((name) => line.startsWith(`${name}:`));
+    if (speaker) {
+      current.speakers.add(speaker);
+    }
+  });
+  const ours = (beat: Beat) => performerNames.length > 0 && performerNames.every((name) => beat.speakers.has(name));
+  const sameCast = beats
+    .filter((beat) => ours(beat))
+    .slice(-LEAN_SAME_CAST_BEATS)
+    .map((beat) => [beat.header, ...beat.lines].filter(Boolean).join('\n'))
+    .join('\n');
+  const elsewhere = beats
+    .filter((beat) => !ours(beat) && beat.header)
+    .slice(-LEAN_ELSEWHERE_HEADERS)
+    .map((beat) => beat.header as string)
+    .join('\n');
+  return { sameCast, elsewhere };
+}
+
 export function performersAlreadyTalking(previously: string, performerNames: string[]): boolean {
   if (!previously || performerNames.length === 0) {
     return false;

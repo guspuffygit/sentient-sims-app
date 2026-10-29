@@ -10,7 +10,9 @@ import { InteractionEvent, SSEventType } from 'main/sentient-sims/models/Interac
 import {
   buildLeanActorSystemPrompt,
   LEAN_CONTINUATION_LINE,
+  LEAN_ELSEWHERE_HEADING,
   speechRules,
+  splitLeanOpening,
   stripOpener,
 } from 'main/sentient-sims/pipeline/prompts/scene';
 import { StageId } from 'main/sentient-sims/pipeline/stages';
@@ -306,7 +308,95 @@ describe('lean voice pipeline', () => {
   });
 });
 
+describe('lean test-day fixes (2026-10-29)', () => {
+  it('(j) a three-round chat stores ONE thought per Sim, not one per round', async () => {
+    const { ctx, calls, play } = leanScene('lean-j');
+    await play(sceneEvent(), { action: 'Alex Doe chats with Bella Goth.' });
+    expect(calls.filter((call) => call.label.startsWith('Actor'))).toHaveLength(6);
+    const thoughts = ctx.memoryRepository.getMemories().filter((memory) => memory.event_type === 'monologue');
+    expect(thoughts.map((memory) => memory.content).sort()).toEqual(['Thought 1.', 'Thought 2.']);
+  });
+
+  it("(k) round 1 shows this cast's own last beats and only the headers of everyone else's", async () => {
+    const { ctx, calls, play } = leanScene('lean-k');
+    // The builder's window is the current scene's rows at its location
+    ctx.sceneService.checkSceneBoundary(sceneEvent());
+    const seed = (content: string, ids: string[]) =>
+      ctx.memoryRepository.createMemory({
+        memory: { content, location_id: 5, event_type: 'interaction' },
+        participants: ids.map((id) => ({ id })),
+      });
+    seed('Alex Doe is yelling at Cara Lee.\nAlex Doe: Tailpipe? I rebuilt that machine.\nCara Lee: Relax, Alex.', [
+      '1',
+      '3',
+    ]);
+    seed('Alex Doe is flirting with Bella Goth.\nAlex Doe: Look at you.\nBella Goth: You say that to everyone.', [
+      '1',
+      '2',
+    ]);
+    seed('Alex Doe is using the SimRay on Dan Roe.\nAlex Doe: Hold still.\nDan Roe: Five percent lamp, Alex.', [
+      '1',
+      '4',
+    ]);
+    await play(sceneEvent(), { action: 'Alex Doe chats with Bella Goth.' });
+    const round1 = calls[0].user;
+    const previously = round1.split('Previously in this scene:\n')[1].split('\n\n')[0];
+    expect(previously.split('\n')).toEqual([
+      'Alex Doe is flirting with Bella Goth.',
+      'Alex Doe: Look at you.',
+      'Bella Goth: You say that to everyone.',
+    ]);
+    const elsewhere = round1.split(`${LEAN_ELSEWHERE_HEADING}\n`)[1].split('\n\n')[0];
+    expect(elsewhere.split('\n')).toEqual([
+      'Alex Doe is yelling at Cara Lee.',
+      'Alex Doe is using the SimRay on Dan Roe.',
+    ]);
+    expect(round1).not.toContain('Tailpipe');
+    expect(round1).not.toContain('Five percent lamp');
+    // The pair was already talking, so the beat is not framed as an opening
+    expect(round1).not.toContain(OPENER);
+    // Round 2 is untouched: this scene's lines only, no elsewhere block
+    expect(calls[2].user).not.toContain(LEAN_ELSEWHERE_HEADING);
+  });
+});
+
 describe('lean prompt helpers', () => {
+  it('splitLeanOpening keeps the last two same-cast beats, headers for the rest, nothing else', () => {
+    const previously = [
+      'Milo Calder is greeting Itzel Ahmed in a flirty manner.',
+      'Milo Calder: Well, look at you.',
+      'Milo Calder is flirting with Lyra Sinclair.',
+      'Milo Calder: Lyra! Perfect timing.',
+      'Lyra Sinclair: Ha, you say that to everyone.',
+      'Milo Calder is asking Lyra Sinclair to talk about themselves.',
+      'Milo Calder: Guilty as charged.',
+      'Lyra Sinclair: Mostly retro game marathons.',
+      'Continue talking and interacting',
+      'Milo Calder: Which one?',
+      'Lyra Sinclair: An obscure one.',
+      'Lyra Sinclair is empathizing with Milo Calder.',
+      'Lyra Sinclair: You okay?',
+      'Milo Calder: Rough morning.',
+      'Milo Calder is yelling at Kaleigh McKinnon, furious.',
+      'Milo Calder: Tailpipe?',
+      'Kaleigh McKinnon: Come on, Milo.',
+    ].join('\n');
+    const split = splitLeanOpening(previously, ['Milo Calder', 'Lyra Sinclair']);
+    expect(split.sameCast.split('\n')).toEqual([
+      'Milo Calder: Which one?',
+      'Lyra Sinclair: An obscure one.',
+      'Lyra Sinclair is empathizing with Milo Calder.',
+      'Lyra Sinclair: You okay?',
+      'Milo Calder: Rough morning.',
+    ]);
+    expect(split.elsewhere.split('\n')).toEqual([
+      'Milo Calder is greeting Itzel Ahmed in a flirty manner.',
+      'Milo Calder is yelling at Kaleigh McKinnon, furious.',
+    ]);
+    expect(splitLeanOpening('', ['Milo Calder'])).toEqual({ sameCast: '', elsewhere: '' });
+    expect(splitLeanOpening(previously, []).sameCast).toBe('');
+  });
+
   it('strips both opener sentences and nothing else', () => {
     const beat =
       'Alex chats with Bella. Open the scene: the characters are just starting this conversation — the first line begins it, nothing was said before. This is a HOSTILE beat: it lands as genuinely unfriendly, hurtful or angry — never warm, never a joke between friends.';
@@ -327,8 +417,8 @@ describe('lean prompt helpers', () => {
       monologueOnly: false,
       nameFreeRules: true,
     });
-    const order = ['How to respond', 'You are Mara Vale.', '<LOCATION>', '<KNOWN_FACTS>', '<STATUS>'].map(
-      (marker) => prompt.indexOf(marker),
+    const order = ['How to respond', 'You are Mara Vale.', '<LOCATION>', '<KNOWN_FACTS>', '<STATUS>'].map((marker) =>
+      prompt.indexOf(marker),
     );
     expect(order.every((index) => index >= 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
