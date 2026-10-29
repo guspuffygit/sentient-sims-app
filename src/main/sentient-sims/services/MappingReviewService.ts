@@ -105,7 +105,7 @@ export class MappingReviewService {
   async review(request: MappingReviewRequest): Promise<MappingReview> {
     const sims = request.sims ?? [];
     const { action } = request;
-    const savedNames = this.ctx.interactions.namesFromSaveIn(action);
+    const savedNames = this.ctx.interactions.nameHitsFromSaveIn(action);
     const checks = lintMapping(action, { kind: request.kind, simCount: sims.length || undefined, savedNames });
 
     // Nothing for a reviewer to read: the player sees the check and tries again
@@ -192,7 +192,7 @@ export class MappingReviewService {
     const problems = lintMapping(cleaned, {
       kind: request.kind,
       simCount: simCount || undefined,
-      savedNames: this.ctx.interactions.namesFromSaveIn(cleaned),
+      savedNames: this.ctx.interactions.nameHitsFromSaveIn(cleaned),
     });
     if (problems.some((problem) => problem.confidence === 'high' && problem.flag !== 'VERBOSE')) {
       log.info(`[MappingReview] ${request.name}: dropped a suggestion that fails the checks: ${cleaned}`);
