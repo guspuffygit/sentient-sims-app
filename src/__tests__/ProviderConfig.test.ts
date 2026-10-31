@@ -170,6 +170,125 @@ describe('Provider Configs', () => {
     expect(ctx.settings.aiApiType).toEqual(fallbackDefault.apiType);
   });
 
+  it('a Sim pinned to a config is served by it ahead of the action and stage overrides', () => {
+    ctx.settings.aiApiType = ApiType.OpenAI;
+    addConfig({ id: 'evil', name: 'Evil', apiType: ApiType.VLLM, model: 'evil-model' });
+    addConfig({ id: 'ww', name: 'WW', apiType: ApiType.Gemini, model: 'ww-model' });
+    ctx.settings.aiActionProviderOverrides = { [AIActionType.WICKED_WHIMS]: 'ww' };
+    ctx.settings.aiSimProviderOverrides = { '42': 'evil' };
+
+    const pinned = ctx.providerConfigs.getConfigForDirectedStage(
+      AIActionType.DIRECTED_SCENE_ACTOR,
+      AIActionType.WICKED_WHIMS,
+      '42',
+    );
+    expect(pinned.model).toEqual('evil-model');
+
+    const other = ctx.providerConfigs.getConfigForDirectedStage(
+      AIActionType.DIRECTED_SCENE_ACTOR,
+      AIActionType.WICKED_WHIMS,
+      '43',
+    );
+    expect(other.model).toEqual('ww-model');
+
+    const plain = ctx.providerConfigs.getConfigForDirectedStage(AIActionType.DIRECTED_SCENE_ACTOR, undefined, '43');
+    expect(plain.apiType).toEqual(ApiType.OpenAI);
+    expect(ctx.providerConfigs.getConfigForSim('43')).toBeUndefined();
+  });
+
+  it('a Sim pin on a stale or deleted config falls through to the usual pick', () => {
+    ctx.settings.aiApiType = ApiType.OpenAI;
+    addConfig({ id: 'evil', name: 'Evil', apiType: ApiType.VLLM, model: 'evil-model' });
+    ctx.settings.aiSimProviderOverrides = { '42': 'evil', '43': 'never-existed', '': 'evil' };
+    expect(ctx.settings.aiSimProviderOverrides).toEqual({ '42': 'evil', '43': 'never-existed' });
+    expect(ctx.providerConfigs.getConfigForDirectedStage(AIActionType.COGNITION, undefined, '43').apiType).toEqual(
+      ApiType.OpenAI,
+    );
+
+    ctx.settings.aiProviderConfigs = ctx.settings.aiProviderConfigs.filter((config) => config.id !== 'evil');
+
+    expect(ctx.settings.aiSimProviderOverrides['42']).toBeUndefined();
+    expect(ctx.providerConfigs.getConfigForDirectedStage(AIActionType.COGNITION, undefined, '42').apiType).toEqual(
+      ApiType.OpenAI,
+    );
+  });
+
+  it('AIService sends a one-shot made as a pinned Sim to their provider and everyone else to the default', async () => {
+    ctx.settings.aiApiType = ApiType.VLLM;
+    addConfig({ id: 'evil', name: 'Evil', apiType: ApiType.OpenAI, model: 'evil-model' });
+    ctx.settings.aiSimProviderOverrides = { '42': 'evil' };
+
+    const openAISpy = vi
+      .spyOn(ctx.getGenerationService(ApiType.OpenAI), 'sentientSimsGenerate')
+      .mockResolvedValue({ text: 'muahaha', request: { messages: [], maxResponseTokens: 50 } });
+    const vllmSpy = vi
+      .spyOn(ctx.getGenerationService(ApiType.VLLM), 'sentientSimsGenerate')
+      .mockResolvedValue({ text: 'hello', request: { messages: [], maxResponseTokens: 50 } });
+
+    const pinned = await ctx.ai.runOneShot(
+      'Actor: Evil',
+      'sys',
+      'user',
+      50,
+      undefined,
+      AIActionType.DIRECTED_SCENE_ACTOR,
+      undefined,
+      {
+        simId: '42',
+      },
+    );
+    expect(pinned.text).toEqual('muahaha');
+    expect(openAISpy).toHaveBeenCalledOnce();
+    expect(openAISpy.mock.calls[0][0].model).toEqual('evil-model');
+    expect(vllmSpy).not.toHaveBeenCalled();
+
+    const other = await ctx.ai.runOneShot(
+      'Actor: Other',
+      'sys',
+      'user',
+      50,
+      undefined,
+      AIActionType.DIRECTED_SCENE_ACTOR,
+      undefined,
+      {
+        simId: '43',
+      },
+    );
+    expect(other.text).toEqual('hello');
+    expect(vllmSpy).toHaveBeenCalledOnce();
+    expect(openAISpy).toHaveBeenCalledOnce();
+  });
+
+  it('a config with its own context window trims a one-shot to it', async () => {
+    ctx.settings.aiApiType = ApiType.VLLM;
+    addConfig({ id: 'small', name: 'Small server', apiType: ApiType.OpenAI, model: 'tiny', contextTokens: 300 });
+    addConfig({ id: 'loose', name: 'Loose', apiType: ApiType.OpenAI, model: 'tiny', contextTokens: -5 });
+    expect(ctx.settings.aiProviderConfigs.find((config) => config.id === 'loose')?.contextTokens).toBeUndefined();
+    expect(ctx.providerConfigs.getResolvedConfig('small').contextTokens).toEqual(300);
+    ctx.settings.aiSimProviderOverrides = { '42': 'small' };
+
+    const openAISpy = vi
+      .spyOn(ctx.getGenerationService(ApiType.OpenAI), 'sentientSimsGenerate')
+      .mockResolvedValue({ text: 'ok', request: { messages: [], maxResponseTokens: 50 } });
+
+    const longUserText = 'the scene goes on and on '.repeat(200);
+    await ctx.ai.runOneShot(
+      'Actor: Small',
+      'sys',
+      longUserText,
+      50,
+      undefined,
+      AIActionType.DIRECTED_SCENE_ACTOR,
+      undefined,
+      {
+        simId: '42',
+      },
+    );
+    const request = openAISpy.mock.calls[0][0];
+    expect(request.promptOverflow?.budgetTokens).toEqual(250);
+    expect(request.promptOverflow?.droppedTokens).toBeGreaterThan(0);
+  });
+
   it('override falls back to default when the override id is stale', () => {
     ctx.settings.aiApiType = ApiType.OpenAI;
     // bypass the prune by writing an override for a config that never existed

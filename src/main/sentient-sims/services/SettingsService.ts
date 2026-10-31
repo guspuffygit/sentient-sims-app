@@ -10,7 +10,14 @@ import {
 } from '../models/PlayerVoicePersona';
 import { defaultOpenAITTSSettings, OpenAITTSSettings } from '../models/OpenAITTSSettings';
 import { ApiType, ApiTypeFromValue } from '../models/ApiType';
-import { AIProviderConfig, autoConfigId, newAutoConfig, sanitizeProviderConfigs } from '../models/AIProviderConfig';
+import {
+  AIProviderConfig,
+  autoConfigId,
+  newAutoConfig,
+  sanitizeProviderConfigs,
+  sanitizeSimProviderOverrides,
+  SimProviderOverrides,
+} from '../models/AIProviderConfig';
 import { AIActionOverrides } from '../models/AIActionType';
 import { sanitizeStagePromptOverrides, StagePromptOverrides } from '../pipeline/prompts';
 import { defaultEmbeddingModelFor } from '../models/EmbeddingModels';
@@ -504,6 +511,10 @@ export function defaultStore(cwd?: string) {
         type: 'object',
         default: {},
       },
+      [SettingsEnum.AI_SIM_PROVIDER_OVERRIDES.toString()]: {
+        type: 'object',
+        default: {},
+      },
       [SettingsEnum.STAGE_PROMPT_OVERRIDES.toString()]: {
         type: 'object',
         default: {},
@@ -709,6 +720,12 @@ export class SettingsService {
     const prunedEntries = Object.entries(overrides).filter(([, configId]) => configId && ids.has(configId));
     if (prunedEntries.length !== Object.keys(overrides).length) {
       this.set(SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES, Object.fromEntries(prunedEntries));
+    }
+
+    const simOverrides = this.aiSimProviderOverrides;
+    const prunedSims = Object.entries(simOverrides).filter(([, configId]) => ids.has(configId));
+    if (prunedSims.length !== Object.keys(simOverrides).length) {
+      this.set(SettingsEnum.AI_SIM_PROVIDER_OVERRIDES, Object.fromEntries(prunedSims));
     }
   }
 
@@ -1109,6 +1126,14 @@ export class SettingsService {
 
   set aiActionProviderOverrides(value: AIActionOverrides) {
     this.set(SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES, value);
+  }
+
+  get aiSimProviderOverrides(): SimProviderOverrides {
+    return sanitizeSimProviderOverrides(this.get(SettingsEnum.AI_SIM_PROVIDER_OVERRIDES));
+  }
+
+  set aiSimProviderOverrides(value: SimProviderOverrides) {
+    this.set(SettingsEnum.AI_SIM_PROVIDER_OVERRIDES, sanitizeSimProviderOverrides(value));
   }
 
   // A player-set replacement for one pipeline stage's system prompt, keyed by StageId.

@@ -36,13 +36,25 @@ export class ProviderConfigService {
     return this.getResolvedConfig(overrideId);
   }
 
+  // The config one Sim is pinned to, if any (a stale id counts as none)
+  getConfigForSim(simId?: string): ResolvedProviderConfig | undefined {
+    const configId = simId ? this.ctx.settings.aiSimProviderOverrides[simId] : undefined;
+    const config = configId ? this.getConfig(configId) : undefined;
+    return config ? this.resolve(config) : undefined;
+  }
+
   /**
    * A directed scene runs as several stages (director, actors, reviewer) that can each be
    * pointed at their own provider. A stage with no override of its own inherits the one set
    * for the interaction that started the scene, so overriding a single action still covers
-   * every AI call that action makes.
+   * every AI call that action makes. A Sim's SPOKEN line (the actor call made as them)
+   * goes to that Sim's own config first, ahead of every other override.
    */
-  getConfigForDirectedStage(stage: AIActionType, interaction?: AIActionType): ResolvedProviderConfig {
+  getConfigForDirectedStage(stage: AIActionType, interaction?: AIActionType, simId?: string): ResolvedProviderConfig {
+    const simConfig = this.getConfigForSim(simId);
+    if (simConfig) {
+      return simConfig;
+    }
     const overrides = this.ctx.settings.aiActionProviderOverrides;
     // A sexual act stays on the provider picked for Wicked Whims at every stage: that pick
     // is about who may write explicit content, which a stage's own pick never considered
@@ -58,6 +70,7 @@ export class ProviderConfigService {
       name: config.name,
       apiType: config.apiType,
       model: config.model ?? this.providerModel(config.apiType),
+      contextTokens: config.contextTokens,
     };
   }
 

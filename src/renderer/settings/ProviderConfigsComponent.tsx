@@ -32,7 +32,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SyncIcon from '@mui/icons-material/Sync';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import {
   ApiType,
@@ -42,7 +42,8 @@ import {
   generationApiTypes,
   imageGenerationApiTypes,
 } from 'main/sentient-sims/models/ApiType';
-import { AIProviderConfig, deriveAutoApiType } from 'main/sentient-sims/models/AIProviderConfig';
+import { AIProviderConfig, deriveAutoApiType, SimProviderOverrides } from 'main/sentient-sims/models/AIProviderConfig';
+import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
 import {
   AIActionOverrides,
   AIActionTypeDescription,
@@ -205,6 +206,7 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
   // narrow the open dropdown to entries matching that prefill - hiding the
   // fetched model list. Only filter after the user actually types.
   const [modelFilterActive, setModelFilterActive] = useState(false);
+  const [contextTokens, setContextTokens] = useState(initial?.contextTokens ? String(initial.contextTokens) : '');
   const [testResult, setTestResult] = useState<AITestStatus | undefined>();
   const { userAttributes } = useAuth();
   const patreonUser = new PatreonUser(userAttributes);
@@ -271,6 +273,10 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
     };
     if (trimmedModel && modelSelectionSupported) {
       config.model = trimmedModel;
+    }
+    const parsedContext = Number.parseInt(contextTokens, 10);
+    if (capability === 'text' && Number.isInteger(parsedContext) && parsedContext > 0) {
+      config.contextTokens = parsedContext;
     }
     onSave(config);
   };
@@ -416,6 +422,20 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
         {apiType === ApiType.VLLM ? (
           <FormHelperText>Leave the model empty to use the VLLM server default.</FormHelperText>
         ) : null}
+        {capability === 'text' ? (
+          <TextField
+            label="Context window (tokens)"
+            value={contextTokens}
+            onChange={(change) => {
+              setContextTokens(change.target.value.replace(/\D/g, ''));
+            }}
+            fullWidth
+            size="small"
+            sx={{ marginTop: 2 }}
+            placeholder="Model default"
+            helperText="Only for a server that takes fewer tokens than the model allows: prompts are trimmed to fit this, prompt and reply together."
+          />
+        ) : null}
         {upgradeRequired ? (
           <Alert
             severity="warning"
@@ -470,6 +490,7 @@ export function ProviderConfigsComponent({
   const configsSetting = useSetting<AIProviderConfig[]>(definition.configsKey, []);
   const defaultIdSetting = useSetting<string>(definition.defaultIdKey, '');
   const overridesSetting = useSetting<AIActionOverrides>(SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES, {});
+  const simOverridesSetting = useSetting<SimProviderOverrides>(SettingsEnum.AI_SIM_PROVIDER_OVERRIDES, {});
   const autoApiType = useAutoApiType(definition.apiTypes);
   const sentientSimsEmbeddingModel = useSetting<string>(
     SettingsEnum.SENTIENTSIMSAI_EMBEDDING_MODEL,
@@ -479,9 +500,33 @@ export function ProviderConfigsComponent({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<AIProviderConfig | undefined>();
   const [testResults, setTestResults] = useState<Record<string, AITestStatus | undefined>>({});
+  // The Sims the app knows, for the per-Sim override picker (text capability only)
+  const [participants, setParticipants] = useState<ParticipantDTO[]>([]);
+  const [pendingSim, setPendingSim] = useState<ParticipantDTO | null>(null);
+  const [pendingConfigId, setPendingConfigId] = useState('');
 
   const configs = configsSetting.value;
   const overrides = overridesSetting.value;
+  const simOverrides = simOverridesSetting.value;
+
+  useEffect(() => {
+    if (capability !== 'text') {
+      return;
+    }
+    const controller = new AbortController();
+    fetch(`${appApiUrl}/participants`, { signal: controller.signal })
+      .then((response) => parseJsonResponse<ParticipantDTO[]>(response, 'Unable to list Sims'))
+      .then((list) => {
+        setParticipants(list.filter((sim) => sim.name).sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')));
+        return list;
+      })
+      .catch(() => {
+        // The picker just stays empty; the pins already set still show by id
+      });
+    return () => {
+      controller.abort();
+    };
+  }, [capability]);
   const defaultConfig = configs.find((config) => config.id === defaultIdSetting.value);
 
   // What Auto resolves to right now: the backend keeps the legacy Sentient Sims
@@ -524,6 +569,12 @@ export function ProviderConfigsComponent({
       if (prunedEntries.length !== Object.keys(overrides).length) {
         void overridesSetting.setSetting(Object.fromEntries(prunedEntries));
       }
+      const prunedSims = Object.entries(simOverrides).filter(
+        ([, configId]) => configId !== config.id && next.some((existing) => existing.id === configId),
+      );
+      if (prunedSims.length !== Object.keys(simOverrides).length) {
+        void simOverridesSetting.setSetting(Object.fromEntries(prunedSims));
+      }
     }
   };
 
@@ -558,6 +609,17 @@ export function ProviderConfigsComponent({
     }
     void overridesSetting.setSetting(Object.fromEntries(entries));
   };
+
+  const setSimOverride = (simId: string, configId: string) => {
+    const entries = Object.entries(simOverrides).filter(([key]) => key !== simId);
+    if (configId !== '') {
+      entries.push([simId, configId]);
+    }
+    void simOverridesSetting.setSetting(Object.fromEntries(entries));
+  };
+
+  const simName = (simId: string) => participants.find((sim) => sim.id === simId)?.name ?? `Sim ${simId}`;
+  const pinnableSims = participants.filter((sim) => !(sim.id in simOverrides));
 
   const showTable = definition.hasAutoRow || configs.length > 0;
 
@@ -717,6 +779,97 @@ export function ProviderConfigsComponent({
                 </Box>
               );
             })}
+          </AccordionDetails>
+        </Accordion>
+      ) : null}
+      {capability === 'text' ? (
+        <Accordion disableGutters>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography>Per-Sim Provider Overrides</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <FormHelperText sx={{ marginBottom: 1 }}>
+              Pin one Sim to a provider configuration. That Sim&apos;s spoken lines (their actor call in every scene)
+              come from it, ahead of the overrides above. Everything else about them, and every other Sim, keeps the
+              usual pick.
+            </FormHelperText>
+            {Object.entries(simOverrides).map(([simId, configId]) => {
+              const value = configs.some((config) => config.id === configId) ? configId : '';
+              return (
+                <Box key={simId} sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}>
+                  <Typography sx={{ width: 170, flexShrink: 0 }}>{simName(simId)}</Typography>
+                  <Select
+                    size="small"
+                    displayEmpty
+                    value={value}
+                    sx={{ minWidth: 260 }}
+                    onChange={(change) => {
+                      setSimOverride(simId, change.target.value);
+                    }}
+                  >
+                    <MenuItem value="">Default{defaultConfig ? ` (${defaultConfig.name})` : ''}</MenuItem>
+                    {configs.map((config) => (
+                      <MenuItem key={config.id} value={config.id}>
+                        {config.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <IconButton
+                    size="small"
+                    title="Remove"
+                    onClick={() => {
+                      setSimOverride(simId, '');
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              );
+            })}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginTop: 1 }}>
+              <Autocomplete
+                size="small"
+                sx={{ width: 240 }}
+                options={pinnableSims}
+                value={pendingSim}
+                getOptionLabel={(sim) => sim.name ?? sim.id}
+                isOptionEqualToValue={(option, selected) => option.id === selected.id}
+                onChange={(_event, sim) => {
+                  setPendingSim(sim);
+                }}
+                renderInput={(params) => <TextField {...params} label="Sim" />}
+              />
+              <Select
+                size="small"
+                displayEmpty
+                value={pendingConfigId}
+                sx={{ minWidth: 260 }}
+                onChange={(change) => {
+                  setPendingConfigId(change.target.value);
+                }}
+              >
+                <MenuItem value="">Configuration</MenuItem>
+                {configs.map((config) => (
+                  <MenuItem key={config.id} value={config.id}>
+                    {config.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={!pendingSim || pendingConfigId === ''}
+                onClick={() => {
+                  if (pendingSim && pendingConfigId !== '') {
+                    setSimOverride(pendingSim.id, pendingConfigId);
+                    setPendingSim(null);
+                    setPendingConfigId('');
+                  }
+                }}
+              >
+                Pin Sim
+              </Button>
+            </Box>
           </AccordionDetails>
         </Accordion>
       ) : null}

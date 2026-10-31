@@ -98,6 +98,8 @@ import { ModAddBuff, ModWebsocketMessageType } from '../models/ModWebsocketMessa
 import { ParticipantDTO } from '../db/dto/ParticipantDTO';
 import { ApiContext } from './ApiContext';
 import { AIActionType, actionTypeForEvent } from '../models/AIActionType';
+import { ResolvedProviderConfig } from '../models/AIProviderConfig';
+import { ModelSettings } from '../modelSettings';
 import { assertDiaryIsProse, repairDiary } from '../util/diaryProse';
 import { SceneState } from './SceneService';
 import { isBelowChild, lifeStageOf } from '../util/simLifeStage';
@@ -395,6 +397,8 @@ type RequestDeadline = {
 // signal, and the time the game gives up on the request it serves
 export type OneShotOptions = {
   stageId?: StageId;
+  // The Sim whose spoken line this is; a Sim pinned to a provider config goes there
+  simId?: string;
   // Usage purpose when the action type does not say enough (sim vs location description)
   purpose?: string;
   signal?: AbortSignal;
@@ -1215,7 +1219,7 @@ ${factsBlock}
       prePreAction: options.prePreAction,
       stopTokens: options.stopTokens,
       apiType: providerConfig.apiType,
-      modelSettings: await this.ctx.modelSettings.getModelSettings(providerConfig.model, providerConfig.apiType),
+      modelSettings: await this.modelSettingsFor(providerConfig),
       continue: options.continue,
       promptHistoryMode: options.promptHistoryMode,
       maxResponseTokens: options.maxResponseTokens,
@@ -1536,12 +1540,19 @@ ${factsBlock}
     if (options?.signal?.aborted) {
       throw new SceneAbortedError(label);
     }
-    const providerConfig = this.ctx.providerConfigs.getConfigForDirectedStage(actionType, interactionActionType);
+    const providerConfig = this.ctx.providerConfigs.getConfigForDirectedStage(
+      actionType,
+      interactionActionType,
+      options?.simId,
+    );
+    if (options?.simId && this.ctx.providerConfigs.getConfigForSim(options.simId)) {
+      log.info(`[Provider] ${label}: sim ${options.simId} is pinned to ${providerConfig.name}`);
+    }
     // The context budget belongs to the model, not to this call site: a hardcoded 3900 threw
     // away most of a 16k window on the big models and silently cut the payload on every one.
     // The reply has to fit in the same window, so its budget is reserved off the top.
     const resolvedModel = model ?? providerConfig.model;
-    const modelSettings = await this.ctx.modelSettings.getModelSettings(resolvedModel, providerConfig.apiType);
+    const modelSettings = await this.modelSettingsFor(providerConfig, resolvedModel);
     // A stage the player has overridden sends their prompt instead of the built one
     const resolvedSystemPrompt = options?.stageId
       ? promptFor(options.stageId, systemPrompt, this.ctx.settings.stagePromptOverrides)
@@ -1587,6 +1598,16 @@ ${factsBlock}
       throw err;
     }
     return { exchange: { label, request: openAIRequest, responseText: response.text }, text: response.text };
+  }
+
+  // The model's settings with its window capped at the config's own context size, when
+  // the server behind the config takes less than the model's table says
+  private async modelSettingsFor(config: ResolvedProviderConfig, model?: string): Promise<ModelSettings> {
+    const settings = await this.ctx.modelSettings.getModelSettings(model ?? config.model, config.apiType);
+    if (config.contextTokens === undefined || config.contextTokens >= settings.max_tokens) {
+      return settings;
+    }
+    return { ...settings, max_tokens: config.contextTokens };
   }
 
   // A call the game is waiting on may not outlive the game's patience; one nobody is
@@ -1675,7 +1696,7 @@ ${factsBlock}
       sexCategoryType: intimateEvent?.sex_category,
       sexLocationType: intimateEvent?.sex_location,
       apiType: directorConfig.apiType,
-      modelSettings: await this.ctx.modelSettings.getModelSettings(directorConfig.model, directorConfig.apiType),
+      modelSettings: await this.modelSettingsFor(directorConfig),
     };
     const promptRequest = await this.ctx.promptBuilder.buildPromptRequest(event, promptOptions);
     if (options.continueScene && roundDropped()) {
@@ -1951,7 +1972,7 @@ ${factsBlock}
           options.actorModels?.[event.sentient_sims.indexOf(sim)],
           AIActionType.DIRECTED_SCENE_ACTOR,
           interactionActionType,
-          { ...callControl, stageId: StageId.BROCA_SPEECH },
+          { ...callControl, stageId: StageId.BROCA_SPEECH, simId: sim.sim_id },
         );
         exchanges.push(performance.exchange);
         this.logExchange(performance.exchange);

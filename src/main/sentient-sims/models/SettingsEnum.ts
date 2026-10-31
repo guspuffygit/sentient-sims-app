@@ -57,6 +57,8 @@ export enum SettingsEnum {
   AI_PROVIDER_CONFIGS = 'aiProviderConfigs',
   DEFAULT_AI_PROVIDER_CONFIG_ID = 'defaultAiProviderConfigId',
   AI_ACTION_PROVIDER_OVERRIDES = 'aiActionProviderOverrides',
+  // One Sim's own provider config, keyed by sim id: their lines and thoughts go there
+  AI_SIM_PROVIDER_OVERRIDES = 'aiSimProviderOverrides',
   // Per-stage system prompt overrides, keyed by pipeline StageId
   STAGE_PROMPT_OVERRIDES = 'stagePromptOverrides',
   // How many memories retrieval scores per query (Phase 3.1 H3). Raised from the old
