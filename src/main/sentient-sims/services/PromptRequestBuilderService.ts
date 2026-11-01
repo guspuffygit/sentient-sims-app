@@ -173,10 +173,17 @@ export class PromptRequestBuilderService {
     return formattedParticipants;
   }
 
-  formatSimPostures(sentientSims: SentientSim[]) {
+  // With `activities` (the lean actor prompt, 2026-10-31) each Sim's clause ends with what
+  // they are in the middle of, as the mod's pie label ("Augustus St Fleur is lying in the
+  // bed, sleeping"), unless it is the scene's own beat (`beatLabel`, the event's
+  // interaction_display_name: the same label the mod produced), which the beat already says.
+  formatSimPostures(sentientSims: SentientSim[], options: { activities?: boolean; beatLabel?: string } = {}) {
     const formattedPositions: string[] = [];
+    const beatLabel = options.beatLabel?.trim().toLowerCase();
     sentientSims.forEach((sentientSim) => {
       const positionStrings: string[] = [`${sentientSim.name} is`];
+      const doing = options.activities ? sentientSim.doing?.trim() : undefined;
+      const sayDoing = doing && doing.toLowerCase() !== beatLabel ? doing.toLowerCase() : undefined;
       if (sentientSim.body_posture && sentientSim.body_posture in postureDescriptions) {
         const bodyPosturePosition = postureDescriptions[sentientSim.body_posture];
         if (bodyPosturePosition.ignored !== true && bodyPosturePosition.description) {
@@ -210,8 +217,14 @@ export class PromptRequestBuilderService {
         }
       }
 
+      if (sayDoing) {
+        // "X is sitting at the desk, using the computer"; a Sim with no posture words
+        // reads "X is cooking garlic noodles"
+        positionStrings.push(positionStrings.length > 1 ? `, ${sayDoing}` : sayDoing);
+      }
+
       if (positionStrings.length > 1) {
-        formattedPositions.push(positionStrings.join(' '));
+        formattedPositions.push(positionStrings.join(' ').replace(' , ', ', '));
       }
     });
 
@@ -542,7 +555,14 @@ export class PromptRequestBuilderService {
     const dateTime = formatDateTime(event.environment);
     const season = formatSeason(event.environment);
     const weather = formatWeather(event.environment);
-    const postures = this.formatSimPostures(event.sentient_sims);
+    // The doing clause is lean-only: the full pipeline's postures also fill formatAction's
+    // {postures} token and its fixture pins that text
+    const postures = this.formatSimPostures(
+      event.sentient_sims,
+      options.lean
+        ? { activities: true, beatLabel: (event as Partial<InteractionEvent>).interaction_display_name }
+        : {},
+    );
 
     let formattedAction;
     if (options.action) {

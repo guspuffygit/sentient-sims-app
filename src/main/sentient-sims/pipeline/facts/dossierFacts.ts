@@ -168,6 +168,12 @@ export function dossierToFacts(dossier: SimDossier, options: DossierToFactsOptio
       // sim who has not branched keeps the claim an older mod build sent.
       const name = careerBranchWords(career.track) ? `${career.career}/${career.track as string}` : career.career;
       add(FactPredicate.JOB, career.level ? `${name} (level ${career.level})` : name);
+      // The title is its own single-valued fact beside the job (2026-10-31): a promotion
+      // retires the old title the way it retires the old job claim, and a mod that sends
+      // no title leaves every existing job row untouched.
+      if (career.title) {
+        add(FactPredicate.JOB_TITLE, career.title);
+      }
     }
   }
   for (const business of dossier.businesses ?? []) {

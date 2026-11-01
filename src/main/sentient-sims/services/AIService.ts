@@ -86,7 +86,9 @@ import {
   escapeRegExp,
   formatSceneForChatWindow,
   formatAction,
+  formatCoarseDateTime,
   formatListToString,
+  formatSlimSentientSim,
   isDegenerateOutput,
   parseDialogueLines,
   splitLinesForPacing,
@@ -1719,14 +1721,20 @@ ${factsBlock}
     // promptRequest.location is already wrapped in <LOCATION> tags. The scene prefix
     // (where and when) is kept apart from the participants block because an actor whose
     // briefing failed may only see the prefix and their own character (see the fallback).
-    // Lean keeps the two halves apart: the place is stable across a scene and sits in the
-    // system prompt; the now-block (clock, season, weather, postures) changes every call and
-    // heads the user message, so the cacheable text is never interrupted by it.
+    // Lean keeps the halves apart: the place is stable across a scene and sits in the
+    // system prompt; the setting (coarse date, season, weather) is fixed per event too and
+    // closes the system message (2026-10-31; before, it headed the user message with the
+    // clock minute, which bought nothing); only the postures line, which changes every
+    // call, heads the user message, so the cacheable text is never interrupted by it.
     const locationBlock =
       promptRequest.location && promptRequest.location.trim().length > 0 ? promptRequest.location : '';
     const nowBlock = [promptRequest.dateTime, promptRequest.season, promptRequest.weather, promptRequest.postures]
       .filter((part) => part && part.trim().length > 0)
       .join('\n');
+    const leanSettingBlock = [formatCoarseDateTime(event.environment), promptRequest.season, promptRequest.weather]
+      .filter((part) => part && part.trim().length > 0)
+      .join('\n');
+    const leanNowBlock = promptRequest.postures ?? '';
     const scenePrefix = [locationBlock, nowBlock].filter((part) => part.length > 0).join('\n');
     const sceneContext = [scenePrefix, promptRequest.participants]
       .filter((part) => part && part.trim().length > 0)
@@ -2012,7 +2020,7 @@ ${factsBlock}
       const simBeat = actionFor?.(sim.name) ?? sceneAction;
       // Lean: the Sim's own character block is the identity; what it names (and the beat)
       // decides whose fact lines join theirs
-      const characterBlock = lean ? ownCharacterBlock(sim.name, promptRequest.participants) : '';
+      const fullBlock = lean ? ownCharacterBlock(sim.name, promptRequest.participants) : '';
       let actorFacts: string;
       const carriedFacts = lean ? options.factsBySim?.get(sim.name) : undefined;
       if (carriedFacts !== undefined) {
@@ -2030,7 +2038,7 @@ ${factsBlock}
                 // Anyone the briefing or the scene so far names gets their real fact line, so a
                 // solo introspection about Adrian cannot read Adrian's absence as nonexistence
                 mentionedText: [
-                  lean ? characterBlock : (actorPrompts.get(sim.name) ?? ''),
+                  lean ? fullBlock : (actorPrompts.get(sim.name) ?? ''),
                   previouslyBlock,
                   simBeat,
                   toTranscript(sceneLines),
@@ -2045,6 +2053,16 @@ ${factsBlock}
       if (actorFacts || lean) {
         factsBySim.set(sim.name, actorFacts);
       }
+      // Lean, with facts: the slim block (bio, mood, clothing), since the facts carry the
+      // traits, likes and job; the full block repeated them at ~62% of its length (10-30
+      // stream). Without facts (a visitor the store never met) the full block stays: its
+      // trait sentences are all the model gets. Round 2+ reuses round 1's facts, so the
+      // choice and the text are the same every round. formatSims put the stored bio on this
+      // very object (performers are the event's Sims), so the slim render reads it.
+      const characterBlock =
+        lean && actorFacts
+          ? `<CHARACTER_IN_INTERACTION>\n${formatSlimSentientSim(sim)}\n</CHARACTER_IN_INTERACTION>`
+          : fullBlock;
       const thinkOnly = monologueOnly || silentNames.includes(sim.name);
       const statusBlock = playerFacing ? this.selfStatusBlock(sim.sim_id) || undefined : undefined;
       const actorSystemPrompt = lean
@@ -2053,6 +2071,7 @@ ${factsBlock}
             characterBlock,
             locationBlock,
             factsBlock: actorFacts || undefined,
+            settingBlock: leanSettingBlock,
             statusBlock,
             playerFacing,
             monologueOnly: thinkOnly,
@@ -2069,7 +2088,13 @@ ${factsBlock}
 
       const conversationSoFar = toTranscript(sceneLines);
       const actorUserText = lean
-        ? buildLeanActorUserMessage({ nowBlock, previouslyBlock, beat: simBeat, conversationSoFar, simName: sim.name })
+        ? buildLeanActorUserMessage({
+            nowBlock: leanNowBlock,
+            previouslyBlock,
+            beat: simBeat,
+            conversationSoFar,
+            simName: sim.name,
+          })
         : `${previouslyBlock}${simBeat}${conversationSoFar ? `\n\nThe conversation so far:\n${conversationSoFar}` : ''}`;
       if (performedLines.length > 0 && overBudget()) {
         log.error('Directed scene ran out of time mid-performance, airing the lines delivered so far');

@@ -87,6 +87,31 @@ describe('renderKnownFacts', () => {
     expect(jobWords('career_Adult_TechGuru (level 2)')).toBe('you work in the Tech Guru career, level 2');
   });
 
+  it("says the game's job title when the mod sent one (2026-10-31), the career in brackets", () => {
+    expect(jobWords('career_Adult_Culinary (level 4)', 'Line Cook')).toBe(
+      'you work as a Line Cook (Culinary career, level 4)',
+    );
+    expect(jobWords('career_Adult_Business (level 1)', 'Office Assistant')).toBe(
+      'you work as an Office Assistant (Business career, level 1)',
+    );
+    expect(jobWords('career_Adult_Athletic/Athletic_Track3_BodyBuilder (level 10)', 'Mr. Olympia')).toBe(
+      'you work as a Mr. Olympia (Athletic career, Bodybuilder branch, level 10)',
+    );
+    // A typed job keeps its own words whatever the title says
+    expect(jobWords("Pub Owner at The Gnome's Arms", 'Line Cook')).toBe("you work as Pub Owner at The Gnome's Arms");
+    const block = render({
+      selfFacts: [
+        ...summerFacts,
+        fact(FactPredicate.JOB, 'career_Adult_Culinary (level 4)'),
+        fact(FactPredicate.JOB_TITLE, 'Line Cook'),
+      ],
+    });
+    expect(block).toContain('you work as a Line Cook (Culinary career, level 4)');
+    expect(block).not.toContain('you work in the Culinary career');
+    // The title renders no line of its own
+    expect(block.match(/Line Cook/g)).toHaveLength(1);
+  });
+
   it('says a business owner owns it, and is not jobless', () => {
     const block = render({ selfFacts: [...summerFacts, fact(FactPredicate.BUSINESS, 'Vale Curios')] });
     expect(block).toContain('you own a small business, Vale Curios');

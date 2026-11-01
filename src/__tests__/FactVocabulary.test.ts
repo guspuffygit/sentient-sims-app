@@ -82,6 +82,18 @@ describe('dossier to facts', () => {
     expect(promoted.some((fact) => fact.objectText === 'career_Adult_TechGuru (level 5)')).toBe(true);
   });
 
+  it("carries the game's job title beside the job, never inside it (2026-10-31)", () => {
+    const titled = dossierToFacts({
+      sim_id: '1',
+      careers: [{ career: 'career_Adult_TechGuru', level: 4, title: 'Code Monkey' }],
+    });
+    expect(titled).toContainEqual({ predicate: FactPredicate.JOB, objectText: 'career_Adult_TechGuru (level 4)' });
+    expect(titled).toContainEqual({ predicate: FactPredicate.JOB_TITLE, objectText: 'Code Monkey' });
+    // An older mod sends no title: no title fact, the job claim unchanged
+    const untitled = dossierToFacts({ sim_id: '1', careers: [{ career: 'career_Adult_TechGuru', level: 4 }] });
+    expect(untitled.some((fact) => fact.predicate === FactPredicate.JOB_TITLE)).toBe(false);
+  });
+
   it('puts the branch inside the claim once chosen, and leaves the starting track off', () => {
     const texts = (careers: { career: string; track?: string; level?: number }[]) =>
       dossierToFacts({ sim_id: '1', careers })

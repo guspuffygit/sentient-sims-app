@@ -5,12 +5,18 @@ import * as os from 'os';
 import {
   BodyState,
   cleanupAIOutput,
+  formatCoarseDateTime,
   formatListToString,
+  formatMoodSentence,
+  formatSentientSim,
+  formatSlimSentientSim,
   formatWeather,
   formatWWProperties,
   hasWWProperties,
   isDegenerateOutput,
+  normalizeMoodName,
   parseDialogueLines,
+  partOfDay,
   splitLinesForPacing,
 } from 'main/sentient-sims/formatter/PromptFormatter';
 import { assignVoicesToSpeakers } from 'main/sentient-sims/formatter/VoiceAssignment';
@@ -771,6 +777,80 @@ describe('Output', () => {
       sentientSim.upper_body = BodyState.NUDE;
       sentientSim.lower_body = BodyState.NUDE;
       expect(formatWWProperties(sentientSim)).toEqual(`${sentientSim.name} is completely naked.`);
+    });
+
+    // 2026-10-31: the mod used to send str() of the Mood tuning class and no prompt ever
+    // carried a mood; both the old and the fixed shape must resolve
+    it('normalizes a mood name from either mod shape', () => {
+      expect(normalizeMoodName('Mood_Happy')).toBe('Mood_Happy');
+      expect(normalizeMoodName("<class 'sims4.tuning.instances.Mood_Happy'>")).toBe('Mood_Happy');
+      expect(normalizeMoodName("<class 'sims4.tuning.instances.mood_Angry_Cat'>")).toBe('mood_Angry_Cat');
+      expect(normalizeMoodName('  Mood_Fine ')).toBe('Mood_Fine');
+    });
+
+    it('writes one mood sentence for the first described mood', () => {
+      sentientSim.name = 'Paolo Rocca';
+      expect(formatMoodSentence(sentientSim)).toBeUndefined();
+      sentientSim.moods = ["<class 'sims4.tuning.instances.Mood_Uncomfortable'>"];
+      expect(formatMoodSentence(sentientSim)).toBe('Paolo Rocca is feeling uncomfortable.');
+      sentientSim.moods = ['Mood_Happy', 'Mood_Sad'];
+      expect(formatMoodSentence(sentientSim)).toBe('Paolo Rocca is feeling happy.');
+      // The full block lists every described mood, as it was always meant to
+      expect(formatSentientSim(sentientSim)).toContain('Paolo Rocca is feeling happy and is feeling sad.');
+    });
+
+    it('slim block: bio, mood, clothing, properties, closing line; no lists', () => {
+      sentientSim.name = 'Augustus St Fleur';
+      sentientSim.gender = 'Male';
+      sentientSim.traits = ['trait_Cheerful'];
+      sentientSim.moods = ['Mood_Confident'];
+      sentientSim.description = 'Augustus talks in long, polished, run-on sentences';
+      sentientSim.upper_body = BodyState.OUTFIT;
+      sentientSim.lower_body = BodyState.OUTFIT;
+      sentientSim.is_ghost = true;
+      expect(formatSlimSentientSim(sentientSim)).toBe(
+        'Augustus talks in long, polished, run-on sentences. Augustus St Fleur is feeling confident. ' +
+          'Augustus St Fleur is fully clothed. Augustus St Fleur is a dead translucent ghost ' +
+          'Play Augustus St Fleur true to this description, their mood, and the facts below.',
+      );
+      expect(formatSlimSentientSim(sentientSim)).not.toContain('Male adult');
+      expect(formatSlimSentientSim(sentientSim)).not.toContain('cheerful');
+      // Nothing but the closing line when the Sim has none of it
+      sentientSim.description = undefined;
+      sentientSim.moods = [];
+      sentientSim.upper_body = undefined;
+      sentientSim.is_ghost = false;
+      expect(formatSlimSentientSim(sentientSim)).toBe(
+        'Play Augustus St Fleur true to this description, their mood, and the facts below.',
+      );
+    });
+  });
+
+  describe('formatCoarseDateTime', () => {
+    it('buckets the hour into a part of the day', () => {
+      expect(partOfDay(0)).toBe('night');
+      expect(partOfDay(4)).toBe('night');
+      expect(partOfDay(5)).toBe('early morning');
+      expect(partOfDay(7)).toBe('early morning');
+      expect(partOfDay(8)).toBe('morning');
+      expect(partOfDay(11)).toBe('morning');
+      expect(partOfDay(12)).toBe('afternoon');
+      expect(partOfDay(15)).toBe('afternoon');
+      expect(partOfDay(16)).toBe('late afternoon');
+      expect(partOfDay(17)).toBe('late afternoon');
+      expect(partOfDay(18)).toBe('evening');
+      expect(partOfDay(20)).toBe('evening');
+      expect(partOfDay(21)).toBe('late evening');
+      expect(partOfDay(23)).toBe('late evening');
+    });
+
+    it('names the day and the part of day, never the minute', () => {
+      const environment = {
+        location_id: 0,
+        world_id: 0,
+        time: { second: 0, minute: 52, hour: 16, day: 1, week: 0 },
+      } as SSEnvironment;
+      expect(formatCoarseDateTime(environment)).toBe('<DATE>It is Monday, late afternoon.</DATE>');
     });
   });
 

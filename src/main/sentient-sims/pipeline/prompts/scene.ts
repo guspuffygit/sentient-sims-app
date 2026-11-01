@@ -227,7 +227,8 @@ Rules for THINK:
 //
 // Layout: stable text first, volatile text last, so a provider's prefix cache (vLLM, OpenAI
 // auto-caching, Parasail) serves [rules][identity][place][facts] on every later line of a
-// scene; the now-block (date, weather, postures) moves to the head of the USER message.
+// scene; the setting (coarse date, season, weather: fixed for the scene, computed once per
+// event) closes the system message, and the postures line heads the USER message.
 // ---------------------------------------------------------------------------------------
 
 /**
@@ -256,6 +257,9 @@ export type LeanActorSystemPromptContext = {
   locationBlock: string;
   // The Sim's own <KNOWN_FACTS> block, computed on round 1 and reused on every later round
   factsBlock?: string;
+  // <DATE> (coarse: day + part of day), <SEASON>, <WEATHER>, newline-joined; fixed for the
+  // scene, so it sits after the facts and before the status
+  settingBlock?: string;
   // Player-facing only: the live <STATUS>/<TODAYS_PLAN> block. Volatile, so it goes last.
   statusBlock?: string;
   playerFacing?: boolean;
@@ -265,7 +269,8 @@ export type LeanActorSystemPromptContext = {
 };
 
 export function buildLeanActorSystemPrompt(context: LeanActorSystemPromptContext): string {
-  const { simName, characterBlock, locationBlock, factsBlock, statusBlock, playerFacing, monologueOnly } = context;
+  const { simName, characterBlock, locationBlock, factsBlock, settingBlock, statusBlock, playerFacing, monologueOnly } =
+    context;
   const rules = speechRules(speechRuleKind(playerFacing, monologueOnly), {
     simName: context.nameFreeRules ? undefined : simName,
     lean: true,
@@ -280,11 +285,14 @@ These facts are what the game records about you right now. Where your character 
       ? `${statusBlock}
 This is what you want and need right now, as the game records it. When asked what you want, answer from it.`
       : '';
-  return [rules, identity, locationBlock.trim(), facts, status].filter((part) => part.length > 0).join('\n\n');
+  return [rules, identity, locationBlock.trim(), facts, (settingBlock ?? '').trim(), status]
+    .filter((part) => part.length > 0)
+    .join('\n\n');
 }
 
 export type LeanActorUserMessageContext = {
-  // <DATE>, <SEASON>, <WEATHER> and the postures line, newline-joined; may be empty
+  // The postures line (who is standing, sitting, doing what); may be empty. The date,
+  // season and weather sit at the end of the system message (settingBlock) since 2026-10-31.
   nowBlock: string;
   // "Previously in this scene:\n...\n\n" as the 4.6 pipeline builds it, or empty
   previouslyBlock: string;

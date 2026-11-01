@@ -103,6 +103,19 @@ describe('groupFacts', () => {
     expect(grouped.categories.map((c) => c.title)).not.toContain('Aspiration');
   });
 
+  it("puts the game's job title on the career summary and shows it nowhere else", () => {
+    const titled = groupFacts({
+      facts: [fact(FactPredicate.JOB, 'career_Adult_Culinary (level 4)'), fact(FactPredicate.JOB_TITLE, 'Line Cook')],
+      names,
+      species,
+    });
+    expect(titled.summary.map((item) => [item.title, item.label])).toEqual([
+      ['Career', 'Line Cook (Culinary, level 4)'],
+    ]);
+    const rows = titled.categories.flatMap((c) => c.rows);
+    expect(rows.some((row) => row.label === 'Line Cook')).toBe(false);
+  });
+
   it('names the career branch and the businesses the sim owns', () => {
     const owner = groupFacts({
       facts: [

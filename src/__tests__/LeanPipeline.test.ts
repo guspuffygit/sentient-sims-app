@@ -196,10 +196,44 @@ describe('lean voice pipeline', () => {
     expect(rules).toContain('Stay in character at all times.');
     expect(rules).toContain('in the tone of the scene');
     expect(rules).not.toContain('your director');
-    // Identity follows the rules; the now-block heads the USER message, not the system prompt
+    // Identity follows the rules; the setting (coarse date, season) closes the system prompt
+    // after the facts (2026-10-31), the user message carries no clock at all
     expect(calls[0].system).toContain('You are Alex Doe.');
-    expect(calls[0].system).not.toContain('<DATE>');
-    expect(calls[0].user.indexOf('<DATE>')).toBe(0);
+    expect(calls[0].system).toContain('<DATE>It is Monday, evening.</DATE>');
+    expect(calls[0].system).not.toContain('8:00 PM');
+    expect(calls[0].system.indexOf('<DATE>')).toBeGreaterThan(calls[0].system.indexOf('You are Alex Doe.'));
+    expect(calls[0].system.indexOf('<SEASON>')).toBeGreaterThan(calls[0].system.indexOf('<DATE>'));
+    expect(calls[0].user).not.toContain('<DATE>');
+    expect(calls[0].user).not.toContain('<SEASON>');
+  });
+
+  it('(d3) a Sim with facts gets the slim character block; a Sim without keeps the full one', async () => {
+    const { ctx, calls, play } = leanScene('lean-d3');
+    const alex = makeSim('Alex Doe', '1');
+    alex.description = 'Alex talks in long, polished run-on sentences';
+    alex.moods = ['Mood_Happy'];
+    alex.traits = ['trait_Cheerful'];
+    const bella = makeSim('Bella Goth', '2');
+    bella.traits = ['trait_Cheerful'];
+    vi.spyOn(ctx.semanticMemory, 'recall').mockImplementation((simId: string) =>
+      simId === '1' ? '<KNOWN_FACTS>\nAbout you: you are cheerful.\n</KNOWN_FACTS>' : '',
+    );
+    await play(sceneEvent('social_Chat', [alex, bella]), { action: 'Alex Doe chats with Bella Goth.' });
+    const alexSystem = calls[0].system;
+    expect(alexSystem).toContain('<KNOWN_FACTS>');
+    expect(alexSystem).toContain('Alex talks in long, polished run-on sentences.');
+    expect(alexSystem).toContain('Alex Doe is feeling happy.');
+    expect(alexSystem).toContain('Play Alex Doe true to this description, their mood, and the facts below.');
+    expect(alexSystem).not.toContain('Alex Doe is a Female adult.');
+    expect(alexSystem).not.toContain('Write Alex Doe consistently');
+    // The facts follow the block they are "below" of
+    expect(alexSystem.indexOf('Play Alex Doe true')).toBeLessThan(alexSystem.indexOf('<KNOWN_FACTS>'));
+    // Same block every round
+    expect(calls[2].system).toBe(alexSystem);
+    const bellaSystem = calls[1].system;
+    expect(bellaSystem).not.toContain('<KNOWN_FACTS>');
+    expect(bellaSystem).toContain('Bella Goth is a Female adult.');
+    expect(bellaSystem).not.toContain('Play Bella Goth true');
   });
 
   it('(d2) named rules interpolate the Sim and still keep the lean tone wording', async () => {
@@ -406,19 +440,20 @@ describe('lean prompt helpers', () => {
     expect(stripOpener('Plain beat.')).toBe('Plain beat.');
   });
 
-  it('lays the system prompt out rules, identity, place, facts, status', () => {
+  it('lays the system prompt out rules, identity, place, facts, setting, status', () => {
     const prompt = buildLeanActorSystemPrompt({
       simName: 'Mara Vale',
       characterBlock: '<CHARACTER_IN_INTERACTION>\nMara Vale is a female adult.\n</CHARACTER_IN_INTERACTION>',
       locationBlock: '<LOCATION>\nHome\n</LOCATION>',
       factsBlock: '<KNOWN_FACTS>\nMara Vale has no job.\n</KNOWN_FACTS>',
+      settingBlock: '<DATE>It is Monday, evening.</DATE>\n<SEASON>Mid Summer</SEASON>',
       statusBlock: '<STATUS>\nhungry\n</STATUS>',
       playerFacing: true,
       monologueOnly: false,
       nameFreeRules: true,
     });
-    const order = ['How to respond', 'You are Mara Vale.', '<LOCATION>', '<KNOWN_FACTS>', '<STATUS>'].map((marker) =>
-      prompt.indexOf(marker),
+    const order = ['How to respond', 'You are Mara Vale.', '<LOCATION>', '<KNOWN_FACTS>', '<DATE>', '<STATUS>'].map(
+      (marker) => prompt.indexOf(marker),
     );
     expect(order.every((index) => index >= 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
