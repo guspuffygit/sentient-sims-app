@@ -5,6 +5,8 @@ import log from 'electron-log';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { ParticipantDTO } from 'main/sentient-sims/db/dto/ParticipantDTO';
 import { VoiceType } from 'main/sentient-sims/models/VoiceType';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import { AIProviderConfig, SimProviderOverrides } from 'main/sentient-sims/models/AIProviderConfig';
 import SportsEsportsOutlinedIcon from '@mui/icons-material/SportsEsportsOutlined';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
 import EditNoteIcon from '@mui/icons-material/EditNote';
@@ -13,16 +15,20 @@ import { EmptyState } from './components/EmptyState';
 import { MemoryEditInput } from './components/MemoryEditInput';
 import { SimVoiceSelect, SimVoiceSelection } from './components/SimVoiceSelect';
 import { KokoroSimVoiceSelect } from './components/KokoroSimVoiceSelect';
+import { SimProviderSelect } from './components/SimProviderSelect';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
 import { useOnDatabaseLoaded } from './hooks/useOnDatabaseLoaded';
 import { useActiveVoiceType } from './hooks/useActiveVoiceType';
 import { useWebsocket } from './providers/WebsocketProvider';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
 import { TIER } from './tiers/index';
+import useSetting from './hooks/useSetting';
 
 type SelectedSim = {
   sim: ParticipantDTO;
   index: number;
+  // The provider config pinned in the card, written to aiSimProviderOverrides on Save
+  providerConfigId?: string;
 };
 
 const client = new SentientSimsAppClient();
@@ -38,6 +44,12 @@ export default function SimsPage() {
   // Which provider's pinned voices the page shows and edits (ElevenLabs or Kokoro),
   // driven by the TTS provider selected in settings
   const activeVoiceType = useActiveVoiceType();
+  const configsSetting = useSetting<AIProviderConfig[]>(SettingsEnum.AI_PROVIDER_CONFIGS, []);
+  const defaultIdSetting = useSetting<string>(SettingsEnum.DEFAULT_AI_PROVIDER_CONFIG_ID, '');
+  const simOverridesSetting = useSetting<SimProviderOverrides>(SettingsEnum.AI_SIM_PROVIDER_OVERRIDES, {});
+  const configs = configsSetting.value;
+  const simOverrides = simOverridesSetting.value;
+  const defaultConfig = configs.find((config) => config.id === defaultIdSetting.value);
 
   const columns: GridColDef<ParticipantDTO>[] = useMemo(
     () => [
@@ -52,6 +64,13 @@ export default function SimsPage() {
           if (!voice?.voiceId) return 'Default';
           return voice.voiceName ?? voice.voiceId;
         },
+      },
+      {
+        field: 'provider',
+        headerName: 'AI Model',
+        width: 180,
+        valueGetter: (_value: never, row: ParticipantDTO) =>
+          configs.find((config) => config.id === simOverrides[row.id])?.name ?? 'Default',
       },
       {
         field: 'facts',
@@ -76,7 +95,7 @@ export default function SimsPage() {
         width: 2000,
       },
     ],
-    [activeVoiceType],
+    [activeVoiceType, configs, simOverrides],
   );
 
   function getSims() {
@@ -139,11 +158,27 @@ export default function SimsPage() {
         setEditedSim({
           sim: sims[index],
           index,
+          providerConfigId: simOverrides[sims[index].id] ?? '',
         });
       }
     },
-    [sims],
+    [sims, simOverrides],
   );
+
+  async function saveProviderPin(simId: string, configId: string) {
+    const current = simOverrides[simId] ?? '';
+    if (configId === current) {
+      return;
+    }
+    // Pins to deleted configs drop out on the way
+    const entries = Object.entries(simOverrides).filter(
+      ([key, pinned]) => key !== simId && configs.some((config) => config.id === pinned),
+    );
+    if (configId !== '') {
+      entries.push([simId, configId]);
+    }
+    await simOverridesSetting.setSetting(Object.fromEntries(entries));
+  }
 
   async function handleSave() {
     if (editedSim) {
@@ -159,6 +194,7 @@ export default function SimsPage() {
             ? { voiceType: activeVoiceType, voiceId: pinnedVoice?.voiceId ?? '', voiceName: pinnedVoice?.voiceName }
             : {}),
         });
+        await saveProviderPin(editedSim.sim.id, editedSim.providerConfigId ?? '');
       } catch (error) {
         log.error('Error saving updated sim', error);
         if (error instanceof Error && error.cause) {
@@ -190,6 +226,7 @@ export default function SimsPage() {
   const handleDescriptionEdit = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setEditedSim((previousSim) => ({
       index: Number(previousSim?.index),
+      providerConfigId: previousSim?.providerConfigId,
       sim: {
         ...previousSim?.sim,
         id: previousSim?.sim.id || '',
@@ -199,11 +236,16 @@ export default function SimsPage() {
     }));
   }, []);
 
+  const handleProviderEdit = useCallback((configId: string) => {
+    setEditedSim((previousSim) => previousSim && { ...previousSim, providerConfigId: configId });
+  }, []);
+
   const handleVoiceEdit = useCallback(
     (voice: SimVoiceSelection) => {
       if (!activeVoiceType) return;
       setEditedSim((previousSim) => ({
         index: Number(previousSim?.index),
+        providerConfigId: previousSim?.providerConfigId,
         sim: {
           ...previousSim?.sim,
           id: previousSim?.sim.id || '',
@@ -280,6 +322,12 @@ export default function SimsPage() {
             </CardActions>
           }
         >
+          <SimProviderSelect
+            configId={editedSim.providerConfigId ?? ''}
+            configs={configs}
+            defaultConfig={defaultConfig}
+            onChange={handleProviderEdit}
+          />
           {activeVoiceType === VoiceType.ElevenLabs && (
             <SimVoiceSelect
               voiceId={editedSim.sim.voices?.[VoiceType.ElevenLabs]?.voiceId}
@@ -342,6 +390,7 @@ export default function SimsPage() {
                         setEditedSim({
                           sim,
                           index: i,
+                          providerConfigId: simOverrides[sim.id] ?? '',
                         });
                         break;
                       }
