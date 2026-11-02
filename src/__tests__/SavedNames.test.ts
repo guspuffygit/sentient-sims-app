@@ -1,4 +1,4 @@
-import { findSavedNames } from 'main/sentient-sims/util/savedNames';
+import { findSavedNameHits, findSavedNames } from 'main/sentient-sims/util/savedNames';
 
 const save = ['Audrey Bennett', 'Elliot Jr', 'Yuki Behr', 'Bo Chen', 'Art Miller'];
 
@@ -27,7 +27,8 @@ describe('findSavedNames', () => {
 
   it('matches whole words only, and ignores names too short to be worth it', () => {
     // "Art" is a sim here, but a mapping about painting is not about him
-    expect(findSavedNames('{actor.0} makes art at the easel', save)).toEqual(['Art']);
+    expect(findSavedNames('{actor.0} makes art at the easel', save)).toEqual([]);
+    expect(findSavedNames('{actor.0} makes Art laugh', save)).toEqual(['Art']);
     expect(findSavedNames('{actor.0} joins the party', save)).toEqual([]);
     expect(findSavedNames('{actor.0} bothers {actor.1}', save)).toEqual([]);
   });
@@ -43,8 +44,18 @@ describe('findSavedNames', () => {
   });
 
   it('lets an everyday word through even when a townie is called it', () => {
-    const townies = ['Story Bright', 'Blue Street'];
+    const townies = ['Story Bright', 'Blue Street', 'Good Evil', 'The Reaper', 'Prince Winter'];
     expect(findSavedNames('A two-story house with a bright blue door on a quiet street.', townies)).toEqual([]);
     expect(findSavedNames('The study belongs to Story Bright.', townies)).toEqual(['Story Bright']);
+    // Capitalised or not, a word on its own is a word
+    expect(findSavedNames('Good and Evil. The Prince of Winter.', townies)).toEqual([]);
+    expect(findSavedNames('{actor.0} meets The Reaper', townies)).toEqual(['The Reaper']);
+  });
+
+  it('tells a full name from a lone first or last name', () => {
+    expect(findSavedNameHits('{actor.0}: Chat with Yuki and Audrey Bennett', save)).toEqual([
+      { name: 'Audrey Bennett', whole: true },
+      { name: 'Yuki', whole: false },
+    ]);
   });
 });

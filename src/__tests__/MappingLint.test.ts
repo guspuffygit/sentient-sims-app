@@ -78,8 +78,20 @@ describe('lintMapping', () => {
   });
 
   it('flags a name from the save the service found', () => {
-    const findings = lintMapping('{actor.0} plays with Elliot Jr.', { ...two, savedNames: ['Elliot Jr'] });
+    const findings = lintMapping('{actor.0} plays with Elliot Jr.', {
+      ...two,
+      savedNames: [{ name: 'Elliot Jr', whole: true }],
+    });
     expect(findings[0]).toMatchObject({ flag: 'HARDCODED_NAME', confidence: 'high', quote: 'Elliot Jr' });
+  });
+
+  it('only asks about a lone first or last name, since a townie can be called anything', () => {
+    const findings = lintMapping('{actor.0} tells {actor.1} about Winter.', {
+      ...two,
+      savedNames: [{ name: 'Winter', whole: false }],
+    });
+    expect(findings[0]).toMatchObject({ flag: 'HARDCODED_NAME', confidence: 'medium', quote: 'Winter' });
+    expect(mappingVerdict(findings)).toBe('needs_work');
   });
 
   it('flags a game identifier pasted into the prose', () => {

@@ -2,7 +2,7 @@ import log from 'electron-log';
 import { interactionDescriptions, InteractionDescription } from '../descriptions/interactionDescriptions';
 import { BasicInteraction, InteractionDTO } from '../db/dto/InteractionDTO';
 import { notifyUnmappedInteractionChanged } from '../util/notifyRenderer';
-import { findSavedNames } from '../util/savedNames';
+import { SavedNameHit, findSavedNameHits } from '../util/savedNames';
 import { ApiContext } from './ApiContext';
 
 export class InteractionService {
@@ -29,11 +29,15 @@ export class InteractionService {
   // no save is loaded: nothing to compare against is not the same as nothing to find, but
   // refusing every publish while the game is closed would be worse than the risk.
   namesFromSaveIn(text: string | undefined): string[] {
+    return this.nameHitsFromSaveIn(text).map((hit) => hit.name);
+  }
+
+  nameHitsFromSaveIn(text: string | undefined): SavedNameHit[] {
     if (!this.ctx.db.isLoaded()) {
       return [];
     }
     try {
-      return findSavedNames(text, this.ctx.participantRepository.getAllNames());
+      return findSavedNameHits(text, this.ctx.participantRepository.getAllNames());
     } catch (err) {
       log.error('[Interactions] Could not check text against the save for names:', err);
       return [];
