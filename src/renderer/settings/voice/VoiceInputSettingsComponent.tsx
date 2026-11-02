@@ -481,7 +481,8 @@ export default function VoiceInputSettingsComponent() {
           <FormHelperText>
             Hold the hotkey while the game is focused, speak, and release — your words become your active Sim&apos;s
             spoken line to whoever they&apos;re talking to. The game&apos;s overlay listens for the key, so it works
-            only while the game window is focused and the overlay is loaded; no system permission is needed.
+            only while the game window is focused and the overlay is loaded; no system permission is needed. (Change
+            hotkey with the Hotkey setting above)
           </FormHelperText>
         </Stack>
       ) : null}

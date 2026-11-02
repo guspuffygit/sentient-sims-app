@@ -46,6 +46,7 @@ describe('setting redaction', () => {
     const readable: string[] = [
       SettingsEnum.VOICE_INPUT_HOTKEY,
       SettingsEnum.VOICE_INPUT_HOTKEY_MODE,
+      SettingsEnum.VOICE_INPUT_HOTKEY_MIGRATED,
       SettingsEnum.VOICE_COMMAND_HOTKEY,
       SettingsEnum.MAX_RESPONSE_TOKENS,
       SettingsEnum.PLAYER_REPLY_MAX_TOKENS,

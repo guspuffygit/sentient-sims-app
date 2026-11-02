@@ -1,21 +1,12 @@
 export type VoiceHotkeyPreset = { value: string; label: string };
 
 // Single keys must be ones The Sims 4 leaves unbound — the game overlay observes the
-// key without consuming it, so the game still sees every press
-const pcPresets = [
-  'Backquote',
-  'Insert',
-  'ScrollLock',
-  'F13',
-  'Ctrl+Space',
-  'Ctrl+Alt+Space',
-  'Ctrl+Shift+Space',
-  'Alt+V',
-];
+// key without consuming it, so the game still sees every press. No Space anywhere:
+// the game binds it.
+const pcPresets = ['Ctrl+S', 'Backquote', 'Insert', 'ScrollLock', 'F13', 'Ctrl+Shift+S', 'Alt+V'];
 
-// A Mac keyboard has no Insert or Scroll Lock, and macOS takes Ctrl+Space and
-// Ctrl+Option+Space to switch input sources before the game sees them
-const macPresets = ['Alt+V', 'Ctrl+Shift+Space', 'F13'];
+// A Mac keyboard has no Insert or Scroll Lock
+const macPresets = ['Alt+V', 'Ctrl+S', 'F13'];
 
 const keyLabels: Record<string, string> = {
   Backquote: '` (backquote)',
