@@ -655,13 +655,10 @@ export class AIService {
       const others = pov ? names.filter((name) => name !== pov.simName) : names;
       const namesList = others.length > 0 ? others.join(', ') : 'the people present';
 
-      const diaryRows = this.diaryTranscriptRows(sceneMemories, pov?.simId, stage);
-      const transcriptOf = (rows: MemoryEntity[]) =>
-        this.ctx.promptBuilder
-          .groupMemories(rows)
-          .map((message) => message.content)
-          .join('\n');
-      const transcript = transcriptOf(diaryRows);
+      const transcript = this.ctx.promptBuilder
+        .groupMemories(this.diaryTranscriptRows(sceneMemories, pov?.simId, stage))
+        .map((message) => message.content)
+        .join('\n');
 
       // What the sim actually knows, so a diary cannot invent a sibling. Only the pov
       // sim has a point of view to recall from; a povless reflection stays as it was.
@@ -693,37 +690,17 @@ ${factsBlock}
       const plan = boundary === 'sleep' && pov ? this.ctx.ext.sleepPlanner?.prepare(pov, sleepClock) : undefined;
       const systemPrompt = plan ? plan.systemPrompt(reflectionContext) : buildDiaryOnlySystemPrompt(reflectionContext);
 
-      const write = async (input: string) => {
-        const result = await this.runOneShot(
-          plan ? 'Scene Reflection + Daily Plan' : 'Scene Reflection',
-          systemPrompt,
-          input,
-          plan ? 900 : 160,
-          undefined,
-          plan ? AIActionType.DAILY_PLAN : AIActionType.REFLECTION,
-          undefined,
-          { stageId: plan ? StageId.CONSOLIDATION_PLAN : StageId.CONSOLIDATION_REFLECT },
-        );
-        this.logExchange(result.exchange);
-        return result;
-      };
-      let reflection = await write(transcript);
-      // A model that declines the day over a sexual act (Flora's diary on Haiku, 2026-10-29,
-      // stored as "I'm not going to write this diary entry...") writes it once more with the
-      // act left out; a refusal with nothing intimate in the day stores nothing.
-      if (isRefusal(cleanupAIOutput(reflection.text))) {
-        const chaste = diaryRows.filter((row) => row.event_type !== SSEventType.WICKED_WHIMS);
-        if (chaste.length === diaryRows.length) {
-          log.error(`[Reflection] model refused the diary for scene ${previousScene.sceneId}; dropping it`);
-          return;
-        }
-        log.warn(`[Reflection] model refused the diary over an intimate row; writing it again without the act`);
-        reflection = await write(transcriptOf(chaste));
-        if (isRefusal(cleanupAIOutput(reflection.text))) {
-          log.error(`[Reflection] model refused the diary twice for scene ${previousScene.sceneId}; dropping it`);
-          return;
-        }
-      }
+      const reflection = await this.runOneShot(
+        plan ? 'Scene Reflection + Daily Plan' : 'Scene Reflection',
+        systemPrompt,
+        transcript,
+        plan ? 900 : 160,
+        undefined,
+        plan ? AIActionType.DAILY_PLAN : AIActionType.REFLECTION,
+        undefined,
+        { stageId: plan ? StageId.CONSOLIDATION_PLAN : StageId.CONSOLIDATION_REFLECT },
+      );
+      this.logExchange(reflection.exchange);
 
       let text = cleanupAIOutput(reflection.text);
       if (plan) {

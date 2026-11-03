@@ -66,7 +66,7 @@ export function keepIntimateRowForDiary(
 // text (after an optional "Name (diary):" label) so in-character lines such as
 // "I can't help myself" are never mistaken for one.
 const REFUSAL_OPENING =
-  /^\W*(?:[A-Z][\w .'-]*\s\((?:diary|thinking|thought)\):\s*)?(?:I|You)\s*(?:can(?:no|'|’)t|cannot|won(?:'|’)t|am unable to|am not able to|(?:'|’)m not going to|am not going to|will not)\s+(?:help with|assist with|create|write|generate|produce|fulfil|fulfill|provide|continue with|narrate|engage in)\b/i;
+  /^\W*(?:[A-Z][\w .'-]*\s\((?:diary|thinking|thought)\):\s*)?(?:I|You)\s+(?:can(?:no|'|’)t|cannot|won(?:'|’)t|am unable to|am not able to)\s+(?:help with|assist with|create|write|generate|produce|fulfil|fulfill|provide|continue with|narrate|engage in)\b/i;
 const EXPLICIT_REFUSAL =
   /\b(?:can(?:no|'|’)t|cannot|won(?:'|’)t|unable to|not able to)\s+(?:create|write|generate|produce|provide)\s+(?:sexually\s+)?explicit\b/i;
 
