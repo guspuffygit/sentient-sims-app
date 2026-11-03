@@ -311,6 +311,59 @@ describe('GenerationQueueService', () => {
     expect(claimed.result.result_source).toBe('synchronous');
   });
 
+  it('forgets the repeat key when a claim on a prefetched entry ends without a scene', async () => {
+    let finish!: (value: { result: InteractionEventResult; play: () => void }) => void;
+    const pending = new Promise<{ result: InteractionEventResult; play: () => void }>((resolve) => {
+      finish = resolve;
+    });
+    const { ctx, ai, sceneRepeatGuard } = makeContext({ interactionEventDeferred: vi.fn(() => pending) });
+    const queue = new GenerationQueueService(ctx);
+    const request = { correlation_id: 'sim:1', event: event('one') };
+    await queue.prefetch(request);
+    await vi.waitFor(() => {
+      expect(ai.interactionEventDeferred).toHaveBeenCalledOnce();
+    });
+
+    // Two claims wait on one entry: the second is handed NOOP when the first takes the result
+    const first = queue.claim(request);
+    const second = queue.claim(request);
+    finish({ result: generated(), play: vi.fn() });
+    expect((await first).result.status).toBe(InteractionEventStatus.GENERATED);
+    expect((await second).result.status).toBe(InteractionEventStatus.NOOP);
+    expect(sceneRepeatGuard.forget).toHaveBeenCalledOnce();
+    expect(sceneRepeatGuard.forget).toHaveBeenCalledWith(request.event);
+  });
+
+  it('keeps the repeat key when a prefetch without a scene is claimed as its pre-action fallback', async () => {
+    const noop: InteractionEventResult = { status: InteractionEventStatus.NOOP };
+    const { ctx, ai, sceneRepeatGuard } = makeContext({
+      interactionEventDeferred: vi.fn(() => Promise.resolve({ result: noop, play: vi.fn() })),
+    });
+    const queue = new GenerationQueueService(ctx);
+    const request = { correlation_id: 'sim:1', event: event('one') };
+    await queue.prefetch(request);
+    await vi.waitFor(() => {
+      expect(ai.interactionEventDeferred).toHaveBeenCalledOnce();
+    });
+
+    const claimed = await queue.claim(request);
+    expect(claimed.result.result_source).toBe('preaction_fallback');
+    expect(sceneRepeatGuard.forget).not.toHaveBeenCalled();
+  });
+
+  it('keeps the repeat key when a claimed prefetch played a scene', async () => {
+    const { ctx, ai, sceneRepeatGuard } = makeContext();
+    const queue = new GenerationQueueService(ctx);
+    const request = { correlation_id: 'sim:1', event: event('one') };
+    await queue.prefetch(request);
+    await vi.waitFor(() => {
+      expect(ai.interactionEventDeferred).toHaveBeenCalledOnce();
+    });
+
+    await queue.claim(request);
+    expect(sceneRepeatGuard.forget).not.toHaveBeenCalled();
+  });
+
   it('cancels an unclaimed completed result without playing it', async () => {
     const { ctx, ai, play } = makeContext();
     const queue = new GenerationQueueService(ctx);

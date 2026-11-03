@@ -182,12 +182,20 @@ export class GenerationQueueService {
       return { result, play: () => {} };
     }
 
+    const claimed = await this.claimEntry(entry);
+    if (judged.judged && claimed.result.status !== InteractionEventStatus.GENERATED) {
+      this.ctx.sceneRepeatGuard.forget(request.event);
+    }
+    return claimed;
+  }
+
+  private claimEntry(entry: PrefetchEntry): Promise<DeferredInteractionResult> {
     if (entry.state === 'done' || entry.state === 'fallback' || entry.state === 'abandoned') {
-      return this.consume(entry);
+      return Promise.resolve(this.consume(entry));
     }
     if (entry.state === 'cancelled') {
       this.entries.delete(entry.correlationId);
-      return { result: noopResult(), play: () => {} };
+      return Promise.resolve({ result: noopResult(), play: () => {} });
     }
 
     return new Promise<DeferredInteractionResult>((resolve) => {

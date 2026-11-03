@@ -927,7 +927,7 @@ ${factsBlock}
     if (resolved.result) {
       return resolved.result;
     }
-    if (deadline.reaction && this.ctx.settings.directedScenesEnabled) {
+    if (deadline.reaction && primaryEvent.sentient_sims.length > 0 && this.ctx.settings.directedScenesEnabled) {
       // The game's reaction system, not a Sim's choice (the cat watching the guitar): the
       // actor alone thinks one silent thought over the full cast's pre-action. No scene, no
       // voice; SceneRepeatGuard makes it one per cooldown (handoff SCENE-REPEATS 2b).
