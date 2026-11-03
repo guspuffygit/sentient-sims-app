@@ -205,6 +205,7 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
   // narrow the open dropdown to entries matching that prefill - hiding the
   // fetched model list. Only filter after the user actually types.
   const [modelFilterActive, setModelFilterActive] = useState(false);
+  const [contextTokens, setContextTokens] = useState(initial?.contextTokens ? String(initial.contextTokens) : '');
   const [testResult, setTestResult] = useState<AITestStatus | undefined>();
   const { userAttributes } = useAuth();
   const patreonUser = new PatreonUser(userAttributes);
@@ -271,6 +272,10 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
     };
     if (trimmedModel && modelSelectionSupported) {
       config.model = trimmedModel;
+    }
+    const parsedContext = Number.parseInt(contextTokens, 10);
+    if (capability === 'text' && Number.isInteger(parsedContext) && parsedContext > 0) {
+      config.contextTokens = parsedContext;
     }
     onSave(config);
   };
@@ -416,6 +421,20 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
         {apiType === ApiType.VLLM ? (
           <FormHelperText>Leave the model empty to use the VLLM server default.</FormHelperText>
         ) : null}
+        {capability === 'text' ? (
+          <TextField
+            label="Context window (tokens)"
+            value={contextTokens}
+            onChange={(change) => {
+              setContextTokens(change.target.value.replace(/\D/g, ''));
+            }}
+            fullWidth
+            size="small"
+            sx={{ marginTop: 2 }}
+            placeholder="Model default"
+            helperText="Only for a server that takes fewer tokens than the model allows: prompts are trimmed to fit this, prompt and reply together."
+          />
+        ) : null}
         {upgradeRequired ? (
           <Alert
             severity="warning"
@@ -482,6 +501,7 @@ export function ProviderConfigsComponent({
 
   const configs = configsSetting.value;
   const overrides = overridesSetting.value;
+
   const defaultConfig = configs.find((config) => config.id === defaultIdSetting.value);
 
   // What Auto resolves to right now: the backend keeps the legacy Sentient Sims
