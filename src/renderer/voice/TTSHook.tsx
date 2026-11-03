@@ -1,7 +1,13 @@
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
 
+export type SpeakOptions = {
+  // false: a voice test; the clip plays at once whatever the game clock says
+  // (audioPlayback PlaybackOptions.followsClock). Default true.
+  followsClock?: boolean;
+};
+
 export interface TTSHook {
-  speak: (text: string) => Promise<void>;
+  speak: (text: string, options?: SpeakOptions) => Promise<void>;
   // onLineStart fires as each line begins playing so callers can sync external
   // displays (the in-game subtitle) to the audio; voiced is false when the line has no
   // audio and is only held for reading time. onLineEnd fires when its playback (or

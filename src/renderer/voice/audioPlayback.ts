@@ -10,6 +10,12 @@ export type AudioPlaybackHandle = {
   setRate?: (rate: number) => void;
 };
 
+export type PlaybackOptions = {
+  // false: a voice TEST, not a scene line. It plays at once at rate 1 whatever the game
+  // clock says; it is never held, paused or sped up with the game. Default true.
+  followsClock?: boolean;
+};
+
 // V-1: a user pause suspends the shared context (every line, WebAudio and media
 // element alike); resume brings it back. Registered once, survives every line.
 let clockWired = false;
@@ -39,6 +45,30 @@ function getAudioContext(): AudioContext {
   return sharedContext;
 }
 
+// A clip outside the clock gets its own context: the user pause suspends the shared one,
+// and resuming it for a test would also resume a scene line held mid-word.
+let freeContext: AudioContext | null = null;
+
+async function readyContext(followsClock: boolean): Promise<AudioContext> {
+  if (!followsClock) {
+    if (!freeContext) {
+      freeContext = new AudioContext();
+    }
+    if (freeContext.state === 'suspended') {
+      await freeContext.resume();
+    }
+    return freeContext;
+  }
+  const context = getAudioContext();
+  wirePlaybackClock(context);
+  // A user pause holds the line before it starts (never resume the context over a pause)
+  await waitWhileUserPaused();
+  if (context.state === 'suspended' && !isUserPaused()) {
+    await context.resume();
+  }
+  return context;
+}
+
 // Start playback slightly in the future so the first syllable isn't swallowed
 // while the output stream is still waking up.
 const playbackLeadInSeconds = 0.1;
@@ -47,14 +77,13 @@ const playbackLeadInSeconds = 0.1;
  * Plays audio from a (blob) URL through the shared AudioContext. The audio is fully
  * decoded before playback starts, so nothing is dropped to buffering either.
  */
-export async function playAudioUrl(audioUrl: string, volume: number): Promise<AudioPlaybackHandle> {
-  const context = getAudioContext();
-  wirePlaybackClock(context);
-  // A user pause holds the line before it starts (never resume the context over a pause)
-  await waitWhileUserPaused();
-  if (context.state === 'suspended' && !isUserPaused()) {
-    await context.resume();
-  }
+export async function playAudioUrl(
+  audioUrl: string,
+  volume: number,
+  options?: PlaybackOptions,
+): Promise<AudioPlaybackHandle> {
+  const followsClock = options?.followsClock ?? true;
+  const context = await readyContext(followsClock);
 
   const response = await fetch(audioUrl);
   const audioBuffer = await context.decodeAudioData(await response.arrayBuffer());
@@ -66,16 +95,18 @@ export async function playAudioUrl(audioUrl: string, volume: number): Promise<Au
 
   const source = context.createBufferSource();
   source.buffer = audioBuffer;
-  source.playbackRate.value = currentRate();
+  source.playbackRate.value = followsClock ? currentRate() : 1;
   source.connect(gain);
 
-  const offRate = onRateChange((rate) => {
-    try {
-      source.playbackRate.value = rate;
-    } catch (err) {
-      log.debug('Could not change playback rate', err);
-    }
-  });
+  const offRate = followsClock
+    ? onRateChange((rate) => {
+        try {
+          source.playbackRate.value = rate;
+        } catch (err) {
+          log.debug('Could not change playback rate', err);
+        }
+      })
+    : () => {};
 
   const finished = new Promise<void>((resolve) => {
     source.onended = () => {
@@ -112,13 +143,10 @@ export async function playAudioUrl(audioUrl: string, volume: number): Promise<Au
 export async function playAudioStream(
   stream: ReadableStream<Uint8Array>,
   volume: number,
+  options?: PlaybackOptions,
 ): Promise<AudioPlaybackHandle> {
-  const context = getAudioContext();
-  wirePlaybackClock(context);
-  await waitWhileUserPaused();
-  if (context.state === 'suspended' && !isUserPaused()) {
-    await context.resume();
-  }
+  const followsClock = options?.followsClock ?? true;
+  const context = await readyContext(followsClock);
   if (context.state !== 'running') {
     log.warn(`[TTS] AudioContext not running after resume: ${context.state} — stream will be silent`);
   }
@@ -126,20 +154,24 @@ export async function playAudioStream(
   const mediaSource = new MediaSource();
   const audio = new Audio();
   audio.src = URL.createObjectURL(mediaSource);
-  audio.playbackRate = currentRate();
-  const offRate = onRateChange((rate) => {
-    audio.playbackRate = rate;
-  });
-  // The element keeps its own transport: pause/resume it with the user pause too
-  const offPause = onPauseChange((paused) => {
-    if (paused) {
-      audio.pause();
-    } else {
-      void audio.play().catch((err: unknown) => {
-        log.debug('resume after user pause failed', err);
-      });
-    }
-  });
+  audio.playbackRate = followsClock ? currentRate() : 1;
+  let offRate = () => {};
+  let offPause = () => {};
+  if (followsClock) {
+    offRate = onRateChange((rate) => {
+      audio.playbackRate = rate;
+    });
+    // The element keeps its own transport: pause/resume it with the user pause too
+    offPause = onPauseChange((paused) => {
+      if (paused) {
+        audio.pause();
+      } else {
+        void audio.play().catch((err: unknown) => {
+          log.debug('resume after user pause failed', err);
+        });
+      }
+    });
+  }
 
   const element = context.createMediaElementSource(audio);
   const gain = context.createGain();
