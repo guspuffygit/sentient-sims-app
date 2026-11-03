@@ -271,8 +271,8 @@ export function formatSentientSim(sentientSim: SentientSim, options?: { traitCon
 }
 
 // The lean actor's character block when the Sim HAS a <KNOWN_FACTS> block in the prompt
-// (2026-10-31, HANDOFF-CHARACTER-BLOCK): only what the facts do not carry. Measured on Jaz's
-// 10-30 stream, the full block was 29% of the system message and ~62% of it repeated the facts
+// (2026-10-31): only what the facts do not carry. Measured on a live session (2026-10-30),
+// the full block was 29% of the system message and ~62% of it repeated the facts
 // (uncapped likes, attraction lists, fears that disagreed with the facts line). What stays is
 // the bio (the one place voice and manner live), the mood, clothing and the live properties.
 // A Sim with no facts block keeps formatSentientSim: its trait sentences are all the model gets.

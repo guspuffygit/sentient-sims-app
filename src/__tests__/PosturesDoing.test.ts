@@ -4,7 +4,7 @@ import { SimAge } from 'main/sentient-sims/models/SimAge';
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 import { mockApiContext } from './util';
 
-// 2026-10-31 (HANDOFF-CHARACTER-BLOCK 2E): the lean actor's posture line says what each Sim is
+// 2026-10-31: the lean actor's posture line says what each Sim is
 // in the middle of, as the mod's pie label, unless it is the scene's own beat. The full
 // pipeline's posture line is untouched (its fixture pins it).
 

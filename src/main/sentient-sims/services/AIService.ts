@@ -2451,7 +2451,7 @@ ${factsBlock}
       // still arrives via the mod's POST /memories when the interaction completes.
       // Lean runs every round as its own generation: the thought is stored on the opening
       // round only, or a three-round chat left three near-identical thoughts per Sim
-      // (Jaz's test day, 2026-10-29).
+      // (live, 2026-10-29).
       if (!lean || !options.continueScene) {
         this.storeMonologues(event, performers, monologueBySim, sceneScores.scores);
       }

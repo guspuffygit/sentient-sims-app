@@ -20,9 +20,8 @@ import { mockApiContext } from './util';
 
 // The lean voice pipeline (2026-10-27): one actor call per Sim per round, the beat carried
 // into every round per Sim, fixed rounds, no director, no reviewer, scores only when the
-// player is being answered. Series 3 of the voice-pipeline bench (mod repo,
-// .claude/voice-pipeline-tests/RESULTS-LEAN-2026-10-27.md): +0.85/10 over the 4.6 pipeline
-// at -66% tokens, the lie kept through round 3 in every sample.
+// player is being answered. Offline bench against the 4.6 pipeline (blind judges, 2026-10-27):
+// +0.85/10 at -66% tokens a scene, the lie kept through round 3 in every sample.
 
 function makeSim(name: string, simId: string): SentientSim {
   return {

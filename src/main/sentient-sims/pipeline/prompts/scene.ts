@@ -218,8 +218,8 @@ Rules for THINK:
 
 // ---------------------------------------------------------------------------------------
 // The lean pipeline (2026-10-27): one actor call per Sim per round, no director, no
-// reviewer, no per-round scores. Measured over three of Jaz's streams and two offline
-// series (.claude/voice-pipeline-tests in the mod repo): the director earned nothing a judge
+// reviewer, no per-round scores. Measured over three live sessions and two offline
+// bench series (blind judges, 2026-10-27): the director earned nothing a judge
 // could see on ordinary scenes, the reviewer changed 2-5% of rounds and broke the one it
 // touched, and the scorer said "continue" 92% of the time. What the director DID carry was
 // the beat into rounds 2-3, where the 4.6 actor message had only the transcript and "The
@@ -573,7 +573,7 @@ export function deceptionFraming(
 // every performer; a beat is the run of lines between two non-dialogue lines (a pre-action,
 // an interaction header).
 // Lean round 1 (2026-10-29): the 4.6 window put the location's last rows under "Previously in
-// this scene" whole, whoever was in them. Live on Jaz's test day, Miho's first line to Milo
+// this scene" whole, whoever was in them. Live (2026-10-29), Miho's first line to Milo
 // followed his chats with Itzel, Lyra, Kaleigh, Deacon and Rhys (60 lines), and a pair kept
 // replaying an old joke two interactions on. Only the beats every performer spoke in are this
 // conversation, and only the last LEAN_SAME_CAST_BEATS of them are shown; every other beat is
