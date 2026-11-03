@@ -7,6 +7,38 @@ function pretty(text: string): string {
   return text.replace(/_/g, ' ');
 }
 
+// The game's needs run 100 (met) to -100 (failing), but a model reads the raw number the
+// other way round ("bladder 99" as a full bladder), so each need is rendered as a WORD from
+// its own ladder and the number is never shown. Six rungs at 100 / 50 / 0 / -50 / -90 / -100.
+
+const NEED_LADDERS: Record<string, string[]> = {
+  bladder: ['empty', 'comfortable', 'no urge to pee', 'needs to pee', 'DESPERATELY needs to pee', 'having an accident'],
+  hunger: ['completely full', 'satisfied', 'could eat', 'hungry', 'RAVENOUS', 'STARVING'],
+  fun: ['thoroughly entertained', 'enjoying themselves', 'neutral', 'bored', 'MISERABLY bored', 'completely miserable'],
+  social: ['socially fulfilled', 'connected', 'fine alone', 'lonely', 'DESPERATELY lonely', 'socially deprived'],
+  hygiene: ['squeaky clean', 'clean', 'could freshen up', 'dirty', 'FILTHY', 'extremely filthy'],
+  energy: ['fully rested', 'energized', 'could rest', 'tired', 'EXHAUSTED', 'passing out'],
+};
+const GENERIC_LADDER = ['fully satisfied', 'satisfied', 'fine', 'low', 'DESPERATE', 'failing'];
+
+export function needWord(need: string, value: number): string {
+  const ladder = NEED_LADDERS[need.toLowerCase()] ?? GENERIC_LADDER;
+  if (value >= 75) return ladder[0];
+  if (value >= 25) return ladder[1];
+  if (value > -25) return ladder[2];
+  if (value > -70) return ladder[3];
+  if (value > -95) return ladder[4];
+  return ladder[5];
+}
+
+// Worst first; no numbers, only the words
+export function describeNeeds(needs: Record<string, number>): string {
+  return Object.entries(needs)
+    .sort(([, a], [, b]) => a - b)
+    .map(([need, value]) => `${pretty(need)}: ${needWord(need, value)}`)
+    .join(', ');
+}
+
 // The day's plan as the prompt sees it: goal labels + the persona stage direction.
 // The loadout is deliberately NOT rendered — the OFFERED lists are already narrowed to
 // it, and naming the mechanism invites meta-reasoning about "allowed actions".
@@ -46,11 +78,7 @@ export function formatSelfStatusSections(entry: SimStateEntry, plan?: TodaysPlan
       // Worst-first with the negatives flagged: fed in arbitrary order the model kept
       // topping up healthy needs (brush_teeth at hygiene 70) while fun sat at -47 and
       // social at -100 (observed live)
-      const needs = Object.entries(self.needs)
-        .sort(([, a], [, b]) => a - b)
-        .map(([need, value]) => `${pretty(need)} ${value}${value <= -75 ? ' (DESPERATE)' : value < 0 ? ' (low)' : ''}`)
-        .join(', ');
-      selfLines.push(`Needs, WORST FIRST (-100 to 100): ${needs}`);
+      selfLines.push(`Needs, worst first: ${describeNeeds(self.needs)}`);
     }
     if (self.wants?.length) {
       selfLines.push(`Current wants: ${self.wants.map(pretty).join(', ')}`);

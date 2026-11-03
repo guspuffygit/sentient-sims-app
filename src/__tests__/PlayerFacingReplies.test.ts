@@ -185,13 +185,14 @@ describe('the status block a reply is answered from', () => {
         location: { zone_id: 1 },
         sims: [],
         objects: [],
-        self: { mood: 'Sad', needs: { fun: -20, hunger: 40 }, wants: ['go_on_date'], age: 'ADULT' },
+        self: { mood: 'Sad', needs: { fun: -20, hunger: 40, bladder: 99 }, wants: ['go_on_date'], age: 'ADULT' },
         activity: { queue: [], running: 'practice_in_mirror', in_social: false },
       },
       { goals: [{ label: 'Call Zoe' }], persona: 'Someone who follows through' },
     );
     expect(block).toContain('Current wants: go on date');
-    expect(block).toContain('Needs, WORST FIRST (-100 to 100): fun -20 (low), hunger 40');
+    expect(block).toContain('Needs, worst first: fun: neutral, hunger: satisfied, bladder: empty');
+    expect(block).not.toMatch(/bladder \d/);
     expect(block).toContain("Today's goals: Call Zoe");
     expect(block).toContain('You are currently: practice in mirror.');
   });
