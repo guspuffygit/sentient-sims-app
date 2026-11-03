@@ -2288,10 +2288,24 @@ ${factsBlock}
     // Lean scores only a reply to the player: the verdict closes the thread ("said their
     // piece") and feeds the conversation action. A pair scene's scores only ever drove the
     // continue gate (92% "continue") and the autonomy tier's desire arming.
-    const sceneScores: { scores: Map<string, SceneScore>; exchange?: LLMExchange } =
+    //
+    // A reply to the player does not WAIT for its scores (2026-11-01): the scorer sat in
+    // series between the actor and the audio (1.0 s median, 2.6-4.7 s worst on Jaz's
+    // 10-29/30 streams) and its verdict only closes the thread, prices the stored rows and
+    // feeds the conversation action, none of which the audio needs. So whenever the scores
+    // cannot change what plays next (lean never gates continuation on them; a lone Sim
+    // answering the player never continues) the reply airs first and `applyScores` below
+    // runs once BOTH the audio is with the renderer and the scorer has answered. A full
+    // pipeline group chat keeps waiting: its scores drive wantsMore.
+    type SceneScores = { scores: Map<string, SceneScore>; exchange?: LLMExchange };
+    const noScores: SceneScores = { scores: new Map() };
+    // A lone sim answering the player has nobody to continue WITH (see continueNext)
+    const partnerless = Boolean(playerLine) && speakers.length === 1;
+    const deferScores = playerFacing && Boolean(playerLine) && (lean || partnerless);
+    const scoresPromise: Promise<SceneScores> =
       lean && !playerFacing
-        ? { scores: new Map() }
-        : await this.runSceneScores(
+        ? Promise.resolve(noScores)
+        : this.runSceneScores(
             sharedScene || sceneAction,
             dialogueText,
             performers.map((sim) => ({ name: sim.name, think: monologueBySim.get(sim.sim_id) })),
@@ -2299,41 +2313,56 @@ ${factsBlock}
             interactionActionType,
             playerFacing && playerLine ? { speaker: playerLine.speaker } : undefined,
             callControl,
-          );
-    if (sceneScores.exchange) {
-      exchanges.push(sceneScores.exchange);
-    }
-    if (sceneScores.scores.size > 0) {
-      const summary = [...sceneScores.scores.entries()]
-        .map(
-          ([name, score]) =>
-            `${name}: memory ${score.memory}, action ${score.action}${score.action_reason ? ` (${score.action_reason})` : ''}`,
-        )
-        .join('; ');
-      log.info(`[Pipeline] Scene scores — ${summary}`);
+          ).catch((error: unknown) => {
+            // A deferred scorer outlives the round's stage boundaries: a stop that lands
+            // while it runs makes its verdict unwanted, not the round a failure
+            if (deferScores && error instanceof SceneAbortedError) {
+              return noScores;
+            }
+            throw error;
+          });
+    const settleScores = (result: SceneScores) => {
+      if (result.exchange) {
+        exchanges.push(result.exchange);
+      }
+      if (result.scores.size > 0) {
+        const summary = [...result.scores.entries()]
+          .map(
+            ([name, score]) =>
+              `${name}: memory ${score.memory}, action ${score.action}${score.action_reason ? ` (${score.action_reason})` : ''}`,
+          )
+          .join('; ');
+        log.info(`[Pipeline] Scene scores — ${summary}`);
+      }
+    };
+    const sceneScores: SceneScores = deferScores ? noScores : await scoresPromise;
+    if (!deferScores) {
+      settleScores(sceneScores);
     }
     if (playerFacing && playerLine) {
       // The scorer's action verdict on a player-facing beat acts NOW (CognitionService
       // .actOnConversation) instead of arming the next tick: the player said something
-      // and the sim follows through while it is still the subject
-      this.actOnConversation(
-        performers,
-        sceneScores.scores,
-        monologueBySim,
-        playerLine.speaker,
-        [...carriedLines, ...(playerLine.text ? [playerLine] : []), ...finalLines],
-        options,
-        sceneId,
-      );
+      // and the sim follows through while it is still the subject. Deferred: applyScores.
+      if (!deferScores) {
+        this.actOnConversation(
+          performers,
+          sceneScores.scores,
+          monologueBySim,
+          playerLine.speaker,
+          [...carriedLines, ...(playerLine.text ? [playerLine] : []), ...finalLines],
+          options,
+          sceneId,
+        );
+      }
     } else {
       this.armCognitionDesires(event, sceneScores.scores, monologueBySim);
     }
     // The thread hears the verdict: every performer has said their piece (the scorer's
     // "done"; without one, a beat that landed — nothing hanging, no pull for another round)
-    const landed =
+    const landedFrom = (scores: Map<string, SceneScore>) =>
       performers.length > 0 &&
       performers.every((sim) => {
-        const score = this.findScore(sceneScores.scores, sim);
+        const score = this.findScore(scores, sim);
         if (!score) {
           return false;
         }
@@ -2342,6 +2371,8 @@ ${factsBlock}
         }
         return score.unfinished !== true && (score.continue ?? 10) <= 3;
       });
+    // Deferred: the lines are recorded as the reply airs and the verdict follows on its own
+    const landed = deferScores ? false : landedFrom(sceneScores.scores);
 
     // V-5a: multi-round conversations. The scorer says whether the exchange is still open
     // and how strongly the scene wants another round; capped by sceneMaxRounds and the
@@ -2358,8 +2389,8 @@ ${factsBlock}
     // conversation forward" — and the actor obliged by writing the player's next line
     // as their own thought (live 2026-08-17: "The Voice: Let's just say I've been
     // watching…" aired as Ehren's inner monologue). The player speaks next, not the sim.
-    const partnerless = Boolean(playerLine) && speakers.length === 1;
-    // (a monologue-only beat returned above, so it never reaches this gate)
+    // (`partnerless`, defined with the scorer above; a monologue-only beat returned
+    // above, so it never reaches this gate)
     // An interaction the game is blocked on is already queued: the next round would hold
     // the queue for most of the mod's 80 s and the interaction would time out behind it.
     // The scene closes as idle instead; the interaction runs next with the time to itself.
@@ -2414,6 +2445,8 @@ ${factsBlock}
       },
     });
 
+    // The reply row's id when a lone sim answers the player (re-priced by applyScores)
+    let replyRow: { id: string; simId: string } | undefined;
     const newMemory: MemoryEntity = {
       content: finalText,
       location_id: event.environment.location_id,
@@ -2455,7 +2488,14 @@ ${factsBlock}
                 this.findScore(sceneScores.scores, performers[0])?.memory ?? heuristicImportance(newMemory.event_type),
             }
           : undefined;
-      this.ctx.memoryRepository.createMemory({ memory: newMemory, participants, index }, { modDisplayAction });
+      const saved = this.ctx.memoryRepository.createMemory(
+        { memory: newMemory, participants, index },
+        { modDisplayAction },
+      );
+      if (index && saved?.id !== undefined) {
+        // Priced by the heuristic while the scorer is still out: re-priced in applyScores
+        replyRow = { id: saved.id, simId: performers[0].sim_id };
+      }
     }
 
     // The scene reaches the game one line at a time: the memory block's subtitle is
@@ -2465,6 +2505,64 @@ ${factsBlock}
     // and a speaker label is all a scene line otherwise carries.
     const simIdByName = new Map(event.sentient_sims.map((sim) => [sim.name, sim.sim_id]));
     const participantSimIds = performers.map((sim) => sim.sim_id);
+
+    // The deferred verdict (see the scorer above) lands once the reply is airing AND the
+    // scorer has answered, whichever comes second: the thread closes if the beat landed,
+    // the conversation action is held, and the rows stored at the heuristic price get the
+    // scorer's memory score. The conversation-action hold has to register before the scene
+    // can close, so play() holds the scene open (generationStarted) from the moment the
+    // audio is handed over until the verdict is in (generationFinished, always).
+    let scored: SceneScores | undefined;
+    let played = false;
+    let monologueRows: Map<string, string> | undefined;
+    const applyScores = once(() => {
+      try {
+        if (sceneStopped()) {
+          // The game ended the scene while the scorer ran: the thread closed with it
+          // ('stopped'), there is nothing to act on and nothing worth pricing
+          log.info(`[Pipeline] Scene ${sceneId} ended in-game before its scores arrived; verdict dropped`);
+          return;
+        }
+        const { scores } = scored ?? noScores;
+        if (thread) {
+          // The lines went on the thread as the reply aired; this is the verdict alone
+          this.ctx.playerConversations.record(thread.key, [], { landed: landedFrom(scores) });
+        }
+        if (playerLine) {
+          this.actOnConversation(
+            performers,
+            scores,
+            monologueBySim,
+            playerLine.speaker,
+            [...carriedLines, ...(playerLine.text ? [playerLine] : []), ...finalLines],
+            options,
+            sceneId,
+          );
+        }
+        this.priceStoredRows(performers, scores, monologueRows, replyRow);
+      } finally {
+        this.ctx.scenePlayback.generationFinished(sceneId);
+      }
+    });
+    const applyWhenReady = () => {
+      if (played && scored) {
+        applyScores();
+      }
+    };
+    if (deferScores) {
+      // Attached before the return path's await, so settle + apply run before the caller
+      // (and the continuation) sees the result
+      void (async () => {
+        try {
+          const result = await scoresPromise;
+          scored = result;
+          settleScores(result);
+          applyWhenReady();
+        } catch (error) {
+          log.warn(`[Pipeline] Scene ${sceneId} deferred scores failed`, error);
+        }
+      })();
+    }
 
     const play = once(() => {
       if (sceneStopped()) {
@@ -2480,7 +2578,7 @@ ${factsBlock}
       // round only, or a three-round chat left three near-identical thoughts per Sim
       // (live, 2026-10-29).
       if (!lean || !options.continueScene) {
-        this.storeMonologues(event, performers, monologueBySim, sceneScores.scores);
+        monologueRows = this.storeMonologues(event, performers, monologueBySim, sceneScores.scores);
       }
       markScenePaced(finalText);
       if (thread) {
@@ -2550,6 +2648,12 @@ ${factsBlock}
         sceneId,
         participantSimIds,
       });
+      if (deferScores) {
+        // The audio is with the renderer: hold the scene open for the verdict
+        this.ctx.scenePlayback.generationStarted(sceneId);
+        played = true;
+        applyWhenReady();
+      }
       if (continueNext) {
         log.info(
           `[Pipeline] Scene round ${round + 1}/${this.ctx.settings.sceneMaxRounds}: continuing the conversation`,
@@ -2611,6 +2715,11 @@ ${factsBlock}
       playbackOptions.onPlaybackReady?.(play);
     } else {
       play();
+    }
+    if (deferScores) {
+      // The audio is already playing; this wait only keeps the result (its exchanges, the
+      // trace that holds them by reference, the bench) and the queue slot as they were
+      await scoresPromise;
     }
 
     return {
@@ -3016,12 +3125,15 @@ ${factsBlock}
   // cognition tick runs (3 of 34 rows rated in 12 min, 2026-10-27), and the annotator
   // keeps any numeric stamp as final, so the stamp here is the row's rating. Never
   // notifies the mod — thoughts are not subtitles. Must never break playback.
+  // Returns the stored row id per sim id (a row the repository refused, or folded into an
+  // earlier duplicate, is still a row and may be re-priced)
   private storeMonologues(
     event: SSEvent,
     performers: SentientSim[],
     monologueBySim: Map<string, string>,
     scores: Map<string, SceneScore>,
-  ) {
+  ): Map<string, string> {
+    const rows = new Map<string, string>();
     performers.forEach((sim) => {
       const think = monologueBySim.get(sim.sim_id);
       if (!think) {
@@ -3030,7 +3142,7 @@ ${factsBlock}
       try {
         // Pushed to the mod so the memories window shows the thought live under the
         // sim's lines; the mod keeps monologue rows off the subtitle/pause path.
-        this.ctx.memoryRepository.createMemory({
+        const row = this.ctx.memoryRepository.createMemory({
           memory: {
             content: think,
             location_id: event.environment.location_id,
@@ -3039,9 +3151,41 @@ ${factsBlock}
           participants: [{ id: sim.sim_id }],
           index: { owner: sim.sim_id, importance: scores.get(sim.name)?.memory ?? heuristicImportance('monologue') },
         });
+        if (row?.id !== undefined) {
+          rows.set(sim.sim_id, row.id);
+        }
       } catch (error) {
         log.warn(`[Pipeline] Failed to store monologue for ${sim.name}`, error);
       }
+    });
+    return rows;
+  }
+
+  // A reply that aired before its scores (runDirectedGeneration) stored its rows at the
+  // type heuristic, and the annotator keeps a numeric stamp as final, so the scorer's
+  // memory score is written over the stamp here once it arrives. Owner and day are kept
+  // by upsertIndex.
+  private priceStoredRows(
+    performers: SentientSim[],
+    scores: Map<string, SceneScore>,
+    monologueRows?: Map<string, string>,
+    replyRow?: { id: string; simId: string },
+  ) {
+    performers.forEach((sim) => {
+      const importance = this.findScore(scores, sim)?.memory;
+      if (importance === undefined) {
+        return;
+      }
+      const ids = [monologueRows?.get(sim.sim_id), replyRow?.simId === sim.sim_id ? replyRow.id : undefined].filter(
+        (id): id is string => Boolean(id),
+      );
+      ids.forEach((id) => {
+        try {
+          this.ctx.memoryIndexRepository.upsertIndex({ memory_id: id, importance });
+        } catch (error) {
+          log.warn(`[Pipeline] Failed to re-price memory ${id} for ${sim.name}`, error);
+        }
+      });
     });
   }
 
