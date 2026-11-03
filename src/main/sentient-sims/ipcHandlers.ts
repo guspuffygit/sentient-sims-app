@@ -87,10 +87,14 @@ export default function ipcHandlers(ctx: ApiContext, voiceInput: VoiceInputServi
     sendSceneLineEndedToMod(line);
   });
   // A round's playback finished. `completed` false means the renderer cut it short, so
-  // the pipeline stops feeding the conversation more rounds.
-  ipcMain.on('scene-playback-ended', (_event: IpcMainEvent, payload: { sceneId: string; completed: boolean }) => {
-    ctx.scenePlayback.playbackEnded(payload.sceneId, payload.completed);
-  });
+  // the pipeline stops feeding the conversation more rounds; reason 'yielded' means it
+  // stepped aside after its current line for a player reply (a soft end, not a cut).
+  ipcMain.on(
+    'scene-playback-ended',
+    (_event: IpcMainEvent, payload: { sceneId: string; completed: boolean; reason?: 'yielded' }) => {
+      ctx.scenePlayback.playbackEnded(payload.sceneId, payload.completed, payload.reason);
+    },
+  );
   // A paced scene the renderer never played would otherwise display nowhere in-game: its
   // block subtitle was suppressed on the promise that lines would stream. Un-mark it so the
   // memory_created broadcast falls back to the normal subtitle block.

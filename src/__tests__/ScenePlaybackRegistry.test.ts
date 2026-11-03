@@ -102,6 +102,28 @@ describe('ScenePlaybackRegistry', () => {
     expect(registry.isStopped(SCENE)).toBe(true);
   });
 
+  it('softly stops a conversation the renderer yielded to a player reply', () => {
+    const { registry, notifyStop, notifySceneEnded, onSceneClosed } = harness;
+    registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Hello.', 'Hi.', 'So anyway.'));
+    registry.lineShown(SCENE);
+    registry.lineShown(SCENE);
+
+    // A reply to the player arrived; the renderer let Bella's line finish and stopped there
+    registry.playbackEnded(SCENE, false, 'yielded');
+
+    expect(notifyStop).toHaveBeenCalledWith({ sceneId: SCENE, mode: 'soft' });
+    expect(notifySceneEnded).toHaveBeenCalledWith(SCENE, 'stopped');
+    expect(onSceneClosed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sceneId: SCENE,
+        reason: 'stopped',
+        stopReason: 'yielded',
+        lines: lines('Hello.', 'Hi.'),
+      }),
+    );
+    expect(registry.isStopped(SCENE)).toBe(true);
+  });
+
   it('stops every conversation when the lot goes away', () => {
     const { registry, notifyStop } = harness;
     registry.roundQueued('a', PARTICIPANTS, 1, lines('Hello.'));
