@@ -76,6 +76,7 @@ import { PlayerConversationService } from './PlayerConversationService';
 import { PromptRequestBuilderService } from './PromptRequestBuilderService';
 import { SceneService } from './SceneService';
 import { ScenePlaybackRegistry } from './ScenePlaybackRegistry';
+import { SceneRepeatGuard } from './SceneRepeatGuard';
 import { ProviderConfigService } from './ProviderConfigService';
 import { SemanticMemoryService } from './SemanticMemoryService';
 import { SentientSimsAIService } from './SentientSimsAIService';
@@ -289,6 +290,8 @@ export class ApiContext {
   private _defaultDescriptionService?: DefaultDescriptionService;
   private _mappingReviewService?: MappingReviewService;
   private readonly _simStateCache: SimStateCache;
+
+  private readonly _sceneRepeatGuard: SceneRepeatGuard;
   private readonly _openAIEmbeddingService: OpenAIEmbeddingService;
   private readonly _sentientSimsEmbeddingService: SentientSimsEmbeddingService;
   private readonly _geminiEmbeddingService: GeminiEmbeddingService;
@@ -439,6 +442,10 @@ export class ApiContext {
     // finds its row again at its close to rewrite it to what was actually said.
     setSceneMemoryObserver((pacedText, memoryId) => this._scenePlaybackRegistry.attachMemory(pacedText, memoryId));
     this._simStateCache = new SimStateCache();
+    // Did this cast just have this beat? (a repeat inside the cooldown is dropped)
+    this._sceneRepeatGuard = new SceneRepeatGuard({
+      cooldownMs: () => this._settings.sceneRepeatCooldownSeconds * 1000,
+    });
     this._openAIEmbeddingService = new OpenAIEmbeddingService(this);
     this._sentientSimsEmbeddingService = new SentientSimsEmbeddingService(this);
     this._geminiEmbeddingService = new GeminiEmbeddingService(this);
@@ -602,6 +609,10 @@ export class ApiContext {
 
   get simStateCache(): SimStateCache {
     return this._simStateCache;
+  }
+
+  get sceneRepeatGuard(): SceneRepeatGuard {
+    return this._sceneRepeatGuard;
   }
 
   // Evaluated per access so changing the embedding provider (or setting a key/token at

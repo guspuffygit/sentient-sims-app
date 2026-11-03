@@ -6521,9 +6521,8 @@ export const interactionDescriptions: Map<string, InteractionDescription> = new 
     'sim_Chat': {
       pre_actions: ['{actor.0} strikes up a conversation with {actor.1}.'],
     },
-    'idle_Chatting_ListenWithPhone_STC': {
-      pre_actions: ['{actor.0} glances at their phone while continuing to chat with {actor.1}.'],
-    },
+    // An idle loop while chatting: 39 scenes in 27 minutes on 2026-10-30 (handoff SCENE-REPEATS)
+    'idle_Chatting_ListenWithPhone_STC': { ignored: true },
     'sim_doStretching': {
       ignored: true,
       // # "observations": [
@@ -8445,5 +8444,7 @@ export const interactionDescriptions: Map<string, InteractionDescription> = new 
     },
     'mixer_Career_Reaper_Investigate_WipeSweat': { ignored: true },
     'Computer_Use_React': { ignored: true },
+    // The cat's wait-near-owner idle: a scene every 40 s on 2026-10-30 (handoff SCENE-REPEATS)
+    'petCat_WaitNearbyOwner_Mixer_Active': { ignored: true },
   }),
 );

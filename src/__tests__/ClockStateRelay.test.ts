@@ -30,7 +30,9 @@ import { publishClockState, startWebSocketServer } from 'main/sentient-sims/webs
 
 const settings = { playbackFollowsGameClock: true };
 const simStateCache = new SimStateCache();
-const ctx = { settings, simStateCache, tiers: [] } as unknown as ApiContext;
+// The repeat guard only hears the reset
+const sceneRepeatGuard = { reset: () => undefined };
+const ctx = { settings, simStateCache, sceneRepeatGuard, tiers: [] } as unknown as ApiContext;
 
 startWebSocketServer(ctx);
 const modServer = (servers as FakeServer[]).find((server) => server.options.port === modWebsocketPort);

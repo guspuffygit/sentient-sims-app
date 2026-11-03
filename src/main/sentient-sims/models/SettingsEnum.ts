@@ -113,6 +113,9 @@ export enum SettingsEnum {
   // Lean only: the actor rules without the Sim's name (one cacheable prefix shared by every
   // Sim and every user). Series 3 of the voice-pipeline bench sets the default.
   LEAN_NAME_FREE_RULES = 'leanNameFreeRules',
+  // The same cast on the same beat inside this many seconds is dropped, not played again
+  // (a sliding window; 0 = off). A reaction event gets one silent thought per window.
+  SCENE_REPEAT_COOLDOWN_SECONDS = 'sceneRepeatCooldownSeconds',
   // Player-facing replies (chat window, voice, conscience, Twitch): the actor's token
   // budget for a reply to the player, how long a conversation thread stays open between
   // the player's lines, and whether a reply may turn straight into an action

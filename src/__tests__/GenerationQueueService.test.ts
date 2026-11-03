@@ -32,11 +32,17 @@ function makeContext(overrides: Record<string, unknown> = {}, generationConcurre
     })),
     ...overrides,
   };
+  const sceneRepeatGuard = {
+    admit: vi.fn(() => ({ kind: 'fresh' })),
+    peek: vi.fn(() => ({ kind: 'fresh' })),
+    forget: vi.fn(),
+  };
   const ctx = {
     settings: { generationConcurrency, prefetchMaxQueueDepth: 2 },
     ai,
+    sceneRepeatGuard,
   } as unknown as ApiContext;
-  return { ctx, ai, play };
+  return { ctx, ai, play, sceneRepeatGuard };
 }
 
 describe('GenerationQueueService', () => {
@@ -297,7 +303,11 @@ describe('GenerationQueueService', () => {
 
     const claimed = await queue.claim(request);
 
-    expect(ai.interactionEvent).toHaveBeenCalledWith(request.event, { arrivedAt: expect.any(Number) as number });
+    expect(ai.interactionEvent).toHaveBeenCalledWith(request.event, {
+      arrivedAt: expect.any(Number) as number,
+      // The repeat guard's verdict rides along: a plain event is not a reaction
+      reaction: false,
+    });
     expect(claimed.result.result_source).toBe('synchronous');
   });
 

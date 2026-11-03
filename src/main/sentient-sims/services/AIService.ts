@@ -356,6 +356,9 @@ export type DirectedGenerationOptions = {
   deadlineAt?: number;
   // Fires when the game ends the scene, cutting short whatever provider call is in flight
   signal?: AbortSignal;
+  // A reaction the game fired (the cat watching the guitar): the lone actor's thought is
+  // written as a monologue row and nothing is voiced or subtitled; no desire is armed
+  silentThought?: boolean;
   // A chat beat opens with a line the player already typed: it drives the scene and seeds the
   // transcript the actors reply to, the sim who said it takes no actor turn, and it stays out
   // of the aired scene (the mod already showed it, and it rides along as the memory's action)
@@ -391,10 +394,13 @@ export type DirectedGenerationOptions = {
 // What the queue knows about a request the game is blocked on: when it reached the queue
 export type InteractionRequestContext = {
   arrivedAt?: number;
+  // The mod says the game's reaction system fired this event: one silent thought, no scene
+  reaction?: boolean;
 };
 
 type RequestDeadline = {
   deadlineAt?: number;
+  reaction?: boolean;
 };
 
 // Which pipeline stage a one-shot call is, and how it can be cut short: the scene's stop
@@ -576,6 +582,8 @@ export class AIService {
       // zone unloads, but that message can be lost to a websocket reconnect mid-travel,
       // and dialogue from the old lot playing over the new one is exactly what this is for.
       this.ctx.scenePlayback.stopAll('zone_unload');
+      // Nor does a beat from the old lot count as a repeat on the new one
+      this.ctx.sceneRepeatGuard.reset();
       // The traveller is the player's sim — the reflection is their private recollection
       const traveller = event.sentient_sims.find((sentientSim) => sentientSim.is_player_sim);
       await this.runSceneReflection(
@@ -796,6 +804,7 @@ ${factsBlock}
   ): Promise<InteractionEventResult> {
     const deadline: RequestDeadline = {
       deadlineAt: request.arrivedAt === undefined ? undefined : request.arrivedAt + interactionDeadlineMs,
+      reaction: request.reaction,
     };
     if (deadline.deadlineAt !== undefined && deadline.deadlineAt - Date.now() < minimumGenerationMs) {
       // The mod has given up on this request, or will before any generation lands
@@ -917,6 +926,23 @@ ${factsBlock}
     const resolved = await this.resolveInteractionPreAction(primaryEvent, event);
     if (resolved.result) {
       return resolved.result;
+    }
+    if (deadline.reaction && this.ctx.settings.directedScenesEnabled) {
+      // The game's reaction system, not a Sim's choice (the cat watching the guitar): the
+      // actor alone thinks one silent thought over the full cast's pre-action. No scene, no
+      // voice; SceneRepeatGuard makes it one per cooldown (handoff SCENE-REPEATS 2b).
+      const [actor] = primaryEvent.sentient_sims;
+      const soloEvent: InteractionEvent = {
+        ...primaryEvent,
+        sentient_sims: [actor],
+        // Bits between sims outside the cast crash formatSims' lookup
+        relationships: { ...primaryEvent.relationships, relationship_bits: [] },
+      };
+      return this.runDirectedGeneration(soloEvent, {
+        action: resolved.preAction,
+        deadlineAt: deadline.deadlineAt,
+        silentThought: true,
+      });
     }
     // Directed scenes: pairs play dialogue + monologue, a lone sim gets a monologue-only
     // beat. With the setting off, the single-pass narrator.
@@ -2137,8 +2163,9 @@ ${factsBlock}
     if (monologueOnly) {
       return this.finishMonologueScene(event, options, playbackOptions, {
         performances: performers.map((sim) => ({ performer: sim, think: monologueBySim.get(sim.sim_id) })),
-        // A silent cast keeps its thoughts to itself; a lone speaker voices theirs
-        aloud: speakers.length > 0,
+        // A silent cast keeps its thoughts to itself; a lone speaker voices theirs, unless
+        // the beat is a game reaction answered with a silent thought
+        aloud: speakers.length > 0 && !options.silentThought,
         sharedScene,
         sceneAction,
         displayAction,
@@ -2665,11 +2692,14 @@ ${factsBlock}
         .join('; ');
       log.info(`[Pipeline] Scene scores — ${summary}`);
     }
-    this.armCognitionDesires(
-      event,
-      sceneScores.scores,
-      new Map(thoughts.map(({ performer, think }) => [performer.name, think])),
-    );
+    if (!options.silentThought) {
+      // A reaction's thought is a note in the margin, not a beat that leaves the Sim wanting
+      this.armCognitionDesires(
+        event,
+        sceneScores.scores,
+        new Map(thoughts.map(({ performer, think }) => [performer.name, think])),
+      );
+    }
 
     const interactionName = (event as Partial<InteractionEvent>).interaction_name ?? intimateEvent?.animation_name;
     const rows = thoughts.map(({ performer, think }) => {

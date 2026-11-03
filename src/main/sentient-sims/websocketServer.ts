@@ -139,6 +139,7 @@ export const startWebSocketServer = (ctx: ApiContext) => {
       publishClockState(ctx);
       // The next game session numbers its state reports from 1 again
       ctx.simStateCache.reset();
+      ctx.sceneRepeatGuard.reset();
       notifyWebsocketStatus({
         type: 'mod',
         status: false,

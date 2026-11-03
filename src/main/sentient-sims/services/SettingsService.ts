@@ -45,6 +45,7 @@ import {
   defaultVoiceInputModel,
   defaultTwitchCommandWord,
   defaultTwitchChatVoiceId,
+  defaultSceneRepeatCooldownSeconds,
 } from '../constants';
 import { TwitchStoredAuth } from '../models/TwitchStoredAuth';
 import { redactSettingValue } from '../util/redactSetting';
@@ -369,6 +370,10 @@ export function defaultStore(cwd?: string) {
         // Series 3 (2026-10-27): name-free within 0.25/10 of named rules, beat kept on 10/11
         // special scenes; watch words per line on the first stream (9.5 vs 9.0)
         default: true,
+      },
+      [SettingsEnum.SCENE_REPEAT_COOLDOWN_SECONDS.toString()]: {
+        type: 'number',
+        default: 120,
       },
       [SettingsEnum.PLAYER_REPLY_MAX_TOKENS.toString()]: {
         type: 'number',
@@ -1325,6 +1330,13 @@ export class SettingsService {
   get sceneMaxRounds(): number {
     const raw = Number(this.get(SettingsEnum.SCENE_MAX_ROUNDS));
     return Math.min(5, Math.max(1, Number.isFinite(raw) ? raw : 3));
+  }
+
+  // How long the same cast must be quiet on a beat before that beat plays again. 0 turns the
+  // guard off; capped so a typo cannot silence a pair for the evening.
+  get sceneRepeatCooldownSeconds(): number {
+    const raw = Number(this.get(SettingsEnum.SCENE_REPEAT_COOLDOWN_SECONDS));
+    return Math.min(600, Math.max(0, Number.isFinite(raw) ? raw : defaultSceneRepeatCooldownSeconds));
   }
 
   // Player-facing replies: the actor's token budget when answering the player. Clamped so
