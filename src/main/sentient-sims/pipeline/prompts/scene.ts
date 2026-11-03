@@ -76,7 +76,7 @@ Rules:
 - If a character's description and their <KNOWN_FACTS> disagree, the FACTS are right and the description is out of date. Descriptions are written once and never revised, so a character can be described as a teenager years after growing up. The same goes for the location's description: residents it names may have moved, grown up, or never lived there; the household facts win, and nobody it names is present unless they appear in the scene.
 - A <PAST_REFLECTIONS> block, if present, holds one character's own distilled memories of earlier scenes (the speaker attribute says whose). Mine it for that character's continuity and feelings in their private briefing only — the other actors were not in that character's head, so never put it in the shared scene or in anyone else's briefing. It is not happening now: never stage it as the current scene, and fold in only the details that matter here.
 - Smooth over wrinkles: if the context is awkward, contradictory, or overloaded, resolve it into a clean, playable scene.
-- If the user message contains "Previously in this scene", the conversation is already underway: tell each actor to pick up mid-flow and build on what has already been said — no greetings, no introductions, no re-describing the setting.
+- If the user message contains "Previously in this scene", the conversation is already underway: tell each actor to pick up mid-flow and build on what has already been said — no greetings, no introductions, no re-describing the setting. The exception is a user message that ends by saying to open the scene: then the lines above are an earlier conversation these characters did not have together, and the first line starts this one.
 ${lengthRule}
 - Give every scene bit a SHAPE — a beginning (what starts it), a middle (where it turns), and an end (where it lands) — even inside two to four lines. If this is the opening beat, direct the first line to actually open the conversation; if the scene is already underway, direct where this round should land.
 - Do not write any dialogue or inner-monologue lines, and do not tell the actors specific lines to say or think.
@@ -126,63 +126,217 @@ This is what you want and need right now, as the game records it. When asked wha
 ${withFacts}`
       : withFacts;
 
-  if (playerFacing && !monologueOnly) {
-    return `${actorPrompt}
+  return `${actorPrompt}
 
-How to respond — in this format:
-SAY: <the words ${simName} says out loud>
-THINK: <one short line of ${simName}'s private inner monologue in this moment>
+${speechRules(speechRuleKind(playerFacing, monologueOnly), { simName })}`;
+}
+
+// Which of the three response formats a performer answers in
+export type SpeechRuleKind = 'pair' | 'playerFacing' | 'monologue';
+
+export function speechRuleKind(playerFacing: boolean | undefined, monologueOnly: boolean): SpeechRuleKind {
+  if (monologueOnly) {
+    return 'monologue';
+  }
+  return playerFacing ? 'playerFacing' : 'pair';
+}
+
+export type SpeechRuleOptions = {
+  // The performer's name, interpolated into the rules as the 4.6 pipeline always did. Absent,
+  // the rules are NAME-FREE ("Stay in character at all times", "your character's voice"): one
+  // text shared by every Sim and every user, so a provider's prefix cache serves it whole.
+  simName?: string;
+  // The lean pipeline has no director, so "the tone your director set" becomes "the tone of
+  // the scene". Full mode keeps the 4.6 wording byte for byte.
+  lean?: boolean;
+};
+
+// The SAY/THINK answer format and the rules under it, the most load-bearing text in the
+// whole pipeline (series 2, 2026-10-27: without "ONE short line, ten words or so" lines ran
+// 8 -> 24 words, -1.3/10; without the SAY list, 29 words, -1.7). Shared by the 4.6 prompt
+// (buildSpeechSystemPrompt, output unchanged) and the lean prompt below.
+export function speechRules(kind: SpeechRuleKind, options: SpeechRuleOptions = {}): string {
+  const { simName, lean } = options;
+  // Subject and possessive: "Mara Vale" / "Mara Vale's", or "your character" / "your character's"
+  const who = simName ?? 'your character';
+  const whose = simName ? `${simName}'s` : "your character's";
+  const stay = simName ? `- Stay in character as ${simName} at all times.` : '- Stay in character at all times.';
+  const tone = lean ? 'in the tone of the scene' : 'in the tone your director set';
+
+  if (kind === 'playerFacing') {
+    return `How to respond — in this format:
+SAY: <the words ${who} says out loud>
+THINK: <one short line of ${whose} private inner monologue in this moment>
 
 Rules for SAY:
-- Stay in character as ${simName} at all times.
+${stay}
 - Only the words spoken out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no delivery notes, no commentary.
 - Say as much as you actually have to say. A full answer with your reasons can run several sentences; a one-liner is fine when that is all there is. Stop when you have answered.
 - When asked a direct question, answer it first, plainly and specifically: pick one, name it, give your reason. Never answer a question with a question, never "that's not the point", and never a bare "I don't know" — if you don't know, say what you DO know or what would decide it. If you are keeping something back, say that you are and why.
-- Talk like a real person in this conversation: a direct, natural reply to what was just said, in ${simName}'s voice and in the tone your director set.
+- Talk like a real person in this conversation: a direct, natural reply to what was just said, in ${whose} voice and ${tone}.
 - You may ask something back after you have answered, never instead of answering. Never repeat or rephrase anything already said.
 - If the conversation is already underway (anything under "Previously in this scene" or "The conversation so far"), jump straight in mid-flow — no greetings and no re-introductions.
 - If you have said what you have to say, you may wrap the conversation up naturally — a goodbye, a "let me think about it", getting back to what you were doing.
 - Do not mention physical actions, props, furniture, or locations.
 
 Rules for THINK:
-- First person, present tense — what is actually running through ${simName}'s head right now.
-- Private: nobody hears it, and it may differ from what ${simName} says out loud — but it is ${simName}'s real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.
+- First person, present tense — what is actually running through ${whose} head right now.
+- Private: nobody hears it, and it may differ from what ${who} says out loud — but it is ${whose} real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.
 - One short line. No physical actions, and never addressed to anyone.`;
   }
 
-  if (monologueOnly) {
-    return `${actorPrompt}
-
-How to respond — exactly one line, in this format:
-THINK: <one short sentence of ${simName}'s private inner monologue in this moment>
+  if (kind === 'monologue') {
+    return `How to respond — exactly one line, in this format:
+THINK: <one short sentence of ${whose} private inner monologue in this moment>
 
 Rules for THINK:
-- Stay in character as ${simName} at all times.
-- First person, present tense — what is actually running through ${simName}'s head right now, in the middle of what they are doing.
+${stay}
+- First person, present tense — what is actually running through ${whose} head right now, in the middle of what they are doing.
 - Private: nobody hears it. No spoken dialogue, no name tag, no quotation marks.
 - Grounded in this moment; never third person, never narration of physical actions.
-- It is ${simName}'s real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.`;
+- It is ${whose} real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.`;
   }
 
-  return `${actorPrompt}
-
-How to respond — exactly two lines, in this format:
-SAY: <the words ${simName} says out loud>
-THINK: <one short line of ${simName}'s private inner monologue in this moment>
+  return `How to respond — exactly two lines, in this format:
+SAY: <the words ${who} says out loud>
+THINK: <one short line of ${whose} private inner monologue in this moment>
 
 Rules for SAY:
-- Stay in character as ${simName} at all times.
+${stay}
 - Only the words spoken out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no delivery notes, no commentary.
 - ONE short line, ten words or so, the way people actually talk. Never a speech.
-- Talk like a real person in this conversation: your line must be a direct, natural reply to what was just said, in ${simName}'s voice and in the tone your director set. Not every line needs to be clever — a plain reply that keeps the conversation flowing beats a quip that does not connect.
+- Talk like a real person in this conversation: your line must be a direct, natural reply to what was just said, in ${whose} voice and ${tone}. Not every line needs to be clever — a plain reply that keeps the conversation flowing beats a quip that does not connect.
 - Move the conversation forward — answer questions that were asked, follow up on what the other person said, never repeat or rephrase anything already said.
-- If the conversation is already underway (anything under "Previously in this scene"), jump straight in mid-flow — no greetings and no re-introductions.
+- If the conversation is already underway (anything under "Previously in this scene"), jump straight in mid-flow — no greetings and no re-introductions. When you are told to open the scene, the lines above were an earlier conversation: start this one.
 - Do not mention physical actions, props, furniture, or locations.
 
 Rules for THINK:
-- First person, present tense — what is actually running through ${simName}'s head right now.
-- Private: nobody hears it, and it may differ from what ${simName} says out loud — but it is ${simName}'s real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.
+- First person, present tense — what is actually running through ${whose} head right now.
+- Private: nobody hears it, and it may differ from what ${who} says out loud — but it is ${whose} real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.
 - One short line. No physical actions, and never addressed to anyone.`;
+}
+
+// ---------------------------------------------------------------------------------------
+// The lean pipeline (2026-10-27): one actor call per Sim per round, no director, no
+// reviewer, no per-round scores. Measured over three live sessions and two offline
+// bench series (blind judges, 2026-10-27): the director earned nothing a judge
+// could see on ordinary scenes, the reviewer changed 2-5% of rounds and broke the one it
+// touched, and the scorer said "continue" 92% of the time. What the director DID carry was
+// the beat into rounds 2-3, where the 4.6 actor message had only the transcript and "The
+// scene continues"; lean carries the beat itself (buildLeanActorUserMessage).
+//
+// Layout: stable text first, volatile text last, so a provider's prefix cache (vLLM, OpenAI
+// auto-caching, Parasail) serves [rules][identity][place][facts] on every later line of a
+// scene; the setting (coarse date, season, weather: fixed for the scene, computed once per
+// event) closes the system message, and the postures line heads the USER message.
+// ---------------------------------------------------------------------------------------
+
+/**
+ * The Sim's own <CHARACTER_IN_INTERACTION> block out of the rendered participants, matched
+ * by its header line (formatSentientSim writes `<name> is a <gender> <age>.`), never by a
+ * mention inside another Sim's block. Empty when the Sim has none.
+ */
+export function ownCharacterBlock(name: string, participants: string): string {
+  const blockPattern = /<CHARACTER_IN_INTERACTION>\s*([\s\S]*?)\s*<\/CHARACTER_IN_INTERACTION>/g;
+  let match = blockPattern.exec(participants);
+  while (match) {
+    const firstLine = match[1].split('\n')[0].trim();
+    if (firstLine.startsWith(`${name} is `) || firstLine === name) {
+      return `<CHARACTER_IN_INTERACTION>\n${match[1].trim()}\n</CHARACTER_IN_INTERACTION>`;
+    }
+    match = blockPattern.exec(participants);
+  }
+  return '';
+}
+
+export type LeanActorSystemPromptContext = {
+  simName: string;
+  // The Sim's own <CHARACTER_IN_INTERACTION> block (ownCharacterBlock), or empty
+  characterBlock: string;
+  // <LOCATION>...</LOCATION>, or empty
+  locationBlock: string;
+  // The Sim's own <KNOWN_FACTS> block, computed on round 1 and reused on every later round
+  factsBlock?: string;
+  // <DATE> (coarse: day + part of day), <SEASON>, <WEATHER>, newline-joined; fixed for the
+  // scene, so it sits after the facts and before the status
+  settingBlock?: string;
+  // Player-facing only: the live <STATUS>/<TODAYS_PLAN> block. Volatile, so it goes last.
+  statusBlock?: string;
+  playerFacing?: boolean;
+  monologueOnly: boolean;
+  // Name-free rules: see SpeechRuleOptions.simName
+  nameFreeRules?: boolean;
+};
+
+export function buildLeanActorSystemPrompt(context: LeanActorSystemPromptContext): string {
+  const { simName, characterBlock, locationBlock, factsBlock, settingBlock, statusBlock, playerFacing, monologueOnly } =
+    context;
+  const rules = speechRules(speechRuleKind(playerFacing, monologueOnly), {
+    simName: context.nameFreeRules ? undefined : simName,
+    lean: true,
+  });
+  const identity = [`You are ${simName}.`, characterBlock.trim()].filter((part) => part.length > 0).join('\n\n');
+  const facts = factsBlock
+    ? `${factsBlock}
+These facts are what the game records about you right now. Where your character description disagrees with them, the facts are right.`
+    : '';
+  const status =
+    playerFacing && statusBlock
+      ? `${statusBlock}
+This is what you want and need right now, as the game records it. When asked what you want, answer from it.`
+      : '';
+  return [rules, identity, locationBlock.trim(), facts, (settingBlock ?? '').trim(), status]
+    .filter((part) => part.length > 0)
+    .join('\n\n');
+}
+
+export type LeanActorUserMessageContext = {
+  // The postures line (who is standing, sitting, doing what); may be empty. The date,
+  // season and weather sit at the end of the system message (settingBlock) since 2026-10-31.
+  nowBlock: string;
+  // "Previously in this scene:\n...\n\n" as the 4.6 pipeline builds it, or empty
+  previouslyBlock: string;
+  // This Sim's beat for this round, already framed (opener, valence, deception split on
+  // round 1; "This scene: ..." plus the continuation line on rounds 2+)
+  beat: string;
+  // This round's earlier lines, "Speaker: text" per line, or empty
+  conversationSoFar: string;
+  // The Sim this call plays
+  simName: string;
+};
+
+// Closes the message with whose turn it is: the system prompt names the Sim once, and a
+// transcript and beat that are all about the other Sim pulled Haiku into speaking as them.
+export function leanTurnLine(simName: string): string {
+  return `Now respond as ${simName}.`;
+}
+
+export function buildLeanActorUserMessage(context: LeanActorUserMessageContext): string {
+  const { nowBlock, previouslyBlock, beat, conversationSoFar, simName } = context;
+  const now = nowBlock.trim();
+  return `${now ? `${now}\n\n` : ''}${previouslyBlock}${beat}${
+    conversationSoFar ? `\n\nThe conversation so far:\n${conversationSoFar}` : ''
+  }\n\n${leanTurnLine(simName)}`;
+}
+
+// The two opener sentences the 4.6 beat carries on round 1 (AIService frames them); a beat
+// carried into round 2+ must not tell the actor to open the scene again.
+const OPENER_SENTENCES = [
+  ' Open the scene: the characters are just starting this conversation — the first line begins it. The lines above were an earlier conversation, not part of this one.',
+  ' Open the scene: the characters are just starting this conversation — the first line begins it, nothing was said before.',
+];
+
+export function stripOpener(beat: string): string {
+  return OPENER_SENTENCES.reduce((text, sentence) => text.split(sentence).join(''), beat).trim();
+}
+
+export const LEAN_CONTINUATION_LINE =
+  'The scene continues. Pick up the conversation exactly where it left off and move it forward — do not repeat or rephrase anything already said.';
+
+// Rounds 2+ of a lean scene: the Sim's own round-1 beat (their side of a deception, their
+// valence clause), opener removed, then the continuation instruction
+export function carriedBeat(roundOneBeat: string): string {
+  return `This scene: ${stripOpener(roundOneBeat)}\n\n${LEAN_CONTINUATION_LINE}`;
 }
 
 export type SceneReviewPromptContext = {
@@ -238,6 +392,8 @@ export function buildSceneReviewSystemPrompt(context: SceneReviewPromptContext):
 ${factsBlocks.join('\n\n')}
 
 Read every delivered line against its speaker's facts. A claim the facts deny — a parent or child called a sibling, a sibling called a parent, a job when the record says there is none, a partner when the record says single, an age the record contradicts, a relative the record does not have — is the actor's mistake, never a performance choice, and the default to return lines exactly as written does not protect it. Repair just that claim to match the facts, in the actor's own voice and at the same length, and keep the rest of the line.
+
+Check a line only against ITS OWN speaker's facts. Another character's facts are that character's record, not the speaker's knowledge: never use them to judge or rewrite what the speaker says about that character. A repair removes or corrects the wrong claim; it never adds a name, job, title or detail the line did not already contain.
 
 `
       : '';
@@ -350,4 +506,144 @@ export function withContentFreeHint(
     return formattedPreAction;
   }
   return `${formattedPreAction} ${hint}`;
+}
+
+// A spoken lie only works if the listener never hears the stage direction. Live 2026-09-30:
+// LieAboutCareer sent "Elliot is telling Paolo a false story about their career" to BOTH
+// actors, so Paolo called the bluff ("I know you're not a CEO") before Elliot had told any
+// story, and Elliot, given no material, said only "Everything's going great at work". The
+// target now sees the beat as they would ("Elliot is telling Paolo how his career is going");
+// the liar sees the truth plus a nudge to actually tell the lie. Only verbal deceptions are
+// here: a jump scare or a hand buzzer is something the target experiences, so it hides nothing.
+export type DeceptionFraming = {
+  // The beat as the target experiences it, instead of the true pre-action
+  targetView: string;
+  // Appended to the liar's (true) pre-action
+  liarHint: string;
+};
+
+const DECEPTION_SOCIALS: Array<{ pattern: RegExp; framing: (liar: string, target: string) => DeceptionFraming }> = [
+  {
+    pattern: /LieAboutCareer/i,
+    framing: (liar, target) => ({
+      targetView: `${liar} is telling ${target} how work is going.`,
+      liarHint: `${liar} makes the story up out loud: a specific, impressive claim about their job that ${target} could believe. ${target} has not heard it before and does not know it is false.`,
+    }),
+  },
+  {
+    pattern: /GiveFakeBadNews/i,
+    framing: (liar, target) => ({
+      targetView: `${liar} is telling ${target} some bad news.`,
+      liarHint: `${liar} invents the bad news on the spot and says it plainly, as if it were true. ${target} does not know it is made up.`,
+    }),
+  },
+  {
+    pattern: /InstillWithFalseConfidence/i,
+    framing: (liar, target) => ({
+      targetView: `${liar} is encouraging ${target}.`,
+      liarHint: `${liar} does not mean it: the encouragement is mischief, meant to send ${target} off overconfident. ${target} takes it at face value.`,
+    }),
+  },
+  {
+    pattern: /InviteToFakeParty/i,
+    framing: (liar, target) => ({
+      targetView: `${liar} is inviting ${target} to a party.`,
+      liarHint: `There is no party: ${liar} is pranking ${target}, and ${target} does not know.`,
+    }),
+  },
+];
+
+export function deceptionFraming(
+  interactionName: string | undefined,
+  liar: string,
+  target: string,
+): DeceptionFraming | undefined {
+  if (!interactionName) {
+    return undefined;
+  }
+  const match = DECEPTION_SOCIALS.find(({ pattern }) => pattern.test(interactionName));
+  return match?.framing(liar, target);
+}
+
+// V-5b's opener fired only when "Previously in this scene" was empty. It rarely is: it holds
+// the last few rows at this location, whoever was in them, so a new pair right after another
+// conversation was told to jump in mid-flow and skipped the first half of theirs (live
+// 2026-09-30: Elliot's first line to Paolo followed his conversation with Lillie, as if Paolo
+// had been in it). The pair is underway only when some beat above carries dialogue from
+// every performer; a beat is the run of lines between two non-dialogue lines (a pre-action,
+// an interaction header).
+// Lean round 1 (2026-10-29): the 4.6 window put the location's last rows under "Previously in
+// this scene" whole, whoever was in them. Live (2026-10-29), Miho's first line to Milo
+// followed his chats with Itzel, Lyra, Kaleigh, Deacon and Rhys (60 lines), and a pair kept
+// replaying an old joke two interactions on. Only the beats every performer spoke in are this
+// conversation, and only the last LEAN_SAME_CAST_BEATS of them are shown; every other beat is
+// reduced to its header line, so a Sim knows what happened around them without a transcript
+// to echo. A beat is the run of lines under one non-dialogue header.
+export const LEAN_SAME_CAST_BEATS = 2;
+export const LEAN_ELSEWHERE_HEADERS = 4;
+export const LEAN_ELSEWHERE_HEADING =
+  'Earlier here, other conversations (not this one; bring them up only when it fits):';
+const CONTINUATION_HEADER = 'Continue talking and interacting';
+
+type Beat = { header?: string; lines: string[]; speakers: Set<string> };
+
+export function splitLeanOpening(
+  previously: string,
+  performerNames: string[],
+): { sameCast: string; elsewhere: string } {
+  const beats: Beat[] = [];
+  let current: Beat | undefined;
+  previously.split('\n').forEach((raw) => {
+    const line = raw.trim();
+    if (!line) {
+      return;
+    }
+    if (!/^[^:]{1,60}:\s/.test(line)) {
+      current = { header: line === CONTINUATION_HEADER ? undefined : line, lines: [], speakers: new Set() };
+      beats.push(current);
+      return;
+    }
+    if (!current) {
+      current = { lines: [], speakers: new Set() };
+      beats.push(current);
+    }
+    current.lines.push(line);
+    const speaker = performerNames.find((name) => line.startsWith(`${name}:`));
+    if (speaker) {
+      current.speakers.add(speaker);
+    }
+  });
+  const ours = (beat: Beat) => performerNames.length > 0 && performerNames.every((name) => beat.speakers.has(name));
+  const sameCast = beats
+    .filter((beat) => ours(beat))
+    .slice(-LEAN_SAME_CAST_BEATS)
+    .map((beat) => [beat.header, ...beat.lines].filter(Boolean).join('\n'))
+    .join('\n');
+  const elsewhere = beats
+    .filter((beat) => !ours(beat) && beat.header)
+    .slice(-LEAN_ELSEWHERE_HEADERS)
+    .map((beat) => beat.header as string)
+    .join('\n');
+  return { sameCast, elsewhere };
+}
+
+export function performersAlreadyTalking(previously: string, performerNames: string[]): boolean {
+  if (!previously || performerNames.length === 0) {
+    return false;
+  }
+  const beats: Set<string>[] = [new Set()];
+  previously.split('\n').forEach((raw) => {
+    const line = raw.trim();
+    if (!line) {
+      return;
+    }
+    const speaker = performerNames.find((name) => line.startsWith(`${name}:`));
+    if (speaker) {
+      beats[beats.length - 1].add(speaker);
+    } else if (!/^[^:]{1,60}:\s/.test(line) && beats[beats.length - 1].size > 0) {
+      // A non-dialogue line closes the beat; another speaker's dialogue does not
+      beats.push(new Set());
+    }
+  });
+  return beats.some((beat) => performerNames.every((name) => beat.has(name)));
 }

@@ -147,7 +147,7 @@ export function useElevenLabsTTS(): TTSHook {
       lines: DialogueLine[],
       onLineStart?: (line: DialogueLine, voiced: boolean) => void,
       onLineEnd?: (line: DialogueLine) => void,
-      shouldContinue?: () => boolean,
+      shouldContinue?: (nextIndex: number, entries: DialogueLine[]) => boolean,
     ): Promise<void> => {
       setError(undefined);
       playSessionRef.current += 1;
@@ -192,7 +192,7 @@ export function useElevenLabsTTS(): TTSHook {
         if (playSessionRef.current !== session) break;
         // The conversation ended while the previous line was playing; that line got
         // to finish, this one never starts
-        if (shouldContinue && !shouldContinue()) break;
+        if (shouldContinue && !shouldContinue(i, speakable)) break;
         startFetch(i + 1);
 
         let played = false;
@@ -247,6 +247,9 @@ export function useElevenLabsTTS(): TTSHook {
         }
 
         if (i < speakable.length - 1 && playSessionRef.current === session) {
+          // A scene that will not go on (ended, or yielding to a player reply) skips the
+          // gap too: the next scene starts the moment this line is over
+          if (shouldContinue && !shouldContinue(i + 1, speakable)) break;
           await pacedDelay(speakable[i].continues ? sceneChunkGapMs : sceneLineGapMs);
         }
       }

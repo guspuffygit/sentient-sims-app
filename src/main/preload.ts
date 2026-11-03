@@ -172,8 +172,9 @@ const electronHandler = {
   notifySceneDropped: (pacedText: string) => {
     ipcRenderer.send('scene-dropped', pacedText);
   },
-  // A scene's playback is over: completed false means it was cut short
-  notifyScenePlaybackEnded: (payload: { sceneId: string; completed: boolean }) => {
+  // A scene's playback is over: completed false means it was cut short; reason 'yielded'
+  // means the renderer ended it after its current line to let a player reply through
+  notifyScenePlaybackEnded: (payload: { sceneId: string; completed: boolean; reason?: 'yielded' }) => {
     ipcRenderer.send('scene-playback-ended', payload);
   },
   // The game ended a conversation partway (a sim walked away or left the lot)

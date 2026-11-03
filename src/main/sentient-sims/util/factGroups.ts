@@ -233,12 +233,18 @@ export function groupFacts<F extends GroupableFact>(input: {
   if (household) {
     add('Household', household, FactPredicate.HOUSEHOLD);
   }
+  add('Home', one(FactPredicate.HOME), FactPredicate.HOME);
   const job = one(FactPredicate.JOB);
   if (job) {
+    // "Line Cook (Culinary, level 4)" with the game's title (mod 2026-10-31+); else
     // "Bodybuilder (Athletic, level 10)" once the sim has branched, "Athletic, level 3" before
     const { track, branch, level } = careerParts(job);
-    const inside = [branch ? track : undefined, level ? `level ${level}` : undefined].filter(Boolean).join(', ');
-    add('Career', branch ? `${branch} (${inside})` : inside ? `${track}, ${inside}` : track, FactPredicate.JOB);
+    const title = one(FactPredicate.JOB_TITLE);
+    const inside = [branch || title ? track : undefined, level ? `level ${level}` : undefined]
+      .filter(Boolean)
+      .join(', ');
+    const headline = title ?? branch;
+    add('Career', headline ? `${headline} (${inside})` : inside ? `${track}, ${inside}` : track, FactPredicate.JOB);
   }
   const businesses = current
     .filter((fact) => fact.predicate === FactPredicate.BUSINESS && fact.objectText)
@@ -350,8 +356,10 @@ export function groupFacts<F extends GroupableFact>(input: {
       }
       case FactPredicate.ASPIRATION:
       case FactPredicate.HOUSEHOLD:
-        // The aspiration and the household's name are on the summary line; the
-        // household category is who lives there
+      case FactPredicate.HOME:
+      case FactPredicate.JOB_TITLE:
+        // The aspiration, the household's name, its home and the job title are on the
+        // summary line; the household category is who lives there
         break;
       case FactPredicate.HOUSEHOLD_MEMBER:
       case FactPredicate.PET:

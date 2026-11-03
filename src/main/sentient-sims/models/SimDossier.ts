@@ -38,7 +38,14 @@ export type SimDossier = {
   // mod build yet: the app learns species from the state report and accepts it here so a
   // future dossier can carry it without an app change.
   species?: string;
-  household?: { id?: string; name?: string; member_ids?: string[] };
+  // `home` is the household's home lot: lot id (the id locations are keyed by), the lot's
+  // name and the world. Absent for a household with no home, and before mod builds of 2026-10-19.
+  household?: {
+    id?: string;
+    name?: string;
+    member_ids?: string[];
+    home?: { lot_id?: string; name?: string; world?: string };
+  };
   family?: {
     parents?: string[];
     siblings?: string[];
@@ -63,13 +70,15 @@ export type SimDossier = {
   aspiration?: { track?: string; aspiration?: string; objective?: string };
   // `career` is the career's tuning name (career_Adult_Culinary), `track` the branch track
   // the sim is on (Athletic_Track3_BodyBuilder; Athletic_Track1 before the branch choice;
-  // mod builds from 2026-10-13) and `level` the user-facing level. The job TITLE for that
-  // level (Line Cook, Mixologist) is a LocalizedString the mod cannot resolve without the
-  // game's string table, so career and branch are as specific as the app can get -
-  // rendered as "the Culinary career, level 4" rather than as a job title, since a sim
-  // handed a bare "Culinary (level 4)" invented one.
+  // mod builds from 2026-10-13) and `level` the user-facing level. `title` is the job title
+  // the game shows for that level (Line Cook, Supreme Villain), read off EA's string
+  // tables by the mod (builds from 2026-10-31; absent for NPC and quest careers, and for
+  // the first minutes of a session before the table has loaded). Older builds send no
+  // title, and the facts line falls back to "the Culinary career, level 4": a sim handed a
+  // bare "Culinary (level 4)" once invented a bartending job.
   careers?: {
     career?: string;
+    title?: string;
     track?: string;
     level?: number;
     performance?: number;

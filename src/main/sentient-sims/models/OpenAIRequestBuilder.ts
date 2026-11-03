@@ -207,7 +207,23 @@ export class OpenAIRequestBuilder {
 
       // Keep the tail: in a one-shot the end of the text is the part being acted on (the
       // scene action after the "previously" block, the newest lines of a transcript).
-      const truncated = truncateToTokens(messageTexts[i], remaining, this.tokenCounter, 'tail');
+      // A leading section label ("Previously in this scene:") is kept and the cut is taken
+      // under it: cut off with the oldest lines, the scene history read as the current
+      // beat (live 2026-09-30, the director briefing lost its label to a 148-token cut).
+      const label = /^[A-Z][^\n:]{0,60}:\n/.exec(messageTexts[i])?.[0] ?? '';
+      const labelTokens = label ? this.tokenCounter.countTokens(label) : 0;
+      let truncated: string;
+      if (label && labelTokens < remaining) {
+        const body = truncateToTokens(
+          messageTexts[i].slice(label.length),
+          remaining - labelTokens,
+          this.tokenCounter,
+          'tail',
+        );
+        truncated = body ? `${label}${body}` : '';
+      } else {
+        truncated = truncateToTokens(messageTexts[i], remaining, this.tokenCounter, 'tail');
+      }
       if (truncated !== '') {
         userInputCount += this.tokenCounter.countTokens(truncated);
         memoriesToInsert.unshift(truncated);

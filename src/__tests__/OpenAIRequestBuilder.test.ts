@@ -155,3 +155,19 @@ describe('OpenAIRequestBuilder.buildOneShotOpenAIRequest', () => {
     expect(request.promptOverflow).toBeUndefined();
   });
 });
+
+// Live 2026-09-30: a 148-token cut off the top of the director briefing's user message took
+// the "Previously in this scene:" label with it, and the history read as the current beat.
+describe('OpenAIRequestBuilder one-shot truncation keeps a section label', () => {
+  it('cuts the oldest lines under the label, never the label itself', () => {
+    const history = Array.from({ length: 40 }, (_, i) => `Line ${i}: something said`).join('\n');
+    const payload = `Previously in this scene:\n${history}\n\nElliot is telling Paolo how work is going.`;
+    const request = build({ systemPrompt: 'system', messages: [payload], maxTokens: 300 });
+
+    const user = request.messages[1].content;
+    expect(user.startsWith('Previously in this scene:\n')).toBe(true);
+    expect(user.endsWith('Elliot is telling Paolo how work is going.')).toBe(true);
+    expect(user).not.toContain('Line 0:');
+    expect(user.length).toBeLessThanOrEqual(300 - 'system'.length);
+  });
+});

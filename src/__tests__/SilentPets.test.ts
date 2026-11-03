@@ -68,6 +68,8 @@ const SCORES = JSON.stringify({
 
 function sceneContext(sessionId: string, petsSpeak: boolean, stage: { review?: string } = {}) {
   const ctx: ApiContext = mockApiContext();
+  // These tests mock the 4.6 pipeline by stage label; the default is lean (2026-10-27)
+  ctx.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
   fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
   ctx.db.loadDatabase({ sessionId, saveId: '1' });
   ctx.settings.set(SettingsEnum.NON_CONTROLLABLE_SIMS_SPEAK, petsSpeak);
@@ -228,6 +230,8 @@ describe('who can speak', () => {
 
   it('trusts the state report over the event: a Twitch-shaped ask still knows a dog is a dog', () => {
     const ctx = mockApiContext();
+    // These tests mock the 4.6 pipeline by stage label; the default is lean (2026-10-27)
+    ctx.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
     ctx.settings.set(SettingsEnum.NON_CONTROLLABLE_SIMS_SPEAK, false);
     ctx.simStateCache.ingest(
       report([

@@ -34,10 +34,33 @@ export function formatListToString(items: string[]): string {
   return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
 }
 
+// The mood as the mod names it. Mod builds before 2026-10-31 sent str() of the Mood tuning
+// class, "<class 'sims4.tuning.instances.Mood_Happy'>", which never matched a moodDescriptions
+// key (keys are the bare tuning name, Mood_Happy): no prompt ever carried a mood. Both shapes
+// resolve here so an older mod still gets its mood sentence.
+export function normalizeMoodName(raw: string): string {
+  const quoted = /^<class '([^']+)'>$/.exec(raw.trim());
+  if (quoted) {
+    const segments = quoted[1].split('.');
+    return segments[segments.length - 1];
+  }
+  return raw.trim();
+}
+
 function formatMoods(moods: string[]): string[] {
   return moods
+    .map(normalizeMoodName)
     .filter((mood) => mood in moodDescriptions && !moodDescriptions[mood].ignored && moodDescriptions[mood].description)
     .map((mood) => moodDescriptions[mood].description as string);
+}
+
+// "Paolo Rocca is feeling uncomfortable." for the Sim's first described mood, or undefined
+export function formatMoodSentence(sentientSim: SentientSim): string | undefined {
+  const moods = formatMoods(sentientSim.moods);
+  if (moods.length === 0) {
+    return undefined;
+  }
+  return `${sentientSim.name} ${moods[0]}.`;
 }
 
 function formatAge(age: SimAge): string {
@@ -244,6 +267,44 @@ export function formatSentientSim(sentientSim: SentientSim, options?: { traitCon
     );
   }
 
+  return prompt.join(' ');
+}
+
+// The lean actor's character block when the Sim HAS a <KNOWN_FACTS> block in the prompt
+// (2026-10-31): only what the facts do not carry. Measured on a live session (2026-10-30),
+// the full block was 29% of the system message and ~62% of it repeated the facts
+// (uncapped likes, attraction lists, fears that disagreed with the facts line). What stays is
+// the bio (the one place voice and manner live), the mood, clothing and the live properties.
+// A Sim with no facts block keeps formatSentientSim: its trait sentences are all the model gets.
+export function formatSlimSentientSim(sentientSim: SentientSim): string {
+  const prompt: string[] = [];
+
+  if (sentientSim.description) {
+    let { description } = sentientSim;
+    if (!description.endsWith('!') && !description.endsWith('.')) {
+      description += '.';
+    }
+    prompt.push(description);
+  }
+
+  const mood = formatMoodSentence(sentientSim);
+  if (mood) {
+    prompt.push(mood);
+  }
+
+  if (hasWWProperties(sentientSim)) {
+    const formattedWWProperties = formatWWProperties(sentientSim);
+    if (formattedWWProperties) {
+      prompt.push(formattedWWProperties);
+    }
+  }
+
+  const properties = formatProperties(sentientSim);
+  if (properties.length > 0) {
+    prompt.push(`${sentientSim.name} ${formatListToString(properties)}`);
+  }
+
+  prompt.push(`Play ${sentientSim.name} true to this description, their mood, and the facts below.`);
   return prompt.join(' ');
 }
 
@@ -677,6 +738,25 @@ export function formatDateTime(environment: SSEnvironment): string {
   const hourIn12HourFormat = environment.time.hour % 12 || 12; // Convert 0 hour to 12 for 12 AM.
 
   return `<DATE>The day is ${dayName} at ${hourIn12HourFormat}:${minute} ${amPm}.</DATE>`;
+}
+
+// The part of the day a Sim would name, from the game clock's hour
+export function partOfDay(hour: number): string {
+  if (hour < 5) return 'night';
+  if (hour < 8) return 'early morning';
+  if (hour < 12) return 'morning';
+  if (hour < 16) return 'afternoon';
+  if (hour < 18) return 'late afternoon';
+  if (hour < 21) return 'evening';
+  return 'late evening';
+}
+
+// The lean actor's setting line (2026-10-31): day and part of day, no clock. The date is
+// fixed per scene (every round carries the scene-start time), so it sits at the END of the
+// system message; the exact minute invited lines about the time without grounding anything.
+export function formatCoarseDateTime(environment: SSEnvironment): string {
+  const dayName = daysOfWeek[environment.time.day];
+  return `<DATE>It is ${dayName}, ${partOfDay(environment.time.hour)}.</DATE>`;
 }
 
 export function formatSeason(environment: SSEnvironment): string {

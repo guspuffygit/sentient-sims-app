@@ -26,6 +26,8 @@ export const FactPredicate = {
   // state report, not the dossier, which never says what kind of creature a sim is.
   SPECIES: 'species',
   HOUSEHOLD: 'household',
+  // Where the household lives: 'Inner Circle, Mirage Park, Del Sol Valley'
+  HOME: 'home',
   TRAIT: 'trait',
   // A reward trait: earned from an aspiration (Business Savvy), a childhood (Top-Notch
   // Infant) or a child's skills (Headstrong). Stays with the sim for life.
@@ -38,6 +40,11 @@ export const FactPredicate = {
   DISLIKES: 'dislikes',
   ASPIRATION: 'aspiration',
   JOB: 'job',
+  // The game's job title for the sim's current level (Line Cook), mod builds from
+  // 2026-10-31. Rides beside JOB rather than inside its objectText so the title's arrival
+  // does not close and reopen every employed sim's job row; renderKnownFacts folds it into
+  // the job line and it renders no line of its own.
+  JOB_TITLE: 'job_title',
   // A business the sim owns: the name, with the kind after it unless it is a small
   // business ('Vale Curios', 'Chez Vale (restaurant)')
   BUSINESS: 'business',
@@ -94,7 +101,9 @@ export const SINGLE_VALUED_PREDICATES: ReadonlySet<string> = new Set([
   FactPredicate.DEATH_TYPE,
   FactPredicate.SPECIES,
   FactPredicate.HOUSEHOLD,
+  FactPredicate.HOME,
   FactPredicate.ASPIRATION,
+  FactPredicate.JOB_TITLE,
   FactPredicate.SPOUSE,
   FactPredicate.FIANCE,
 ]);
@@ -122,6 +131,7 @@ export const FACT_PREDICATE_HELP: Record<FactPredicate, string> = {
   household:
     'The name of the household this Sim belongs to, as shown in Manage Worlds (for example "Calloway"). ' +
     'It is the family name on the mailbox, not a list of who lives there - see "household member" for the people.',
+  home: 'The lot the household lives on, with its neighborhood and world, like "Inner Circle, Mirage Park, Del Sol Valley".',
   trait: 'A personality trait from Create a Sim, like Cheerful or Loner.',
   reward_trait:
     "A trait the Sim earned and keeps: from an aspiration, from a well-raised childhood, or from a child's skills.",
@@ -130,7 +140,8 @@ export const FACT_PREDICATE_HELP: Record<FactPredicate, string> = {
   likes: 'Something the Sim likes: a colour, a music genre, an activity or a decor style.',
   dislikes: 'Something the Sim dislikes: a colour, a music genre, an activity or a decor style.',
   aspiration: 'The life goal the Sim is working towards.',
-  job: 'The career the Sim is in, its branch once they have picked one, and their level. Not the job title.',
+  job: 'The career the Sim is in, its branch once they have picked one, and their level.',
+  job_title: 'The job title the game shows for the Sim at their current level, like Line Cook or Regional Manager.',
   business: 'A business the Sim owns: a small business, retail store, restaurant or vet clinic.',
   skill: 'A skill the Sim is good at (level 3 or higher).',
   household_member: 'Someone who lives in the same home as this Sim, people and pets alike.',

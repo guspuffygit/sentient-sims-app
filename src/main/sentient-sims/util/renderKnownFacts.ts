@@ -102,16 +102,27 @@ function joinWords(values: string[], conjunction: 'and' | 'or'): string {
   return `${values.slice(0, -1).join(', ')} ${conjunction} ${values[values.length - 1]}`;
 }
 
+// 'a Line Cook', 'an Office Assistant'
+function withArticle(noun: string): string {
+  return `${/^[aeiou]/i.test(noun) ? 'an' : 'a'} ${noun}`;
+}
+
 // The game stores a career as a tuning name plus the level the diff cares about
-// ('career_Adult_Culinary (level 4)'). The level's actual job title (Line Cook, Mixologist)
-// is a LocalizedString the mod cannot read without the string table, so the track is the
-// best available - said as a career rather than as a job title, which is what stopped a
-// Culinary sim from inventing a bartending job.
-export function jobWords(objectText: string): string {
+// ('career_Adult_Culinary (level 4)'). With the level's job title (the JOB_TITLE fact, mod
+// builds from 2026-10-31) the line is "you work as a Line Cook (Culinary career, level 4)".
+// Without one the track is the best available - said as a career rather than as a job
+// title, which is what stopped a Culinary sim from inventing a bartending job.
+export function jobWords(objectText: string, title?: string): string {
   const { track, branch, level } = careerParts(objectText);
   if (track === objectText && !level) {
     // Not a career tuning name: a job the player typed ("Pub Owner at The Gnome's Arms")
     return `you work as ${track}`;
+  }
+  if (title) {
+    const inside = [`${track} career`, branch ? `${branch} branch` : undefined, level ? `level ${level}` : undefined]
+      .filter(Boolean)
+      .join(', ');
+    return `you work as ${withArticle(title)} (${inside})`;
   }
   const career = branch ? `the ${track} career (${branch} branch)` : `the ${track} career`;
   return level ? `you work in ${career}, level ${level}` : `you work in ${career}`;
@@ -135,6 +146,8 @@ function selfLine(
   fact: RenderableFact,
   names: Record<string, string | undefined>,
   species: Species = {},
+  // The sim's JOB_TITLE fact, folded into the JOB line
+  jobTitle?: string,
 ): string | undefined {
   const name = (id?: string) => (id ? (names[id] ?? `sim ${id}`) : undefined);
   switch (fact.predicate) {
@@ -160,7 +173,10 @@ function selfLine(
     case FactPredicate.ASPIRATION:
       return fact.objectText ? `your aspiration is ${aspirationWords(fact.objectText)}` : undefined;
     case FactPredicate.JOB:
-      return fact.objectText ? jobWords(fact.objectText) : undefined;
+      return fact.objectText ? jobWords(fact.objectText, jobTitle) : undefined;
+    case FactPredicate.JOB_TITLE:
+      // Said inside the job line, never on its own
+      return undefined;
     case FactPredicate.BUSINESS:
       return fact.objectText ? businessWords(fact.objectText) : undefined;
     case FactPredicate.PARENT:
@@ -372,6 +388,7 @@ export function renderKnownFacts(input: RenderKnownFactsInput): string {
   const species = input.species ?? {};
   const selfLines: string[] = [];
   const notes: string[] = [];
+  const jobTitle = input.selfFacts.find((fact) => fact.predicate === FactPredicate.JOB_TITLE)?.objectText;
   for (const fact of input.selfFacts) {
     if (fact.objectSimId && describedElsewhere.has(fact.objectSimId)) {
       continue;
@@ -380,7 +397,7 @@ export function renderKnownFacts(input: RenderKnownFactsInput): string {
     if (fact.predicate === FactPredicate.PET) {
       continue;
     }
-    const line = selfLine(fact, input.names, species);
+    const line = selfLine(fact, input.names, species, jobTitle);
     if (!line) {
       continue;
     }
@@ -389,6 +406,11 @@ export function renderKnownFacts(input: RenderKnownFactsInput): string {
     } else {
       selfLines.push(line);
     }
+  }
+  // Where they live comes first: it is the most basic thing a sim knows about themselves
+  const home = input.selfFacts.find((fact) => fact.predicate === FactPredicate.HOME)?.objectText;
+  if (home) {
+    selfLines.unshift(`your home is ${home}`);
   }
   const household = householdLine(input.selfFacts, input.names);
   if (household) {

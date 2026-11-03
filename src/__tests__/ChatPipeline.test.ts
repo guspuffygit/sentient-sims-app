@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import fs from 'fs';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
-import { ChatInteractionEvent, SSEventType } from 'main/sentient-sims/models/InteractionEvents';
+import { ChatInteractionEvent, InteractionEvent, SSEventType } from 'main/sentient-sims/models/InteractionEvents';
 import { InteractionEventStatus } from 'main/sentient-sims/models/InteractionEventResult';
 import { OpenAICompatibleRequest } from 'main/sentient-sims/models/OpenAICompatibleRequest';
 import { SentientSim } from 'main/sentient-sims/models/SentientSim';
@@ -88,6 +89,8 @@ describe('Chat pipeline', () => {
 
   beforeEach(() => {
     ctx = mockApiContext();
+    // These tests mock the 4.6 pipeline by stage label; the default is lean (2026-10-27)
+    ctx.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
     fs.mkdirSync(ctx.directory.getSentientSimsFolder(), { recursive: true });
     ctx.db.loadDatabase({ sessionId: `chat-${Math.random().toString(36).slice(2)}`, saveId: '1' });
     ctx.settings.aiApiType = ApiType.OpenAI;
@@ -196,5 +199,45 @@ describe('Chat pipeline', () => {
     expect(systemPrompts.some((prompt) => prompt.includes('You are directing a scene'))).toBe(false);
     expect(result.exchanges).toBeUndefined();
     expect(result.memory?.action).toEqual('How are you feeling today?');
+  });
+
+  // Live 2026-09-30: LieAboutCareer told BOTH actors it was "a false story", and the target
+  // called the bluff before any story was told
+  it('keeps a spoken lie out of the target actor prompt', async () => {
+    const generate = mockGeneration();
+    const event = {
+      ...buildChatEvent('', [playerSim, targetSim]),
+      event_type: SSEventType.INTERACTION,
+      action: undefined,
+      interaction_name: 'mixer_social_LieAboutCareer_group_mischief_skills',
+    } as unknown as InteractionEvent;
+
+    await ctx.ai.interactionEvent(event);
+
+    const userTextFor = (name: string) => {
+      const call = generate.mock.calls.find(([request]) =>
+        request.messages.some(
+          (message) => message.role === 'system' && message.content.includes(`SAY: <the words ${name} says`),
+        ),
+      );
+      return call?.[0].messages.find((message) => message.role === 'user')?.content ?? '';
+    };
+    const liarText = userTextFor(playerSim.name);
+    const targetText = userTextFor(targetSim.name);
+
+    expect(liarText).toContain('a false story about their career');
+    expect(liarText).toContain('makes the story up out loud');
+    expect(targetText).toContain(`${playerSim.name} is telling ${targetSim.name} how work is going.`);
+    expect(targetText).not.toMatch(/false|lie\b|HOSTILE/);
+    // Nothing was said between them before: both open the conversation
+    expect(targetText).toContain('Open the scene');
+
+    const directorCall = generate.mock.calls.find(([request]) =>
+      request.messages.some(
+        (message) => message.role === 'system' && message.content.includes('You are directing a scene'),
+      ),
+    );
+    const directorText = directorCall?.[0].messages.find((message) => message.role === 'user')?.content ?? '';
+    expect(directorText).toContain(`${targetSim.name} does not know it is a lie`);
   });
 });

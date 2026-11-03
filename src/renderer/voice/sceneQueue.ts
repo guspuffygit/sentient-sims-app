@@ -58,3 +58,40 @@ export function insertScene<T extends OrderedScene>(
     onDrop(dropped);
   }
 }
+
+// How a playing scene is ending early. 'soft' and 'hard' come from the game (a sim walked
+// away / left the lot); 'yield' is the renderer's own: a reply to the player arrived while
+// an autonomous scene was playing, so that scene finishes the LINE it is on (every
+// `continues` chunk of it) and hands over, instead of airing all its remaining lines first
+// (typed replies waited 8-25 s for that on a busy lot, measured 2026-10-29/30).
+export type SceneStopMark = 'soft' | 'hard' | 'yield';
+
+export type YieldScene = {
+  priority: boolean;
+  paced: boolean;
+  sceneId?: string;
+};
+
+// Does the incoming scene make the one playing now yield after its current line? Only a
+// player reply (priority) over a paced autonomous scene with an id of its own; a reply
+// never yields to a reply, and a round of the same conversation is a continuation, not
+// an interruption.
+export function shouldYieldTo(incoming: YieldScene, current: YieldScene | undefined): boolean {
+  if (!incoming.priority || !current) return false;
+  if (current.priority || !current.paced || !current.sceneId) return false;
+  return incoming.sceneId !== current.sceneId;
+}
+
+// May the entry at `next` start, given how (if at all) the scene was marked? Unmarked:
+// always. Soft/hard: never (the game ended it). Yield: only while the line in progress
+// has more chunks to come (the previous entry `continues`), so a long reply split into
+// sentence chunks is still heard whole; a fresh line never starts.
+export function mayStartEntry(
+  mark: SceneStopMark | undefined,
+  entries: { continues?: boolean }[],
+  next: number,
+): boolean {
+  if (!mark) return true;
+  if (mark !== 'yield') return false;
+  return next > 0 && entries[next - 1]?.continues === true;
+}

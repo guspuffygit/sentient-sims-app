@@ -253,7 +253,7 @@ export function useSentientSimsTTS(): TTSHook {
       lines: DialogueLine[],
       onLineStart?: (line: DialogueLine, voiced: boolean) => void,
       onLineEnd?: (line: DialogueLine) => void,
-      shouldContinue?: () => boolean,
+      shouldContinue?: (nextIndex: number, entries: DialogueLine[]) => boolean,
     ): Promise<void> => {
       if (lines.length === 0) return;
 
@@ -298,7 +298,7 @@ export function useSentientSimsTTS(): TTSHook {
           if (speakSessionRef.current !== session) break;
           // The conversation ended while the previous line was playing; that line got
           // to finish, this one never starts
-          if (shouldContinue && !shouldContinue()) break;
+          if (shouldContinue && !shouldContinue(i, lines)) break;
           startFetch(i + 1);
           const audioUrl = (await audioPromises[i]) ?? null;
           if (speakSessionRef.current !== session) {
@@ -331,6 +331,8 @@ export function useSentientSimsTTS(): TTSHook {
           }
 
           if (i < lines.length - 1 && speakSessionRef.current === session) {
+            // A scene that will not go on skips the gap too (see useElevenLabsTTS)
+            if (shouldContinue && !shouldContinue(i + 1, lines)) break;
             await pacedDelay(lines[i].continues ? sceneChunkGapMs : sceneLineGapMs);
           }
         }

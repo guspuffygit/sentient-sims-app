@@ -9,7 +9,8 @@ import { SceneEndedReason } from '../models/ModWebsocketMessage';
 //          and audio from the old lot must never carry into the new one.
 export type SceneStopMode = 'soft' | 'hard';
 
-export type SceneStopReason = 'walked_away' | 'left_lot' | 'zone_unload' | 'cheat' | 'preempted';
+// 'yielded' - the renderer ended it after its current line so a player reply could play
+export type SceneStopReason = 'walked_away' | 'left_lot' | 'zone_unload' | 'cheat' | 'preempted' | 'yielded';
 
 // A scene whose renderer never reported back (window closed mid-playback) would
 // otherwise sit here forever holding a memory id.
@@ -160,12 +161,21 @@ export class ScenePlaybackRegistry {
   }
 
   /** The renderer finished (or abandoned) a round's playback. */
-  playbackEnded(sceneId: string, completed: boolean) {
+  playbackEnded(sceneId: string, completed: boolean, reason?: 'yielded') {
     const entry = this.scenes.get(sceneId);
     if (!entry) return;
     entry.pendingRounds = Math.max(0, entry.pendingRounds - 1);
     entry.touchedAt = Date.now();
     if (!completed && !entry.stopped) {
+      if (reason === 'yielded') {
+        // The renderer let the current line finish and stepped aside for a player
+        // reply: a soft end (every aired line was heard whole), the queued rounds and
+        // the continuation go, the mod clears its watch. (A yield that lands during the
+        // scene's LAST line still reads 'yielded' though nothing was cut; the lines
+        // kept are the same either way.)
+        this.stop(sceneId, 'yielded', 'soft');
+        return;
+      }
       // The renderer cut the scene short on its own (the player's voice hotkey
       // pre-empted it): the pipeline must stop feeding it rounds too
       this.stop(sceneId, 'preempted', 'hard');

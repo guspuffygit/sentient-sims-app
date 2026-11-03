@@ -107,6 +107,15 @@ export enum SettingsEnum {
   OUTCOME_INSTANT_SUCCESS_MS = 'outcomeInstantSuccessMs',
   // V-5a: how many rounds a directed scene may continue itself
   SCENE_MAX_ROUNDS = 'sceneMaxRounds',
+  // Lean (default, 2026-10-27): one actor call per Sim per round, the beat carried into every
+  // round, fixed rounds; no director, reviewer or per-round scores. Full: the 4.6 pipeline.
+  SCENE_PIPELINE_MODE = 'scenePipelineMode',
+  // Lean only: the actor rules without the Sim's name (one cacheable prefix shared by every
+  // Sim and every user). Series 3 of the voice-pipeline bench sets the default.
+  LEAN_NAME_FREE_RULES = 'leanNameFreeRules',
+  // The same cast on the same beat inside this many seconds is dropped, not played again
+  // (a sliding window; 0 = off). A reaction event gets one silent thought per window.
+  SCENE_REPEAT_COOLDOWN_SECONDS = 'sceneRepeatCooldownSeconds',
   // Player-facing replies (chat window, voice, conscience, Twitch): the actor's token
   // budget for a reply to the player, how long a conversation thread stays open between
   // the player's lines, and whether a reply may turn straight into an action
@@ -142,6 +151,9 @@ export enum SettingsEnum {
   TWITCH_SPEAK_QUESTIONS = 'twitchSpeakQuestions',
   TWITCH_CHAT_VOICE_ID = 'twitchChatVoiceId', // '' = the built-in default chat voice
 }
+
+// The directed-scene pipeline: see SettingsEnum.SCENE_PIPELINE_MODE
+export type ScenePipelineMode = 'lean' | 'full';
 
 export enum DeprecatedSettingsEnum {
   CUSTOM_LLM_ENABLED = 'customLLMEnabled',

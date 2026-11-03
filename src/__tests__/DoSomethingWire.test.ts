@@ -1,4 +1,5 @@
 import { describe, expect, it, beforeAll, afterAll } from 'vitest';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import fs from 'fs';
 import http, { Server } from 'http';
 import { AddressInfo } from 'net';
@@ -108,6 +109,8 @@ function buildSim(name: string, simId: string, isPlayerSim: boolean): SentientSi
 
 describe('Do Something wire-level requests (SentientSimsAI provider)', () => {
   const ctx = mockApiContext({ port: 25197 });
+  // These tests mock the 4.6 pipeline by stage label; the default is lean (2026-10-27)
+  ctx.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
   const aiClient = new AIClient(`http://localhost:${ctx.port}`);
   let server: Server;
   let stub: http.Server;

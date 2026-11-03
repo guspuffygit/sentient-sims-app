@@ -37,6 +37,9 @@ export type SentientSimProperties = {
   target_name?: string;
   target_part_owner_name?: string;
   target_slot_type_set_name?: string;
+  // What the Sim is in the middle of, as the pie-menu label the player reads ("Cook Garlic
+  // Noodles"); mod builds from 2026-10-31, never for a social (the beat says it)
+  doing?: string;
 };
 
 export type SentientSim = SentientSimProperties & {

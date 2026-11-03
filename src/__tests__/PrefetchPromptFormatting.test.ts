@@ -29,6 +29,29 @@ describe('prefetch prompt formatting', () => {
     expect(messages[2]).toEqual({ role: 'user', content: 'At The Blue Velvet (Lounge), Morgan smiles' });
   });
 
+  it('keeps back-to-back scene rows on separate lines', () => {
+    const ctx = {
+      locationRepository: {
+        getLocation: () => ({ id: 7, name: 'The Bluffs', lot_type: 'Park' }),
+      },
+    } as unknown as ApiContext;
+    const builder = new PromptRequestBuilderService(ctx);
+
+    const messages = builder.groupMemories([
+      {
+        location_id: 7,
+        event_type: 'interaction',
+        content: 'Elliot asks Lillie about her day.\nLillie: It was amazing',
+      },
+      { location_id: 7, event_type: 'interaction', content: 'Elliot is flirting with Lillie.\nElliot: You light up' },
+    ]);
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0].content).toBe(
+      'Elliot asks Lillie about her day.\nLillie: It was amazing\nElliot is flirting with Lillie.\nElliot: You light up',
+    );
+  });
+
   it('puts a blank line before a pre-action that follows dialogue', () => {
     expect(
       formatPreviouslyInScene([

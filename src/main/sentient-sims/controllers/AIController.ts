@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
-import { InteractionEvents, SSEventType } from '../models/InteractionEvents';
+import { InteractionEvent, InteractionEvents, SSEventType } from '../models/InteractionEvents';
 import { DirectedSceneRequest } from '../models/DirectedSceneRequest';
+import { judgeInteraction } from '../services/SceneRepeatGuard';
 import { playTTS, sendChatGeneration } from '../util/notifyRenderer';
 import { OpenAICompatibleRequest } from '../models/OpenAICompatibleRequest';
 import { InteractionEventStatus } from '../models/InteractionEventResult';
@@ -59,12 +60,24 @@ export class AIController {
     // The chat window blocks on this response while prefetch traffic is speculative,
     // so chat messages skip ahead of queued prefetch generations
     const isChat = event.event_type === SSEventType.CHAT || event.event_type === SSEventType.CHAT_CONTINUE;
+    // Did this cast just have this beat? A repeat inside the cooldown takes no queue slot
+    // and no model call; a reaction event runs as one silent thought (SceneRepeatGuard)
+    const judged = judgeInteraction(this.ctx, event);
+    if (judged.drop) {
+      res.json({ status: InteractionEventStatus.NOOP, input: event });
+      return;
+    }
+    const meta = judged.judged ? { reaction: judged.reaction } : undefined;
     const result = isPlayerVoice
-      ? await this.ctx.generationQueue.runSpeech(() => this.ctx.ai.interactionEvent(event))
+      ? await this.ctx.generationQueue.runSpeech(() => this.ctx.ai.interactionEvent(event, meta))
       : await this.ctx.generationQueue.runExclusive(
-          ({ arrivedAt }) => this.ctx.ai.interactionEvent(event, { arrivedAt }),
+          ({ arrivedAt }) => this.ctx.ai.interactionEvent(event, { ...meta, arrivedAt }),
           { priority: isChat, blocking: true },
         );
+    if (judged.judged && result.status !== InteractionEventStatus.GENERATED) {
+      // Nothing played (stale, ignored, unmapped): do not hold the pair for the cooldown
+      this.ctx.sceneRepeatGuard.forget(event as InteractionEvent);
+    }
     result.input = event;
     // Leading newline so each generation stands apart from the previous one in the game window;
     // memories, TTS, and the app chat UI keep the untouched text. Classic mode sends it verbatim.

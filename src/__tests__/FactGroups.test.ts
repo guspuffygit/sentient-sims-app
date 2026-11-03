@@ -41,6 +41,7 @@ describe('groupFacts', () => {
     fact(FactPredicate.OCCULT_CURRENT, 'HUMAN'),
     fact(FactPredicate.ALIVE, 'yes'),
     fact(FactPredicate.HOUSEHOLD, 'Calloway'),
+    fact(FactPredicate.HOME, 'Inner Circle, Mirage Park, Del Sol Valley'),
     fact(FactPredicate.HOUSEHOLD_MEMBER, undefined, '200'),
     fact(FactPredicate.HOUSEHOLD_MEMBER, undefined, '700'),
     fact(FactPredicate.PET, undefined, '700'),
@@ -94,11 +95,25 @@ describe('groupFacts', () => {
       ['Age', 'young adult'],
       ['Gender', 'male (he/him)'],
       ['Household', 'Calloway'],
+      ['Home', 'Inner Circle, Mirage Park, Del Sol Valley'],
       ['Career', 'Business, level 6'],
       ['Aspiration', 'Friend of the World'],
     ]);
     // The aspiration lives on the summary line alone
     expect(grouped.categories.map((c) => c.title)).not.toContain('Aspiration');
+  });
+
+  it("puts the game's job title on the career summary and shows it nowhere else", () => {
+    const titled = groupFacts({
+      facts: [fact(FactPredicate.JOB, 'career_Adult_Culinary (level 4)'), fact(FactPredicate.JOB_TITLE, 'Line Cook')],
+      names,
+      species,
+    });
+    expect(titled.summary.map((item) => [item.title, item.label])).toEqual([
+      ['Career', 'Line Cook (Culinary, level 4)'],
+    ]);
+    const rows = titled.categories.flatMap((c) => c.rows);
+    expect(rows.some((row) => row.label === 'Line Cook')).toBe(false);
   });
 
   it('names the career branch and the businesses the sim owns', () => {

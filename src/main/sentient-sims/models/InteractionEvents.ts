@@ -132,6 +132,10 @@ export type InteractionEvent = SSEvent & {
   // so a yell is framed as a yell before a word is generated. Absent on older mods.
   interaction_category?: string;
   valence?: 'positive' | 'negative' | 'romance' | 'neutral';
+  // The game's reaction system fired this (mod 2026-10-31+: source SCRIPT/REACTION or a
+  // reaction/idle name family). Answered with one silent thought for the actor, one per
+  // cooldown, never a scene. Absent on older mods and on a Sim's own choice.
+  reaction?: boolean;
 };
 
 export type InteractionMappingEvent = InteractionEvent & {

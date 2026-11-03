@@ -6,6 +6,7 @@ import { SettingsService } from 'main/sentient-sims/services/SettingsService';
 import { SimDossier } from 'main/sentient-sims/models/SimDossier';
 import { SimStateReport } from 'main/sentient-sims/models/SimStateReport';
 import { FactPredicate } from 'main/sentient-sims/pipeline/facts/predicates';
+import { homeText } from 'main/sentient-sims/pipeline/facts/dossierFacts';
 import { mockApiContext, mockEnvironment } from './util';
 
 // H2: the semantic fact store. The point of the block is that a sim can answer a question
@@ -61,6 +62,20 @@ describe('semantic memory', () => {
     expect(facts.find((fact) => fact.predicate === FactPredicate.FAMILY_BIT)?.objectText).toBe(
       'family_Target_IsSonOrDaughterOf_Actor',
     );
+  });
+
+  it('knows where the sim lives: the lot, its neighborhood and world', () => {
+    const home = { lot_id: '3031564292', name: 'Inner Circle', world: 'Del Sol Valley' };
+    ctx.semanticMemory.ingestDossier(dossier({ household: { id: '900', name: 'Diffey', member_ids: ['100'], home } }), {
+      day: 10,
+    });
+    const facts = ctx.semanticMemory.getCurrentFacts('100');
+    expect(facts.find((fact) => fact.predicate === FactPredicate.HOME)?.objectText).toBe(
+      'Inner Circle, Mirage Park, Del Sol Valley',
+    );
+    // A lot the shipped table does not know (a player's own build) takes the reported world
+    expect(homeText({ lot_id: '42', name: 'The Nook', world: 'Willow Creek' })).toBe('The Nook, Willow Creek');
+    expect(homeText(undefined)).toBeUndefined();
   });
 
   it('adds and retires nothing when the dossier is re-sent unchanged', () => {

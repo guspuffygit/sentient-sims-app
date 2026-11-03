@@ -79,6 +79,11 @@ export function summarizeMemory(memory: MemoryEntity): string {
 export type PromptRequestBuilderOptions = GenerationOptions & {
   apiType: ApiType;
   modelSettings: ModelSettings;
+  // The lean directed-scene pipeline (2026-10-27): only the location, the now-block, the
+  // character blocks and this scene's recent rows are read, so the director-only material
+  // (lot roster, director notes, diaries, retrieved memories, the scene facts list) and the
+  // embedding query behind it are skipped. Nothing in a lean round would read them.
+  lean?: boolean;
 };
 
 export class PromptRequestBuilderService {
@@ -168,10 +173,17 @@ export class PromptRequestBuilderService {
     return formattedParticipants;
   }
 
-  formatSimPostures(sentientSims: SentientSim[]) {
+  // With `activities` (the lean actor prompt, 2026-10-31) each Sim's clause ends with what
+  // they are in the middle of, as the mod's pie label ("Augustus St Fleur is lying in the
+  // bed, sleeping"), unless it is the scene's own beat (`beatLabel`, the event's
+  // interaction_display_name: the same label the mod produced), which the beat already says.
+  formatSimPostures(sentientSims: SentientSim[], options: { activities?: boolean; beatLabel?: string } = {}) {
     const formattedPositions: string[] = [];
+    const beatLabel = options.beatLabel?.trim().toLowerCase();
     sentientSims.forEach((sentientSim) => {
       const positionStrings: string[] = [`${sentientSim.name} is`];
+      const doing = options.activities ? sentientSim.doing?.trim() : undefined;
+      const sayDoing = doing && doing.toLowerCase() !== beatLabel ? doing.toLowerCase() : undefined;
       if (sentientSim.body_posture && sentientSim.body_posture in postureDescriptions) {
         const bodyPosturePosition = postureDescriptions[sentientSim.body_posture];
         if (bodyPosturePosition.ignored !== true && bodyPosturePosition.description) {
@@ -205,8 +217,14 @@ export class PromptRequestBuilderService {
         }
       }
 
+      if (sayDoing) {
+        // "X is sitting at the desk, using the computer"; a Sim with no posture words
+        // reads "X is cooking garlic noodles"
+        positionStrings.push(positionStrings.length > 1 ? `, ${sayDoing}` : sayDoing);
+      }
+
       if (positionStrings.length > 1) {
-        formattedPositions.push(positionStrings.join(' '));
+        formattedPositions.push(positionStrings.join(' ').replace(' , ', ', '));
       }
     });
 
@@ -405,7 +423,11 @@ export class PromptRequestBuilderService {
           location.id === messages[messages.length - 1].location &&
           includeLocation === messages[messages.length - 1].includeLocation
         ) {
-          messages[messages.length - 1].content += ` ${text.trim()}`;
+          // A scene row is a transcript ("<header>\nA: ...\nB: ..."); glued on with a space,
+          // one scene's last line ran into the next one's header ("B: Thanks for asking
+          // Elliot is flirting with Lillie."), live 2026-09-30
+          const separator = role === 'assistant' ? '\n' : ' ';
+          messages[messages.length - 1].content += `${separator}${text.trim()}`;
           return;
         }
         if (role === 'assistant') {
@@ -533,7 +555,14 @@ export class PromptRequestBuilderService {
     const dateTime = formatDateTime(event.environment);
     const season = formatSeason(event.environment);
     const weather = formatWeather(event.environment);
-    const postures = this.formatSimPostures(event.sentient_sims);
+    // The doing clause is lean-only: the full pipeline's postures also fill formatAction's
+    // {postures} token and its fixture pins that text
+    const postures = this.formatSimPostures(
+      event.sentient_sims,
+      options.lean
+        ? { activities: true, beatLabel: (event as Partial<InteractionEvent>).interaction_display_name }
+        : {},
+    );
 
     let formattedAction;
     if (options.action) {
@@ -635,17 +664,18 @@ export class PromptRequestBuilderService {
     // J3: who else is on this lot (people and pets, species where the mod says), right
     // after the character blocks, so "which cats are here" has a roster to answer from.
     // Only for the lot the report is about; another lot's event renders nothing here.
-    const alsoPresent = isIntimateAct
-      ? undefined
-      : buildAlsoPresentBlock(
-          this.ctx.simStateCache.getReport(),
-          event.environment.location_id,
-          event.sentient_sims.map((sim) => sim.sim_id),
-        );
+    const alsoPresent =
+      isIntimateAct || options.lean
+        ? undefined
+        : buildAlsoPresentBlock(
+            this.ctx.simStateCache.getReport(),
+            event.environment.location_id,
+            event.sentient_sims.map((sim) => sim.sim_id),
+          );
     if (alsoPresent) {
       sims.push(alsoPresent);
     }
-    if (directedScenes && !isIntimateAct) {
+    if (directedScenes && !isIntimateAct && !options.lean) {
       sims.push(this.buildDirectorBlock(event));
       sims.push(this.buildSceneGuidance());
     }
@@ -653,7 +683,7 @@ export class PromptRequestBuilderService {
     // Diaries, retrieved recollections and the facts list stay out of a sexual act too. On
     // 09-23 all three were about the household's toddler (bedtime stories, "you live with
     // Elliot Jr"), and they are the context the model reached for.
-    const reflectionsBySim = isIntimateAct ? [] : this.getReflections(event);
+    const reflectionsBySim = isIntimateAct || options.lean ? [] : this.getReflections(event);
     const reflections = reflectionsBySim.flatMap((entry) => entry.reflections);
     const reflectionsBlock = this.buildReflectionsBlock(reflectionsBySim);
     if (reflectionsBlock) {
@@ -671,7 +701,8 @@ export class PromptRequestBuilderService {
     const excludeMemoryIds = [...memories, ...reflections]
       .map((memory) => memory.id)
       .filter((id): id is string => id !== undefined);
-    const relevantMemories = isIntimateAct ? [] : await this.getRelevantMemories(event, queryText, excludeMemoryIds);
+    const relevantMemories =
+      isIntimateAct || options.lean ? [] : await this.getRelevantMemories(event, queryText, excludeMemoryIds);
     const relevantMemoriesBlock = this.buildRelevantMemoriesBlock(relevantMemories);
     if (relevantMemoriesBlock) {
       sims.push(relevantMemoriesBlock);
@@ -682,7 +713,7 @@ export class PromptRequestBuilderService {
     // lived with, Travis named two people who do not exist (self-knowledge battery,
     // 2026-09-03, 1/9). Facts go BEFORE the memories block for the same reason as in the
     // tick - what is true should survive a truncation that costs a recollection.
-    const factsBlock = isIntimateAct ? undefined : this.knownFactsForScene(event);
+    const factsBlock = isIntimateAct || options.lean ? undefined : this.knownFactsForScene(event);
     if (factsBlock) {
       sims.splice(relevantMemoriesBlock ? sims.length - 1 : sims.length, 0, factsBlock);
     }
