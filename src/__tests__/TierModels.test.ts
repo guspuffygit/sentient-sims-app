@@ -23,8 +23,17 @@ describe('tier gated models', () => {
     ]);
   });
 
-  it('grants tier 2 access to tier 2 subscribers and devs only', () => {
+  it('counts every paid tier as a member', () => {
+    expect(userWith({ subscriptionLevel: 'tier1' }).isMember()).toBe(true);
+    expect(userWith({ subscriptionLevel: 'tier2' }).isMember()).toBe(true);
+    expect(userWith({ subscriptionLevel: 'tier3' }).isMember()).toBe(true);
+    expect(userWith({ subscriptionLevel: 'free' }).isMember()).toBe(false);
+    expect(userWith({}).isMember()).toBe(false);
+  });
+
+  it('grants tier 2 access to tier 2 and 3 subscribers and devs only', () => {
     expect(userWith({ subscriptionLevel: 'tier2' }).hasTier2Access()).toBe(true);
+    expect(userWith({ subscriptionLevel: 'tier3' }).hasTier2Access()).toBe(true);
     expect(userWith({ founderStatus: 'dev' }).hasTier2Access()).toBe(true);
     expect(userWith({ subscriptionLevel: 'tier1' }).hasTier2Access()).toBe(false);
     expect(userWith({ founderStatus: 'founder' }).hasTier2Access()).toBe(false);
@@ -41,6 +50,7 @@ describe('tier gated models', () => {
     expect(userWith({ subscriptionLevel: 'tier1' }).canUseModel(turbo)).toBe(false);
     expect(userWith({ founderStatus: 'founder' }).canUseModel(turbo)).toBe(false);
     expect(userWith({ subscriptionLevel: 'tier2' }).canUseModel(turbo)).toBe(true);
+    expect(userWith({ subscriptionLevel: 'tier3' }).canUseModel(turbo)).toBe(true);
     expect(userWith({ founderStatus: 'dev' }).canUseModel(turbo)).toBe(true);
   });
 

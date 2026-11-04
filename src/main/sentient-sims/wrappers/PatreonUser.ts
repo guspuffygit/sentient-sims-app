@@ -5,6 +5,10 @@ export enum CognitoGroup {
   Mappers = 'mappers',
 }
 
+// Patreon subscription levels Cognito stores in custom:subscription_level
+const PAID_TIERS = ['tier1', 'tier2', 'tier3'];
+const TIER2_PERK_TIERS = ['tier2', 'tier3'];
+
 export class PatreonUser {
   private readonly userAttributes?: AuthUserAttributes;
 
@@ -54,20 +58,17 @@ export class PatreonUser {
   }
 
   isSubscriber() {
-    const subscriptionLevel = this.getSubscriptionLevel();
-    if (subscriptionLevel === 'tier1') {
-      return true;
-    }
-    return subscriptionLevel === 'tier2';
+    return PAID_TIERS.includes(this.getSubscriptionLevel());
   }
 
   isMember() {
     return this.isFounder() || this.isSubscriber() || this.isDev();
   }
 
-  // Tier 2 perks go to tier 2 subscribers and devs; founders and tier 1 see them locked
+  // Tier 2 perks go to tier 2 and 3 subscribers (tier 3 includes every tier 2
+  // benefit) and devs; founders and tier 1 see them locked
   hasTier2Access() {
-    return this.isDev() || this.getSubscriptionLevel() === 'tier2';
+    return this.isDev() || TIER2_PERK_TIERS.includes(this.getSubscriptionLevel());
   }
 
   canUseModel(model: AIModel) {
