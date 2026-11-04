@@ -16,6 +16,9 @@ import { MemoryEditInput } from './components/MemoryEditInput';
 import { SimVoiceSelect, SimVoiceSelection } from './components/SimVoiceSelect';
 import { KokoroSimVoiceSelect } from './components/KokoroSimVoiceSelect';
 import { SimProviderSelect } from './components/SimProviderSelect';
+import { ElevenLabsCatalogSimVoiceSelect } from './components/ElevenLabsCatalogSimVoiceSelect';
+import { useAISettings } from './providers/AISettingsProvider';
+import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { BlankDataGridFooterComponent } from './components/BlankDataGridFooter';
 import { useOnDatabaseLoaded } from './hooks/useOnDatabaseLoaded';
 import { useActiveVoiceType } from './hooks/useActiveVoiceType';
@@ -50,6 +53,10 @@ export default function SimsPage() {
   const configs = configsSetting.value;
   const simOverrides = simOverridesSetting.value;
   const defaultConfig = configs.find((config) => config.id === defaultIdSetting.value);
+  // ElevenLabs through Sentient Sims AI picks from the app's own catalog; the
+  // player's own key picks from their My Voices
+  const { ttsApiType } = useAISettings();
+  const catalogElevenLabs = activeVoiceType === VoiceType.ElevenLabs && ttsApiType === ApiType.SentientSimsAI;
 
   const columns: GridColDef<ParticipantDTO>[] = useMemo(
     () => [
@@ -328,7 +335,13 @@ export default function SimsPage() {
             defaultConfig={defaultConfig}
             onChange={handleProviderEdit}
           />
-          {activeVoiceType === VoiceType.ElevenLabs && (
+          {activeVoiceType === VoiceType.ElevenLabs && catalogElevenLabs && (
+            <ElevenLabsCatalogSimVoiceSelect
+              voiceId={editedSim.sim.voices?.[VoiceType.ElevenLabs]?.voiceId}
+              onChange={handleVoiceEdit}
+            />
+          )}
+          {activeVoiceType === VoiceType.ElevenLabs && !catalogElevenLabs && (
             <SimVoiceSelect
               voiceId={editedSim.sim.voices?.[VoiceType.ElevenLabs]?.voiceId}
               voiceName={editedSim.sim.voices?.[VoiceType.ElevenLabs]?.voiceName}

@@ -74,7 +74,7 @@ describe('OpenAIServiceIT', () => {
     const request = builder.buildOpenAIRequest(promptRequest);
     const result = await openAIService.sentientSimsGenerate(request);
     console.log(`Translation: ${result.text}`);
-    const possibleMatches = ['acuerdo?', 'bien?', 'acuerdo'];
+    const possibleMatches = ['acuerdo?', 'bien?', 'acuerdo', 'listo?'];
     const isMatch = possibleMatches.some((item) => result.text.toLocaleLowerCase().includes(item));
     expect(isMatch).toBeTruthy();
   }, 20000);

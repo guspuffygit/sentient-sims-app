@@ -1,5 +1,5 @@
 import { ApiType } from './ApiType';
-import { SentientSimsAISpeechModel } from './SentientSimsAITTSSettings';
+import { isElevenLabsSpeechModel, SentientSimsAISpeechModel } from './SentientSimsAITTSSettings';
 
 // A family of interchangeable voices that a sim can be pinned to. Pins are stored
 // per voice type so switching TTS providers back and forth never loses a sim's
@@ -20,7 +20,8 @@ export function toVoiceType(value?: string): VoiceType | undefined {
  * The voice type the active TTS setup speaks with, or undefined for setups without
  * per-sim voices (e.g. the Orpheus model, which has no blendable voice pool).
  * Sentient Sims AI running the kokoro model and a local Kokoro instance share the
- * same voice names, so they share one pool of pinned voices.
+ * same voice names, so they share one pool of pinned voices; Sentient Sims AI on
+ * ElevenLabs v4 Turbo and a player's own ElevenLabs key share the ElevenLabs pool.
  */
 export function voiceTypeForTTS(ttsApiType: ApiType, sentientSimsAISpeechModel?: string): VoiceType | undefined {
   switch (ttsApiType) {
@@ -29,7 +30,10 @@ export function voiceTypeForTTS(ttsApiType: ApiType, sentientSimsAISpeechModel?:
     case ApiType.Kokoro:
       return VoiceType.Kokoro;
     case ApiType.SentientSimsAI:
-      return sentientSimsAISpeechModel === SentientSimsAISpeechModel.KOKORO.toString() ? VoiceType.Kokoro : undefined;
+      if (sentientSimsAISpeechModel === SentientSimsAISpeechModel.KOKORO.toString()) {
+        return VoiceType.Kokoro;
+      }
+      return isElevenLabsSpeechModel(sentientSimsAISpeechModel) ? VoiceType.ElevenLabs : undefined;
     default:
       return undefined;
   }

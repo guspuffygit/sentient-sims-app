@@ -38,12 +38,20 @@ export enum SentientSimsAISpeechOrpheusVoice {
   Zac = 'zac',
 }
 
-export type SentientSimsAISpeechVoice = SentientSimsAISpeechKokoroVoice | SentientSimsAISpeechOrpheusVoice;
+// An ElevenLabs voice is a catalog voice id (formatter/ElevenLabsVoiceCasting), not an enum member
+export type SentientSimsAISpeechVoice =
+  | SentientSimsAISpeechKokoroVoice
+  | SentientSimsAISpeechOrpheusVoice
+  | (string & {});
 
 export enum SentientSimsAISpeechModel {
   KOKORO = 'kokoro',
   ORPHEUS = 'canopylabs/orpheus-3b-0.1-ft',
+  ELEVEN_V4_TURBO = 'eleven_v4_turbo',
 }
+
+// Rachel, the first premade ElevenLabs voice
+export const DEFAULT_SENTIENT_SIMS_AI_ELEVENLABS_VOICE = '21m00Tcm4TlvDq8ikWAM';
 
 export type SentientSimsAITTSSettings = {
   model: (string & {}) | SentientSimsAISpeechModel;
@@ -59,6 +67,27 @@ export const defaultSentientSimsAITTSSettings: SentientSimsAITTSSettings = {
   // Dialogue reads sluggish at 1.0
   speed: 1.25,
 };
+
+// What a Tier 3 or Tier 4 member gets when the wizard picks their voices
+export const defaultSentientSimsAIElevenLabsSettings: SentientSimsAITTSSettings = {
+  model: SentientSimsAISpeechModel.ELEVEN_V4_TURBO,
+  voice: [DEFAULT_SENTIENT_SIMS_AI_ELEVENLABS_VOICE],
+  response_format: 'wav',
+};
+
+export function isElevenLabsSpeechModel(model?: string): boolean {
+  return model === (SentientSimsAISpeechModel.ELEVEN_V4_TURBO as string);
+}
+
+const SPEECH_MODEL_NAMES: Readonly<Record<string, string>> = {
+  [SentientSimsAISpeechModel.KOKORO]: 'Kokoro',
+  [SentientSimsAISpeechModel.ORPHEUS]: 'Orpheus',
+  [SentientSimsAISpeechModel.ELEVEN_V4_TURBO]: 'ElevenLabs v4 Turbo',
+};
+
+export function speechModelName(model: string): string {
+  return model in SPEECH_MODEL_NAMES ? SPEECH_MODEL_NAMES[model] : model;
+}
 
 export function toSpeechModel(model?: string): SentientSimsAISpeechModel {
   if (Object.values(SentientSimsAISpeechModel).includes(model as SentientSimsAISpeechModel)) {

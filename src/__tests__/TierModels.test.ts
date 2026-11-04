@@ -23,8 +23,19 @@ describe('tier gated models', () => {
     ]);
   });
 
-  it('grants tier 2 access to tier 2 subscribers and devs only', () => {
+  it('counts every Patreon tier as a member', () => {
+    for (const subscriptionLevel of ['tier1', 'tier2', 'tier3', 'tier4']) {
+      expect(userWith({ subscriptionLevel }).isSubscriber()).toBe(true);
+      expect(userWith({ subscriptionLevel }).isMember()).toBe(true);
+    }
+    expect(userWith({ subscriptionLevel: 'free' }).isMember()).toBe(false);
+    expect(userWith({}).isMember()).toBe(false);
+  });
+
+  it('grants tier 2 access to tier 2 and up and devs only', () => {
     expect(userWith({ subscriptionLevel: 'tier2' }).hasTier2Access()).toBe(true);
+    expect(userWith({ subscriptionLevel: 'tier3' }).hasTier2Access()).toBe(true);
+    expect(userWith({ subscriptionLevel: 'tier4' }).hasTier2Access()).toBe(true);
     expect(userWith({ founderStatus: 'dev' }).hasTier2Access()).toBe(true);
     expect(userWith({ subscriptionLevel: 'tier1' }).hasTier2Access()).toBe(false);
     expect(userWith({ founderStatus: 'founder' }).hasTier2Access()).toBe(false);
@@ -42,6 +53,17 @@ describe('tier gated models', () => {
     expect(userWith({ founderStatus: 'founder' }).canUseModel(turbo)).toBe(false);
     expect(userWith({ subscriptionLevel: 'tier2' }).canUseModel(turbo)).toBe(true);
     expect(userWith({ founderStatus: 'dev' }).canUseModel(turbo)).toBe(true);
+    expect(userWith({ subscriptionLevel: 'tier3' }).canUseModel(turbo)).toBe(true);
+  });
+
+  it('offers ElevenLabs through Sentient Sims AI to Tier 3, Tier 4 and devs', () => {
+    expect(userWith({ subscriptionLevel: 'tier3' }).canUseElevenLabs()).toBe(true);
+    expect(userWith({ subscriptionLevel: 'tier4' }).canUseElevenLabs()).toBe(true);
+    expect(userWith({ founderStatus: 'dev' }).canUseElevenLabs()).toBe(true);
+    expect(userWith({ subscriptionLevel: 'tier2' }).canUseElevenLabs()).toBe(false);
+    expect(userWith({ subscriptionLevel: 'tier1' }).canUseElevenLabs()).toBe(false);
+    expect(userWith({ founderStatus: 'founder' }).canUseElevenLabs()).toBe(false);
+    expect(new PatreonUser(undefined).canUseElevenLabs()).toBe(false);
   });
 
   it('turns the 453 body into an upgrade hint', () => {

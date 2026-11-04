@@ -1,80 +1,47 @@
-import { Avatar, Stack, Typography } from '@mui/material';
+import { Avatar, Stack, Typography, TypographyProps } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import { useMemo } from 'react';
 import AppCard from './AppCard';
-import { useThankYous } from './hooks/useThankYous';
+import { ThankYouUser, useThankYous } from './hooks/useThankYous';
 import PatreonComponent from './PatreonComponent';
 
-export enum AvatarType {
-  DEV = '#206694',
-  TIER_2 = '#f1c40f',
-  TIER_1 = '#2ecc71',
-}
-
-type AvatarCardProps = {
-  name: string;
-  url: string;
-  type: AvatarType;
-};
-
-type AvatarSize = {
+type AvatarStyle = {
+  color: string;
   size: number;
-  variant:
-    | 'body2'
-    | 'button'
-    | 'caption'
-    | 'h1'
-    | 'h2'
-    | 'h3'
-    | 'h4'
-    | 'h5'
-    | 'h6'
-    | 'inherit'
-    | 'subtitle1'
-    | 'subtitle2'
-    | 'body1'
-    | 'overline'
-    | undefined;
+  variant: TypographyProps['variant'];
+  sizedAvatar: boolean;
 };
 
-function getAvatarSize(avatarType: AvatarType): AvatarSize {
-  if (avatarType === AvatarType.TIER_2) {
-    return { size: 30, variant: 'body1' };
-  }
+const DEV: AvatarStyle = { color: '#206694', size: 40, variant: 'h6', sizedAvatar: true };
+const TIER_4: AvatarStyle = { color: '#e91e63', size: 36, variant: 'subtitle1', sizedAvatar: true };
+const TIER_3: AvatarStyle = { color: '#e67e22', size: 33, variant: 'body1', sizedAvatar: true };
+const TIER_2: AvatarStyle = { color: '#f1c40f', size: 30, variant: 'body1', sizedAvatar: true };
+const TIER_1: AvatarStyle = { color: '#2ecc71', size: 20, variant: 'body2', sizedAvatar: false };
 
-  if (avatarType === AvatarType.TIER_1) {
-    return { size: 20, variant: 'body2' };
-  }
-
-  // Dev
-  return { size: 40, variant: 'h6' };
-}
-
-function AvatarCard({ name, url, type }: AvatarCardProps) {
-  const avatarSize = useMemo(() => {
-    return getAvatarSize(type);
-  }, [type]);
-
+function AvatarCard({ user, style }: { user: ThankYouUser; style: AvatarStyle }) {
+  const name = `@${user.name}`;
   return (
-    <Stack
-      direction="row"
-      spacing={1}
-      sx={{
-        alignItems: 'center',
-      }}
-    >
+    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
       <Avatar
         alt={name}
-        src={url}
-        sx={{
-          height: avatarSize.size,
-          width: avatarSize.size,
-          backgroundColor: 'white',
-        }}
+        src={style.sizedAvatar ? `${user.avatar}?size=128` : user.avatar}
+        sx={{ height: style.size, width: style.size, backgroundColor: 'white' }}
       />
-      <Typography variant={avatarSize.variant} sx={{ color: type }}>
+      <Typography variant={style.variant} sx={{ color: style.color }}>
         {name}
       </Typography>
+    </Stack>
+  );
+}
+
+function AvatarRow({ users, style }: { users?: ThankYouUser[]; style: AvatarStyle }) {
+  if (!users?.length) {
+    return null;
+  }
+  return (
+    <Stack direction="row" spacing={{ xs: 1, sm: 1 }} useFlexGap sx={{ flexWrap: 'wrap', marginTop: 1 }}>
+      {users.map((user) => (
+        <AvatarCard user={user} style={style} key={`@${user.name}`} />
+      ))}
     </Stack>
   );
 }
@@ -86,79 +53,17 @@ export default function ThankYouCard() {
 export function ThankYouCardPatreon() {
   const thankYous = useThankYous();
 
-  const tier2Exists = thankYous.tier2.length > 0;
-  const tier1Exists = thankYous.tier1.length > 0;
-
   return (
     <AppCard
       title="Thank You"
       subtitle="To the Devs and Patrons who make Sentient Sims possible"
       icon={<FavoriteIcon fontSize="small" />}
     >
-      <Stack
-        direction="row"
-        spacing={{ xs: 1, sm: 1 }}
-        useFlexGap
-        sx={{
-          flexWrap: 'wrap',
-          marginTop: 1,
-        }}
-      >
-        {thankYous.dev.map((thankYouUser) => {
-          return (
-            <AvatarCard
-              name={`@${thankYouUser.name}`}
-              url={`${thankYouUser.avatar}?size=128`}
-              type={AvatarType.DEV}
-              key={`@${thankYouUser.name}`}
-            />
-          );
-        })}
-      </Stack>
-      {tier2Exists ? (
-        <Stack
-          direction="row"
-          spacing={{ xs: 1, sm: 1 }}
-          useFlexGap
-          sx={{
-            flexWrap: 'wrap',
-            marginTop: 1,
-          }}
-        >
-          {thankYous.tier2.map((thankYouUser) => {
-            return (
-              <AvatarCard
-                name={`@${thankYouUser.name}`}
-                url={`${thankYouUser.avatar}?size=128`}
-                type={AvatarType.TIER_2}
-                key={`@${thankYouUser.name}`}
-              />
-            );
-          })}
-        </Stack>
-      ) : null}
-      {tier1Exists ? (
-        <Stack
-          direction="row"
-          spacing={{ xs: 1, sm: 1 }}
-          useFlexGap
-          sx={{
-            flexWrap: 'wrap',
-            marginTop: 1,
-          }}
-        >
-          {thankYous.tier1.map((thankYouUser) => {
-            return (
-              <AvatarCard
-                name={`@${thankYouUser.name}`}
-                url={thankYouUser.avatar}
-                type={AvatarType.TIER_1}
-                key={`@${thankYouUser.name}`}
-              />
-            );
-          })}
-        </Stack>
-      ) : null}
+      <AvatarRow users={thankYous.dev} style={DEV} />
+      <AvatarRow users={thankYous.tier4} style={TIER_4} />
+      <AvatarRow users={thankYous.tier3} style={TIER_3} />
+      <AvatarRow users={thankYous.tier2} style={TIER_2} />
+      <AvatarRow users={thankYous.tier1} style={TIER_1} />
       <PatreonComponent />
     </AppCard>
   );

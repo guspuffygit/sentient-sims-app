@@ -13,8 +13,10 @@ import {
 } from 'main/sentient-sims/constants';
 import {
   defaultSentientSimsAITTSSettings,
+  isElevenLabsSpeechModel,
   SentientSimsAITTSSettings,
 } from 'main/sentient-sims/models/SentientSimsAITTSSettings';
+import { dialogueContext, elevenLabsLineText } from 'main/sentient-sims/clients/ElevenLabsTTSRequest';
 import { axiosClient } from 'main/sentient-sims/clients/AxiosClient';
 import { SentenceTokenizeResponse } from 'main/sentient-sims/models/SentenceTokenizeResponse';
 import { SentenceTokenizeRequest } from 'main/sentient-sims/models/SentenceTokenizerRequest';
@@ -25,6 +27,24 @@ import { pacedDelay } from './playbackClock';
 import { TTSHook } from './TTSHook';
 
 type QueuedSpeech = { text: string; voice: string[] };
+
+// The lines either side of the one being spoken; only ElevenLabs reads them
+type LineContext = { previousText?: string; nextText?: string };
+
+// The server's 452 and 4xx bodies are {message} or {error}; show the words, not the JSON
+function errorText(body: string): string {
+  try {
+    const parsed: unknown = JSON.parse(body);
+    if (parsed && typeof parsed === 'object') {
+      const { message, error } = parsed as { message?: unknown; error?: unknown };
+      if (typeof message === 'string') return message;
+      if (typeof error === 'string') return error;
+    }
+  } catch {
+    // not JSON
+  }
+  return body;
+}
 
 export function useSentientSimsTTS(): TTSHook {
   const aiSettings = useAISettings();
@@ -54,7 +74,7 @@ export function useSentientSimsTTS(): TTSHook {
 
   // Fetches one utterance's audio and returns an object URL, or null on failure
   const fetchAudioUrl = useCallback(
-    async (text: string, voice: string[]): Promise<string | null> => {
+    async (text: string, voice: string[], context?: LineContext): Promise<string | null> => {
       log.debug(`Sentient Sims TTS Fetcher: Fetching audio for "${text}"`);
 
       if (voice.length === 0) {
@@ -62,13 +82,23 @@ export function useSentientSimsTTS(): TTSHook {
         return null;
       }
 
-      const requestBody = {
-        model: sentientSimsAITTSSettings.value.model,
-        input: text,
-        voice: voice.join('+'),
-        response_format: sentientSimsAITTSSettings.value.response_format,
-        speed: sentientSimsAITTSSettings.value.speed ?? defaultSentientSimsAITTSSettings.speed,
-      };
+      const { model } = sentientSimsAITTSSettings.value;
+      const requestBody = isElevenLabsSpeechModel(model)
+        ? {
+            model,
+            input: text,
+            voice: voice[0],
+            response_format: sentientSimsAITTSSettings.value.response_format,
+            previous_text: dialogueContext(context?.previousText, 'previous'),
+            next_text: dialogueContext(context?.nextText, 'next'),
+          }
+        : {
+            model,
+            input: text,
+            voice: voice.join('+'),
+            response_format: sentientSimsAITTSSettings.value.response_format,
+            speed: sentientSimsAITTSSettings.value.speed ?? defaultSentientSimsAITTSSettings.speed,
+          };
 
       const url = `${sentientSimsAIEndpointSetting.value}/v2/audio/speech`;
 
@@ -102,7 +132,7 @@ export function useSentientSimsTTS(): TTSHook {
           try {
             const bodyResponse = await response.text();
             log.error(bodyResponse);
-            setError(bodyResponse);
+            setError(errorText(bodyResponse));
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (err: any) {
             setError(errorMessage);
@@ -283,11 +313,17 @@ export function useSentientSimsTTS(): TTSHook {
 
       // Conversation pacing: each line runs for exactly its audio's duration, with the
       // next line's audio prefetched while this one plays so lines flow back-to-back
+      const { model } = sentientSimsAITTSSettings.value;
+      const elevenLabs = isElevenLabsSpeechModel(model);
       const audioPromises: (Promise<string | null> | undefined)[] = [];
       const startFetch = (index: number) => {
         if (index < lines.length && !audioPromises[index]) {
           const line = lines[index];
-          audioPromises[index] = fetchAudioUrl(line.text, lineVoice(line));
+          const text = elevenLabs ? elevenLabsLineText(line, model) : line.text;
+          const context = elevenLabs
+            ? { previousText: lines[index - 1]?.text, nextText: lines[index + 1]?.text }
+            : undefined;
+          audioPromises[index] = fetchAudioUrl(text, lineVoice(line), context);
         }
       };
       startFetch(0);

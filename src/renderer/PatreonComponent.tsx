@@ -86,7 +86,8 @@ interface SubscribedPatreonProps {
 
 function SubscribedPatreon({ patreonUser }: SubscribedPatreonProps) {
   const { enableDebugMode } = useDebugMode();
-  let text = `Thank you for being a ${patreonUser.getSubscriptionLevel()} Patreon subscriber!`;
+  const tierName = patreonUser.getSubscriptionLevel().replace(/^tier(\d)$/, 'Tier $1');
+  let text = `Thank you for being a ${tierName} Patreon subscriber!`;
   if (patreonUser.isDev()) {
     text = `Thank you for being a Dev!`;
   }

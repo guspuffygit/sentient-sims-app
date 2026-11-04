@@ -10,6 +10,8 @@ export type ThankYouUser = {
 export type ThankYou = {
   tier1: ThankYouUser[];
   tier2: ThankYouUser[];
+  tier3?: ThankYouUser[];
+  tier4?: ThankYouUser[];
   dev: ThankYouUser[];
 };
 

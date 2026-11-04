@@ -50,6 +50,13 @@ import { voiceHotkeyLabel } from 'main/sentient-sims/models/VoiceHotkeyPresets';
 import { ElevenLabsKeySetup } from 'renderer/settings/voice/ElevenLabsKeySetup';
 import { AboutYouFields, MicrophoneSetup, VoiceHotkeyRow } from 'renderer/settings/voice/VoiceInputSettingsComponent';
 import { getPatreonOauthUrl, PatreonActionButton } from 'renderer/PatreonComponent';
+import {
+  defaultSentientSimsAIElevenLabsSettings,
+  defaultSentientSimsAITTSSettings,
+  isElevenLabsSpeechModel,
+  SentientSimsAISpeechModel,
+  SentientSimsAITTSSettings,
+} from 'main/sentient-sims/models/SentientSimsAITTSSettings';
 import { LoginComponent } from './LoginComponent';
 import { QuickstartList } from './QuickstartCard';
 
@@ -826,14 +833,26 @@ const TRANSCRIPTION_FOR_AI: Partial<Record<ApiType, ApiType>> = {
 function VoiceSetupPage({ setPage }: PageProps) {
   const aiSettings = useAISettings();
   const { userAttributes, authStatus, loading: authLoading } = useAuth();
-  const isMember = new PatreonUser(userAttributes).isMember();
+  const patreonUser = new PatreonUser(userAttributes);
+  const isMember = patreonUser.isMember();
+  const includesElevenLabs = patreonUser.canUseElevenLabs();
   const usesElevenLabs = aiSettings.ttsApiType === ApiType.ElevenLabs;
   const [elevenLabsKeyWorks, setElevenLabsKeyWorks] = useState(false);
   const needsElevenLabsKey = aiSettings.ttsEnabled && usesElevenLabs && !elevenLabsKeyWorks;
+  const sentientSimsAITtsSettings = useSetting<SentientSimsAITTSSettings>(
+    SettingsEnum.SENTIENTSIMSAI_TTS_SETTINGS,
+    defaultSentientSimsAITTSSettings,
+  );
+  const speechModel = sentientSimsAITtsSettings.value.model;
 
-  // Waits for the membership and settings to load, then sets the page up once
+  // Waits for the membership and settings to load, then sets the page up once. A
+  // Tier 3 or 4 member still on the Kokoro default gets ElevenLabs through Sentient
+  // Sims AI; a model they picked themselves stays.
   const membershipKnown = authStatus === 'unauthenticated' || (!!userAttributes && !authLoading);
-  const settingsLoaded = !aiSettings.aiApiTypeSetting.isLoading && !aiSettings.ttsApiTypeSetting.isLoading;
+  const settingsLoaded =
+    !aiSettings.aiApiTypeSetting.isLoading &&
+    !aiSettings.ttsApiTypeSetting.isLoading &&
+    !sentientSimsAITtsSettings.isLoading;
   const preparedRef = useRef(false);
   useEffect(() => {
     if (preparedRef.current || !membershipKnown || !settingsLoaded) {
@@ -842,8 +861,21 @@ function VoiceSetupPage({ setPage }: PageProps) {
     preparedRef.current = true;
     if (!isMember && !usesElevenLabs) {
       void aiSettings.ttsEnabledSetting.setSetting(false);
+      return;
+    }
+    if (includesElevenLabs && !usesElevenLabs && speechModel === SentientSimsAISpeechModel.KOKORO) {
+      void aiSettings.ttsApiTypeSetting.setSetting(ApiType.SentientSimsAI);
+      void sentientSimsAITtsSettings.setSetting(defaultSentientSimsAIElevenLabsSettings);
     }
   });
+
+  let membershipVoicesText = 'Voices come with your Patreon membership. ElevenLabs voices come with Tier 3 and Tier 4.';
+  if (includesElevenLabs && isElevenLabsSpeechModel(speechModel)) {
+    membershipVoicesText = 'ElevenLabs v4 Turbo voices come with your Patreon membership.';
+  } else if (includesElevenLabs) {
+    membershipVoicesText =
+      'Voices come with your Patreon membership, ElevenLabs v4 Turbo included. Pick it in Settings, Voice.';
+  }
 
   const setVoices = (on: boolean) => {
     if (on && !isMember) {
@@ -877,7 +909,7 @@ function VoiceSetupPage({ setPage }: PageProps) {
           <ElevenLabsKeySetup autoCheck onCheckedChange={setElevenLabsKeyWorks} />
         ) : (
           <Typography variant="body2" sx={{ color: 'success.main' }}>
-            Voices come with your Patreon membership.
+            {membershipVoicesText}
           </Typography>
         )}
       </Box>

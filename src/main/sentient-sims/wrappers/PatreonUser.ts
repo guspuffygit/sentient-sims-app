@@ -5,6 +5,12 @@ export enum CognitoGroup {
   Mappers = 'mappers',
 }
 
+const SUBSCRIBER_TIERS = ['tier1', 'tier2', 'tier3', 'tier4'];
+
+const TIER_2_ACCESS_TIERS = ['tier2', 'tier3', 'tier4'];
+
+export const ELEVENLABS_TIERS = ['tier3', 'tier4'];
+
 export class PatreonUser {
   private readonly userAttributes?: AuthUserAttributes;
 
@@ -54,20 +60,21 @@ export class PatreonUser {
   }
 
   isSubscriber() {
-    const subscriptionLevel = this.getSubscriptionLevel();
-    if (subscriptionLevel === 'tier1') {
-      return true;
-    }
-    return subscriptionLevel === 'tier2';
+    return SUBSCRIBER_TIERS.includes(this.getSubscriptionLevel());
   }
 
   isMember() {
     return this.isFounder() || this.isSubscriber() || this.isDev();
   }
 
-  // Tier 2 perks go to tier 2 subscribers and devs; founders and tier 1 see them locked
+  // Tier 2 perks go to tier 2 and up and devs; founders and tier 1 see them locked
   hasTier2Access() {
-    return this.isDev() || this.getSubscriptionLevel() === 'tier2';
+    return this.isDev() || TIER_2_ACCESS_TIERS.includes(this.getSubscriptionLevel());
+  }
+
+  // ElevenLabs voices through Sentient Sims AI come with Tier 3 and Tier 4
+  canUseElevenLabs() {
+    return this.isDev() || ELEVENLABS_TIERS.includes(this.getSubscriptionLevel());
   }
 
   canUseModel(model: AIModel) {
