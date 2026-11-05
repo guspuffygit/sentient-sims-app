@@ -14,6 +14,7 @@ import { modWebsocketPort, rendererWebsocketPort } from './constants';
 import { WebsocketStatusChange } from './models/WebsocketStatusResponse';
 import { ApiContext } from './services/ApiContext';
 import { getAllBrowserWindows } from './util/browserWindows';
+import { updateAppIfModRequiresNewer } from './util/appUpdater';
 
 function notifyAllWindows(message: string, ...args: unknown[]) {
   getAllBrowserWindows().forEach((wnd) => {
@@ -174,6 +175,7 @@ export const startWebSocketServer = (ctx: ApiContext) => {
           `[Mod] connected: tier=${lastModInfo.tier} mod=${lastModInfo.mod_version} ` +
             `requires app ${lastModInfo.required_app_version}`,
         );
+        updateAppIfModRequiresNewer(lastModInfo.required_app_version);
         return;
       }
 

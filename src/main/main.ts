@@ -11,7 +11,7 @@
 import path from 'path';
 import fs from 'fs';
 import { install as installSourceMapSupport } from 'source-map-support';
-import { app, BrowserWindow, shell, session, WebRequestFilter, dialog } from 'electron';
+import { app, BrowserWindow, shell, session, WebRequestFilter } from 'electron';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import registerDebugToggleHotkey from './sentient-sims/registerDebugToggleHotkey';
@@ -24,13 +24,10 @@ import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 import { disableDebugLogging, enableDebugLogging } from './sentient-sims/util/debugLog';
 import { APP_STATUS_SETTINGS, notifySettingChanged, sendAppStatusToMod } from './sentient-sims/util/notifyRenderer';
 import { publishClockState } from './sentient-sims/websocketServer';
+import { checkForAppUpdate } from './sentient-sims/util/appUpdater';
 import { setSimAliases } from './sentient-sims/util/simAliases';
 import { SettingsEnum } from './sentient-sims/models/SettingsEnum';
 import debug from 'electron-debug';
-// electron-updater is CommonJS; import the default (whole module) and destructure
-// locally. A bare dynamic import() would be left external by the bundler and break
-// the packaged app (electron-updater ships only in the bundle, not release/app/node_modules).
-import electronUpdater from 'electron-updater';
 import { resolveHtmlPath } from './util';
 import { ApiContext } from './sentient-sims/services/ApiContext';
 import { VoiceInputService } from './sentient-sims/services/VoiceInputService';
@@ -247,27 +244,7 @@ const startServices = () => {
 
   log.transports.file.level = 'info';
 
-  // eslint-disable-next-line import-x/no-named-as-default-member
-  const { autoUpdater } = electronUpdater;
-
-  autoUpdater.logger = log;
-  try {
-    void autoUpdater.checkForUpdatesAndNotify();
-    autoUpdater.on('update-downloaded', (info) => {
-      void dialog
-        .showMessageBox({
-          type: 'question',
-          buttons: ['Install and Restart'],
-          defaultId: 0,
-          message: `Update ${info.version} has been downloaded and is ready to install, please restart to install the update.`,
-        })
-        .then(() => {
-          autoUpdater.quitAndInstall();
-        });
-    });
-  } catch (err) {
-    log.error(`Unable to check for updates and notify`, err);
-  }
+  void checkForAppUpdate({ notify: true });
 
   const filter: WebRequestFilter = {
     urls: [`http://localhost:${appApiPort}/login/*`],
