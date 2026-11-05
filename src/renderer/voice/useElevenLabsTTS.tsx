@@ -17,9 +17,9 @@ import {
 } from 'main/sentient-sims/clients/ElevenLabsTTSRequest';
 import { elevenLabsErrorMessage } from 'main/sentient-sims/clients/ElevenLabsError';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
-import { AudioPlaybackHandle, playAudioStream, playAudioUrl } from './audioPlayback';
+import { AudioPlaybackHandle, PlaybackOptions, playAudioStream, playAudioUrl } from './audioPlayback';
 import { pacedDelay } from './playbackClock';
-import { TTSHook } from './TTSHook';
+import { SpeakOptions, TTSHook } from './TTSHook';
 
 type LineContext = { previousText?: string; nextText?: string };
 
@@ -99,9 +99,9 @@ export function useElevenLabsTTS(): TTSHook {
   );
 
   const playUrl = useCallback(
-    async (audioUrl: string): Promise<void> => {
+    async (audioUrl: string, options?: PlaybackOptions): Promise<void> => {
       try {
-        const handle = await playAudioUrl(audioUrl, aiSettings.ttsVolume);
+        const handle = await playAudioUrl(audioUrl, aiSettings.ttsVolume, options);
         setPlayback(handle); // Store reference for stopping
         await handle.finished;
       } finally {
@@ -113,9 +113,9 @@ export function useElevenLabsTTS(): TTSHook {
   );
 
   const playStream = useCallback(
-    async (stream: ReadableStream<Uint8Array>): Promise<void> => {
+    async (stream: ReadableStream<Uint8Array>, options?: PlaybackOptions): Promise<void> => {
       try {
-        const handle = await playAudioStream(stream, aiSettings.ttsVolume);
+        const handle = await playAudioStream(stream, aiSettings.ttsVolume, options);
         setPlayback(handle); // Store reference for stopping
         await handle.finished;
       } finally {
@@ -126,13 +126,15 @@ export function useElevenLabsTTS(): TTSHook {
   );
 
   const tts = useCallback(
-    async (text: string): Promise<void> => {
+    async (text: string, options?: SpeakOptions): Promise<void> => {
       setError(undefined);
 
       if (!text.trim()) return;
 
       try {
-        await playStream(await fetchAudioStream(text, elevenLabsTTSSettings.value.voice));
+        await playStream(await fetchAudioStream(text, elevenLabsTTSSettings.value.voice), {
+          followsClock: options?.followsClock,
+        });
       } catch (err: any) {
         const errorMessage = `TTS request failed: ${err instanceof Error ? err.message : String(err)}`;
         log.error(errorMessage);
@@ -205,7 +207,7 @@ export function useElevenLabsTTS(): TTSHook {
             }
             onLineStart?.(speakable[0], true);
             try {
-              await playStream(stream);
+              await playStream(stream, { followsClock: speakable[0].followsClock });
             } finally {
               onLineEnd?.(speakable[0]);
             }
@@ -230,7 +232,7 @@ export function useElevenLabsTTS(): TTSHook {
           try {
             if (audioUrl) {
               try {
-                await playUrl(audioUrl);
+                await playUrl(audioUrl, { followsClock: speakable[i].followsClock });
               } catch (err: any) {
                 const errorMessage = `TTS playback failed: ${err instanceof Error ? err.message : String(err)}`;
                 log.error(errorMessage);

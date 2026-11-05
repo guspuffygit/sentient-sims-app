@@ -5,14 +5,16 @@ import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
 import { sceneChunkGapMs, sceneLineGapMs, sceneLineReadingHoldMs } from 'main/sentient-sims/constants';
 import { useElevenLabsTTS } from 'renderer/voice/useElevenLabsTTS';
 import { useSentientSimsTTS } from 'renderer/voice/useSentientSimsTTS';
+import { SpeakOptions } from 'renderer/voice/TTSHook';
 import { pacedDelay, setClockState, waitWhileUserPaused } from 'renderer/voice/playbackClock';
 import { insertScene, mayStartEntry, SceneStopMark, shouldYieldTo } from 'renderer/voice/sceneQueue';
 import { useAISettings } from './AISettingsProvider';
 
 interface TTSAudioContextType {
   // voiceId pins a specific cast voice (an ElevenLabs voice id or a Kokoro blend like
-  // 'af_heart+af_sky') instead of the settings default — used by per-sim voice test buttons
-  speak: (text: string, voiceId?: string) => Promise<void>;
+  // 'af_heart+af_sky') instead of the settings default — used by per-sim voice test buttons.
+  // options.followsClock false is a voice test: it plays at once, outside the game clock.
+  speak: (text: string, voiceId?: string, options?: SpeakOptions) => Promise<void>;
   stop: () => void;
   isWebGPUSupported: boolean | null;
   isPlaying: boolean | undefined;
@@ -82,7 +84,7 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
   }, []);
 
   const speak = useCallback(
-    async (text: string, voiceId?: string) => {
+    async (text: string, voiceId?: string, options?: SpeakOptions) => {
       if (!text.trim()) return;
 
       if (!aiSettings.ttsEnabled) return;
@@ -90,10 +92,10 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
       // A pinned voice has to go through the per-line path; plain speak() always
       // uses the settings default voice
       if (voiceId && tts?.speakLines) {
-        await tts.speakLines([{ speaker: 'Voice test', text, voiceId }]);
+        await tts.speakLines([{ speaker: 'Voice test', text, voiceId, followsClock: options?.followsClock }]);
         return;
       }
-      await tts?.speak(text);
+      await tts?.speak(text, options);
     },
     [aiSettings.ttsEnabled, tts],
   );

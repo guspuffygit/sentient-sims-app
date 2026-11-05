@@ -611,6 +611,9 @@ export type DialogueLine = {
   // and the mod keeps the speaker's mouth going through it instead of closing it at the
   // chunk's end. Absent or false on the last chunk and on every ordinary line.
   continues?: boolean;
+  // false on a voice TEST line only: it plays at once, outside the game clock
+  // (renderer audioPlayback PlaybackOptions.followsClock). Absent on every scene line.
+  followsClock?: boolean;
 };
 
 const dialogueLineRegex = /^([A-Za-z][A-Za-z'-]*(?:\s[A-Za-z][A-Za-z'-]*){0,2}):\s*(?:\(([^)]*)\)\s*)?"([^"]+)"\s*$/;

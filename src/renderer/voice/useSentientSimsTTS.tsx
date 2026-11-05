@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import { reportUsageHeader } from 'renderer/billing/reportUsageHeader';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import log from 'electron-log';
@@ -25,9 +24,10 @@ import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
 import { assignVoicesToSpeakers } from 'main/sentient-sims/formatter/VoiceAssignment';
 import { AudioPlaybackHandle, playAudioUrl } from './audioPlayback';
 import { pacedDelay } from './playbackClock';
-import { TTSHook } from './TTSHook';
+import { SpeakOptions, TTSHook } from './TTSHook';
 
-type QueuedSpeech = { text: string; voice: string[] };
+type QueuedSpeech = { text: string; voice: string[]; followsClock: boolean };
+type QueuedAudio = { url: string; followsClock: boolean };
 
 // The lines either side of the one being spoken; only ElevenLabs reads them
 type LineContext = { previousText?: string; nextText?: string };
@@ -63,7 +63,7 @@ export function useSentientSimsTTS(): TTSHook {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const sentenceQueueRef = useRef<QueuedSpeech[]>([]);
-  const audioUrlQueueRef = useRef<string[]>([]);
+  const audioUrlQueueRef = useRef<QueuedAudio[]>([]);
 
   const playerRunningRef = useRef(false);
   const fetcherRunningRef = useRef(false);
@@ -177,7 +177,7 @@ export function useSentientSimsTTS(): TTSHook {
       if (!item) continue;
       const audioUrl = await fetchAudioUrl(item.text, item.voice);
       if (!audioUrl) break;
-      audioUrlQueueRef.current.push(audioUrl);
+      audioUrlQueueRef.current.push({ url: audioUrl, followsClock: item.followsClock });
     }
 
     fetcherRunningRef.current = false;
@@ -193,12 +193,13 @@ export function useSentientSimsTTS(): TTSHook {
 
     while (audioUrlQueueRef.current.length > 0 || fetcherRunningRef.current) {
       if (audioUrlQueueRef.current.length > 0) {
-        const audioUrl = audioUrlQueueRef.current.shift();
-        if (!audioUrl) continue;
+        const queued = audioUrlQueueRef.current.shift();
+        if (!queued) continue;
+        const audioUrl = queued.url;
 
         log.debug(`Player: Playing audio from URL: ${audioUrl}`);
         try {
-          const playback = await playAudioUrl(audioUrl, aiSettings.ttsVolume);
+          const playback = await playAudioUrl(audioUrl, aiSettings.ttsVolume, { followsClock: queued.followsClock });
           currentPlaybackRef.current = playback;
           await playback.finished;
           log.debug('Audio finished playing.');
@@ -238,8 +239,9 @@ export function useSentientSimsTTS(): TTSHook {
   }, []);
 
   const speak = useCallback(
-    async (text: string) => {
+    async (text: string, speakOptions?: SpeakOptions) => {
       log.debug(`Sentient Sims Voice Speak called: ${text}`);
+      const followsClock = speakOptions?.followsClock ?? true;
 
       try {
         const request: SentenceTokenizeRequest = { paragraph: text };
@@ -256,7 +258,11 @@ export function useSentientSimsTTS(): TTSHook {
 
         if (sentences.length > 0) {
           sentences.forEach((sentence) =>
-            sentenceQueueRef.current.push({ text: sentence, voice: sentientSimsAITTSSettings.value.voice }),
+            sentenceQueueRef.current.push({
+              text: sentence,
+              voice: sentientSimsAITTSSettings.value.voice,
+              followsClock,
+            }),
           );
           log.debug(`Queued ${sentences.length} sentences. Starting fetcher and player.`);
           void fetcherLoop();
@@ -350,7 +356,9 @@ export function useSentientSimsTTS(): TTSHook {
           try {
             if (audioUrl) {
               try {
-                const playback = await playAudioUrl(audioUrl, aiSettings.ttsVolume);
+                const playback = await playAudioUrl(audioUrl, aiSettings.ttsVolume, {
+                  followsClock: lines[i].followsClock,
+                });
                 currentPlaybackRef.current = playback;
                 await playback.finished;
               } catch (err) {
@@ -399,7 +407,9 @@ export function useSentientSimsTTS(): TTSHook {
     }
 
     sentenceQueueRef.current = [];
-    audioUrlQueueRef.current.forEach(URL.revokeObjectURL);
+    audioUrlQueueRef.current.forEach((queued) => {
+      URL.revokeObjectURL(queued.url);
+    });
     audioUrlQueueRef.current = [];
 
     setIsPlaying(false);
@@ -407,7 +417,9 @@ export function useSentientSimsTTS(): TTSHook {
 
   useEffect(() => {
     return () => {
-      audioUrlQueueRef.current.forEach(URL.revokeObjectURL);
+      audioUrlQueueRef.current.forEach((queued) => {
+        URL.revokeObjectURL(queued.url);
+      });
     };
   }, []);
 
