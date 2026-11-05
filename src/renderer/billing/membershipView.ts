@@ -183,9 +183,11 @@ function bonusFor(info: MembershipInfo | undefined, now: number): Bonus | undefi
   return launchOfferOpen(now) ? { multiplier: LAUNCH_BONUS.multiplier, until: LAUNCH_BONUS.until } : undefined;
 }
 
+export const RECOMMENDED_TIER = 'tier3';
+
 function badgeFor(tier: string): string | undefined {
-  if (tier === 'tier2') {
-    return 'Most popular';
+  if (tier === RECOMMENDED_TIER) {
+    return 'Recommended';
   }
   return ELEVENLABS_TIERS.includes(tier) ? 'New' : undefined;
 }

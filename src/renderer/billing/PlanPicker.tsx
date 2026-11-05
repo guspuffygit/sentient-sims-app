@@ -17,6 +17,7 @@ import {
   LAUNCH_OFFER_DEADLINE,
   launchOfferOpen,
   offerEndsText,
+  RECOMMENDED_TIER,
   STRIPE_ENABLED,
   TierCardView,
   tierCardsView,
@@ -293,7 +294,7 @@ export function PlanPicker({ pricingLink = true }: Props) {
           <PlanCard
             key={view.plan.tier}
             view={view}
-            highlighted={hasCurrent ? view.action === 'current' : view.plan.tier === 'tier2'}
+            highlighted={hasCurrent ? view.action === 'current' : view.plan.tier === RECOMMENDED_TIER}
           />
         ))}
       </Box>

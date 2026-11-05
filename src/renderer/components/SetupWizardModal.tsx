@@ -62,6 +62,7 @@ import {
   formatUsd,
   LAUNCH_OFFER_DEADLINE,
   offerEndsText,
+  RECOMMENDED_TIER,
   TierCardView,
   tierCardsView,
   tierName,
@@ -1155,7 +1156,7 @@ function OfferPerks() {
 
 function TierRow({ view }: { view: TierCardView }) {
   const accent = tierAccent(view.plan.tier);
-  const popular = view.plan.tier === 'tier2';
+  const recommended = view.plan.tier === RECOMMENDED_TIER;
   const voices = view.perks.includes(ELEVENLABS_PLAN_PERK);
   const usage = view.bonusUsd ?? view.plan.includedUsd;
   return (
@@ -1168,8 +1169,8 @@ function TierRow({ view }: { view: TierCardView }) {
         paddingY: 0.75,
         paddingX: 1.5,
         borderRadius: 2,
-        backgroundColor: popular ? alpha(accent, 0.1) : 'transparent',
-        border: `1px solid ${popular ? alpha(accent, 0.35) : 'transparent'}`,
+        backgroundColor: recommended ? alpha(accent, 0.1) : 'transparent',
+        border: `1px solid ${recommended ? alpha(accent, 0.35) : 'transparent'}`,
       }}
     >
       <Box sx={{ width: 4, alignSelf: 'stretch', borderRadius: 2, backgroundColor: accent, flexShrink: 0 }} />
@@ -1188,7 +1189,7 @@ function TierRow({ view }: { view: TierCardView }) {
               color="success"
               sx={{ height: 18, fontWeight: 600, fontSize: '0.68rem' }}
             />
-          ) : popular ? (
+          ) : recommended ? (
             <Chip
               label={view.badge}
               size="small"

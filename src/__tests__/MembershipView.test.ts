@@ -268,9 +268,9 @@ describe('tier cards', () => {
     expect(tierCardsView(patreonPlans, patreon({ tier: 'tier1' }), beforeCutoff)[3].bonusUsd).toBeUndefined();
   });
 
-  it('badges the popular tier and the new ElevenLabs tiers', () => {
+  it('badges the recommended tier and the new ElevenLabs tier', () => {
     const views = tierCardsView(patreonPlans, none, afterCutoff);
-    expect(views.map((view) => view.badge)).toEqual([undefined, 'Most popular', 'New', 'New']);
+    expect(views.map((view) => view.badge)).toEqual([undefined, undefined, 'Recommended', 'New']);
     expect(views[3].perks).toEqual(planPerksFor('tier4'));
   });
 
