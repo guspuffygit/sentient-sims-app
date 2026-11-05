@@ -8,11 +8,13 @@ import { InteractionBugReport } from '../models/InteractionBugReport';
 import { SSEventType, WWInteractionEvent } from '../models/InteractionEvents';
 import { sendPopUpNotification } from '../util/notifyRenderer';
 import { SendLogsRequest } from '../models/SendLogsRequest';
-import { GetPatreonDebugText } from '../util/patreonUtil';
+import { getMembershipDebugText } from '../util/membershipDebug';
 import { CaughtError } from '../models/CaughtError';
 import { ApiContext } from './ApiContext';
 import { SendLogsResponse } from '../models/SendLogsResponse';
 import { redactSettingValue } from '../util/redactSetting';
+import { SentientSimsAiApiClient } from '../clients/SentientSimsAiApiClient';
+import { MembershipInfo } from '../models/UserInfo';
 
 export const webhookUrl = [
   'https://d',
@@ -29,12 +31,37 @@ export const webhookUrl = [
 ].join('');
 
 const MAX_LOG_BYTES = 3 * 1024 * 1024;
+const MEMBERSHIP_LOOKUP_MS = 5000;
 
 export class LogSendService {
   private ctx: ApiContext;
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
+  }
+
+  // Main holds the signed-in token, so the report reads /me here and the crash
+  // reporter, which has no hooks, gets the same membership block
+  async membershipForReport(): Promise<MembershipInfo | undefined> {
+    const token = this.ctx.settings.accessToken;
+    if (!token) {
+      return undefined;
+    }
+    const timeout = new Promise<undefined>((resolve) => {
+      setTimeout(() => {
+        resolve(undefined);
+      }, MEMBERSHIP_LOOKUP_MS);
+    });
+    try {
+      const me = await Promise.race([
+        new SentientSimsAiApiClient().getMe(token, this.ctx.settings.sentientSimsAIEndpoint),
+        timeout,
+      ]);
+      return me?.membership;
+    } catch (err) {
+      log.warn(`Membership lookup for the bug report failed: ${err instanceof Error ? err.message : String(err)}`);
+      return undefined;
+    }
   }
 
   static newLogId() {
@@ -56,8 +83,13 @@ export class LogSendService {
       ];
 
       if (sendLogsRequest.userAttributes) {
-        const patreonDebugTexts: string[] = GetPatreonDebugText(sendLogsRequest.userAttributes);
-        patreonDebugTexts.forEach((text) => extraData.push(text));
+        const info = await this.membershipForReport();
+        const membershipDebugTexts = getMembershipDebugText(
+          sendLogsRequest.userAttributes,
+          info,
+          this.ctx.usageLimit.current(),
+        );
+        membershipDebugTexts.forEach((text) => extraData.push(text));
       }
 
       const endData: string[] = [];

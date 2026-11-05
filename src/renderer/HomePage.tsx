@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Box, Button, Chip, Grid, Typography } from '@mui/material';
 import UpdateComponent from './UpdateComponent';
 import DebugCard from './DebugCard';
-import { ThankYouCardPatreon } from './ThankYouCard';
+import { MembershipCard } from './billing/MembershipCard';
 import { MappingLeaderboardComponent } from './components/MappingLeaderboardComponent';
 import { QuickstartCard } from './components/QuickstartCard';
 import { useSetupWizard } from './providers/SetupWizardProvider';
@@ -94,7 +94,7 @@ export default function HomePage() {
           <MappingLeaderboardComponent />
         </Grid>
         <Grid size={6}>
-          <ThankYouCardPatreon />
+          <MembershipCard />
         </Grid>
       </Grid>
     </div>

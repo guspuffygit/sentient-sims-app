@@ -73,6 +73,7 @@ export function runApi(ctx: ApiContext) {
   expressApp.delete('/memories', ctx.controller.memories.deleteAllMemories);
 
   expressApp.get('/patreon-redirect', ctx.controller.patreon.handleRedirect);
+  expressApp.get('/billing/return', ctx.controller.billing.handleReturn);
   expressApp.get('/login/callback', ctx.controller.login.handleRedirect);
 
   expressApp.get('/db/load/:sessionId', modOutOfDate);

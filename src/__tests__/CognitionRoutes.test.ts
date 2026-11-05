@@ -6,7 +6,7 @@ import { WebsocketNotification } from 'main/sentient-sims/models/ModWebsocketMes
 import { mockApiContext } from './util';
 
 describe('cognition routes', () => {
-  const ctx = mockApiContext({ port: 25204, tiers: [] });
+  const ctx = mockApiContext({ tiers: [] });
   const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server;
 

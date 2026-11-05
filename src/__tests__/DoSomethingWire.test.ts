@@ -108,7 +108,7 @@ function buildSim(name: string, simId: string, isPlayerSim: boolean): SentientSi
 }
 
 describe('Do Something wire-level requests (SentientSimsAI provider)', () => {
-  const ctx = mockApiContext({ port: 25197 });
+  const ctx = mockApiContext();
   // These tests mock the 4.6 pipeline by stage label; the default is lean (2026-10-27)
   ctx.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
   const aiClient = new AIClient(`http://localhost:${ctx.port}`);

@@ -20,22 +20,19 @@ export default defineConfig({
     // Several integration tests download from S3 / call live AI APIs; the suite mixes
     // network-bound tests (some already used 30s under jest), so use a generous default.
     testTimeout: 30000,
-    // Run test files serially in forked Electron child processes. `fileParallelism: false`
-    // (Vitest 4's replacement for poolOptions.forks.singleFork) avoids the fixed Express
-    // ports (25198/25199) used by Api/OptionsController tests colliding across workers, and
-    // keeps native-module loading deterministic.
+    // Test files run in parallel forked Electron child processes. Each worker binds its
+    // Express servers in its own port block (testPort in src/__tests__/util.tsx).
     pool: 'forks',
-    fileParallelism: false,
     // Node environment externalizes node_modules by default; force `electron` external so
     // `require('electron')` hits the runtime stub instead of Vitest trying to transform it.
     server: {
       deps: { external: ['electron'] },
     },
     coverage: {
-      provider: 'istanbul',
+      provider: 'v8',
       reportsDirectory: 'coverage',
       reporter: ['text', 'html', 'lcov'],
-      // Scope to source files only — a bare 'src/**' makes istanbul try to parse
+      // Scope to source files only. A bare 'src/**' makes the provider parse
       // non-code files (index.html, tokenizer .json) as JS and crash.
       include: ['src/**/*.{ts,tsx,js,jsx}'],
       exclude: [

@@ -1,33 +1,35 @@
-/* eslint-disable promise/always-return */
-
 import log from 'electron-log';
 import { fetchAuthSession } from '@aws-amplify/auth';
 import { useEffect } from 'react';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 
-export function refreshAuth() {
+// Forces a new ID token from Cognito and hands it to the main process, which sends it
+// on every Sentient Sims AI request. Resolves without a token when nobody is signed in.
+export async function refreshAuthToken(): Promise<string | undefined> {
   log.debug('Updating auth credentials');
-  fetchAuthSession({ forceRefresh: true })
-    .then((authSession) => {
-      if (!authSession.userSub) {
-        log.debug('User not logged in?');
-        return;
-      }
+  const authSession = await fetchAuthSession({ forceRefresh: true });
+  if (!authSession.userSub) {
+    log.debug('User not logged in?');
+    return undefined;
+  }
+  if (!authSession.credentials) {
+    return undefined;
+  }
 
-      if (!authSession.credentials) {
-        return;
-      }
+  log.debug('Updating auth token');
+  const idToken = authSession.tokens?.idToken?.toString();
+  window.electron.setSetting(SettingsEnum.ACCESS_TOKEN, idToken);
+  return idToken;
+}
 
-      log.debug('Updating auth token');
-      window.electron.setSetting(SettingsEnum.ACCESS_TOKEN, authSession.tokens?.idToken?.toString());
-    })
-    .catch((error: unknown) => {
-      if (error === 'The user is not authenticated') {
-        log.debug('User is not logged in');
-      } else {
-        log.error(`Unknown Error: ${error instanceof Error ? error.message : JSON.stringify(error)}`);
-      }
-    });
+export function refreshAuth() {
+  refreshAuthToken().catch((error: unknown) => {
+    if (error === 'The user is not authenticated') {
+      log.debug('User is not logged in');
+    } else {
+      log.error(`Unknown Error: ${error instanceof Error ? error.message : JSON.stringify(error)}`);
+    }
+  });
 }
 
 export default function useAuthCredentials() {

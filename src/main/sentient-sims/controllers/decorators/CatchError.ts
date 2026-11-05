@@ -2,6 +2,7 @@ import log from 'electron-log';
 import { Request, Response, NextFunction } from 'express';
 import { CaughtError } from 'main/sentient-sims/models/CaughtError';
 import { sendPopUpCaughtErrorNotification } from '../../util/notifyRenderer';
+import { respondUsageRejection } from '../usageRejection';
 
 const defaultStatusCode = 200;
 
@@ -22,6 +23,10 @@ export function CatchErrors(catchErrorsParameters?: CatchErrorsParameters) {
         try {
           await initialValue(req, res, next);
         } catch (err) {
+          if (respondUsageRejection(res, err)) {
+            log.info(`Usage refusal in ${fieldName}: ${err instanceof Error ? err.message : String(err)}`);
+            return;
+          }
           const statusCode = catchErrorsParameters?.statusCode ?? defaultStatusCode;
           log.error(`Error in ${fieldName}:`, err);
           const message = err instanceof Error ? err.message : String(err);

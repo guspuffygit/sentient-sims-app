@@ -8,8 +8,8 @@ import {
   openaiDefaultEndpoint,
   openrouterDefaultEndpoint,
 } from 'main/sentient-sims/constants';
-import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import { useAuth } from 'renderer/providers/AuthProvider';
+import { useMembership } from './useMembership';
 import useSetting from './useSetting';
 
 export type ProviderConnectionStatus = {
@@ -35,6 +35,7 @@ export function useProviderConnectionStatus(apiType: ApiType): ProviderConnectio
   const vllmEndpoint = useSetting(SettingsEnum.VLLM_ENDPOINT, defaultVLLMEndpoint);
   const koboldEndpoint = useSetting(SettingsEnum.KOBOLDAI_ENDPOINT, koboldaiDefaultEndpoint);
   const { userAttributes } = useAuth();
+  const { membership } = useMembership();
 
   function keyStatus(key: SettingsHookLike, endpoint: SettingsHookLike): ProviderConnectionStatus {
     const loading = key.isLoading || endpoint.isLoading;
@@ -73,8 +74,11 @@ export function useProviderConnectionStatus(apiType: ApiType): ProviderConnectio
       if (!userAttributes) {
         return { ready: false, loading: false, label: 'Login required' };
       }
-      if (!new PatreonUser(userAttributes).isMember()) {
-        return { ready: false, loading: false, label: 'Patreon membership required' };
+      if (!membership.canUseSentientSimsAI()) {
+        return { ready: false, loading: false, label: 'Membership required' };
+      }
+      if (membership.isWorkerOnly()) {
+        return { ready: true, loading: false, label: 'Connected (founder)' };
       }
       return { ready: true, loading: false, label: 'Connected' };
     }

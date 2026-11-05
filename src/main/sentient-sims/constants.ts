@@ -134,7 +134,6 @@ export const openaiDefaultImageModel = 'gpt-image-1';
 export const openaiImageModels = ['gpt-image-1', 'dall-e-3', 'dall-e-2'];
 export const novelaiDefaultModel = 'kayra-v1';
 export const sentientSimsAIDefaultModel = 'meta-llama/Llama-3.3-70B-Instruct';
-export const patreonMembershipUrl = 'https://www.patreon.com/SentientSims/membership';
 // Models the hosted Sentient Sims AI service no longer offers, mapped to what now serves
 // them. runMigrations rewrites saved picks on launch and the model picker hides them. Only
 // for the hosted service — a CustomAI server may genuinely run one of these.

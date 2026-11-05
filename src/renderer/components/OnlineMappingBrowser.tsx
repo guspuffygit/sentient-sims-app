@@ -34,7 +34,7 @@ import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined';
 import TravelExploreOutlinedIcon from '@mui/icons-material/TravelExploreOutlined';
 import { appApiUrl } from 'main/sentient-sims/constants';
-import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
+import { Membership } from 'main/sentient-sims/wrappers/Membership';
 import { BasicInteraction, BrowsableInteraction, ShadowedVersion } from 'main/sentient-sims/db/dto/InteractionDTO';
 import { Animation, BrowsableAnimation } from 'main/sentient-sims/models/Animation';
 import { MappingSource, OnlineMappingType } from 'main/sentient-sims/models/MappingSource';
@@ -707,7 +707,7 @@ export default function OnlineMappingBrowser() {
     setCurrentPage(1);
   };
 
-  const isMapper = new PatreonUser(userAttributes).isMapper();
+  const isMapper = new Membership(userAttributes).isMapper();
 
   const semanticActive = semanticEnabled && mappingType === 'interactions' && Boolean(debouncedFilter);
   const semanticLoading = semanticActive && semanticSearch?.query !== debouncedFilter;

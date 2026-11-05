@@ -5,7 +5,7 @@ import { MemoryEntity } from 'main/sentient-sims/db/entities/MemoryEntity';
 import { mockApiContext } from './util';
 
 describe('MemoriesController', () => {
-  const ctx = mockApiContext({ port: 25199 });
+  const ctx = mockApiContext();
   const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server;
 

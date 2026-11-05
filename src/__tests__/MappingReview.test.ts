@@ -10,7 +10,7 @@ import { mockApiContext } from './util';
 // against the mapping guidelines. The app's own checks always answer; the reviewer model adds what
 // they cannot see, and its absence is reported, not thrown.
 describe('POST /mappings/review', () => {
-  const ctx = mockApiContext({ port: 25211 });
+  const ctx = mockApiContext();
   const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server;
   let reviewer: MockInstance<typeof ctx.ai.runOneShot>;

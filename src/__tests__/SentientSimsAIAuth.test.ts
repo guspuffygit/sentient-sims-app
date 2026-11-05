@@ -16,7 +16,7 @@ const request: OpenAICompatibleRequest = {
 };
 
 describe('SentientSimsAIService token refresh', () => {
-  const ctx = mockApiContext({ port: 25196 });
+  const ctx = mockApiContext();
   let stub: http.Server;
   // Completions succeed only for tokens in this set
   const acceptedTokens = new Set<string>();

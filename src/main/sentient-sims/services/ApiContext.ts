@@ -1,6 +1,7 @@
 import { AIController } from '../controllers/AIController';
 import { AnimationsController } from '../controllers/AnimationsController';
 import { AssetsController } from '../controllers/AssetsController';
+import { BillingController } from '../controllers/BillingController';
 import { CognitionController } from '../controllers/CognitionController';
 import { DbController } from '../controllers/DbController';
 import { DebugController } from '../controllers/DebugController';
@@ -39,6 +40,7 @@ import { TokenCounter } from '../tokens/TokenCounter';
 import { ActionDispatcherService } from './ActionDispatcherService';
 import { AIExchangeLogService } from './AIExchangeLogService';
 import { AIService } from './AIService';
+import { UsageLimitService } from './UsageLimitService';
 import { AnimationsService } from './AnimationsService';
 import { DbService } from './DbService';
 import { DefaultDescriptionService } from './DefaultDescriptionService';
@@ -121,6 +123,7 @@ class ControllerContext {
   private readonly _updateController: UpdateController;
   private readonly _settingsController: SettingsController;
   private readonly _patreonController: PatreonController;
+  private readonly _billingController: BillingController;
   private readonly _loginController: LoginController;
   private readonly _debugController: DebugController;
   private readonly _interactionDescriptionController: InteractionDescriptionController;
@@ -147,6 +150,7 @@ class ControllerContext {
     this._updateController = new UpdateController(ctx);
     this._settingsController = new SettingsController(ctx);
     this._patreonController = new PatreonController(ctx);
+    this._billingController = new BillingController(ctx);
     this._loginController = new LoginController(ctx);
     this._debugController = new DebugController(ctx);
     this._interactionDescriptionController = new InteractionDescriptionController(ctx);
@@ -198,6 +202,10 @@ class ControllerContext {
 
   get patreon(): PatreonController {
     return this._patreonController;
+  }
+
+  get billing(): BillingController {
+    return this._billingController;
   }
 
   get login(): LoginController {
@@ -279,6 +287,7 @@ export class ApiContext {
   private readonly _animationsService: AnimationsService;
   private readonly _interactionService: InteractionService;
   private readonly _aiService: AIService;
+  private readonly _usageLimitService: UsageLimitService;
   private readonly _generationQueueService: GenerationQueueService;
   private readonly _mappingService: MappingService;
   private readonly _sceneService: SceneService;
@@ -455,6 +464,7 @@ export class ApiContext {
     this._promptBuilder = new PromptRequestBuilderService(this);
     this._interactionService = new InteractionService(this);
 
+    this._usageLimitService = new UsageLimitService(this);
     this._aiService = new AIService(this);
     this._generationQueueService = new GenerationQueueService(this);
     this._mappingService = new MappingService();
@@ -562,6 +572,10 @@ export class ApiContext {
 
   get interactions(): InteractionService {
     return this._interactionService;
+  }
+
+  get usageLimit(): UsageLimitService {
+    return this._usageLimitService;
   }
 
   get ai(): AIService {

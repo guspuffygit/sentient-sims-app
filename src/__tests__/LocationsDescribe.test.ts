@@ -10,7 +10,7 @@ import { mockApiContext, mockEnvironment } from './util';
 // not reported this app run is a 409, not a description written from no facts; a provider error comes back in plain words.
 describe('POST /locations/:locationId/describe', () => {
   const { directoryService, settingsService } = mockEnvironment();
-  const ctx = mockApiContext({ port: 25209, directoryService, settingsService });
+  const ctx = mockApiContext({ directoryService, settingsService });
   const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server;
   const prompts: string[] = [];

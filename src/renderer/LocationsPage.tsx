@@ -27,7 +27,7 @@ import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
+import { Membership } from 'main/sentient-sims/wrappers/Membership';
 import AppCard from './AppCard';
 import { EmptyState } from './components/EmptyState';
 import { MemoryEditInput } from './components/MemoryEditInput';
@@ -100,7 +100,7 @@ export default function LocationsPage() {
   const { userAttributes } = useAuth();
   const { showMessage } = useSnackBar();
   const navigate = useNavigate();
-  const isMapper = new PatreonUser(userAttributes).isMapper();
+  const isMapper = new Membership(userAttributes).isMapper();
 
   function getLocations() {
     client.locations

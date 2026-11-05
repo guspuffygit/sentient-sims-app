@@ -59,6 +59,9 @@ export default function ipcHandlers(ctx: ApiContext, voiceInput: VoiceInputServi
       }
     });
   });
+  ipcMain.on('usage-header', (_event: IpcMainEvent, value: string) => {
+    ctx.usageLimit.record(value);
+  });
   ipcMain.on('open-browser-link', (_event: IpcMainEvent, link: string) => {
     void shell.openExternal(link);
   });

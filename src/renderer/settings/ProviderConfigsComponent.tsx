@@ -2,10 +2,8 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Alert,
   Autocomplete,
   Box,
-  Chip,
   createFilterOptions,
   Button,
   CircularProgress,
@@ -58,19 +56,19 @@ import {
   novelaiDefaultModel,
   openaiDefaultModel,
   openrouterDefaultModel,
-  patreonMembershipUrl,
   sentientSimsAIDefaultEmbeddingModel,
   sentientSimsAIDefaultModel,
 } from 'main/sentient-sims/constants';
 import { AIHealthCheckResponse, AITestStatus } from 'main/sentient-sims/models/AIHealthCheckResponse';
 import { AIModel } from 'main/sentient-sims/models/AIModel';
 import { parseJsonResponse } from 'main/sentient-sims/clients/jsonResponse';
-import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import HelpButton from 'renderer/components/HelpButton';
-import handleOpenExternalLink from 'renderer/hooks/handleOpenExternalLink';
 import useSetting from '../hooks/useSetting';
 import { useAIModels } from '../hooks/useAIModels';
 import { useProviderConnectionStatus } from '../hooks/useProviderConnectionStatus';
+import { useMembership } from '../hooks/useMembership';
+import { chatCostLabel, SUBSCRIPTION_REQUIRED_LABEL } from '../billing/membershipView';
+import { useRateCard } from '../billing/useRateCard';
 import { useAISettings } from '../providers/AISettingsProvider';
 import { useAuth } from '../providers/AuthProvider';
 import { ProviderConnectionPanel } from './ProviderConnectionPanel';
@@ -186,6 +184,37 @@ function useAutoApiType(capableTypes: ApiType[]): ApiType {
 
 const modelFilter = createFilterOptions<string>();
 
+const CAPABILITY_FEATURE: Record<ProviderCapability, string> = {
+  text: 'This model',
+  image: 'Image generation',
+  embedding: 'Memory search',
+};
+
+// A founder without a plan reaches only the Sentient Sims worker models. The server
+// flags the chat models it cannot serve them; images and embeddings always need a plan.
+function useNeedsSubscription(capability: ProviderCapability) {
+  const { membership } = useMembership();
+  const workerOnly = membership.isWorkerOnly();
+  const sentientSimsModels = useAIModels(ApiType.SentientSimsAI, capability === 'text' && workerOnly);
+  return (apiType: ApiType, model?: string) => {
+    if (!workerOnly || (apiType !== ApiType.SentientSimsAI && apiType !== ApiType.CustomAI)) {
+      return false;
+    }
+    if (capability !== 'text') {
+      return true;
+    }
+    return Boolean(sentientSimsModels.data?.some((aiModel) => aiModel.name === model && aiModel.subscriberOnly));
+  };
+}
+
+function subscriptionText(capability: ProviderCapability) {
+  return `${CAPABILITY_FEATURE[capability]} needs a Sentient Sims subscription. Founders can use the models that run on Sentient Sims servers.`;
+}
+
+function SubscriptionNote({ show }: { show: boolean }) {
+  return show ? <FormHelperText error>{SUBSCRIPTION_REQUIRED_LABEL}</FormHelperText> : null;
+}
+
 type ProviderConfigDialogProps = {
   capability: ProviderCapability;
   initial?: AIProviderConfig;
@@ -207,8 +236,6 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
   const [modelFilterActive, setModelFilterActive] = useState(false);
   const [contextTokens, setContextTokens] = useState(initial?.contextTokens ? String(initial.contextTokens) : '');
   const [testResult, setTestResult] = useState<AITestStatus | undefined>();
-  const { userAttributes } = useAuth();
-  const patreonUser = new PatreonUser(userAttributes);
 
   const connection = useProviderConnectionStatus(apiType);
   const modelSelectionSupported = capability !== 'text' || apiType !== ApiType.KoboldAI;
@@ -225,16 +252,18 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
   );
   const modelOptions = capability === 'text' ? [...modelsByName.keys()] : staticSuggestions;
   const modelsFetching = capability === 'text' && aiModels.isFetching;
+  const needsSubscription = useNeedsSubscription(capability);
+  const modelNeedsSubscription = needsSubscription(apiType, model.trim());
+  const rateCard = useRateCard(capability === 'text' && apiType === ApiType.SentientSimsAI);
+  const costCaption = (option: string): string | undefined => {
+    const cost = apiType === ApiType.SentientSimsAI ? rateCard.data?.chat[option] : undefined;
+    if (!cost) {
+      return undefined;
+    }
+    return option === rateCard.data?.base_chat ? `${chatCostLabel(cost)}, baseline` : chatCostLabel(cost);
+  };
 
   const missingModel = modelRequired && model.trim() === '';
-  // Tier-gated models stay in the list so lower tiers can see them, but the
-  // server refuses them, so saving one is blocked and the upgrade path shown
-  const selectedModel = modelsByName.get(model.trim());
-  const upgradeRequired = selectedModel !== undefined && !patreonUser.canUseModel(selectedModel);
-  const lockedModel = (option: string) => {
-    const aiModel = modelsByName.get(option);
-    return aiModel !== undefined && !patreonUser.canUseModel(aiModel);
-  };
 
   const handleProviderChange = (value: unknown) => {
     const type = ApiTypeFromValue(value);
@@ -351,20 +380,22 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
                 }
               }}
               loading={modelsFetching}
-              renderOption={({ key, ...optionProps }, option) => {
-                const requiresTier = modelsByName.get(option)?.requiresTier;
+              renderOption={(props, option) => {
+                const { key, ...optionProps } = props;
+                const caption = [
+                  costCaption(option),
+                  modelsByName.get(option)?.subscriberOnly ? SUBSCRIPTION_REQUIRED_LABEL : undefined,
+                ]
+                  .filter(Boolean)
+                  .join(' · ');
                 return (
                   <li key={key} {...optionProps}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: 1 }}>
-                      <span>{option}</span>
-                      {requiresTier ? (
-                        <Chip
-                          size="small"
-                          label="Tier 2"
-                          color={lockedModel(option) ? 'warning' : 'success'}
-                          variant="outlined"
-                          sx={{ marginLeft: 2 }}
-                        />
+                    <Box>
+                      <Typography variant="body2">{option}</Typography>
+                      {caption ? (
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          {caption}
+                        </Typography>
                       ) : null}
                     </Box>
                   </li>
@@ -435,24 +466,7 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
             helperText="Only for a server that takes fewer tokens than the model allows: prompts are trimmed to fit this, prompt and reply together."
           />
         ) : null}
-        {upgradeRequired ? (
-          <Alert
-            severity="warning"
-            sx={{ marginTop: 2 }}
-            action={
-              <Button
-                color="inherit"
-                size="small"
-                href={patreonMembershipUrl}
-                onClick={handleOpenExternalLink(patreonMembershipUrl)}
-              >
-                Upgrade
-              </Button>
-            }
-          >
-            {selectedModel.displayName} is a Tier 2 perk. Upgrade your Patreon membership to Tier 2 to use it.
-          </Alert>
-        ) : null}
+        {modelNeedsSubscription ? <FormHelperText error>{subscriptionText(capability)}</FormHelperText> : null}
       </DialogContent>
       <DialogActions>
         <Button
@@ -468,7 +482,7 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
           <FormHelperText error={Boolean(testResult.error)}>{testResult.error || testResult.status}</FormHelperText>
         ) : null}
         <Button onClick={onCancel}>Cancel</Button>
-        <Button variant="contained" disabled={missingModel || upgradeRequired} onClick={handleSave}>
+        <Button variant="contained" disabled={missingModel} onClick={handleSave}>
           Save
         </Button>
       </DialogActions>
@@ -495,6 +509,7 @@ export function ProviderConfigsComponent({
     sentientSimsAIDefaultEmbeddingModel,
   );
 
+  const needsSubscription = useNeedsSubscription(capability);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<AIProviderConfig | undefined>();
   const [testResults, setTestResults] = useState<Record<string, AITestStatus | undefined>>({});
@@ -621,7 +636,10 @@ export function ProviderConfigsComponent({
                 </TableCell>
                 <TableCell>Auto — follows your main provider (currently {ApiTypeName(autoApiType)})</TableCell>
                 <TableCell>{ApiTypeName(autoApiType)}</TableCell>
-                <TableCell>{autoModel}</TableCell>
+                <TableCell>
+                  {autoModel}
+                  <SubscriptionNote show={needsSubscription(autoApiType, autoModel)} />
+                </TableCell>
                 <TableCell align="right" />
               </TableRow>
             ) : null}
@@ -647,7 +665,10 @@ export function ProviderConfigsComponent({
                     ) : null}
                   </TableCell>
                   <TableCell>{ApiTypeName(ApiTypeFromValue(config.apiType))}</TableCell>
-                  <TableCell>{config.model ?? 'Provider default'}</TableCell>
+                  <TableCell>
+                    {config.model ?? 'Provider default'}
+                    <SubscriptionNote show={needsSubscription(ApiTypeFromValue(config.apiType), config.model)} />
+                  </TableCell>
                   <TableCell align="right">
                     {capability === 'text' ? (
                       <Button

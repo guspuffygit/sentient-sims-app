@@ -101,7 +101,7 @@ function fakeGenerate(request: OpenAICompatibleRequest): Promise<SimsGenerateRes
 }
 
 describe('Do Something event', () => {
-  const ctx = mockApiContext({ port: 25199 });
+  const ctx = mockApiContext();
   const aiClient = new AIClient(`http://localhost:${ctx.port}`);
   let server: Server;
 

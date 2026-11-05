@@ -2,7 +2,7 @@ import fs from 'fs';
 import { Request, Response } from 'express';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { Animation } from 'main/sentient-sims/models/Animation';
-import { mockApiContext, mockEnvironment } from './util';
+import { mockApiContext, mockEnvironment, testPort } from './util';
 import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 
 describe('AnimationsController', () => {
@@ -16,7 +16,7 @@ describe('AnimationsController', () => {
     const { directoryService, settingsService } = mockEnvironment();
     ctx = new ApiContext({
       getAssetPath,
-      port: 25198,
+      port: testPort(),
       settingsService,
       directoryService,
       appVersion: '1.0.0',

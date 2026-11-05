@@ -1,3 +1,4 @@
+import { respondUsageRejection } from './usageRejection';
 import { Request, Response } from 'express';
 import { randomUUID } from 'crypto';
 import log from 'electron-log';
@@ -158,6 +159,9 @@ export class CognitionController {
       log.info(`[Cognition] outcome ${event.request_id ?? '(uncorrelated)'}: ${observation}`);
       return res.json({ ok: true, correlated: pending !== undefined, memory_id: memory?.id });
     } catch (err) {
+      if (respondUsageRejection(res, err)) {
+        return res;
+      }
       log.error('Error handling cognition outcome', err);
       return res.status(500).json({ error: errorMessage(err) });
     }
@@ -223,6 +227,9 @@ export class CognitionController {
       await this.ctx.ai.runSceneReflection(previousScene, { simId, simName: who }, 'sleep', clock);
       return res.json({ ok: true, reflected: true, scene_id: previousScene.sceneId });
     } catch (err) {
+      if (respondUsageRejection(res, err)) {
+        return res;
+      }
       log.error('Error handling sleep boundary', err);
       return res.status(500).json({ error: errorMessage(err) });
     }
@@ -249,6 +256,9 @@ export class CognitionController {
       log.info(`[Cognition] perception ${full.request_id ?? ''} for sim ${full.sim_id}:\n${formatted}`);
       return res.json({ ok: true, formatted });
     } catch (err) {
+      if (respondUsageRejection(res, err)) {
+        return res;
+      }
       log.error('Error handling perception snapshot', err);
       return res.status(500).json({ error: errorMessage(err) });
     }
@@ -270,6 +280,9 @@ export class CognitionController {
       this.ctx.actionDispatcher.sendToMod(message);
       return res.json({ request_id: message.request_id });
     } catch (err) {
+      if (respondUsageRejection(res, err)) {
+        return res;
+      }
       log.error('Error dispatching perception request', err);
       return res.status(500).json({ error: errorMessage(err) });
     }
@@ -286,6 +299,9 @@ export class CognitionController {
       const requestId = this.ctx.actionDispatcher.dispatch(intent);
       return res.json({ request_id: requestId });
     } catch (err) {
+      if (respondUsageRejection(res, err)) {
+        return res;
+      }
       log.error('Error dispatching debug enqueue', err);
       return res.status(500).json({ error: errorMessage(err) });
     }

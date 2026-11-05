@@ -7,6 +7,7 @@ export type ThankYouUser = {
   avatar: string;
 };
 
+// thankyou.json comes from Discord roles; tier3 and tier4 appear once the bot has those roles
 export type ThankYou = {
   tier1: ThankYouUser[];
   tier2: ThankYouUser[];

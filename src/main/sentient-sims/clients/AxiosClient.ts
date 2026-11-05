@@ -1,6 +1,12 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import log from 'electron-log';
 import { UnexpectedStringResponseError } from '../exceptions/UnexpectedStringResponseError';
+import { UsageLimitError, parseUsageLimitRefusal } from '../exceptions/UsageLimitError';
+import {
+  SUBSCRIBE_HINT,
+  SubscriptionRequiredError,
+  parseSubscriptionRequired,
+} from '../exceptions/SubscriptionRequiredError';
 import { SentientSimsHTTPStatusCode } from '../models/SentientSimsHTTPStatusCode';
 
 export const axiosClient = axios.create({
@@ -18,15 +24,6 @@ axiosClient.interceptors.request.use((config) => {
 });
 
 const defaultMaxRetries = 3;
-
-// The server names the model and the tier it needs; the hint points at the fix
-export function tierUpgradeMessage(body: unknown): string {
-  const reason =
-    body && typeof body === 'object' && typeof (body as { error?: unknown }).error === 'string'
-      ? (body as { error: string }).error
-      : 'This model needs a higher Patreon tier';
-  return `${reason}. Upgrade on Patreon or pick another model in the AI provider settings.`;
-}
 
 function retryElseThrow(error: Error, maxRetries: number, config?: AxiosRequestConfig) {
   if (typeof config?.retryCount === 'number' && config.retryCount < maxRetries) {
@@ -82,10 +79,20 @@ axiosClient.interceptors.response.use(
         );
       }
       case SentientSimsHTTPStatusCode.NOT_MEMBER_EXCEPTION: {
-        throw new Error('Must be a Founder or Patron to use the Sentient Sims Uncensored AI Server.');
+        const subscriptionRequired = parseSubscriptionRequired(error.response?.data);
+        if (subscriptionRequired) {
+          throw new SubscriptionRequiredError(`${subscriptionRequired} ${SUBSCRIBE_HINT}`);
+        }
+        throw new Error(`A Sentient Sims membership is needed to use the Sentient Sims AI Server. ${SUBSCRIBE_HINT}`);
       }
-      case SentientSimsHTTPStatusCode.TIER_UPGRADE_REQUIRED: {
-        throw new Error(tierUpgradeMessage(error.response?.data));
+      case SentientSimsHTTPStatusCode.USAGE_USED_UP: {
+        // A usage refusal holds until the member changes a setting or the period
+        // resets, so a retry would only repeat it; a provider rate limit still retries
+        const refusal = parseUsageLimitRefusal(error.response?.data);
+        if (refusal) {
+          throw new UsageLimitError(refusal);
+        }
+        return retryElseThrow(error, defaultMaxRetries, error.config);
       }
       default: {
         return retryElseThrow(error, 3, error.config);

@@ -49,6 +49,14 @@ export class SentientSimsAIService extends VLLMAIService implements ImageGenerat
     return this.ctx.settings.sentientSimsAIModel;
   }
 
+  protected chatHeaders(): Record<string, string> {
+    return this.ctx.usageLimit.laneHeader();
+  }
+
+  protected recordUsage(headers: unknown) {
+    this.ctx.usageLimit.record(headers);
+  }
+
   protected modelSettingsApiType(): ApiType {
     return ApiType.SentientSimsAI;
   }
@@ -112,6 +120,7 @@ export class SentientSimsAIService extends VLLMAIService implements ImageGenerat
     try {
       return await makeRequest();
     } catch (err) {
+      this.ctx.usageLimit.recordError(err);
       const unauthorized = err instanceof AxiosError && err.response?.status === 401;
       if (!unauthorized || !this.hasDecodableToken()) {
         throw err;
@@ -150,6 +159,7 @@ export class SentientSimsAIService extends VLLMAIService implements ImageGenerat
       }),
     );
 
+    this.ctx.usageLimit.record(response.headers);
     const imageBase64 = await this.toImageBase64(response.data);
     if (!imageBase64) {
       log.error(`No image data returned from Sentient Sims AI:\n${JSON.stringify(response.data)}`);
@@ -180,6 +190,7 @@ export class SentientSimsAIService extends VLLMAIService implements ImageGenerat
       }),
     );
 
+    this.ctx.usageLimit.record(response.headers);
     return response.data.text;
   }
 

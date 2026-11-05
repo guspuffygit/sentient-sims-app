@@ -43,6 +43,15 @@ export class VLLMAIService implements GenerationService {
     return `${this.ctx.settings.vllmModel}`;
   }
 
+  // Headers only chat completions carry; the hosted service adds the lane
+  protected chatHeaders(): Record<string, string> {
+    return {};
+  }
+
+  // Only the hosted service meters usage, so a self-hosted endpoint never reaches the meter
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected recordUsage(headers: unknown) {}
+
   // The provider type used when looking up model settings; SentientSimsAIService
   // overrides this so remote model settings sync only happens for that provider.
   protected modelSettingsApiType(): ApiType {
@@ -146,8 +155,9 @@ export class VLLMAIService implements GenerationService {
       baseURL: this.serviceUrl(),
       timeout: control?.timeoutMs ?? this.ctx.settings.generationTimeoutSeconds * 1000,
       signal: control?.signal,
-      headers: this.getAuthorizationHeaders(request.purpose),
+      headers: { ...this.getAuthorizationHeaders(request.purpose), ...this.chatHeaders() },
     });
+    this.recordUsage(response.headers);
 
     const result = response.data;
     log.debug(`Info about it: ${response.status} ${JSON.stringify(result, null, 2)}`);

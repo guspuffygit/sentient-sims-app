@@ -11,7 +11,7 @@ import { mockApiContext, mockEnvironment } from './util';
 // MCP tools have had no way to ask either question until now.
 describe('sim fact routes', () => {
   const { directoryService, settingsService } = mockEnvironment();
-  const ctx = mockApiContext({ port: 25206, directoryService, settingsService });
+  const ctx = mockApiContext({ directoryService, settingsService });
   const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server;
 

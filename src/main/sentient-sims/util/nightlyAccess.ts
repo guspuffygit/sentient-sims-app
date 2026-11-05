@@ -1,9 +1,9 @@
-import { PatreonUser } from '../wrappers/PatreonUser';
+import { Membership } from '../wrappers/Membership';
 
-export function getNightlyAccess(patreonUser: PatreonUser) {
-  const disableNightly = !patreonUser.isMember();
-  let nightlyText = 'Patreon Early Access';
-  if (patreonUser.isFounder()) {
+export function getNightlyAccess(membership: Membership) {
+  const disableNightly = !membership.isMember();
+  let nightlyText = 'Member Early Access';
+  if (membership.isFounder()) {
     nightlyText = 'Founder Early Access';
   }
   return { disableNightly, nightlyText };

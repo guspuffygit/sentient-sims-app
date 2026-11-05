@@ -20,17 +20,19 @@ import { elevenLabsVoiceCatalog } from 'main/sentient-sims/formatter/ElevenLabsV
 import { elevenLabsCatalogVoiceLabel } from 'renderer/components/ElevenLabsCatalogSimVoiceSelect';
 import { TestVoiceButton } from 'renderer/components/VoiceTestButton';
 import { useTTS } from 'renderer/providers/AudioContextProvider';
-import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
+import { useMembership } from 'renderer/hooks/useMembership';
+import { SUBSCRIPTION_REQUIRED_LABEL } from 'renderer/billing/membershipView';
+import { PLAN_TAB, SUBSCRIBE_HINT } from 'main/sentient-sims/exceptions/SubscriptionRequiredError';
 import SpeedIcon from '@mui/icons-material/Speed';
 import { useAuth } from '../../providers/AuthProvider';
 
 export function SentientSimsAIVoiceSettingsComponent() {
   const { userAttributes } = useAuth();
 
-  const patreonUser = new PatreonUser(userAttributes);
+  const { membership } = useMembership();
 
   const showLogInError = !userAttributes;
-  const showMemberError = !patreonUser.isMember();
+  const showMemberError = !membership.canUseSentientSimsAI();
 
   const errors: JSX.Element[] = [];
   if (showLogInError) {
@@ -43,7 +45,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
   if (showMemberError) {
     errors.push(
       <FormHelperText sx={{ marginBottom: 2 }} error>
-        You must be a Founder or Patron to use the Sentient Sims Uncensored AI
+        A Sentient Sims membership is needed for Sentient Sims AI voices. {SUBSCRIBE_HINT}
       </FormHelperText>,
     );
   }
@@ -53,23 +55,40 @@ export function SentientSimsAIVoiceSettingsComponent() {
     defaultSentientSimsAITTSSettings,
   );
 
+  // Orpheus runs at an outside provider, so a founder without a plan cannot use it
+  const workerOnly = membership.isWorkerOnly();
+  const needsSubscription = (model: string) => workerOnly && toSpeechModel(model) === SentientSimsAISpeechModel.ORPHEUS;
+  const showSubscriptionError = needsSubscription(sentientsimsaiTtsSettings.value.model);
+  if (showSubscriptionError) {
+    errors.push(
+      <FormHelperText sx={{ marginBottom: 2 }} error>
+        Orpheus voices need a Sentient Sims subscription. Founders can use the Kokoro voices, or subscribe from{' '}
+        {PLAN_TAB}.
+      </FormHelperText>,
+    );
+  }
+
   // ElevenLabs voices come with Tier 3 and Tier 4
-  const includesElevenLabs = patreonUser.canUseElevenLabs();
+  const includesElevenLabs = membership.canUseElevenLabs();
   const isElevenLabs = isElevenLabsSpeechModel(sentientsimsaiTtsSettings.value.model);
   const showTierError = isElevenLabs && !includesElevenLabs;
   if (showTierError) {
     errors.push(
       <FormHelperText sx={{ marginBottom: 2 }} error>
-        ElevenLabs voices need a Tier 3 or Tier 4 Patreon membership. Upgrade on Patreon, or pick Kokoro or Orpheus.
+        ElevenLabs voices need a Tier 3 or Tier 4 Sentient Sims membership. Upgrade from {PLAN_TAB}, or pick Kokoro or
+        Orpheus.
       </FormHelperText>,
     );
   }
 
   const modelLabel = (model: string) => {
-    if (!isElevenLabsSpeechModel(model)) return speechModelName(model);
-    return includesElevenLabs
-      ? `${speechModelName(model)} (Tier 3 and 4)`
-      : `${speechModelName(model)} (needs Tier 3 or 4)`;
+    if (needsSubscription(model)) return `${speechModelName(model)} (${SUBSCRIPTION_REQUIRED_LABEL.toLowerCase()})`;
+    if (isElevenLabsSpeechModel(model)) {
+      return includesElevenLabs
+        ? `${speechModelName(model)} (Tier 3 and 4)`
+        : `${speechModelName(model)} (needs Tier 3 or 4)`;
+    }
+    return speechModelName(model);
   };
 
   const modelMenuItems: any[] = [];
@@ -264,7 +283,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
         </Box>
       )}
       <Box sx={{ marginTop: 2.5 }}>
-        <TestVoiceButton disabled={showLogInError || showMemberError || showTierError} />
+        <TestVoiceButton disabled={showLogInError || showMemberError || showSubscriptionError || showTierError} />
       </Box>
       {tts.error && (
         <Box sx={{ marginTop: 1.5 }}>

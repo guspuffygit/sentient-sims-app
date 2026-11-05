@@ -2,13 +2,11 @@ import { MenuItem, Select, SelectChangeEvent, Tooltip } from '@mui/material';
 import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { getNightlyAccess } from 'main/sentient-sims/util/nightlyAccess';
-import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import useSetting, { SettingsHook } from 'renderer/hooks/useSetting';
-import { useAuth } from 'renderer/providers/AuthProvider';
+import { useMembership } from 'renderer/hooks/useMembership';
 
 export function ReleaseTypeSelector() {
-  const { userAttributes } = useAuth();
-  const patreonUser = new PatreonUser(userAttributes);
+  const { membership } = useMembership();
   const releaseType: SettingsHook<string> = useSetting<string>(SettingsEnum.MOD_RELEASE, 'main');
 
   const handleChangeReleaseType = async (event: SelectChangeEvent): Promise<void> => {
@@ -17,10 +15,10 @@ export function ReleaseTypeSelector() {
     await releaseType.setSetting(newType);
   };
 
-  const { disableNightly, nightlyText } = getNightlyAccess(patreonUser);
+  const { disableNightly, nightlyText } = getNightlyAccess(membership);
 
   return (
-    <Tooltip title="Select the mod release channel. Patreon members get early access to nightly builds" placement="top">
+    <Tooltip title="Select the mod release channel. Members get early access to nightly builds" placement="top">
       <Select
         size="small"
         labelId="release-type-select-label"

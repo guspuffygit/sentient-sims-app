@@ -1,9 +1,6 @@
-import { Box, Button, Typography } from '@mui/material';
-import { PropsWithChildren } from 'react';
+import { Button, Typography } from '@mui/material';
 import { appApiUrl } from 'main/sentient-sims/constants';
-import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
-import { useAuth } from './providers/AuthProvider';
-import { useDebugMode } from './providers/DebugModeProvider';
+import { Membership } from 'main/sentient-sims/wrappers/Membership';
 
 export const getPatreonOauthUrl = (): string => {
   const redirectUrl = `${appApiUrl}/patreon-redirect`;
@@ -65,66 +62,14 @@ export function PatreonActionButton({ url, onClick, label, variant = 'contained'
   );
 }
 
-function CenteredBox({ children }: PropsWithChildren) {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        margin: 2,
-        marginTop: 4,
-      }}
-    >
-      {children}
-    </Box>
-  );
-}
-
-interface SubscribedPatreonProps {
-  patreonUser: PatreonUser;
-}
-
-function SubscribedPatreon({ patreonUser }: SubscribedPatreonProps) {
-  const { enableDebugMode } = useDebugMode();
-  const tierName = patreonUser.getSubscriptionLevel().replace(/^tier(\d)$/, 'Tier $1');
-  let text = `Thank you for being a ${tierName} Patreon subscriber!`;
-  if (patreonUser.isDev()) {
-    text = `Thank you for being a Dev!`;
+// Patreon sign-in, kept for the patrons whose plan comes through Patreon
+export function PatreonLinkSection({ membership }: { membership: Membership }) {
+  if (membership.isPatreonLinked()) {
+    return (
+      <Typography variant="body2" align="center" sx={{ color: 'text.secondary' }}>
+        Patreon account linked
+      </Typography>
+    );
   }
-
-  return (
-    <div>
-      {text === 'Thank you for being a Dev!' ? (
-        <Button
-          onClick={() => {
-            enableDebugMode();
-          }}
-        >
-          {text}
-        </Button>
-      ) : (
-        <Typography variant="h5" align="center">
-          {text}
-        </Typography>
-      )}
-    </div>
-  );
-}
-
-export default function PatreonComponent() {
-  const { userAttributes } = useAuth();
-  if (!userAttributes) {
-    return null;
-  }
-  const patreonUser = new PatreonUser(userAttributes);
-  let content = <PatreonButton url={getPatreonOauthUrl()} />;
-  if (patreonUser.isPatreonLinked() || patreonUser.isDev()) {
-    if (patreonUser.isDev() || patreonUser.getSubscriptionLevel() !== 'free') {
-      content = <SubscribedPatreon patreonUser={patreonUser} />;
-    } else {
-      content = <PatreonButton url="https://www.patreon.com/SentientSims" />;
-    }
-  }
-
-  return <CenteredBox>{content}</CenteredBox>;
+  return <PatreonButton url={getPatreonOauthUrl()} />;
 }

@@ -11,6 +11,8 @@ import { SetupWizardProvider } from './providers/SetupWizardProvider';
 import { PatreonLinkingModal } from './components/PatreonLinkingModal';
 import { Announcements } from './components/Announcements';
 import { LoginModalProvider } from './providers/LoginModalProvider';
+import { BillingReturnListener } from './billing/BillingReturnListener';
+import { TierChangeToast } from './billing/TierChangeToast';
 
 export default function App() {
   const [hideSideBar, setHideSideBar] = useState(() => localStorage.getItem('hideSideBar') === 'true');
@@ -45,6 +47,8 @@ export default function App() {
           <AnimationMappingComponent />
           <InteractionMappingComponent />
           <PatreonLinkingModal />
+          <BillingReturnListener />
+          <TierChangeToast />
         </Container>
       </SetupWizardProvider>
     </LoginModalProvider>

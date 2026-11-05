@@ -181,7 +181,7 @@ describe('core without tiers', () => {
   });
 
   it("serves the core routes, Gus's cognition routes among them, and not the autonomy ones", async () => {
-    const ctx = mockApiContext({ tiers: [], port: 25197 });
+    const ctx = mockApiContext({ tiers: [] });
     const server: Server = runApi(ctx);
     try {
       const base = `http://127.0.0.1:${ctx.port}`;

@@ -10,6 +10,18 @@ export function randomString() {
   return Math.random().toString(36).substring(2, 12);
 }
 
+// Test files run in parallel workers, so each worker gets its own block of API ports.
+// The block sits below every OS ephemeral range and clear of the app's own 2514x ports.
+const PORTS_PER_WORKER = 20;
+let portsTaken = 0;
+
+export function testPort(): number {
+  const worker = Number(process.env.VITEST_POOL_ID ?? 1);
+  const offset = portsTaken % PORTS_PER_WORKER;
+  portsTaken += 1;
+  return 26000 + worker * PORTS_PER_WORKER + offset;
+}
+
 export function mockDirectoryService(mockPath?: string, settingsService?: SettingsService): DirectoryService {
   const directoryService = new DirectoryService(settingsService ?? new SettingsService());
   const fakePath = mockPath ?? path.join(os.tmpdir(), 'sentient-sims-app-test', randomString());
@@ -49,7 +61,7 @@ export function mockApiContext(params?: MockApiContextParams): ApiContext {
   const { directoryService, settingsService } = mockEnvironment();
   return new ApiContext({
     getAssetPath: params?.getAssetPath ?? getAssetPath,
-    port: params?.port ?? 25198,
+    port: params?.port ?? testPort(),
     settingsService: params?.settingsService ?? settingsService,
     directoryService: params?.directoryService ?? directoryService,
     appVersion: '1.0.0',

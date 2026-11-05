@@ -1,3 +1,4 @@
+import { reportUsageHeader } from 'renderer/billing/reportUsageHeader';
 import { useCallback } from 'react';
 import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
@@ -55,6 +56,7 @@ export function useVoiceTestPlayback() {
         }),
       });
 
+      reportUsageHeader(response);
       if (!response.ok) {
         throw new Error(`Unable to fetch audio: ${response.status}`);
       }

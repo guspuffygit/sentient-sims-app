@@ -4,10 +4,8 @@ export type AIModel = {
   // Pins a model to the top of the selector in a deliberate order (lower first).
   // Unset models sort alphabetically below any that set it.
   sortOrder?: number;
-  // The Sentient Sims AI subscription level the model needs ('tier2'); unset
-  // when every member may use it. The picker still lists the model so lower
-  // tiers can see what an upgrade buys.
-  requiresTier?: string;
+  // Listed for a founder without a plan; using it needs a subscription
+  subscriberOnly?: boolean;
 };
 
 export type ModelResponse = {
@@ -17,7 +15,7 @@ export type ModelResponse = {
   owned_by?: string;
   displayName?: string;
   name?: string;
-  requiresTier?: string;
+  subscriberOnly?: boolean;
 };
 
 export type AIModelResponse = {
@@ -35,11 +33,7 @@ export function responseToAIModels(response: AIModelResponse): AIModel[] {
     if (!displayName) {
       displayName = name;
     }
-    aiModels.push({
-      name,
-      displayName,
-      ...(modelResponse.requiresTier ? { requiresTier: modelResponse.requiresTier } : {}),
-    });
+    aiModels.push(modelResponse.subscriberOnly ? { name, displayName, subscriberOnly: true } : { name, displayName });
   });
 
   return aiModels;

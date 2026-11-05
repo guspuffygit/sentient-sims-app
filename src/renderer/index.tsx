@@ -36,6 +36,7 @@ import { AmplifyConfig } from './AmplifyConfig';
 import OnlineMappingBrowser from './components/OnlineMappingBrowser';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
 import { rendererTiers } from './tiers/merge';
+import PricingPage from './billing/PricingPage';
 
 Amplify.configure(AmplifyConfig);
 
@@ -79,6 +80,10 @@ const router = createMemoryRouter([
       {
         path: '/memories',
         element: <MemoriesPage />,
+      },
+      {
+        path: '/pricing',
+        element: <PricingPage />,
       },
       {
         path: '/last-exception',

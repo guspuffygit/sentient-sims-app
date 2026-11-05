@@ -72,7 +72,7 @@ const ARLENE = makeSim('Arlene Zhang', '2', true);
 const WATCH = 'petInvestigate_Obsess_Watch_Instrument_Vocal';
 
 describe('repeated scenes', () => {
-  const ctx: ApiContext = mockApiContext({ port: 25204 });
+  const ctx: ApiContext = mockApiContext();
   const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server;
   const labels: string[] = [];

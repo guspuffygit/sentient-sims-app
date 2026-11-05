@@ -65,6 +65,19 @@ const electronHandler = {
 
     return () => ipcRenderer.removeListener('refresh-user-attributes', callback);
   },
+  reportUsageHeader: (value: string) => {
+    ipcRenderer.send('usage-header', value);
+  },
+  onUsage: (callback: IpcCallback) => {
+    ipcRenderer.on('usage', callback);
+
+    return () => ipcRenderer.removeListener('usage', callback);
+  },
+  onBillingReturn: (callback: IpcCallback) => {
+    ipcRenderer.on('billing-return', callback);
+
+    return () => ipcRenderer.removeListener('billing-return', callback);
+  },
   onLinkingPatreon: (callback: IpcCallback) => {
     ipcRenderer.on('on-linking-patreon', callback);
 

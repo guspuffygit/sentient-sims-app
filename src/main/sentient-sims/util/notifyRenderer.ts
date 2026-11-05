@@ -18,7 +18,10 @@ import { consumePacedScene } from './pacedScenes';
 import { plainProviderError } from './providerErrorWords';
 import type { SettingsService } from '../services/SettingsService';
 import { ApiTypeName } from '../models/ApiType';
+import { latestUsage } from '../billing/usageStatus';
+import { UsageHeader } from '../billing/usageHeader';
 import { SettingsEnum } from '../models/SettingsEnum';
+import { BillingReturnKind } from '../billing/billingReturn';
 
 function notifyAllWindows(message: string, ...args: unknown[]) {
   getAllBrowserWindows().forEach((wnd) => {
@@ -143,6 +146,11 @@ export function notifyRefreshAuth() {
 export function notifyRefreshUserAttributes() {
   log.debug('Notifying renderer to refresh user attributes');
   notifyAllWindows('refresh-user-attributes');
+}
+
+export function notifyBillingReturn(kind: BillingReturnKind) {
+  log.debug(`Notifying renderer of the billing return: ${kind}`);
+  notifyAllWindows('billing-return', kind);
 }
 
 export function notifyGoogleAuthComplete(code: string, state: string) {
@@ -358,6 +366,22 @@ export const APP_STATUS_SETTINGS: string[] = [
   SettingsEnum.DEFAULT_AI_PROVIDER_CONFIG_ID,
 ];
 
+function appStatusUsage() {
+  const usage = latestUsage();
+  if (!usage) {
+    return {};
+  }
+  return {
+    usage_percent: usage.percent,
+    usage_state: usage.state,
+    chat_lane: usage.lane,
+  };
+}
+
+export function notifyUsage(header: UsageHeader) {
+  notifyAllWindows('usage', header);
+}
+
 // Runs inside the mod's connect handler, so a failure is logged, never thrown
 export function sendAppStatusToMod(settings: SettingsService) {
   try {
@@ -370,6 +394,7 @@ export function sendAppStatusToMod(settings: SettingsService) {
       voice_input_enabled: settings.voiceInputEnabled,
       voice_input_mode: settings.voiceInputHotkeyMode,
       ai_provider: ApiTypeName(config ? config.apiType : settings.aiApiType),
+      ...appStatusUsage(),
     });
   } catch (err) {
     log.error('Unable to send the app status to the mod', err);

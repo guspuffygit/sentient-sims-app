@@ -126,6 +126,37 @@ describe('SentientSimsEmbeddingService', () => {
   });
 });
 
+describe('SentientSimsEmbeddingService for a founder without a plan', () => {
+  it('stops asking once refused, until the sign-in changes', async () => {
+    const server = await startEmbeddingsServer((_request, response) => {
+      response.statusCode = 452;
+      response.setHeader('Content-Type', 'application/json');
+      response.end(
+        JSON.stringify({
+          code: 452,
+          message: 'This feature needs a Sentient Sims subscription.',
+          reason: 'subscription_required',
+        }),
+      );
+    });
+    try {
+      const ctx = contextWithToken();
+      ctx.settings.sentientSimsAIEndpoint = server.url;
+      const service = new SentientSimsEmbeddingService(ctx);
+
+      expect(await service.embed(['text'])).toEqual([undefined]);
+      expect(service.isAvailable()).toBe(false);
+      expect(await service.embed(['text'])).toEqual([undefined]);
+      expect(server.requests).toHaveLength(1);
+
+      ctx.settings.accessToken = 'renewed-token';
+      expect(service.isAvailable()).toBe(true);
+    } finally {
+      await server.close();
+    }
+  });
+});
+
 describe('embedding provider selection', () => {
   it('routes the embedding seam by the default embedding provider config', () => {
     const ctx = contextWithToken();

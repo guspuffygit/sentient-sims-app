@@ -5,7 +5,7 @@ import { OptionsStatus } from 'main/sentient-sims/clients/OptionsClient';
 import { mockApiContext } from './util';
 
 describe('OptionsController', () => {
-  const ctx = mockApiContext({ port: 25199 });
+  const ctx = mockApiContext();
   const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server;
 

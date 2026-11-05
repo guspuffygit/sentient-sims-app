@@ -1,15 +1,18 @@
 import React from 'react';
-import { Box, FormHelperText } from '@mui/material';
+import { Box, Button, FormHelperText } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
-import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import { useAuth } from 'renderer/providers/AuthProvider';
+import { useMembership } from 'renderer/hooks/useMembership';
+import { FOUNDER_ACCESS_TEXT } from 'renderer/billing/membershipView';
 import ApiKeyAIComponent from '../ApiKeyAIComponent';
 import { AIEndpointComponent } from './AIEndpointComponent';
 
 function SentientSimsConnectionPanel() {
   const { userAttributes } = useAuth();
-  const patreonUser = new PatreonUser(userAttributes);
+  const { membership } = useMembership();
+  const navigate = useNavigate();
 
   const errors: React.JSX.Element[] = [];
   if (!userAttributes) {
@@ -19,11 +22,23 @@ function SentientSimsConnectionPanel() {
       </FormHelperText>,
     );
   }
-  if (!patreonUser.isMember()) {
+  const workerOnly = membership.isWorkerOnly();
+  if (userAttributes && (workerOnly || !membership.isMember())) {
     errors.push(
-      <FormHelperText key="member" sx={{ marginBottom: 2 }} error>
-        You must be a Founder or Patron to use the Sentient Sims Uncensored AI
-      </FormHelperText>,
+      <Box key="member" sx={{ marginBottom: 2 }}>
+        <FormHelperText sx={{ marginBottom: 1 }} error={!workerOnly}>
+          {workerOnly ? FOUNDER_ACCESS_TEXT : 'A Sentient Sims membership is needed to use the Sentient Sims AI'}
+        </FormHelperText>
+        <Button
+          variant="contained"
+          size="medium"
+          onClick={() => {
+            void navigate('/settings', { state: { tab: 'membership' } });
+          }}
+        >
+          See plans
+        </Button>
+      </Box>,
     );
   }
 

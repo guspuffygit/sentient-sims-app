@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+import { reportUsageHeader } from 'renderer/billing/reportUsageHeader';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import log from 'electron-log';
 import axios from 'axios';
@@ -103,8 +104,8 @@ export function useSentientSimsTTS(): TTSHook {
       const url = `${sentientSimsAIEndpointSetting.value}/v2/audio/speech`;
 
       try {
-        const doFetch = () =>
-          fetch(url, {
+        const doFetch = async () => {
+          const fetched = await fetch(url, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -114,6 +115,9 @@ export function useSentientSimsTTS(): TTSHook {
             },
             body: JSON.stringify(requestBody),
           });
+          reportUsageHeader(fetched);
+          return fetched;
+        };
 
         let response = await doFetch();
         // Gateway hiccups (502/503 from a worker restart) are usually momentary —

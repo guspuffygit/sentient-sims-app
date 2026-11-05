@@ -8,7 +8,7 @@ import { mockApiContext } from './util';
 // stay cheap and forgiving: the mod posts from a daemon thread and treats any non-404 as
 // success, so a malformed report should be rejected loudly but never crash the route.
 describe('dossier route', () => {
-  const ctx = mockApiContext({ port: 25205 });
+  const ctx = mockApiContext();
   const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server;
 

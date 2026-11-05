@@ -2,6 +2,7 @@ import axios from 'axios';
 import log from 'electron-log';
 import { axiosClient } from '../clients/AxiosClient';
 import { ApiType } from '../models/ApiType';
+import { SubscriptionRequiredError } from '../exceptions/SubscriptionRequiredError';
 import { ApiContext } from './ApiContext';
 import { EmbeddingService } from './EmbeddingService';
 import { usageHeaders } from './UsageHeaders';
@@ -22,6 +23,9 @@ const embeddingRequestTimeoutMs = 60000;
 export class SentientSimsEmbeddingService implements EmbeddingService {
   private readonly ctx: ApiContext;
 
+  // A founder without a plan is refused embeddings; stay quiet until the sign-in changes
+  private refusedToken?: string;
+
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
   }
@@ -31,7 +35,8 @@ export class SentientSimsEmbeddingService implements EmbeddingService {
   }
 
   isAvailable(): boolean {
-    return Boolean(this.ctx.settings.accessToken);
+    const token = this.ctx.settings.accessToken;
+    return Boolean(token) && token !== this.refusedToken;
   }
 
   async embed(texts: string[], purpose = 'embedding'): Promise<(Float32Array | undefined)[]> {
@@ -62,6 +67,11 @@ export class SentientSimsEmbeddingService implements EmbeddingService {
         return embedding ? Float32Array.from(embedding) : undefined;
       });
     } catch (error) {
+      if (error instanceof SubscriptionRequiredError) {
+        log.warn(`Sentient Sims AI embeddings are off for this account: ${error.message}`);
+        this.refusedToken = this.ctx.settings.accessToken;
+        return texts.map(() => undefined);
+      }
       // The server answers a bad model with a 400 and a reason; surface that instead of
       // the axios error dump so a log reader can tell a rejected model from an outage
       if (axios.isAxiosError(error) && error.response) {

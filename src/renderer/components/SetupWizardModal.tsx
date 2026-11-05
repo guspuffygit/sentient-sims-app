@@ -26,6 +26,7 @@ import {
   CircularProgress,
   Stack,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { SentientSimsAppClient } from 'main/sentient-sims/clients/SentientSimsAppClient';
@@ -35,6 +36,10 @@ import { useVersions } from 'renderer/providers/VersionsProvider';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import CloseIcon from '@mui/icons-material/Close';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import RecordVoiceOverRoundedIcon from '@mui/icons-material/RecordVoiceOverRounded';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import { ApiType, ApiTypeFromValue, ApiTypeName } from 'main/sentient-sims/models/ApiType';
 import { ProviderConnectionPanel } from 'renderer/settings/ProviderConnectionPanel';
@@ -42,14 +47,27 @@ import ApiKeyAIComponent from 'renderer/ApiKeyAIComponent';
 import { useWebsocket } from 'renderer/providers/WebsocketProvider';
 import useSetting from 'renderer/hooks/useSetting';
 import { WizardPage } from 'main/sentient-sims/models/WizardPage';
-import { PatreonUser } from 'main/sentient-sims/wrappers/PatreonUser';
 import { useAuth } from 'renderer/providers/AuthProvider';
 import { ModInstallOutcome, useModUpdate } from 'renderer/providers/ModUpdateProvider';
-import { appApiUrl, defaultVoiceInputHotkeyFor, patreonMembershipUrl } from 'main/sentient-sims/constants';
+import { appApiUrl, defaultVoiceInputHotkeyFor } from 'main/sentient-sims/constants';
 import { voiceHotkeyLabel } from 'main/sentient-sims/models/VoiceHotkeyPresets';
 import { ElevenLabsKeySetup } from 'renderer/settings/voice/ElevenLabsKeySetup';
 import { AboutYouFields, MicrophoneSetup, VoiceHotkeyRow } from 'renderer/settings/voice/VoiceInputSettingsComponent';
-import { getPatreonOauthUrl, PatreonActionButton } from 'renderer/PatreonComponent';
+import { PlanPicker } from 'renderer/billing/PlanPicker';
+import { usePlans } from 'renderer/billing/usePlans';
+import {
+  ELEVENLABS_PLAN_PERK,
+  FOUNDER_ACCESS_TEXT,
+  formatLongDate,
+  formatUsd,
+  LAUNCH_OFFER_DEADLINE,
+  offerEndsText,
+  TierCardView,
+  tierCardsView,
+  tierName,
+} from 'renderer/billing/membershipView';
+import { tierAccent } from 'renderer/billing/tierAccents';
+import { useLaunchOfferClock } from 'renderer/billing/useLaunchOfferClock';
 import {
   defaultSentientSimsAIElevenLabsSettings,
   defaultSentientSimsAITTSSettings,
@@ -57,6 +75,7 @@ import {
   SentientSimsAISpeechModel,
   SentientSimsAITTSSettings,
 } from 'main/sentient-sims/models/SentientSimsAITTSSettings';
+import { useMembership } from 'renderer/hooks/useMembership';
 import { LoginComponent } from './LoginComponent';
 import { QuickstartList } from './QuickstartCard';
 
@@ -289,7 +308,7 @@ interface CardData {
   points: string[];
 }
 
-// The options shown under the Patreon card, for players not subscribing
+// The options shown under the Sentient Sims AI card, for players not subscribing
 const cardData: CardData[] = [
   {
     header: 'OpenAI',
@@ -328,8 +347,7 @@ function AccountNote() {
         Create your free Sentient Sims account. It&apos;s what downloads and updates the mod.
       </Typography>
       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-        Subscribed on Patreon? You&apos;ll link Patreon in a later step. This account is just for your Sentient Sims
-        mod.
+        The Sentient Sims AI subscription is tied to this account. You can subscribe in the next step.
       </Typography>
     </Box>
   );
@@ -828,14 +846,15 @@ const TRANSCRIPTION_FOR_AI: Partial<Record<ApiType, ApiType>> = {
   [ApiType.OpenRouter]: ApiType.OpenRouter,
 };
 
-// Voices: a Patreon member gets Sentient Sims AI voices with nothing to set up; anyone
+// Voices: a member gets Sentient Sims AI voices with nothing to set up; anyone
 // else starts with voices off and can turn them on with their own ElevenLabs key
 function VoiceSetupPage({ setPage }: PageProps) {
   const aiSettings = useAISettings();
   const { userAttributes, authStatus, loading: authLoading } = useAuth();
-  const patreonUser = new PatreonUser(userAttributes);
-  const isMember = patreonUser.isMember();
-  const includesElevenLabs = patreonUser.canUseElevenLabs();
+  const { membership } = useMembership();
+  const isMember = membership.canUseSentientSimsAI();
+  const workerOnly = membership.isWorkerOnly();
+  const includesElevenLabs = membership.canUseElevenLabs();
   const usesElevenLabs = aiSettings.ttsApiType === ApiType.ElevenLabs;
   const [elevenLabsKeyWorks, setElevenLabsKeyWorks] = useState(false);
   const needsElevenLabsKey = aiSettings.ttsEnabled && usesElevenLabs && !elevenLabsKeyWorks;
@@ -869,12 +888,15 @@ function VoiceSetupPage({ setPage }: PageProps) {
     }
   });
 
-  let membershipVoicesText = 'Voices come with your Patreon membership. ElevenLabs voices come with Tier 3 and Tier 4.';
-  if (includesElevenLabs && isElevenLabsSpeechModel(speechModel)) {
-    membershipVoicesText = 'ElevenLabs v4 Turbo voices come with your Patreon membership.';
-  } else if (includesElevenLabs) {
+  let membershipVoicesText =
+    'Voices come with your Sentient Sims membership. ElevenLabs voices come with Tier 3 and Tier 4.';
+  if (workerOnly) {
     membershipVoicesText =
-      'Voices come with your Patreon membership, ElevenLabs v4 Turbo included. Pick it in Settings, Voice.';
+      'Kokoro voices come with your founder badge. Orpheus voices need a plan, ElevenLabs voices Tier 3 or 4.';
+  } else if (includesElevenLabs && isElevenLabsSpeechModel(speechModel)) {
+    membershipVoicesText = `ElevenLabs v4 Turbo voices come with your ${tierName(membership.getTier())} membership.`;
+  } else if (includesElevenLabs) {
+    membershipVoicesText = `Voices come with your ${tierName(membership.getTier())} membership, ElevenLabs v4 Turbo included. Pick it in Settings, Voice.`;
   }
 
   const setVoices = (on: boolean) => {
@@ -890,7 +912,7 @@ function VoiceSetupPage({ setPage }: PageProps) {
       <Typography variant="body2" sx={{ color: 'text.secondary', paddingLeft: 6, marginBottom: 2 }}>
         {isMember
           ? "Your Sims' words show as subtitles only. You can turn voices on any time in Settings, Voice."
-          : "Your Sims' words show as subtitles. Want to hear them? Sentient Sims AI voices come with a Patreon membership, or turn this on to use your own ElevenLabs key."}
+          : "Your Sims' words show as subtitles. Want to hear them? Sentient Sims AI voices come with a Sentient Sims membership, or turn this on to use your own ElevenLabs key."}
       </Typography>
     );
   } else if (isMember) {
@@ -902,7 +924,7 @@ function VoiceSetupPage({ setPage }: PageProps) {
           sx={{ minWidth: 300, marginBottom: 1 }}
           onChange={(change) => void aiSettings.ttsApiTypeSetting.setSetting(ApiTypeFromValue(change.target.value))}
         >
-          <MenuItem value={ApiType.SentientSimsAI}>Sentient Sims AI voices (Patreon)</MenuItem>
+          <MenuItem value={ApiType.SentientSimsAI}>Sentient Sims AI voices (membership)</MenuItem>
           <MenuItem value={ApiType.ElevenLabs}>ElevenLabs (your own key)</MenuItem>
         </Select>
         {usesElevenLabs ? (
@@ -918,7 +940,7 @@ function VoiceSetupPage({ setPage }: PageProps) {
     voiceDetails = (
       <Box sx={{ paddingLeft: 6, marginBottom: 2 }}>
         <Typography variant="body2" sx={{ marginBottom: 1 }}>
-          Voices use your own ElevenLabs key. (Sentient Sims AI voices come with a Patreon membership.)
+          Voices use your own ElevenLabs key. (Sentient Sims AI voices come with a Sentient Sims membership.)
         </Typography>
         <ElevenLabsKeySetup autoCheck onCheckedChange={setElevenLabsKeyWorks} />
       </Box>
@@ -1102,89 +1124,247 @@ function AboutYouPage({ setPage }: PageProps) {
   );
 }
 
-const PATREON_PERKS = [
+const PLAN_PERKS = [
   'Premium, fast Sentient Sims AI',
   'Uncensored, WickedWhims supported',
-  'Unlimited use, no API keys or usage bills',
+  'AI usage included every month, no API keys',
   'Voices included',
-  'The easiest setup: subscribe, connect, play',
 ];
 
+const ELEVENLABS_PERK = 'ElevenLabs v4 Turbo voices on Tier 3 and Tier 4';
+
+function OfferPerks() {
+  const violet = tierAccent('tier3');
+  return (
+    <Box component="ul" sx={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 0.9 }}>
+      {PLAN_PERKS.map((perk) => (
+        <Box component="li" key={perk} sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+          <CheckRoundedIcon sx={{ fontSize: 18, marginTop: '1px', color: 'success.main' }} />
+          <Typography variant="body2">{perk}</Typography>
+        </Box>
+      ))}
+      <Box component="li" sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+        <RecordVoiceOverRoundedIcon sx={{ fontSize: 18, marginTop: '1px', color: violet }} />
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {ELEVENLABS_PERK}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
+function TierRow({ view }: { view: TierCardView }) {
+  const accent = tierAccent(view.plan.tier);
+  const popular = view.plan.tier === 'tier2';
+  const voices = view.perks.includes(ELEVENLABS_PLAN_PERK);
+  const usage = view.bonusUsd ?? view.plan.includedUsd;
+  return (
+    <Box
+      sx={{
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.5,
+        paddingY: 0.75,
+        paddingX: 1.5,
+        borderRadius: 2,
+        backgroundColor: popular ? alpha(accent, 0.1) : 'transparent',
+        border: `1px solid ${popular ? alpha(accent, 0.35) : 'transparent'}`,
+      }}
+    >
+      <Box sx={{ width: 4, alignSelf: 'stretch', borderRadius: 2, backgroundColor: accent, flexShrink: 0 }} />
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: accent }}>
+            {tierName(view.plan.tier)}
+          </Typography>
+          {voices ? (
+            <RecordVoiceOverRoundedIcon titleAccess="ElevenLabs voices" sx={{ fontSize: 15, color: accent }} />
+          ) : null}
+          {view.action === 'current' ? (
+            <Chip
+              label="Your plan"
+              size="small"
+              color="success"
+              sx={{ height: 18, fontWeight: 600, fontSize: '0.68rem' }}
+            />
+          ) : popular ? (
+            <Chip
+              label={view.badge}
+              size="small"
+              sx={{
+                height: 18,
+                fontWeight: 600,
+                fontSize: '0.68rem',
+                color: accent,
+                backgroundColor: alpha(accent, 0.16),
+              }}
+            />
+          ) : null}
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            {formatUsd(usage)} AI usage a month
+          </Typography>
+          {view.bonusUsd ? (
+            <Typography variant="caption" sx={{ color: 'text.disabled', textDecoration: 'line-through' }}>
+              {formatUsd(view.plan.includedUsd)}
+            </Typography>
+          ) : null}
+        </Box>
+      </Box>
+      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.25, flexShrink: 0 }}>
+        <Typography variant="h6" component="span" sx={{ fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1 }}>
+          {formatUsd(view.plan.priceUsd)}
+        </Typography>
+        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          /mo
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
+// The tiers at a glance; the full plan cards come on the next page
+function TierLadder() {
+  const { plans } = usePlans();
+  const { info } = useMembership();
+  const now = useLaunchOfferClock();
+  const views = tierCardsView(plans, info, now);
+  const bonus = views.find((view) => view.bonusUsd);
+  const ends = offerEndsText(now);
+  const violet = tierAccent('tier3');
+  return (
+    <Box
+      sx={{
+        alignSelf: 'start',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 0.5,
+        padding: 1,
+        borderRadius: 3,
+        border: 1,
+        borderColor: 'divider',
+        backgroundColor: (theme) => alpha(theme.palette.background.default, 0.55),
+      }}
+    >
+      {bonus ? (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.25,
+            padding: 1.25,
+            marginBottom: 0.5,
+            borderRadius: 2,
+            border: (theme) => `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+            background: (theme) =>
+              `linear-gradient(100deg, ${alpha(theme.palette.primary.main, 0.2)}, ${alpha(violet, 0.12)})`,
+          }}
+        >
+          <Box
+            sx={{
+              flexShrink: 0,
+              display: 'grid',
+              placeItems: 'center',
+              width: 30,
+              height: 30,
+              borderRadius: '50%',
+              color: 'primary.contrastText',
+              background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main}, ${violet})`,
+            }}
+          >
+            <AutoAwesomeRoundedIcon sx={{ fontSize: 16 }} />
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, lineHeight: 1.3 }}>
+              {Math.round((bonus.bonusUsd as number) / bonus.plan.includedUsd)}x AI usage until{' '}
+              {formatLongDate(bonus.bonusUntil)}
+            </Typography>
+            {ends && !info?.member ? (
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.4 }}>
+                Join before {LAUNCH_OFFER_DEADLINE}. {ends}. Joining after that gets the regular amount.
+              </Typography>
+            ) : null}
+          </Box>
+        </Box>
+      ) : null}
+      {views.map((view) => (
+        <TierRow key={view.plan.tier} view={view} />
+      ))}
+    </Box>
+  );
+}
+
 // The eye-catching Sentient Sims AI offer at the top of "Choose your AI"
-function PatreonPlug({ onSelect }: { onSelect: () => void }) {
+function SentientSimsAIPlug({ onSelect }: { onSelect: () => void }) {
+  const violet = tierAccent('tier3');
   return (
     <Card
       onClick={onSelect}
       sx={{
+        'position': 'relative',
         'cursor': 'pointer',
-        'border': '1.5px solid',
-        'borderColor': 'primary.main',
+        'containerType': 'inline-size',
+        'borderColor': (theme) => alpha(theme.palette.primary.main, 0.6),
         'background': (theme) =>
-          `linear-gradient(135deg, ${theme.palette.primary.main}2e, ${theme.palette.success.main}1f 60%, transparent)`,
-        'boxShadow': (theme) => `0 6px 32px ${theme.palette.primary.main}33`,
-        'transition': 'box-shadow 120ms ease, transform 120ms ease',
+          `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.16)}, transparent 220px), ${theme.palette.background.paper}`,
+        'boxShadow': (theme) => `0 6px 28px ${alpha(theme.palette.primary.main, 0.2)}`,
+        'transition': 'transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          inset: '0 0 auto 0',
+          height: 3,
+          background: (theme) => `linear-gradient(90deg, ${theme.palette.primary.main}, ${violet})`,
+        },
         '&:hover': {
-          boxShadow: (theme) => `0 8px 40px ${theme.palette.primary.main}55`,
           transform: 'translateY(-2px)',
+          borderColor: (theme) => alpha(theme.palette.primary.main, 0.8),
+          boxShadow: (theme) => `0 10px 36px ${alpha(theme.palette.primary.main, 0.3)}`,
         },
       }}
     >
-      <CardContent
+      <Box
         sx={{
-          'display': 'flex',
-          'flexWrap': 'wrap',
-          'alignItems': 'center',
+          'display': 'grid',
           'gap': 3,
-          'padding': 2.5,
-          '&:last-child': { paddingBottom: 2.5 },
+          'padding': 2.75,
+          'gridTemplateColumns': '1fr',
+          '@container (min-width: 640px)': { gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 360px)' },
         }}
       >
-        <Box sx={{ flex: '1 1 420px', minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginBottom: 0.5 }}>
-            <PlumbobLogo size={28} />
-            <Typography variant="h6" component="div" sx={{ fontWeight: 800 }}>
-              Sentient Sims AI
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, flexWrap: 'wrap' }}>
+              <PlumbobLogo size={32} />
+              <Typography variant="h5" component="div" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
+                Sentient Sims AI
+              </Typography>
+              <Chip
+                label="Recommended"
+                size="small"
+                sx={{
+                  height: 22,
+                  fontWeight: 600,
+                  color: 'primary.light',
+                  backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.18),
+                }}
+              />
+            </Box>
+            <Typography variant="body2" sx={{ color: 'text.secondary', marginTop: 1 }}>
+              The easiest setup. Subscribe, sign in and play.
             </Typography>
-            <Chip
-              label="Recommended"
-              size="small"
-              sx={{
-                backgroundColor: (theme) => `${theme.palette.success.main}33`,
-                color: 'success.light',
-                fontWeight: 600,
-              }}
-            />
           </Box>
-          <List
-            dense
-            disablePadding
-            sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, columnGap: 2 }}
-          >
-            {PATREON_PERKS.map((perk) => (
-              <ListItem key={perk} disablePadding disableGutters>
-                <ListItemIcon sx={{ minWidth: 26 }}>
-                  <CheckCircleOutlineIcon sx={{ fontSize: 18, color: 'success.main' }} />
-                </ListItemIcon>
-                <ListItemText primary={perk} slotProps={{ primary: { variant: 'body2' } }} />
-              </ListItem>
-            ))}
-          </List>
+          <OfferPerks />
+          <Box sx={{ marginTop: 'auto' }}>
+            <Button variant="contained" size="large" endIcon={<ArrowForwardRoundedIcon />}>
+              Set up Sentient Sims AI
+            </Button>
+          </Box>
         </Box>
-        <Box sx={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, lineHeight: 1 }}>
-            $5
-            <Typography component="span" variant="body1" sx={{ color: 'text.secondary', marginLeft: 0.5 }}>
-              /month
-            </Typography>
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            on Patreon
-          </Typography>
-          <Button variant="contained" size="large">
-            Set up Sentient Sims AI
-          </Button>
-        </Box>
-      </CardContent>
+        <TierLadder />
+      </Box>
     </Card>
   );
 }
@@ -1207,7 +1387,7 @@ function AIProviderPage({ setPage }: PageProps) {
         </Button>
       }
     >
-      <PatreonPlug
+      <SentientSimsAIPlug
         onSelect={() => {
           setPage(WizardPage.SENTIENT_SIMS_AI_SETUP);
         }}
@@ -1305,53 +1485,21 @@ function AIProviderPage({ setPage }: PageProps) {
 function SentientSimsAISetupPage({ setPage }: PageProps) {
   const { aiApiTypeSetting } = useAISettings();
   const { setSetting: setAiApiType } = aiApiTypeSetting;
-  const { userAttributes, refreshUserAttributes } = useAuth();
-  const patreonUser = new PatreonUser(userAttributes);
-  const [connecting, setConnecting] = useState(false);
+  const { userAttributes } = useAuth();
+  const { membership } = useMembership();
 
   useEffect(() => {
     void setAiApiType(ApiType.SentientSimsAI);
   }, [setAiApiType]);
 
   const isLoggedIn = !!userAttributes;
-  const isPatreonLinked = isLoggedIn && patreonUser.isPatreonLinked();
-  const isMember = isLoggedIn && patreonUser.isMember();
+  const isMember = isLoggedIn && membership.canUseSentientSimsAI();
+  const workerOnly = isLoggedIn && membership.isWorkerOnly();
 
-  // A subscription made in the browser reaches the account on the server's next
-  // look at Patreon, so a linked non-member is checked again until it shows
-  useEffect(() => {
-    if (!isPatreonLinked || isMember) {
-      return undefined;
-    }
-    const intervalId = setInterval(() => {
-      void refreshUserAttributes();
-    }, 10000);
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [isPatreonLinked, isMember, refreshUserAttributes]);
-
-  // Sign in, subscribe, connect: the first step not done yet is the active one
-  const steps = [isLoggedIn, isMember, isPatreonLinked];
+  // Sign in, subscribe: the first step not done yet is the active one
+  const steps = [isLoggedIn, isMember];
   const firstOpen = steps.findIndex((done) => !done);
   const activeStep = firstOpen === -1 ? steps.length : firstOpen;
-
-  const connectButton = (label: string, variant: 'contained' | 'outlined' = 'contained') => (
-    <PatreonActionButton
-      url={getPatreonOauthUrl()}
-      label={label}
-      variant={variant}
-      onClick={() => {
-        setConnecting(true);
-      }}
-    />
-  );
-
-  const connectingNote = connecting ? (
-    <Typography variant="body2" align="center" sx={{ color: 'text.secondary', marginTop: 1 }}>
-      A browser window opened. Finish there and this page updates by itself.
-    </Typography>
-  ) : null;
 
   let body: ReactNode;
   if (!isLoggedIn) {
@@ -1361,48 +1509,13 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
         <LoginComponent initialState="signUp" />
       </Box>
     );
-  } else if (!isPatreonLinked) {
-    body = (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Card>
-          <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-              Step 1: Subscribe on Patreon
-            </Typography>
-            <Typography variant="body2" align="center" sx={{ color: 'text.secondary' }}>
-              $5 a month. Already subscribed? Skip to step 2.
-            </Typography>
-            <PatreonActionButton url={patreonMembershipUrl} label="Subscribe on Patreon" variant="outlined" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-              Step 2: Link your Patreon account
-            </Typography>
-            <Typography variant="body2" align="center" sx={{ color: 'text.secondary' }}>
-              Sign in on Patreon with the account you subscribed with, then press Allow.
-            </Typography>
-            {connectButton('Link my Patreon account')}
-            {connectingNote}
-          </CardContent>
-        </Card>
-      </Box>
-    );
   } else if (!isMember) {
     body = (
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-        <Alert severity="warning" sx={{ width: '100%' }}>
-          A Patreon account is linked, but it has no Sentient Sims membership yet. Just subscribed? It can take a minute
-          to show, and this page checks again by itself.
-        </Alert>
-        <PatreonActionButton url={patreonMembershipUrl} label="Subscribe on Patreon" />
-        <Typography variant="body2" align="center" sx={{ color: 'text.secondary', maxWidth: 520 }}>
-          Linked the wrong Patreon account? Your browser may have signed you in as someone else. Sign out on
-          patreon.com, then link again with the account you subscribed with.
+      <Box>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700, marginBottom: 1 }}>
+          Pick a plan
         </Typography>
-        {connectButton('Link a different Patreon account', 'outlined')}
-        {connectingNote}
+        <PlanPicker pricingLink={false} />
       </Box>
     );
   } else {
@@ -1417,7 +1530,9 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
         }}
       >
         <CheckCircleOutlineIcon sx={{ color: 'success.main' }} />
-        <Typography variant="body1">All set! Your Patreon membership is connected.</Typography>
+        <Typography variant="body1">
+          {workerOnly ? `All set! ${FOUNDER_ACCESS_TEXT}` : 'All set! Your Sentient Sims membership is active.'}
+        </Typography>
       </Box>
     );
   }
@@ -1457,17 +1572,17 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
             </Typography>
           </StepLabel>
         </Step>
-        <Step key="subscribe-patreon" completed={isMember}>
+        <Step key="subscribe" completed={isMember}>
           <StepLabel>
             <Typography variant="body2" color={isMember ? 'success.main' : undefined}>
-              {isMember ? 'Patreon member' : 'Subscribe on Patreon'}
+              {isMember ? 'Member' : 'Subscribe'}
             </Typography>
           </StepLabel>
         </Step>
-        <Step key="link-patreon" completed={isPatreonLinked}>
+        <Step key="done" completed={isMember}>
           <StepLabel>
-            <Typography variant="body2" color={isPatreonLinked ? 'success.main' : undefined}>
-              {isPatreonLinked ? 'Patreon linked' : 'Link Patreon'}
+            <Typography variant="body2" color={isMember ? 'success.main' : undefined}>
+              Done
             </Typography>
           </StepLabel>
         </Step>
@@ -1475,7 +1590,7 @@ function SentientSimsAISetupPage({ setPage }: PageProps) {
       {body}
       {isLoggedIn && !isMember ? (
         <Typography variant="caption" component="p" align="center" sx={{ color: 'text.secondary', marginTop: 2 }}>
-          You can continue once your account is linked.
+          You can continue once your membership is active.
         </Typography>
       ) : null}
     </WizardStep>
@@ -1827,7 +1942,7 @@ export function SetupWizardModal({ open, setOpen }: SetupWizardModalParameters) 
     void currentWizardPage.setSetting(wizardPage);
   };
 
-  // A sign-in or Patreon link reloads the window; the wizard comes back where it was.
+  // A sign-in reloads the window; the wizard comes back where it was.
   // Once only, when the saved page first arrives, so the X can still close those pages.
   const restoredRef = useRef(false);
   useEffect(() => {

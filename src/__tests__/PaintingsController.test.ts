@@ -7,7 +7,7 @@ import { PaintingMountResult } from 'main/sentient-sims/services/PaintingMountSe
 import { mockApiContext } from './util';
 
 describe('PaintingsController', () => {
-  const ctx = mockApiContext({ port: 25197 });
+  const ctx = mockApiContext();
   const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server;
 

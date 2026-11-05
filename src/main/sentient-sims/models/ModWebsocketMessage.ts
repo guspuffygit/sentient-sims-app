@@ -188,6 +188,9 @@ export type ModAppStatus = ModWebsocketMessage & {
   voice_input_enabled: boolean;
   voice_input_mode: string;
   ai_provider: string;
+  usage_percent?: number;
+  usage_state?: string;
+  chat_lane?: string;
 };
 
 export type WebsocketNotification =

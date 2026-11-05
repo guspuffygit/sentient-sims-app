@@ -8,7 +8,7 @@ import { SentientSimsAIService } from 'main/sentient-sims/services/SentientSimsA
 import { LLaMaTokenCounter } from 'main/sentient-sims/tokens/LLaMaTokenCounter';
 import { NovelAITokenCounter } from 'main/sentient-sims/tokens/NovelAITokenCounter';
 import { OpenAITokenCounter } from 'main/sentient-sims/tokens/OpenAITokenCounter';
-import { mockEnvironment } from './util';
+import { mockEnvironment, testPort } from './util';
 
 describe('Settings', () => {
   let ctx: ApiContext;
@@ -21,7 +21,7 @@ describe('Settings', () => {
     const { directoryService, settingsService } = mockEnvironment();
     ctx = new ApiContext({
       getAssetPath,
-      port: 25198,
+      port: testPort(),
       settingsService,
       directoryService,
       appVersion: '1.0.0',

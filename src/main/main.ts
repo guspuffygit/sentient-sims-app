@@ -205,6 +205,9 @@ const startServices = () => {
     }
     voiceInputService?.onSettingChanged(key);
     ctx.memoryAnnotation.onSettingChanged();
+    if (key === (SettingsEnum.ACCESS_TOKEN as string)) {
+      ctx.usageLimit.onAccessTokenChanged(typeof value === 'string' ? value : '');
+    }
     if (key === (SettingsEnum.PLAYBACK_FOLLOWS_GAME_CLOCK as string)) {
       publishClockState(ctx);
     }

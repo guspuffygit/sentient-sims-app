@@ -16,6 +16,7 @@ import { AIProviderConfig } from 'main/sentient-sims/models/AIProviderConfig';
 import { AIActionOverrides, AIActionType } from 'main/sentient-sims/models/AIActionType';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { SyntheticEvent, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AppCard from './AppCard';
@@ -35,16 +36,19 @@ import LocalizationSettingsComponent from './settings/LocalizationSettingsCompon
 import useSetting from './hooks/useSetting';
 import { PlaybackFollowsClockSetting } from './settings/voice/VoiceInputSettingsComponent';
 import { rendererTiers } from './tiers/merge';
+import { MembershipPanel } from './billing/MembershipPanel';
 
 enum SettingsTabSelectionValue {
   Settings = 'settings',
   Voice = 'voice',
+  Membership = 'membership',
 }
 
 // The core tabs, then the build tiers' (stream: Twitch)
 const SETTINGS_TABS: { value: string; label: string }[] = [
   { value: SettingsTabSelectionValue.Settings, label: 'Settings' },
   { value: SettingsTabSelectionValue.Voice, label: 'Voice' },
+  { value: SettingsTabSelectionValue.Membership, label: 'Plan' },
   ...rendererTiers.settingsTabs.map(({ value, label }) => ({ value, label })),
 ];
 
@@ -55,7 +59,18 @@ function tierRows() {
 export default function SettingsPage() {
   const aiSettings = useAISettings();
   const setupWizard = useSetupWizard();
-  const [tabSelectedValue, setTabSelectedValue] = useState('settings');
+  const location = useLocation();
+  const requestedTab = (location.state as { tab?: string } | null)?.tab;
+  const [tabSelectedValue, setTabSelectedValue] = useState(requestedTab ?? SettingsTabSelectionValue.Settings);
+  const [seenRequestedTab, setSeenRequestedTab] = useState(requestedTab);
+
+  // A later navigate() to settings with a tab in its state switches tabs too
+  if (requestedTab !== seenRequestedTab) {
+    setSeenRequestedTab(requestedTab);
+    if (requestedTab) {
+      setTabSelectedValue(requestedTab);
+    }
+  }
   const configsSetting = useSetting<AIProviderConfig[]>(SettingsEnum.AI_PROVIDER_CONFIGS, []);
   const defaultIdSetting = useSetting<string>(SettingsEnum.DEFAULT_AI_PROVIDER_CONFIG_ID, '');
   const overridesSetting = useSetting<AIActionOverrides>(SettingsEnum.AI_ACTION_PROVIDER_OVERRIDES, {});
@@ -143,6 +158,9 @@ export default function SettingsPage() {
           </TabPanel>
           <TabPanel value={SettingsTabSelectionValue.Voice}>
             <VoiceSettingsComponent />
+          </TabPanel>
+          <TabPanel value={SettingsTabSelectionValue.Membership}>
+            <MembershipPanel />
           </TabPanel>
           {rendererTiers.settingsTabs.map(({ value, Component }) => (
             <TabPanel key={value} value={value}>

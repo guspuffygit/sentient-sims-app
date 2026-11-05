@@ -5,7 +5,7 @@ import { InteractionEventStatus } from 'main/sentient-sims/models/InteractionEve
 import { mockApiContext } from './util';
 
 describe('interaction prefetch routes', () => {
-  const ctx = mockApiContext({ port: 25203 });
+  const ctx = mockApiContext();
   const apiUrl = `http://localhost:${ctx.port}`;
   const event = { event_type: 'interaction', interaction_name: 'Chat' };
   let server: Server;

@@ -1,8 +1,5 @@
 import { Avatar, Stack, Typography, TypographyProps } from '@mui/material';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import AppCard from './AppCard';
 import { ThankYouUser, useThankYous } from './hooks/useThankYous';
-import PatreonComponent from './PatreonComponent';
 
 type AvatarStyle = {
   color: string;
@@ -46,25 +43,16 @@ function AvatarRow({ users, style }: { users?: ThankYouUser[]; style: AvatarStyl
   );
 }
 
-export default function ThankYouCard() {
-  return null;
-}
-
-export function ThankYouCardPatreon() {
+export function ThankYouList() {
   const thankYous = useThankYous();
 
   return (
-    <AppCard
-      title="Thank You"
-      subtitle="To the Devs and Patrons who make Sentient Sims possible"
-      icon={<FavoriteIcon fontSize="small" />}
-    >
+    <>
       <AvatarRow users={thankYous.dev} style={DEV} />
       <AvatarRow users={thankYous.tier4} style={TIER_4} />
       <AvatarRow users={thankYous.tier3} style={TIER_3} />
       <AvatarRow users={thankYous.tier2} style={TIER_2} />
       <AvatarRow users={thankYous.tier1} style={TIER_1} />
-      <PatreonComponent />
-    </AppCard>
+    </>
   );
 }

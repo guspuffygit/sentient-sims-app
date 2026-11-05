@@ -7,7 +7,7 @@ import { mockApiContext } from './util';
 // boundary (CognitionRoutes.test.ts has his test); these are our cases for both. Run here
 // with no tiers at all.
 describe('sim state routes', () => {
-  const ctx = mockApiContext({ port: 25207, tiers: [] });
+  const ctx = mockApiContext({ tiers: [] });
   const apiUrl = `http://localhost:${ctx.port}`;
   let server: Server;
 

@@ -4,7 +4,10 @@ import { fetchAuthSession, fetchUserAttributes } from '@aws-amplify/auth';
 import { createContext, ReactNode, use, useCallback, useEffect, useMemo } from 'react';
 import log from 'electron-log';
 import { AuthUser } from 'aws-amplify/auth';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { refreshAuthToken } from 'renderer/hooks/useAuthCredentials';
+import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import { meQueryKey } from 'renderer/billing/meQuery';
 
 export type AuthUserAttributes = {
   subscriptionLevel?: string;
@@ -60,8 +63,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // The facade types `user` as non-optional, but the underlying auth machine
   // allows undefined even while authStatus is 'authenticated' (e.g. mid token
   // refresh). Widen it so every deref below is forced through a guard.
-  const { user: authenticatorUser, authStatus, signOut } = useAuthenticator();
+  const { user: authenticatorUser, authStatus, signOut: amplifySignOut } = useAuthenticator();
   const user = authenticatorUser as AuthUser | undefined;
+  const queryClient = useQueryClient();
+
+  // Main keeps sending the last token until told otherwise, and the /me cache would
+  // otherwise show the last account's plan to the next one
+  const signOut = useCallback(
+    (data?: AuthEventData) => {
+      amplifySignOut(data);
+      window.electron.setSetting(SettingsEnum.ACCESS_TOKEN, '');
+      queryClient.removeQueries({ queryKey: meQueryKey });
+    },
+    [amplifySignOut, queryClient],
+  );
 
   const {
     data: userAttributes,
@@ -73,7 +88,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     queryFn: () => loadUserAttributes(user?.userId),
   });
 
+  // A membership change lands on the ID token's claims, so the token has to be renewed
+  // before the attributes are read again, and the main process needs the new token too
   const refreshUserAttributes = useCallback(async () => {
+    try {
+      await refreshAuthToken();
+    } catch (error) {
+      log.error(`Could not refresh the auth token: ${error instanceof Error ? error.message : String(error)}`);
+    }
     await refetch();
   }, [refetch]);
 
