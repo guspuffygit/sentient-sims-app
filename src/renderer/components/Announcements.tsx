@@ -15,7 +15,8 @@ import { alpha } from '@mui/material/styles';
 import axios from 'axios';
 import log from 'electron-log';
 import { appApiUrl } from 'main/sentient-sims/constants';
-import { JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, JSX, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { InlineSegment, parseInlineMarkdown } from './announcementMarkdown';
 
 type AnnouncementMessage = {
   id: string;
@@ -33,77 +34,42 @@ type AnnouncementContentProps = {
   content: string;
 };
 
-type TextSegment = {
-  type: 'text';
-  content: string;
-};
-
-type LinkSegment = {
-  type: 'link';
-  text: string;
-  url: string;
-};
-
-type MarkdownSegment = TextSegment | LinkSegment;
-
-function parseMarkdownLinks(input: string): MarkdownSegment[] {
-  const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
-
-  const segments: MarkdownSegment[] = [];
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
-
-  while ((match = regex.exec(input)) !== null) {
-    if (match.index > lastIndex) {
-      segments.push({
-        type: 'text',
-        content: input.slice(lastIndex, match.index),
-      });
-    }
-
-    segments.push({
-      type: 'link',
-      text: match[1],
-      url: match[2],
-    });
-
-    lastIndex = regex.lastIndex;
-  }
-
-  if (lastIndex < input.length) {
-    segments.push({
-      type: 'text',
-      content: input.slice(lastIndex),
-    });
-  }
-
-  return segments;
-}
-
-const AnnouncementContent = ({ content }: AnnouncementContentProps) => {
-  if (content.startsWith('## ')) {
-    return (
-      <Typography variant="h6" sx={{ color: 'text.primary', marginBottom: 1 }}>
-        {content.substring(3, content.length)}
-      </Typography>
-    );
-  }
-
-  return (
-    <Typography variant="body2" sx={{ color: 'text.primary', marginBottom: 1 }}>
-      {parseMarkdownLinks(content).map((segment, index) => {
-        const key = `${index}-${segment.type === 'text' ? segment.content : `${segment.url}-${segment.text}`}`;
-        if (segment.type === 'text') {
-          return <span key={key}>{segment.content}</span>;
-        }
-
+function renderInline(segments: InlineSegment[]): ReactNode[] {
+  return segments.map((segment, index) => {
+    const key = `${index}-${segment.type}`;
+    switch (segment.type) {
+      case 'text':
+        return <Fragment key={key}>{segment.content}</Fragment>;
+      case 'code':
+        return (
+          <Box
+            key={key}
+            component="code"
+            sx={{
+              fontFamily: "'Cascadia Mono', Consolas, 'Courier New', monospace",
+              fontSize: '0.85em',
+              px: 0.5,
+              py: 0.125,
+              borderRadius: 1,
+              backgroundColor: (theme) => alpha(theme.palette.text.primary, 0.1),
+            }}
+          >
+            {segment.content}
+          </Box>
+        );
+      case 'bold':
+        return (
+          <Box key={key} component="strong" sx={{ fontWeight: 700 }}>
+            {renderInline(segment.children)}
+          </Box>
+        );
+      case 'link':
         return (
           <Link
             key={key}
             href={segment.url}
             target="_blank"
             rel="noopener noreferrer"
-            variant="body2"
             underline="none"
             sx={{
               '&:hover': {
@@ -111,10 +77,25 @@ const AnnouncementContent = ({ content }: AnnouncementContentProps) => {
               },
             }}
           >
-            {segment.text}
+            {renderInline(segment.children)}
           </Link>
         );
-      })}
+    }
+  });
+}
+
+const AnnouncementContent = ({ content }: AnnouncementContentProps) => {
+  if (content.startsWith('## ')) {
+    return (
+      <Typography variant="h6" sx={{ color: 'text.primary', marginBottom: 1 }}>
+        {renderInline(parseInlineMarkdown(content.substring(3)))}
+      </Typography>
+    );
+  }
+
+  return (
+    <Typography variant="body2" sx={{ color: 'text.primary', marginBottom: 1 }}>
+      {renderInline(parseInlineMarkdown(content))}
     </Typography>
   );
 };
