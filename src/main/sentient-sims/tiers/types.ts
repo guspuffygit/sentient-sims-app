@@ -41,7 +41,7 @@ export interface TierRegistration {
   onSettingChanged?(ctx: ApiContext, key: string): void;
   onDatabaseLoaded?(ctx: ApiContext): void;
   // A conversation closed (ran its course or the game stopped it). Called in registration
-  // order: stream's moodlet appraisal before autonomy's held conversation actions.
+  // order, after core's moodlet appraisal.
   onSceneClosed?(ctx: ApiContext, closed: SceneClosed): void;
   // A websocket message from the mod that core did not handle. True means handled.
   onModMessage?(ctx: ApiContext, message: ModLogWebsocketMessage): boolean;

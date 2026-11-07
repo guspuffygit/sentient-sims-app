@@ -25,7 +25,6 @@ import {
   playTTS,
   playTTSLines,
   PlayTTSVoiceOptions,
-  sendChatGeneration,
   sendSceneLineToMod,
 } from '../util/notifyRenderer';
 import { VoiceType, voiceTypeForTTS } from '../models/VoiceType';
@@ -105,8 +104,6 @@ import { AIModel } from '../models/AIModel';
 import { DefaultFormatter } from '../formatter/DefaultFormatter';
 import { InteractionDescription } from '../descriptions/interactionDescriptions';
 import { PromptHistoryMode } from '../models/PromptHistoryMode';
-import { sendModNotification } from '../websocketServer';
-import { ModAddBuff, ModWebsocketMessageType } from '../models/ModWebsocketMessage';
 import { ParticipantDTO } from '../db/dto/ParticipantDTO';
 import { ApiContext } from './ApiContext';
 import { AIActionType, actionTypeForEvent } from '../models/AIActionType';
@@ -3265,43 +3262,12 @@ ${factsBlock}
     };
   }
 
-  async runBuff(event: BuffEventRequest) {
-    // The whole buff pipeline (classification + description) follows the BUFF override
-    const classificationResult = await this.runClassification(
-      {
-        name: event.name,
-        classifiers: event.classifiers,
-        messages: event.messages,
-      },
-      AIActionType.BUFF,
-    );
-
-    if (classificationResult.status !== InteractionEventStatus.CLASSIFIED || !classificationResult.text) {
-      return;
-    }
-
-    sendChatGeneration(classificationResult);
-
-    const buffDescriptionResult = await this.runBuffDescription({
-      name: event.name,
-      mood: classificationResult.text,
-      messages: event.messages,
-    });
-
-    if (buffDescriptionResult.status !== InteractionEventStatus.GENERATED || !buffDescriptionResult.text) {
-      return;
-    }
-
-    sendChatGeneration(buffDescriptionResult);
-
-    const modAddBuff: ModAddBuff = {
-      type: ModWebsocketMessageType.ADD_BUFF,
-      sim_id: event.sim_id,
-      mood: classificationResult.text,
-      buff_description: buffDescriptionResult.text,
-    };
-
-    sendModNotification(modAddBuff);
+  runBuff(event: BuffEventRequest): Promise<void> {
+    // The chat window's close used to classify the exchange and write a one-line buff here.
+    // The thread with the player is judged whole when it closes (onConversationClosed), the
+    // way a Sim-to-Sim scene is, so this would be a second, weaker moodlet for the same talk.
+    log.info(`[Scene Moodlets] chat window closed for ${event.name}: the thread's close judges it`);
+    return Promise.resolve();
   }
 
   async runBuffDescription(buffRequest: BuffDescriptionRequest): Promise<InteractionEventResult> {

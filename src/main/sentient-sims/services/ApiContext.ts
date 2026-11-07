@@ -74,10 +74,11 @@ import { OpenRouterEmbeddingService } from './OpenRouterEmbeddingService';
 import { OpenRouterImageGenerationService } from './OpenRouterImageGenerationService';
 import { OpenRouterService } from './OpenRouterService';
 import { PatreonService } from './PatreonService';
-import { PlayerConversationService } from './PlayerConversationService';
+import { CONVERSATION_SWEEP_MS, PlayerConversationService } from './PlayerConversationService';
 import { PromptRequestBuilderService } from './PromptRequestBuilderService';
 import { SceneService } from './SceneService';
-import { ScenePlaybackRegistry } from './ScenePlaybackRegistry';
+import { SceneMoodletService } from './SceneMoodletService';
+import { SceneClosed, ScenePlaybackRegistry } from './ScenePlaybackRegistry';
 import { SceneRepeatGuard } from './SceneRepeatGuard';
 import { ProviderConfigService } from './ProviderConfigService';
 import { SemanticMemoryService } from './SemanticMemoryService';
@@ -294,6 +295,9 @@ export class ApiContext {
   private readonly _actionDispatcherService: ActionDispatcherService;
 
   private readonly _scenePlaybackRegistry: ScenePlaybackRegistry;
+
+  private readonly _sceneMoodlets: SceneMoodletService;
+
   private readonly _playerConversationService: PlayerConversationService;
 
   private _defaultDescriptionService?: DefaultDescriptionService;
@@ -420,12 +424,39 @@ export class ApiContext {
           reason,
         });
       },
+      onClosed: (conversation, reason) => {
+        // The whole exchange with the player, judged once. The registry's close for the
+        // thread's scene comes after its first reply and holds that reply alone.
+        const known = this._scenePlaybackRegistry.castOf(conversation.sceneId);
+        const closed: SceneClosed = {
+          sceneId: conversation.sceneId,
+          participantSimIds: conversation.simIds,
+          cast:
+            known.length > 0
+              ? known
+              : conversation.simIds.map((simId, i) => ({ simId, name: conversation.simNames[i] ?? simId })),
+          lines: conversation.lines.slice(conversation.seeded),
+          reason: reason === 'stopped' ? 'stopped' : 'finished',
+        };
+        void this._sceneMoodlets.appraise(closed, 'conversation');
+      },
     });
+    this._sceneMoodlets = new SceneMoodletService(this);
+    // Silence closes a thread only when something looks: every begin() does, and this does
+    // for the evening's last conversation, so what it left is not held until the next one
+    setInterval(() => {
+      this._playerConversationService.sweepIdle();
+    }, CONVERSATION_SWEEP_MS).unref();
     this._scenePlaybackRegistry = new ScenePlaybackRegistry({
       notifyStop: notifySceneStop,
       // A conversation that closed is weighed for the moodlet it leaves on each sim, and
       // a reply to the player that wanted to act may act now that it has been heard
       onSceneClosed: (closed) => {
+        // A thread with the player is weighed whole when the thread closes (above): its
+        // scene closes after the first reply and holds that reply alone
+        if (!this._playerConversationService.ownsScene(closed.sceneId)) {
+          void this._sceneMoodlets.appraise(closed);
+        }
         for (const tier of this._tiers) {
           tier.onSceneClosed?.(this, closed);
         }
