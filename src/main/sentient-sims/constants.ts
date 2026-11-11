@@ -240,7 +240,9 @@ export const prefetchMaxAttempts = 3;
 // annotation results only need to be ready by the next scene, never during this one.
 export const backgroundIdleDelayMs = 10000;
 export const defaultElevenLabsEndpoint = 'https://api.elevenlabs.io/v1';
-export const defaultKokoroEndpoint = 'https://api.kokorotts.com';
+// A self-hosted Kokoro server (Kokoro-FastAPI listens on 8880). Local by default so dialogue
+// text never leaves the machine unless the player points the endpoint somewhere else.
+export const defaultKokoroEndpoint = 'http://localhost:8880';
 export const defaultVLLMEndpoint = 'http://localhost:8000/v1';
 // Speech-to-text models per voice input provider; any other id can be typed in.
 // Custom OpenAI-compatible endpoints (Groq, local whisper servers) default to whisper-1,
