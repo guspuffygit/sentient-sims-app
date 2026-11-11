@@ -207,6 +207,17 @@
     "win": {
       "target": [
         "nsis"
+      ],
+      "signtoolOptions": {
+        "sign": "./myWindowsSignHook.ts",
+        "signingHashAlgorithms": [
+          "sha256"
+        ],
+        "publisherName": "Sentient Simulations LLC"
+      },
+      "signExts": [
+        ".dll",
+        ".node"
       ]
     },
     "linux": {
