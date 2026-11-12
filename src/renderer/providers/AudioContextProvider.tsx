@@ -4,6 +4,7 @@ import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
 import { sceneChunkGapMs, sceneLineGapMs, sceneLineReadingHoldMs } from 'main/sentient-sims/constants';
 import { useElevenLabsTTS } from 'renderer/voice/useElevenLabsTTS';
+import { useKokoroTTS } from 'renderer/voice/useKokoroTTS';
 import { useSentientSimsTTS } from 'renderer/voice/useSentientSimsTTS';
 import { SpeakOptions } from 'renderer/voice/TTSHook';
 import { pacedDelay, setClockState, waitWhileUserPaused } from 'renderer/voice/playbackClock';
@@ -50,6 +51,7 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
   const aiSettings = useAISettings();
   const sentientSimsTTS = useSentientSimsTTS();
   const elevenLabsTTS = useElevenLabsTTS();
+  const kokoroTTS = useKokoroTTS();
   const [isWebGPUSupported, setIsWebGPUSupported] = useState<boolean | null>(null);
 
   const tts = useMemo(() => {
@@ -59,7 +61,10 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
     if (aiSettings.ttsApiType === ApiType.ElevenLabs) {
       return elevenLabsTTS;
     }
-  }, [aiSettings.ttsApiType, elevenLabsTTS, sentientSimsTTS]);
+    if (aiSettings.ttsApiType === ApiType.Kokoro) {
+      return kokoroTTS;
+    }
+  }, [aiSettings.ttsApiType, elevenLabsTTS, kokoroTTS, sentientSimsTTS]);
 
   useEffect(() => {
     async function checkSupport() {
