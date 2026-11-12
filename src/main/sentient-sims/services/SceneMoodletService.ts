@@ -301,6 +301,9 @@ export class SceneMoodletService {
    * "by anyone else" in the prompt, and only the sims are cast.
    */
   async appraise(closed: SceneClosed, source: MoodletSource = 'scene'): Promise<MoodletVerdict[]> {
+    if (!this.ctx.settings.conversationMoodletsEnabled) {
+      return [];
+    }
     const cast = closed.cast.filter((member) => member.simId && member.name);
     if (cast.length === 0) {
       return [];

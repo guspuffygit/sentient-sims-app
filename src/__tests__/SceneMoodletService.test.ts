@@ -40,9 +40,9 @@ function closed(overrides: Partial<SceneClosed> = {}): SceneClosed {
   };
 }
 
-// The service touches only ctx.ai.runOneShot, so a stub context keeps the test off the
-// (Electron-built) sqlite binding
-function stubContext(answer: string | Error) {
+// The service touches only ctx.ai.runOneShot and its own setting, so a stub context keeps
+// the test off the (Electron-built) sqlite binding
+function stubContext(answer: string | Error, conversationMoodletsEnabled = true) {
   const calls: { label: string; system: string; user: string; args: unknown[] }[] = [];
   const ai = {
     runOneShot: (label: string, system: string, user: string, ...args: unknown[]) => {
@@ -53,7 +53,7 @@ function stubContext(answer: string | Error) {
       return Promise.resolve({ exchange: {} as LLMExchange, text: answer });
     },
   };
-  const ctx = { ai } as unknown as ApiContext;
+  const ctx = { ai, settings: { conversationMoodletsEnabled } } as unknown as ApiContext;
   return { ctx, calls };
 }
 
@@ -219,6 +219,14 @@ describe('SceneMoodletService', () => {
     expect(sendModNotification).toHaveBeenCalledWith(
       expect.objectContaining({ sim_id: '11', mood: 'happy', source: 'conversation' }),
     );
+  });
+
+  it('makes no call and leaves no moodlet when the player has switched it off', async () => {
+    const { ctx, calls } = stubContext(DIVORCE, false);
+    expect(await new SceneMoodletService(ctx).appraise(closed())).toEqual([]);
+    expect(await new SceneMoodletService(ctx).appraise(closed(), 'conversation')).toEqual([]);
+    expect(calls).toEqual([]);
+    expect(sendModNotification).not.toHaveBeenCalled();
   });
 
   it('does not bother the model with a greeting', async () => {

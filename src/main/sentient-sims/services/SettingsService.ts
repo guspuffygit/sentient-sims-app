@@ -406,6 +406,10 @@ export function defaultStore(cwd?: string) {
         type: 'boolean',
         default: true,
       },
+      [SettingsEnum.CONVERSATION_MOODLETS_ENABLED.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
       [SettingsEnum.CONVERSATION_ACTION_SCORE_THRESHOLD.toString()]: {
         type: 'number',
         // Above the tick's 6: on the 09-22 stream 78 of 119 player-facing beats crossed
@@ -1387,6 +1391,10 @@ export class SettingsService {
 
   get nonControllableSimsSpeak(): boolean {
     return this.get(SettingsEnum.NON_CONTROLLABLE_SIMS_SPEAK) !== false;
+  }
+
+  get conversationMoodletsEnabled(): boolean {
+    return this.get(SettingsEnum.CONVERSATION_MOODLETS_ENABLED) !== false;
   }
 
   get conversationActionScoreThreshold(): number {
