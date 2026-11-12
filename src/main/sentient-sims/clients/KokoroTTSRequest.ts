@@ -6,6 +6,7 @@ export type KokoroSpeechRequest = {
     input: string;
     voice: string;
     response_format: string;
+    speed: number;
     stream: boolean;
   };
 };
@@ -18,16 +19,26 @@ export type KokoroSpeechRequestParams = {
   voice: string[];
   model: string;
   responseFormat: string;
+  speed: number;
 };
 
 /**
- * The OpenAI-compatible speech route of a self-hosted Kokoro server (Kokoro-FastAPI and
- * friends). Tolerates a trailing slash and a trailing /v1 on the configured endpoint.
+ * The address of a self-hosted Kokoro server (Kokoro-FastAPI and friends), whatever the
+ * player typed. Tolerates a trailing slash and a trailing /v1 on the configured endpoint.
  */
-export function kokoroSpeechUrl(endpoint: string): string {
+export function kokoroBaseUrl(endpoint: string): string {
   const trimmed = endpoint.trim().replace(/\/+$/, '');
-  const base = trimmed.replace(/\/v1$/, '');
-  return `${base}/v1/audio/speech`;
+  return trimmed.replace(/\/v1$/, '');
+}
+
+// The OpenAI-compatible speech route
+export function kokoroSpeechUrl(endpoint: string): string {
+  return `${kokoroBaseUrl(endpoint)}/v1/audio/speech`;
+}
+
+// Kokoro-FastAPI lists its voices here; asking is how the app finds out a server is running
+export function kokoroVoicesUrl(endpoint: string): string {
+  return `${kokoroBaseUrl(endpoint)}/v1/audio/voices`;
 }
 
 /**
@@ -35,7 +46,7 @@ export function kokoroSpeechUrl(endpoint: string): string {
  * plays whole clips from a blob, and a streamed WAV has no final length in its header.
  */
 export function buildKokoroSpeechRequest(params: KokoroSpeechRequestParams): KokoroSpeechRequest {
-  const { endpoint, text, voice, model, responseFormat } = params;
+  const { endpoint, text, voice, model, responseFormat, speed } = params;
 
   return {
     url: kokoroSpeechUrl(endpoint),
@@ -45,6 +56,7 @@ export function buildKokoroSpeechRequest(params: KokoroSpeechRequestParams): Kok
       input: text,
       voice: voice.join('+'),
       response_format: responseFormat,
+      speed,
       stream: false,
     },
   };

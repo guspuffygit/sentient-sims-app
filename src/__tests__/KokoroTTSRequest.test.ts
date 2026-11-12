@@ -1,7 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { VoiceType, voiceTypeForTTS } from 'main/sentient-sims/models/VoiceType';
-import { buildKokoroSpeechRequest, kokoroSpeechUrl, splitSentences } from 'main/sentient-sims/clients/KokoroTTSRequest';
+import {
+  buildKokoroSpeechRequest,
+  kokoroBaseUrl,
+  kokoroSpeechUrl,
+  kokoroVoicesUrl,
+  splitSentences,
+} from 'main/sentient-sims/clients/KokoroTTSRequest';
+import {
+  defaultKokoroSpeed,
+  defaultSentientSimsAITTSSettings,
+  isKokoroSpeechVoice,
+  kokoroSpeechVoices,
+  SentientSimsAISpeechKokoroVoice,
+} from 'main/sentient-sims/models/SentientSimsAITTSSettings';
+import { defaultKokoroAITTSSettings } from 'main/sentient-sims/models/KokoroAITTSSettings';
+import { VOICES } from 'renderer/kokoro/voices';
 
 describe('self-hosted Kokoro TTS request', () => {
   it('targets the OpenAI-compatible speech route whatever the endpoint looks like', () => {
@@ -12,6 +27,11 @@ describe('self-hosted Kokoro TTS request', () => {
     expect(kokoroSpeechUrl(' http://localhost:8880/v1/ ')).toBe(expected);
   });
 
+  it('finds the server address and voice list from the same endpoint', () => {
+    expect(kokoroBaseUrl(' http://localhost:8880/v1/ ')).toBe('http://localhost:8880');
+    expect(kokoroVoicesUrl('http://localhost:8880/v1')).toBe('http://localhost:8880/v1/audio/voices');
+  });
+
   it('sends a single voice, or a blend joined with +, as one whole clip', () => {
     const single = buildKokoroSpeechRequest({
       endpoint: 'http://localhost:8880',
@@ -19,6 +39,7 @@ describe('self-hosted Kokoro TTS request', () => {
       voice: ['af_heart'],
       model: 'kokoro',
       responseFormat: 'wav',
+      speed: 1.25,
     });
     expect(single.url).toBe('http://localhost:8880/v1/audio/speech');
     expect(single.body).toEqual({
@@ -26,6 +47,7 @@ describe('self-hosted Kokoro TTS request', () => {
       input: 'Hello there.',
       voice: 'af_heart',
       response_format: 'wav',
+      speed: 1.25,
       stream: false,
     });
 
@@ -35,6 +57,7 @@ describe('self-hosted Kokoro TTS request', () => {
       voice: ['af_heart', 'af_sky'],
       model: 'kokoro',
       responseFormat: 'wav',
+      speed: 1.25,
     });
     expect(blend.body.voice).toBe('af_heart+af_sky');
   });
@@ -46,12 +69,32 @@ describe('self-hosted Kokoro TTS request', () => {
       voice: ['af_heart'],
       model: 'kokoro',
       responseFormat: 'wav',
+      speed: 1.25,
     });
     expect(Object.keys(request.headers)).toEqual(['Content-Type']);
   });
 
   it('casts Kokoro voices when the Kokoro provider is selected', () => {
     expect(voiceTypeForTTS(ApiType.Kokoro)).toBe(VoiceType.Kokoro);
+  });
+});
+
+describe('Kokoro voices shared by the Sentient Sims AI and self-hosted panels', () => {
+  it('offers every Kokoro voice except the one that returns no audio', () => {
+    expect(kokoroSpeechVoices).not.toContain(SentientSimsAISpeechKokoroVoice.Isabella);
+    expect(kokoroSpeechVoices).toHaveLength(Object.values(SentientSimsAISpeechKokoroVoice).length - 1);
+    expect(isKokoroSpeechVoice('bf_isabella')).toBe(false);
+    expect(isKokoroSpeechVoice('af_heart')).toBe(true);
+    expect(isKokoroSpeechVoice('tara')).toBe(false);
+  });
+
+  it('has a display name for every offered voice', () => {
+    expect(Object.keys(VOICES)).toEqual(expect.arrayContaining([...kokoroSpeechVoices]));
+  });
+
+  it('starts both providers at the same speed', () => {
+    expect(defaultKokoroAITTSSettings.speed).toBe(defaultKokoroSpeed);
+    expect(defaultSentientSimsAITTSSettings.speed).toBe(defaultKokoroSpeed);
   });
 });
 

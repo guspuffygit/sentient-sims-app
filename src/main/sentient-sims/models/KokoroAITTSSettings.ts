@@ -1,76 +1,15 @@
-export enum KokoroAISpeechVoice {
-  Heart = 'af_heart',
-  Alloy = 'af_alloy',
-  Aoede = 'af_aoede',
-  Bella = 'af_bella',
-  Jessica = 'af_jessica',
-  Kore = 'af_kore',
-  Nicole = 'af_nicole',
-  Nova = 'af_nova',
-  River = 'af_river',
-  Sky = 'af_sky',
-  Adam = 'am_adam',
-  Echo = 'am_echo',
-  Eric = 'am_eric',
-  Fenrir = 'am_fenrir',
-  Liam = 'am_liam',
-  Michael = 'am_michael',
-  Onyx = 'am_onyx',
-  Puck = 'am_puck',
-  Santa = 'am_santa',
-  Emma = 'bf_emma',
-  Isabella = 'bf_isabella',
-  George = 'bm_george',
-  Lewis = 'bm_lewis',
-  Alice = 'bf_alice',
-  Lily = 'bf_lily',
-  Daniel = 'bm_daniel',
-  Fable = 'bm_fable',
-}
-
-export enum KokoroType {
-  Remote = 'remote',
-  WebGPU = 'webgpu',
-}
-
-export enum KokoroAISpeechModel {
-  KOKORO = 'kokoro',
-}
+import { defaultKokoroSpeed, SentientSimsAISpeechKokoroVoice } from './SentientSimsAITTSSettings';
 
 export type KokoroAITTSSettings = {
-  model: (string & {}) | KokoroAISpeechModel;
-  voice: KokoroAISpeechVoice[];
+  model: string;
+  voice: SentientSimsAISpeechKokoroVoice[];
   response_format: 'wav';
-  type: KokoroType;
+  speed?: number;
 };
 
 export const defaultKokoroAITTSSettings: KokoroAITTSSettings = {
-  model: KokoroAISpeechModel.KOKORO,
-  voice: [KokoroAISpeechVoice.Heart],
+  model: 'kokoro',
+  voice: [SentientSimsAISpeechKokoroVoice.Heart],
   response_format: 'wav',
-  type: KokoroType.Remote,
+  speed: defaultKokoroSpeed,
 };
-
-export function toSpeechModel(model?: string): KokoroAISpeechModel {
-  if (Object.values(KokoroAISpeechModel).includes(model as KokoroAISpeechModel)) {
-    return model as KokoroAISpeechModel;
-  }
-
-  throw Error(`Unknown KokoroAISpeechModel ${model}`);
-}
-
-export function toSpeechVoice(voice?: string): KokoroAISpeechVoice {
-  if (Object.values(KokoroAISpeechVoice).includes(voice as KokoroAISpeechVoice)) {
-    return voice as KokoroAISpeechVoice;
-  }
-
-  throw Error(`Unknown KokoroSpeechVoice ${voice}`);
-}
-
-export function toKokoroType(type?: string): KokoroType {
-  if (Object.values(KokoroType).includes(type as KokoroType)) {
-    return type as KokoroType;
-  }
-
-  throw Error(`Unknown KokoroType ${type}`);
-}

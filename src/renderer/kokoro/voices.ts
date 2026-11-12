@@ -1,5 +1,3 @@
-import log from 'electron-log';
-
 export type SentientSimsVoice = {
   name: string;
   language: string;
@@ -264,52 +262,3 @@ export const VOICES: Readonly<Record<string, SentientSimsVoice>> = Object.freeze
     overallGrade: 'A',
   },
 });
-
-const VOICE_DATA_URL = 'https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/main/voices';
-
-async function getVoiceFile(id: keyof typeof VOICES): Promise<ArrayBufferLike> {
-  const url = `${VOICE_DATA_URL}/${id}.bin`;
-
-  let cache;
-  try {
-    cache = await caches.open('kokoro-voices');
-    const cachedResponse = await cache.match(url);
-    if (cachedResponse) {
-      return await cachedResponse.arrayBuffer();
-    }
-  } catch (e) {
-    log.warn('Unable to open cache', e);
-  }
-
-  // No cache, or cache failed to open. Fetch the file.
-  const response = await fetch(url);
-  const buffer = await response.arrayBuffer();
-
-  if (cache) {
-    try {
-      // NOTE: We use `new Response(buffer, ...)` instead of `response.clone()` to handle LFS files
-      await cache.put(
-        url,
-        new Response(buffer, {
-          headers: response.headers,
-        }),
-      );
-    } catch (e) {
-      log.warn('Unable to cache file', e);
-    }
-  }
-
-  return buffer;
-}
-
-const VOICE_CACHE = new Map<string, Float32Array>();
-export async function getVoiceData(voice: keyof typeof VOICES): Promise<Float32Array> {
-  const cached = VOICE_CACHE.get(voice);
-  if (cached) {
-    return cached;
-  }
-
-  const buffer = new Float32Array(await getVoiceFile(voice));
-  VOICE_CACHE.set(voice, buffer);
-  return buffer;
-}

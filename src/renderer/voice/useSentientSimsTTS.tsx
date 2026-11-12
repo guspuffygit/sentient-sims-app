@@ -1,16 +1,10 @@
 import { reportUsageHeader } from 'renderer/billing/reportUsageHeader';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useCallback } from 'react';
 import log from 'electron-log';
 import axios from 'axios';
-import { useAISettings } from 'renderer/providers/AISettingsProvider';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting from 'renderer/hooks/useSetting';
-import {
-  defaultSentientSimsAIHost,
-  sceneChunkGapMs,
-  sceneLineGapMs,
-  sceneLineReadingHoldMs,
-} from 'main/sentient-sims/constants';
+import { defaultSentientSimsAIHost } from 'main/sentient-sims/constants';
 import {
   defaultSentientSimsAITTSSettings,
   isElevenLabsSpeechModel,
@@ -21,34 +15,27 @@ import { axiosClient } from 'main/sentient-sims/clients/AxiosClient';
 import { SentenceTokenizeResponse } from 'main/sentient-sims/models/SentenceTokenizeResponse';
 import { SentenceTokenizeRequest } from 'main/sentient-sims/models/SentenceTokenizerRequest';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
-import { assignVoicesToSpeakers } from 'main/sentient-sims/formatter/VoiceAssignment';
-import { AudioPlaybackHandle, playAudioUrl } from './audioPlayback';
-import { pacedDelay } from './playbackClock';
-import { SpeakOptions, TTSHook } from './TTSHook';
+import { fetchSpeechAudio, SpeechFailure } from './fetchSpeechAudio';
+import { TTSHook } from './TTSHook';
+import { LineContext, SpeechAudioResult, useSpeechPlayback } from './useSpeechPlayback';
 
-type QueuedSpeech = { text: string; voice: string[]; followsClock: boolean };
-type QueuedAudio = { url: string; followsClock: boolean };
+// Matches the sentence tokenizer's limit, and stays under the mod's 80 second timeout
+const requestTimeoutMs = 65000;
 
-// The lines either side of the one being spoken; only ElevenLabs reads them
-type LineContext = { previousText?: string; nextText?: string };
-
-// The server's 452 and 4xx bodies are {message} or {error}; show the words, not the JSON
-function errorText(body: string): string {
-  try {
-    const parsed: unknown = JSON.parse(body);
-    if (parsed && typeof parsed === 'object') {
-      const { message, error } = parsed as { message?: unknown; error?: unknown };
-      if (typeof message === 'string') return message;
-      if (typeof error === 'string') return error;
-    }
-  } catch {
-    // not JSON
+function failureText(failure: SpeechFailure): string {
+  switch (failure.kind) {
+    case 'status':
+      return failure.message || `Unable to fetch audio: ${failure.status}`;
+    case 'not-audio':
+      return 'TTS server returned a non-audio response';
+    case 'timeout':
+      return `TTS request failed: no answer within ${requestTimeoutMs / 1000} seconds`;
+    default:
+      return `TTS request failed: ${failure.reason}`;
   }
-  return body;
 }
 
 export function useSentientSimsTTS(): TTSHook {
-  const aiSettings = useAISettings();
   const sentientSimsAIEndpointSetting = useSetting<string>(
     SettingsEnum.SENTIENTSIMSAI_ENDPOINT,
     defaultSentientSimsAIHost,
@@ -59,32 +46,10 @@ export function useSentientSimsTTS(): TTSHook {
     defaultSentientSimsAITTSSettings,
   );
 
-  const [error, setError] = useState<string | undefined>();
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const sentenceQueueRef = useRef<QueuedSpeech[]>([]);
-  const audioUrlQueueRef = useRef<QueuedAudio[]>([]);
-
-  const playerRunningRef = useRef(false);
-  const fetcherRunningRef = useRef(false);
-
-  const currentPlaybackRef = useRef<AudioPlaybackHandle | null>(null);
-
-  // Bumped by stop() and by each new speakLines run so an in-flight paced loop bails out
-  const speakSessionRef = useRef(0);
-
-  // Fetches one utterance's audio and returns an object URL, or null on failure
-  const fetchAudioUrl = useCallback(
-    async (text: string, voice: string[], context?: LineContext): Promise<string | null> => {
-      log.debug(`Sentient Sims TTS Fetcher: Fetching audio for "${text}"`);
-
-      if (voice.length === 0) {
-        setError('At least one Sentient Sims Voice must be selected');
-        return null;
-      }
-
+  const fetchAudio = useCallback(
+    async (text: string, voice: string[], context?: LineContext): Promise<SpeechAudioResult> => {
       const { model } = sentientSimsAITTSSettings.value;
-      const requestBody = isElevenLabsSpeechModel(model)
+      const body = isElevenLabsSpeechModel(model)
         ? {
             model,
             input: text,
@@ -101,327 +66,68 @@ export function useSentientSimsTTS(): TTSHook {
             speed: sentientSimsAITTSSettings.value.speed ?? defaultSentientSimsAITTSSettings.speed,
           };
 
-      const url = `${sentientSimsAIEndpointSetting.value}/v2/audio/speech`;
+      const fetched = await fetchSpeechAudio({
+        url: `${sentientSimsAIEndpointSetting.value}/v2/audio/speech`,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authentication': sentientSimsAITokenSetting.value,
+          'sentient-sims-model': model,
+          'X-Sentient-Sims-Purpose': 'tts',
+        },
+        body,
+        timeoutMs: requestTimeoutMs,
+        onResponse: reportUsageHeader,
+      });
 
-      try {
-        const doFetch = async () => {
-          const fetched = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authentication': sentientSimsAITokenSetting.value,
-              'sentient-sims-model': requestBody.model,
-              'X-Sentient-Sims-Purpose': 'tts',
-            },
-            body: JSON.stringify(requestBody),
-          });
-          reportUsageHeader(fetched);
-          return fetched;
-        };
-
-        let response = await doFetch();
-        // Gateway hiccups (502/503 from a worker restart) are usually momentary —
-        // one retry saves the line instead of dropping it to a silent subtitle
-        if (response.status >= 500) {
-          log.debug(`TTS returned ${response.status}, retrying once`);
-          await new Promise((resolve) => {
-            setTimeout(resolve, 500);
-          });
-          response = await doFetch();
-        }
-
-        if (!response.ok) {
-          const errorMessage = `Unable to fetch audio: ${response.status}`;
-          log.error(errorMessage);
-          try {
-            const bodyResponse = await response.text();
-            log.error(bodyResponse);
-            setError(errorText(bodyResponse));
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          } catch (err: any) {
-            setError(errorMessage);
-          }
-          return null;
-        }
-
-        // A half-dead gateway can 200 with an HTML error page, which then blows up
-        // audio decoding — treat anything that isn't audio bytes as a failed fetch
-        const contentType = response.headers.get('content-type') ?? '';
-        if (contentType.includes('text/html') || contentType.includes('application/json')) {
-          const bodyText = await response.text();
-          log.error(`TTS returned non-audio response (${contentType}): ${bodyText.slice(0, 200)}`);
-          setError('TTS server returned a non-audio response');
-          return null;
-        }
-
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-        log.debug(`Audio URL created: ${audioUrl}`);
-        return audioUrl;
-      } catch (err) {
-        const errorMessage = `TTS request failed: ${err instanceof Error ? err.message : String(err)}`;
-        log.error(errorMessage);
-        setError(errorMessage);
-        return null;
-      }
+      if ('url' in fetched) return fetched;
+      return { error: failureText(fetched.failure) };
     },
     [sentientSimsAITTSSettings.value, sentientSimsAIEndpointSetting.value, sentientSimsAITokenSetting.value],
   );
 
-  const fetcherLoop = useCallback(async () => {
-    if (fetcherRunningRef.current) return;
-    fetcherRunningRef.current = true;
-
-    while (sentenceQueueRef.current.length > 0) {
-      const item = sentenceQueueRef.current.shift();
-      if (!item) continue;
-      const audioUrl = await fetchAudioUrl(item.text, item.voice);
-      if (!audioUrl) break;
-      audioUrlQueueRef.current.push({ url: audioUrl, followsClock: item.followsClock });
-    }
-
-    fetcherRunningRef.current = false;
-    log.debug('Fetcher loop finished.');
-  }, [fetchAudioUrl]);
-
-  // The Consumer: Plays audio from the audioUrlQueueRef as it becomes available
-  const playerLoop = useCallback(async () => {
-    if (playerRunningRef.current) return;
-    playerRunningRef.current = true;
-    setIsPlaying(true);
-    setError(undefined);
-
-    while (audioUrlQueueRef.current.length > 0 || fetcherRunningRef.current) {
-      if (audioUrlQueueRef.current.length > 0) {
-        const queued = audioUrlQueueRef.current.shift();
-        if (!queued) continue;
-        const audioUrl = queued.url;
-
-        log.debug(`Player: Playing audio from URL: ${audioUrl}`);
-        try {
-          const playback = await playAudioUrl(audioUrl, aiSettings.ttsVolume, { followsClock: queued.followsClock });
-          currentPlaybackRef.current = playback;
-          await playback.finished;
-          log.debug('Audio finished playing.');
-        } catch (err) {
-          // DOMExceptions don't survive electron-log's IPC serialization — stringify here
-          log.error(`Error playing audio: ${err instanceof Error ? `${err.name}: ${err.message}` : String(err)}`);
-          setError('An error occurred during audio playback.');
-        } finally {
-          currentPlaybackRef.current = null;
-          URL.revokeObjectURL(audioUrl);
-        }
-      } else {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 10);
-        });
-      }
-    }
-
-    playerRunningRef.current = false;
-    setIsPlaying(false);
-    log.debug('Player loop finished.');
-  }, [aiSettings.ttsVolume]);
-
-  // Resolves once every queued sentence has been fetched and played, so callers can
-  // await full playback and serialize one scene after another
-  const waitForIdle = useCallback(async () => {
-    while (
-      fetcherRunningRef.current ||
-      playerRunningRef.current ||
-      sentenceQueueRef.current.length > 0 ||
-      audioUrlQueueRef.current.length > 0
-    ) {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 50);
-      });
-    }
-  }, []);
-
-  const speak = useCallback(
-    async (text: string, speakOptions?: SpeakOptions) => {
-      log.debug(`Sentient Sims Voice Speak called: ${text}`);
-      const followsClock = speakOptions?.followsClock ?? true;
-
+  const toSentences = useCallback(
+    async (text: string): Promise<string[]> => {
       try {
         const request: SentenceTokenizeRequest = { paragraph: text };
-        const options = {
+        const response = await axiosClient<SentenceTokenizeResponse>({
           url: '/sent-tokenize',
           method: 'POST',
           data: request,
           baseURL: sentientSimsAIEndpointSetting.value,
           headers: { Authentication: sentientSimsAITokenSetting.value },
-          timeout: 65000,
-        };
-        const response = await axiosClient<SentenceTokenizeResponse>(options);
-        const { sentences } = response.data;
-
-        if (sentences.length > 0) {
-          sentences.forEach((sentence) =>
-            sentenceQueueRef.current.push({
-              text: sentence,
-              voice: sentientSimsAITTSSettings.value.voice,
-              followsClock,
-            }),
-          );
-          log.debug(`Queued ${sentences.length} sentences. Starting fetcher and player.`);
-          void fetcherLoop();
-          void playerLoop();
-          await waitForIdle();
-        } else {
-          log.error('No sentences returned from tokenization.');
-        }
+          timeout: requestTimeoutMs,
+        });
+        return response.data.sentences;
       } catch (err) {
         const errorMessage = `Sentence tokenization failed: ${err instanceof Error ? err.message : String(err)}`;
         const responseData: unknown = axios.isAxiosError(err) ? err.response?.data : undefined;
         log.error(errorMessage, responseData);
-        setError(errorMessage);
+        throw new Error(errorMessage, { cause: err });
       }
     },
-    [
-      sentientSimsAIEndpointSetting.value,
-      sentientSimsAITokenSetting.value,
-      sentientSimsAITTSSettings.value,
-      fetcherLoop,
-      playerLoop,
-      waitForIdle,
-    ],
+    [sentientSimsAIEndpointSetting.value, sentientSimsAITokenSetting.value],
   );
 
-  const speakLines = useCallback(
-    async (
-      lines: DialogueLine[],
-      onLineStart?: (line: DialogueLine, voiced: boolean) => void,
-      onLineEnd?: (line: DialogueLine) => void,
-      shouldContinue?: (nextIndex: number, entries: DialogueLine[]) => boolean,
-    ): Promise<void> => {
-      if (lines.length === 0) return;
-
-      const pool = sentientSimsAITTSSettings.value.voice;
-      // Lines carrying a cast/pinned voice don't need the settings pool; only speakers
-      // without one (e.g. the Narrator) fall back to it
-      const uncastSpeakers = lines.filter((line) => !line.voiceId).map((line) => line.speaker);
-      if (pool.length === 0 && uncastSpeakers.length > 0) {
-        setError('At least one Sentient Sims Voice must be selected');
-        return;
-      }
-
-      const assignments = assignVoicesToSpeakers(uncastSpeakers, pool);
-      const lineVoice = (line: DialogueLine): string[] => {
-        // A cast voice is a single voice or a Kokoro blend like 'af_heart+af_sky'
-        log.info(`[TTS] Line for ${line.speaker}: voice=${line.voiceId ?? '(default, no cast voice)'}`);
-        if (line.voiceId) {
-          return line.voiceId.split('+');
-        }
-        return assignments.get(line.speaker) ?? pool;
-      };
-
-      speakSessionRef.current += 1;
-      const session = speakSessionRef.current;
-      setIsPlaying(true);
-      setError(undefined);
-
-      // Conversation pacing: each line runs for exactly its audio's duration, with the
-      // next line's audio prefetched while this one plays so lines flow back-to-back
+  // ElevenLabs reads the neighbouring lines to carry tone across a scene
+  const lineRequest = useCallback(
+    (lines: DialogueLine[], index: number) => {
       const { model } = sentientSimsAITTSSettings.value;
-      const elevenLabs = isElevenLabsSpeechModel(model);
-      const audioPromises: (Promise<string | null> | undefined)[] = [];
-      const startFetch = (index: number) => {
-        if (index < lines.length && !audioPromises[index]) {
-          const line = lines[index];
-          const text = elevenLabs ? elevenLabsLineText(line, model) : line.text;
-          const context = elevenLabs
-            ? { previousText: lines[index - 1]?.text, nextText: lines[index + 1]?.text }
-            : undefined;
-          audioPromises[index] = fetchAudioUrl(text, lineVoice(line), context);
-        }
-      };
-      startFetch(0);
-
-      log.debug(`Playing ${lines.length} dialogue lines paced to their audio.`);
-      try {
-        for (let i = 0; i < lines.length; i += 1) {
-          if (speakSessionRef.current !== session) break;
-          // The conversation ended while the previous line was playing; that line got
-          // to finish, this one never starts
-          if (shouldContinue && !shouldContinue(i, lines)) break;
-          startFetch(i + 1);
-          const audioUrl = (await audioPromises[i]) ?? null;
-          if (speakSessionRef.current !== session) {
-            if (audioUrl) URL.revokeObjectURL(audioUrl);
-            break;
-          }
-
-          onLineStart?.(lines[i], audioUrl !== null);
-          try {
-            if (audioUrl) {
-              try {
-                const playback = await playAudioUrl(audioUrl, aiSettings.ttsVolume, {
-                  followsClock: lines[i].followsClock,
-                });
-                currentPlaybackRef.current = playback;
-                await playback.finished;
-              } catch (err) {
-                log.error(`Error playing audio: ${err instanceof Error ? `${err.name}: ${err.message}` : String(err)}`);
-                setError('An error occurred during audio playback.');
-              } finally {
-                currentPlaybackRef.current = null;
-                URL.revokeObjectURL(audioUrl);
-              }
-            } else {
-              // No audio to time the subtitle — hold for its reading time instead
-              // (paced: scales with game speed, freezes on a user pause — V-1)
-              await pacedDelay(sceneLineReadingHoldMs(lines[i].text));
-            }
-          } finally {
-            // Whatever ended the line (audio done, error, stop()), the mod hears it
-            onLineEnd?.(lines[i]);
-          }
-
-          if (i < lines.length - 1 && speakSessionRef.current === session) {
-            // A scene that will not go on skips the gap too (see useElevenLabsTTS)
-            if (shouldContinue && !shouldContinue(i + 1, lines)) break;
-            await pacedDelay(lines[i].continues ? sceneChunkGapMs : sceneLineGapMs);
-          }
-        }
-      } finally {
-        // Release any prefetched audio that never played (cancelled session)
-        const leftovers = await Promise.allSettled(audioPromises.filter(Boolean) as Promise<string | null>[]);
-        leftovers.forEach((settled) => {
-          if (settled.status === 'fulfilled' && settled.value && speakSessionRef.current !== session) {
-            URL.revokeObjectURL(settled.value);
-          }
-        });
-        setIsPlaying(false);
+      if (!isElevenLabsSpeechModel(model)) {
+        return { text: lines[index].text };
       }
+      return {
+        text: elevenLabsLineText(lines[index], model),
+        context: { previousText: lines[index - 1]?.text, nextText: lines[index + 1]?.text },
+      };
     },
-    [sentientSimsAITTSSettings.value, fetchAudioUrl, aiSettings.ttsVolume],
+    [sentientSimsAITTSSettings.value],
   );
 
-  const stopTTS = useCallback(() => {
-    log.debug('Stop TTS called.');
-    speakSessionRef.current += 1;
-    if (currentPlaybackRef.current) {
-      currentPlaybackRef.current.stop();
-      currentPlaybackRef.current = null;
-    }
-
-    sentenceQueueRef.current = [];
-    audioUrlQueueRef.current.forEach((queued) => {
-      URL.revokeObjectURL(queued.url);
-    });
-    audioUrlQueueRef.current = [];
-
-    setIsPlaying(false);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      audioUrlQueueRef.current.forEach((queued) => {
-        URL.revokeObjectURL(queued.url);
-      });
-    };
-  }, []);
-
-  return { speak, speakLines, stop: stopTTS, isPlaying, error };
+  return useSpeechPlayback({
+    pool: sentientSimsAITTSSettings.value.voice,
+    noVoiceError: 'At least one Sentient Sims Voice must be selected',
+    fetchAudio,
+    toSentences,
+    lineRequest,
+  });
 }
