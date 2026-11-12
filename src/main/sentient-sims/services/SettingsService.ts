@@ -48,6 +48,7 @@ import {
   defaultSentientSimsAIHost,
   defaultGameAppPath,
   defaultVoiceInputHotkeyFor,
+  formerCtrlDefaultVoiceInputHotkey,
   formerDefaultVoiceInputHotkey,
   defaultVoiceInputModel,
   defaultTwitchCommandWord,
@@ -444,6 +445,10 @@ export function defaultStore(cwd?: string) {
         default: 'hold',
       },
       [SettingsEnum.VOICE_INPUT_HOTKEY_MIGRATED.toString()]: {
+        type: 'boolean',
+        default: false,
+      },
+      [SettingsEnum.VOICE_INPUT_HOTKEY_ONE_KEY_MIGRATED.toString()]: {
         type: 'boolean',
         default: false,
       },
@@ -1518,6 +1523,22 @@ export class SettingsService {
     this.set(SettingsEnum.PREFETCH_MAX_QUEUE_DEPTH, value);
   }
 
+  private migrateVoiceHotkey(flag: SettingsEnum, former: string) {
+    if (this.get(flag)) {
+      return;
+    }
+    const hotkeyDefault = defaultVoiceInputHotkeyFor(process.platform === 'darwin');
+    if (this.voiceInputHotkey === former) {
+      if (this.voiceCommandHotkey === hotkeyDefault) {
+        log.info(`Voice hotkey stays ${former}: the command key is ${hotkeyDefault}`);
+      } else {
+        log.info(`Migrating voice hotkey ${former} -> ${hotkeyDefault}`);
+        this.set(SettingsEnum.VOICE_INPUT_HOTKEY, hotkeyDefault);
+      }
+    }
+    this.set(flag, true);
+  }
+
   runMigrations() {
     // One time: a player who used the app before the wizard opened on its own is
     // already set up. Their provider configs were seeded on an earlier run; a
@@ -1535,20 +1556,13 @@ export class SettingsService {
       this.set(SettingsEnum.SETUP_COMPLETE_SEEDED, true);
     }
 
-    // One time: Ctrl+Space was the Windows default, and The Sims 4 binds Space. The store
+    // One time each: Ctrl+Space was the Windows default (The Sims 4 binds Space), then Ctrl+S
+    // (the game ignores clicks while Ctrl is down, so a click could not pick a Sim). The store
     // writes every schema default to disk, so a player who never touched the setting holds
     // it too; they move to today's default. A chord picked later is left alone.
-    if (!this.get(SettingsEnum.VOICE_INPUT_HOTKEY_MIGRATED)) {
-      const hotkeyDefault = defaultVoiceInputHotkeyFor(process.platform === 'darwin');
-      if (this.voiceInputHotkey === formerDefaultVoiceInputHotkey) {
-        if (this.voiceCommandHotkey === hotkeyDefault) {
-          log.info(`Voice hotkey stays ${formerDefaultVoiceInputHotkey}: the command key is ${hotkeyDefault}`);
-        } else {
-          log.info(`Migrating voice hotkey ${formerDefaultVoiceInputHotkey} -> ${hotkeyDefault}`);
-          this.set(SettingsEnum.VOICE_INPUT_HOTKEY, hotkeyDefault);
-        }
-      }
-      this.set(SettingsEnum.VOICE_INPUT_HOTKEY_MIGRATED, true);
+    this.migrateVoiceHotkey(SettingsEnum.VOICE_INPUT_HOTKEY_MIGRATED, formerDefaultVoiceInputHotkey);
+    if (process.platform !== 'darwin') {
+      this.migrateVoiceHotkey(SettingsEnum.VOICE_INPUT_HOTKEY_ONE_KEY_MIGRATED, formerCtrlDefaultVoiceInputHotkey);
     }
 
     // Before 4.5.3 the voice provider was openai for every OpenAI-compatible server, told

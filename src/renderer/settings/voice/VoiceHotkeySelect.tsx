@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Select, Typography } from '@mui/material';
-import { VoiceHotkeyPreset, voiceHotkeyFromKey, voiceHotkeyLabel } from 'main/sentient-sims/models/VoiceHotkeyPresets';
+import {
+  VoiceHotkeyPreset,
+  voiceHotkeyAllowsModifiers,
+  voiceHotkeyFromKey,
+  voiceHotkeyGameUse,
+  voiceHotkeyLabel,
+} from 'main/sentient-sims/models/VoiceHotkeyPresets';
 
 const CUSTOM = '__custom__';
 
@@ -8,15 +14,22 @@ type Props = {
   value: string;
   presets: VoiceHotkeyPreset[];
   onChange: (chord: string) => void;
+  // What the Custom dialog asks for
+  prompt?: string;
 };
 
+const TALK_PROMPT = 'Press the key you want to use to talk to your Sims.';
+
 // A hotkey dropdown whose last row, "Custom…", opens a dialog that records the next key
-// or chord pressed. The captured chord is saved in the overlay's spelling, and presets
-// keep it as a row of its own once it is the bound key.
-export default function VoiceHotkeySelect({ value, presets, onChange }: Props) {
+// pressed (with its modifiers where the platform allows them) and says so when the game
+// already uses that key. The captured hotkey is saved in the overlay's spelling, and
+// presets keep it as a row of its own once it is the bound key.
+export default function VoiceHotkeySelect({ value, presets, onChange, prompt = TALK_PROMPT }: Props) {
   const { isMac } = window.electron;
   const [capturing, setCapturing] = useState(false);
   const [captured, setCaptured] = useState<string>();
+  const allowModifiers = voiceHotkeyAllowsModifiers(isMac);
+  const gameUse = captured ? voiceHotkeyGameUse(captured) : undefined;
 
   useEffect(() => {
     if (!capturing) {
@@ -24,16 +37,16 @@ export default function VoiceHotkeySelect({ value, presets, onChange }: Props) {
     }
     const onKeyDown = (event: KeyboardEvent) => {
       event.preventDefault();
-      const chord = voiceHotkeyFromKey(event);
-      if (chord) {
-        setCaptured(chord);
+      const hotkey = voiceHotkeyFromKey(event, allowModifiers);
+      if (hotkey) {
+        setCaptured(hotkey);
       }
     };
     window.addEventListener('keydown', onKeyDown, true);
     return () => {
       window.removeEventListener('keydown', onKeyDown, true);
     };
-  }, [capturing]);
+  }, [capturing, allowModifiers]);
 
   function open() {
     setCaptured(undefined);
@@ -79,9 +92,14 @@ export default function VoiceHotkeySelect({ value, presets, onChange }: Props) {
             {captured ? voiceHotkeyLabel(captured, isMac) : '…'}
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Press the key or chord you want, with Ctrl, Alt or Shift held if you like. The game still sees the key, so
-            pick one it leaves alone or add a modifier.
+            {allowModifiers ? `${prompt} You can hold Ctrl, Opt or Shift with it.` : prompt}
           </Typography>
+          {captured && gameUse ? (
+            <Typography variant="body2" sx={{ color: 'warning.main', marginTop: 1 }}>
+              {voiceHotkeyLabel(captured, isMac)} is already used in the game: it {gameUse}. You can still use it, but
+              holding it will talk instead.
+            </Typography>
+          ) : null}
         </DialogContent>
         <DialogActions>
           <Button

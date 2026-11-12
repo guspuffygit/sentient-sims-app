@@ -62,11 +62,15 @@ export class VoiceInputService {
       },
       onToggle: () => {},
     });
+    this.hotkey.armCancel(() => {
+      this.cancelListening();
+    });
   }
 
   shutdown() {
     setVoiceKeySink(undefined);
     this.hotkey.armDictate(undefined);
+    this.hotkey.armCancel(undefined);
     this.hotkey.shutdown();
     this.reset();
   }
@@ -150,6 +154,9 @@ export class VoiceInputService {
     sendPlayerVoiceStatusToMod('listening', undefined, {
       speaker: this.ctx.settings.playerSpeakerName,
       mode: this.captureMode,
+      // The game draws an X on its voice label (cancelListening); the memories
+      // window's button has no label
+      canCancel: mode !== 'dictate',
     });
     // Backstop for a lost keyup (alt-tab mid-hold): never leave the mic hot
     this.forceStopTimer = setTimeout(() => {
@@ -171,6 +178,19 @@ export class VoiceInputService {
     }, audioDeliveryTimeoutMs);
   }
 
+  // The X on the game's voice label: the recording is thrown away, never transcribed.
+  // The mod has already ended the hold on its side and keeps the game paused, so no
+  // status goes back.
+  cancelListening() {
+    if (this.state !== 'listening') {
+      return;
+    }
+    this.clearForceStop();
+    this.state = 'idle';
+    notifyAllWindows('voice-record-cancel');
+    log.info('Voice input cancelled in the game: the recording was dropped');
+  }
+
   // Invoked from the renderer once the recording blob is assembled
   async handleAudio(audio: ArrayBuffer, mimeType?: string): Promise<string> {
     try {
@@ -183,7 +203,8 @@ export class VoiceInputService {
       }
       const raw = await this.ctx.transcription.transcribe(audio, mimeType);
       if (!raw) {
-        sendPlayerVoiceStatusToMod('error', 'Heard nothing');
+        // Nothing to act on: the game says it in passing on the voice label
+        sendPlayerVoiceStatusToMod('error', 'Heard nothing.', { quiet: true });
         return '';
       }
       // V-7 post-pass: snap misheard worlds ("Dale Sol Valley") and near-miss names to
@@ -277,11 +298,12 @@ export class VoiceInputService {
     }
   }
 
-  // Renderer-side mic failure (no permission, no device, recorder error)
+  // Renderer-side mic failure (no permission, no device, recorder error), already in
+  // the player's words (microphoneErrorWords); the game shows the same sentence
   handleRecordError(message: string) {
     log.error(`Voice recording failed in renderer: ${message}`);
-    sendPlayerVoiceStatusToMod('error', 'Microphone unavailable');
-    sendPopUpNotification(`Voice input microphone error: ${message}`);
+    sendPlayerVoiceStatusToMod('error', message);
+    sendPopUpNotification(`Voice input: ${message}`);
     this.reset();
   }
 

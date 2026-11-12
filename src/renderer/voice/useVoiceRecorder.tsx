@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
+import { microphoneErrorWords } from 'main/sentient-sims/util/microphoneErrorWords';
 import useSetting from 'renderer/hooks/useSetting';
 
 export type VoiceRecorderState = {
@@ -29,6 +30,8 @@ export function useVoiceRecorder(): VoiceRecorderState {
     // A stop that lands while getUserMedia is still resolving must still end the
     // recording, or the mic stays hot after the player releases the hotkey
     let stopRequested = false;
+    // A cancel: the recording that is ending is thrown away, not transcribed
+    let discard = false;
 
     const stopRecorder = () => {
       const recorder = recorderRef.current;
@@ -42,6 +45,7 @@ export function useVoiceRecorder(): VoiceRecorderState {
         return;
       }
       stopRequested = false;
+      discard = false;
       try {
         const deviceId = deviceIdRef.current;
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -62,6 +66,9 @@ export function useVoiceRecorder(): VoiceRecorderState {
             recorderRef.current = null;
           }
           setIsRecording(false);
+          if (discard) {
+            return;
+          }
           const blob = new Blob(chunks, { type: 'audio/webm' });
           blob
             .arrayBuffer()
@@ -82,7 +89,11 @@ export function useVoiceRecorder(): VoiceRecorderState {
           recorder.stop();
         }
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
+        const message = microphoneErrorWords(
+          err instanceof Error ? err.name : undefined,
+          err instanceof Error ? err.message : String(err),
+          window.electron.isMac,
+        );
         log.error('Voice recording failed to start', err);
         setError(message);
         window.electron.notifyVoiceRecordError(message);
@@ -94,8 +105,14 @@ export function useVoiceRecorder(): VoiceRecorderState {
       stopRecorder();
     };
 
+    const handleCancel = () => {
+      discard = true;
+      handleStop();
+    };
+
     const unsubscribeStart = window.electron.onVoiceRecordStart(() => void handleStart());
     const unsubscribeStop = window.electron.onVoiceRecordStop(handleStop);
+    const unsubscribeCancel = window.electron.onVoiceRecordCancel(handleCancel);
     const unsubscribeTranscript = window.electron.onVoiceTranscript((_event, text: string) => {
       setLastTranscript(text);
     });
@@ -103,6 +120,7 @@ export function useVoiceRecorder(): VoiceRecorderState {
     return () => {
       unsubscribeStart();
       unsubscribeStop();
+      unsubscribeCancel();
       unsubscribeTranscript();
       handleStop();
     };

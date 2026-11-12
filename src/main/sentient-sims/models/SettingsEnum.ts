@@ -90,6 +90,8 @@ export enum SettingsEnum {
   VOICE_INPUT_HOTKEY_MODE = 'voiceInputHotkeyMode', // hold | toggle
   // Set once runMigrations has moved a store off the old Ctrl+Space default
   VOICE_INPUT_HOTKEY_MIGRATED = 'voiceInputHotkeyMigrated',
+  // Set once runMigrations has moved a Windows store off the old Ctrl+S default
+  VOICE_INPUT_HOTKEY_ONE_KEY_MIGRATED = 'voiceInputHotkeyOneKeyMigrated',
   VOICE_INPUT_LANGUAGE = 'voiceInputLanguage', // ISO-639-1 hint, empty = auto-detect
   VOICE_INPUT_DEVICE_ID = 'voiceInputDeviceId', // empty = system default mic
   // V-1: voice/subtitle playback pauses with a user pause and paces with speed 2/3

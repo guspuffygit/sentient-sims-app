@@ -313,10 +313,13 @@ export function sendPlayerVoiceDraftToMod(text: string) {
 // `speaker` (V-3) is the player's persona label; the mod echoes the heard line under it,
 // so it MUST equal the speaker the reply is generated with (playerSpeakerLabel).
 // `mode` (V-8): 'chat' = talk to the sim, 'command' = an order the sim will act on.
+// `quiet`: an error with nothing to act on, which the game says in passing on the voice
+// label where any other error is a notification.
+// `canCancel`: this app drops the recording on `voice_cancel`, so the label may offer it.
 export function sendPlayerVoiceStatusToMod(
   status: 'listening' | 'transcribing' | 'cancelled' | 'error',
   detail?: string,
-  extra?: { speaker?: string; mode?: 'chat' | 'command' | 'dictate' },
+  extra?: { speaker?: string; mode?: 'chat' | 'command' | 'dictate'; quiet?: boolean; canCancel?: boolean },
 ) {
   sendModNotification({
     type: ModWebsocketMessageType.PLAYER_VOICE_STATUS,
@@ -324,16 +327,19 @@ export function sendPlayerVoiceStatusToMod(
     detail,
     speaker: extra?.speaker,
     mode: extra?.mode,
+    quiet: extra?.quiet,
+    can_cancel: extra?.canCancel,
   });
 }
 
 // The chords the game overlay listens for (D8); the mod re-sends them whenever the
 // overlay (re)loads, so this only has to reach the mod once per change
-export function sendVoiceHotkeysToMod(bindings: { talk: string; command: string }) {
+export function sendVoiceHotkeysToMod(bindings: { talk: string; command: string; mode: 'hold' | 'toggle' }) {
   sendModNotification({
     type: ModWebsocketMessageType.VOICE_HOTKEYS,
     talk: bindings.talk,
     command: bindings.command,
+    mode: bindings.mode,
   });
 }
 
