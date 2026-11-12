@@ -12,8 +12,10 @@ import {
   Select,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
+import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded';
 import MicIcon from '@mui/icons-material/Mic';
 import log from 'electron-log';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
@@ -41,7 +43,6 @@ import {
   PLAYER_VOICE_PERSONA_LABELS,
   PlayerVoicePersona,
 } from 'main/sentient-sims/models/PlayerVoicePersona';
-import HelpButton from 'renderer/components/HelpButton';
 import VoiceHotkeySelect from './VoiceHotkeySelect';
 import { rendererTiers } from '../../tiers/merge';
 
@@ -49,6 +50,20 @@ import { rendererTiers } from '../../tiers/merge';
 const VoiceCommandRow = rendererTiers.voiceCommandRow;
 
 const testRecordMs = 3000;
+
+// The tooltip beside the Enable Voice Input checkbox. A hotkey with a modifier
+// cannot click a Sim (the game reports no click while one is held)
+export function voiceInputHelp(hotkey: string, mode: string): string {
+  const talk =
+    mode === 'toggle'
+      ? 'Press the Voice Input hotkey in game to talk to your Sim, and press it again when you are done.'
+      : 'Hold the Voice Input hotkey in game to talk to your Sim.';
+  if (hotkey.includes('+')) {
+    return talk;
+  }
+  const during = mode === 'toggle' ? 'while it is listening' : 'while holding the hotkey';
+  return `${talk} Click another Sim ${during} to talk as your Sim to them.`;
+}
 
 // The talk key and how it works (hold or press), shared with the setup wizard
 export function VoiceHotkeyRow() {
@@ -344,6 +359,7 @@ export default function VoiceInputSettingsComponent() {
   const openrouterKey = useSetting<string>(SettingsEnum.OPENROUTER_KEY, '');
   const geminiKeys = useSetting<string>(SettingsEnum.GEMINI_KEYS, '');
   const hotkey = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY, defaultVoiceInputHotkeyFor(isMac));
+  const hotkeyMode = useSetting<string>(SettingsEnum.VOICE_INPUT_HOTKEY_MODE, 'hold');
   const language = useSetting<string>(SettingsEnum.VOICE_INPUT_LANGUAGE, '');
 
   const provider = voiceInputProviderFromValue(providerSetting.value);
@@ -387,7 +403,9 @@ export default function VoiceInputSettingsComponent() {
             <Checkbox checked={enabled.value} onChange={(change) => void enabled.setSetting(change.target.checked)} />
           }
         />
-        <HelpButton url="https://github.com/guspuffygit/sentient-sims-app/wiki/Voice" />
+        <Tooltip title={voiceInputHelp(hotkey.value, hotkeyMode.value)}>
+          <HelpOutlineRoundedIcon color="action" />
+        </Tooltip>
       </Box>
       {enabled.value ? (
         <Stack spacing={2} sx={{ maxWidth: 640 }}>
@@ -478,12 +496,6 @@ export default function VoiceInputSettingsComponent() {
             </Select>
           </Stack>
           <MicrophoneSetup />
-          <FormHelperText>
-            Hold the hotkey while the game is focused, speak, and release — your words become your active Sim&apos;s
-            spoken line to whoever they&apos;re talking to. The game&apos;s overlay listens for the key, so it works
-            only while the game window is focused and the overlay is loaded; no system permission is needed. (Change
-            hotkey with the Hotkey setting above)
-          </FormHelperText>
         </Stack>
       ) : null}
     </Box>

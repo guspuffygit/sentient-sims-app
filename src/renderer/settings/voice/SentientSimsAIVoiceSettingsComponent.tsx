@@ -1,9 +1,10 @@
-import { Box, Chip, FormHelperText, MenuItem, Select, Slider, Stack, Typography } from '@mui/material';
+import { Box, Chip, FormHelperText, MenuItem, Select, Typography } from '@mui/material';
 import { SettingsEnum } from 'main/sentient-sims/models/SettingsEnum';
 import useSetting from 'renderer/hooks/useSetting';
-import { JSX, useMemo } from 'react';
+import { JSX } from 'react';
 import {
   DEFAULT_SENTIENT_SIMS_AI_ELEVENLABS_VOICE,
+  defaultKokoroSpeed,
   defaultSentientSimsAITTSSettings,
   isElevenLabsSpeechModel,
   SentientSimsAISpeechModel,
@@ -23,8 +24,8 @@ import { useTTS } from 'renderer/providers/AudioContextProvider';
 import { useMembership } from 'renderer/hooks/useMembership';
 import { SUBSCRIPTION_REQUIRED_LABEL } from 'renderer/billing/membershipView';
 import { PLAN_TAB, SUBSCRIBE_HINT } from 'main/sentient-sims/exceptions/SubscriptionRequiredError';
-import SpeedIcon from '@mui/icons-material/Speed';
 import { useAuth } from '../../providers/AuthProvider';
+import { KokoroSpeedSlider, KokoroVoiceSelect } from './KokoroVoiceControls';
 
 export function SentientSimsAIVoiceSettingsComponent() {
   const { userAttributes } = useAuth();
@@ -71,6 +72,7 @@ export function SentientSimsAIVoiceSettingsComponent() {
   // ElevenLabs voices come with Tier 3 and Tier 4
   const includesElevenLabs = membership.canUseElevenLabs();
   const isElevenLabs = isElevenLabsSpeechModel(sentientsimsaiTtsSettings.value.model);
+  const isKokoro = sentientsimsaiTtsSettings.value.model === SentientSimsAISpeechModel.KOKORO;
   const showTierError = isElevenLabs && !includesElevenLabs;
   if (showTierError) {
     errors.push(
@@ -114,20 +116,13 @@ export function SentientSimsAIVoiceSettingsComponent() {
         </MenuItem>,
       );
     });
-  } else if (sentientsimsaiTtsSettings.value.model === SentientSimsAISpeechModel.KOKORO) {
-    Object.entries(SentientSimsAISpeechKokoroVoice).forEach((key) => {
-      // this voice doesn't work for some reason
-      if (key[1] !== SentientSimsAISpeechKokoroVoice.Isabella) {
-        voiceMenuItems.push(
-          <MenuItem value={key[1]}>{`${key[0]} (${VOICES[key[1]].gender}) : ${
-            VOICES[key[1]].language === 'en-us' ? 'American' : 'British'
-          }`}</MenuItem>,
-        );
-      }
-    });
-  } else {
+  } else if (!isKokoro) {
     Object.entries(SentientSimsAISpeechOrpheusVoice).forEach((key) => {
-      voiceMenuItems.push(<MenuItem value={key[1]}>{key[0]}</MenuItem>);
+      voiceMenuItems.push(
+        <MenuItem key={key[1]} value={key[1]}>
+          {key[0]}
+        </MenuItem>,
+      );
     });
   }
 
@@ -149,54 +144,14 @@ export function SentientSimsAIVoiceSettingsComponent() {
     });
   }
 
-  function handleSpeedChange(speed: number) {
-    void sentientsimsaiTtsSettings.setSetting({
-      model: sentientsimsaiTtsSettings.value.model,
-      voice: sentientsimsaiTtsSettings.value.voice,
-      response_format: sentientsimsaiTtsSettings.value.response_format,
-      speed,
-    });
+  function update(change: Partial<SentientSimsAITTSSettings>) {
+    void sentientsimsaiTtsSettings.setSetting({ ...sentientsimsaiTtsSettings.value, ...change });
   }
 
-  function handleVoiceChange(voice: string | SentientSimsAISpeechVoice[]) {
-    const voices: SentientSimsAISpeechVoice[] = [];
-    if (isElevenLabs) {
-      const picked = typeof voice === 'string' ? voice : voice[0];
-      if (picked) voices.push(picked);
-    } else if (typeof voice === 'string') {
-      voice.split(',').forEach((v) => {
-        const speechVoice = toSpeechVoice(v);
-        if (speechVoice !== SentientSimsAISpeechKokoroVoice.Isabella) {
-          voices.push(speechVoice);
-        }
-      });
-    } else {
-      voice.forEach((v) => {
-        if (v !== SentientSimsAISpeechKokoroVoice.Isabella) {
-          voices.push(v);
-        }
-      });
-    }
-
-    if (voices.length > 4) {
-      return;
-    }
-
-    void sentientsimsaiTtsSettings.setSetting({
-      model: sentientsimsaiTtsSettings.value.model,
-      voice: voices,
-      response_format: sentientsimsaiTtsSettings.value.response_format,
-      speed: sentientsimsaiTtsSettings.value.speed,
-    });
+  // Orpheus and ElevenLabs speak with one voice
+  function handleSingleVoiceChange(voice: string) {
+    update({ voice: [isElevenLabs ? voice : toSpeechVoice(voice)] });
   }
-
-  const speed = useMemo(() => {
-    if (sentientsimsaiTtsSettings.value.speed) {
-      return sentientsimsaiTtsSettings.value.speed;
-    }
-
-    return defaultSentientSimsAITTSSettings.speed;
-  }, [sentientsimsaiTtsSettings.value.speed]);
 
   return (
     <Box sx={{ maxWidth: 560 }}>
@@ -224,62 +179,40 @@ export function SentientSimsAIVoiceSettingsComponent() {
           {modelMenuItems}
         </Select>
       </Box>
-      <Box sx={{ marginBottom: 2 }}>
-        <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 0.75 }}>
-          Speech voice
-        </Typography>
-        <Select
-          size="small"
-          labelId="voice"
-          id="voice"
-          label="Voice"
-          multiple={sentientsimsaiTtsSettings.value.model === SentientSimsAISpeechModel.KOKORO}
-          value={
-            isElevenLabs ? (sentientsimsaiTtsSettings.value.voice[0] ?? '') : sentientsimsaiTtsSettings.value.voice
-          }
-          sx={{ width: '100%' }}
-          onChange={(change) => {
-            handleVoiceChange(change.target.value);
-          }}
-          renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {(typeof selected === 'string' ? [selected] : selected).map((value) => (
-                <Chip key={value} label={voiceLabel(value)} />
-              ))}
-            </Box>
-          )}
-        >
-          {voiceMenuItems}
-        </Select>
-        {sentientsimsaiTtsSettings.value.model === SentientSimsAISpeechModel.KOKORO && (
-          <FormHelperText sx={{ marginTop: 0.75 }}>
-            You can select multiple voices to create a custom voice
-          </FormHelperText>
-        )}
-      </Box>
-      {sentientsimsaiTtsSettings.value.model === SentientSimsAISpeechModel.KOKORO && (
-        <Box sx={{ width: 280, marginBottom: 2 }}>
+      {isKokoro ? (
+        <>
+          <KokoroVoiceSelect
+            value={sentientsimsaiTtsSettings.value.voice}
+            onChange={(voice) => {
+              update({ voice });
+            }}
+          />
+          <KokoroSpeedSlider
+            value={sentientsimsaiTtsSettings.value.speed ?? defaultKokoroSpeed}
+            onChange={(speed) => {
+              update({ speed });
+            }}
+          />
+        </>
+      ) : (
+        <Box sx={{ marginBottom: 2 }}>
           <Typography variant="body2" sx={{ color: 'text.secondary', marginBottom: 0.75 }}>
-            Speed
+            Speech voice
           </Typography>
-          <Stack spacing={1.5} direction="row" sx={{ alignItems: 'center' }}>
-            <Slider
-              aria-label="Speed"
-              value={speed}
-              onChange={(change, value) => {
-                handleSpeedChange(value);
-              }}
-              step={0.01}
-              min={0.4}
-              max={2}
-              marks={[
-                { value: 0.4, label: '0.4' },
-                { value: 1.0, label: '1' },
-                { value: 2.0, label: '2' },
-              ]}
-            />
-            <SpeedIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
-          </Stack>
+          <Select
+            size="small"
+            labelId="voice"
+            id="voice"
+            label="Voice"
+            value={sentientsimsaiTtsSettings.value.voice[0] ?? ''}
+            sx={{ width: '100%' }}
+            onChange={(change) => {
+              handleSingleVoiceChange(change.target.value);
+            }}
+            renderValue={(selected) => <Chip label={voiceLabel(selected)} />}
+          >
+            {voiceMenuItems}
+          </Select>
         </Box>
       )}
       <Box sx={{ marginTop: 2.5 }}>

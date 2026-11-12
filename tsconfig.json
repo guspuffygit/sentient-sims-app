@@ -15,7 +15,6 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "types": [
-      "@webgpu/types",
       "@types/node",
       "vitest/globals"
     ],

@@ -17,7 +17,9 @@ export type HotkeyCallbacks = {
   onToggle: () => void;
 };
 
-export type VoiceHotkeyBindings = { talk: string; command: string };
+// `mode` rides along because in hold mode the overlay leaves a quick tap of the key to
+// the game (backquote is its pause) and reports only a hold; a toggle is a tap by nature
+export type VoiceHotkeyBindings = { talk: string; command: string; mode: 'hold' | 'toggle' };
 
 export class VoiceHotkeyService {
   private talkHotkey = '';
@@ -33,6 +35,9 @@ export class VoiceHotkeyService {
 
   // The memories window's hold-to-talk button: no chord, so disarm() leaves it alone
   private dictateCallbacks?: HotkeyCallbacks;
+
+  // The X on the game's voice label
+  private cancelCallback?: () => void;
 
   arm(hotkey: string, mode: 'hold' | 'toggle', callbacks: HotkeyCallbacks) {
     this.talkHotkey = hotkey;
@@ -68,11 +73,20 @@ export class VoiceHotkeyService {
 
   // What the overlay listens for; empty strings clear a binding
   bindings(): VoiceHotkeyBindings {
-    return { talk: this.talkHotkey, command: this.commandHotkey };
+    return { talk: this.talkHotkey, command: this.commandHotkey, mode: this.mode };
   }
 
   armDictate(callbacks: HotkeyCallbacks | undefined) {
     this.dictateCallbacks = callbacks;
+  }
+
+  armCancel(callback: (() => void) | undefined) {
+    this.cancelCallback = callback;
+  }
+
+  // The player clicked the voice label's X: whatever capture is live is thrown away
+  onCancel() {
+    this.cancelCallback?.();
   }
 
   // A mod that just connected has no bindings yet

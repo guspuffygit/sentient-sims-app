@@ -240,7 +240,10 @@ export const prefetchMaxAttempts = 3;
 // annotation results only need to be ready by the next scene, never during this one.
 export const backgroundIdleDelayMs = 10000;
 export const defaultElevenLabsEndpoint = 'https://api.elevenlabs.io/v1';
-export const defaultKokoroEndpoint = 'https://api.kokorotts.com';
+// A self-hosted Kokoro server (Kokoro-FastAPI listens on 8880). Local by default so dialogue
+// text never leaves the machine unless the player points the endpoint somewhere else.
+export const defaultKokoroEndpoint = 'http://localhost:8880';
+export const kokoroSetupGuideUrl = 'https://github.com/remsky/Kokoro-FastAPI#readme';
 export const defaultVLLMEndpoint = 'http://localhost:8000/v1';
 // Speech-to-text models per voice input provider; any other id can be typed in.
 // Custom OpenAI-compatible endpoints (Groq, local whisper servers) default to whisper-1,
@@ -262,10 +265,12 @@ export const openrouterDefaultTranscriptionModel = openrouterTranscriptionModels
 // Gemini has no dedicated speech endpoint: a text model is handed the audio inline.
 export const geminiTranscriptionModels = ['gemini-flash-latest', 'gemini-flash-lite-latest'];
 export const geminiDefaultTranscriptionModel = geminiTranscriptionModels[0];
-// No Space in a voice chord: The Sims 4 binds Space, and the overlay only observes keys
-export const defaultVoiceInputHotkey = 'Ctrl+S';
-// The old Windows default; runMigrations moves a store still holding it to the current one
+// One key: the game ignores clicks while Ctrl is down, so only a one-key talk key can pick a Sim.
+// The overlay keeps a held talk key from the game and hands a tap back, so ` still pauses.
+export const defaultVoiceInputHotkey = 'Backquote';
+// Earlier Windows defaults; runMigrations moves a store still holding one to the current one
 export const formerDefaultVoiceInputHotkey = 'Ctrl+Space';
+export const formerCtrlDefaultVoiceInputHotkey = 'Ctrl+S';
 // macOS takes Ctrl+Space to switch input sources, and leaves Opt+V to the game
 export const defaultVoiceInputHotkeyMac = 'Alt+V';
 export function defaultVoiceInputHotkeyFor(isMac: boolean): string {

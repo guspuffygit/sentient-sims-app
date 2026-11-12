@@ -1,9 +1,10 @@
-import { createContext, ReactNode, use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, ReactNode, use, useCallback, useEffect, useMemo, useRef } from 'react';
 import log from 'electron-log';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
 import { sceneChunkGapMs, sceneLineGapMs, sceneLineReadingHoldMs } from 'main/sentient-sims/constants';
 import { useElevenLabsTTS } from 'renderer/voice/useElevenLabsTTS';
+import { useKokoroTTS } from 'renderer/voice/useKokoroTTS';
 import { useSentientSimsTTS } from 'renderer/voice/useSentientSimsTTS';
 import { SpeakOptions } from 'renderer/voice/TTSHook';
 import { pacedDelay, setClockState, waitWhileUserPaused } from 'renderer/voice/playbackClock';
@@ -16,7 +17,6 @@ interface TTSAudioContextType {
   // options.followsClock false is a voice test: it plays at once, outside the game clock.
   speak: (text: string, voiceId?: string, options?: SpeakOptions) => Promise<void>;
   stop: () => void;
-  isWebGPUSupported: boolean | null;
   isPlaying: boolean | undefined;
   error: string | undefined;
 }
@@ -27,30 +27,11 @@ interface AudioContextProviderProps {
   children: ReactNode;
 }
 
-async function checkWebGPU(): Promise<boolean> {
-  if (!('gpu' in navigator)) {
-    log.warn('WebGPU is not supported in this environment.');
-    return false;
-  }
-
-  try {
-    const adapter = await navigator.gpu.requestAdapter();
-    if (!adapter) {
-      log.warn('WebGPU adapter is not available.');
-      return false;
-    }
-    return true;
-  } catch (error) {
-    log.error('Error while checking WebGPU support:', error);
-    return false;
-  }
-}
-
 export function AudioContextProvider({ children }: AudioContextProviderProps) {
   const aiSettings = useAISettings();
   const sentientSimsTTS = useSentientSimsTTS();
   const elevenLabsTTS = useElevenLabsTTS();
-  const [isWebGPUSupported, setIsWebGPUSupported] = useState<boolean | null>(null);
+  const kokoroTTS = useKokoroTTS();
 
   const tts = useMemo(() => {
     if (aiSettings.ttsApiType === ApiType.SentientSimsAI) {
@@ -59,16 +40,10 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
     if (aiSettings.ttsApiType === ApiType.ElevenLabs) {
       return elevenLabsTTS;
     }
-  }, [aiSettings.ttsApiType, elevenLabsTTS, sentientSimsTTS]);
-
-  useEffect(() => {
-    async function checkSupport() {
-      const supported = await checkWebGPU();
-      setIsWebGPUSupported(supported);
+    if (aiSettings.ttsApiType === ApiType.Kokoro) {
+      return kokoroTTS;
     }
-
-    void checkSupport();
-  }, []);
+  }, [aiSettings.ttsApiType, elevenLabsTTS, kokoroTTS, sentientSimsTTS]);
 
   // V-1: the game clock drives playback (user pause holds audio + the scene queue;
   // speed 2/3 paces faster). Mod-initiated pauses are filtered out in setClockState.
@@ -379,11 +354,10 @@ export function AudioContextProvider({ children }: AudioContextProviderProps) {
     return {
       speak,
       stop,
-      isWebGPUSupported,
       isPlaying: tts?.isPlaying,
       error: tts?.error,
     };
-  }, [speak, stop, isWebGPUSupported, tts]);
+  }, [speak, stop, tts]);
 
   return <TTSAudioContext value={contextValue}>{children}</TTSAudioContext>;
 }

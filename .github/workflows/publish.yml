@@ -8,12 +8,18 @@ on:
 
 env:
   PYTHON_VERSION: 3.11
+  JSIGN_VERSION: "7.6"
+  JSIGN_SHA256: 6cf58aa080e7ff82656f320cff8d4a3bff30408df8766806dcba3740dd839fa5
 
 jobs:
   publish:
     # To enable auto publishing to github, update your electron publisher
     # config in package.json > "build" and remove the conditional below
     runs-on: ${{ matrix.platform.os }}
+    permissions:
+      contents: write
+      # Lets the Windows job trade a GitHub OIDC token for an Azure code-signing token
+      id-token: write
     strategy:
       matrix:
         platform:
@@ -50,13 +56,80 @@ jobs:
           npm run postinstall
           npm run build
 
+      # Windows signing runs only in the canonical repo, the one identity Azure trusts. A fork
+      # skips these steps and myWindowsSignHook.ts leaves its build unsigned.
+      - name: Azure login for Windows signing
+        if: runner.os == 'Windows' && github.repository == 'guspuffygit/sentient-sims-app'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_SIGNING_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_SIGNING_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      - name: Fetch jsign and a code-signing token
+        id: windows-signing
+        if: runner.os == 'Windows' && github.repository == 'guspuffygit/sentient-sims-app'
+        run: |
+          $jar = Join-Path $env:RUNNER_TEMP 'jsign.jar'
+          Invoke-WebRequest -Uri "https://github.com/ebourg/jsign/releases/download/$env:JSIGN_VERSION/jsign-$env:JSIGN_VERSION.jar" -OutFile $jar
+          if ((Get-FileHash $jar -Algorithm SHA256).Hash -ne $env:JSIGN_SHA256) { throw 'jsign.jar does not match JSIGN_SHA256' }
+          $token = az account get-access-token --resource https://codesigning.azure.net --query accessToken -o tsv
+          if (-not $token) { throw 'az returned no code-signing token' }
+          "::add-mask::$token"
+          "token=$token" >> $env:GITHUB_OUTPUT
+          "jar=$jar" >> $env:GITHUB_OUTPUT
+
+      # Signatures of the binaries we ship but do not build, keyed by the hash of the unsigned
+      # file. The key below never matches exactly, so restore-keys picks the newest saved set.
+      - name: Restore cached Windows signatures
+        id: signature-cache
+        if: runner.os == 'Windows' && github.repository == 'guspuffygit/sentient-sims-app'
+        uses: actions/cache/restore@v4
+        with:
+          path: .signature-cache
+          key: windows-signatures-
+          restore-keys: windows-signatures-
+
       - name: Publish releases
         if: runner.os != 'macOS'
         env:
           # This is used for uploading release assets to github
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Read by myWindowsSignHook.ts; empty outside the canonical repo's Windows job
+          AZURE_CODESIGN_TOKEN: ${{ steps.windows-signing.outputs.token }}
+          JSIGN_JAR: ${{ steps.windows-signing.outputs.jar }}
+          SIGNATURE_CACHE_DIR: ${{ github.workspace }}/.signature-cache
         run: |
           npm exec electron-builder -- --publish always ${{ matrix.platform.cmd }}
+
+      # Smart App Control blocks any unsigned binary the app loads, and installed copies refuse
+      # an update whose publisher is not this one, so an unsigned file fails the job.
+      - name: Verify Windows signatures
+        if: runner.os == 'Windows' && github.repository == 'guspuffygit/sentient-sims-app'
+        run: |
+          $files = @(Get-ChildItem release/build/win-unpacked -Recurse -Include *.exe, *.dll, *.node) + @(Get-ChildItem release/build -Filter *.exe)
+          $unsigned = foreach ($file in $files) {
+            $signature = Get-AuthenticodeSignature $file.FullName
+            if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notlike 'CN=Sentient Simulations LLC,*') {
+              "$($file.FullName): $($signature.Status) $($signature.SignerCertificate.Subject)"
+            }
+          }
+          if ($unsigned) {
+            $unsigned
+            throw "$(@($unsigned).Count) of $($files.Count) Windows binaries are not signed by Sentient Simulations LLC"
+          }
+          "All $($files.Count) Windows binaries are signed by Sentient Simulations LLC"
+
+      # Runs after the verify step, so only signatures Windows accepted are saved.
+      - name: Save Windows signatures
+        if: >-
+          runner.os == 'Windows' && github.repository == 'guspuffygit/sentient-sims-app' &&
+          hashFiles('.signature-cache/*.sig') != '' &&
+          steps.signature-cache.outputs.cache-matched-key != format('windows-signatures-{0}', hashFiles('.signature-cache/*.sig'))
+        uses: actions/cache/save@v4
+        with:
+          path: .signature-cache
+          key: windows-signatures-${{ hashFiles('.signature-cache/*.sig') }}
 
       - name: Publish mac universal release
         if: runner.os == 'macOS'

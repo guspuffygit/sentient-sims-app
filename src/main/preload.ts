@@ -227,6 +227,11 @@ const electronHandler = {
 
     return () => ipcRenderer.removeListener('voice-record-stop', callback);
   },
+  onVoiceRecordCancel: (callback: IpcCallback) => {
+    ipcRenderer.on('voice-record-cancel', callback);
+
+    return () => ipcRenderer.removeListener('voice-record-cancel', callback);
+  },
   onVoiceTranscript: (callback: IpcCallback) => {
     ipcRenderer.on('voice-transcript', callback);
 

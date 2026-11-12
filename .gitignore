@@ -47,3 +47,4 @@ certificate.p12
 
 # Interaction cleanup reports (working data, not code)
 interaction-cleanup-report*.csv
+.signature-cache

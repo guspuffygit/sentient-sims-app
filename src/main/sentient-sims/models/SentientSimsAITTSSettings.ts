@@ -28,6 +28,21 @@ export enum SentientSimsAISpeechKokoroVoice {
   Fable = 'bm_fable',
 }
 
+// The Sentient Sims AI service and a self-hosted Kokoro-FastAPI run the same Kokoro backend,
+// so both voice panels offer this list. bf_isabella returns no audio.
+export const kokoroSpeechVoices: readonly SentientSimsAISpeechKokoroVoice[] = Object.values(
+  SentientSimsAISpeechKokoroVoice,
+).filter((voice) => voice !== SentientSimsAISpeechKokoroVoice.Isabella);
+
+export function isKokoroSpeechVoice(voice: string): voice is SentientSimsAISpeechKokoroVoice {
+  return (kokoroSpeechVoices as readonly string[]).includes(voice);
+}
+
+export const maxKokoroBlendVoices = 4;
+
+// Dialogue reads sluggish at 1.0
+export const defaultKokoroSpeed = 1.25;
+
 export enum SentientSimsAISpeechOrpheusVoice {
   Tara = 'tara',
   Leah = 'leah',
@@ -64,8 +79,7 @@ export const defaultSentientSimsAITTSSettings: SentientSimsAITTSSettings = {
   model: SentientSimsAISpeechModel.KOKORO,
   voice: [SentientSimsAISpeechKokoroVoice.Heart],
   response_format: 'wav',
-  // Dialogue reads sluggish at 1.0
-  speed: 1.25,
+  speed: defaultKokoroSpeed,
 };
 
 // What a Tier 3 or Tier 4 member gets when the wizard picks their voices

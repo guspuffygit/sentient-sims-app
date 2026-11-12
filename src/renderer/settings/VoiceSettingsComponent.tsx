@@ -70,6 +70,7 @@ export default function VoiceSettingsComponent() {
               >
                 <MenuItem value={ApiType.SentientSimsAI}>Sentient Sims AI TTS</MenuItem>
                 <MenuItem value={ApiType.ElevenLabs}>ElevenLabs</MenuItem>
+                <MenuItem value={ApiType.Kokoro}>Kokoro (self-hosted, you run the server)</MenuItem>
               </Select>
             </Box>
             <Box sx={{ width: 280 }}>

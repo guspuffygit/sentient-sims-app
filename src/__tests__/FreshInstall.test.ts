@@ -147,6 +147,28 @@ describe('Voice hotkey migration', () => {
     expect(settings.voiceInputHotkey).toBe('Ctrl+Space');
   });
 
+  it('moves a Windows store still on the old Ctrl+S default to one key, once', () => {
+    if (process.platform === 'darwin') {
+      return;
+    }
+    const settings = newSettings();
+    settings.set(SettingsEnum.VOICE_INPUT_HOTKEY, 'Ctrl+S');
+    settings.runMigrations();
+    expect(settings.voiceInputHotkey).toBe('Backquote');
+    expect(settings.get(SettingsEnum.VOICE_INPUT_HOTKEY_ONE_KEY_MIGRATED)).toBe(true);
+
+    settings.set(SettingsEnum.VOICE_INPUT_HOTKEY, 'Ctrl+S');
+    settings.runMigrations();
+    expect(settings.voiceInputHotkey).toBe('Ctrl+S');
+  });
+
+  it('a store from before both moves goes straight to one key', () => {
+    const settings = newSettings();
+    settings.set(SettingsEnum.VOICE_INPUT_HOTKEY, 'Ctrl+Space');
+    settings.runMigrations();
+    expect(settings.voiceInputHotkey).toBe(hotkeyDefault);
+  });
+
   it('a fresh store starts on the new default', () => {
     const settings = newSettings();
     settings.runMigrations();
