@@ -79,6 +79,17 @@ jobs:
           "token=$token" >> $env:GITHUB_OUTPUT
           "jar=$jar" >> $env:GITHUB_OUTPUT
 
+      # Signatures of the binaries we ship but do not build, keyed by the hash of the unsigned
+      # file. The key below never matches exactly, so restore-keys picks the newest saved set.
+      - name: Restore cached Windows signatures
+        id: signature-cache
+        if: runner.os == 'Windows' && github.repository == 'guspuffygit/sentient-sims-app'
+        uses: actions/cache/restore@v4
+        with:
+          path: .signature-cache
+          key: windows-signatures-
+          restore-keys: windows-signatures-
+
       - name: Publish releases
         if: runner.os != 'macOS'
         env:
@@ -87,6 +98,7 @@ jobs:
           # Read by myWindowsSignHook.ts; empty outside the canonical repo's Windows job
           AZURE_CODESIGN_TOKEN: ${{ steps.windows-signing.outputs.token }}
           JSIGN_JAR: ${{ steps.windows-signing.outputs.jar }}
+          SIGNATURE_CACHE_DIR: ${{ github.workspace }}/.signature-cache
         run: |
           npm exec electron-builder -- --publish always ${{ matrix.platform.cmd }}
 
@@ -107,6 +119,17 @@ jobs:
             throw "$(@($unsigned).Count) of $($files.Count) Windows binaries are not signed by Sentient Simulations LLC"
           }
           "All $($files.Count) Windows binaries are signed by Sentient Simulations LLC"
+
+      # Runs after the verify step, so only signatures Windows accepted are saved.
+      - name: Save Windows signatures
+        if: >-
+          runner.os == 'Windows' && github.repository == 'guspuffygit/sentient-sims-app' &&
+          hashFiles('.signature-cache/*.sig') != '' &&
+          steps.signature-cache.outputs.cache-matched-key != format('windows-signatures-{0}', hashFiles('.signature-cache/*.sig'))
+        uses: actions/cache/save@v4
+        with:
+          path: .signature-cache
+          key: windows-signatures-${{ hashFiles('.signature-cache/*.sig') }}
 
       - name: Publish mac universal release
         if: runner.os == 'macOS'
