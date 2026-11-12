@@ -161,5 +161,22 @@ describe('PlayerConversationService', () => {
     advance(61_000);
     service.sweepIdle();
     expect(handed).toEqual([{ reason: 'idle', lines: ['Still here.'], seeded: 0 }]);
+    // Swept away, and its scene id is still its own: a reply held past the idle window
+    // closes its scene after the thread is gone
+    expect(service.size).toBe(0);
+    expect(service.ownsScene(conversation.sceneId)).toBe(true);
+  });
+
+  it('still owns the scene of a closed thread once the next thread has replaced it', () => {
+    const { service } = build();
+    const first = service.begin(jonah).conversation;
+    service.record(first.key, [{ speaker: 'Jonah Alder', text: 'That is all.' }], { landed: true });
+
+    // The player speaks again while that reply is still airing
+    const next = service.begin(jonah).conversation;
+
+    expect(next.sceneId).not.toBe(first.sceneId);
+    expect(service.ownsScene(first.sceneId)).toBe(true);
+    expect(service.ownsScene(next.sceneId)).toBe(true);
   });
 });

@@ -426,15 +426,16 @@ export class ApiContext {
       },
       onClosed: (conversation, reason) => {
         // The whole exchange with the player, judged once. The registry's close for the
-        // thread's scene comes after its first reply and holds that reply alone.
+        // thread's scene comes after its first reply and holds that reply alone. The cast is
+        // the Sims who answered, with their traits and moods while the registry holds the scene.
         const known = this._scenePlaybackRegistry.castOf(conversation.sceneId);
         const closed: SceneClosed = {
           sceneId: conversation.sceneId,
           participantSimIds: conversation.simIds,
-          cast:
-            known.length > 0
-              ? known
-              : conversation.simIds.map((simId, i) => ({ simId, name: conversation.simNames[i] ?? simId })),
+          cast: conversation.simIds.map(
+            (simId, i) =>
+              known.find((member) => member.simId === simId) ?? { simId, name: conversation.simNames[i] ?? simId },
+          ),
           lines: conversation.lines.slice(conversation.seeded),
           reason: reason === 'stopped' ? 'stopped' : 'finished',
         };

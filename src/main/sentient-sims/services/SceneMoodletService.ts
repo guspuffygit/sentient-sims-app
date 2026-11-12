@@ -40,8 +40,8 @@ export const MOODLET_EMOTIONS = [
 export type MoodletEmotion = (typeof MOODLET_EMOTIONS)[number];
 export type MoodletTier = 1 | 2 | 3;
 
-// Models reach for the feeling's own word ("frustrated", live 2026-09-22, dropped as
-// unknown and the moodlet with it). The nearest of the game's moods stands in.
+// Models reach for the feeling's own word ("frustrated"), which the game has no mood
+// for. The nearest of the game's moods stands in.
 export const EMOTION_SYNONYMS: Record<string, MoodletEmotion> = {
   frustrated: 'angry',
   annoyed: 'angry',
@@ -189,7 +189,7 @@ export function buildMoodletUserText(
   return `The Sims:\n${who}\n\nThe conversation (${how}):\n${transcript}`;
 }
 
-function clampNumber(value: unknown): number | undefined {
+function toNumber(value: unknown): number | undefined {
   const num = typeof value === 'string' ? Number(value) : value;
   if (typeof num !== 'number' || Number.isNaN(num)) {
     return undefined;
@@ -258,10 +258,10 @@ export function parseMoodletVerdicts(rawText: string, cast: SceneCastMember[]): 
       return;
     }
     seen.add(member.simId);
-    const rawTier = clampNumber(verdict.intensity);
+    const rawTier = toNumber(verdict.intensity);
     const intensity = (rawTier === undefined ? 1 : Math.min(3, Math.max(1, Math.round(rawTier)))) as MoodletTier;
     const [low, high] = TIER_HOUR_BANDS[intensity];
-    const rawHours = clampNumber(verdict.duration_hours);
+    const rawHours = toNumber(verdict.duration_hours);
     const hours = rawHours === undefined ? TIER_DEFAULT_HOURS[intensity] : Math.min(high, Math.max(low, rawHours));
     const reasonText = typeof verdict.reason === 'string' ? verdict.reason.trim() : '';
     const reason = reasonText ? trimReason(reasonText) : fallbackReason(member, emotion, cast);

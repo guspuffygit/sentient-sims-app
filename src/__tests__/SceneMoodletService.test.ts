@@ -132,7 +132,7 @@ describe('parseMoodletVerdicts', () => {
   });
 
   it('maps a feeling the game has no mood for onto the nearest one', () => {
-    // Live 2026-09-22: llama answered "frustrated" for a sim stuck in a rut, and the moodlet was lost
+    // "frustrated" is not one of the game's moods; without the stand-in the moodlet is lost
     const text = JSON.stringify({
       'Bella Goth': { emotion: 'Frustrated', intensity: 2, duration_hours: 6, reason: 'x' },
       'Mortimer Goth': { emotion: 'anxious', intensity: 1, reason: 'y' },

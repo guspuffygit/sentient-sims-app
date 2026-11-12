@@ -51,9 +51,15 @@ export const CONVERSATION_CONTEXT_LINES = 16;
 export const CONVERSATION_SEED_LINES = 4;
 // How often the idle sweep runs on its own
 export const CONVERSATION_SWEEP_MS = 30_000;
+// How many thread scene ids are remembered past their threads
+const SCENE_IDS_KEPT = 500;
 
 export class PlayerConversationService {
   private readonly threads = new Map<string, PlayerConversation>();
+
+  // A reply can still be airing when its thread is replaced by the next one or swept, so
+  // the scene ids are kept apart from the threads, oldest dropped first
+  private readonly sceneIds = new Set<string>();
 
   constructor(private readonly deps: PlayerConversationDeps) {}
 
@@ -94,6 +100,10 @@ export class PlayerConversationService {
       closed: false,
     };
     this.threads.set(key, created);
+    this.sceneIds.add(created.sceneId);
+    if (this.sceneIds.size > SCENE_IDS_KEPT) {
+      this.sceneIds.delete(this.sceneIds.values().next().value as string);
+    }
     log.info(
       `[Conversation] ${params.speaker} -> ${params.simNames.join(' & ')}: new thread ${created.sceneId}` +
         (seed.length > 0 ? ` (seeded with ${seed.length} lines of the last one)` : ''),
@@ -127,14 +137,9 @@ export class PlayerConversationService {
     return this.threads.get(key);
   }
 
-  /** Whether this scene id is a thread's: every reply of a thread rides its scene id. */
+  /** Whether this scene id is, or was, a thread's: every reply of a thread rides its scene id. */
   ownsScene(sceneId: string): boolean {
-    for (const conversation of this.threads.values()) {
-      if (conversation.sceneId === sceneId) {
-        return true;
-      }
-    }
-    return false;
+    return this.sceneIds.has(sceneId);
   }
 
   /** A scene the game ended (walk-away, left lot, zone unload) closes its thread. */
