@@ -11,6 +11,8 @@ export type ModLogWebsocketMessage = {
   mod_info?: ModInfo;
   // The overlay heard a bound voice chord go down or up (overlay/overlay_voice_hotkey.py)
   voice_key?: VoiceKeyEvent;
+  // The X on the game's voice label: drop the recording, send nothing
+  voice_cancel?: boolean;
 };
 
 export type VoiceKeyEvent = {

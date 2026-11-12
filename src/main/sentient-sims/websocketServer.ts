@@ -43,6 +43,7 @@ let lastModInfo: ModInfo | undefined;
 export type VoiceKeySink = {
   onModConnected(): void;
   onKey(event: VoiceKeyEvent): void;
+  onCancel(): void;
 };
 let voiceKeySink: VoiceKeySink | undefined;
 
@@ -165,6 +166,11 @@ export const startWebSocketServer = (ctx: ApiContext) => {
 
       if (parsedData.voice_key) {
         voiceKeySink?.onKey(parsedData.voice_key);
+        return;
+      }
+
+      if (parsedData.voice_cancel) {
+        voiceKeySink?.onCancel();
         return;
       }
 

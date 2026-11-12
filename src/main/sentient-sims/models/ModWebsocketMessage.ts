@@ -174,12 +174,18 @@ export type ModPlayerVoiceStatus = ModWebsocketMessage & {
   // V-8: 'command' = the utterance is an order the sim will act on, not talk;
   // 'dictate' = the memories window's talk button, whose transcript comes back as a draft
   mode?: 'chat' | 'command' | 'dictate';
+  // An error with nothing to act on ("Heard nothing."): said on the voice label, no notification
+  quiet?: boolean;
+  // With 'listening': this app drops the recording on `voice_cancel`, so the label may offer its X
+  can_cancel?: boolean;
 };
 
 // Chord strings as the settings spell them ("Ctrl+S", "F13"); '' clears a binding
 export type ModVoiceHotkeys = ModWebsocketMessage & {
   talk: string;
   command: string;
+  // Under 'hold' the overlay leaves a quick tap of the key to the game and reports only a hold
+  mode: 'hold' | 'toggle';
 };
 
 export type ModAppStatus = ModWebsocketMessage & {

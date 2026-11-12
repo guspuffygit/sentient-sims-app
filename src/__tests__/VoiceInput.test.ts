@@ -85,7 +85,14 @@ import {
   openrouterDefaultTranscriptionModel,
 } from 'main/sentient-sims/constants';
 
-import { voiceHotkeyFromKey, voiceHotkeyLabel, voiceHotkeyPresets } from 'main/sentient-sims/models/VoiceHotkeyPresets';
+import {
+  voiceHotkeyAllowsModifiers,
+  voiceHotkeyFromKey,
+  voiceHotkeyGameUse,
+  voiceHotkeyLabel,
+  voiceHotkeyPresets,
+} from 'main/sentient-sims/models/VoiceHotkeyPresets';
+import { microphoneErrorWords } from 'main/sentient-sims/util/microphoneErrorWords';
 
 import { SentientSimsAIService } from 'main/sentient-sims/services/SentientSimsAIService';
 
@@ -113,17 +120,38 @@ describe('VoiceHotkeyService', () => {
   it('publishes the chords to the mod when armed, re-armed, and on connect', () => {
     const service = new VoiceHotkeyService();
     service.arm('Ctrl+S', 'hold', callbackSpies());
-    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenLastCalledWith({ talk: 'Ctrl+S', command: '' });
+    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenLastCalledWith({ talk: 'Ctrl+S', command: '', mode: 'hold' });
 
     service.armCommand('Alt+V', callbackSpies());
-    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenLastCalledWith({ talk: 'Ctrl+S', command: 'Alt+V' });
+    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenLastCalledWith({
+      talk: 'Ctrl+S',
+      command: 'Alt+V',
+      mode: 'hold',
+    });
 
     notifyMocks.sendVoiceHotkeysToMod.mockReset();
     service.onModConnected();
-    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenCalledWith({ talk: 'Ctrl+S', command: 'Alt+V' });
+    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenCalledWith({ talk: 'Ctrl+S', command: 'Alt+V', mode: 'hold' });
 
     service.disarm();
-    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenLastCalledWith({ talk: '', command: '' });
+    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenLastCalledWith({ talk: '', command: '', mode: 'hold' });
+  });
+
+  it('tells the mod the mode, so the overlay knows whether a tap belongs to the game', () => {
+    const service = new VoiceHotkeyService();
+    service.arm('Backquote', 'toggle', callbackSpies());
+    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenLastCalledWith({
+      talk: 'Backquote',
+      command: '',
+      mode: 'toggle',
+    });
+
+    service.arm('Backquote', 'hold', callbackSpies());
+    expect(notifyMocks.sendVoiceHotkeysToMod).toHaveBeenLastCalledWith({
+      talk: 'Backquote',
+      command: '',
+      mode: 'hold',
+    });
   });
 
   it('maps press and release to down and up in hold mode', () => {
@@ -208,18 +236,47 @@ describe('voice hotkey presets', () => {
     expect(key('KeyV', { metaKey: true })).toBeUndefined();
   });
 
+  it('captures one key where modifiers are not allowed', () => {
+    const key = (code: string, mods: Partial<Parameters<typeof voiceHotkeyFromKey>[0]> = {}) =>
+      voiceHotkeyFromKey({ code, ctrlKey: false, altKey: false, shiftKey: false, metaKey: false, ...mods }, false);
+    expect(key('KeyS', { ctrlKey: true })).toBe('S');
+    expect(key('F7', { ctrlKey: true, shiftKey: true })).toBe('F7');
+    expect(key('Insert')).toBe('Insert');
+    expect(key('ShiftLeft', { shiftKey: true })).toBeUndefined();
+    expect(voiceHotkeyAllowsModifiers(false)).toBe(false);
+    expect(voiceHotkeyAllowsModifiers(true)).toBe(true);
+  });
+
+  it('offers a PC single keys only', () => {
+    expect(voiceHotkeyPresets(false).map((preset) => preset.value)).toEqual([
+      'Backquote',
+      'Insert',
+      'ScrollLock',
+      'F13',
+    ]);
+  });
+
+  it('knows the keys the game already uses', () => {
+    expect(voiceHotkeyGameUse('W')).toBe('moves the camera');
+    expect(voiceHotkeyGameUse('Backquote')).toBe('pauses the game');
+    expect(voiceHotkeyGameUse('0')).toBe('pauses the game');
+    expect(voiceHotkeyGameUse('Insert')).toBeUndefined();
+    expect(voiceHotkeyGameUse('F13')).toBeUndefined();
+    expect(voiceHotkeyGameUse('Ctrl+W')).toBeUndefined();
+    expect(voiceHotkeyGameUse('toString')).toBeUndefined();
+  });
+
   it('defaults to a chord macOS leaves alone on a Mac', () => {
     expect(defaultVoiceInputHotkeyFor(true)).toBe('Alt+V');
-    expect(defaultVoiceInputHotkeyFor(false)).toBe('Ctrl+S');
+    expect(defaultVoiceInputHotkeyFor(false)).toBe('Backquote');
   });
 
   it('offers no chord with Space, which The Sims 4 binds', () => {
     for (const isMac of [true, false]) {
       const values = voiceHotkeyPresets(isMac).map((preset) => preset.value);
       expect(values.filter((value) => value.split('+').includes('Space'))).toEqual([]);
-      expect(values).toContain('Ctrl+S');
     }
-    expect(voiceHotkeyPresets(false)[0]).toEqual({ value: 'Ctrl+S', label: 'Ctrl+S' });
+    expect(voiceHotkeyPresets(false)[0]).toEqual({ value: 'Backquote', label: '` (backquote)' });
   });
 
   it('names the Alt key Opt on a Mac and keeps the stored chord', () => {
@@ -255,7 +312,7 @@ describe('voice input settings', () => {
     expect(settingsService.voiceInputProvider).toBe(ApiType.SentientSimsAI);
     expect(settingsService.voiceInputEndpoint).toBe('https://api.openai.com/v1');
     expect(settingsService.voiceInputModel).toBe('whisper-1');
-    expect(settingsService.voiceInputHotkey).toBe(process.platform === 'darwin' ? 'Alt+V' : 'Ctrl+S');
+    expect(settingsService.voiceInputHotkey).toBe(process.platform === 'darwin' ? 'Alt+V' : 'Backquote');
     expect(settingsService.voiceInputHotkeyMode).toBe('hold');
     expect(settingsService.voiceInputLanguage).toBe('');
   });
@@ -940,6 +997,16 @@ describe('VoiceInputService', () => {
     expect(windowSend).toHaveBeenCalledWith('voice-record-start');
   });
 
+  it('passes a microphone failure to the game in the words the renderer chose', () => {
+    const { service } = voiceInputContext();
+    const words = microphoneErrorWords('NotFoundError', 'Requested device not found', false);
+
+    service.handleRecordError(words);
+
+    expect(notifyMocks.sendPlayerVoiceStatusToMod).toHaveBeenCalledWith('error', words);
+    expect(notifyMocks.sendPopUpNotification).toHaveBeenCalledWith(`Voice input: ${words}`);
+  });
+
   it('reports empty transcripts as heard nothing', async () => {
     const { service, transcribe } = voiceInputContext();
     transcribe.mockResolvedValue('');
@@ -947,7 +1014,7 @@ describe('VoiceInputService', () => {
     const text = await service.handleAudio(bigAudio());
 
     expect(text).toBe('');
-    expect(notifyMocks.sendPlayerVoiceStatusToMod).toHaveBeenCalledWith('error', 'Heard nothing');
+    expect(notifyMocks.sendPlayerVoiceStatusToMod).toHaveBeenCalledWith('error', 'Heard nothing.', { quiet: true });
     expect(notifyMocks.sendPlayerVoiceMessageToMod).not.toHaveBeenCalled();
   });
 
@@ -1015,6 +1082,63 @@ describe('VoiceInputService', () => {
     expect(notifyMocks.sendPlayerVoiceStatusToMod).toHaveBeenLastCalledWith('cancelled');
   });
 
+  it('tells the game it can cancel a talk capture, never a dictation', () => {
+    const { service, hotkey } = voiceInputContext();
+
+    service.startListening();
+    expect(notifyMocks.sendPlayerVoiceStatusToMod).toHaveBeenLastCalledWith(
+      'listening',
+      undefined,
+      expect.objectContaining({ canCancel: true }),
+    );
+    service.stopListening();
+    void service.handleAudio(new ArrayBuffer(8));
+
+    hotkey.onKey({ id: 'dictate', down: true });
+    expect(notifyMocks.sendPlayerVoiceStatusToMod).toHaveBeenLastCalledWith(
+      'listening',
+      undefined,
+      expect.objectContaining({ canCancel: false }),
+    );
+  });
+
+  it("drops the recording when the game's voice label is cancelled", async () => {
+    const { service, hotkey, transcribe } = voiceInputContext();
+    service.startListening();
+    notifyMocks.sendPlayerVoiceStatusToMod.mockClear();
+
+    hotkey.onCancel();
+
+    expect(windowSend).toHaveBeenCalledWith('voice-record-cancel');
+    expect(windowSend).not.toHaveBeenCalledWith('voice-record-stop');
+    // The mod ended the hold itself and keeps the game paused: nothing goes back
+    expect(notifyMocks.sendPlayerVoiceStatusToMod).not.toHaveBeenCalled();
+    expect(transcribe).not.toHaveBeenCalled();
+
+    // The key let go after the cancel is nothing, and the next press records again
+    windowSend.mockClear();
+    service.stopListening();
+    expect(windowSend).not.toHaveBeenCalled();
+    service.startListening();
+    expect(windowSend).toHaveBeenCalledWith('voice-record-start');
+
+    // The max-record backstop of the cancelled capture is gone with it
+    service.stopListening();
+    await service.handleAudio(new ArrayBuffer(8));
+    windowSend.mockClear();
+    vi.advanceTimersByTime(10 * 60 * 1000);
+    expect(windowSend).not.toHaveBeenCalled();
+  });
+
+  it('ignores a cancel when nothing is being recorded', () => {
+    const { hotkey } = voiceInputContext();
+
+    hotkey.onCancel();
+
+    expect(windowSend).not.toHaveBeenCalled();
+    expect(notifyMocks.sendPlayerVoiceStatusToMod).not.toHaveBeenCalled();
+  });
+
   it('sends no cancel when no hold is open', async () => {
     const { service, transcribe } = voiceInputContext();
     transcribe.mockResolvedValue('Hello Bella');
@@ -1025,5 +1149,26 @@ describe('VoiceInputService', () => {
     service.shutdown();
 
     expect(notifyMocks.sendPlayerVoiceStatusToMod).not.toHaveBeenCalledWith('cancelled');
+  });
+});
+
+describe('microphoneErrorWords', () => {
+  it('says there is no microphone and where to set one up', () => {
+    expect(microphoneErrorWords('NotFoundError', 'Requested device not found', false)).toBe(
+      'No microphone detected. Plug one in, then check Settings > Voice in the Sentient Sims app.',
+    );
+  });
+
+  it('tells a chosen microphone that is gone from no microphone at all', () => {
+    expect(microphoneErrorWords('OverconstrainedError', '', false)).toContain('Pick another under Settings > Voice');
+  });
+
+  it('names the privacy setting of the platform', () => {
+    expect(microphoneErrorWords('NotAllowedError', 'Permission denied', false)).toContain('Windows Settings');
+    expect(microphoneErrorWords('NotAllowedError', 'Permission denied', true)).toContain('System Settings');
+  });
+
+  it('keeps the browser message for a failure it has no words for', () => {
+    expect(microphoneErrorWords(undefined, 'boom', false)).toBe('The microphone did not work: boom');
   });
 });
