@@ -84,4 +84,10 @@ describe('Settings', () => {
     ctx.settings.set(SettingsEnum.NON_CONTROLLABLE_SIMS_SPEAK, false);
     expect(ctx.settings.nonControllableSimsSpeak).toBe(false);
   });
+
+  it('conversations leave moodlets unless the player switches them off', () => {
+    expect(ctx.settings.conversationMoodletsEnabled).toBe(true);
+    ctx.settings.set(SettingsEnum.CONVERSATION_MOODLETS_ENABLED, false);
+    expect(ctx.settings.conversationMoodletsEnabled).toBe(false);
+  });
 });

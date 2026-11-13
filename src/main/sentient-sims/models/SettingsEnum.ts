@@ -132,6 +132,9 @@ export enum SettingsEnum {
   // Pets, babies and infants (the sims the player cannot control) take speaking turns.
   // Off: they still think, as a private monologue row, but never say a line aloud
   NON_CONTROLLABLE_SIMS_SPEAK = 'nonControllableSimsSpeak',
+  // A conversation that closes is judged for the moodlet it leaves on each Sim, one AI
+  // call per conversation. Off: no call; the chat window's own one-line buff still runs
+  CONVERSATION_MOODLETS_ENABLED = 'conversationMoodletsEnabled',
   // V-6: write a first description for undescribed sims/lots instead of the stock default
   GENERATED_DEFAULT_DESCRIPTIONS = 'generatedDefaultDescriptions',
   GAME_APP_PATH = 'gameAppPath',

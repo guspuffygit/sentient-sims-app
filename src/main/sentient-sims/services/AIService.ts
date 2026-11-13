@@ -3266,6 +3266,13 @@ ${factsBlock}
   }
 
   async runBuff(event: BuffEventRequest) {
+    // A thread with the player is judged whole when it closes (ApiContext's onClosed), and
+    // threads ride the directed path: with both on, a buff from here is a second moodlet
+    if (this.ctx.settings.conversationMoodletsEnabled && this.ctx.settings.directedScenesEnabled) {
+      log.info(`[Scene Moodlets] chat window closed for ${event.name}: the thread's close judges it`);
+      return;
+    }
+
     // The whole buff pipeline (classification + description) follows the BUFF override
     const classificationResult = await this.runClassification(
       {

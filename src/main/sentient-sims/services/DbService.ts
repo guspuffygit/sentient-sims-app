@@ -116,6 +116,7 @@ export class DbService {
     // that scene's memory row by id and the same id is a different row in the next save.
     this.ctx.generationQueue.flushToFallback();
     this.ctx.sceneService.reset();
+    this.ctx.playerConversations.closeAll('reset');
     this.ctx.scenePlayback.stopAll('zone_unload');
 
     // Close any previously loaded database first: an open handle keeps the old
@@ -278,6 +279,7 @@ export class DbService {
   unloadDatabase() {
     this.ctx.generationQueue.flushToFallback();
     this.ctx.sceneService.reset();
+    this.ctx.playerConversations.closeAll('reset');
     this.ctx.scenePlayback.stopAll('zone_unload');
 
     this.closeDatabase();
