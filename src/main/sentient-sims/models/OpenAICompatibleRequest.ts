@@ -1,5 +1,6 @@
 import { ApiType } from './ApiType';
 import { OpenAIMessage } from './OpenAIMessage';
+import { ReasoningEffort } from './ReasoningEffort';
 
 export type OpenAICompatibleRequest = {
   messages: Array<OpenAIMessage>;
@@ -13,6 +14,9 @@ export type OpenAICompatibleRequest = {
   // directed-scene tester to run the director and each actor on different models).
   model?: string;
   apiType?: ApiType;
+  // The provider config's reasoning effort, sent as reasoning_effort by the OpenAI-compatible
+  // service. Undefined sends nothing.
+  reasoningEffort?: ReasoningEffort;
   // What the request is for, sent to the Sentient Sims AI server as X-Sentient-Sims-Purpose
   purpose?: string;
   // Set by the request builder when the prompt did not fit its token budget and the user

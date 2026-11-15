@@ -7,7 +7,12 @@ import { OpenAIService } from 'main/sentient-sims/services/OpenAIService';
 import { OpenRouterService } from 'main/sentient-sims/services/OpenRouterService';
 import { mockApiContext } from './util';
 
-type SentRequest = { model: string; max_tokens?: number; reasoning?: { effort: string } };
+type SentRequest = {
+  model: string;
+  max_tokens?: number;
+  reasoning?: { effort: string };
+  reasoning_effort?: string;
+};
 
 function completion(content: string | null, overrides: Partial<ChatCompletion> = {}): ChatCompletion {
   return {
@@ -93,6 +98,37 @@ describe('OpenAIService', () => {
     expect(create.mock.calls[0][0].reasoning).toBeUndefined();
   });
 
+  it('sends no reasoning_effort field when the config sets none', async () => {
+    const service = new OpenAIService(ctx);
+    const create = mockCreate(service);
+
+    await service.sentientSimsGenerate(request);
+
+    expect('reasoning_effort' in create.mock.calls[0][0]).toBe(false);
+  });
+
+  it('sends the configured reasoning effort to an OpenAI-compatible server', async () => {
+    const service = new OpenAIService(ctx);
+    const create = mockCreate(service);
+
+    await service.sentientSimsGenerate({ ...request, reasoningEffort: 'none' });
+    await service.sentientSimsGenerate({ ...request, reasoningEffort: 'xhigh' });
+
+    expect(create.mock.calls[0][0].reasoning_effort).toEqual('none');
+    expect(create.mock.calls[1][0].reasoning_effort).toEqual('xhigh');
+  });
+
+  it('carries the configured reasoning effort into the translation pass', async () => {
+    ctx.settings.localizationEnabled = true;
+    const service = new OpenAIService(ctx);
+    const create = mockCreate(service);
+
+    await service.sentientSimsGenerate({ ...request, reasoningEffort: 'none' });
+
+    expect(create).toHaveBeenCalledTimes(2);
+    expect(create.mock.calls[1][0].reasoning_effort).toEqual('none');
+  });
+
   it('passes the call control through to the request as its signal and timeout', async () => {
     const service = new OpenAIService(ctx);
     const create = mockCreate(service);
@@ -141,6 +177,15 @@ describe('OpenAIService', () => {
       expect(create).toHaveBeenCalledTimes(2);
       expect(create.mock.calls[1][0].reasoning).toEqual({ effort: 'none' });
       expect(create.mock.calls[1][0].max_tokens).toBeUndefined();
+    });
+
+    it('keeps its own reasoning control and ignores a configured reasoning effort', async () => {
+      const create = mockCreate(service);
+
+      await service.sentientSimsGenerate({ ...request, reasoningEffort: 'high' });
+
+      expect(create.mock.calls[0][0].reasoning).toEqual({ effort: 'none' });
+      expect('reasoning_effort' in create.mock.calls[0][0]).toBe(false);
     });
 
     it('falls back to minimal reasoning with headroom for a model that must reason', async () => {

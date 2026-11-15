@@ -14,6 +14,7 @@ import { buildOpenRouterModels, isOpenRouterEndpoint, openrouterAttributionHeade
 import { ApiContext } from './ApiContext';
 import { OpenAIMessage, withoutImageData } from '../models/OpenAIMessage';
 import { plainKeyTestError } from '../util/providerErrorWords';
+import { ReasoningEffort, reasoningEffortBody } from '../models/ReasoningEffort';
 
 // OpenRouter's reasoning control. The SDK types lack it, but the SDK sends extra body
 // fields through untouched.
@@ -159,6 +160,8 @@ export class OpenAIService implements GenerationService {
       max_tokens: request.maxResponseTokens,
       messages: request.messages.map((message) => toChatMessage(message)),
     };
+    // The SDK types may lag the values a server takes, and it sends extra body fields untouched
+    Object.assign(completionRequest, this.reasoningBody(request.reasoningEffort));
 
     if (request.guidedChoice && this.supportsJsonSchema()) {
       const schema: ResponseFormatJSONSchema = {
@@ -195,13 +198,22 @@ export class OpenAIService implements GenerationService {
     }
 
     if (this.ctx.settings.localizationEnabled) {
-      text = await this.translate(text, this.ctx.settings.localizationLanguage, completionRequest.model);
+      text = await this.translate(
+        text,
+        this.ctx.settings.localizationLanguage,
+        completionRequest.model,
+        request.reasoningEffort,
+      );
     }
 
     return {
       text,
       request,
     };
+  }
+
+  private reasoningBody(effort?: ReasoningEffort) {
+    return reasoningEffortBody(effort, isOpenRouterEndpoint(this.serviceUrl()));
   }
 
   // Reasoning tokens count against max_tokens, so a reasoning model given the short reply
@@ -263,7 +275,7 @@ export class OpenAIService implements GenerationService {
     throw new Error(`Output wasnt truthy from OpenAI API ${output}`);
   }
 
-  async translate(text: string, language: string, model?: string) {
+  async translate(text: string, language: string, model?: string, reasoningEffort?: ReasoningEffort) {
     const request: ChatCompletionCreateParamsNonStreaming = {
       model: model ?? this.getOpenAIModel(),
       messages: [
@@ -277,6 +289,7 @@ export class OpenAIService implements GenerationService {
         },
       ],
     };
+    Object.assign(request, this.reasoningBody(reasoningEffort));
     const result = await this.createCompletion(request);
     return this.getOutputFromGeneration(result);
   }
