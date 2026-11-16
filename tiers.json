@@ -6,14 +6,12 @@
     "src/renderer/settings/TwitchSettingsComponent.tsx",
     "src/main/sentient-sims/services/TwitchAuthService.ts",
     "src/main/sentient-sims/services/TwitchChatService.ts",
-    "src/main/sentient-sims/services/SceneMoodletService.ts",
     "src/main/sentient-sims/util/twitchIrc.ts",
     "src/main/sentient-sims/util/twitchSimTarget.ts",
     "src/main/sentient-sims/util/twitchConstants.ts",
     "src/main/sentient-sims/models/TwitchChatStatus.ts",
     "src/main/sentient-sims/db/AIExchangeRepository.ts",
     "src/__tests__/TwitchChat.test.ts",
-    "src/__tests__/SceneMoodletService.test.ts",
     "src/__tests__/AIExchangePersistence.test.ts"
   ],
   "autonomy": [

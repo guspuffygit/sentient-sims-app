@@ -23,6 +23,7 @@ import AppCard from './AppCard';
 import DebugLogsSettingsComponent from './settings/DebugLogsSettingsComponent';
 import DirectedScenesSettingsComponent from './settings/DirectedScenesSettingsComponent';
 import PetsSpeakSettingsComponent from './settings/PetsSpeakSettingsComponent';
+import ConversationMoodletsSettingsComponent from './settings/ConversationMoodletsSettingsComponent';
 import { AnimationMappingSettingsComponent } from './settings/AnimationMappingSettingsComponent';
 import { ModsDirectoryComponent } from './ModsDirectoryComponent';
 import { GameAppPathComponent } from './GameAppPathComponent';
@@ -135,6 +136,7 @@ export default function SettingsPage() {
                 <GameAppPathComponent />
                 <DirectedScenesSettingsComponent />
                 <PetsSpeakSettingsComponent />
+                <ConversationMoodletsSettingsComponent />
                 <PlaybackFollowsClockSetting />
                 {tierRows()}
                 <DebugLogsSettingsComponent />

@@ -24,6 +24,9 @@ export type PlayerConversation = {
   simNames: string[];
   speaker: string;
   lines: DialogueLine[];
+  // How many of `lines` were carried over from the thread before (its tail); what this
+  // thread itself said starts there
+  seeded: number;
   startedAt: number;
   lastActivityAt: number;
   closed: boolean;
@@ -34,6 +37,10 @@ export type PlayerConversationDeps = {
   // Real milliseconds of silence after which an open thread is forgotten
   idleMs: () => number;
   notifyClosed?: (conversation: PlayerConversation, reason: ConversationCloseReason) => void;
+  // Every close but a reset: the whole exchange is over and can be judged (the moodlet it
+  // leaves on the sim). The thread's scene closes in ScenePlaybackRegistry after its FIRST
+  // reply airs and never holds the player's lines, so this is the one complete view.
+  onClosed?: (conversation: PlayerConversation, reason: ConversationCloseReason) => void;
   now?: () => number;
 };
 
@@ -42,9 +49,17 @@ export const CONVERSATION_CONTEXT_LINES = 16;
 // A new thread opened right after one closed starts with the tail of the old one, so the
 // sim is not amnesiac about the conversation they just wrapped up
 export const CONVERSATION_SEED_LINES = 4;
+// How often the idle sweep runs on its own
+export const CONVERSATION_SWEEP_MS = 30_000;
+// How many thread scene ids are remembered past their threads
+const SCENE_IDS_KEPT = 500;
 
 export class PlayerConversationService {
   private readonly threads = new Map<string, PlayerConversation>();
+
+  // A reply can still be airing when its thread is replaced by the next one or swept, so
+  // the scene ids are kept apart from the threads, oldest dropped first
+  private readonly sceneIds = new Set<string>();
 
   constructor(private readonly deps: PlayerConversationDeps) {}
 
@@ -60,7 +75,7 @@ export class PlayerConversationService {
     conversation: PlayerConversation;
     resumed: boolean;
   } {
-    this.sweep();
+    this.sweepIdle();
     const key = PlayerConversationService.keyFor(params.simIds, params.speaker);
     const existing = this.threads.get(key);
     const now = this.now();
@@ -79,11 +94,16 @@ export class PlayerConversationService {
       simNames: [...params.simNames],
       speaker: params.speaker,
       lines: seed,
+      seeded: seed.length,
       startedAt: now,
       lastActivityAt: now,
       closed: false,
     };
     this.threads.set(key, created);
+    this.sceneIds.add(created.sceneId);
+    if (this.sceneIds.size > SCENE_IDS_KEPT) {
+      this.sceneIds.delete(this.sceneIds.values().next().value as string);
+    }
     log.info(
       `[Conversation] ${params.speaker} -> ${params.simNames.join(' & ')}: new thread ${created.sceneId}` +
         (seed.length > 0 ? ` (seeded with ${seed.length} lines of the last one)` : ''),
@@ -115,6 +135,11 @@ export class PlayerConversationService {
 
   get(key: string): PlayerConversation | undefined {
     return this.threads.get(key);
+  }
+
+  /** Whether this scene id is, or was, a thread's: every reply of a thread rides its scene id. */
+  ownsScene(sceneId: string): boolean {
+    return this.sceneIds.has(sceneId);
   }
 
   /** A scene the game ended (walk-away, left lot, zone unload) closes its thread. */
@@ -161,9 +186,22 @@ export class PlayerConversationService {
         log.warn('[Conversation] failed to announce the closed thread', error);
       }
     }
+    // A reset is the save going away: nobody is left to feel the conversation
+    if (reason !== 'reset') {
+      try {
+        this.deps.onClosed?.(conversation, reason);
+      } catch (error) {
+        log.warn('[Conversation] failed to hand the closed thread on', error);
+      }
+    }
   }
 
-  private sweep() {
+  /**
+   * Close the threads that went quiet for the idle window and forget the closed ones past
+   * it. Every begin() runs this; a timer runs it too, or the evening's last conversation
+   * would wait for the next one to be judged.
+   */
+  sweepIdle() {
     const now = this.now();
     const idle = this.deps.idleMs();
     this.threads.forEach((conversation, key) => {

@@ -6,17 +6,26 @@ import { PlayerConversationService } from 'main/sentient-sims/services/PlayerCon
 function build(idleMs = 60_000) {
   let now = 1_000_000;
   const closed: { speaker: string; reason: string }[] = [];
+  // What every close hands on to be judged: the thread's own lines, never its seed
+  const handed: { reason: string; lines: string[]; seeded: number }[] = [];
   const service = new PlayerConversationService({
     idleMs: () => idleMs,
     now: () => now,
     notifyClosed: (conversation, reason) => {
       closed.push({ speaker: conversation.speaker, reason });
     },
+    onClosed: (conversation, reason) => {
+      handed.push({
+        reason,
+        lines: conversation.lines.slice(conversation.seeded).map((line) => line.text),
+        seeded: conversation.seeded,
+      });
+    },
   });
   const advance = (ms: number) => {
     now += ms;
   };
-  return { service, closed, advance };
+  return { service, closed, handed, advance };
 }
 
 const jonah = { simIds: ['100'], simNames: ['Jonah Alder'], speaker: 'Conscience' };
@@ -109,5 +118,65 @@ describe('PlayerConversationService', () => {
     service.record(conversation.key, [{ speaker: 'Jonah Alder', text: 'Bye.' }], { landed: true });
     service.record(conversation.key, [{ speaker: 'Jonah Alder', text: 'More.' }], { landed: false });
     expect(conversation.lines.map((line) => line.text)).toEqual(['Bye.']);
+  });
+
+  it('hands the whole exchange on at every close but a reset, without the lines it was seeded with', () => {
+    const { service, handed } = build();
+    const { conversation } = service.begin(jonah);
+    service.record(
+      conversation.key,
+      [
+        { speaker: 'Conscience', text: 'Who?' },
+        { speaker: 'Jonah Alder', text: 'Zoe.' },
+      ],
+      { landed: true },
+    );
+    expect(handed).toEqual([{ reason: 'landed', lines: ['Who?', 'Zoe.'], seeded: 0 }]);
+
+    // The next thread opens seeded with that tail; judged on its own lines only
+    const next = service.begin(jonah).conversation;
+    expect(next.seeded).toBe(2);
+    service.record(
+      next.key,
+      [
+        { speaker: 'Conscience', text: 'Why her?' },
+        { speaker: 'Jonah Alder', text: 'She listens.' },
+      ],
+      { landed: false },
+    );
+    service.onSceneStopped(next.sceneId);
+    expect(handed[1]).toEqual({ reason: 'stopped', lines: ['Why her?', 'She listens.'], seeded: 2 });
+
+    service.begin(jonah);
+    service.closeAll('reset');
+    expect(handed).toHaveLength(2);
+  });
+
+  it('knows its own scene ids and closes idle threads on a sweep', () => {
+    const { service, handed, advance } = build(60_000);
+    const { conversation } = service.begin(jonah);
+    expect(service.ownsScene(conversation.sceneId)).toBe(true);
+    expect(service.ownsScene('some-other-scene')).toBe(false);
+    service.record(conversation.key, [{ speaker: 'Jonah Alder', text: 'Still here.' }], { landed: false });
+    advance(61_000);
+    service.sweepIdle();
+    expect(handed).toEqual([{ reason: 'idle', lines: ['Still here.'], seeded: 0 }]);
+    // Swept away, and its scene id is still its own: a reply held past the idle window
+    // closes its scene after the thread is gone
+    expect(service.size).toBe(0);
+    expect(service.ownsScene(conversation.sceneId)).toBe(true);
+  });
+
+  it('still owns the scene of a closed thread once the next thread has replaced it', () => {
+    const { service } = build();
+    const first = service.begin(jonah).conversation;
+    service.record(first.key, [{ speaker: 'Jonah Alder', text: 'That is all.' }], { landed: true });
+
+    // The player speaks again while that reply is still airing
+    const next = service.begin(jonah).conversation;
+
+    expect(next.sceneId).not.toBe(first.sceneId);
+    expect(service.ownsScene(first.sceneId)).toBe(true);
+    expect(service.ownsScene(next.sceneId)).toBe(true);
   });
 });

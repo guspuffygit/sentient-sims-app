@@ -253,6 +253,11 @@ export class ScenePlaybackRegistry {
     return this.scenes.size;
   }
 
+  /** The cast a scene's rounds carried, as the appraisal needs it; [] for a scene not held. */
+  castOf(sceneId: string): SceneCastMember[] {
+    return this.scenes.get(sceneId)?.cast ?? [];
+  }
+
   private entry(sceneId: string, participantSimIds: string[]): SceneEntry {
     this.sweep();
     const existing = this.scenes.get(sceneId);
