@@ -90,6 +90,7 @@ import { TranscriptionService } from './TranscriptionService';
 import { UpdateService } from './UpdateService';
 import { VersionService } from './VersionService';
 import { VLLMAIService } from './VLLMAIService';
+import { WickedWhimsPatter } from './WickedWhimsPatter';
 import {
   notifySceneStop,
   sendConversationClosedToMod,
@@ -305,6 +306,9 @@ export class ApiContext {
   private readonly _simStateCache: SimStateCache;
 
   private readonly _sceneRepeatGuard: SceneRepeatGuard;
+
+  private readonly _wwPatter: WickedWhimsPatter;
+
   private readonly _openAIEmbeddingService: OpenAIEmbeddingService;
   private readonly _sentientSimsEmbeddingService: SentientSimsEmbeddingService;
   private readonly _geminiEmbeddingService: GeminiEmbeddingService;
@@ -453,6 +457,8 @@ export class ApiContext {
       // A conversation that closed is weighed for the moodlet it leaves on each sim, and
       // a reply to the player that wanted to act may act now that it has been heard
       onSceneClosed: (closed) => {
+        // A held Wicked Whims scene the game stopped: the patter stops on it
+        this._wwPatter.sceneClosed(closed);
         // A thread with the player is weighed whole when the thread closes (above): its
         // scene closes after the first reply and holds that reply alone
         if (!this._playerConversationService.ownsScene(closed.sceneId)) {
@@ -478,6 +484,10 @@ export class ApiContext {
         const existing = this._memoryRepository.getMemory({ id: memoryId });
         this._memoryRepository.updateMemory({ ...existing, content });
       },
+      // A Wicked Whims scene held open by the patter has played its last round: count down
+      onSceneIdle: (sceneId) => {
+        this._wwPatter.sceneIdle(sceneId);
+      },
     });
     // A scene's transcript row is saved from round 1 alone; this is how the scene
     // finds its row again at its close to rewrite it to what was actually said.
@@ -486,6 +496,21 @@ export class ApiContext {
     // Did this cast just have this beat? (a repeat inside the cooldown is dropped)
     this._sceneRepeatGuard = new SceneRepeatGuard({
       cooldownMs: () => this._settings.sceneRepeatCooldownSeconds * 1000,
+    });
+    // While a Wicked Whims animation runs, one more round (one Sim, taking turns) after every
+    // stretch of quiet, following the game clock (websocketServer feeds it the clock). The lean
+    // pipeline only: on the full one a round is the director, the actors and the reviewer.
+    this._wwPatter = new WickedWhimsPatter({
+      enabled: () => this._settings.wwPatterEnabled && this._settings.scenePipelineMode === 'lean',
+      intervalMs: () => this._settings.wwPatterIntervalSeconds * 1000,
+      isGameWaiting: () => this._generationQueueService.hasBlockedRequestWaiting(),
+      hold: (sceneId) => this._scenePlaybackRegistry.hold(sceneId),
+      release: (sceneId) => {
+        this._scenePlaybackRegistry.release(sceneId);
+      },
+    });
+    this._simStateCache.onReport((report) => {
+      this._wwPatter.stateReport(report);
     });
     this._openAIEmbeddingService = new OpenAIEmbeddingService(this);
     this._sentientSimsEmbeddingService = new SentientSimsEmbeddingService(this);
@@ -659,6 +684,10 @@ export class ApiContext {
 
   get sceneRepeatGuard(): SceneRepeatGuard {
     return this._sceneRepeatGuard;
+  }
+
+  get wwPatter(): WickedWhimsPatter {
+    return this._wwPatter;
   }
 
   // Evaluated per access so changing the embedding provider (or setting a key/token at

@@ -124,6 +124,10 @@ export enum SettingsEnum {
   // The same cast on the same beat inside this many seconds is dropped, not played again
   // (a sliding window; 0 = off). A reaction event gets one silent thought per window.
   SCENE_REPEAT_COOLDOWN_SECONDS = 'sceneRepeatCooldownSeconds',
+  // While one Wicked Whims animation runs, one more round (one Sim, taking turns) every this
+  // many seconds of quiet, so an act is not silent between its animation changes (lean only)
+  WW_PATTER_ENABLED = 'wwPatterEnabled',
+  WW_PATTER_INTERVAL_SECONDS = 'wwPatterIntervalSeconds',
   // Player-facing replies (chat window, voice, conscience, Twitch): the actor's token
   // budget for a reply to the player, how long a conversation thread stays open between
   // the player's lines, and whether a reply may turn straight into an action

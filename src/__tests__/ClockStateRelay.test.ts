@@ -32,7 +32,9 @@ const settings = { playbackFollowsGameClock: true };
 const simStateCache = new SimStateCache();
 // The repeat guard only hears the reset
 const sceneRepeatGuard = { reset: () => undefined };
-const ctx = { settings, simStateCache, sceneRepeatGuard, tiers: [] } as unknown as ApiContext;
+// The Wicked Whims patter hears the clock and the disconnect
+const wwPatter = { reset: vi.fn(), clockChanged: vi.fn() };
+const ctx = { settings, simStateCache, sceneRepeatGuard, tiers: [], wwPatter } as unknown as ApiContext;
 
 startWebSocketServer(ctx);
 const modServer = (servers as FakeServer[]).find((server) => server.options.port === modWebsocketPort);
@@ -92,6 +94,20 @@ describe('clock state relay', () => {
     settings.playbackFollowsGameClock = false;
     publishClockState(ctx);
     expect(clockStatesSent()).toEqual([userPause, running]);
+  });
+
+  it('hands the patter every report, and undefined when the mod goes away', () => {
+    const socket = connectMod();
+    wwPatter.clockChanged.mockClear();
+    sendClock(socket, userPause);
+    socket.emit('close');
+    expect(wwPatter.clockChanged.mock.calls).toEqual([[userPause], [undefined]]);
+  });
+
+  it('ends the patter when the mod disconnects', () => {
+    wwPatter.reset.mockClear();
+    connectMod().emit('close');
+    expect(wwPatter.reset).toHaveBeenCalledTimes(1);
   });
 
   it('applies the pause the game is already in when the setting is switched on', () => {

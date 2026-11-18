@@ -362,10 +362,68 @@ export function stripOpener(beat: string): string {
 export const LEAN_CONTINUATION_LINE =
   'The scene continues. Pick up the conversation exactly where it left off and move it forward — do not repeat or rephrase anything already said.';
 
+// A patter round in a Wicked Whims act (WickedWhimsPatter) is the same animation a little
+// later, one Sim speaking. Tested against alternatives: a plain "never repeat" line repeated on
+// 38% of pokes; banning every word said so far stopped repeats but, over a long animation,
+// collapsed into "[groan] Lucas, two words" with Sims saying their own name (68% of lines led
+// with a name, 26% were fragments). The rule kept: the words of the last 8 lines plus every word
+// used 3+ times in the scene, the Sim's own name never said, at most 8 pokes per animation
+// (WickedWhimsPatter). On pokes 1-8: 2.1% repeats, no own name.
+// Kept VERBATIM: that wording is what tested best.
+export function patterLine(usedWords: string[]): string {
+  const used =
+    usedWords.length > 0
+      ? ` Words already said in this scene: ${usedWords.join(', ')}. Use none of them again (names are fine).`
+      : '';
+  return `Still the same moment, a little later. Do not describe anything new: no new position, nobody arriving, no instructions to anyone.${used} Never say your own name. Answer with a sound you have not made yet and a few new words, in your own voice, about how it feels right now.`;
+}
+
+// How many recent lines a patter round may not echo, and how often a word must have been said
+// anywhere in the scene to stay banned for good
+export const PATTER_WINDOW_LINES = 8;
+export const PATTER_PERMANENT_USES = 3;
+
+// The words a patter round may not use: the distinct words of the last 8 lines that have words, then every word said 3+ times anywhere in the scene, first use first.
+// Lines as the next round reads them (plain text; a sounds-only line has none). The OTHER cast
+// members' names are exempt; the speaker's own name is not, so it is banned once said.
+export function patterUsedWords(lines: { text: string; voiceOnly?: boolean }[], otherCastNames: string[]): string[] {
+  const exempt = new Set(otherCastNames.flatMap((name) => name.toLowerCase().split(/\s+/)));
+  const wordsOf = (text: string) => (text.match(/[A-Za-z']+/g) ?? []).map((word) => word.toLowerCase());
+  const spoken = lines.filter((line) => !line.voiceOnly && line.text.trim().length > 1);
+  const banned: string[] = [];
+  spoken.slice(-PATTER_WINDOW_LINES).forEach((line) => {
+    wordsOf(line.text).forEach((word) => {
+      if (!exempt.has(word) && !banned.includes(word)) {
+        banned.push(word);
+      }
+    });
+  });
+  const counts = new Map<string, number>();
+  const order: string[] = [];
+  spoken.forEach((line) => {
+    wordsOf(line.text).forEach((word) => {
+      if (exempt.has(word)) {
+        return;
+      }
+      counts.set(word, (counts.get(word) ?? 0) + 1);
+      if (!order.includes(word)) {
+        order.push(word);
+      }
+    });
+  });
+  order.forEach((word) => {
+    if ((counts.get(word) ?? 0) >= PATTER_PERMANENT_USES && !banned.includes(word)) {
+      banned.push(word);
+    }
+  });
+  return banned;
+}
+
 // Rounds 2+ of a lean scene: the Sim's own round-1 beat (their side of a deception, their
-// valence clause), opener removed, then the continuation instruction
-export function carriedBeat(roundOneBeat: string): string {
-  return `This scene: ${stripOpener(roundOneBeat)}\n\n${LEAN_CONTINUATION_LINE}`;
+// valence clause), opener removed, then the continuation instruction (or, on a Wicked Whims
+// patter round, the patter line)
+export function carriedBeat(roundOneBeat: string, continuation: string = LEAN_CONTINUATION_LINE): string {
+  return `This scene: ${stripOpener(roundOneBeat)}\n\n${continuation}`;
 }
 
 export type SceneReviewPromptContext = {

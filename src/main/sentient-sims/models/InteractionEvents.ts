@@ -17,6 +17,8 @@ export enum WWEventType {
   STARTING = 'starting',
   ACTIVE = 'active',
   MAPPING = 'mapping',
+  // The act is over: the patter stops. Sent by a mod with WickedWhims' post-sex hook.
+  ENDED = 'ended',
 }
 
 export type SSTime = {
@@ -111,6 +113,9 @@ export type WWInteractionEvent = SSEvent & {
   animation_name: string;
   animation_identifier: string;
   ww_event_type: WWEventType;
+  // One act from its first animation to its end (the mod's id for WickedWhims' active sex
+  // instance); absent on an ask and on an older mod
+  act_id?: string;
 };
 
 export type WantsInteractionEvent = SSEvent;

@@ -13,7 +13,7 @@ import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { INTIMATE_SCENE_FRAMING } from 'main/sentient-sims/util/intimateScene';
 import { ElevenLabsSpeechModel } from 'main/sentient-sims/models/ElevenLabsTTSSettings';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
-import { speechRuleKind, speechRules } from 'main/sentient-sims/pipeline/prompts/scene';
+import { patterLine, patterUsedWords, speechRuleKind, speechRules } from 'main/sentient-sims/pipeline/prompts/scene';
 import { mockApiContext } from './util';
 
 // WickedWhims events run through the directed pipeline (director, actors, reviewer,
@@ -531,5 +531,152 @@ describe('a WickedWhims act on the lean pipeline', () => {
     expect(actor?.systemPrompt).not.toContain('This is sex, not a conversation.');
     expect(voicedLines(scene).some((line) => line.speaker === 'Margo Calloway')).toBe(false);
     expect(result.memory?.content).toContain('Desmond Calloway: Come here.');
+  });
+});
+
+// Between animation changes the patter pokes one more round, one Sim at a time
+describe('the Wicked Whims patter', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('keeps the tested wording byte for byte', () => {
+    expect(patterLine(['oh', 'god'])).toEqual(
+      'Still the same moment, a little later. Do not describe anything new: no new position, nobody arriving, no instructions to anyone. Words already said in this scene: oh, god. Use none of them again (names are fine). Never say your own name. Answer with a sound you have not made yet and a few new words, in your own voice, about how it feels right now.',
+    );
+    expect(patterLine([])).toEqual(
+      'Still the same moment, a little later. Do not describe anything new: no new position, nobody arriving, no instructions to anyone. Never say your own name. Answer with a sound you have not made yet and a few new words, in your own voice, about how it feels right now.',
+    );
+  });
+
+  it('lists the words said, once, first use first, without the other names or sounds-only lines', () => {
+    expect(
+      patterUsedWords(
+        [{ text: "Oh, Lucas. Don't stop." }, { text: '', voiceOnly: true }, { text: 'Oh yes, Valentina... yes.' }],
+        // Valentina speaks next: Lucas is exempt, her own name is not
+        ['Lucas Hart'],
+      ),
+    ).toEqual(['oh', "don't", 'stop', 'yes', 'valentina']);
+  });
+
+  it('bans the last 8 lines, plus any word said 3 times anywhere in the scene', () => {
+    const lines = [
+      { text: 'deeper' },
+      { text: 'deeper please' },
+      { text: 'deeper now' },
+      { text: 'wild' },
+      ...['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'].map((text) => ({ text })),
+    ];
+    // 'wild' and 'please' fell out of the window; 'deeper' was said 3 times and stays banned
+    expect(patterUsedWords(lines, [])).toEqual([
+      'one',
+      'two',
+      'three',
+      'four',
+      'five',
+      'six',
+      'seven',
+      'eight',
+      'deeper',
+    ]);
+  });
+
+  it('hears every lean round with its lines, its speakers and a way to poke the next', async () => {
+    const scene = leanWw('ww-patter-round-aired', 'v4');
+    const aired = vi.spyOn(scene.ctx.wwPatter, 'roundAired');
+
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE));
+
+    expect(aired).toHaveBeenCalledTimes(1);
+    const [round] = aired.mock.calls[0];
+    expect(round.round).toBe(1);
+    expect(round.speakerIds).toEqual(['1', '2']);
+    expect(round.lines.map((line) => [line.speaker, line.simId])).toEqual([
+      ['Margo Calloway', '1'],
+      ['Desmond Calloway', '2'],
+    ]);
+    expect(scene.ctx.scenePlayback.isHeld(round.sceneId)).toBe(true);
+  });
+
+  it('holds nothing and follows no act on the full pipeline: the patter is lean only', async () => {
+    const scene = wwContext('ww-patter-full');
+    const aired = vi.spyOn(scene.ctx.wwPatter, 'roundAired');
+
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE));
+
+    expect(aired).toHaveBeenCalledTimes(1);
+    const [round] = aired.mock.calls[0];
+    expect(scene.ctx.scenePlayback.isHeld(round.sceneId)).toBe(false);
+    expect(scene.ctx.wwPatter.size).toBe(0);
+  });
+
+  it('pokes ONE actor call on the sounds-first rules (not a thought), carrying the patter line', async () => {
+    const scene = leanWw('ww-patter-poke', 'v4', {
+      actorText: (label) =>
+        label === 'Actor: Desmond Calloway' ? 'SAY: [groans] Margo.\nTHINK: Yes.' : 'SAY: Come here.\nTHINK: Now.',
+    });
+    const aired = vi.spyOn(scene.ctx.wwPatter, 'roundAired');
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE));
+    const [round] = aired.mock.calls[0];
+    // The queue runs the poke at once
+    scene.continued.mockImplementation((task) =>
+      task({ yielded: new AbortController().signal, arrivedAt: Date.now() }),
+    );
+    scene.calls.length = 0;
+    scene.voiced.mockClear();
+
+    await round.poke('2', new AbortController().signal);
+
+    expect(scene.labels()).toEqual(['Actor: Desmond Calloway']);
+    const actor = scene.calls[0];
+    expect(actor.systemPrompt).toContain('This is sex, not a conversation.');
+    expect(actor.systemPrompt).not.toContain('THINK: <one short sentence');
+    // Desmond only said his partner's name in round 1: the list is Margo's words alone
+    expect(actor.userText).toContain(patterLine(['come', 'here']));
+    expect(actor.userText).toContain('Margo Calloway: Come here.');
+    expect(voicedLines(scene).map((line) => line.ttsText ?? line.text)).toEqual(['[groans] Margo.']);
+    // The poke round reports back on the same scene
+    expect(aired).toHaveBeenCalledTimes(2);
+    expect(aired.mock.calls[1][0].sceneId).toBe(round.sceneId);
+    expect(aired.mock.calls[1][0].round).toBe(2);
+  });
+
+  it('does not air a poke whose act moved on while it was written', async () => {
+    const scene = leanWw('ww-patter-moved-on', 'v4');
+    const aired = vi.spyOn(scene.ctx.wwPatter, 'roundAired');
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE));
+    const [round] = aired.mock.calls[0];
+    const pokeStop = new AbortController();
+    scene.continued.mockImplementation((task) => {
+      pokeStop.abort();
+      return task({ yielded: new AbortController().signal, arrivedAt: Date.now() });
+    });
+    scene.voiced.mockClear();
+
+    await round.poke('2', pokeStop.signal);
+
+    expect(scene.voiced).not.toHaveBeenCalled();
+  });
+
+  it('leaves the ask and the walk-up alone: only an animation is the act', async () => {
+    const scene = leanWw('ww-patter-walk-up', 'v4');
+    const aired = vi.spyOn(scene.ctx.wwPatter, 'roundAired');
+
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.STARTING));
+
+    expect(aired).not.toHaveBeenCalled();
+  });
+
+  it('makes no scene of the act ending and never says it skipped one', async () => {
+    const scene = leanWw('ww-patter-ended', 'v4');
+    const heard = vi.spyOn(scene.ctx.wwPatter, 'wwEvent');
+    const nsfw = vi.spyOn(scene.ctx.animations, 'isNsfwEnabled').mockReturnValue(true);
+
+    const result = await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ENDED));
+
+    expect(result.status).toEqual(InteractionEventStatus.NOOP);
+    expect(scene.calls).toHaveLength(0);
+    expect(heard).toHaveBeenCalledTimes(1);
+    expect(nsfw).not.toHaveBeenCalled();
   });
 });
