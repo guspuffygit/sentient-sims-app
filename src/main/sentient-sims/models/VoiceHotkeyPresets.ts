@@ -5,9 +5,8 @@ export type VoiceHotkeyPreset = { value: string; label: string };
 // back, so a key the game binds (` pauses) still works as itself.
 const pcPresets = ['Backquote', 'Insert', 'ScrollLock', 'F13'];
 
-// A Mac keyboard has no Insert or Scroll Lock. Chords stay on a Mac: whether macOS drops a
-// click under Option the way Windows does under Ctrl is not measured.
-const macPresets = ['Alt+V', 'Ctrl+S', 'F13'];
+// A Mac keyboard has no Insert, Scroll Lock or F13, and Opt+V is the one chord tested there
+const macPresets = ['Alt+V'];
 
 const keyLabels: Record<string, string> = {
   Backquote: '` (backquote)',

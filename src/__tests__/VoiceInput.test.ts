@@ -289,7 +289,7 @@ describe('voice hotkey presets', () => {
   it('offers a Mac only keys it has and macOS does not take', () => {
     const values = voiceHotkeyPresets(true).map((preset) => preset.value);
     expect(values).toContain(defaultVoiceInputHotkeyFor(true));
-    for (const absent of ['Insert', 'ScrollLock', 'Ctrl+Space', 'Ctrl+Alt+Space']) {
+    for (const absent of ['Insert', 'ScrollLock', 'F13', 'Ctrl+S', 'Ctrl+Space', 'Ctrl+Alt+Space']) {
       expect(values).not.toContain(absent);
     }
     expect(voiceHotkeyPresets(false).map((preset) => preset.value)).toContain(defaultVoiceInputHotkeyFor(false));
