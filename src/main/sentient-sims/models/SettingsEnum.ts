@@ -121,6 +121,9 @@ export enum SettingsEnum {
   // is voiced with no subtitle on a voice that performs tags. Off: the pair rules, and a line
   // of sounds alone is dropped, as before.
   WW_VOICE_TAGS = 'wwVoiceTags',
+  // On a voice that performs audio tags, a lean pair line or a reply to the player may carry
+  // one invented sound in square brackets ([sighs]). Off: the bare-subtitle rule, as before.
+  VOICE_TAGS = 'voiceTags',
   // The same cast on the same beat inside this many seconds is dropped, not played again
   // (a sliding window; 0 = off). A reaction event gets one silent thought per window.
   SCENE_REPEAT_COOLDOWN_SECONDS = 'sceneRepeatCooldownSeconds',

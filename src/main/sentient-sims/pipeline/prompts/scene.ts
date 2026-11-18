@@ -157,14 +157,28 @@ export type SpeechRuleOptions = {
   // The lean pipeline has no director, so "the tone your director set" becomes "the tone of
   // the scene". Full mode keeps the 4.6 wording byte for byte.
   lean?: boolean;
+  // The voice performs audio tags (voiceReadsTags: ElevenLabs v3 / v4), so a pair line or a reply
+  // to the player may carry one invented sound in square brackets. See VOICE_TAG_RULE.
+  voiceTags?: boolean;
 };
 
 // The SAY/THINK answer format and the rules under it, the most load-bearing text in the
 // whole pipeline (series 2, 2026-10-27: without "ONE short line, ten words or so" lines ran
 // 8 -> 24 words, -1.3/10; without the SAY list, 29 words, -1.7). Shared by the 4.6 prompt
 // (buildSpeechSystemPrompt, output unchanged) and the lean prompt below.
+// The bare-subtitle bullet of the pair and player-facing rules, and what replaces it when the
+// voice performs audio tags: "no delivery notes" dropped and one bullet added. The wording is the
+// one that was tested: Haiku 5.5 tagged 1 line in 5 under it, with no silent tags, no copying of
+// the examples and no change in line quality. The tag rides ttsText and never reaches the
+// subtitle or the memory row (util/voiceTags).
+export const BARE_SUBTITLE_RULE =
+  '- Only the words spoken out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no delivery notes, no commentary.';
+export const VOICE_TAG_RULE = `- Only the words spoken out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no commentary.
+- One voice tag per line at most, in square brackets, invented, where a real voice would make the sound: [quiet laugh], [sighs]. Skip it when the line is plain. Never a silent action like [smiles].`;
+
 export function speechRules(kind: SpeechRuleKind, options: SpeechRuleOptions = {}): string {
   const { simName, lean } = options;
+  const bare = options.voiceTags ? VOICE_TAG_RULE : BARE_SUBTITLE_RULE;
   // Subject and possessive: "Mara Vale" / "Mara Vale's", or "your character" / "your character's"
   const who = simName ?? 'your character';
   const whose = simName ? `${simName}'s` : "your character's";
@@ -178,7 +192,7 @@ THINK: <one short line of ${whose} private inner monologue in this moment>
 
 Rules for SAY:
 ${stay}
-- Only the words spoken out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no delivery notes, no commentary.
+${bare}
 - Say as much as you actually have to say. A full answer with your reasons can run several sentences; a one-liner is fine when that is all there is. Stop when you have answered.
 - When asked a direct question, answer it first, plainly and specifically: pick one, name it, give your reason. Never answer a question with a question, never "that's not the point", and never a bare "I don't know" — if you don't know, say what you DO know or what would decide it. If you are keeping something back, say that you are and why.
 - Talk like a real person in this conversation: a direct, natural reply to what was just said, in ${whose} voice and ${tone}.
@@ -230,7 +244,7 @@ THINK: <one short line of ${whose} private inner monologue in this moment>
 
 Rules for SAY:
 ${stay}
-- Only the words spoken out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no delivery notes, no commentary.
+${bare}
 - ONE short line, ten words or so, the way people actually talk. Never a speech.
 - Talk like a real person in this conversation: your line must be a direct, natural reply to what was just said, in ${whose} voice and ${tone}. Not every line needs to be clever — a plain reply that keeps the conversation flowing beats a quip that does not connect.
 - Move the conversation forward — answer questions that were asked, follow up on what the other person said, never repeat or rephrase anything already said.
@@ -295,6 +309,8 @@ export type LeanActorSystemPromptContext = {
   nameFreeRules?: boolean;
   // A Wicked Whims act: the sounds-first rules (speechRules 'intimate') in place of the pair rules
   intimate?: boolean;
+  // The voice performs audio tags: the pair and player-facing rules allow one (VOICE_TAG_RULE)
+  voiceTags?: boolean;
 };
 
 export function buildLeanActorSystemPrompt(context: LeanActorSystemPromptContext): string {
@@ -303,6 +319,7 @@ export function buildLeanActorSystemPrompt(context: LeanActorSystemPromptContext
   const rules = speechRules(speechRuleKind(playerFacing, monologueOnly, context.intimate), {
     simName: context.nameFreeRules ? undefined : simName,
     lean: true,
+    voiceTags: context.voiceTags,
   });
   const identity = [`You are ${simName}.`, characterBlock.trim()].filter((part) => part.length > 0).join('\n\n');
   const facts = factsBlock

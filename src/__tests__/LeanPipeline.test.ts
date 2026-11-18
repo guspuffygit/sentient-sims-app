@@ -11,11 +11,16 @@ import {
   buildLeanActorSystemPrompt,
   LEAN_CONTINUATION_LINE,
   LEAN_ELSEWHERE_HEADING,
+  BARE_SUBTITLE_RULE,
   speechRules,
   splitLeanOpening,
   stripOpener,
+  VOICE_TAG_RULE,
 } from 'main/sentient-sims/pipeline/prompts/scene';
 import { StageId } from 'main/sentient-sims/pipeline/stages';
+import { ApiType } from 'main/sentient-sims/models/ApiType';
+import { ElevenLabsSpeechModel } from 'main/sentient-sims/models/ElevenLabsTTSSettings';
+import { defaultSentientSimsAIElevenLabsSettings } from 'main/sentient-sims/models/SentientSimsAITTSSettings';
 import { mockApiContext } from './util';
 
 // The lean voice pipeline (2026-10-27): one actor call per Sim per round, the beat carried
@@ -440,6 +445,112 @@ describe('voice tags in a reply to the player', () => {
       .flatMap((call) => call[0])
       .filter((line) => !line.speaker.includes('(to self)'));
     expect(spoken).toEqual([]);
+  });
+});
+
+// On a voice that performs audio tags, a pair line or a reply to the player may carry one
+// invented sound.
+describe('the everyday voice-tag rule', () => {
+  const TAGGED = `- Only the words spoken out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no commentary.
+- One voice tag per line at most, in square brackets, invented, where a real voice would make the sound: [quiet laugh], [sighs]. Skip it when the line is plain. Never a silent action like [smiles].`;
+
+  function voiced(sessionId: string, voice: 'v4' | 'v2' | 'kokoro' | 'off') {
+    const scene = leanScene(sessionId);
+    scene.ctx.settings.ttsEnabled = voice !== 'off';
+    scene.ctx.settings.ttsApiType = voice === 'kokoro' ? ApiType.Kokoro : ApiType.ElevenLabs;
+    scene.ctx.settings.elevenLabsTtsSettings = {
+      ...scene.ctx.settings.elevenLabsTtsSettings,
+      model: voice === 'v2' ? ElevenLabsSpeechModel.ELEVEN_MULTILINGUAL_V2 : ElevenLabsSpeechModel.ELEVEN_V4,
+    };
+    return scene;
+  }
+
+  it('keeps the tested wording byte for byte, in the pair and the player-facing rules only', () => {
+    expect(VOICE_TAG_RULE).toEqual(TAGGED);
+    (['pair', 'playerFacing'] as const).forEach((kind) => {
+      const tagged = speechRules(kind, { lean: true, voiceTags: true });
+      const plain = speechRules(kind, { lean: true });
+      expect(tagged).toEqual(plain.replace(BARE_SUBTITLE_RULE, TAGGED));
+      expect(tagged).not.toContain('no delivery notes');
+      expect(plain).toEqual(speechRules(kind, { lean: true, voiceTags: false }));
+    });
+    (['monologue', 'intimate'] as const).forEach((kind) => {
+      expect(speechRules(kind, { lean: true, voiceTags: true })).toEqual(speechRules(kind, { lean: true }));
+    });
+  });
+
+  it('a pair scene on a voice that reads tags gets the rule', async () => {
+    const { calls, play } = voiced('lean-tags-pair', 'v4');
+    await play(sceneEvent(), { action: 'chat' });
+    const actors = calls.filter((call) => call.label.startsWith('Actor'));
+    expect(actors.length).toBeGreaterThan(0);
+    actors.forEach((call) => {
+      expect(call.system).toContain(TAGGED);
+      expect(call.system).not.toContain('no delivery notes');
+    });
+  });
+
+  it('a reply to the player on a voice that reads tags gets the rule', async () => {
+    const { calls, play } = voiced('lean-tags-player', 'v4');
+    await play(sceneEvent('social_Chat', [makeSim('Alex Doe', '1')]), {
+      action: 'chat',
+      playerLine: { speaker: 'The Voice', text: 'Cheer up!' },
+    });
+    expect(calls.find((call) => call.label.startsWith('Actor'))?.system).toContain(TAGGED);
+  });
+
+  it('a solo thought never gets it', async () => {
+    const { calls, play } = voiced('lean-tags-solo', 'v4');
+    await play(sceneEvent('computer_BrowseWeb', [makeSim('Alex Doe', '1')]), { action: 'browse' });
+    calls.forEach((call) => {
+      expect(call.system).not.toContain('voice tag');
+    });
+  });
+
+  it.each(['v2', 'kokoro', 'off'] as const)('the prompt is unchanged on %s', async (voice) => {
+    const { calls, play } = voiced(`lean-tags-${voice}`, voice);
+    await play(sceneEvent(), { action: 'chat' });
+    const actors = calls.filter((call) => call.label.startsWith('Actor'));
+    expect(actors.length).toBeGreaterThan(0);
+    actors.forEach((call) => {
+      expect(call.system).toContain(BARE_SUBTITLE_RULE);
+      expect(call.system).not.toContain('voice tag');
+    });
+  });
+
+  it('full mode keeps the 4.6 rules on any voice', async () => {
+    const { ctx, calls, play } = voiced('lean-tags-full', 'v4');
+    ctx.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'full');
+    await play(sceneEvent(), { action: 'chat' });
+    calls.forEach((call) => {
+      expect(call.system).not.toContain('voice tag');
+    });
+  });
+
+  it('the hosted ElevenLabs voice gets the rule', async () => {
+    const { ctx, calls, play } = leanScene('lean-tags-hosted');
+    ctx.settings.ttsEnabled = true;
+    ctx.settings.ttsApiType = ApiType.SentientSimsAI;
+    ctx.settings.sentientSimsAITtsSettings = defaultSentientSimsAIElevenLabsSettings;
+    await play(sceneEvent(), { action: 'chat' });
+    const actors = calls.filter((call) => call.label.startsWith('Actor'));
+    expect(actors.length).toBeGreaterThan(0);
+    actors.forEach((call) => {
+      expect(call.system).toContain(TAGGED);
+    });
+  });
+
+  it('with the everyday-tags setting off, the prompt is unchanged on a voice that reads tags', async () => {
+    const { ctx, calls, play } = voiced('lean-tags-setting-off', 'v4');
+    expect(ctx.settings.voiceTags).toBe(true);
+    ctx.settings.set(SettingsEnum.VOICE_TAGS, false);
+    await play(sceneEvent(), { action: 'chat' });
+    const actors = calls.filter((call) => call.label.startsWith('Actor'));
+    expect(actors.length).toBeGreaterThan(0);
+    actors.forEach((call) => {
+      expect(call.system).toContain(BARE_SUBTITLE_RULE);
+      expect(call.system).not.toContain('voice tag');
+    });
   });
 });
 

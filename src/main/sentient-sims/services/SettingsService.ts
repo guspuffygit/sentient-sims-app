@@ -384,6 +384,10 @@ export function defaultStore(cwd?: string) {
         type: 'boolean',
         default: true,
       },
+      [SettingsEnum.VOICE_TAGS.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
       [SettingsEnum.SCENE_REPEAT_COOLDOWN_SECONDS.toString()]: {
         type: 'number',
         default: 120,
@@ -1376,6 +1380,10 @@ export class SettingsService {
 
   get wwVoiceTags(): boolean {
     return this.get(SettingsEnum.WW_VOICE_TAGS) === true;
+  }
+
+  get voiceTags(): boolean {
+    return this.get(SettingsEnum.VOICE_TAGS) === true;
   }
 
   get sceneMaxRounds(): number {

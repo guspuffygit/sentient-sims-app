@@ -2171,6 +2171,9 @@ ${factsBlock}
             nameFreeRules: this.ctx.settings.leanNameFreeRules,
             // A Wicked Whims act answers in sounds first (speechRules 'intimate')
             intimate: soundsFirst,
+            // Everyday lines may carry one invented sound when the voice performs tags. Never a
+            // Wicked Whims act: with its sounds-first rules off it keeps the plain pair rules
+            voiceTags: !intimateAct && this.ctx.settings.voiceTags && voiceReadsTags(this.ctx.settings),
           })
         : buildSpeechSystemPrompt({
             simName: sim.name,
