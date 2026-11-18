@@ -122,6 +122,7 @@ import { SceneState } from './SceneService';
 import { isBelowChild, lifeStageOf } from '../util/simLifeStage';
 import {
   INTIMATE_SCENE_FRAMING,
+  INTIMATE_SOLO_FRAMING,
   intimateOutputProblem,
   isAdultAge,
   isRefusal,
@@ -1867,6 +1868,16 @@ ${factsBlock}
     // conscience, Twitch). Full-length straight answers, the sim's live status in the
     // prompt, the thread as context, and a reply that may act on what was said.
     const playerFacing = Boolean(playerLine);
+    // A solo Wicked Whims animation on the sounds-first rules: the Sim plays it aloud, talking
+    // to themselves (own rules, framing and patter line: nobody else is in it), so its scene
+    // exists for the patter to hold and poke.
+    const soloAct =
+      lean &&
+      soundsFirst &&
+      intimateEvent?.ww_event_type === WWEventType.ACTIVE &&
+      performers.length === 1 &&
+      speakers.length === 1 &&
+      !playerLine;
 
     let sceneAction: string | undefined;
     // The beat as it HAPPENED, with none of the prompt scaffolding the actors are given
@@ -1896,7 +1907,7 @@ ${factsBlock}
         // come from. Model-only, after displayAction is taken: the memory row keeps the
         // beat as it happened, never a stage direction (the 08-16 lesson above).
         let action = withContentFreeHint(base, interactionName);
-        if (action && opens) {
+        if (action && opens && !soloAct) {
           action += previously
             ? ' Open the scene: the characters are just starting this conversation — the first line begins it. The lines above were an earlier conversation, not part of this one.'
             : ' Open the scene: the characters are just starting this conversation — the first line begins it, nothing was said before.';
@@ -1905,7 +1916,7 @@ ${factsBlock}
           action += ` ${valenceClause}`;
         }
         if (action && intimateAct) {
-          action += ` ${INTIMATE_SCENE_FRAMING}`;
+          action += ` ${soloAct ? INTIMATE_SOLO_FRAMING : INTIMATE_SCENE_FRAMING}`;
         }
         return action;
       };
@@ -1945,9 +1956,10 @@ ${factsBlock}
                 carriedLines,
                 simNames.filter((other) => other !== name),
               ),
+              soloAct,
             )
           : LEAN_CONTINUATION_LINE;
-      sceneAction = options.patter ? patterLine([]) : LEAN_CONTINUATION_LINE;
+      sceneAction = options.patter ? patterLine([], soloAct) : LEAN_CONTINUATION_LINE;
       actionFor = options.patter ? continuationFor : undefined;
       if (lean) {
         // THE lean tweak: the beat rides into every round, per Sim (the liar keeps the lie,
@@ -1956,7 +1968,7 @@ ${factsBlock}
         const opening = frameBeat(false);
         if (opening.action) {
           const openingAction = opening.action;
-          sceneAction = carriedBeat(openingAction, options.patter ? patterLine([]) : LEAN_CONTINUATION_LINE);
+          sceneAction = carriedBeat(openingAction, options.patter ? patterLine([], soloAct) : LEAN_CONTINUATION_LINE);
           actionFor = (name) => carriedBeat(opening.perSim?.(name) ?? openingAction, continuationFor(name));
         }
       }
@@ -1995,7 +2007,8 @@ ${factsBlock}
     // A lone sim runs the same pipeline with the dialogue stage NULLed: director, then
     // inner monologue only, then scores. There is no narrator — a solo beat is a thought.
     // So is a beat whose performers can none of them speak.
-    const monologueOnly = speakers.length === 0 || (performers.length === 1 && !playerLine);
+    // A solo act (soloAct, above) is the exception: said aloud, never a thought.
+    const monologueOnly = speakers.length === 0 || (performers.length === 1 && !playerLine && !soloAct);
 
     const exchanges: LLMExchange[] = [];
     // The mod abandons an interaction request after 80 seconds, so each stage checks the
@@ -2171,6 +2184,7 @@ ${factsBlock}
             nameFreeRules: this.ctx.settings.leanNameFreeRules,
             // A Wicked Whims act answers in sounds first (speechRules 'intimate')
             intimate: soundsFirst,
+            intimateSolo: soloAct,
             // Everyday lines may carry one invented sound when the voice performs tags. Never a
             // Wicked Whims act: with its sounds-first rules off it keeps the plain pair rules
             voiceTags: !intimateAct && this.ctx.settings.voiceTags && voiceReadsTags(this.ctx.settings),
@@ -2263,7 +2277,10 @@ ${factsBlock}
       }
     }
 
-    if (monologueOnly) {
+    // A solo act's opening round with no line to air (sounds alone, on a voice that cannot
+    // perform them) plays as the thought aloud, so the animation is never left silent
+    const soloActThought = soloAct && !options.continueScene && performedLines.length === 0;
+    if (monologueOnly || soloActThought) {
       return this.finishMonologueScene(event, options, playbackOptions, {
         performances: performers.map((sim) => ({ performer: sim, think: monologueBySim.get(sim.sim_id) })),
         // A silent cast keeps its thoughts to itself; a lone speaker voices theirs, unless

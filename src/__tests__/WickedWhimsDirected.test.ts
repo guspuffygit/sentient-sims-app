@@ -10,7 +10,7 @@ import { SSEventType, WWEventType, WWInteractionEvent } from 'main/sentient-sims
 import { SimStateReport } from 'main/sentient-sims/models/SimStateReport';
 import { AIActionType } from 'main/sentient-sims/models/AIActionType';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
-import { INTIMATE_SCENE_FRAMING } from 'main/sentient-sims/util/intimateScene';
+import { INTIMATE_SCENE_FRAMING, INTIMATE_SOLO_FRAMING } from 'main/sentient-sims/util/intimateScene';
 import { ElevenLabsSpeechModel } from 'main/sentient-sims/models/ElevenLabsTTSSettings';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
 import { patterLine, patterUsedWords, speechRuleKind, speechRules } from 'main/sentient-sims/pipeline/prompts/scene';
@@ -413,6 +413,28 @@ describe('a WickedWhims act on the lean pipeline', () => {
     );
   });
 
+  it('gives a solo act its own rules: the same shape, said to nobody', () => {
+    const solo = speechRules('intimateSolo', { lean: true });
+    expect(speechRuleKind(false, false, true, true)).toBe('intimateSolo');
+    // A solo act with the sounds-first setting off is not this kind (it stays a thought)
+    expect(speechRuleKind(false, false, false, true)).toBe('pair');
+    // The tested rules with three edits and nothing else
+    expect(solo).toEqual(
+      INTIMATE_RULES_NAME_FREE.replace(
+        'This is sex, not a conversation.',
+        'This is a solo sex scene, not a conversation.',
+      )
+        .replace('a few words at most: a name, a yes,', 'a few words at most, said to yourself: a yes,')
+        .replace('Never repeat the last line; react to it.', 'Never repeat your last line.'),
+    );
+    expect(INTIMATE_SOLO_FRAMING).toEqual(
+      'This is an intimate adult scene of one adult: the character talks to themself during it, explicit and uninhibited when the moment calls for it, true to their personality and mood.',
+    );
+    // The patter line loses "(names are fine)" and nothing else
+    expect(patterLine(['oh'], true)).toEqual(patterLine(['oh']).replace(' (names are fine)', ''));
+    expect(patterLine([], true)).toEqual(patterLine([]));
+  });
+
   it('is the intimate kind only for a performer who speaks', () => {
     expect(speechRuleKind(false, false, true)).toBe('intimate');
     expect(speechRuleKind(false, true, true)).toBe('monologue');
@@ -664,6 +686,86 @@ describe('the Wicked Whims patter', () => {
 
     await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.STARTING));
 
+    expect(aired).not.toHaveBeenCalled();
+  });
+
+  it('plays a solo act aloud on the sounds-first rules and holds its scene for the patter', async () => {
+    const scene = leanWw('ww-patter-solo', 'v4', {
+      actorText: () => 'SAY: [soft moan] Oh, yes.\nTHINK: Nobody is home.',
+    });
+    const aired = vi.spyOn(scene.ctx.wwPatter, 'roundAired');
+
+    const result = await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE, [MARGO]));
+
+    expect(result.status).toEqual(InteractionEventStatus.GENERATED);
+    expect(scene.labels()).toEqual(['Actor: Margo Calloway']);
+    // Its own rules and framing: talking to themselves, nobody to answer or to open a scene with
+    const [actor] = scene.calls;
+    expect(actor.systemPrompt).toContain('This is a solo sex scene, not a conversation.');
+    expect(actor.systemPrompt).toContain('a few words at most, said to yourself: a yes,');
+    expect(actor.systemPrompt).not.toContain('This is sex, not a conversation.');
+    expect(actor.userText).toContain(INTIMATE_SOLO_FRAMING);
+    expect(actor.userText).not.toContain('talk to each other');
+    expect(actor.userText).not.toContain('Open the scene');
+    expect(voicedLines(scene).map((line) => [line.speaker, line.ttsText ?? line.text])).toEqual([
+      ['Margo Calloway', '[soft moan] Oh, yes.'],
+    ]);
+    expect(aired).toHaveBeenCalledTimes(1);
+    const [round] = aired.mock.calls[0];
+    expect(round.speakerIds).toEqual(['1']);
+    expect(scene.ctx.scenePlayback.isHeld(round.sceneId)).toBe(true);
+  });
+
+  it('pokes a solo act: one more line from the Sim alone, carrying the patter line', async () => {
+    const scene = leanWw('ww-patter-solo-poke', 'v4', {
+      actorText: () => 'SAY: [soft moan] Oh, yes.\nTHINK: Nobody is home.',
+    });
+    const aired = vi.spyOn(scene.ctx.wwPatter, 'roundAired');
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE, [MARGO]));
+    const [round] = aired.mock.calls[0];
+    scene.continued.mockImplementation((task) =>
+      task({ yielded: new AbortController().signal, arrivedAt: Date.now() }),
+    );
+    scene.calls.length = 0;
+    scene.voiced.mockClear();
+
+    await round.poke('1', new AbortController().signal);
+
+    expect(scene.labels()).toEqual(['Actor: Margo Calloway']);
+    expect(scene.calls[0].systemPrompt).toContain('This is a solo sex scene, not a conversation.');
+    expect(scene.calls[0].userText).toContain(patterLine(['oh', 'yes'], true));
+    expect(scene.calls[0].userText).toContain(INTIMATE_SOLO_FRAMING);
+    expect(scene.calls[0].userText).not.toContain('names are fine');
+    expect(voicedLines(scene).map((line) => line.speaker)).toEqual(['Margo Calloway']);
+    expect(aired).toHaveBeenCalledTimes(2);
+    expect(aired.mock.calls[1][0].sceneId).toBe(round.sceneId);
+    expect(aired.mock.calls[1][0].round).toBe(2);
+  });
+
+  it('plays a solo act of sounds alone as the thought aloud on a voice that cannot perform them', async () => {
+    const scene = leanWw('ww-patter-solo-kokoro', 'kokoro', {
+      actorText: () => 'SAY: [moans] [gasps]\nTHINK: Nobody is home.',
+    });
+    const aired = vi.spyOn(scene.ctx.wwPatter, 'roundAired');
+
+    const result = await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE, [MARGO]));
+
+    expect(result.status).toEqual(InteractionEventStatus.GENERATED);
+    expect(voicedLines(scene).map((line) => [line.speaker, line.text])).toEqual([
+      ['Margo Calloway (to self)', 'Nobody is home.'],
+    ]);
+    expect(aired).not.toHaveBeenCalled();
+  });
+
+  it('with the sounds-first setting off, a solo act stays a thought aloud with no patter', async () => {
+    const scene = leanWw('ww-patter-solo-off', 'v4');
+    scene.ctx.settings.set(SettingsEnum.WW_VOICE_TAGS, false);
+    const aired = vi.spyOn(scene.ctx.wwPatter, 'roundAired');
+
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE, [MARGO]));
+
+    expect(scene.calls[0].systemPrompt).toContain('THINK: <one short sentence');
+    expect(voicedLines(scene).map((line) => line.speaker)).toEqual(['Margo Calloway (to self)']);
     expect(aired).not.toHaveBeenCalled();
   });
 

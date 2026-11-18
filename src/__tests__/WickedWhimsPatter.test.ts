@@ -151,6 +151,24 @@ describe('WickedWhimsPatter', () => {
     expect(h.pokes.map((poke) => poke.speakerId)).toEqual(['14', '23', '14']);
   });
 
+  it('pokes a solo act too: the one Sim takes every turn, across animations', () => {
+    const h = build();
+    const solo = wwEvent(WWEventType.ACTIVE, 'act-solo', [VAL]);
+    h.patter.roundAired(h.round('s1', 1, [{ simId: '14', text: 'Oh.' }], solo));
+    h.patter.sceneIdle('s1');
+    h.advance(20_000);
+    h.patter.sceneIdle('s1');
+    h.advance(20_000);
+
+    h.patter.wwEvent(solo);
+    h.patter.roundAired(h.round('s2', 1, [{ simId: '14', text: 'Yes.' }], solo));
+    h.patter.sceneIdle('s2');
+    h.advance(20_000);
+
+    expect(h.pokes.map((poke) => poke.speakerId)).toEqual(['14', '14', '14']);
+    expect(h.released).toEqual(['s1']);
+  });
+
   it('starts over on a new animation: the old scene is released, the turn order re-read', () => {
     const h = build();
     h.patter.roundAired(h.round('s1', 1, ROUND_ONE));

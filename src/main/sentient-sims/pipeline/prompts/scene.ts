@@ -132,19 +132,21 @@ ${speechRules(speechRuleKind(playerFacing, monologueOnly), { simName })}`;
 }
 
 // Which response format a performer answers in. 'intimate' is a Wicked Whims act on the lean
-// pipeline (sounds first, a few words between); a solo act is still a THINK call.
-export type SpeechRuleKind = 'pair' | 'playerFacing' | 'monologue' | 'intimate';
+// pipeline (sounds first, a few words between); 'intimateSolo' is a solo animation, said
+// aloud to nobody. A solo ask or walk-up is still a THINK call.
+export type SpeechRuleKind = 'pair' | 'playerFacing' | 'monologue' | 'intimate' | 'intimateSolo';
 
 export function speechRuleKind(
   playerFacing: boolean | undefined,
   monologueOnly: boolean,
   intimate = false,
+  solo = false,
 ): SpeechRuleKind {
   if (monologueOnly) {
     return 'monologue';
   }
   if (intimate) {
-    return 'intimate';
+    return solo ? 'intimateSolo' : 'intimate';
   }
   return playerFacing ? 'playerFacing' : 'pair';
 }
@@ -221,6 +223,24 @@ ${stay}
 - This is sex, not a conversation. Mostly sounds, in square brackets, invented for the moment: [moans], [breathless], [gasps], [soft laugh], [whispers]. Between them a few words at most: a name, a yes, a want, a reaction to what is happening right now.
 - Explicit when it fits them; blunt is blunt, shy is shy. Never a speech, never romance-card lines.
 - No narration, no name tag, no quotation marks. Never repeat the last line; react to it.
+
+Rules for THINK:
+- First person, present tense, one short line. No physical actions.`;
+  }
+
+  // A solo act: the tested 'intimate' rules framed as self-talk. Only "a name" and "react to
+  // it" are gone, since in a scene of one they ask for a partner. Said aloud (SAY), so it is a
+  // line in the bubble, not a thought.
+  if (kind === 'intimateSolo') {
+    return `How to respond — exactly two lines, in this format:
+SAY: <the sounds and the few words out of your character's mouth right now>
+THINK: <one short line of your character's private thought>
+
+Rules for SAY:
+${stay}
+- This is a solo sex scene, not a conversation. Mostly sounds, in square brackets, invented for the moment: [moans], [breathless], [gasps], [soft laugh], [whispers]. Between them a few words at most, said to yourself: a yes, a want, a reaction to what is happening right now.
+- Explicit when it fits them; blunt is blunt, shy is shy. Never a speech, never romance-card lines.
+- No narration, no name tag, no quotation marks. Never repeat your last line.
 
 Rules for THINK:
 - First person, present tense, one short line. No physical actions.`;
@@ -309,6 +329,8 @@ export type LeanActorSystemPromptContext = {
   nameFreeRules?: boolean;
   // A Wicked Whims act: the sounds-first rules (speechRules 'intimate') in place of the pair rules
   intimate?: boolean;
+  // A solo Wicked Whims act: the talking-to-yourself rules (speechRules 'intimateSolo')
+  intimateSolo?: boolean;
   // The voice performs audio tags: the pair and player-facing rules allow one (VOICE_TAG_RULE)
   voiceTags?: boolean;
 };
@@ -316,7 +338,7 @@ export type LeanActorSystemPromptContext = {
 export function buildLeanActorSystemPrompt(context: LeanActorSystemPromptContext): string {
   const { simName, characterBlock, locationBlock, factsBlock, settingBlock, statusBlock, playerFacing, monologueOnly } =
     context;
-  const rules = speechRules(speechRuleKind(playerFacing, monologueOnly, context.intimate), {
+  const rules = speechRules(speechRuleKind(playerFacing, monologueOnly, context.intimate, context.intimateSolo), {
     simName: context.nameFreeRules ? undefined : simName,
     lean: true,
     voiceTags: context.voiceTags,
@@ -387,10 +409,12 @@ export const LEAN_CONTINUATION_LINE =
 // used 3+ times in the scene, the Sim's own name never said, at most 8 pokes per animation
 // (WickedWhimsPatter). On pokes 1-8: 2.1% repeats, no own name.
 // Kept VERBATIM: that wording is what tested best.
-export function patterLine(usedWords: string[]): string {
+// `solo` is a solo act's line: the same words without "(names are fine)", which in a scene of
+// one invites a partner's name.
+export function patterLine(usedWords: string[], solo = false): string {
   const used =
     usedWords.length > 0
-      ? ` Words already said in this scene: ${usedWords.join(', ')}. Use none of them again (names are fine).`
+      ? ` Words already said in this scene: ${usedWords.join(', ')}. Use none of them again${solo ? '' : ' (names are fine)'}.`
       : '';
   return `Still the same moment, a little later. Do not describe anything new: no new position, nobody arriving, no instructions to anyone.${used} Never say your own name. Answer with a sound you have not made yet and a few new words, in your own voice, about how it feels right now.`;
 }
