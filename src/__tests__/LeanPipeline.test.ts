@@ -393,6 +393,56 @@ describe('lean test-day fixes (2026-10-29)', () => {
   });
 });
 
+// A reply to the player that copies [laughs] out of the persona bio airs the laugh, but
+// the memory row, the thread and the subtitle get plain words
+describe('voice tags in a reply to the player', () => {
+  it('stores and shows plain words; only the voice reads the tag', async () => {
+    const { ctx, play } = leanScene('lean-voice-tags');
+    vi.spyOn(ctx.ai, 'runOneShot').mockImplementation((label: string) => {
+      const text = label.startsWith('Actor')
+        ? "SAY: [laughs] That's the spirit.\nTHINK: Good."
+        : JSON.stringify({
+            'Alex Doe': { memory: 5, action: 1, action_reason: '', unfinished: false, continue: 1, done: true },
+          });
+      return Promise.resolve({
+        exchange: { label, request: { messages: [], maxResponseTokens: 120 }, responseText: text },
+        text,
+      });
+    });
+    const playLines = vi.spyOn(ctx.ai, 'playTtsLines');
+    const record = vi.spyOn(ctx.playerConversations, 'record');
+    const result = await play(sceneEvent('social_Chat', [makeSim('Alex Doe', '1')]), {
+      action: 'chat',
+      playerLine: { speaker: 'The Voice', text: 'Cheer up!' },
+    });
+
+    expect(result.memory?.content).toContain("Alex Doe: That's the spirit.");
+    expect(result.memory?.content).not.toContain('[');
+    const cast = playLines.mock.calls.flatMap((call) => call[0]).find((line) => line.speaker === 'Alex Doe');
+    expect(cast?.text).toEqual("That's the spirit.");
+    expect(cast?.ttsText).toEqual("[laughs] That's the spirit.");
+    const threadLines = record.mock.calls.flatMap((call) => call[1]);
+    expect(threadLines.find((line) => line.speaker === 'Alex Doe')?.text).toEqual("That's the spirit.");
+  });
+
+  it('a bare tag with no words is not a line', async () => {
+    const { ctx, play } = leanScene('lean-voice-tags-bare');
+    vi.spyOn(ctx.ai, 'runOneShot').mockImplementation((label: string) => {
+      const text = 'SAY: [laughs]\nTHINK: Ha.';
+      return Promise.resolve({
+        exchange: { label, request: { messages: [], maxResponseTokens: 120 }, responseText: text },
+        text,
+      });
+    });
+    const playLines = vi.spyOn(ctx.ai, 'playTtsLines');
+    await play(sceneEvent(), { action: 'chat' });
+    const spoken = playLines.mock.calls
+      .flatMap((call) => call[0])
+      .filter((line) => !line.speaker.includes('(to self)'));
+    expect(spoken).toEqual([]);
+  });
+});
+
 describe('lean prompt helpers', () => {
   it('splitLeanOpening keeps the last two same-cast beats, headers for the rest, nothing else', () => {
     const previously = [

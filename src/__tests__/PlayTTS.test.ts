@@ -246,6 +246,25 @@ describe('playTTSLines', () => {
     expect(sentVoiceLines()[0].deliveryNote).toEqual('sarcastic');
   });
 
+  it('gives no mood note to a line that carries its own voice tag; a plain line still gets one', () => {
+    const sadRicky = makeSim({ ...ricky, moods: ['Mood_Sad'] });
+    playTTSLines(
+      [
+        { speaker: 'Ricky Rickerson', text: 'Fine then.', ttsText: 'Fine then. [sighs]' },
+        { speaker: 'Ricky Rickerson', text: 'Been fishing here for years.' },
+        { speaker: 'Ricky Rickerson', text: 'Sure.', ttsText: '[laughs] Sure.', deliveryNote: 'sarcastic' },
+      ],
+      [sadRicky],
+      { voiceType: VoiceType.ElevenLabs },
+    );
+
+    const lines = sentVoiceLines();
+    expect(lines[0].deliveryNote).toBeUndefined();
+    expect(lines[0].ttsText).toEqual('Fine then. [sighs]');
+    expect(lines[1].deliveryNote).toEqual('quietly sad');
+    expect(lines[2].deliveryNote).toEqual('sarcastic');
+  });
+
   it('attaches no mood when the switch is off', () => {
     const sadRicky = makeSim({ ...ricky, moods: ['Mood_Sad'] });
     playTTSLines([{ speaker: 'Ricky Rickerson', text: 'Been fishing here for years.' }], [sadRicky], {

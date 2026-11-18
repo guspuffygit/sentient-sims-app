@@ -94,6 +94,7 @@ import {
   splitLinesForPacing,
 } from '../formatter/PromptFormatter';
 import { splitLinesForAiring } from '../util/airingChunks';
+import { splitVoiceTags, stripVoiceTags } from '../util/voiceTags';
 import { formatSelfStatus, TodaysPlanBlock } from '../util/formatSelfStatus';
 import { PlayerConversation, PlayerConversationService } from './PlayerConversationService';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
@@ -325,9 +326,10 @@ function parseReviewedLines(rawText: string, speakerNames: string[]): DialogueLi
     .forEach((line) => {
       const name = speakerNames.find((speaker) => new RegExp(`^${escapeRegExp(speaker)}\\s*:`, 'i').test(line));
       if (name) {
-        const text = extractSubtitle(line, speakerNames);
-        if (text.length > 1) {
-          lines.push({ speaker: name, text });
+        // A voice tag ([laughs]) moves to ttsText; a bare tag is not a line
+        const reviewed = splitVoiceTags({ speaker: name, text: extractSubtitle(line, speakerNames) });
+        if (reviewed.text.length > 1) {
+          lines.push(reviewed);
         }
       }
     });
@@ -1378,7 +1380,7 @@ ${factsBlock}
         newMemory.content = output;
         // Classic playback: one narrator utterance, no per-speaker parsing or voice casting
         if (!playbackOptions.silent) {
-          this.playTtsLines([{ speaker: 'Narrator', text: output }]);
+          this.playTtsLines([splitVoiceTags({ speaker: 'Narrator', text: output })]);
         }
         return {
           status: InteractionEventStatus.GENERATED,
@@ -1431,11 +1433,14 @@ ${factsBlock}
             parseDialogueLines(
               output,
               event.sentient_sims.map((sim) => sim.name),
-            ),
+            ).map(splitVoiceTags),
           ).filter((line) => !silentNames.includes(line.speaker));
           this.playTtsLines(lines, event.sentient_sims, { paced: true, pacedText: output });
         } else if (playbackOptions.ttsSpeaker) {
-          this.playTtsLines([{ speaker: playbackOptions.ttsSpeaker, text: output }], event.sentient_sims);
+          this.playTtsLines(
+            [splitVoiceTags({ speaker: playbackOptions.ttsSpeaker, text: output })],
+            event.sentient_sims,
+          );
         } else {
           this.playTts(output, event.sentient_sims);
         }
@@ -1695,7 +1700,10 @@ ${factsBlock}
           const answer = (asked.memory?.content ?? '').replace(/^[^\n]*?\(to self\):\s*/, '').trim();
           this.ctx.playerConversations.record(
             thread.key,
-            [options.playerLine, ...(answer ? [{ speaker: event.sentient_sims[0].name, text: answer }] : [])],
+            [
+              options.playerLine,
+              ...(answer ? [{ speaker: event.sentient_sims[0].name, text: stripVoiceTags(answer) }] : []),
+            ],
             { landed: false },
           );
         }
@@ -2161,8 +2169,10 @@ ${factsBlock}
           think = '';
         }
         log.info(`[Pipeline] Actor ${sim.name} — say: ${say || '(none)'} | think: ${think || '(none)'}`);
-        if (say.length > 1) {
-          const line = { speaker: sim.name, text: say };
+        // A voice tag ([laughs]) is for the voice only: text is the plain words, ttsText
+        // keeps the tag. A bare tag with no words is not a line.
+        const line = splitVoiceTags({ speaker: sim.name, text: say });
+        if (line.text.length > 1) {
           sceneLines.push(line);
           performedLines.push(line);
         }
@@ -2890,10 +2900,14 @@ ${factsBlock}
       if (aloud) {
         const [{ performer, think }] = rows;
         markScenePaced(finalText);
-        this.playTtsLines([{ speaker: `${performer.name} (to self)`, text: think }], event.sentient_sims, {
-          paced: true,
-          pacedText: finalText,
-        });
+        this.playTtsLines(
+          [splitVoiceTags({ speaker: `${performer.name} (to self)`, text: think })],
+          event.sentient_sims,
+          {
+            paced: true,
+            pacedText: finalText,
+          },
+        );
       }
       return true;
     });

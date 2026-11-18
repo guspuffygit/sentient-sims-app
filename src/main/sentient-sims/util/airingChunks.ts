@@ -1,4 +1,5 @@
 import { DialogueLine } from '../formatter/PromptFormatter';
+import { hasVoiceTags, stripVoiceTags, VOICE_TAG_RE } from './voiceTags';
 
 // A reply to the player may run to a paragraph (playerReplyMaxTokens). Aired as ONE scene
 // line it would be one long TTS fetch, one subtitle the mod cuts at its character cap, and
@@ -84,11 +85,55 @@ export function splitTextForAiring(text: string, maxChars = AIRING_CHUNK_MAX_CHA
   return chunks;
 }
 
+// A space inside a tag ("[clears throat]") must never be a cut point, so it hides as a
+// private-use character while the text is split
+const TAG_SPACE = '\uE000';
+
+// A tagged line is split on what the VOICE reads, so each chunk keeps its own tags in
+// ttsText and the plain words in text. A chunk that is only tags joins its neighbour
+// (the next one, or the one before when it is last).
+function splitTaggedLineForAiring(line: DialogueLine, tagged: string, maxChars: number): DialogueLine[] {
+  const guarded = tagged.replace(VOICE_TAG_RE, (tag) => tag.replace(/\s/g, TAG_SPACE));
+  const pieces = splitTextForAiring(guarded, maxChars).map((piece) => piece.split(TAG_SPACE).join(' '));
+  const folded: string[] = [];
+  let carry = '';
+  pieces.forEach((piece) => {
+    const withCarry = carry ? `${carry} ${piece}` : piece;
+    if (stripVoiceTags(withCarry).length === 0) {
+      carry = withCarry;
+      return;
+    }
+    carry = '';
+    folded.push(withCarry);
+  });
+  if (carry) {
+    if (folded.length === 0) {
+      return [line];
+    }
+    folded[folded.length - 1] = `${folded[folded.length - 1]} ${carry}`;
+  }
+  if (folded.length <= 1) {
+    return [line];
+  }
+  return folded.map((ttsText, index) => {
+    const chunk: DialogueLine = { ...line, text: stripVoiceTags(ttsText), ttsText };
+    if (index < folded.length - 1) {
+      chunk.continues = true;
+    } else {
+      delete chunk.continues;
+    }
+    return chunk;
+  });
+}
+
 export function splitLineForAiring(line: DialogueLine, maxChars = AIRING_CHUNK_MAX_CHARS): DialogueLine[] {
   // A line whose subtitle was already sent (a Twitch question) is never split: the
   // subtitle and the voice must stay one thing
   if (line.skipSceneLine) {
     return [line];
+  }
+  if (line.ttsText !== undefined && hasVoiceTags(line.ttsText)) {
+    return splitTaggedLineForAiring(line, line.ttsText, maxChars);
   }
   const chunks = splitTextForAiring(line.text, maxChars);
   if (chunks.length <= 1) {

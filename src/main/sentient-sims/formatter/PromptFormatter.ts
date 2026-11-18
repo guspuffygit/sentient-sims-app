@@ -595,6 +595,10 @@ export function formatSceneForChatWindow(text: string): string {
 export type DialogueLine = {
   speaker: string;
   text: string;
+  // What the voice is sent when it differs from the shown text: the same words with their
+  // inline voice tags (`[laughs]`, util/voiceTags), which `text` never carries. Absent
+  // means the voice reads `text`.
+  ttsText?: string;
   // Inline parenthetical delivery note, e.g. `Ricky: (nervous) "..."` — feeds v3 audio tags
   deliveryNote?: string;
   // Provider-specific voice cast for this speaker (an ElevenLabs voice id, or a Kokoro

@@ -461,4 +461,17 @@ describe('elevenLabsLineText', () => {
     const plain: DialogueLine = { speaker: 'Ricky', text: 'Been fishing here for years.' };
     expect(elevenLabsLineText(plain, ElevenLabsSpeechModel.ELEVEN_V3)).toEqual('Been fishing here for years.');
   });
+
+  it("keeps a line's inline tags on v3/v4 and strips them on models that would read them aloud", () => {
+    const tagged: DialogueLine = {
+      speaker: 'Ricky',
+      text: 'Oh, sorry.',
+      ttsText: 'Oh, [laughs] sorry.',
+      deliveryNote: 'nervous',
+    };
+    expect(elevenLabsLineText(tagged, ElevenLabsSpeechModel.ELEVEN_V3)).toEqual('[nervous] Oh, [laughs] sorry.');
+    expect(elevenLabsLineText(tagged, ElevenLabsSpeechModel.ELEVEN_V4)).toEqual('[nervous] Oh, [laughs] sorry.');
+    expect(elevenLabsLineText(tagged, ElevenLabsSpeechModel.ELEVEN_FLASH_V2_5)).toEqual('Oh, sorry.');
+    expect(elevenLabsLineText(tagged, ElevenLabsSpeechModel.ELEVEN_MULTILINGUAL_V2)).toEqual('Oh, sorry.');
+  });
 });
