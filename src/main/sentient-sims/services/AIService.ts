@@ -1123,7 +1123,8 @@ ${factsBlock}
     } else if (event.ww_event_type === WWEventType.STARTING) {
       preAction = "{actor.0} is taking {actor.1}'s hand and leading them to start {sex_category} {sex_location}.";
       if (event.sentient_sims.length === 1) {
-        preAction = '{actor.0} is walking to start {sex_category} {sex_location}.';
+        // Never the category words: a solo "handjob" read "giving a handjob", to somebody
+        preAction = '{actor.0} is walking to start pleasuring themselves {sex_location}.';
       }
     } else if (event.ww_event_type === WWEventType.ACTIVE) {
       if (event.testing_action) {
@@ -1776,9 +1777,10 @@ ${factsBlock}
     // A sexual act (WickedWhims) is told from its performers alone (util/intimateScene)
     const intimateAct = event.event_type === SSEventType.WICKED_WHIMS;
     const intimateEvent = intimateAct ? (event as WWInteractionEvent) : undefined;
-    // and answers in sounds first: the sounds-first rules on the lean pipeline, and a line of
-    // sounds alone voiced on a voice that performs tags
-    const soundsFirst = intimateAct && this.ctx.settings.wwVoiceTags;
+    // and answers in sounds first on a voice that performs tags: the sounds-first rules on the
+    // lean pipeline, and a line of sounds alone voiced. A voice that cannot (Kokoro, text only)
+    // keeps the everyday rules: with the sounds stripped its lines were two or three words.
+    const soundsFirst = intimateAct && this.ctx.settings.wwVoiceTags && voiceReadsTags(this.ctx.settings);
     // The lean pipeline (2026-10-27, default): one actor call per Sim per round with the beat
     // carried into every round, fixed rounds, scores only for a reply to the player. 'full'
     // is the 4.6 pipeline: director, actors, reviewer, scores, every round.
@@ -1868,16 +1870,17 @@ ${factsBlock}
     // conscience, Twitch). Full-length straight answers, the sim's live status in the
     // prompt, the thread as context, and a reply that may act on what was said.
     const playerFacing = Boolean(playerLine);
-    // A solo Wicked Whims animation on the sounds-first rules: the Sim plays it aloud, talking
-    // to themselves (own rules, framing and patter line: nobody else is in it), so its scene
-    // exists for the patter to hold and poke.
+    // A Wicked Whims moment with one Sim in it (walk-up or animation, any voice): framed as
+    // self-talk, never as a conversation, which invited a partner who is not there
+    const soloIntimate = intimateAct && performers.length === 1 && !playerLine;
+    // A solo animation on the sounds-first rules: the Sim plays it aloud (own rules and patter
+    // line), so its scene exists for the patter to hold and poke.
     const soloAct =
+      soloIntimate &&
       lean &&
       soundsFirst &&
       intimateEvent?.ww_event_type === WWEventType.ACTIVE &&
-      performers.length === 1 &&
-      speakers.length === 1 &&
-      !playerLine;
+      speakers.length === 1;
 
     let sceneAction: string | undefined;
     // The beat as it HAPPENED, with none of the prompt scaffolding the actors are given
@@ -1907,7 +1910,7 @@ ${factsBlock}
         // come from. Model-only, after displayAction is taken: the memory row keeps the
         // beat as it happened, never a stage direction (the 08-16 lesson above).
         let action = withContentFreeHint(base, interactionName);
-        if (action && opens && !soloAct) {
+        if (action && opens && !soloIntimate) {
           action += previously
             ? ' Open the scene: the characters are just starting this conversation — the first line begins it. The lines above were an earlier conversation, not part of this one.'
             : ' Open the scene: the characters are just starting this conversation — the first line begins it, nothing was said before.';
@@ -1916,7 +1919,7 @@ ${factsBlock}
           action += ` ${valenceClause}`;
         }
         if (action && intimateAct) {
-          action += ` ${soloAct ? INTIMATE_SOLO_FRAMING : INTIMATE_SCENE_FRAMING}`;
+          action += ` ${soloIntimate ? INTIMATE_SOLO_FRAMING : INTIMATE_SCENE_FRAMING}`;
         }
         return action;
       };
@@ -2257,7 +2260,7 @@ ${factsBlock}
         if (line.text.length > 1) {
           sceneLines.push(line);
           performedLines.push(line);
-        } else if (soundsFirst && hasVoiceTags(line.ttsText ?? '') && voiceReadsTags(this.ctx.settings)) {
+        } else if (soundsFirst && hasVoiceTags(line.ttsText ?? '')) {
           const soundsOnly: DialogueLine = { ...line, text: '', voiceOnly: true };
           sceneLines.push(soundsOnly);
           performedLines.push(soundsOnly);
@@ -2277,8 +2280,8 @@ ${factsBlock}
       }
     }
 
-    // A solo act's opening round with no line to air (sounds alone, on a voice that cannot
-    // perform them) plays as the thought aloud, so the animation is never left silent
+    // A solo act's opening round with no line to air (the actor answered with a thought alone)
+    // plays as the thought aloud, so the animation is never left silent
     const soloActThought = soloAct && !options.continueScene && performedLines.length === 0;
     if (monologueOnly || soloActThought) {
       return this.finishMonologueScene(event, options, playbackOptions, {

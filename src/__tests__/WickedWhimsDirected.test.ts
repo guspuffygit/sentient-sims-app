@@ -266,6 +266,25 @@ describe('a WickedWhims scene', () => {
     expect(guarded.voiced).not.toHaveBeenCalled();
   });
 
+  it('frames a solo walk-up as one Sim alone: no partnered act, no conversation', async () => {
+    const solo = leanWw('ww-directed-solo-walk-up', 'kokoro', { actorText: () => 'THINK: Finally some quiet.' });
+    // WickedWhims files a solo animation under a partnered category (1 = handjob)
+    await solo.ctx.ai.interactionEvent({ ...wwEvent(WWEventType.STARTING, [MARGO]), sex_category: 1 });
+
+    const [actor] = solo.calls;
+    expect(actor.userText).toContain('Margo Calloway is walking to start pleasuring themselves');
+    expect(actor.userText).not.toContain('handjob');
+    expect(actor.userText).toContain(INTIMATE_SOLO_FRAMING);
+    expect(actor.userText).not.toContain('talk to each other');
+    expect(actor.userText).not.toContain('Open the scene');
+
+    // Two Sims keep the walk-up and the framing they had
+    const pair = leanWw('ww-directed-pair-walk-up', 'kokoro');
+    await pair.ctx.ai.interactionEvent({ ...wwEvent(WWEventType.STARTING), sex_category: 1 });
+    expect(pair.calls[0].userText).toContain("is taking Desmond Calloway's hand");
+    expect(pair.calls[0].userText).toContain(INTIMATE_SCENE_FRAMING);
+  });
+
   it('plays an unmapped animation from its act and place, through the Wicked Whims provider', async () => {
     const scene = wwContext('ww-directed-unmapped', { unmapped: true });
     const event = { ...wwEvent(WWEventType.ACTIVE), sex_category: 4, sex_location: 1 };
@@ -507,6 +526,10 @@ describe('a WickedWhims act on the lean pipeline', () => {
 
     const result = await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE));
 
+    // A voice that cannot perform sounds is never asked for them: the everyday rules
+    const actor = scene.calls.find((call) => call.label === 'Actor: Margo Calloway');
+    expect(actor?.systemPrompt).not.toContain('This is sex, not a conversation.');
+    expect(actor?.systemPrompt).toContain('ONE short line, ten words or so');
     expect(voicedLines(scene).some((line) => line.speaker === 'Margo Calloway')).toBe(false);
     expect(result.memory?.content).not.toContain('Margo Calloway:');
   });
@@ -742,9 +765,25 @@ describe('the Wicked Whims patter', () => {
     expect(aired.mock.calls[1][0].round).toBe(2);
   });
 
-  it('plays a solo act of sounds alone as the thought aloud on a voice that cannot perform them', async () => {
+  it('on a voice that cannot perform sounds, a solo act stays a thought aloud with no patter', async () => {
     const scene = leanWw('ww-patter-solo-kokoro', 'kokoro', {
-      actorText: () => 'SAY: [moans] [gasps]\nTHINK: Nobody is home.',
+      actorText: () => 'THINK: Nobody is home.',
+    });
+    const aired = vi.spyOn(scene.ctx.wwPatter, 'roundAired');
+
+    const result = await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE, [MARGO]));
+
+    expect(result.status).toEqual(InteractionEventStatus.GENERATED);
+    expect(scene.calls[0].systemPrompt).toContain('THINK: <one short sentence');
+    expect(voicedLines(scene).map((line) => [line.speaker, line.text])).toEqual([
+      ['Margo Calloway (to self)', 'Nobody is home.'],
+    ]);
+    expect(aired).not.toHaveBeenCalled();
+  });
+
+  it('plays a solo act whose opening has no line as the thought aloud', async () => {
+    const scene = leanWw('ww-patter-solo-no-line', 'v4', {
+      actorText: () => 'THINK: Nobody is home.',
     });
     const aired = vi.spyOn(scene.ctx.wwPatter, 'roundAired');
 
