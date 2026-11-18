@@ -131,12 +131,20 @@ ${withFacts}`
 ${speechRules(speechRuleKind(playerFacing, monologueOnly), { simName })}`;
 }
 
-// Which of the three response formats a performer answers in
-export type SpeechRuleKind = 'pair' | 'playerFacing' | 'monologue';
+// Which response format a performer answers in. 'intimate' is a Wicked Whims act on the lean
+// pipeline (sounds first, a few words between); a solo act is still a THINK call.
+export type SpeechRuleKind = 'pair' | 'playerFacing' | 'monologue' | 'intimate';
 
-export function speechRuleKind(playerFacing: boolean | undefined, monologueOnly: boolean): SpeechRuleKind {
+export function speechRuleKind(
+  playerFacing: boolean | undefined,
+  monologueOnly: boolean,
+  intimate = false,
+): SpeechRuleKind {
   if (monologueOnly) {
     return 'monologue';
+  }
+  if (intimate) {
+    return 'intimate';
   }
   return playerFacing ? 'playerFacing' : 'pair';
 }
@@ -183,6 +191,25 @@ Rules for THINK:
 - First person, present tense — what is actually running through ${whose} head right now.
 - Private: nobody hears it, and it may differ from what ${who} says out loud — but it is ${whose} real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.
 - One short line. No physical actions, and never addressed to anyone.`;
+  }
+
+  // A Wicked Whims act. On ElevenLabs the delivery notes were the act's sounds, and the shared
+  // chat rules forbid them, so acts went quiet: these rules ask for sounds first, in square
+  // brackets, with a few words between. The sounds ride ttsText for a voice that performs tags
+  // and are stripped from the subtitle, the memory row and every voice that cannot.
+  if (kind === 'intimate') {
+    return `How to respond — exactly two lines, in this format:
+SAY: <the sounds and the few words out of your character's mouth right now>
+THINK: <one short line of your character's private thought>
+
+Rules for SAY:
+${stay}
+- This is sex, not a conversation. Mostly sounds, in square brackets, invented for the moment: [moans], [breathless], [gasps], [soft laugh], [whispers]. Between them a few words at most: a name, a yes, a want, a reaction to what is happening right now.
+- Explicit when it fits them; blunt is blunt, shy is shy. Never a speech, never romance-card lines.
+- No narration, no name tag, no quotation marks. Never repeat the last line; react to it.
+
+Rules for THINK:
+- First person, present tense, one short line. No physical actions.`;
   }
 
   if (kind === 'monologue') {
@@ -266,12 +293,14 @@ export type LeanActorSystemPromptContext = {
   monologueOnly: boolean;
   // Name-free rules: see SpeechRuleOptions.simName
   nameFreeRules?: boolean;
+  // A Wicked Whims act: the sounds-first rules (speechRules 'intimate') in place of the pair rules
+  intimate?: boolean;
 };
 
 export function buildLeanActorSystemPrompt(context: LeanActorSystemPromptContext): string {
   const { simName, characterBlock, locationBlock, factsBlock, settingBlock, statusBlock, playerFacing, monologueOnly } =
     context;
-  const rules = speechRules(speechRuleKind(playerFacing, monologueOnly), {
+  const rules = speechRules(speechRuleKind(playerFacing, monologueOnly, context.intimate), {
     simName: context.nameFreeRules ? undefined : simName,
     lean: true,
   });

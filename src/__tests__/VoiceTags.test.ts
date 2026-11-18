@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
-import { hasVoiceTags, splitVoiceTags, stripVoiceTags } from 'main/sentient-sims/util/voiceTags';
+import { hasVoiceTags, isSpeakable, splitVoiceTags, stripVoiceTags } from 'main/sentient-sims/util/voiceTags';
+import { splitLineForAiring } from 'main/sentient-sims/util/airingChunks';
+import { voiceReadsTags } from 'main/sentient-sims/services/AIService';
+import { ApiType } from 'main/sentient-sims/models/ApiType';
+import { ElevenLabsSpeechModel } from 'main/sentient-sims/models/ElevenLabsTTSSettings';
+import { SentientSimsAISpeechModel } from 'main/sentient-sims/models/SentientSimsAITTSSettings';
 
 // A voice tag like [laughs] is for the voice only. The subtitle, the bubble, the memory row
 // and the chat window get the plain words.
@@ -63,5 +68,40 @@ describe('splitVoiceTags', () => {
   it('leaves a line alone when only its ttsText differs', () => {
     const line: DialogueLine = { speaker: 'Ricky', text: 'Hi Jonah.', ttsText: 'Hi Joe-nuh.' };
     expect(splitVoiceTags(line)).toBe(line);
+  });
+});
+
+describe('a line of sounds alone (a Wicked Whims act)', () => {
+  it('airs as itself, unsplit', () => {
+    const line: DialogueLine = {
+      speaker: 'Margo Calloway',
+      text: '',
+      ttsText: '[moans] [gasps]',
+      voiceOnly: true,
+    };
+    expect(splitLineForAiring(line)).toEqual([line]);
+  });
+
+  it('is speakable while an empty ordinary line is not', () => {
+    expect(isSpeakable({ speaker: 'Margo', text: '', ttsText: '[moans]', voiceOnly: true })).toBe(true);
+    expect(isSpeakable({ speaker: 'Margo', text: '', ttsText: '[moans]' })).toBe(false);
+    expect(isSpeakable({ speaker: 'Margo', text: 'Yes.' })).toBe(true);
+  });
+
+  it('is voiced only where the voice performs tags', () => {
+    const settings = (ttsApiType: ApiType, model: string, ttsEnabled = true) => ({
+      ttsEnabled,
+      ttsApiType,
+      elevenLabsTtsSettings: { model },
+      sentientSimsAITtsSettings: { model },
+    });
+    expect(voiceReadsTags(settings(ApiType.ElevenLabs, ElevenLabsSpeechModel.ELEVEN_V4))).toBe(true);
+    expect(voiceReadsTags(settings(ApiType.ElevenLabs, ElevenLabsSpeechModel.ELEVEN_V3))).toBe(true);
+    expect(voiceReadsTags(settings(ApiType.ElevenLabs, ElevenLabsSpeechModel.ELEVEN_FLASH_V2_5))).toBe(false);
+    expect(voiceReadsTags(settings(ApiType.Kokoro, ElevenLabsSpeechModel.ELEVEN_V4))).toBe(false);
+    expect(voiceReadsTags(settings(ApiType.ElevenLabs, ElevenLabsSpeechModel.ELEVEN_V4, false))).toBe(false);
+    // The Sentient Sims AI voice performs tags on its ElevenLabs model, not on Kokoro
+    expect(voiceReadsTags(settings(ApiType.SentientSimsAI, SentientSimsAISpeechModel.ELEVEN_V4_TURBO))).toBe(true);
+    expect(voiceReadsTags(settings(ApiType.SentientSimsAI, SentientSimsAISpeechModel.KOKORO))).toBe(false);
   });
 });

@@ -358,6 +358,10 @@ export class ScenePlaybackRegistry {
     const rows: string[] = entry.openingPreAction ? [entry.openingPreAction] : [];
     let joinsPrevious = false;
     kept.forEach((line) => {
+      // Sounds with no words were heard, never written down
+      if (line.voiceOnly) {
+        return;
+      }
       if (joinsPrevious) {
         rows[rows.length - 1] += ` ${line.text}`;
       } else {

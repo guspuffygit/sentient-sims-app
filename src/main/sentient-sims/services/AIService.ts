@@ -94,7 +94,9 @@ import {
   splitLinesForPacing,
 } from '../formatter/PromptFormatter';
 import { splitLinesForAiring } from '../util/airingChunks';
-import { splitVoiceTags, stripVoiceTags } from '../util/voiceTags';
+import { hasVoiceTags, splitVoiceTags, stripVoiceTags } from '../util/voiceTags';
+import { supportsAudioTags } from '../clients/ElevenLabsTTSRequest';
+import { isElevenLabsSpeechModel } from '../models/SentientSimsAITTSSettings';
 import { formatSelfStatus, TodaysPlanBlock } from '../util/formatSelfStatus';
 import { PlayerConversation, PlayerConversationService } from './PlayerConversationService';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
@@ -336,8 +338,37 @@ function parseReviewedLines(rawText: string, speakerNames: string[]): DialogueLi
   return lines;
 }
 
+// A voiceOnly line (sounds with no words) is heard, never read: it has no place in a memory
+// row, a carried transcript, the next round or a conversation action
 function toTranscript(lines: DialogueLine[]): string {
-  return lines.map((line) => `${line.speaker}: ${line.text}`).join('\n');
+  return lines
+    .filter((line) => !line.voiceOnly)
+    .map((line) => `${line.speaker}: ${line.text}`)
+    .join('\n');
+}
+
+// The voice performs `[moans]` rather than dropping it: ElevenLabs v3 / v4, on the user's own
+// key or the Sentient Sims AI voice. Kokoro and the older Eleven models get every tag stripped,
+// so a line of sounds alone would say nothing.
+export function voiceReadsTags(settings: {
+  ttsEnabled: boolean;
+  ttsApiType: ApiType;
+  elevenLabsTtsSettings: { model: string };
+  sentientSimsAITtsSettings: { model: string };
+}): boolean {
+  if (!settings.ttsEnabled) {
+    return false;
+  }
+  if (settings.ttsApiType === ApiType.ElevenLabs) {
+    return supportsAudioTags(settings.elevenLabsTtsSettings.model);
+  }
+  // The hosted ElevenLabs voice is sent the tagged line too (useSentientSimsTTS lineRequest)
+  const hostedModel = settings.sentientSimsAITtsSettings.model;
+  return (
+    settings.ttsApiType === ApiType.SentientSimsAI &&
+    isElevenLabsSpeechModel(hostedModel) &&
+    supportsAudioTags(hostedModel)
+  );
 }
 
 export type DirectedGenerationOptions = {
@@ -1731,6 +1762,9 @@ ${factsBlock}
     // A sexual act (WickedWhims) is told from its performers alone (util/intimateScene)
     const intimateAct = event.event_type === SSEventType.WICKED_WHIMS;
     const intimateEvent = intimateAct ? (event as WWInteractionEvent) : undefined;
+    // and answers in sounds first: the sounds-first rules on the lean pipeline, and a line of
+    // sounds alone voiced on a voice that performs tags
+    const soundsFirst = intimateAct && this.ctx.settings.wwVoiceTags;
     // The lean pipeline (2026-10-27, default): one actor call per Sim per round with the beat
     // carried into every round, fixed rounds, scores only for a reply to the player. 'full'
     // is the 4.6 pipeline: director, actors, reviewer, scores, every round.
@@ -1861,7 +1895,7 @@ ${factsBlock}
         }
         return action;
       };
-      let action = frame(beatDisplay, true);
+      const action = frame(beatDisplay, true);
       let perSim: ((name: string) => string) | undefined;
       let forDirector: string | undefined;
 
@@ -1880,9 +1914,7 @@ ${factsBlock}
           `${liarAction}\n\n${target} does not know it is a lie. Only ${liar}'s private briefing may say so; ` +
           `the shared briefing and ${target}'s briefing describe the beat as ${target} experiences it: "${deception.targetView}"`;
       }
-      if (action && intimateAct) {
-        action = `${action} ${INTIMATE_SCENE_FRAMING}`;
-      }
+      // frame() already appended INTIMATE_SCENE_FRAMING; appending it here too said it twice
       return { action, perSim, forDirector, beatDisplay };
     };
     if (continuingScene && playerLine) {
@@ -2108,6 +2140,8 @@ ${factsBlock}
             playerFacing,
             monologueOnly: thinkOnly,
             nameFreeRules: this.ctx.settings.leanNameFreeRules,
+            // A Wicked Whims act answers in sounds first (speechRules 'intimate')
+            intimate: soundsFirst,
           })
         : buildSpeechSystemPrompt({
             simName: sim.name,
@@ -2170,11 +2204,17 @@ ${factsBlock}
         }
         log.info(`[Pipeline] Actor ${sim.name} — say: ${say || '(none)'} | think: ${think || '(none)'}`);
         // A voice tag ([laughs]) is for the voice only: text is the plain words, ttsText
-        // keeps the tag. A bare tag with no words is not a line.
+        // keeps the tag. A bare tag with no words is not a line, except in a Wicked Whims act
+        // on a voice that performs tags: `[moans] [gasps]` is voiced with no subtitle and no
+        // memory text (voiceOnly).
         const line = splitVoiceTags({ speaker: sim.name, text: say });
         if (line.text.length > 1) {
           sceneLines.push(line);
           performedLines.push(line);
+        } else if (soundsFirst && hasVoiceTags(line.ttsText ?? '') && voiceReadsTags(this.ctx.settings)) {
+          const soundsOnly: DialogueLine = { ...line, text: '', voiceOnly: true };
+          sceneLines.push(soundsOnly);
+          performedLines.push(soundsOnly);
         }
         if (think.length > 1) {
           // Keyed by sim_id, never name: two sims sharing a name string collided in
@@ -2301,7 +2341,11 @@ ${factsBlock}
 
     // Nothing that fails the guard is stored or voiced, its thoughts included
     const intimateProblem = intimateAct
-      ? this.intimateSceneProblem(event, [...finalLines.map((line) => line.text), ...monologueBySim.values()])
+      ? this.intimateSceneProblem(event, [
+          // A sounds-only line is checked on its tags: an outside name inside one is still caught
+          ...finalLines.map((line) => (line.voiceOnly ? (line.ttsText ?? '') : line.text)),
+          ...monologueBySim.values(),
+        ])
       : undefined;
     if (intimateProblem) {
       log.warn(`[Pipeline] Discarded ${event.event_type} scene (${intimateProblem}): ${dialogueText.slice(0, 160)}`);
@@ -2461,7 +2505,8 @@ ${factsBlock}
     // action is a direction written for the actors, and the player's line already showed in
     // the game's chat box — neither belongs above the reply.
     const preActionLine = continuingScene || playerLine ? undefined : displayAction;
-    const finalText = preActionLine ? `${preActionLine}\n${dialogueText}` : dialogueText;
+    // A round of sounds alone has no dialogue text: the row is the action line by itself
+    const finalText = preActionLine ? [preActionLine, dialogueText].filter(Boolean).join('\n') : dialogueText;
 
     // The memory may be persisted here, or later by the mod posting back either the raw
     // scene text or the chat-window-formatted one — key the trace on every shape it can take

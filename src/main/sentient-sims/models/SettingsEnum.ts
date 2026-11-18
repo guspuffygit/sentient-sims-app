@@ -117,6 +117,10 @@ export enum SettingsEnum {
   // Lean only: the actor rules without the Sim's name (one cacheable prefix shared by every
   // Sim and every user). Series 3 of the voice-pipeline bench sets the default.
   LEAN_NAME_FREE_RULES = 'leanNameFreeRules',
+  // A Wicked Whims act answers in sounds first on the lean pipeline, and a line of sounds alone
+  // is voiced with no subtitle on a voice that performs tags. Off: the pair rules, and a line
+  // of sounds alone is dropped, as before.
+  WW_VOICE_TAGS = 'wwVoiceTags',
   // The same cast on the same beat inside this many seconds is dropped, not played again
   // (a sliding window; 0 = off). A reaction event gets one silent thought per window.
   SCENE_REPEAT_COOLDOWN_SECONDS = 'sceneRepeatCooldownSeconds',

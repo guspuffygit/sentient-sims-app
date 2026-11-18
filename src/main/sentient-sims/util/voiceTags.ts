@@ -42,6 +42,14 @@ export function stripVoiceTags(text: string): string {
 }
 
 /**
+ * A line the voice has something to say for: words, or sounds alone (a voiceOnly line,
+ * whose `text` is empty and whose `ttsText` carries the tags).
+ */
+export function isSpeakable(line: DialogueLine): boolean {
+  return line.text.trim().length > 0 || Boolean(line.voiceOnly && line.ttsText?.trim());
+}
+
+/**
  * The line with its tags moved off the subtitle: `text` plain, `ttsText` the tagged words.
  * A line whose `text` has no tags comes back as the same object; a `ttsText` already set
  * is kept.

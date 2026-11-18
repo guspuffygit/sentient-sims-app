@@ -379,6 +379,10 @@ export function defaultStore(cwd?: string) {
         // special scenes; watch words per line on the first stream (9.5 vs 9.0)
         default: true,
       },
+      [SettingsEnum.WW_VOICE_TAGS.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
       [SettingsEnum.SCENE_REPEAT_COOLDOWN_SECONDS.toString()]: {
         type: 'number',
         default: 120,
@@ -1359,6 +1363,10 @@ export class SettingsService {
 
   get leanNameFreeRules(): boolean {
     return this.get(SettingsEnum.LEAN_NAME_FREE_RULES) === true;
+  }
+
+  get wwVoiceTags(): boolean {
+    return this.get(SettingsEnum.WW_VOICE_TAGS) === true;
   }
 
   get sceneMaxRounds(): number {

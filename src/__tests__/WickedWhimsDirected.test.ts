@@ -11,6 +11,9 @@ import { SimStateReport } from 'main/sentient-sims/models/SimStateReport';
 import { AIActionType } from 'main/sentient-sims/models/AIActionType';
 import { ApiType } from 'main/sentient-sims/models/ApiType';
 import { INTIMATE_SCENE_FRAMING } from 'main/sentient-sims/util/intimateScene';
+import { ElevenLabsSpeechModel } from 'main/sentient-sims/models/ElevenLabsTTSSettings';
+import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
+import { speechRuleKind, speechRules } from 'main/sentient-sims/pipeline/prompts/scene';
 import { mockApiContext } from './util';
 
 // WickedWhims events run through the directed pipeline (director, actors, reviewer,
@@ -188,7 +191,8 @@ describe('a WickedWhims scene', () => {
     await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.STARTING));
 
     const actor = scene.calls.find((call) => call.label === 'Actor: Margo Calloway');
-    expect(actor?.userText).toContain(INTIMATE_SCENE_FRAMING);
+    // Once: it used to be appended a second time after the deception block
+    expect(actor?.userText.split(INTIMATE_SCENE_FRAMING)).toHaveLength(2);
     expect(actor?.userText).toContain('foreplay');
     expect(actor?.userText).not.toContain('{sex_category}');
   });
@@ -360,5 +364,172 @@ describe('the Wicked Whims provider', () => {
     });
 
     expect(ctx.animations.isNsfwEnabled()).toBe(true);
+  });
+});
+
+// On the lean pipeline a WickedWhims act answers in sounds first: mostly sounds in square
+// brackets, a few words between (setting wwVoiceTags, on by default)
+const INTIMATE_RULES_NAME_FREE = `How to respond — exactly two lines, in this format:
+SAY: <the sounds and the few words out of your character's mouth right now>
+THINK: <one short line of your character's private thought>
+
+Rules for SAY:
+- Stay in character at all times.
+- This is sex, not a conversation. Mostly sounds, in square brackets, invented for the moment: [moans], [breathless], [gasps], [soft laugh], [whispers]. Between them a few words at most: a name, a yes, a want, a reaction to what is happening right now.
+- Explicit when it fits them; blunt is blunt, shy is shy. Never a speech, never romance-card lines.
+- No narration, no name tag, no quotation marks. Never repeat the last line; react to it.
+
+Rules for THINK:
+- First person, present tense, one short line. No physical actions.`;
+
+function leanWw(sessionId: string, voice: 'v4' | 'kokoro', stage: Stage = {}) {
+  const scene = wwContext(sessionId, stage);
+  scene.ctx.settings.set(SettingsEnum.SCENE_PIPELINE_MODE, 'lean');
+  scene.ctx.settings.ttsEnabled = true;
+  if (voice === 'v4') {
+    scene.ctx.settings.ttsApiType = ApiType.ElevenLabs;
+    scene.ctx.settings.elevenLabsTtsSettings = {
+      ...scene.ctx.settings.elevenLabsTtsSettings,
+      model: ElevenLabsSpeechModel.ELEVEN_V4,
+    };
+  } else {
+    scene.ctx.settings.ttsApiType = ApiType.Kokoro;
+  }
+  return scene;
+}
+
+const voicedLines = (scene: ReturnType<typeof wwContext>): DialogueLine[] =>
+  scene.voiced.mock.calls.flatMap(([lines]) => lines);
+
+describe('a WickedWhims act on the lean pipeline', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('keeps the tested wording byte for byte', () => {
+    expect(speechRules('intimate', { lean: true })).toEqual(INTIMATE_RULES_NAME_FREE);
+    expect(speechRules('intimate', { simName: 'Margo Calloway', lean: true })).toContain(
+      '- Stay in character as Margo Calloway at all times.',
+    );
+  });
+
+  it('is the intimate kind only for a performer who speaks', () => {
+    expect(speechRuleKind(false, false, true)).toBe('intimate');
+    expect(speechRuleKind(false, true, true)).toBe('monologue');
+    expect(speechRuleKind(false, false)).toBe('pair');
+  });
+
+  it('opens the actor prompt with the sounds-first rules, not the pair rules', async () => {
+    const scene = leanWw('ww-lean-rules', 'v4');
+    scene.ctx.settings.set(SettingsEnum.LEAN_NAME_FREE_RULES, true);
+
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE));
+
+    expect(scene.labels()).toEqual(['Actor: Margo Calloway', 'Actor: Desmond Calloway']);
+    const actor = scene.calls.find((call) => call.label === 'Actor: Margo Calloway');
+    expect(actor?.systemPrompt.startsWith(INTIMATE_RULES_NAME_FREE)).toBe(true);
+    expect(actor?.systemPrompt).not.toContain('no delivery notes');
+  });
+
+  it('says the framing sentence once', async () => {
+    const scene = leanWw('ww-lean-framing-once', 'v4');
+
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.STARTING));
+
+    const actor = scene.calls.find((call) => call.label === 'Actor: Margo Calloway');
+    expect(actor?.userText.split(INTIMATE_SCENE_FRAMING)).toHaveLength(2);
+  });
+
+  it('shows and stores the words, and keeps the sounds for the voice', async () => {
+    const scene = leanWw('ww-lean-tagged-line', 'v4', {
+      actorText: (label) =>
+        label === 'Actor: Margo Calloway'
+          ? 'SAY: [moans] Desmond... [gasps]\nTHINK: Finally.'
+          : 'SAY: Come here.\nTHINK: I have missed this.',
+    });
+
+    const result = await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE));
+
+    const margo = voicedLines(scene).find((line) => line.speaker === 'Margo Calloway');
+    expect(margo?.text).toEqual('Desmond...');
+    expect(margo?.ttsText).toEqual('[moans] Desmond... [gasps]');
+    expect(margo?.voiceOnly).toBeUndefined();
+    expect(result.memory?.content).toContain('Margo Calloway: Desmond...');
+    expect(result.memory?.content).not.toContain('[');
+  });
+
+  it('voices a line of sounds alone with no subtitle and no memory text on a voice that reads tags', async () => {
+    const scene = leanWw('ww-lean-sounds-only-v4', 'v4', {
+      actorText: (label) =>
+        label === 'Actor: Margo Calloway'
+          ? 'SAY: [moans] [gasps]\nTHINK: Finally.'
+          : 'SAY: Come here.\nTHINK: I have missed this.',
+    });
+
+    const result = await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE));
+
+    expect(result.status).toEqual(InteractionEventStatus.GENERATED);
+    const margo = voicedLines(scene).find((line) => line.speaker === 'Margo Calloway');
+    expect(margo).toMatchObject({ text: '', voiceOnly: true, ttsText: '[moans] [gasps]' });
+    expect(result.memory?.content).not.toContain('Margo Calloway:');
+    expect(result.memory?.content).toContain('Desmond Calloway: Come here.');
+  });
+
+  it('drops a line of sounds alone on a voice that cannot read tags', async () => {
+    const scene = leanWw('ww-lean-sounds-only-kokoro', 'kokoro', {
+      actorText: (label) =>
+        label === 'Actor: Margo Calloway'
+          ? 'SAY: [moans] [gasps]\nTHINK: Finally.'
+          : 'SAY: Come here.\nTHINK: I have missed this.',
+    });
+
+    const result = await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE));
+
+    expect(voicedLines(scene).some((line) => line.speaker === 'Margo Calloway')).toBe(false);
+    expect(result.memory?.content).not.toContain('Margo Calloway:');
+  });
+
+  it('still throws the act away when a sound names someone outside it', async () => {
+    const scene = leanWw('ww-lean-sounds-guard', 'v4', {
+      actorText: (label) =>
+        label === 'Actor: Margo Calloway'
+          ? 'SAY: [whispers Elliot Jr]\nTHINK: Finally.'
+          : 'SAY: Come here.\nTHINK: I have missed this.',
+    });
+
+    const result = await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE));
+
+    expect(result.status).toEqual(InteractionEventStatus.NOOP);
+    expect(scene.voiced).not.toHaveBeenCalled();
+  });
+
+  it('leaves the full pipeline on the pair rules', async () => {
+    const scene = wwContext('ww-full-pair-rules');
+
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE));
+
+    const actor = scene.calls.find((call) => call.label === 'Actor: Margo Calloway');
+    expect(actor?.systemPrompt).toContain(speechRules('pair', { simName: 'Margo Calloway' }));
+    expect(actor?.systemPrompt).not.toContain('This is sex, not a conversation.');
+  });
+
+  it('with the sounds-first setting off, gets the pair rules and drops a line of sounds alone', async () => {
+    const scene = leanWw('ww-lean-sounds-first-off', 'v4', {
+      actorText: (label) =>
+        label === 'Actor: Margo Calloway'
+          ? 'SAY: [moans] [gasps]\nTHINK: Finally.'
+          : 'SAY: Come here.\nTHINK: I have missed this.',
+    });
+    expect(scene.ctx.settings.wwVoiceTags).toBe(true);
+    scene.ctx.settings.set(SettingsEnum.WW_VOICE_TAGS, false);
+    scene.ctx.settings.set(SettingsEnum.LEAN_NAME_FREE_RULES, true);
+
+    const result = await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE));
+
+    const actor = scene.calls.find((call) => call.label === 'Actor: Margo Calloway');
+    expect(actor?.systemPrompt.startsWith(speechRules('pair', { lean: true }))).toBe(true);
+    expect(actor?.systemPrompt).not.toContain('This is sex, not a conversation.');
+    expect(voicedLines(scene).some((line) => line.speaker === 'Margo Calloway')).toBe(false);
+    expect(result.memory?.content).toContain('Desmond Calloway: Come here.');
   });
 });
