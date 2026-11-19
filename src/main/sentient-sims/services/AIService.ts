@@ -542,6 +542,7 @@ export class AIService {
         ...promptRequest,
         model: promptRequest.model ?? providerConfig.model,
         apiType: promptRequest.apiType ?? providerConfig.apiType,
+        reasoningEffort: promptRequest.reasoningEffort ?? providerConfig.reasoningEffort,
         purpose: promptRequest.purpose ?? AIActionType.GENERATE,
       }),
     );
@@ -1292,6 +1293,7 @@ ${factsBlock}
     const openAIRequest = openAIRequestBuilder.buildOpenAIRequest(promptRequest);
     openAIRequest.model = providerConfig.model;
     openAIRequest.apiType = providerConfig.apiType;
+    openAIRequest.reasoningEffort = providerConfig.reasoningEffort;
 
     const generationAction = actionTypeForEvent(event.event_type);
     openAIRequest.purpose = options.purpose ?? generationAction;
@@ -1605,6 +1607,7 @@ ${factsBlock}
     // An explicit model (scenario tester's per-stage picks) wins over the action's provider config
     openAIRequest.model = resolvedModel;
     openAIRequest.apiType = providerConfig.apiType;
+    openAIRequest.reasoningEffort = providerConfig.reasoningEffort;
     openAIRequest.purpose = options?.purpose ?? actionType;
     const userMessage = openAIRequest.messages.findLast((message) => message.role === 'user');
     if (userMessage && options?.images?.length) {
@@ -3241,6 +3244,7 @@ ${factsBlock}
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
     openAIRequest.model = providerConfig.model;
     openAIRequest.apiType = apiType;
+    openAIRequest.reasoningEffort = providerConfig.reasoningEffort;
     openAIRequest.purpose = actionType === AIActionType.BUFF ? 'buff_classification' : actionType;
 
     const response = await this.ctx.aiExchangeLog.runLabeled(
@@ -3344,6 +3348,7 @@ Write me a buff description based on the conversation so that ${buffRequest.name
     const openAIRequest = openAIRequestBuilder.buildOneShotOpenAIRequest(oneShotRequest);
     openAIRequest.model = providerConfig.model;
     openAIRequest.apiType = apiType;
+    openAIRequest.reasoningEffort = providerConfig.reasoningEffort;
     openAIRequest.purpose = 'buff_description';
 
     const response = await this.ctx.aiExchangeLog.runLabeled(

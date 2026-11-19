@@ -1,4 +1,5 @@
 import { ApiType, ApiTypeFromValue, ApiTypeName } from './ApiType';
+import { ReasoningEffort, reasoningEffortFromValue, supportsReasoningEffort } from './ReasoningEffort';
 
 export type AIProviderConfig = {
   id: string;
@@ -11,6 +12,9 @@ export type AIProviderConfig = {
   // is smaller than the model's own table says (a self-hosted endpoint with an input
   // cap). Undefined = the model's table entry, or the 3900 default.
   contextTokens?: number;
+  // Sent as reasoning_effort to an OpenAI-compatible server; none turns thinking off on a
+  // model that allows it. Undefined = send nothing, the server's own default applies.
+  reasoningEffort?: ReasoningEffort;
 };
 
 // A config with the model resolved against the provider-level model setting
@@ -20,6 +24,7 @@ export type ResolvedProviderConfig = {
   apiType: ApiType;
   model?: string;
   contextTokens?: number;
+  reasoningEffort?: ReasoningEffort;
 };
 
 // Sim id -> provider config id. A Sim with an entry speaks and thinks through that config
@@ -82,7 +87,7 @@ export function sanitizeProviderConfigs(value: unknown): AIProviderConfig[] {
     if (!item || typeof item !== 'object') {
       return;
     }
-    const { id, name, apiType, model, contextTokens } = item as Record<string, unknown>;
+    const { id, name, apiType, model, contextTokens, reasoningEffort } = item as Record<string, unknown>;
     if (typeof id !== 'string' || id === '' || typeof name !== 'string') {
       return;
     }
@@ -96,6 +101,10 @@ export function sanitizeProviderConfigs(value: unknown): AIProviderConfig[] {
     }
     if (typeof contextTokens === 'number' && Number.isInteger(contextTokens) && contextTokens > 0) {
       config.contextTokens = contextTokens;
+    }
+    const effort = reasoningEffortFromValue(reasoningEffort);
+    if (effort !== undefined && supportsReasoningEffort(config.apiType)) {
+      config.reasoningEffort = effort;
     }
     configs.push(config);
   });

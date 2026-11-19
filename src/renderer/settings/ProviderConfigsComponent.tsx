@@ -48,6 +48,13 @@ import {
   AllAIActionTypes,
   TIER_ACTION_TYPES,
 } from 'main/sentient-sims/models/AIActionType';
+import {
+  ReasoningEffort,
+  reasoningEffortFromValue,
+  reasoningEffortName,
+  reasoningEfforts,
+  supportsReasoningEffort,
+} from 'main/sentient-sims/models/ReasoningEffort';
 import { defaultImageModelFor, imageModelSuggestions } from 'main/sentient-sims/models/ImageGeneration';
 import { defaultEmbeddingModelFor, embeddingModelSuggestions } from 'main/sentient-sims/models/EmbeddingModels';
 import {
@@ -235,6 +242,8 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
   // fetched model list. Only filter after the user actually types.
   const [modelFilterActive, setModelFilterActive] = useState(false);
   const [contextTokens, setContextTokens] = useState(initial?.contextTokens ? String(initial.contextTokens) : '');
+  // '' = send nothing, the server's own default applies
+  const [reasoningEffort, setReasoningEffort] = useState<ReasoningEffort | ''>(initial?.reasoningEffort ?? '');
   const [testResult, setTestResult] = useState<AITestStatus | undefined>();
 
   const connection = useProviderConnectionStatus(apiType);
@@ -305,6 +314,9 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
     const parsedContext = Number.parseInt(contextTokens, 10);
     if (capability === 'text' && Number.isInteger(parsedContext) && parsedContext > 0) {
       config.contextTokens = parsedContext;
+    }
+    if (capability === 'text' && supportsReasoningEffort(apiType) && reasoningEffort !== '') {
+      config.reasoningEffort = reasoningEffort;
     }
     onSave(config);
   };
@@ -465,6 +477,28 @@ function ProviderConfigDialog({ capability, initial, onCancel, onSave }: Provide
             placeholder="Model default"
             helperText="Only for a server that takes fewer tokens than the model allows: prompts are trimmed to fit this, prompt and reply together."
           />
+        ) : null}
+        {capability === 'text' && supportsReasoningEffort(apiType) ? (
+          <TextField
+            select
+            label="Reasoning effort"
+            value={reasoningEffort}
+            onChange={(change) => {
+              setReasoningEffort(reasoningEffortFromValue(change.target.value) ?? '');
+            }}
+            fullWidth
+            size="small"
+            sx={{ marginTop: 2 }}
+            helperText="None turns thinking off on models that allow it, so replies arrive sooner. Leave it on Server default for a model that does not reason: some servers reject the setting."
+            slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+          >
+            <MenuItem value="">Server default (send nothing)</MenuItem>
+            {reasoningEfforts.map((effort) => (
+              <MenuItem key={effort} value={effort}>
+                {reasoningEffortName(effort)}
+              </MenuItem>
+            ))}
+          </TextField>
         ) : null}
         {modelNeedsSubscription ? <FormHelperText error>{subscriptionText(capability)}</FormHelperText> : null}
       </DialogContent>
@@ -667,6 +701,9 @@ export function ProviderConfigsComponent({
                   <TableCell>{ApiTypeName(ApiTypeFromValue(config.apiType))}</TableCell>
                   <TableCell>
                     {config.model ?? 'Provider default'}
+                    {config.reasoningEffort ? (
+                      <FormHelperText>Reasoning: {reasoningEffortName(config.reasoningEffort)}</FormHelperText>
+                    ) : null}
                     <SubscriptionNote show={needsSubscription(ApiTypeFromValue(config.apiType), config.model)} />
                   </TableCell>
                   <TableCell align="right">

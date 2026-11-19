@@ -71,6 +71,7 @@ export class ProviderConfigService {
       apiType: config.apiType,
       model: config.model ?? this.providerModel(config.apiType),
       contextTokens: config.contextTokens,
+      reasoningEffort: config.reasoningEffort,
     };
   }
 
