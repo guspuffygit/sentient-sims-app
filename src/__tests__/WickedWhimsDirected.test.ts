@@ -277,12 +277,15 @@ describe('a WickedWhims scene', () => {
     expect(actor.userText).toContain(INTIMATE_SOLO_FRAMING);
     expect(actor.userText).not.toContain('talk to each other');
     expect(actor.userText).not.toContain('Open the scene');
+    // nor the day and the weather, which every solo thought otherwise turns to
+    expect(actor.systemPrompt).not.toContain('<DATE>');
 
     // Two Sims keep the walk-up and the framing they had
     const pair = leanWw('ww-directed-pair-walk-up', 'kokoro');
     await pair.ctx.ai.interactionEvent({ ...wwEvent(WWEventType.STARTING), sex_category: 1 });
     expect(pair.calls[0].userText).toContain("is taking Desmond Calloway's hand");
     expect(pair.calls[0].userText).toContain(INTIMATE_SCENE_FRAMING);
+    expect(pair.calls[0].systemPrompt).toContain('<DATE>');
   });
 
   it('plays an unmapped animation from its act and place, through the Wicked Whims provider', async () => {
@@ -779,6 +782,55 @@ describe('the Wicked Whims patter', () => {
       ['Margo Calloway (to self)', 'Nobody is home.'],
     ]);
     expect(aired).not.toHaveBeenCalled();
+  });
+
+  it('does not say the same solo thought aloud twice in a row', async () => {
+    const scene = leanWw('ww-solo-thought-echo', 'kokoro', {
+      actorText: () => 'THINK: This is exactly what I needed on a hot Tuesday morning.',
+    });
+
+    // The walk-up and the first animation each ask for a thought, a second apart
+    const walkUp = await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.STARTING, [MARGO]));
+    const animation = await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE, [MARGO]));
+
+    expect(walkUp.status).toEqual(InteractionEventStatus.GENERATED);
+    expect(animation.status).toEqual(InteractionEventStatus.NOOP);
+    expect(voicedLines(scene).map((line) => line.text)).toEqual([
+      'This is exactly what I needed on a hot Tuesday morning.',
+    ]);
+  });
+
+  it('says a new solo thought aloud after an earlier one', async () => {
+    const answers = ['THINK: Finally some quiet.', 'THINK: Nobody is home until six.'];
+    const scene = leanWw('ww-solo-thought-new', 'kokoro', { actorText: () => answers.shift() ?? '' });
+
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.STARTING, [MARGO]));
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE, [MARGO]));
+
+    expect(voicedLines(scene).map((line) => line.text)).toEqual(['Finally some quiet.', 'Nobody is home until six.']);
+  });
+
+  it('tells a solo thought what the Sim has already said to themself', async () => {
+    const answers = ['THINK: Finally some quiet.', 'THINK: Nobody is home until six.'];
+    const scene = leanWw('ww-solo-already-said', 'kokoro', { actorText: () => answers.shift() ?? '' });
+
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.STARTING, [MARGO]));
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE, [MARGO]));
+
+    const [walkUp, animation] = scene.calls;
+    expect(walkUp.userText).not.toContain('Already said during this');
+    expect(animation.userText).toContain(
+      'Already said during this: "Finally some quiet.". Say none of it again, in any wording.',
+    );
+  });
+
+  it('tells a partner act nothing of the kind', async () => {
+    const scene = leanWw('ww-pair-not-told', 'kokoro');
+
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE, [MARGO]));
+    await scene.ctx.ai.interactionEvent(wwEvent(WWEventType.ACTIVE));
+
+    expect(scene.calls.slice(1).some((call) => call.userText.includes('Already said during this'))).toBe(false);
   });
 
   it('plays a solo act whose opening has no line as the thought aloud', async () => {

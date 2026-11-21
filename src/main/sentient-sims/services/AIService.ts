@@ -71,6 +71,8 @@ import {
   DIRECTOR_REVIEW_SYSTEM_PROMPT,
   LEAN_CONTINUATION_LINE,
   patterLine,
+  alreadySaidLine,
+  ALREADY_SAID_LINES,
   patterUsedWords,
   ownCharacterBlock,
   performersAlreadyTalking,
@@ -97,6 +99,7 @@ import {
 } from '../formatter/PromptFormatter';
 import { splitLinesForAiring } from '../util/airingChunks';
 import { hasVoiceTags, splitVoiceTags, stripVoiceTags } from '../util/voiceTags';
+import { RecentThoughts } from '../util/recentThoughts';
 import { supportsAudioTags } from '../clients/ElevenLabsTTSRequest';
 import { isElevenLabsSpeechModel } from '../models/SentientSimsAITTSSettings';
 import { formatSelfStatus, TodaysPlanBlock } from '../util/formatSelfStatus';
@@ -571,6 +574,11 @@ export function valenceFraming(valence: string | undefined): string | undefined 
 
 export class AIService {
   private readonly ctx: ApiContext;
+
+  private readonly thoughtsAloud = new RecentThoughts();
+
+  // What each Sim has said to themself during a solo Wicked Whims act
+  private readonly soloActThoughts = new RecentThoughts();
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
@@ -2180,7 +2188,9 @@ ${factsBlock}
             characterBlock,
             locationBlock,
             factsBlock: actorFacts || undefined,
-            settingBlock: leanSettingBlock,
+            // A solo Wicked Whims thought leaves the day and the weather out: they were the only
+            // concrete thing in its prompt, so every thought was about them
+            settingBlock: soloIntimate && thinkOnly ? undefined : leanSettingBlock,
             statusBlock,
             playerFacing,
             monologueOnly: thinkOnly,
@@ -2202,15 +2212,19 @@ ${factsBlock}
           });
 
       const conversationSoFar = toTranscript(sceneLines);
+      // A solo Wicked Whims thought is told what this Sim has already said to themself, so the
+      // next animation's is a new one
+      const alreadySaid = soloIntimate && thinkOnly ? this.soloActThoughts.recent(sim.sim_id, ALREADY_SAID_LINES) : [];
+      const beatForSim = alreadySaid.length > 0 ? `${simBeat}\n\n${alreadySaidLine(alreadySaid)}` : simBeat;
       const actorUserText = lean
         ? buildLeanActorUserMessage({
             nowBlock: leanNowBlock,
             previouslyBlock,
-            beat: simBeat,
+            beat: beatForSim,
             conversationSoFar,
             simName: sim.name,
           })
-        : `${previouslyBlock}${simBeat}${conversationSoFar ? `\n\nThe conversation so far:\n${conversationSoFar}` : ''}`;
+        : `${previouslyBlock}${beatForSim}${conversationSoFar ? `\n\nThe conversation so far:\n${conversationSoFar}` : ''}`;
       if (performedLines.length > 0 && overBudget()) {
         log.error('Directed scene ran out of time mid-performance, airing the lines delivered so far');
         break;
@@ -2969,6 +2983,19 @@ ${factsBlock}
         `[Pipeline] Discarded ${event.event_type} thought (${intimateProblem}): ${thoughts[0].think.slice(0, 160)}`,
       );
       return { status: InteractionEventStatus.NOOP, exchanges };
+    }
+
+    // A thought this Sim has just said aloud is not said again
+    if (aloud) {
+      const [{ performer, think }] = thoughts;
+      if (this.thoughtsAloud.repeats(performer.sim_id, think)) {
+        log.info(`[Pipeline] ${performer.name}'s thought repeats one just said aloud; not said again: ${think}`);
+        return { status: InteractionEventStatus.NOOP, exchanges };
+      }
+      this.thoughtsAloud.note(performer.sim_id, think);
+      if (intimateEvent) {
+        this.soloActThoughts.note(performer.sim_id, think);
+      }
     }
 
     const sceneScores: { scores: Map<string, SceneScore>; exchange?: LLMExchange } = scene.lean

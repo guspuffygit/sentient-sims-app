@@ -419,6 +419,15 @@ export function patterLine(usedWords: string[], solo = false): string {
   return `Still the same moment, a little later. Do not describe anything new: no new position, nobody arriving, no instructions to anyone.${used} Never say your own name. Answer with a sound you have not made yet and a few new words, in your own voice, about how it feels right now.`;
 }
 
+// A solo Wicked Whims thought is one call per animation with the same prompt, and answered with
+// the same sentence each time (29 of 36 thoughts on a replay of six-animation acts). Told what
+// the Sim has already said to themself, none repeated (0 of 72). Kept VERBATIM: the tested wording.
+export const ALREADY_SAID_LINES = 5;
+
+export function alreadySaidLine(said: string[]): string {
+  return `Already said during this: ${said.map((line) => `"${line}"`).join('; ')}. Say none of it again, in any wording.`;
+}
+
 // How many recent lines a patter round may not echo, and how often a word must have been said
 // anywhere in the scene to stay banned for good
 export const PATTER_WINDOW_LINES = 8;
