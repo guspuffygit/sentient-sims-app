@@ -429,3 +429,89 @@ describe('ScenePlaybackRegistry', () => {
     expect(notifyStop).not.toHaveBeenCalled();
   });
 });
+
+// The Wicked Whims patter holds an animation's scene open between its rounds
+describe('ScenePlaybackRegistry holds', () => {
+  function held() {
+    const notifyStop = vi.fn();
+    const notifySceneEnded = vi.fn();
+    const rewriteMemory = vi.fn();
+    const onSceneClosed = vi.fn<(closed: SceneClosed) => void>();
+    const onSceneIdle = vi.fn<(sceneId: string) => void>();
+    const registry = new ScenePlaybackRegistry({
+      notifyStop,
+      notifySceneEnded,
+      rewriteMemory,
+      onSceneClosed,
+      onSceneIdle,
+    });
+    registry.roundQueued(SCENE, PARTICIPANTS, 1, lines('Oh.', 'Yes.'), 'Alex: Oh.\nBella: Yes.', CAST);
+    registry.attachMemory('Alex: Oh.\nBella: Yes.', 'row-1');
+    expect(registry.hold(SCENE)).toBe(true);
+    return { registry, notifyStop, notifySceneEnded, rewriteMemory, onSceneClosed, onSceneIdle };
+  }
+
+  it('does not finish a held scene at idle, and says it is idle', () => {
+    const { registry, notifySceneEnded, onSceneClosed, onSceneIdle } = held();
+
+    registry.playbackEnded(SCENE, true);
+
+    expect(notifySceneEnded).not.toHaveBeenCalled();
+    expect(onSceneClosed).not.toHaveBeenCalled();
+    expect(onSceneIdle).toHaveBeenCalledWith(SCENE);
+    expect(registry.size).toBe(1);
+  });
+
+  it('settles the row and reports finished once, at release', () => {
+    const { registry, notifySceneEnded, rewriteMemory, onSceneIdle } = held();
+    registry.playbackEnded(SCENE, true);
+    // A patter round on the held scene
+    registry.generationStarted(SCENE);
+    registry.roundQueued(SCENE, PARTICIPANTS, 2, [{ speaker: 'Alex', text: 'More.' }]);
+    registry.generationFinished(SCENE);
+    registry.playbackEnded(SCENE, true);
+    expect(onSceneIdle).toHaveBeenCalledTimes(2);
+
+    registry.release(SCENE);
+    registry.release(SCENE);
+
+    expect(notifySceneEnded).toHaveBeenCalledTimes(1);
+    expect(notifySceneEnded).toHaveBeenCalledWith(SCENE, 'finished');
+    expect(rewriteMemory).toHaveBeenCalledWith('row-1', 'Alex: Oh.\nBella: Yes.\nAlex: More.');
+    expect(registry.size).toBe(0);
+  });
+
+  it('released while a round still plays, finishes when it ends', () => {
+    const { registry, notifySceneEnded } = held();
+
+    registry.release(SCENE);
+    expect(notifySceneEnded).not.toHaveBeenCalled();
+
+    registry.playbackEnded(SCENE, true);
+    expect(notifySceneEnded).toHaveBeenCalledWith(SCENE, 'finished');
+  });
+
+  it('still stops a held scene', () => {
+    const { registry, notifySceneEnded, onSceneClosed } = held();
+
+    registry.stop(SCENE, 'zone_unload', 'hard');
+
+    expect(notifySceneEnded).toHaveBeenCalledWith(SCENE, 'stopped');
+    expect(onSceneClosed).toHaveBeenCalledWith(expect.objectContaining({ reason: 'stopped' }));
+    expect(registry.hold(SCENE)).toBe(false);
+  });
+
+  it('is not swept while held', () => {
+    vi.useFakeTimers();
+    try {
+      const { registry } = held();
+      registry.playbackEnded(SCENE, true);
+      vi.setSystemTime(Date.now() + 11 * 60 * 1000);
+      // Any new scene sweeps the old ones
+      registry.roundQueued('scene-2', PARTICIPANTS, 1, lines('Hi.'));
+      expect(registry.isHeld(SCENE)).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

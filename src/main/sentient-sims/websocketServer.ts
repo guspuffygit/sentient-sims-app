@@ -54,6 +54,16 @@ export function setVoiceKeySink(sink: VoiceKeySink | undefined) {
 const runningClock: ClockState = { speed: 'NORMAL', paused: false, paused_by: null };
 // The clock the connected mod last reported
 let modClockState: ClockState | undefined;
+// The mod's clock changed (a report, or undefined when the mod goes away): the renderer's
+// playback follows it (publishClockState) and so does the Wicked Whims patter
+function setModClockState(ctx: ApiContext, state: ClockState | undefined) {
+  modClockState = state;
+  try {
+    ctx.wwPatter.clockChanged(state);
+  } catch (err) {
+    log.error('[Clock] the patter failed to take the clock', err);
+  }
+}
 
 // V-1: the renderer holds playback on the last state it was sent, so it is sent again
 // whenever the mod reports, the mod disconnects, or the setting changes
@@ -137,8 +147,10 @@ export const startWebSocketServer = (ctx: ApiContext) => {
       }
       modWs = undefined;
       modConnected = false;
-      modClockState = undefined;
+      setModClockState(ctx, undefined);
       publishClockState(ctx);
+      // An act in progress cannot be heard ending now: its patter stops and its scene closes
+      ctx.wwPatter.reset();
       // The next game session numbers its state reports from 1 again
       ctx.simStateCache.reset();
       ctx.sceneRepeatGuard.reset();
@@ -159,7 +171,7 @@ export const startWebSocketServer = (ctx: ApiContext) => {
       }
 
       if (parsedData.clock_state) {
-        modClockState = parsedData.clock_state;
+        setModClockState(ctx, parsedData.clock_state);
         publishClockState(ctx);
         return;
       }

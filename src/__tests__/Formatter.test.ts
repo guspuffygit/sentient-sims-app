@@ -8,6 +8,15 @@ describe('PromptFormatter', () => {
     expect(trimIncompleteSentence(imcompleteSentence)).toEqual('This is a sentence.');
   });
 
+  it('keeps voice tags after the last sentence', () => {
+    expect(trimIncompleteSentence('Desmond... [gasps]')).toEqual('Desmond... [gasps]');
+    expect(trimIncompleteSentence("That's the spirit. [laughs] [sighs] ")).toEqual(
+      "That's the spirit. [laughs] [sighs]",
+    );
+    expect(trimIncompleteSentence('Yes. [moans] and then')).toEqual('Yes.');
+    expect(trimIncompleteSentence('Yes. [moans')).toEqual('Yes.');
+  });
+
   it('should remove last paragraph', () => {
     const lineOne = 'Line one.';
     const lineTwo = 'Line two.';

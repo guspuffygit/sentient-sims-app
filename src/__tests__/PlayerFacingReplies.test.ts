@@ -6,7 +6,8 @@ import {
   buildSpeechSystemPrompt,
 } from 'main/sentient-sims/pipeline/prompts/scene';
 import { parseActorPerformance, parseSceneScores } from 'main/sentient-sims/services/AIService';
-import { splitLinesForAiring, splitTextForAiring } from 'main/sentient-sims/util/airingChunks';
+import { AIRING_CHUNK_MAX_CHARS, splitLinesForAiring, splitTextForAiring } from 'main/sentient-sims/util/airingChunks';
+import { splitVoiceTags, stripVoiceTags } from 'main/sentient-sims/util/voiceTags';
 import { formatSelfStatus } from 'main/sentient-sims/util/formatSelfStatus';
 
 // 2026-09-21: a reply to the player (chat window, voice, conscience, Twitch) is a full,
@@ -174,6 +175,69 @@ describe('airing a long reply in chunks', () => {
     const question = { speaker: 'Chat', text: `${reply} ${reply}`, skipSceneLine: true };
     expect(splitLinesForAiring([question], 80)).toEqual([question]);
   });
+});
+
+// A tagged reply is cut on what the voice reads, so every chunk keeps its own tags in
+// ttsText and shows plain words
+describe('airing a tagged reply in chunks', () => {
+  const tagged =
+    '[laughs] No, not yet. I saw her kiss Jonah and it has been eating at me every day since, but walking away ' +
+    'now would be about being scared of ending up alone. [sighs] What would change my mind is her lying to me ' +
+    'again. I need to talk to her tonight. [clears throat]';
+
+  it('splits with plain text, each chunk carrying only its own tags, the last tag folded in', () => {
+    const line = splitVoiceTags({ speaker: 'Jake Flores', text: tagged, simId: '7' });
+    const chunks = splitLinesForAiring([line], AIRING_CHUNK_MAX_CHARS);
+    expect(chunks.length).toBeGreaterThan(1);
+    chunks.forEach((chunk, index) => {
+      expect(chunk.text).not.toMatch(/[[\]]/);
+      expect(chunk.text).toEqual(stripVoiceTags(chunk.ttsText ?? ''));
+      expect(chunk.simId).toBe('7');
+      expect(Boolean(chunk.continues)).toBe(index < chunks.length - 1);
+    });
+    expect(chunks[0].ttsText?.startsWith('[laughs] No, not yet.')).toBe(true);
+    expect(chunks[0].ttsText).not.toContain('[sighs]');
+    expect(chunks.some((chunk) => chunk.ttsText?.includes('[sighs] What would'))).toBe(true);
+    // the tag-only tail is folded into the last chunk, never aired alone
+    expect(chunks[chunks.length - 1].ttsText?.endsWith('tonight. [clears throat]')).toBe(true);
+    // Nothing lost, nothing invented
+    expect(chunks.map((chunk) => chunk.text).join(' ')).toBe(stripVoiceTags(tagged));
+    expect(chunks.map((chunk) => chunk.ttsText).join(' ')).toBe(tagged);
+  });
+
+  it('never cuts inside a tag that has a space in it', () => {
+    const long = `${'word '.repeat(22)}[clears throat] ${'more '.repeat(10)}end.`;
+    const chunks = splitLinesForAiring([splitVoiceTags({ speaker: 'Jake', text: long })], 120);
+    chunks.forEach((chunk) => {
+      expect(chunk.text).not.toMatch(/[[\]]/);
+      expect(chunk.ttsText?.match(/\[/g)?.length ?? 0).toEqual(chunk.ttsText?.match(/\]/g)?.length ?? 0);
+    });
+    expect(chunks.map((chunk) => chunk.ttsText).join(' ')).toContain('[clears throat]');
+  });
+
+  it('folds a chunk that is only a tag into the chunk after it', () => {
+    const first = 'This first sentence runs to roughly fifty five chars.';
+    const second = 'And this second one is about the same length again.';
+    const chunks = splitLinesForAiring([splitVoiceTags({ speaker: 'Jake', text: `${first} [laughs!] ${second}` })], 60);
+    expect(chunks.map((chunk) => chunk.ttsText)).toEqual([first, `[laughs!] ${second}`]);
+    expect(chunks.map((chunk) => chunk.text)).toEqual([first, second]);
+    expect(chunks[0].continues).toBe(true);
+    expect(chunks[1].continues).toBeUndefined();
+  });
+
+  it('keeps a line whose ttsText has no tags on the plain path', () => {
+    const respelled = { speaker: 'Jake', text: reply(), ttsText: reply().replace('Jonah', 'Joe-nuh') };
+    const chunks = splitLinesForAiring([respelled], 120);
+    // chunks come from text (the whole-line ttsText rides along unchanged)
+    expect(chunks.map((chunk) => chunk.text).join(' ')).toBe(reply());
+  });
+
+  function reply() {
+    return (
+      'No, not yet. I saw her kiss Jonah and it has been eating at me every day since, but walking away now ' +
+      'would be about being scared of ending up alone, not about her.'
+    );
+  }
 });
 
 describe('the status block a reply is answered from', () => {

@@ -70,6 +70,10 @@ type SceneEntry = {
   allLines: DialogueLine[];
   cast: SceneCastMember[];
   closed: boolean;
+  // Held open past idle (the Wicked Whims patter): the scene does not finish when its last
+  // round has played, because another round may follow while the act's animation runs.
+  // release() lets it finish.
+  held?: boolean;
 };
 
 export type ScenePlaybackDeps = {
@@ -81,6 +85,8 @@ export type ScenePlaybackDeps = {
   rewriteMemory?: (memoryId: string, content: string) => void;
   // The conversation is over and this is what was heard: appraise what it left behind
   onSceneClosed?: (closed: SceneClosed) => void;
+  // A held scene has nothing left playing or generating (the patter arms its next round)
+  onSceneIdle?: (sceneId: string) => void;
 };
 
 /**
@@ -220,6 +226,36 @@ export class ScenePlaybackRegistry {
     });
   }
 
+  /**
+   * Keep the scene open once it goes idle (the Wicked Whims patter): no finish, no
+   * scene_ended, no memory rewrite until release(). False when the scene is unknown or
+   * already stopped.
+   */
+  hold(sceneId: string): boolean {
+    const entry = this.scenes.get(sceneId);
+    if (!entry || entry.stopped) {
+      return false;
+    }
+    entry.held = true;
+    entry.touchedAt = Date.now();
+    return true;
+  }
+
+  /** Let a held scene finish: at once when idle, else when its last round has played. */
+  release(sceneId: string) {
+    const entry = this.scenes.get(sceneId);
+    if (!entry || !entry.held) {
+      return;
+    }
+    entry.held = false;
+    this.finishIfIdle(sceneId, entry);
+  }
+
+  isHeld(sceneId?: string): boolean {
+    if (!sceneId) return false;
+    return Boolean(this.scenes.get(sceneId)?.held);
+  }
+
   isStopped(sceneId?: string): boolean {
     if (!sceneId) return false;
     const entry = this.scenes.get(sceneId);
@@ -284,6 +320,15 @@ export class ScenePlaybackRegistry {
 
   private finishIfIdle(sceneId: string, entry: SceneEntry) {
     if (entry.stopped || entry.pendingRounds > 0 || entry.generating > 0) {
+      return;
+    }
+    if (entry.held) {
+      // Idle, but held open for another round: whoever holds it decides when it ends
+      try {
+        this.deps.onSceneIdle?.(sceneId);
+      } catch (err) {
+        log.error('[Scene] idle listener failed', err);
+      }
       return;
     }
     // Nothing left playing and nothing left to generate: the conversation ran
@@ -358,6 +403,10 @@ export class ScenePlaybackRegistry {
     const rows: string[] = entry.openingPreAction ? [entry.openingPreAction] : [];
     let joinsPrevious = false;
     kept.forEach((line) => {
+      // Sounds with no words were heard, never written down
+      if (line.voiceOnly) {
+        return;
+      }
       if (joinsPrevious) {
         rows[rows.length - 1] += ` ${line.text}`;
       } else {
@@ -389,6 +438,10 @@ export class ScenePlaybackRegistry {
   private sweep() {
     const now = Date.now();
     this.scenes.forEach((entry, sceneId) => {
+      if (entry.held && !entry.stopped) {
+        // A held scene lives until its holder releases it (the patter's own cap ends an act)
+        return;
+      }
       const ttl = entry.stopped ? STOPPED_TTL_MS : SCENE_TTL_MS;
       const since = entry.stopped ? (entry.stoppedAt ?? entry.touchedAt) : entry.touchedAt;
       if (now - since > ttl) {

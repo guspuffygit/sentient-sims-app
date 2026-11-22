@@ -1,6 +1,12 @@
 import { Request, Response } from 'express';
 import log from 'electron-log';
-import { InteractionEvent, InteractionEvents, SSEventType } from '../models/InteractionEvents';
+import {
+  InteractionEvent,
+  InteractionEvents,
+  SSEventType,
+  WWEventType,
+  WWInteractionEvent,
+} from '../models/InteractionEvents';
 import { DirectedSceneRequest } from '../models/DirectedSceneRequest';
 import { judgeInteraction } from '../services/SceneRepeatGuard';
 import { playTTS, sendChatGeneration } from '../util/notifyRenderer';
@@ -60,6 +66,17 @@ export class AIController {
     // The chat window blocks on this response while prefetch traffic is speculative,
     // so chat messages skip ahead of queued prefetch generations
     const isChat = event.event_type === SSEventType.CHAT || event.event_type === SSEventType.CHAT_CONTINUE;
+    // The Wicked Whims patter hears every act event on arrival, before it waits in the queue:
+    // a new animation stops the countdown and any poke in flight at once, and the end of the
+    // act needs no scene at all, nor does an animation that arrives after it
+    if (event.event_type === SSEventType.WICKED_WHIMS) {
+      const wwEvent = event as WWInteractionEvent;
+      this.ctx.wwPatter.wwEvent(wwEvent);
+      if (wwEvent.ww_event_type === WWEventType.ENDED || this.ctx.wwPatter.isLate(wwEvent)) {
+        res.json({ status: InteractionEventStatus.NOOP, input: event });
+        return;
+      }
+    }
     // Did this cast just have this beat? A repeat inside the cooldown takes no queue slot
     // and no model call; a reaction event runs as one silent thought (SceneRepeatGuard)
     const judged = judgeInteraction(this.ctx, event);

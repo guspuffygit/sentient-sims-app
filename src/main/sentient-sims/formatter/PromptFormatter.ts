@@ -497,12 +497,20 @@ export function removeLastParagraph(text: string): string {
   return paragraphs.join('\n').trim();
 }
 
+// Nothing but voice tags ([gasps], [soft laugh]) after the last sentence: a sound, not a
+// sentence cut off, so it stays (util/voiceTags): "Wait... [gasps]" keeps its gasp
+const TRAILING_VOICE_TAGS = /^(?:\s*\[[^[\]\n]{1,40}\])+\s*$/;
+
 export function trimIncompleteSentence(text: string): string {
   const lastPunctIndex = Math.max(text.lastIndexOf('.'), text.lastIndexOf('?'), text.lastIndexOf('!'));
 
   if (lastPunctIndex >= 0) {
     const nextChar = text[lastPunctIndex + 1];
     const endIndex = nextChar === '"' || nextChar === "'" ? lastPunctIndex + 2 : lastPunctIndex + 1;
+    const rest = text.substring(endIndex);
+    if (TRAILING_VOICE_TAGS.test(rest)) {
+      return text.trimEnd();
+    }
     return text.substring(0, endIndex);
   }
 
@@ -595,6 +603,14 @@ export function formatSceneForChatWindow(text: string): string {
 export type DialogueLine = {
   speaker: string;
   text: string;
+  // What the voice is sent when it differs from the shown text: the same words with their
+  // inline voice tags (`[laughs]`, util/voiceTags), which `text` never carries. Absent
+  // means the voice reads `text`.
+  ttsText?: string;
+  // A line of sounds with no words (`[moans] [gasps]` in a Wicked Whims act, on a voice that
+  // performs tags): `text` is empty and the voice performs `ttsText`. Nothing is shown or
+  // stored for it: no subtitle, no memory text, no transcript line.
+  voiceOnly?: boolean;
   // Inline parenthetical delivery note, e.g. `Ricky: (nervous) "..."` — feeds v3 audio tags
   deliveryNote?: string;
   // Provider-specific voice cast for this speaker (an ElevenLabs voice id, or a Kokoro

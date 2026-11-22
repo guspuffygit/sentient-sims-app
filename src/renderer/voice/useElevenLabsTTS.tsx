@@ -17,6 +17,7 @@ import {
 } from 'main/sentient-sims/clients/ElevenLabsTTSRequest';
 import { elevenLabsErrorMessage } from 'main/sentient-sims/clients/ElevenLabsError';
 import { DialogueLine } from 'main/sentient-sims/formatter/PromptFormatter';
+import { isSpeakable } from 'main/sentient-sims/util/voiceTags';
 import { AudioPlaybackHandle, PlaybackOptions, playAudioStream, playAudioUrl } from './audioPlayback';
 import { pacedDelay } from './playbackClock';
 import { SpeakOptions, TTSHook } from './TTSHook';
@@ -155,7 +156,7 @@ export function useElevenLabsTTS(): TTSHook {
       playSessionRef.current += 1;
       const session = playSessionRef.current;
 
-      const speakable = lines.filter((line) => line.text.trim());
+      const speakable = lines.filter(isSpeakable);
 
       const lineText = (line: DialogueLine): string => elevenLabsLineText(line, elevenLabsTTSSettings.value.model);
       const lineVoice = (line: DialogueLine): string => {

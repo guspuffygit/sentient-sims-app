@@ -131,12 +131,22 @@ ${withFacts}`
 ${speechRules(speechRuleKind(playerFacing, monologueOnly), { simName })}`;
 }
 
-// Which of the three response formats a performer answers in
-export type SpeechRuleKind = 'pair' | 'playerFacing' | 'monologue';
+// Which response format a performer answers in. 'intimate' is a Wicked Whims act on the lean
+// pipeline (sounds first, a few words between); 'intimateSolo' is a solo animation, said
+// aloud to nobody. A solo ask or walk-up is still a THINK call.
+export type SpeechRuleKind = 'pair' | 'playerFacing' | 'monologue' | 'intimate' | 'intimateSolo';
 
-export function speechRuleKind(playerFacing: boolean | undefined, monologueOnly: boolean): SpeechRuleKind {
+export function speechRuleKind(
+  playerFacing: boolean | undefined,
+  monologueOnly: boolean,
+  intimate = false,
+  solo = false,
+): SpeechRuleKind {
   if (monologueOnly) {
     return 'monologue';
+  }
+  if (intimate) {
+    return solo ? 'intimateSolo' : 'intimate';
   }
   return playerFacing ? 'playerFacing' : 'pair';
 }
@@ -149,14 +159,28 @@ export type SpeechRuleOptions = {
   // The lean pipeline has no director, so "the tone your director set" becomes "the tone of
   // the scene". Full mode keeps the 4.6 wording byte for byte.
   lean?: boolean;
+  // The voice performs audio tags (voiceReadsTags: ElevenLabs v3 / v4), so a pair line or a reply
+  // to the player may carry one invented sound in square brackets. See VOICE_TAG_RULE.
+  voiceTags?: boolean;
 };
 
 // The SAY/THINK answer format and the rules under it, the most load-bearing text in the
 // whole pipeline (series 2, 2026-10-27: without "ONE short line, ten words or so" lines ran
 // 8 -> 24 words, -1.3/10; without the SAY list, 29 words, -1.7). Shared by the 4.6 prompt
 // (buildSpeechSystemPrompt, output unchanged) and the lean prompt below.
+// The bare-subtitle bullet of the pair and player-facing rules, and what replaces it when the
+// voice performs audio tags: "no delivery notes" dropped and one bullet added. The wording is the
+// one that was tested: Haiku 5.5 tagged 1 line in 5 under it, with no silent tags, no copying of
+// the examples and no change in line quality. The tag rides ttsText and never reaches the
+// subtitle or the memory row (util/voiceTags).
+export const BARE_SUBTITLE_RULE =
+  '- Only the words spoken out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no delivery notes, no commentary.';
+export const VOICE_TAG_RULE = `- Only the words spoken out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no commentary.
+- One voice tag per line at most, in square brackets, invented, where a real voice would make the sound: [quiet laugh], [sighs]. Skip it when the line is plain. Never a silent action like [smiles].`;
+
 export function speechRules(kind: SpeechRuleKind, options: SpeechRuleOptions = {}): string {
   const { simName, lean } = options;
+  const bare = options.voiceTags ? VOICE_TAG_RULE : BARE_SUBTITLE_RULE;
   // Subject and possessive: "Mara Vale" / "Mara Vale's", or "your character" / "your character's"
   const who = simName ?? 'your character';
   const whose = simName ? `${simName}'s` : "your character's";
@@ -170,7 +194,7 @@ THINK: <one short line of ${whose} private inner monologue in this moment>
 
 Rules for SAY:
 ${stay}
-- Only the words spoken out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no delivery notes, no commentary.
+${bare}
 - Say as much as you actually have to say. A full answer with your reasons can run several sentences; a one-liner is fine when that is all there is. Stop when you have answered.
 - When asked a direct question, answer it first, plainly and specifically: pick one, name it, give your reason. Never answer a question with a question, never "that's not the point", and never a bare "I don't know" — if you don't know, say what you DO know or what would decide it. If you are keeping something back, say that you are and why.
 - Talk like a real person in this conversation: a direct, natural reply to what was just said, in ${whose} voice and ${tone}.
@@ -183,6 +207,43 @@ Rules for THINK:
 - First person, present tense — what is actually running through ${whose} head right now.
 - Private: nobody hears it, and it may differ from what ${who} says out loud — but it is ${whose} real personality, not a secretly insecure version of it. Never invent self-doubt the character's traits and description do not support.
 - One short line. No physical actions, and never addressed to anyone.`;
+  }
+
+  // A Wicked Whims act. On ElevenLabs the delivery notes were the act's sounds, and the shared
+  // chat rules forbid them, so acts went quiet: these rules ask for sounds first, in square
+  // brackets, with a few words between. The sounds ride ttsText for a voice that performs tags
+  // and are stripped from the subtitle, the memory row and every voice that cannot.
+  if (kind === 'intimate') {
+    return `How to respond — exactly two lines, in this format:
+SAY: <the sounds and the few words out of your character's mouth right now>
+THINK: <one short line of your character's private thought>
+
+Rules for SAY:
+${stay}
+- This is sex, not a conversation. Mostly sounds, in square brackets, invented for the moment: [moans], [breathless], [gasps], [soft laugh], [whispers]. Between them a few words at most: a name, a yes, a want, a reaction to what is happening right now.
+- Explicit when it fits them; blunt is blunt, shy is shy. Never a speech, never romance-card lines.
+- No narration, no name tag, no quotation marks. Never repeat the last line; react to it.
+
+Rules for THINK:
+- First person, present tense, one short line. No physical actions.`;
+  }
+
+  // A solo act: the tested 'intimate' rules framed as self-talk. Only "a name" and "react to
+  // it" are gone, since in a scene of one they ask for a partner. Said aloud (SAY), so it is a
+  // line in the bubble, not a thought.
+  if (kind === 'intimateSolo') {
+    return `How to respond — exactly two lines, in this format:
+SAY: <the sounds and the few words out of your character's mouth right now>
+THINK: <one short line of your character's private thought>
+
+Rules for SAY:
+${stay}
+- This is a solo sex scene, not a conversation. Mostly sounds, in square brackets, invented for the moment: [moans], [breathless], [gasps], [soft laugh], [whispers]. Between them a few words at most, said to yourself: a yes, a want, a reaction to what is happening right now.
+- Explicit when it fits them; blunt is blunt, shy is shy. Never a speech, never romance-card lines.
+- No narration, no name tag, no quotation marks. Never repeat your last line.
+
+Rules for THINK:
+- First person, present tense, one short line. No physical actions.`;
   }
 
   if (kind === 'monologue') {
@@ -203,7 +264,7 @@ THINK: <one short line of ${whose} private inner monologue in this moment>
 
 Rules for SAY:
 ${stay}
-- Only the words spoken out loud — a bare subtitle. No name tag, no quotation marks, no stage directions, no delivery notes, no commentary.
+${bare}
 - ONE short line, ten words or so, the way people actually talk. Never a speech.
 - Talk like a real person in this conversation: your line must be a direct, natural reply to what was just said, in ${whose} voice and ${tone}. Not every line needs to be clever — a plain reply that keeps the conversation flowing beats a quip that does not connect.
 - Move the conversation forward — answer questions that were asked, follow up on what the other person said, never repeat or rephrase anything already said.
@@ -266,14 +327,21 @@ export type LeanActorSystemPromptContext = {
   monologueOnly: boolean;
   // Name-free rules: see SpeechRuleOptions.simName
   nameFreeRules?: boolean;
+  // A Wicked Whims act: the sounds-first rules (speechRules 'intimate') in place of the pair rules
+  intimate?: boolean;
+  // A solo Wicked Whims act: the talking-to-yourself rules (speechRules 'intimateSolo')
+  intimateSolo?: boolean;
+  // The voice performs audio tags: the pair and player-facing rules allow one (VOICE_TAG_RULE)
+  voiceTags?: boolean;
 };
 
 export function buildLeanActorSystemPrompt(context: LeanActorSystemPromptContext): string {
   const { simName, characterBlock, locationBlock, factsBlock, settingBlock, statusBlock, playerFacing, monologueOnly } =
     context;
-  const rules = speechRules(speechRuleKind(playerFacing, monologueOnly), {
+  const rules = speechRules(speechRuleKind(playerFacing, monologueOnly, context.intimate, context.intimateSolo), {
     simName: context.nameFreeRules ? undefined : simName,
     lean: true,
+    voiceTags: context.voiceTags,
   });
   const identity = [`You are ${simName}.`, characterBlock.trim()].filter((part) => part.length > 0).join('\n\n');
   const facts = factsBlock
@@ -333,10 +401,79 @@ export function stripOpener(beat: string): string {
 export const LEAN_CONTINUATION_LINE =
   'The scene continues. Pick up the conversation exactly where it left off and move it forward — do not repeat or rephrase anything already said.';
 
+// A patter round in a Wicked Whims act (WickedWhimsPatter) is the same animation a little
+// later, one Sim speaking. Tested against alternatives: a plain "never repeat" line repeated on
+// 38% of pokes; banning every word said so far stopped repeats but, over a long animation,
+// collapsed into "[groan] Lucas, two words" with Sims saying their own name (68% of lines led
+// with a name, 26% were fragments). The rule kept: the words of the last 8 lines plus every word
+// used 3+ times in the scene, the Sim's own name never said, at most 8 pokes per animation
+// (WickedWhimsPatter). On pokes 1-8: 2.1% repeats, no own name.
+// Kept VERBATIM: that wording is what tested best.
+// `solo` is a solo act's line: the same words without "(names are fine)", which in a scene of
+// one invites a partner's name.
+export function patterLine(usedWords: string[], solo = false): string {
+  const used =
+    usedWords.length > 0
+      ? ` Words already said in this scene: ${usedWords.join(', ')}. Use none of them again${solo ? '' : ' (names are fine)'}.`
+      : '';
+  return `Still the same moment, a little later. Do not describe anything new: no new position, nobody arriving, no instructions to anyone.${used} Never say your own name. Answer with a sound you have not made yet and a few new words, in your own voice, about how it feels right now.`;
+}
+
+// A solo Wicked Whims thought is one call per animation with the same prompt, and answered with
+// the same sentence each time (29 of 36 thoughts on a replay of six-animation acts). Told what
+// the Sim has already said to themself, none repeated (0 of 72). Kept VERBATIM: the tested wording.
+export const ALREADY_SAID_LINES = 5;
+
+export function alreadySaidLine(said: string[]): string {
+  return `Already said during this: ${said.map((line) => `"${line}"`).join('; ')}. Say none of it again, in any wording.`;
+}
+
+// How many recent lines a patter round may not echo, and how often a word must have been said
+// anywhere in the scene to stay banned for good
+export const PATTER_WINDOW_LINES = 8;
+export const PATTER_PERMANENT_USES = 3;
+
+// The words a patter round may not use: the distinct words of the last 8 lines that have words, then every word said 3+ times anywhere in the scene, first use first.
+// Lines as the next round reads them (plain text; a sounds-only line has none). The OTHER cast
+// members' names are exempt; the speaker's own name is not, so it is banned once said.
+export function patterUsedWords(lines: { text: string; voiceOnly?: boolean }[], otherCastNames: string[]): string[] {
+  const exempt = new Set(otherCastNames.flatMap((name) => name.toLowerCase().split(/\s+/)));
+  const wordsOf = (text: string) => (text.match(/[A-Za-z']+/g) ?? []).map((word) => word.toLowerCase());
+  const spoken = lines.filter((line) => !line.voiceOnly && line.text.trim().length > 1);
+  const banned: string[] = [];
+  spoken.slice(-PATTER_WINDOW_LINES).forEach((line) => {
+    wordsOf(line.text).forEach((word) => {
+      if (!exempt.has(word) && !banned.includes(word)) {
+        banned.push(word);
+      }
+    });
+  });
+  const counts = new Map<string, number>();
+  const order: string[] = [];
+  spoken.forEach((line) => {
+    wordsOf(line.text).forEach((word) => {
+      if (exempt.has(word)) {
+        return;
+      }
+      counts.set(word, (counts.get(word) ?? 0) + 1);
+      if (!order.includes(word)) {
+        order.push(word);
+      }
+    });
+  });
+  order.forEach((word) => {
+    if ((counts.get(word) ?? 0) >= PATTER_PERMANENT_USES && !banned.includes(word)) {
+      banned.push(word);
+    }
+  });
+  return banned;
+}
+
 // Rounds 2+ of a lean scene: the Sim's own round-1 beat (their side of a deception, their
-// valence clause), opener removed, then the continuation instruction
-export function carriedBeat(roundOneBeat: string): string {
-  return `This scene: ${stripOpener(roundOneBeat)}\n\n${LEAN_CONTINUATION_LINE}`;
+// valence clause), opener removed, then the continuation instruction (or, on a Wicked Whims
+// patter round, the patter line)
+export function carriedBeat(roundOneBeat: string, continuation: string = LEAN_CONTINUATION_LINE): string {
+  return `This scene: ${stripOpener(roundOneBeat)}\n\n${continuation}`;
 }
 
 export type SceneReviewPromptContext = {

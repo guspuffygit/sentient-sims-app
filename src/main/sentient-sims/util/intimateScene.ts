@@ -83,6 +83,11 @@ export function isRefusal(text: string | undefined): boolean {
 export const INTIMATE_SCENE_FRAMING =
   'This is an intimate adult scene between consenting adults: the characters talk to each other during it, explicit and uninhibited when the moment calls for it, each true to their personality and mood.';
 
+// The same for a solo act: one Sim, nobody to talk to. The pair framing's "talk to each other"
+// invites a partner who is not there.
+export const INTIMATE_SOLO_FRAMING =
+  'This is an intimate adult scene of one adult: the character talks to themself during it, explicit and uninhibited when the moment calls for it, true to their personality and mood.';
+
 type Performer = { sim_id: string; name: string; age?: SimAge | number | string };
 
 // Everyone the state report names (reported sims and everyone they perceive, any tier)

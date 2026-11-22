@@ -4,6 +4,7 @@ import {
   ElevenLabsSpeechModel,
   ElevenLabsTTSSettings,
 } from '../models/ElevenLabsTTSSettings';
+import { stripVoiceTags } from '../util/voiceTags';
 
 export type ElevenLabsSpeechRequest = {
   url: string;
@@ -76,10 +77,15 @@ export function usesDialogueEndpoint(model: string): boolean {
 /**
  * The text to actually send for a dialogue line. v3 and v4 understand inline audio tags
  * like [nervous], so a parenthetical delivery note becomes one; older models would read
- * the note aloud, so they only ever get the spoken text.
+ * the note aloud, so they only ever get the spoken text, with any inline tag the line
+ * itself carries (`[laughs]` in ttsText) stripped too.
  */
 export function elevenLabsLineText(line: DialogueLine, model: string): string {
-  return supportsAudioTags(model) && line.deliveryNote ? `[${line.deliveryNote}] ${line.text}` : line.text;
+  const spoken = line.ttsText ?? line.text;
+  if (!supportsAudioTags(model)) {
+    return stripVoiceTags(spoken);
+  }
+  return line.deliveryNote ? `[${line.deliveryNote}] ${spoken}` : spoken;
 }
 
 /**

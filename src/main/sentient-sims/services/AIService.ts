@@ -70,6 +70,10 @@ import {
   deceptionFraming,
   DIRECTOR_REVIEW_SYSTEM_PROMPT,
   LEAN_CONTINUATION_LINE,
+  patterLine,
+  alreadySaidLine,
+  ALREADY_SAID_LINES,
+  patterUsedWords,
   ownCharacterBlock,
   performersAlreadyTalking,
   splitLeanOpening,
@@ -94,6 +98,10 @@ import {
   splitLinesForPacing,
 } from '../formatter/PromptFormatter';
 import { splitLinesForAiring } from '../util/airingChunks';
+import { hasVoiceTags, splitVoiceTags, stripVoiceTags } from '../util/voiceTags';
+import { RecentThoughts } from '../util/recentThoughts';
+import { supportsAudioTags } from '../clients/ElevenLabsTTSRequest';
+import { isElevenLabsSpeechModel } from '../models/SentientSimsAITTSSettings';
 import { formatSelfStatus, TodaysPlanBlock } from '../util/formatSelfStatus';
 import { PlayerConversation, PlayerConversationService } from './PlayerConversationService';
 import { MemoryEntity } from '../db/entities/MemoryEntity';
@@ -117,6 +125,7 @@ import { SceneState } from './SceneService';
 import { isBelowChild, lifeStageOf } from '../util/simLifeStage';
 import {
   INTIMATE_SCENE_FRAMING,
+  INTIMATE_SOLO_FRAMING,
   intimateOutputProblem,
   isAdultAge,
   isRefusal,
@@ -325,17 +334,47 @@ function parseReviewedLines(rawText: string, speakerNames: string[]): DialogueLi
     .forEach((line) => {
       const name = speakerNames.find((speaker) => new RegExp(`^${escapeRegExp(speaker)}\\s*:`, 'i').test(line));
       if (name) {
-        const text = extractSubtitle(line, speakerNames);
-        if (text.length > 1) {
-          lines.push({ speaker: name, text });
+        // A voice tag ([laughs]) moves to ttsText; a bare tag is not a line
+        const reviewed = splitVoiceTags({ speaker: name, text: extractSubtitle(line, speakerNames) });
+        if (reviewed.text.length > 1) {
+          lines.push(reviewed);
         }
       }
     });
   return lines;
 }
 
+// A voiceOnly line (sounds with no words) is heard, never read: it has no place in a memory
+// row, a carried transcript, the next round or a conversation action
 function toTranscript(lines: DialogueLine[]): string {
-  return lines.map((line) => `${line.speaker}: ${line.text}`).join('\n');
+  return lines
+    .filter((line) => !line.voiceOnly)
+    .map((line) => `${line.speaker}: ${line.text}`)
+    .join('\n');
+}
+
+// The voice performs `[moans]` rather than dropping it: ElevenLabs v3 / v4, on the user's own
+// key or the Sentient Sims AI voice. Kokoro and the older Eleven models get every tag stripped,
+// so a line of sounds alone would say nothing.
+export function voiceReadsTags(settings: {
+  ttsEnabled: boolean;
+  ttsApiType: ApiType;
+  elevenLabsTtsSettings: { model: string };
+  sentientSimsAITtsSettings: { model: string };
+}): boolean {
+  if (!settings.ttsEnabled) {
+    return false;
+  }
+  if (settings.ttsApiType === ApiType.ElevenLabs) {
+    return supportsAudioTags(settings.elevenLabsTtsSettings.model);
+  }
+  // The hosted ElevenLabs voice is sent the tagged line too (useSentientSimsTTS lineRequest)
+  const hostedModel = settings.sentientSimsAITtsSettings.model;
+  return (
+    settings.ttsApiType === ApiType.SentientSimsAI &&
+    isElevenLabsSpeechModel(hostedModel) &&
+    supportsAudioTags(hostedModel)
+  );
 }
 
 export type DirectedGenerationOptions = {
@@ -391,6 +430,11 @@ export type DirectedGenerationOptions = {
   // dispatched, and every verdict is reported here
   suggestActionsOnly?: boolean;
   onConversationAction?: (result: { simId: string; acted: boolean; action?: string; target?: string }) => void;
+  // A Wicked Whims patter round (WickedWhimsPatter): the same animation a little later,
+  // carried beat + the patter line, and only `speakerIds` take an actor turn. Everyone else stays
+  // in the scene (the prompt, monologueOnly), so a lone speaker is still not a THINK call.
+  patter?: boolean;
+  speakerIds?: string[];
 };
 
 // What the queue knows about a request the game is blocked on: when it reached the queue
@@ -530,6 +574,11 @@ export function valenceFraming(valence: string | undefined): string | undefined 
 
 export class AIService {
   private readonly ctx: ApiContext;
+
+  private readonly thoughtsAloud = new RecentThoughts();
+
+  // What each Sim has said to themself during a solo Wicked Whims act
+  private readonly soloActThoughts = new RecentThoughts();
 
   constructor(ctx: ApiContext) {
     this.ctx = ctx;
@@ -1054,6 +1103,17 @@ ${factsBlock}
 
   async handleWickedWhims(event: WWInteractionEvent, deadline: RequestDeadline = {}) {
     const animationKey = `${event.animation_author}:${event.animation_identifier}`;
+    if (event.ww_event_type === WWEventType.ENDED) {
+      // The act is over: no scene, only the patter stopping (AIController tells it first; this
+      // is idempotent and covers a caller that comes straight here)
+      this.ctx.wwPatter.wwEvent(event);
+      return { status: InteractionEventStatus.NOOP };
+    }
+    if (this.ctx.wwPatter.isLate(event)) {
+      // The act ended while this animation waited its turn: nothing is said about it
+      log.info(`[WickedWhims] ${animationKey} skipped: its act has ended`);
+      return { status: InteractionEventStatus.NOOP };
+    }
     if (!this.ctx.animations.isNsfwEnabled()) {
       log.info(`[WickedWhims] ${event.ww_event_type} skipped: NSFW is off for an OpenAI stage`);
       return { status: InteractionEventStatus.NSFW_DISABLED };
@@ -1076,7 +1136,8 @@ ${factsBlock}
     } else if (event.ww_event_type === WWEventType.STARTING) {
       preAction = "{actor.0} is taking {actor.1}'s hand and leading them to start {sex_category} {sex_location}.";
       if (event.sentient_sims.length === 1) {
-        preAction = '{actor.0} is walking to start {sex_category} {sex_location}.';
+        // Never the category words: a solo "handjob" read "giving a handjob", to somebody
+        preAction = '{actor.0} is walking to start pleasuring themselves {sex_location}.';
       }
     } else if (event.ww_event_type === WWEventType.ACTIVE) {
       if (event.testing_action) {
@@ -1378,7 +1439,7 @@ ${factsBlock}
         newMemory.content = output;
         // Classic playback: one narrator utterance, no per-speaker parsing or voice casting
         if (!playbackOptions.silent) {
-          this.playTtsLines([{ speaker: 'Narrator', text: output }]);
+          this.playTtsLines([splitVoiceTags({ speaker: 'Narrator', text: output })]);
         }
         return {
           status: InteractionEventStatus.GENERATED,
@@ -1431,11 +1492,14 @@ ${factsBlock}
             parseDialogueLines(
               output,
               event.sentient_sims.map((sim) => sim.name),
-            ),
+            ).map(splitVoiceTags),
           ).filter((line) => !silentNames.includes(line.speaker));
           this.playTtsLines(lines, event.sentient_sims, { paced: true, pacedText: output });
         } else if (playbackOptions.ttsSpeaker) {
-          this.playTtsLines([{ speaker: playbackOptions.ttsSpeaker, text: output }], event.sentient_sims);
+          this.playTtsLines(
+            [splitVoiceTags({ speaker: playbackOptions.ttsSpeaker, text: output })],
+            event.sentient_sims,
+          );
         } else {
           this.playTts(output, event.sentient_sims);
         }
@@ -1695,7 +1759,10 @@ ${factsBlock}
           const answer = (asked.memory?.content ?? '').replace(/^[^\n]*?\(to self\):\s*/, '').trim();
           this.ctx.playerConversations.record(
             thread.key,
-            [options.playerLine, ...(answer ? [{ speaker: event.sentient_sims[0].name, text: answer }] : [])],
+            [
+              options.playerLine,
+              ...(answer ? [{ speaker: event.sentient_sims[0].name, text: stripVoiceTags(answer) }] : []),
+            ],
             { landed: false },
           );
         }
@@ -1723,6 +1790,10 @@ ${factsBlock}
     // A sexual act (WickedWhims) is told from its performers alone (util/intimateScene)
     const intimateAct = event.event_type === SSEventType.WICKED_WHIMS;
     const intimateEvent = intimateAct ? (event as WWInteractionEvent) : undefined;
+    // and answers in sounds first on a voice that performs tags: the sounds-first rules on the
+    // lean pipeline, and a line of sounds alone voiced. A voice that cannot (Kokoro, text only)
+    // keeps the everyday rules: with the sounds stripped its lines were two or three words.
+    const soundsFirst = intimateAct && this.ctx.settings.wwVoiceTags && voiceReadsTags(this.ctx.settings);
     // The lean pipeline (2026-10-27, default): one actor call per Sim per round with the beat
     // carried into every round, fixed rounds, scores only for a reply to the player. 'full'
     // is the 4.6 pipeline: director, actors, reviewer, scores, every round.
@@ -1796,7 +1867,8 @@ ${factsBlock}
 
     // Continuing a scene re-uses the same event; driving it with the original action again
     // would just replay the same beat, so swap in a continuation instruction instead
-    const continuingScene = Boolean(options.continueScene) && previously.length > 0;
+    // A patter round continues even when every line so far was sounds (no transcript text)
+    const continuingScene = Boolean(options.continueScene) && (previously.length > 0 || Boolean(options.patter));
     const { playerLine } = options;
     const simNames = event.sentient_sims.map((sim) => sim.name);
     // The player's line is already spoken, so that sim takes no turn — everyone else replies to it
@@ -1811,6 +1883,17 @@ ${factsBlock}
     // conscience, Twitch). Full-length straight answers, the sim's live status in the
     // prompt, the thread as context, and a reply that may act on what was said.
     const playerFacing = Boolean(playerLine);
+    // A Wicked Whims moment with one Sim in it (walk-up or animation, any voice): framed as
+    // self-talk, never as a conversation, which invited a partner who is not there
+    const soloIntimate = intimateAct && performers.length === 1 && !playerLine;
+    // A solo animation on the sounds-first rules: the Sim plays it aloud (own rules and patter
+    // line), so its scene exists for the patter to hold and poke.
+    const soloAct =
+      soloIntimate &&
+      lean &&
+      soundsFirst &&
+      intimateEvent?.ww_event_type === WWEventType.ACTIVE &&
+      speakers.length === 1;
 
     let sceneAction: string | undefined;
     // The beat as it HAPPENED, with none of the prompt scaffolding the actors are given
@@ -1840,7 +1923,7 @@ ${factsBlock}
         // come from. Model-only, after displayAction is taken: the memory row keeps the
         // beat as it happened, never a stage direction (the 08-16 lesson above).
         let action = withContentFreeHint(base, interactionName);
-        if (action && opens) {
+        if (action && opens && !soloIntimate) {
           action += previously
             ? ' Open the scene: the characters are just starting this conversation — the first line begins it. The lines above were an earlier conversation, not part of this one.'
             : ' Open the scene: the characters are just starting this conversation — the first line begins it, nothing was said before.';
@@ -1849,11 +1932,11 @@ ${factsBlock}
           action += ` ${valenceClause}`;
         }
         if (action && intimateAct) {
-          action += ` ${INTIMATE_SCENE_FRAMING}`;
+          action += ` ${soloIntimate ? INTIMATE_SOLO_FRAMING : INTIMATE_SCENE_FRAMING}`;
         }
         return action;
       };
-      let action = frame(beatDisplay, true);
+      const action = frame(beatDisplay, true);
       let perSim: ((name: string) => string) | undefined;
       let forDirector: string | undefined;
 
@@ -1872,9 +1955,6 @@ ${factsBlock}
           `${liarAction}\n\n${target} does not know it is a lie. Only ${liar}'s private briefing may say so; ` +
           `the shared briefing and ${target}'s briefing describe the beat as ${target} experiences it: "${deception.targetView}"`;
       }
-      if (action && intimateAct) {
-        action = `${action} ${INTIMATE_SCENE_FRAMING}`;
-      }
       return { action, perSim, forDirector, beatDisplay };
     };
     if (continuingScene && playerLine) {
@@ -1882,7 +1962,20 @@ ${factsBlock}
       // player, who said nothing new — or wraps up
       sceneAction = `You are still talking to ${playerLine.speaker}, who is waiting. Say what else you have to say about what was said, or wrap the conversation up.`;
     } else if (continuingScene) {
-      sceneAction = LEAN_CONTINUATION_LINE;
+      // A Wicked Whims patter round names the words the speaker may not use: per Sim, since
+      // their own name is banned and the others' are not
+      const continuationFor = (name: string) =>
+        options.patter
+          ? patterLine(
+              patterUsedWords(
+                carriedLines,
+                simNames.filter((other) => other !== name),
+              ),
+              soloAct,
+            )
+          : LEAN_CONTINUATION_LINE;
+      sceneAction = options.patter ? patterLine([], soloAct) : LEAN_CONTINUATION_LINE;
+      actionFor = options.patter ? continuationFor : undefined;
       if (lean) {
         // THE lean tweak: the beat rides into every round, per Sim (the liar keeps the lie,
         // the dupe keeps the cover beat), opener off. In 4.6 only the director re-stated it,
@@ -1890,8 +1983,8 @@ ${factsBlock}
         const opening = frameBeat(false);
         if (opening.action) {
           const openingAction = opening.action;
-          sceneAction = carriedBeat(openingAction);
-          actionFor = (name) => carriedBeat(opening.perSim?.(name) ?? openingAction);
+          sceneAction = carriedBeat(openingAction, options.patter ? patterLine([], soloAct) : LEAN_CONTINUATION_LINE);
+          actionFor = (name) => carriedBeat(opening.perSim?.(name) ?? openingAction, continuationFor(name));
         }
       }
     } else if (playerLine) {
@@ -1929,7 +2022,8 @@ ${factsBlock}
     // A lone sim runs the same pipeline with the dialogue stage NULLed: director, then
     // inner monologue only, then scores. There is no narrator — a solo beat is a thought.
     // So is a beat whose performers can none of them speak.
-    const monologueOnly = speakers.length === 0 || (performers.length === 1 && !playerLine);
+    // A solo act (soloAct, above) is the exception: said aloud, never a thought.
+    const monologueOnly = speakers.length === 0 || (performers.length === 1 && !playerLine && !soloAct);
 
     const exchanges: LLMExchange[] = [];
     // The mod abandons an interaction request after 80 seconds, so each stage checks the
@@ -2033,14 +2127,17 @@ ${factsBlock}
     const monologueBySim = new Map<string, string>();
     // Fix D: the reviewer reads the same facts the actors did, keyed by speaker name
     const factsBySim = new Map<string, string>();
-    for (let i = 0; i < performers.length; i += 1) {
+    // A patter round gives the turn to one Sim; the rest of the cast stays in the scene
+    const { speakerIds } = options;
+    const actorTurns = speakerIds ? performers.filter((sim) => speakerIds.includes(sim.sim_id)) : performers;
+    for (let i = 0; i < actorTurns.length; i += 1) {
       // Checked between turns: a walk-away lands mid-generation more often than not,
       // and every further turn is a request paid for and thrown away
       if (options.continueScene && roundDropped()) {
         log.info(`[Pipeline] Scene ${sceneId} ${dropReason()} mid-performance; dropping it`);
         return { status: InteractionEventStatus.NOOP, exchanges };
       }
-      const sim = performers[i];
+      const sim = actorTurns[i];
       const simBeat = actionFor?.(sim.name) ?? sceneAction;
       // Lean: the Sim's own character block is the identity; what it names (and the beat)
       // decides whose fact lines join theirs
@@ -2095,11 +2192,19 @@ ${factsBlock}
             characterBlock,
             locationBlock,
             factsBlock: actorFacts || undefined,
-            settingBlock: leanSettingBlock,
+            // A solo Wicked Whims thought leaves the day and the weather out: they were the only
+            // concrete thing in its prompt, so every thought was about them
+            settingBlock: soloIntimate && thinkOnly ? undefined : leanSettingBlock,
             statusBlock,
             playerFacing,
             monologueOnly: thinkOnly,
             nameFreeRules: this.ctx.settings.leanNameFreeRules,
+            // A Wicked Whims act answers in sounds first (speechRules 'intimate')
+            intimate: soundsFirst,
+            intimateSolo: soloAct,
+            // Everyday lines may carry one invented sound when the voice performs tags. Never a
+            // Wicked Whims act: with its sounds-first rules off it keeps the plain pair rules
+            voiceTags: !intimateAct && this.ctx.settings.voiceTags && voiceReadsTags(this.ctx.settings),
           })
         : buildSpeechSystemPrompt({
             simName: sim.name,
@@ -2111,15 +2216,19 @@ ${factsBlock}
           });
 
       const conversationSoFar = toTranscript(sceneLines);
+      // A solo Wicked Whims thought is told what this Sim has already said to themself, so the
+      // next animation's is a new one
+      const alreadySaid = soloIntimate && thinkOnly ? this.soloActThoughts.recent(sim.sim_id, ALREADY_SAID_LINES) : [];
+      const beatForSim = alreadySaid.length > 0 ? `${simBeat}\n\n${alreadySaidLine(alreadySaid)}` : simBeat;
       const actorUserText = lean
         ? buildLeanActorUserMessage({
             nowBlock: leanNowBlock,
             previouslyBlock,
-            beat: simBeat,
+            beat: beatForSim,
             conversationSoFar,
             simName: sim.name,
           })
-        : `${previouslyBlock}${simBeat}${conversationSoFar ? `\n\nThe conversation so far:\n${conversationSoFar}` : ''}`;
+        : `${previouslyBlock}${beatForSim}${conversationSoFar ? `\n\nThe conversation so far:\n${conversationSoFar}` : ''}`;
       if (performedLines.length > 0 && overBudget()) {
         log.error('Directed scene ran out of time mid-performance, airing the lines delivered so far');
         break;
@@ -2161,10 +2270,18 @@ ${factsBlock}
           think = '';
         }
         log.info(`[Pipeline] Actor ${sim.name} — say: ${say || '(none)'} | think: ${think || '(none)'}`);
-        if (say.length > 1) {
-          const line = { speaker: sim.name, text: say };
+        // A voice tag ([laughs]) is for the voice only: text is the plain words, ttsText
+        // keeps the tag. A bare tag with no words is not a line, except in a Wicked Whims act
+        // on a voice that performs tags: `[moans] [gasps]` is voiced with no subtitle and no
+        // memory text (voiceOnly).
+        const line = splitVoiceTags({ speaker: sim.name, text: say });
+        if (line.text.length > 1) {
           sceneLines.push(line);
           performedLines.push(line);
+        } else if (soundsFirst && hasVoiceTags(line.ttsText ?? '')) {
+          const soundsOnly: DialogueLine = { ...line, text: '', voiceOnly: true };
+          sceneLines.push(soundsOnly);
+          performedLines.push(soundsOnly);
         }
         if (think.length > 1) {
           // Keyed by sim_id, never name: two sims sharing a name string collided in
@@ -2181,7 +2298,10 @@ ${factsBlock}
       }
     }
 
-    if (monologueOnly) {
+    // A solo act's opening round with no line to air (the actor answered with a thought alone)
+    // plays as the thought aloud, so the animation is never left silent
+    const soloActThought = soloAct && !options.continueScene && performedLines.length === 0;
+    if (monologueOnly || soloActThought) {
       return this.finishMonologueScene(event, options, playbackOptions, {
         performances: performers.map((sim) => ({ performer: sim, think: monologueBySim.get(sim.sim_id) })),
         // A silent cast keeps its thoughts to itself; a lone speaker voices theirs, unless
@@ -2282,7 +2402,9 @@ ${factsBlock}
     const finalLines = useReviewerCut ? reviewedLines : performedLines;
     if (lean) {
       log.info(
-        `[Pipeline] lean round ${round}: ${performerNames.join(' & ')}, ${Date.now() - startedAt} ms, ${performedLines.length} line(s)`,
+        `[Pipeline] lean round ${round}${options.patter ? ' (patter)' : ''}: ${actorTurns
+          .map((sim) => sim.name)
+          .join(' & ')}, ${Date.now() - startedAt} ms, ${performedLines.length} line(s)`,
       );
     } else {
       log.info(`[Pipeline] Final cut: ${useReviewerCut ? "reviewer's cut" : "actors' original lines"}`);
@@ -2291,7 +2413,11 @@ ${factsBlock}
 
     // Nothing that fails the guard is stored or voiced, its thoughts included
     const intimateProblem = intimateAct
-      ? this.intimateSceneProblem(event, [...finalLines.map((line) => line.text), ...monologueBySim.values()])
+      ? this.intimateSceneProblem(event, [
+          // A sounds-only line is checked on its tags: an outside name inside one is still caught
+          ...finalLines.map((line) => (line.voiceOnly ? (line.ttsText ?? '') : line.text)),
+          ...monologueBySim.values(),
+        ])
       : undefined;
     if (intimateProblem) {
       log.warn(`[Pipeline] Discarded ${event.event_type} scene (${intimateProblem}): ${dialogueText.slice(0, 160)}`);
@@ -2451,7 +2577,8 @@ ${factsBlock}
     // action is a direction written for the actors, and the player's line already showed in
     // the game's chat box — neither belongs above the reply.
     const preActionLine = continuingScene || playerLine ? undefined : displayAction;
-    const finalText = preActionLine ? `${preActionLine}\n${dialogueText}` : dialogueText;
+    // A round of sounds alone has no dialogue text: the row is the action line by itself
+    const finalText = preActionLine ? [preActionLine, dialogueText].filter(Boolean).join('\n') : dialogueText;
 
     // The memory may be persisted here, or later by the mod posting back either the raw
     // scene text or the chat-window-formatted one — key the trace on every shape it can take
@@ -2592,13 +2719,19 @@ ${factsBlock}
         log.info(`[Pipeline] Scene ${sceneId} ended in-game before playback; not airing it`);
         return;
       }
+      if (options.patter && options.signal?.aborted) {
+        // The act moved to its next animation (or ended) while this poke was being written
+        log.info(`[Patter] scene ${sceneId}: the act moved on before the poke aired; not airing it`);
+        return;
+      }
       // Inner monologue becomes each sim's own PRIVATE memory the moment the scene
       // actually airs — a canceled prefetch leaves no trace. The shared transcript row
       // still arrives via the mod's POST /memories when the interaction completes.
       // Lean runs every round as its own generation: the thought is stored on the opening
       // round only, or a three-round chat left three near-identical thoughts per Sim
       // (live, 2026-10-29).
-      if (!lean || !options.continueScene) {
+      // A patter round's thoughts are never kept: one per poke would bury the act's own
+      if ((!lean || !options.continueScene) && !options.patter) {
         monologueRows = this.storeMonologues(event, performers, monologueBySim, sceneScores.scores);
       }
       markScenePaced(finalText);
@@ -2680,56 +2813,38 @@ ${factsBlock}
           `[Pipeline] Scene round ${round + 1}/${this.ctx.settings.sceneMaxRounds}: continuing the conversation`,
         );
         const nextRoundLines = [...carriedLines, ...(playerLine ? [playerLine] : []), ...finalLines];
-        // Fire-and-forget: the continuation is its own generation. Its lines join the
-        // scene's shared memory row when the scene closes (ScenePlaybackRegistry).
-        // Registered as in-flight so the scene is not declared finished while a round is
-        // still being written — and so a stop from the game reaches it.
-        // Queued (priority FIFO lane) rather than run bare so a later-requested generation
-        // can never finish and air before this round; not awaited, so the enclosing queue
-        // job completes and drain() picks the continuation up next — no deadlock at
-        // concurrency 1.
-        const sceneSignal = this.ctx.scenePlayback.generationStarted(sceneId);
-        let yieldedToGame: AbortSignal | undefined;
-        void this.ctx.generationQueue
-          .runExclusive(
-            ({ yielded }) => {
-              yieldedToGame = yielded;
-              return this.runDirectedGeneration(
-                event,
-                {
-                  ...options,
-                  continueScene: true,
-                  playerLine: undefined,
-                  speakPlayerLine: undefined,
-                  round: round + 1,
-                  carriedLines: nextRoundLines,
-                  // Lean: the facts round 1 computed ride along (see DirectedGenerationOptions)
-                  factsBySim: lean ? factsBySim : undefined,
-                  sceneId,
-                  // Nobody is blocked on a continuation, so it has no deadline. Only the
-                  // game's stop, or an interaction the game is waiting on, can cut it.
-                  deadlineAt: undefined,
-                  signal: sceneSignal ? AbortSignal.any([sceneSignal, yielded]) : yielded,
-                },
-                { ...playbackOptions, deferPlayback: false, onPlaybackReady: undefined },
-              );
-            },
-            { priority: true, yieldsToBlocking: true },
-          )
-          .catch((error: unknown) => {
-            if (error instanceof SceneAbortedError) {
-              log.info(
-                yieldedToGame?.aborted
-                  ? `[Pipeline] Scene ${sceneId} yielded to an interaction the game is waiting on; round ${round + 1} dropped`
-                  : `[Pipeline] Scene ${sceneId} ended in-game mid-request; round ${round + 1} dropped`,
-              );
-              return;
-            }
-            log.warn(`[Pipeline] Scene round ${round + 1} failed`, error);
-          })
-          .finally(() => {
-            this.ctx.scenePlayback.generationFinished(sceneId);
-          });
+        // Fire-and-forget: the continuation is its own generation (queueSceneRound)
+        void this.queueSceneRound(event, options, playbackOptions, {
+          round: round + 1,
+          carriedLines: nextRoundLines,
+          // Lean: the facts round 1 computed ride along (see DirectedGenerationOptions)
+          factsBySim: lean ? factsBySim : undefined,
+          sceneId,
+        });
+      }
+      if (intimateEvent?.ww_event_type === WWEventType.ACTIVE) {
+        // A Wicked Whims act gets no continuation (above); the patter holds this animation's
+        // scene open and pokes one more round, one Sim at a time, every stretch of quiet until
+        // the next animation or the act's end (WickedWhimsPatter). An animation only: the ask
+        // and the walk-up are not the act
+        const actLines = [...carriedLines, ...finalLines];
+        this.ctx.wwPatter.roundAired({
+          event: intimateEvent,
+          sceneId,
+          round,
+          // The cast lines carry each speaker's id, so the first poke goes to whoever did not
+          // speak last
+          lines: [...carriedLines, ...castLines],
+          speakerIds: speakers.map((sim) => sim.sim_id),
+          poke: (speakerId, pokeSignal) =>
+            this.queueSceneRound(event, options, playbackOptions, {
+              round: round + 1,
+              carriedLines: actLines,
+              factsBySim: lean ? factsBySim : undefined,
+              sceneId,
+              patter: { speakerId, signal: pokeSignal },
+            }),
+        });
       }
     });
     if (playbackOptions.deferPlayback) {
@@ -2750,6 +2865,79 @@ ${factsBlock}
       exchanges,
       memory: newMemory,
     };
+  }
+
+  // The next round of a scene already airing: a lean continuation, or a Wicked Whims patter
+  // round (one Sim, the patter line). Its lines join the scene's shared memory row when the
+  // scene closes (ScenePlaybackRegistry). Registered as in-flight so the scene is not declared
+  // finished while a round is still being written, and so a stop from the game reaches it.
+  // Queued (priority FIFO lane) rather than run bare so a later-requested generation can never
+  // finish and air before this round; the caller does not await it, so the enclosing queue job
+  // completes and drain() picks this round up next (no deadlock at concurrency 1).
+  private queueSceneRound(
+    event: SSEvent,
+    options: DirectedGenerationOptions,
+    playbackOptions: PlaybackOptions,
+    next: {
+      round: number;
+      carriedLines: DialogueLine[];
+      factsBySim?: Map<string, string>;
+      sceneId: string;
+      // A patter round: who speaks, and the patter's own stop (a new animation, the act's end)
+      patter?: { speakerId: string; signal: AbortSignal };
+    },
+  ): Promise<void> {
+    const { round, sceneId, patter } = next;
+    const what = patter ? 'patter round' : 'round';
+    const sceneSignal = this.ctx.scenePlayback.generationStarted(sceneId);
+    let yieldedToGame: AbortSignal | undefined;
+    return this.ctx.generationQueue
+      .runExclusive(
+        ({ yielded }) => {
+          yieldedToGame = yielded;
+          const signals = [sceneSignal, yielded, patter?.signal].filter((signal): signal is AbortSignal =>
+            Boolean(signal),
+          );
+          return this.runDirectedGeneration(
+            event,
+            {
+              ...options,
+              continueScene: true,
+              playerLine: undefined,
+              speakPlayerLine: undefined,
+              round,
+              carriedLines: next.carriedLines,
+              factsBySim: next.factsBySim,
+              sceneId,
+              // Nobody is blocked on a continuation, so it has no deadline. Only the
+              // game's stop, or an interaction the game is waiting on, can cut it.
+              deadlineAt: undefined,
+              signal: signals.length === 1 ? signals[0] : AbortSignal.any(signals),
+              patter: Boolean(patter),
+              speakerIds: patter ? [patter.speakerId] : undefined,
+            },
+            { ...playbackOptions, deferPlayback: false, onPlaybackReady: undefined },
+          );
+        },
+        { priority: true, yieldsToBlocking: true },
+      )
+      .then(() => undefined)
+      .catch((error: unknown) => {
+        if (error instanceof SceneAbortedError) {
+          log.info(
+            yieldedToGame?.aborted
+              ? `[Pipeline] Scene ${sceneId} yielded to an interaction the game is waiting on; ${what} ${round} dropped`
+              : patter?.signal.aborted
+                ? `[Patter] scene ${sceneId}: the act moved on mid-request; ${what} ${round} dropped`
+                : `[Pipeline] Scene ${sceneId} ended in-game mid-request; ${what} ${round} dropped`,
+          );
+          return;
+        }
+        log.warn(`[Pipeline] Scene ${what} ${round} failed`, error);
+      })
+      .finally(() => {
+        this.ctx.scenePlayback.generationFinished(sceneId);
+      });
   }
 
   // Completion path for a directed scene with no dialogue: no reviewer. The thought IS the
@@ -2799,6 +2987,19 @@ ${factsBlock}
         `[Pipeline] Discarded ${event.event_type} thought (${intimateProblem}): ${thoughts[0].think.slice(0, 160)}`,
       );
       return { status: InteractionEventStatus.NOOP, exchanges };
+    }
+
+    // A thought this Sim has just said aloud is not said again
+    if (aloud) {
+      const [{ performer, think }] = thoughts;
+      if (this.thoughtsAloud.repeats(performer.sim_id, think)) {
+        log.info(`[Pipeline] ${performer.name}'s thought repeats one just said aloud; not said again: ${think}`);
+        return { status: InteractionEventStatus.NOOP, exchanges };
+      }
+      this.thoughtsAloud.note(performer.sim_id, think);
+      if (intimateEvent) {
+        this.soloActThoughts.note(performer.sim_id, think);
+      }
     }
 
     const sceneScores: { scores: Map<string, SceneScore>; exchange?: LLMExchange } = scene.lean
@@ -2890,10 +3091,14 @@ ${factsBlock}
       if (aloud) {
         const [{ performer, think }] = rows;
         markScenePaced(finalText);
-        this.playTtsLines([{ speaker: `${performer.name} (to self)`, text: think }], event.sentient_sims, {
-          paced: true,
-          pacedText: finalText,
-        });
+        this.playTtsLines(
+          [splitVoiceTags({ speaker: `${performer.name} (to self)`, text: think })],
+          event.sentient_sims,
+          {
+            paced: true,
+            pacedText: finalText,
+          },
+        );
       }
       return true;
     });

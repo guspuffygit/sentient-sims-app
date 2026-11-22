@@ -2,6 +2,7 @@ import { SentientSim } from '../models/SentientSim';
 import { VoiceType } from '../models/VoiceType';
 import { getSimAliases } from '../util/simAliases';
 import { moodDeliveryTag } from '../util/moodDeliveryTags';
+import { hasVoiceTags } from '../util/voiceTags';
 import { castElevenLabsVoice } from './ElevenLabsVoiceCasting';
 import { castKokoroVoice } from './KokoroVoiceCasting';
 import { DialogueLine } from './PromptFormatter';
@@ -41,11 +42,12 @@ export function findSimForSpeaker(speaker: string, sims: SentientSim[]): Sentien
  * Gives each line whose speaker resolves to a sim in a tagged mood a delivery note for
  * that mood, unless the line already carries one (the classic screenplay path lets the
  * LLM write `(nervous)` and that wins). Only v3/v4 turn the note into an audio tag
- * (elevenLabsLineText); every other model and provider ignores it.
+ * (elevenLabsLineText); every other model and provider ignores it. A line that carries its
+ * own inline tag (`[laughs]` in ttsText) keeps it alone: the model's tag beats the mood's.
  */
 export function attachMoodDeliveryNotes(lines: DialogueLine[], sims: SentientSim[]): DialogueLine[] {
   return lines.map((line) => {
-    if (line.deliveryNote) {
+    if (line.deliveryNote || hasVoiceTags(line.ttsText ?? line.text)) {
       return line;
     }
     const sim = findSimForSpeaker(line.speaker, sims);

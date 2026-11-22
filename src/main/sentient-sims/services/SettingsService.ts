@@ -54,6 +54,7 @@ import {
   defaultTwitchCommandWord,
   defaultTwitchChatVoiceId,
   defaultSceneRepeatCooldownSeconds,
+  defaultWwPatterIntervalSeconds,
 } from '../constants';
 import { TwitchStoredAuth } from '../models/TwitchStoredAuth';
 import { redactSettingValue } from '../util/redactSetting';
@@ -379,9 +380,25 @@ export function defaultStore(cwd?: string) {
         // special scenes; watch words per line on the first stream (9.5 vs 9.0)
         default: true,
       },
+      [SettingsEnum.WW_VOICE_TAGS.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
+      [SettingsEnum.VOICE_TAGS.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
       [SettingsEnum.SCENE_REPEAT_COOLDOWN_SECONDS.toString()]: {
         type: 'number',
         default: 120,
+      },
+      [SettingsEnum.WW_PATTER_ENABLED.toString()]: {
+        type: 'boolean',
+        default: true,
+      },
+      [SettingsEnum.WW_PATTER_INTERVAL_SECONDS.toString()]: {
+        type: 'number',
+        default: defaultWwPatterIntervalSeconds,
       },
       [SettingsEnum.PLAYER_REPLY_MAX_TOKENS.toString()]: {
         type: 'number',
@@ -1361,6 +1378,14 @@ export class SettingsService {
     return this.get(SettingsEnum.LEAN_NAME_FREE_RULES) === true;
   }
 
+  get wwVoiceTags(): boolean {
+    return this.get(SettingsEnum.WW_VOICE_TAGS) === true;
+  }
+
+  get voiceTags(): boolean {
+    return this.get(SettingsEnum.VOICE_TAGS) === true;
+  }
+
   get sceneMaxRounds(): number {
     const raw = Number(this.get(SettingsEnum.SCENE_MAX_ROUNDS));
     return Math.min(5, Math.max(1, Number.isFinite(raw) ? raw : 3));
@@ -1371,6 +1396,18 @@ export class SettingsService {
   get sceneRepeatCooldownSeconds(): number {
     const raw = Number(this.get(SettingsEnum.SCENE_REPEAT_COOLDOWN_SECONDS));
     return Math.min(600, Math.max(0, Number.isFinite(raw) ? raw : defaultSceneRepeatCooldownSeconds));
+  }
+
+  // The Wicked Whims patter between an act's animation changes
+  get wwPatterEnabled(): boolean {
+    return this.get(SettingsEnum.WW_PATTER_ENABLED) !== false;
+  }
+
+  // Seconds of quiet before the next patter round, at normal speed. Clamped: under 10 the
+  // lines run into each other, over 60 the act is as quiet as it was without the patter.
+  get wwPatterIntervalSeconds(): number {
+    const raw = Number(this.get(SettingsEnum.WW_PATTER_INTERVAL_SECONDS));
+    return Math.min(60, Math.max(10, Number.isFinite(raw) ? raw : defaultWwPatterIntervalSeconds));
   }
 
   // Player-facing replies: the actor's token budget when answering the player. Clamped so

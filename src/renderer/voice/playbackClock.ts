@@ -8,17 +8,9 @@
 // except through setClockState(); the main process forwards CLOCK_STATE from the mod.
 
 import log from 'electron-log';
+import { playbackRate } from 'main/sentient-sims/util/clockRate';
 
 export type ClockState = { speed: string; paused: boolean; paused_by?: 'user' | 'mod' | null };
-
-const RATE_BY_SPEED: Record<string, number> = {
-  PAUSED: 1,
-  NORMAL: 1,
-  SPEED2: 1.25,
-  SPEED3: 1.5,
-  SUPER_SPEED3: 1.5,
-  INTERACTION_STARTUP_SPEED: 1,
-};
 
 type RateListener = (rate: number) => void;
 
@@ -29,7 +21,7 @@ const pauseListeners = new Set<(paused: boolean) => void>();
 
 export function setClockState(state: ClockState) {
   const nextPaused = state.paused && state.paused_by === 'user';
-  const nextRate = RATE_BY_SPEED[state.speed.toUpperCase()] ?? 1;
+  const nextRate = playbackRate(state.speed);
   if (nextPaused !== userPaused) {
     userPaused = nextPaused;
     log.info(`[PlaybackClock] user pause ${userPaused ? 'ON' : 'OFF'} (game ${state.speed})`);

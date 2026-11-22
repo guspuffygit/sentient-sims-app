@@ -110,6 +110,9 @@ export const directedSceneBudgetMs = 50_000;
 // The same Sims on the same beat again inside this window is the game's loop, not a new
 // conversation (the cat's six Watch_Instrument events in three minutes, 2026-10-29)
 export const defaultSceneRepeatCooldownSeconds = 120;
+// A Wicked Whims act gets one more round after this many seconds of quiet while one animation
+// runs (an act can go 60-120 s between animation changes, silent)
+export const defaultWwPatterIntervalSeconds = 20;
 // A request the game is blocked on has this long from reaching the queue, whatever it waited
 // behind, before the mod gives up on it at 80 seconds
 export const interactionDeadlineMs = 70_000;
