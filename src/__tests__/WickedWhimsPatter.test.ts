@@ -1,4 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { Request, Response } from 'express';
+import { AIController } from 'main/sentient-sims/controllers/AIController';
+import { InteractionEventStatus } from 'main/sentient-sims/models/InteractionEventResult';
+import { ApiContext } from 'main/sentient-sims/services/ApiContext';
 import { SSEventType, WWEventType, WWInteractionEvent } from 'main/sentient-sims/models/InteractionEvents';
 import { ClockState } from 'main/sentient-sims/models/ModLogWebsocketMessage';
 import { SimStateReport } from 'main/sentient-sims/models/SimStateReport';
@@ -216,6 +220,92 @@ describe('WickedWhimsPatter', () => {
     expect(h.holds.has('s9')).toBe(false);
   });
 
+  it('ignores an animation event that arrives after its act ended', () => {
+    const h = build();
+    h.patter.roundAired(h.round('s1', 1, ROUND_ONE));
+    h.patter.sceneIdle('s1');
+    h.patter.wwEvent(wwEvent(WWEventType.ENDED));
+
+    const late = wwEvent(WWEventType.ACTIVE);
+    h.patter.wwEvent(late);
+    h.patter.roundAired(h.round('s2', 1, ROUND_ONE, late));
+    h.patter.sceneIdle('s2');
+    h.advance(60_000);
+
+    expect(h.patter.isLate(late)).toBe(true);
+    expect(h.patter.size).toBe(0);
+    expect(h.holds.has('s2')).toBe(false);
+    expect(h.pokes).toHaveLength(0);
+  });
+
+  it('ignores an animation event whose act ended before any event of it arrived', () => {
+    const h = build();
+    h.patter.wwEvent(wwEvent(WWEventType.ENDED));
+
+    const late = wwEvent(WWEventType.ACTIVE);
+    h.patter.wwEvent(late);
+
+    expect(h.patter.isLate(late)).toBe(true);
+    expect(h.patter.size).toBe(0);
+  });
+
+  it('starts the same cast on a new act right after an end', () => {
+    const h = build();
+    h.patter.wwEvent(wwEvent(WWEventType.ENDED));
+
+    const next = wwEvent(WWEventType.ACTIVE, 'act-2');
+    h.patter.wwEvent(next);
+    h.patter.roundAired(h.round('s2', 1, ROUND_ONE, next));
+    h.patter.sceneIdle('s2');
+    h.advance(20_000);
+
+    expect(h.patter.isLate(next)).toBe(false);
+    expect(h.pokes).toHaveLength(1);
+  });
+
+  it('never reads an event with no act id as late (an older mod)', () => {
+    const h = build();
+    const old = { ...wwEvent(WWEventType.ACTIVE), act_id: undefined };
+    h.patter.roundAired(h.round('s1', 1, ROUND_ONE, old));
+    h.patter.reset();
+
+    h.patter.wwEvent(old);
+    h.patter.roundAired(h.round('s2', 1, ROUND_ONE, old));
+
+    expect(h.patter.isLate(old)).toBe(false);
+    expect(h.holds.has('s2')).toBe(true);
+  });
+
+  it('never reads a test from Animation Mapping as late', () => {
+    const h = build();
+    h.patter.wwEvent(wwEvent(WWEventType.ENDED));
+
+    const test = { ...wwEvent(WWEventType.ACTIVE), testing_action: 'They kiss.' };
+
+    expect(h.patter.isLate(test)).toBe(false);
+  });
+
+  it('takes an act up again on its next animation when only the app had let it go', () => {
+    const h = build();
+    h.patter.roundAired(h.round('s1', 1, ROUND_ONE));
+    h.patter.reset();
+
+    const next = wwEvent(WWEventType.ACTIVE);
+    h.patter.wwEvent(next);
+    h.patter.roundAired(h.round('s2', 1, ROUND_ONE, next));
+
+    expect(h.patter.isLate(next)).toBe(false);
+    expect(h.holds.has('s2')).toBe(true);
+  });
+
+  it('forgets a reported end after ten minutes', () => {
+    const h = build();
+    h.patter.wwEvent(wwEvent(WWEventType.ENDED));
+    h.advance(10 * 60_000 + 1);
+
+    expect(h.patter.isLate(wwEvent(WWEventType.ACTIVE))).toBe(false);
+  });
+
   it('holds while the player pauses and resumes with what was left', () => {
     const h = build();
     h.patter.roundAired(h.round('s1', 1, ROUND_ONE));
@@ -395,6 +485,22 @@ describe('WickedWhimsPatter', () => {
     expect(wwActKey(wwEvent(WWEventType.ACTIVE, 'act-7'))).toBe('act-7');
     const old = { ...wwEvent(WWEventType.ACTIVE), act_id: undefined };
     expect(wwActKey(old)).toBe('14+23');
+  });
+});
+
+describe('WickedWhimsPatter on arrival', () => {
+  it('answers an animation event that arrives after its act ended NOOP, ahead of the queue', async () => {
+    const h = build();
+    const controller = new AIController({ wwPatter: h.patter } as unknown as ApiContext);
+    const json = vi.fn();
+    const res = { json, status: () => res } as unknown as Response;
+    const late = wwEvent(WWEventType.ACTIVE);
+
+    await controller.interactionEvent({ body: wwEvent(WWEventType.ENDED) } as Request, res);
+    await controller.interactionEvent({ body: late } as Request, res);
+
+    expect(json).toHaveBeenCalledTimes(2);
+    expect(json).toHaveBeenLastCalledWith({ status: InteractionEventStatus.NOOP, input: late });
   });
 });
 

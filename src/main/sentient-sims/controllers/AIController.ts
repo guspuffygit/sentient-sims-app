@@ -68,11 +68,11 @@ export class AIController {
     const isChat = event.event_type === SSEventType.CHAT || event.event_type === SSEventType.CHAT_CONTINUE;
     // The Wicked Whims patter hears every act event on arrival, before it waits in the queue:
     // a new animation stops the countdown and any poke in flight at once, and the end of the
-    // act needs no scene at all
+    // act needs no scene at all, nor does an animation that arrives after it
     if (event.event_type === SSEventType.WICKED_WHIMS) {
       const wwEvent = event as WWInteractionEvent;
       this.ctx.wwPatter.wwEvent(wwEvent);
-      if (wwEvent.ww_event_type === WWEventType.ENDED) {
+      if (wwEvent.ww_event_type === WWEventType.ENDED || this.ctx.wwPatter.isLate(wwEvent)) {
         res.json({ status: InteractionEventStatus.NOOP, input: event });
         return;
       }

@@ -1109,6 +1109,11 @@ ${factsBlock}
       this.ctx.wwPatter.wwEvent(event);
       return { status: InteractionEventStatus.NOOP };
     }
+    if (this.ctx.wwPatter.isLate(event)) {
+      // The act ended while this animation waited its turn: nothing is said about it
+      log.info(`[WickedWhims] ${animationKey} skipped: its act has ended`);
+      return { status: InteractionEventStatus.NOOP };
+    }
     if (!this.ctx.animations.isNsfwEnabled()) {
       log.info(`[WickedWhims] ${event.ww_event_type} skipped: NSFW is off for an OpenAI stage`);
       return { status: InteractionEventStatus.NSFW_DISABLED };
@@ -1950,7 +1955,6 @@ ${factsBlock}
           `${liarAction}\n\n${target} does not know it is a lie. Only ${liar}'s private briefing may say so; ` +
           `the shared briefing and ${target}'s briefing describe the beat as ${target} experiences it: "${deception.targetView}"`;
       }
-      // frame() already appended INTIMATE_SCENE_FRAMING; appending it here too said it twice
       return { action, perSim, forDirector, beatDisplay };
     };
     if (continuingScene && playerLine) {

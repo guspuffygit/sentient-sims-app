@@ -29,7 +29,7 @@ export const WW_PATTER_MAX_POKES_PER_ANIMATION = 8;
 // The state-report fallback: no WW event for this long and the cast out of the act twice
 export const WW_PATTER_FALLBACK_QUIET_MS = 60_000;
 export const WW_PATTER_FALLBACK_REPORTS = 2;
-// An ended act's key refuses a late round this long (a round still generating at the end)
+// How long an ended act refuses a late round, and an act the mod reported over a late animation
 const ENDED_TTL_MS = 10 * 60_000;
 
 // What a WW round hands the patter once its lines are with the renderer (AIService.play)
@@ -101,6 +101,10 @@ export class WickedWhimsPatter {
 
   private readonly ended = new Map<string, number>();
 
+  // Act ids the mod has reported over. The mod posts an act's end at once while an animation
+  // event can still wait in its queue; one that carries such an id arrives late.
+  private readonly reportedOver = new Map<string, number>();
+
   // The mod's clock as last reported (clockChanged); undefined = no mod, normal speed
   private clock?: ClockState;
 
@@ -131,6 +135,20 @@ export class WickedWhimsPatter {
   }
 
   /**
+   * An animation event of an act the mod has already reported over: no scene, no patter.
+   * Never a test from Animation Mapping, which replays the act's event whenever the player asks.
+   */
+  isLate(event: WWInteractionEvent): boolean {
+    this.pruneEnded();
+    return (
+      event.ww_event_type === WWEventType.ACTIVE &&
+      !event.testing_action &&
+      event.act_id !== undefined &&
+      this.reportedOver.has(event.act_id)
+    );
+  }
+
+  /**
    * A WickedWhims event reached the app, before it queues: an animation change releases the
    * old scene (its round is coming), an ask or a walk-up ends any act its cast is in, and the
    * end of the act ends it.
@@ -141,6 +159,9 @@ export class WickedWhimsPatter {
     const simIds = simIdsOf(event);
     switch (event.ww_event_type) {
       case WWEventType.ENDED: {
+        if (event.act_id !== undefined) {
+          this.reportedOver.set(event.act_id, this.now());
+        }
         const act = this.acts.get(key) ?? this.overlapping(simIds).at(0);
         if (act) {
           this.end(act, 'ended');
@@ -156,6 +177,10 @@ export class WickedWhimsPatter {
         });
         return;
       case WWEventType.ACTIVE: {
+        if (this.isLate(event)) {
+          log.info(`[Patter] animation for an act that has ended; ignored (${key})`);
+          return;
+        }
         // Somebody joined or left: WickedWhims runs the new cast as a new act
         this.overlapping(simIds)
           .filter((act) => act.key !== key)
@@ -464,10 +489,12 @@ export class WickedWhimsPatter {
 
   private pruneEnded() {
     const now = this.now();
-    this.ended.forEach((at, key) => {
-      if (now - at > ENDED_TTL_MS) {
-        this.ended.delete(key);
-      }
+    [this.ended, this.reportedOver].forEach((map) => {
+      map.forEach((at, key) => {
+        if (now - at > ENDED_TTL_MS) {
+          map.delete(key);
+        }
+      });
     });
   }
 }

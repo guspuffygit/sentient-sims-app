@@ -872,4 +872,16 @@ describe('the Wicked Whims patter', () => {
     expect(heard).toHaveBeenCalledTimes(1);
     expect(nsfw).not.toHaveBeenCalled();
   });
+
+  it('makes no scene of an animation that arrives after its act ended', async () => {
+    const scene = leanWw('ww-patter-late-animation', 'v4');
+    const aired = vi.spyOn(scene.ctx.wwPatter, 'roundAired');
+
+    await scene.ctx.ai.interactionEvent({ ...wwEvent(WWEventType.ENDED), act_id: 'act-9' });
+    const result = await scene.ctx.ai.interactionEvent({ ...wwEvent(WWEventType.ACTIVE), act_id: 'act-9' });
+
+    expect(result.status).toEqual(InteractionEventStatus.NOOP);
+    expect(scene.calls).toHaveLength(0);
+    expect(aired).not.toHaveBeenCalled();
+  });
 });
